@@ -1,0 +1,31 @@
+name: Docker
+on: [push, pull_request]
+
+jobs:
+  amd64:
+    name: umee Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push blockchain
+        run: docker buildx build --tag ${{ secrets.DOCKERHUB_USERNAME }}/umee --file Dockerfile --platform linux/amd64,linux/arm64 --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/umee:cache --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/umee:cache --push --progress tty .
+
+      - name: Build and push UI
+        run: docker buildx build --tag ${{ secrets.DOCKERHUB_USERNAME }}/umee-ui --file vue/Dockerfile --platform linux/amd64,linux/arm64 --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/umee-ui:cache --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/umee-ui:cache --push --progress tty ./vue
