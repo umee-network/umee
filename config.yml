@@ -6,3 +6,7 @@ accounts:
 validator:
   name: alice
   staked: "100000000stake"
+servers:
+  dev-ui-address: "localhost:12345"
+genesis:
+  chain_id: "umee-test"
