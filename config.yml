@@ -1,12 +1,23 @@
+genesis:
+  chain_id: "umee-local-testnet"
+  app_state:
+    staking:
+      params:
+        bond_denom: "uumee"
 accounts:
   - name: alice
-    coins: ["1000token", "100000000stake"]
+    coins: ["39000000000000uumee"]
   - name: bob
-    coins: ["500token"]
+    coins: ["5500000000000uumee"]
+  - name: faucet
+    coins: ["5500000000000uumee"]
 validator:
   name: alice
-  staked: "100000000stake"
+  staked: "33500000000000uumee"
 servers:
   dev-ui-address: "localhost:12345"
-genesis:
-  chain_id: "umee-test"
+faucet:
+  port: 4500
+  name: "faucet"
+  coins: ["5500000000000uumee"]
+  coins_max: ["1000000000uumee"]
