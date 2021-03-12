@@ -103,7 +103,7 @@ var (
 		genutil.AppModuleBasic{},
 		bank.AppModuleBasic{},
 		capability.AppModuleBasic{},
-		staking.AppModuleBasic{},
+		stakingModule{},
 		mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(getGovProposalHandlers()...),
@@ -133,7 +133,7 @@ var (
 func init() {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		panic(fmt.Sprintf("failed to get user home directory: %w", err))
+		panic(fmt.Sprintf("failed to get user home directory: %s", err))
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)

@@ -55,12 +55,6 @@ towards borrowing assets on another blockchain.`,
 
 	initRootCmd(rootCmd, encodingConfig)
 
-	// TODO: Consider removing or evaluate further.
-	// overwriteFlagDefaults(rootCmd, map[string]string{
-	// 	flags.FlagChainID:        ChainID,
-	// 	flags.FlagKeyringBackend: "test",
-	// })
-
 	return rootCmd, encodingConfig
 }
 
