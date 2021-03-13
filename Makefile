@@ -85,3 +85,5 @@ go.sum: go.mod
 
 clean:
 	rm -rf $(BUILD_DIR)/
+
+.PHONY: build build-linux clean
