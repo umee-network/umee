@@ -4,7 +4,6 @@ BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
 BUILD_DIR      ?= ./build
 LEDGER_ENABLED ?= true
-BUILD_TARGETS  := build install
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
 #############
@@ -22,12 +21,6 @@ endif
 ###########
 ## Build ##
 ###########
-
-$(BUILD_TARGETS): go.sum $(BUILD_DIR)/
-	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
-
-$(BUILD_DIR)/:
-	mkdir -p $(BUILD_DIR)/
 
 build_tags = netgo
 
@@ -70,7 +63,13 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
-build: BUILD_ARGS=-o $(BUILD_DIR)/
+build: go.sum
+	@echo "--> Building..."
+	go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+
+install: go.sum
+	@echo "--> Installing..."
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
@@ -84,6 +83,7 @@ go.sum: go.mod
 	@go mod verify
 
 clean:
-	rm -rf $(BUILD_DIR)/
+	@echo "--> Cleaning..."
+	@rm -rf $(BUILD_DIR)/
 
-.PHONY: build build-linux clean
+.PHONY: install build build-linux clean
