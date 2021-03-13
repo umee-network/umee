@@ -26,6 +26,9 @@ endif
 $(BUILD_TARGETS): go.sum $(BUILD_DIR)/
 	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
+$(BUILD_DIR)/:
+	mkdir -p $(BUILD_DIR)/
+
 build_tags = netgo
 
 ifeq ($(LEDGER_ENABLED),true)
