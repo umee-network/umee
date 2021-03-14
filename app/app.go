@@ -84,8 +84,13 @@ import (
 	"github.com/umee-network/umee/x/umee"
 )
 
-// Name defines the application name of the Umee network.
-const Name = "umee"
+const (
+	// Name defines the application name of the Umee network.
+	Name = "umee"
+
+	// BondDenom defines the native staking token denomination.
+	BondDenom = "uumee"
+)
 
 var (
 	_ CosmosApp               = (*UmeeApp)(nil)
