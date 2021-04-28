@@ -2,7 +2,7 @@
 
 ## Changelog
 
-- {date}: {changelog}
+- {Month} {Day}, {Year}: {Changelog} {@User}
 
 ## Status
 
