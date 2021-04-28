@@ -10,15 +10,26 @@ Proposed
 
 ## Context
 
-> This section contains all the context one needs to understand the current state,
-> and why there is a problem. It should be as succinct as possible and introduce
-> the high level idea behind the solution.
+Umee is a Universal Capital Facility that can collateralize assets on one
+blockchain towards borrowing assets on another blockchain. The platform specializes
+in allowing staked assets from POS blockchains to be used as collateral for
+borrowing across blockchains. The platform uses a combination of algorithmically
+determined interest rates based on market driven conditions.
 
-## Alternative Approaches
+For the initial MVP implementation of the Umee network, we require the ability
+for users to be able to send ATOM tokens to a dedicated pool in the Umee network
+via IBC. ATOM tokens deposited into the Umee pool will mint a derivative meToken
+in a one-to-one ratio, i.e. one ATOM mints one meToken derivative.
 
-> This section contains information around alternative options that are considered
-> before making a decision. It should contain a explanation on why the alternative
-> approach(es) were not chosen.
+Validators on the Umee network will take these deposited ATOM tokens and delegate
+them to a set of governance-controlled validators on the ATOM source chain,
+e.g. the Cosmos Hub.
+
+A user that sent ATOM tokens to the Umee network can then take their derivative
+meTokens and send them to Ethereum via a bridge where a synthetic ERC-20 version
+of the meTokens are minted. Once sent, the meTokens are locked in Umee and the
+user can then freely trade and operate within Ethereum's DeFi ecosystem with the
+synthetic ERC-20 meTokens.
 
 ## Decision
 
