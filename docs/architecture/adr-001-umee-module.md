@@ -33,57 +33,58 @@ synthetic ERC-20 meTokens.
 
 ## Decision
 
-> This section records the decision that was made.
-> It is best to record as much info as possible from the discussion that happened.
-> This aids in not having to go back to the Pull Request to get the needed information.
+To support users sending ATOM tokens to the Umee network via IBC, we will create
+a `x/umee` module that contains a dedicated `ModuleAccount` that represents the
+ATOM pool. In addition, we will implement a [custom IBC module](https://github.com/cosmos/ibc-go/blob/v1.0.0-alpha1/docs/custom.md).
+The custom IBC module will handle receiving custom packets on a custom Umee port.
+The custom module will be nearly identical to the ICS-20 module, except that it
+will perform the following:
 
-## Detailed Design
+- Automatically send source ATOM tokens to the dedicated `ModuleAccount` pool
+  address instead of a user supplied address.
+- Mark the transfer's amount in a pending queue, `PendingDelegationQueue`, to be
+  later used for delegation on the source chain.
+- Track the sender and amount in the module's state.
+- Mint derivative meTokens and send them to the source sender's Umee account.
 
-> This section does not need to be filled in at the start of the ADR, but must
-> be completed prior to the merging of the implementation.
->
-> Here are some common questions that get answered as part of the detailed design:
->
-> - What are the user requirements?
->
-> - What systems will be affected?
->
-> - What new data structures are needed, what data structures will be changed?
->
-> - What new APIs will be needed, what APIs will be changed?
->
-> - What are the efficiency considerations (time/space)?
->
-> - What are the expected access patterns (load/throughput)?
->
-> - Are there any logging, monitoring or observability needs?
->
-> - Are there any security considerations?
->
-> - Are there any privacy considerations?
->
-> - How will the changes be tested?
->
-> - If the change is large, how will the changes be broken up for ease of review?
->
-> - Will these changes require a breaking (major) release?
->
-> - Does this change require coordination with the SDK or other?
+At the beginning of a staking epoch, E<sub>1</sub> in `BeginBlock`, the `x/umee`
+module will perform the following:
+
+- Move the funds from the `PendingDelegationQueue` into another queue,
+  `PrevPendingDelegationQueue`. This queue is locked as funds cannot be sent to
+  it. In addition, these are the funds that will be delegated to the source chain
+  during the current staking epoch.
+- Clear out `PendingDelegationQueue`.
+
+The validators in the current staking epoch, E<sub>1</sub>, will then construct,
+sign, and broadcast multisig transactions to the Umee network. Once enough
+transactions are received by the `x/umee` module, specifically 2/3 of total
+staking weight, the `x/umee` module will store the constructed multisig transaction
+and emit an event signalling a delegation transaction can be made to the source
+chain.
+
+A separate relayer process will not only be responsible for relaying IBC packets
+to and from the source chain and Umee, but it will also be responsible for
+listening for these delegation events, and broadcasting the constructed multisig
+transaction to the source chain.
+
+Any new transfers during E<sub>1</sub> will be processed in the same manner during
+E<sub>2</sub>.
 
 ## Consequences
 
-> This section describes the consequences, after applying the decision. All
-> consequences should be summarized here, not just the "positive" ones.
-
 ### Positive
+
+- Allows for cross-chain delegations in a decentralized manner.
 
 ### Negative
 
+- Requires the maintenance of a validator controlled multisig account each epoch.
+- Requires a relayer process to listen for unique events and broadcast
+  delegation transactions.
+- Transferred ATOMs to the Umee network are not delegated until the next epoch
+  and thus do not earn rewards until the next epoch.
+  
 ### Neutral
 
 ## References
-
-> Are there any relevant PR comments, issues that led up to this, or articles
-> referenced for why we made the given design choice? If so link them here!
-
-- {reference link}
