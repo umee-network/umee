@@ -58,10 +58,22 @@ module will perform the following:
 
 The validators in the current staking epoch, E<sub>1</sub>, will then construct,
 sign, and broadcast multisig transactions to the Umee network. Once enough
-transactions are received by the `x/umee` module, specifically 2/3 of total
-staking weight, the `x/umee` module will store the constructed multisig transaction
-and emit an event signalling a delegation transaction can be made to the source
-chain. Delegations will be made to validators controlled by Umee governance.
+transactions are received by the `x/umee` module, the `x/umee` module will store
+the constructed multisig transaction and emit an event signalling a delegation
+transaction can be made to the source chain. Delegations will be made to
+validators controlled by Umee governance.
+
+The multisig will be constructed such that all constituents are the validators
+in the current epoch. The threshold of the multisig will be the total number of
+validators in the epoch. This means all validators will have to sign and broadcast
+their part of the multisig. If any signature is missing, a cross delegation
+cannot be made. We do not envision a penalty for missing multisig transactions
+but this can be revised in the future in addition to an incentive mechanism.
+
+The multisig account must exist on native ATOM chain, which can already exist
+from a previous epoch or if a validator set changes in an epoch. When an account
+does not exist on the native ATOM chain, it will have to be created by Umee via
+IBC by sending some tokens to that account.
 
 A separate relayer process will not only be responsible for relaying IBC packets
 to and from the source chain and Umee, but it will also be responsible for
