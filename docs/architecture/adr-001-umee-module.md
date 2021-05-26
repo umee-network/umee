@@ -56,7 +56,7 @@ E<sub>1</sub> in `BeginBlock`, the `x/umee` module will perform the following:
   during the current staking epoch.
 - Clear out `PendingDelegationQueue`.
 
-The validators in the current staking epoch, E<sub>1</sub>, will then construct,
+The Umee validators in the current staking epoch, E<sub>1</sub>, will then construct,
 sign, and broadcast multisig transactions to the Umee network. Once enough
 transactions are received by the `x/umee` module, the `x/umee` module will store
 the constructed multisig transaction and emit an event signalling a delegation
