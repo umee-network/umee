@@ -47,8 +47,8 @@ will perform the following:
 - Track the sender and amount in the module's state.
 - Mint derivative meTokens and send them to the source sender's Umee account.
 
-At the beginning of a staking epoch, E<sub>1</sub> in `BeginBlock`, the `x/umee`
-module will perform the following:
+At the beginning of a staking epoch, on the order of a few hours (to be determined),
+E<sub>1</sub> in `BeginBlock`, the `x/umee` module will perform the following:
 
 - Move the funds from the `PendingDelegationQueue` into another queue,
   `PrevPendingDelegationQueue`. This queue is locked as funds cannot be sent to
