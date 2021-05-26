@@ -61,7 +61,7 @@ sign, and broadcast multisig transactions to the Umee network. Once enough
 transactions are received by the `x/umee` module, specifically 2/3 of total
 staking weight, the `x/umee` module will store the constructed multisig transaction
 and emit an event signalling a delegation transaction can be made to the source
-chain.
+chain. Delegations will be made to validators controlled by Umee governance.
 
 A separate relayer process will not only be responsible for relaying IBC packets
 to and from the source chain and Umee, but it will also be responsible for
