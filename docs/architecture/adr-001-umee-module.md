@@ -142,7 +142,9 @@ bearing on when cross-chain delegations can be made.
 
 ### Validator Delegation Set Parameter Changes
 
-TODO
+Users, via Umee's governance, can decide to change or update the validator
+delegation set via a `ParameterChangeProposal`. When this happens, we need to
+ensure the cross-chain delegations accurately reflects the new set of validators.
 
 ## Open Questions
 
