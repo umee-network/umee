@@ -167,6 +167,8 @@ ensure the cross-chain delegations accurately reflects the new set of validators
 
 ### Neutral
 
+- The use of `Interchain Accounts` is contingent upon it's acceptance and deployment
+  on the Cosmos Hub. This is expected to occur by end of Q4 2021.
 - Requires a relayer process to listen for unique events and broadcast
   delegation transactions.
 
