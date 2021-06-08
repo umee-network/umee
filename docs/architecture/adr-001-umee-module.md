@@ -140,6 +140,21 @@ bearing on when cross-chain delegations can be made.
 > need to use a queue and the `Interchain Account` ICS standard will take care of
 > this for us.
 
+### Validator Delegation Set Parameter Changes
+
+TODO
+
+## Open Questions
+
+1. How will Umee handle situations where one or more validators in the validator
+   delegation set leaves the validator set in the ATOM chain?
+2. How will Umee handle situations where one or more validators in the validator
+   delegation set gets slashed for misbehavior in the ATOM chain?
+3. How will users reclaim their original ATOMs?
+4. How will Umee handle the situation where the cross-chain delegation cannot be
+   made for indefinite period of time due to faulty relayers, liveness issues or
+   other errors on the ATOM-based chain?
+
 ## Consequences
 
 ### Positive
@@ -148,13 +163,10 @@ bearing on when cross-chain delegations can be made.
 
 ### Negative
 
-- Requires the maintenance of a validator controlled multisig account each epoch.
+### Neutral
+
 - Requires a relayer process to listen for unique events and broadcast
   delegation transactions.
-- Transferred ATOMs to the Umee network are not delegated until the next epoch
-  and thus do not earn rewards until the next epoch.
-  
-### Neutral
 
 ## References
 
