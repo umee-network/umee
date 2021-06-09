@@ -146,6 +146,12 @@ Users, via Umee's governance, can decide to change or update the validator
 delegation set via a `ParameterChangeProposal`. When this happens, we need to
 ensure the cross-chain delegations accurately reflects the new set of validators.
 
+When a `ParameterChangeProposal` passes, we utilize the `AfterProposalVotingPeriodEnded`
+hook defined in `x/gov` which is executed during `EndBlock`. We ensure that the
+`EndBlock` for `x/gov` happens before the `EndBlock` for `x/umee`.
+
+TODO: ...
+
 ## Open Questions
 
 1. How will Umee handle situations where one or more validators in the validator
