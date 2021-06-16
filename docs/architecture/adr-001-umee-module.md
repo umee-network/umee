@@ -159,7 +159,8 @@ TODO: ...
 2. How will Umee handle situations where one or more validators in the validator
    delegation set gets slashed for misbehavior in the ATOM chain?
 3. How will users reclaim their original ATOMs?
-4. How will Umee handle the situation where the cross-chain delegation cannot be
+4. How will inflation & rewards be re-distributed back to Umee and it's users?
+5. How will Umee handle the situation where the cross-chain delegation cannot be
    made for indefinite period of time due to faulty relayers, liveness issues or
    other errors on the ATOM-based chain?
 
