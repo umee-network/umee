@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, arm64]
-        targetos: [windows, darwin, linux]
+        targetos: [darwin, linux]
     name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
       - uses: actions/checkout@v2
@@ -36,4 +36,3 @@ jobs:
         with:
           name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
           path: cmd/umeed/umeed
-
