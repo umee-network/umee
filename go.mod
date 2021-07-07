@@ -1,6 +1,6 @@
 module github.com/umee-network/umee
 
-go 1.15
+go 1.16
 
 require (
 	github.com/cosmos/cosmos-sdk v0.41.0

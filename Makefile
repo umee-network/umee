@@ -6,9 +6,9 @@ BUILD_DIR      ?= ./build
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
-#############
-## Version ##
-#############
+###############################################################################
+##                                  Version                                  ##
+###############################################################################
 
 ifeq (,$(VERSION))
   VERSION := $(shell git describe --exact-match 2>/dev/null)
@@ -18,9 +18,9 @@ ifeq (,$(VERSION))
   endif
 endif
 
-###########
-## Build ##
-###########
+###############################################################################
+##                                   Build                                   ##
+###############################################################################
 
 build_tags = netgo
 
@@ -65,11 +65,11 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
 
 install: go.sum
 	@echo "--> Installing..."
-	go install -mod=readonly $(BUILD_FLAGS) ./...
+	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
@@ -87,3 +87,16 @@ clean:
 	@rm -rf $(BUILD_DIR)/
 
 .PHONY: install build build-linux clean
+
+###############################################################################
+##                                 Localnet                                  ##
+###############################################################################
+
+localnet-start: build-linux localnet-stop
+	@rm -fr ./build/node*
+	@docker-compose -f docker-compose.localnet.yaml up -d
+
+localnet-stop:
+	@docker-compose -f docker-compose.localnet.yaml down
+
+.PHONY: localnet-stop localnet-start
