@@ -13,5 +13,4 @@ FROM gcr.io/distroless/base
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
 EXPOSE 26656 26657 1317 9090
 
-# Add default command
-ENTRYPOINT ["umeed"]
+ENTRYPOINT ["umeed", "start"]

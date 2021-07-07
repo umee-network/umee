@@ -84,16 +84,28 @@ go.sum: go.mod
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/
+	@rm -rf $(BUILD_DIR)/**
 
 .PHONY: install build build-linux clean
+
+###############################################################################
+##                                  Docker                                   ##
+###############################################################################
+
+docker-build:
+	@docker build -t umeenetwork/umeed .
+
+docker-localnet-build:
+	@docker build -t umeenetwork/umeed-localnet --file localnet.Dockerfile .
+
+.PHONY: docker-build docker-localnet-build
 
 ###############################################################################
 ##                                 Localnet                                  ##
 ###############################################################################
 
 localnet-start: build-linux localnet-stop
-	@rm -fr ./build/node*
+	@rm -fr $(BUILD_DIR)/node*
 	@docker-compose -f docker-compose.localnet.yaml up -d
 
 localnet-stop:
