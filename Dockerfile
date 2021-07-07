@@ -9,7 +9,7 @@ RUN apk add --no-cache $PACKAGES
 RUN make install
 
 # Add to a distroless container
-FROM gcr.io/distroless/base:debug
+FROM gcr.io/distroless/base
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
 EXPOSE 26656 26657 1317 9090
 
