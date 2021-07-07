@@ -3,7 +3,7 @@ module github.com/umee-network/umee
 go 1.15
 
 require (
-	github.com/cosmos/cosmos-sdk v0.42.6
+	github.com/cosmos/cosmos-sdk v0.42.4-0.20210623214207-eb0fc466c99b
 	github.com/gogo/protobuf v1.3.3
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
