@@ -2,7 +2,7 @@
 
 BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
-BUILD_DIR      ?= ./build
+BUILD_DIR      ?= $(CURDIR)/build
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
@@ -105,7 +105,11 @@ docker-localnet-build:
 ###############################################################################
 
 localnet-start: build-linux localnet-stop
-	@rm -fr $(BUILD_DIR)/node*
+  # start a local Umee network if a network configuration does not already exist
+	@if ! [ -f $(BUILD_DIR)/node0/umeed/config/genesis.json ]; then \
+    docker run --rm -v $(BUILD_DIR):/umeed:Z umeenetwork/umeed-localnet \
+    localnet --num-validators=4 --starting-ip-address=192.168.30.2 --keyring-backend=test -o .; \
+  fi
 	@docker-compose -f docker-compose.localnet.yaml up -d
 
 localnet-stop:
