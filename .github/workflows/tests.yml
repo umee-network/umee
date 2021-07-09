@@ -24,7 +24,7 @@ jobs:
             go.sum
       - name: Start Local Network
         run: |
-          make clean localnet-start
+          make clean docker-localnet-build localnet-start
         if: env.GIT_DIFF
       - name: Test Local Network Liveness
         run: |
