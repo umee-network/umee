@@ -1,4 +1,4 @@
-# Umee
+![Logo!](assets/umee-small-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://godoc.org/github.com/umee-network/umee)
@@ -17,3 +17,32 @@ allowing staked assets from PoS blockchains to be used as collateral for borrowi
 across blockchains. The platform uses a combination of algorithmically determined
 interest rates based on market driven conditions. As a cross chain DeFi protocol,
 Umee will allow a multitude of decentralized debt products.
+
+## Table of Contents
+
+- [Dependencies](#dependencies)
+- [Active Networks](#active-networks)
+- [Build](#build)
+
+## Dependencies
+
+- [Go 1.16+](https://golang.org/dl/)
+- [Cosmos SDK v0.42.0+](https://github.com/cosmos/cosmos-sdk/releases)
+
+## Active Networks
+
+Coming soon...
+
+## Build
+
+To install the `umeed` binary:
+
+```shell
+$ make install
+```
+
+To run the linter:
+
+```shell
+$ make lint
+```
