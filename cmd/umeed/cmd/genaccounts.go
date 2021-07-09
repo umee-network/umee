@@ -27,8 +27,8 @@ const (
 	flagVestingAmt   = "vesting-amount"
 )
 
-// AddGenesisAccountCmd returns add-genesis-account cobra Command.
-func AddGenesisAccountCmd(defaultNodeHome string) *cobra.Command {
+// nolint: lll
+func addGenesisAccountCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-genesis-account [address_or_key_name] [coin][,[coin]]",
 		Short: "Add a genesis account to genesis.json",

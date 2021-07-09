@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  umeednode0:
+    container_name: umeednode0
+    image: "umeenetwork/umeed-localnet"
+    ports:
+      - "26656-26657:26656-26657"
+      - "1317:1317"
+      - "9090:9090"
+    environment:
+      - ID=0
+    volumes:
+      - ./build:/umeed:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.30.2
+
+  umeednode1:
+    container_name: umeednode1
+    image: "umeenetwork/umeed-localnet"
+    ports:
+      - "26666-26667:26656-26657"
+      - "1318:1317"
+      - "9091:9090"
+    environment:
+      - ID=1
+    volumes:
+      - ./build:/umeed:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.30.3
+
+  umeednode2:
+    container_name: umeednode2
+    image: "umeenetwork/umeed-localnet"
+    ports:
+      - "26676-26677:26656-26657"
+      - "1319:1317"
+      - "9092:9090"
+    environment:
+      - ID=2
+    volumes:
+      - ./build:/umeed:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.30.4
+
+  umeednode3:
+    container_name: umeednode3
+    image: "umeenetwork/umeed-localnet"
+    ports:
+      - "26686-26687:26656-26657"
+      - "1320:1317"
+      - "9093:9090"
+    environment:
+      - ID=3
+    volumes:
+      - ./build:/umeed:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.30.5
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.30.0/25

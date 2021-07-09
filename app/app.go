@@ -80,6 +80,7 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
+
 	appparams "github.com/umee-network/umee/app/params"
 	"github.com/umee-network/umee/x/umee"
 )
@@ -184,7 +185,7 @@ type UmeeApp struct {
 	mm *module.Manager
 
 	// simulation manager
-	sm *module.SimulationManager
+	// sm *module.SimulationManager
 }
 
 func New(
@@ -232,10 +233,16 @@ func New(
 	app.ParamsKeeper = initParamsKeeper(appCodec, legacyAmino, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
 	// set the BaseApp's parameter store
-	base.SetParamStore(app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramskeeper.ConsensusParamsKeyTable()))
+	base.SetParamStore(
+		app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramskeeper.ConsensusParamsKeyTable()),
+	)
 
 	// add capability keeper and ScopeToModule for ibc module
-	app.CapabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
+	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
+		appCodec,
+		keys[capabilitytypes.StoreKey],
+		memKeys[capabilitytypes.MemStoreKey],
+	)
 
 	// grant capabilities for the ibc and ibc-transfer modules
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
@@ -494,7 +501,7 @@ func (app *UmeeApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.R
 func (app *UmeeApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
-		panic(fmt.Sprintf("failed to unmarshal genesis state: %w", err))
+		panic(fmt.Sprintf("failed to unmarshal genesis state: %v", err))
 	}
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
