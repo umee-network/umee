@@ -43,6 +43,7 @@ const (
 	flagNumValidators     = "num-validators"
 )
 
+// nolint: lll
 func localnetCmd(mbm module.BasicManager, genBalIterator banktypes.GenesisBalancesIterator) *cobra.Command {
 	cmdCfg := viper.New()
 

@@ -116,3 +116,13 @@ localnet-stop:
 	@docker-compose -f docker-compose.localnet.yaml down
 
 .PHONY: localnet-stop localnet-start
+
+###############################################################################
+##                              Tests & Linting                              ##
+###############################################################################
+
+lint:
+	@echo "--> Running linter"
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+
+.PHONY: lint

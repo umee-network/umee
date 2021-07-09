@@ -3,19 +3,17 @@ package umee
 import (
 	"encoding/json"
 	"fmt"
-	// this line is used by starport scaffolding # 1
-
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/umee-network/umee/x/umee/client/cli"
 	"github.com/umee-network/umee/x/umee/client/rest"
 	"github.com/umee-network/umee/x/umee/keeper"
@@ -26,10 +24,6 @@ var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
-
-// ----------------------------------------------------------------------------
-// AppModuleBasic
-// ----------------------------------------------------------------------------
 
 // AppModuleBasic implements the AppModuleBasic interface for the capability module.
 type AppModuleBasic struct {
@@ -64,11 +58,17 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONMarshaler) json.RawMessage {
 }
 
 // ValidateGenesis performs genesis state validation for the capability module.
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONMarshaler, config client.TxEncodingConfig, bz json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(
+	cdc codec.JSONMarshaler,
+	config client.TxEncodingConfig,
+	bz json.RawMessage,
+) error {
+
 	var genState types.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
 	}
+
 	return genState.Validate()
 }
 
@@ -91,10 +91,6 @@ func (a AppModuleBasic) GetTxCmd() *cobra.Command {
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 	return cli.GetQueryCmd(types.StoreKey)
 }
-
-// ----------------------------------------------------------------------------
-// AppModule
-// ----------------------------------------------------------------------------
 
 // AppModule implements the AppModule interface for the capability module.
 type AppModule struct {
