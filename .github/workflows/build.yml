@@ -1,13 +1,7 @@
-# This is a basic workflow that is manually triggered
-
-name: umee
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
+name: Build
 on: [push, pull_request]
 
-# This workflow makes x86_64 binaries for mac, windows, and linux.
-
+# This workflow makes amd64 and arm64 binaries for macOS and Linux.
 jobs:
   build:
     runs-on: ubuntu-latest

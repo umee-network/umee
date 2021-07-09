@@ -1,14 +1,16 @@
 # Compile
-FROM golang:alpine AS builder
+FROM golang:1.16-alpine AS umeed-builder
 WORKDIR /src/app/
 COPY go.mod go.sum* ./
 RUN go mod download
 COPY . .
-RUN for bin in cmd/*; do CGO_ENABLED=0 go build -o=/usr/local/bin/$(basename $bin) ./cmd/$(basename $bin); done
-
+ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
+RUN apk add --no-cache $PACKAGES
+RUN make install
 
 # Add to a distroless container
 FROM gcr.io/distroless/base
-COPY --from=builder /usr/local/bin /usr/local/bin
-USER nonroot:nonroot
-CMD ["umeed start"]
+COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
+EXPOSE 26656 26657 1317 9090
+
+ENTRYPOINT ["umeed", "start"]

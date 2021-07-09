@@ -2,13 +2,13 @@
 
 BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
-BUILD_DIR      ?= ./build
+BUILD_DIR      ?= $(CURDIR)/build
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
-#############
-## Version ##
-#############
+###############################################################################
+##                                  Version                                  ##
+###############################################################################
 
 ifeq (,$(VERSION))
   VERSION := $(shell git describe --exact-match 2>/dev/null)
@@ -18,9 +18,9 @@ ifeq (,$(VERSION))
   endif
 endif
 
-###########
-## Build ##
-###########
+###############################################################################
+##                                   Build                                   ##
+###############################################################################
 
 build_tags = netgo
 
@@ -65,11 +65,11 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
 
 install: go.sum
 	@echo "--> Installing..."
-	go install -mod=readonly $(BUILD_FLAGS) ./...
+	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
@@ -84,6 +84,45 @@ go.sum: go.mod
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/
+	@rm -rf $(BUILD_DIR)/**
 
 .PHONY: install build build-linux clean
+
+###############################################################################
+##                                  Docker                                   ##
+###############################################################################
+
+docker-build:
+	@docker build -t umeenetwork/umeed .
+
+docker-localnet-build:
+	@docker build -t umeenetwork/umeed-localnet --file localnet.Dockerfile .
+
+.PHONY: docker-build docker-localnet-build
+
+###############################################################################
+##                                 Localnet                                  ##
+###############################################################################
+
+localnet-start: build-linux localnet-stop
+  # start a local Umee network if a network configuration does not already exist
+	@if ! [ -f $(BUILD_DIR)/node0/umeed/config/genesis.json ]; then \
+    docker run --rm -v $(BUILD_DIR):/umeed:Z umeenetwork/umeed-localnet \
+    localnet --num-validators=4 --starting-ip-address=192.168.30.2 --keyring-backend=test -o .; \
+  fi
+	@docker-compose -f docker-compose.localnet.yaml up -d
+
+localnet-stop:
+	@docker-compose -f docker-compose.localnet.yaml down
+
+.PHONY: localnet-stop localnet-start
+
+###############################################################################
+##                              Tests & Linting                              ##
+###############################################################################
+
+lint:
+	@echo "--> Running linter"
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+
+.PHONY: lint
