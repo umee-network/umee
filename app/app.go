@@ -237,7 +237,12 @@ func New(
 		memKeys:           memKeys,
 	}
 
-	app.ParamsKeeper = initParamsKeeper(appCodec, legacyAmino, keys[paramstypes.StoreKey], transientKeys[paramstypes.TStoreKey])
+	app.ParamsKeeper = initParamsKeeper(
+		appCodec,
+		legacyAmino,
+		keys[paramstypes.StoreKey],
+		transientKeys[paramstypes.TStoreKey],
+	)
 
 	// set the BaseApp's parameter store
 	base.SetParamStore(
