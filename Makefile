@@ -95,27 +95,7 @@ clean:
 docker-build:
 	@docker build -t umeenetwork/umeed .
 
-docker-localnet-build:
-	@docker build -t umeenetwork/umeed-localnet --file localnet.Dockerfile .
-
 .PHONY: docker-build docker-localnet-build
-
-###############################################################################
-##                                 Localnet                                  ##
-###############################################################################
-
-localnet-start: build-linux localnet-stop
-  # start a local Umee network if a network configuration does not already exist
-	@if ! [ -f $(BUILD_DIR)/node0/umeed/config/genesis.json ]; then \
-    docker run --rm -v $(BUILD_DIR):/umeed:Z umeenetwork/umeed-localnet \
-    localnet --num-validators=4 --starting-ip-address=192.168.30.2 --keyring-backend=test -o .; \
-  fi
-	@docker-compose -f docker-compose.localnet.yaml up -d
-
-localnet-stop:
-	@docker-compose -f docker-compose.localnet.yaml down
-
-.PHONY: localnet-stop localnet-start
 
 ###############################################################################
 ##                              Tests & Linting                              ##
