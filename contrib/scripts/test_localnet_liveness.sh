@@ -44,7 +44,7 @@ while [ ${CNT} -lt $ITER ]; do
     exit 0
   fi
 
-  sleep 1
+  sleep $SLEEP
 done
 
 echo "Failed: timeout reached"
