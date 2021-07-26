@@ -5,16 +5,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tmconfig "github.com/tendermint/tendermint/config"
+	"github.com/ybbus/jsonrpc/v2"
+
+	"github.com/umee-network/umee/app"
 )
 
 const (
@@ -24,13 +31,16 @@ const (
 
 var (
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin("uumee", stakeAmount)
+	stakeAmountCoin = sdk.NewCoin(app.BondDenom, stakeAmount)
 )
 
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	chain *chain
+	chain        *chain
+	dkrPool      *dockertest.Pool
+	dkrNet       *dockertest.Network
+	ethContainer *dockertest.Resource
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -46,15 +56,27 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.chain.id, s.chain.dataDir)
 
+	// initialization
 	s.initNodes()
 	s.initEthereum()
 	s.initGenesis()
 	s.initValidatorConfigs()
+
+	s.dkrPool, err = dockertest.NewPool("")
+	s.Require().NoError(err)
+
+	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
+	s.Require().NoError(err)
+
+	// container infrastructure
+	s.runEthContainer()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	s.T().Log("tearing down e2e integration test suite...")
+
 	os.RemoveAll(s.chain.dataDir)
+	s.Require().NoError(s.dkrPool.Purge(s.ethContainer))
 }
 
 func (s *IntegrationTestSuite) initNodes() {
@@ -78,7 +100,7 @@ func (s *IntegrationTestSuite) initNodes() {
 
 	// copy the genesis file to the remaining validators
 	for _, val := range s.chain.validators[1:] {
-		_, err := fileCopy(
+		_, err := copyFile(
 			filepath.Join(val0ConfigDir, "config", "genesis.json"),
 			filepath.Join(val.configDir(), "config", "genesis.json"),
 		)
@@ -129,10 +151,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "The native staking token of the Umee network",
 		Display:     "umee",
-		Base:        "uumee",
+		Base:        app.BondDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    "uumee",
+				Denom:    app.BondDenom,
 				Exponent: 0,
 				Aliases: []string{
 					"microumee",
@@ -234,5 +256,72 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 		valConfig.P2P.PersistentPeers = strings.Join(peers, ",")
 
 		tmconfig.WriteConfigFile(cfgPath, valConfig)
+	}
+}
+
+func (s *IntegrationTestSuite) runEthContainer() {
+	s.T().Log("Starting Ethereum container...")
+
+	_, err := copyFile(
+		filepath.Join("./", "eth.Dockerfile"),
+		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
+	)
+
+	s.ethContainer, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "eth.Dockerfile",
+			ContextDir: s.chain.configDir(),
+		},
+		&dockertest.RunOptions{
+			Name:      "ethereum",
+			NetworkID: s.dkrNet.Network.ID,
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"8545/tcp": {
+					{
+						HostIP:   "",
+						HostPort: "8545",
+					},
+				},
+			},
+			Env: []string{},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	// Wait for the Ethereum node to start producing blocks; DAG completion takes
+	// about two minutes.
+	rpcClient := jsonrpc.NewClient("http://localhost:8545")
+	s.Require().Eventually(
+		func() bool {
+			resp, err := rpcClient.Call("eth_blockNumber")
+			if err != nil {
+				return false
+			}
+
+			heightStr := strings.Replace(resp.Result.(string), "0x", "", -1)
+			height, err := strconv.ParseInt(heightStr, 16, 64)
+			if err != nil {
+				return false
+			}
+
+			if height < 1 {
+				return false
+			}
+
+			return true
+		},
+		5*time.Minute,
+		time.Second,
+		"geth node failed to produce a block",
+	)
+
+	s.T().Logf("started Ethereum container: %s", s.ethContainer.Container.ID)
+}
+
+func noRestart(config *docker.HostConfig) {
+	// in this case we don't want the nodes to restart on failure
+	config.RestartPolicy = docker.RestartPolicy{
+		Name: "no",
 	}
 }

@@ -4,10 +4,10 @@ RUN apk add --no-cache curl
 COPY eth_genesis.json eth_genesis.json
 RUN geth --identity "UmeeTestnet" \
   --nodiscover \
-  --networkid 21 init eth_genesis.json
+  --networkid 15 init eth_genesis.json
 
 ENTRYPOINT geth --identity "UmeeTestnet" --nodiscover \
-  --networkid 21 \
+  --networkid 15 \
   --mine \
   --http \
   --http.port "8545" \
