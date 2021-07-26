@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -19,6 +20,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tmconfig "github.com/tendermint/tendermint/config"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	"github.com/ybbus/jsonrpc/v2"
 
 	"github.com/umee-network/umee/app"
@@ -37,10 +40,11 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	chain        *chain
-	dkrPool      *dockertest.Pool
-	dkrNet       *dockertest.Network
-	ethContainer *dockertest.Resource
+	chain         *chain
+	dkrPool       *dockertest.Pool
+	dkrNet        *dockertest.Network
+	ethContainer  *dockertest.Resource
+	valContainers []*dockertest.Resource
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -49,6 +53,9 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	s.T().Log("setting up e2e integration test suite...")
+
+	// set bech32 prefixes
+	app.SetAddressConfig()
 
 	var err error
 	s.chain, err = newChain()
@@ -70,13 +77,27 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// container infrastructure
 	s.runEthContainer()
+	s.runValidators()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
+	if str := os.Getenv("UMEE_E2E_SKIP_CLEANUP"); len(str) > 0 {
+		skipCleanup, err := strconv.ParseBool(str)
+		s.Require().NoError(err)
+
+		if skipCleanup {
+			return
+		}
+	}
+
 	s.T().Log("tearing down e2e integration test suite...")
 
 	os.RemoveAll(s.chain.dataDir)
 	s.Require().NoError(s.dkrPool.Purge(s.ethContainer))
+
+	for _, vc := range s.valContainers {
+		s.Require().NoError(s.dkrPool.Purge(vc))
+	}
 }
 
 func (s *IntegrationTestSuite) initNodes() {
@@ -214,7 +235,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	genDoc.AppState = bz
 
-	bz, err = json.MarshalIndent(genDoc, "", "  ")
+	bz, err = tmjson.MarshalIndent(genDoc, "", "  ")
 	s.Require().NoError(err)
 
 	// write the updated genesis file to each validator
@@ -260,7 +281,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 }
 
 func (s *IntegrationTestSuite) runEthContainer() {
-	s.T().Log("Starting Ethereum container...")
+	s.T().Log("starting Ethereum container...")
 
 	_, err := copyFile(
 		filepath.Join("./", "eth.Dockerfile"),
@@ -276,12 +297,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 			Name:      "ethereum",
 			NetworkID: s.dkrNet.Network.ID,
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"8545/tcp": {
-					{
-						HostIP:   "",
-						HostPort: "8545",
-					},
-				},
+				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
 			},
 			Env: []string{},
 		},
@@ -317,6 +333,67 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 
 	s.T().Logf("started Ethereum container: %s", s.ethContainer.Container.ID)
+}
+
+func (s *IntegrationTestSuite) runValidators() {
+	s.T().Log("starting validator containers...")
+
+	s.valContainers = make([]*dockertest.Resource, len(s.chain.validators))
+
+	for i, val := range s.chain.validators {
+		runOpts := &dockertest.RunOptions{
+			Name:      val.instanceName(),
+			NetworkID: s.dkrNet.Network.ID,
+			Mounts: []string{
+				fmt.Sprintf("%s/:/root/.umee", val.configDir()),
+			},
+			Repository: "umeenet/umeed",
+		}
+
+		// expose the first validator for debugging and communication
+		if val.index == 0 {
+			runOpts.PortBindings = map[docker.Port][]docker.PortBinding{
+				"1317/tcp":  {{HostIP: "", HostPort: "1317"}},
+				"6060/tcp":  {{HostIP: "", HostPort: "6060"}},
+				"6061/tcp":  {{HostIP: "", HostPort: "6061"}},
+				"6062/tcp":  {{HostIP: "", HostPort: "6062"}},
+				"6063/tcp":  {{HostIP: "", HostPort: "6063"}},
+				"6064/tcp":  {{HostIP: "", HostPort: "6064"}},
+				"6065/tcp":  {{HostIP: "", HostPort: "6065"}},
+				"9090/tcp":  {{HostIP: "", HostPort: "9090"}},
+				"26656/tcp": {{HostIP: "", HostPort: "26656"}},
+				"26657/tcp": {{HostIP: "", HostPort: "26657"}},
+			}
+		}
+
+		resource, err := s.dkrPool.RunWithOptions(runOpts, noRestart)
+		s.Require().NoError(err)
+
+		s.valContainers[i] = resource
+		s.T().Logf("started validator container: %s", resource.Container.ID)
+	}
+
+	rpcClient, err := rpchttp.New("tcp://localhost:26657", "/websocket")
+	s.Require().NoError(err)
+
+	s.Require().Eventually(
+		func() bool {
+			status, err := rpcClient.Status(context.Background())
+			if err != nil {
+				return false
+			}
+
+			// let the node produce a few blocks
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 5 {
+				return false
+			}
+
+			return true
+		},
+		5*time.Minute,
+		time.Second,
+		"umee node failed to produce blocks",
+	)
 }
 
 func noRestart(config *docker.HostConfig) {

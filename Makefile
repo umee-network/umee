@@ -93,7 +93,7 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenetwork/umeed .
+	@docker build -t umeenet/umeed .
 
 .PHONY: docker-build docker-localnet-build
 
