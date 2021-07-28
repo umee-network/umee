@@ -1,3 +1,5 @@
+ARG IMG_TAG=latest
+
 # Compile the umeed binary
 FROM golang:1.16-alpine AS umeed-builder
 WORKDIR /src/app/
@@ -29,7 +31,8 @@ ADD https://github.com/PeggyJV/gravity-bridge/releases/download/${GRAVITY_VERSIO
 RUN chmod +x /downloads/*
 
 # Add to a distroless container
-FROM gcr.io/distroless/cc
+FROM gcr.io/distroless/cc:$IMG_TAG
+ARG IMG_TAG
 COPY --from=gravity-builder /downloads/client /usr/local/bin/gravity-client
 COPY --from=gravity-builder /downloads/contract-deployer /usr/local/bin/
 COPY --from=gravity-builder /downloads/Gravity.json /var/data/

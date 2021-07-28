@@ -6,6 +6,9 @@ RUN geth --identity "UmeeTestnet" \
   --nodiscover \
   --networkid 15 init eth_genesis.json
 
+# NOTE:
+# - etherbase is where rewards get sent
+# - private key for this address is 0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7
 ENTRYPOINT geth --identity "UmeeTestnet" --nodiscover \
   --networkid 15 \
   --mine \

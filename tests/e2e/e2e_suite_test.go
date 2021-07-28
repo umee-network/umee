@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -40,11 +41,12 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	chain         *chain
-	dkrPool       *dockertest.Pool
-	dkrNet        *dockertest.Network
-	ethContainer  *dockertest.Resource
-	valContainers []*dockertest.Resource
+	chain               *chain
+	dkrPool             *dockertest.Pool
+	dkrNet              *dockertest.Network
+	ethResource         *dockertest.Resource
+	valResources        []*dockertest.Resource
+	gravityContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -78,6 +80,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	// container infrastructure
 	s.runEthContainer()
 	s.runValidators()
+	s.runContractDeployment()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -93,9 +96,9 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.T().Log("tearing down e2e integration test suite...")
 
 	os.RemoveAll(s.chain.dataDir)
-	s.Require().NoError(s.dkrPool.Purge(s.ethContainer))
+	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 
-	for _, vc := range s.valContainers {
+	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
 	}
 }
@@ -288,7 +291,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
 	)
 
-	s.ethContainer, err = s.dkrPool.BuildAndRunWithBuildOptions(
+	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "eth.Dockerfile",
 			ContextDir: s.chain.configDir(),
@@ -332,13 +335,13 @@ func (s *IntegrationTestSuite) runEthContainer() {
 		"geth node failed to produce a block",
 	)
 
-	s.T().Logf("started Ethereum container: %s", s.ethContainer.Container.ID)
+	s.T().Logf("started Ethereum container: %s", s.ethResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runValidators() {
 	s.T().Log("starting validator containers...")
 
-	s.valContainers = make([]*dockertest.Resource, len(s.chain.validators))
+	s.valResources = make([]*dockertest.Resource, len(s.chain.validators))
 
 	for i, val := range s.chain.validators {
 		runOpts := &dockertest.RunOptions{
@@ -369,7 +372,7 @@ func (s *IntegrationTestSuite) runValidators() {
 		resource, err := s.dkrPool.RunWithOptions(runOpts, noRestart)
 		s.Require().NoError(err)
 
-		s.valContainers[i] = resource
+		s.valResources[i] = resource
 		s.T().Logf("started validator container: %s", resource.Container.ID)
 	}
 
@@ -394,6 +397,66 @@ func (s *IntegrationTestSuite) runValidators() {
 		time.Second,
 		"umee node failed to produce blocks",
 	)
+}
+
+func (s *IntegrationTestSuite) runContractDeployment() {
+	s.T().Log("starting contract deployer container...")
+
+	resource, err := s.dkrPool.RunWithOptions(
+		&dockertest.RunOptions{
+			Name:       "gravity-contract-deployer",
+			NetworkID:  s.dkrNet.Network.ID,
+			Repository: "umeenet/umeed",
+			Entrypoint: []string{
+				"contract-deployer",
+				"--cosmos-node",
+				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
+				"--eth-node",
+				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+				"--eth-privkey",
+				"0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7",
+				"--contract",
+				"/var/data/Gravity.json",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	s.T().Logf("started contract deployer: %s", resource.Container.ID)
+
+	// wait for the container to finish executing, i.e. deploys the gravity contract
+	container := resource.Container
+	for container.State.Running {
+		time.Sleep(10 * time.Second)
+
+		container, err = s.dkrPool.Client.InspectContainer(resource.Container.ID)
+		s.Require().NoError(err)
+	}
+
+	var containerLogsBuf bytes.Buffer
+	s.Require().NoError(s.dkrPool.Client.Logs(
+		docker.LogsOptions{
+			Container:    resource.Container.ID,
+			OutputStream: &containerLogsBuf,
+			Stdout:       true,
+		},
+	), containerLogsBuf.String())
+
+	var gravityContractAddr string
+	for _, s := range strings.Split(containerLogsBuf.String(), "\n") {
+		if strings.HasPrefix(s, "Gravity deployed at Address") {
+			tokens := strings.Split(s, "-")
+			gravityContractAddr = strings.ReplaceAll(tokens[1], " ", "")
+			break
+		}
+	}
+
+	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
+	s.Require().NotEmpty(gravityContractAddr)
+
+	s.T().Logf("deployed gravity contract: %s", gravityContractAddr)
+	s.gravityContractAddr = gravityContractAddr
 }
 
 func noRestart(config *docker.HostConfig) {

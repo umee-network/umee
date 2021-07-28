@@ -64,7 +64,9 @@ func (v *validator) createConfig() error {
 }
 
 func (v *validator) init() error {
-	v.createConfig()
+	if err := v.createConfig(); err != nil {
+		return err
+	}
 
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
