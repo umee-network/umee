@@ -546,7 +546,9 @@ prefix = "umee"
 	}
 
 	// TODO: [bez] Determine if there is a way to check the health or status of
-	// the gorc orchestrator processes.
+	// the gorc orchestrator processes. For now, we allow enough time for the
+	// orchestrator processes to perform the initial validator set update.
+	time.Sleep(20 * time.Second)
 }
 
 func noRestart(config *docker.HostConfig) {
