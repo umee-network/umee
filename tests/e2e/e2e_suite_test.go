@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	wDaiDenom           = "wdai"
-	initBalanceStr      = "100000000000uumee,100000000000wdai"
+	photonDenom         = "photon"
+	initBalanceStr      = "100000000000uumee,100000000000photon"
 	ethChainID     uint = 15
 )
 
@@ -202,11 +202,11 @@ func (s *IntegrationTestSuite) initGenesis() {
 	})
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "An example stable token",
-		Display:     wDaiDenom,
-		Base:        wDaiDenom,
+		Display:     photonDenom,
+		Base:        photonDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    wDaiDenom,
+				Denom:    photonDenom,
 				Exponent: 0,
 			},
 		},
@@ -491,7 +491,7 @@ grpc = "http://%s:9090"
 prefix = "umee"
 `,
 			s.gravityContractAddr,
-			wDaiDenom,
+			photonDenom,
 			// NOTE: container names are prefixed with '/'
 			s.ethResource.Container.Name[1:],
 			s.valResources[i].Container.Name[1:],
