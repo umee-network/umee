@@ -546,9 +546,45 @@ prefix = "umee"
 	}
 
 	// TODO: [bez] Determine if there is a way to check the health or status of
-	// the gorc orchestrator processes. For now, we allow enough time for the
-	// orchestrator processes to perform the initial validator set update.
-	time.Sleep(20 * time.Second)
+	// the gorc orchestrator processes. For now, we search the logs to determine
+	// when each orchestrator resource has seen a validator set update.
+	for _, resource := range s.orchResources {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+
+		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
+		s.waitForHealthOrchestrator(ctx, resource)
+	}
+}
+
+func (s *IntegrationTestSuite) waitForHealthOrchestrator(ctx context.Context, r *dockertest.Resource) {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	match := "relayer::valset_relaying: Consideration: looks good"
+
+	for {
+		select {
+		case <-ticker.C:
+			var containerLogsBuf bytes.Buffer
+			s.Require().NoError(s.dkrPool.Client.Logs(
+				docker.LogsOptions{
+					Container:    r.Container.ID,
+					OutputStream: &containerLogsBuf,
+					Stdout:       true,
+					Stderr:       true,
+				},
+			))
+
+			if strings.Contains(containerLogsBuf.String(), match) {
+				return
+			}
+
+		case <-ctx.Done():
+			s.Require().NoError(ctx.Err())
+			return
+		}
+	}
 }
 
 func noRestart(config *docker.HostConfig) {
