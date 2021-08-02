@@ -553,11 +553,11 @@ prefix = "umee"
 		defer cancel()
 
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
-		s.waitForHealthOrchestrator(ctx, resource)
+		s.waitForHealthyOrchestrator(ctx, resource)
 	}
 }
 
-func (s *IntegrationTestSuite) waitForHealthOrchestrator(ctx context.Context, r *dockertest.Resource) {
+func (s *IntegrationTestSuite) waitForHealthyOrchestrator(ctx context.Context, r *dockertest.Resource) {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
