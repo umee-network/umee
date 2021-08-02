@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ import (
 )
 
 const (
+	wDaiDenom           = "wdai"
 	initBalanceStr      = "100000000000uumee,100000000000wdai"
 	ethChainID     uint = 15
 )
@@ -46,6 +48,7 @@ type IntegrationTestSuite struct {
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
 	valResources        []*dockertest.Resource
+	orchResources       []*dockertest.Resource
 	gravityContractAddr string
 }
 
@@ -81,6 +84,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.runEthContainer()
 	s.runValidators()
 	s.runContractDeployment()
+	s.runOrchestrators()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -101,6 +105,12 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
 	}
+
+	for _, oc := range s.orchResources {
+		s.Require().NoError(s.dkrPool.Purge(oc))
+	}
+
+	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
 }
 
 func (s *IntegrationTestSuite) initNodes() {
@@ -192,11 +202,11 @@ func (s *IntegrationTestSuite) initGenesis() {
 	})
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "An example stable token",
-		Display:     "wdai",
-		Base:        "wdai",
+		Display:     wDaiDenom,
+		Base:        wDaiDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    "wdai",
+				Denom:    wDaiDenom,
 				Exponent: 0,
 			},
 		},
@@ -290,6 +300,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 		filepath.Join("./", "eth.Dockerfile"),
 		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
 	)
+	s.Require().NoError(err)
 
 	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
@@ -342,7 +353,6 @@ func (s *IntegrationTestSuite) runValidators() {
 	s.T().Log("starting validator containers...")
 
 	s.valResources = make([]*dockertest.Resource, len(s.chain.validators))
-
 	for i, val := range s.chain.validators {
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
@@ -407,6 +417,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
 			Repository: "umeenet/umeed",
+			// NOTE: container names are prefixed with '/'
 			Entrypoint: []string{
 				"contract-deployer",
 				"--cosmos-node",
@@ -457,6 +468,85 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	s.T().Logf("deployed gravity contract: %s", gravityContractAddr)
 	s.gravityContractAddr = gravityContractAddr
+}
+
+func (s *IntegrationTestSuite) runOrchestrators() {
+	s.T().Log("starting orchestrator containers...")
+
+	s.orchResources = make([]*dockertest.Resource, len(s.chain.orchestrators))
+	for i, orch := range s.chain.orchestrators {
+		gorcCfg := fmt.Sprintf(`keystore = "/root/gorc/keystore/"
+
+[gravity]
+contract = "%s"
+fees_denom = "%s"
+
+[ethereum]
+key_derivation_path = "m/44'/60'/0'/0/0"
+rpc = "http://%s:8545"
+
+[cosmos]
+key_derivation_path = "m/44'/118'/0'/0/0"
+grpc = "http://%s:9090"
+prefix = "umee"
+`,
+			s.gravityContractAddr,
+			wDaiDenom,
+			// NOTE: container names are prefixed with '/'
+			s.ethResource.Container.Name[1:],
+			s.valResources[i].Container.Name[1:],
+		)
+
+		val := s.chain.validators[i]
+
+		gorcCfgPath := path.Join(val.configDir(), "gorc")
+		s.Require().NoError(os.MkdirAll(gorcCfgPath, 0755))
+
+		filePath := path.Join(gorcCfgPath, "config.toml")
+		s.Require().NoError(writeFile(filePath, []byte(gorcCfg)))
+
+		// We must first populate the orchestrator's keystore prior to starting
+		// the orchestrator gorc process. The keystore must contain the Ethereum
+		// and orchestrator keys. These keys will be used for relaying txs to
+		// and from Umee and Ethereum. The gorc_bootstrap.sh scripts encapsulates
+		// this entire process.
+		//
+		// NOTE: If the Docker build changes, the script might have to be modified
+		// as it relies on busybox.
+		_, err := copyFile(
+			filepath.Join("./", "gorc_bootstrap.sh"),
+			filepath.Join(gorcCfgPath, "gorc_bootstrap.sh"),
+		)
+		s.Require().NoError(err)
+
+		resource, err := s.dkrPool.RunWithOptions(
+			&dockertest.RunOptions{
+				Name:      orch.instanceName(),
+				NetworkID: s.dkrNet.Network.ID,
+				Mounts: []string{
+					fmt.Sprintf("%s/:/root/gorc", gorcCfgPath),
+				},
+				Repository: "umeenet/umeed",
+				Env: []string{
+					fmt.Sprintf("UMEE_E2E_ORCH_MNEMONIC=%s", orch.mnemonic),
+					fmt.Sprintf("UMEE_E2E_ETH_PRIV_KEY=%s", val.ethereumKey.privateKey),
+				},
+				Entrypoint: []string{
+					"sh",
+					"-c",
+					"chmod +x /root/gorc/gorc_bootstrap.sh && /root/gorc/gorc_bootstrap.sh",
+				},
+			},
+			noRestart,
+		)
+		s.Require().NoError(err)
+
+		s.orchResources[i] = resource
+		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
+	}
+
+	// TODO: [bez] Determine if there is a way to check the health or status of
+	// the gorc orchestrator processes.
 }
 
 func noRestart(config *docker.HostConfig) {
