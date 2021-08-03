@@ -548,42 +548,29 @@ prefix = "umee"
 	// TODO: [bez] Determine if there is a way to check the health or status of
 	// the gorc orchestrator processes. For now, we search the logs to determine
 	// when each orchestrator resource has seen a validator set update.
-	for _, resource := range s.orchResources {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		defer cancel()
-
-		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
-		s.waitForHealthyOrchestrator(ctx, resource)
-	}
-}
-
-func (s *IntegrationTestSuite) waitForHealthyOrchestrator(ctx context.Context, r *dockertest.Resource) {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
 	match := "relayer::valset_relaying: Consideration: looks good"
+	for _, resource := range s.orchResources {
+		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
-	for {
-		select {
-		case <-ticker.C:
-			var containerLogsBuf bytes.Buffer
-			s.Require().NoError(s.dkrPool.Client.Logs(
-				docker.LogsOptions{
-					Container:    r.Container.ID,
-					OutputStream: &containerLogsBuf,
-					Stdout:       true,
-					Stderr:       true,
-				},
-			))
+		s.Eventuallyf(
+			func() bool {
+				var containerLogsBuf bytes.Buffer
+				s.Require().NoError(s.dkrPool.Client.Logs(
+					docker.LogsOptions{
+						Container:    resource.Container.ID,
+						OutputStream: &containerLogsBuf,
+						Stdout:       true,
+						Stderr:       true,
+					},
+				))
 
-			if strings.Contains(containerLogsBuf.String(), match) {
-				return
-			}
-
-		case <-ctx.Done():
-			s.Require().NoError(ctx.Err())
-			return
-		}
+				return strings.Contains(containerLogsBuf.String(), match)
+			},
+			30*time.Second,
+			2*time.Second,
+			"orchestrator %s not healthy",
+			resource.Container.ID,
+		)
 	}
 }
 
