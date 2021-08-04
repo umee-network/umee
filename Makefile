@@ -95,7 +95,7 @@ clean:
 docker-build:
 	@docker build -t umeenet/umeed .
 
-.PHONY: docker-build docker-localnet-build
+.PHONY: docker-build
 
 ###############################################################################
 ##                              Tests & Linting                              ##
