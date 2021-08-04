@@ -203,14 +203,7 @@ func (v *validator) generateEthereumKey() error {
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
-	description := stakingtypes.NewDescription(
-		v.moniker,
-		"",
-		"",
-		"",
-		"",
-	)
-
+	description := stakingtypes.NewDescription(v.moniker, "", "", "", "")
 	commissionRates := stakingtypes.CommissionRates{
 		Rate:          sdk.MustNewDecFromStr("0.1"),
 		MaxRate:       sdk.MustNewDecFromStr("0.2"),
@@ -225,19 +218,9 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 		return nil, err
 	}
 
-	pubKeyStr, err := sdk.Bech32ifyPubKey(sdk.Bech32PubKeyTypeConsPub, valPubKey)
-	if err != nil {
-		return nil, err
-	}
-
-	pubKey, err := sdk.GetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, pubKeyStr)
-	if err != nil {
-		return nil, err
-	}
-
 	return stakingtypes.NewMsgCreateValidator(
 		sdk.ValAddress(v.keyInfo.GetAddress()),
-		pubKey,
+		valPubKey,
 		amount,
 		description,
 		commissionRates,
@@ -261,7 +244,7 @@ func (v *validator) buildDelegateKeysMsg() sdk.Msg {
 		Nonce:            0,
 	}
 
-	signMsgBz := cdc.MustMarshalBinaryBare(&signMsg)
+	signMsgBz := cdc.MustMarshal(&signMsg)
 	hash := crypto.Keccak256Hash(signMsgBz).Bytes()
 	ethSig, err := gravitytypes.NewEthereumSignature(hash, privKey)
 	if err != nil {
