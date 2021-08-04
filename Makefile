@@ -93,33 +93,40 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenetwork/umeed .
+	@docker build -t umeenet/umeed .
 
-docker-localnet-build:
-	@docker build -t umeenetwork/umeed-localnet --file localnet.Dockerfile .
+docker-build-debug:
+	@docker build -t umeenet/umeed --build-arg IMG_TAG=debug .
 
-.PHONY: docker-build docker-localnet-build
-
-###############################################################################
-##                                 Localnet                                  ##
-###############################################################################
-
-localnet-start: build-linux localnet-stop
-  # start a local Umee network if a network configuration does not already exist
-	@if ! [ -f $(BUILD_DIR)/node0/umeed/config/genesis.json ]; then \
-    docker run --rm -v $(BUILD_DIR):/umeed:Z umeenetwork/umeed-localnet \
-    localnet --num-validators=4 --starting-ip-address=192.168.30.2 --keyring-backend=test -o .; \
-  fi
-	@docker-compose -f docker-compose.localnet.yaml up -d
-
-localnet-stop:
-	@docker-compose -f docker-compose.localnet.yaml down
-
-.PHONY: localnet-stop localnet-start
+.PHONY: docker-build docker-build-debug
 
 ###############################################################################
 ##                              Tests & Linting                              ##
 ###############################################################################
+
+PACKAGES_UNIT=$(shell go list ./... | grep -v '/e2e')
+PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
+TEST_PACKAGES=./...
+TEST_TARGETS := test-unit test-unit-cover test-e2e
+
+test-unit: ARGS=-timeout=5m -race
+test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
+test-unit-cover: ARGS=-timeout=5m -race -coverprofile=coverage.txt -covermode=atomic
+test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
+test-e2e: ARGS=-timeout=25m -v
+test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
+$(TEST_TARGETS): run-tests
+
+run-tests:
+ifneq (,$(shell which tparse 2>/dev/null))
+	@echo "--> Running tests"
+	@go test -mod=readonly -json $(ARGS) $(TEST_PACKAGES) | tparse
+else
+	@echo "--> Running tests"
+	@go test -mod=readonly $(ARGS) $(TEST_PACKAGES)
+endif
+
+.PHONY: run-tests $(TEST_TARGETS)
 
 lint:
 	@echo "--> Running linter"

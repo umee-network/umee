@@ -1,5 +1,7 @@
 run:
   tests: false
+  skip-dirs:
+    - tests/e2e
 
 linters:
   enable:
