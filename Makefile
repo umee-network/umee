@@ -95,7 +95,10 @@ clean:
 docker-build:
 	@docker build -t umeenet/umeed .
 
-.PHONY: docker-build
+docker-build-debug:
+	@docker build -t umeenet/umeed --build-arg IMG_TAG=debug .
+
+.PHONY: docker-build docker-build-debug
 
 ###############################################################################
 ##                              Tests & Linting                              ##
