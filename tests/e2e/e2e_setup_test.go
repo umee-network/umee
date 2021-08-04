@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/server"
+	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
@@ -31,7 +32,7 @@ import (
 
 const (
 	photonDenom         = "photon"
-	initBalanceStr      = "100000000000uumee,100000000000photon"
+	initBalanceStr      = "110000000000uumee,100000000000photon"
 	ethChainID     uint = 15
 )
 
@@ -259,10 +260,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 func (s *IntegrationTestSuite) initValidatorConfigs() {
 	for i, val := range s.chain.validators {
-		cfgPath := filepath.Join(val.configDir(), "config", "config.toml")
+		tmCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
 
 		vpr := viper.New()
-		vpr.SetConfigFile(cfgPath)
+		vpr.SetConfigFile(tmCfgPath)
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := &tmconfig.Config{}
@@ -289,7 +290,20 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		valConfig.P2P.PersistentPeers = strings.Join(peers, ",")
 
-		tmconfig.WriteConfigFile(cfgPath, valConfig)
+		tmconfig.WriteConfigFile(tmCfgPath, valConfig)
+
+		// set application configuration
+		appCfgPath := filepath.Join(val.configDir(), "config", "app.toml")
+
+		appConfig := srvconfig.DefaultConfig()
+		appConfig.API.Enable = true
+		// TODO: Re-enable minimum gas prices once gorc allows configurable gas
+		// prices. Otherwise, relaying will fail as min fees are never met.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/11
+		// appConfig.MinGasPrices = "0.00001photon"
+
+		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
 }
 
