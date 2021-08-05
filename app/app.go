@@ -155,8 +155,7 @@ func init() {
 
 	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", Name))
 
-	sdk.GetConfig().SetAddressVerifier(VerifyAddressFormat)
-	sdk.GetConfig().Seal()
+	SetAddressConfig()
 }
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of

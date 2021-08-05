@@ -10,19 +10,17 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ory/dockertest/v3/docker"
 )
 
-func (s *IntegrationTestSuite) deployERC20Token(baseDenom, name, symbol string, decimals int) string {
+func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	s.T().Logf(
-		"deploying ERC20 token contract; base: %s, name: %s, symbol: %s, decimals: %d",
-		baseDenom, name, symbol, decimals,
-	)
+	s.T().Logf("deploying ERC20 token contract: %s", baseDenom)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,
@@ -36,9 +34,6 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom, name, symbol string, 
 			fmt.Sprintf("--ethereum-rpc=http://%s:8545", s.ethResource.Container.Name[1:]),
 			fmt.Sprintf("--cosmos-grpc=http://%s:9090", s.valResources[0].Container.Name[1:]),
 			fmt.Sprintf("--cosmos-denom=%s", baseDenom),
-			fmt.Sprintf("--erc20-decimals=%d", decimals),
-			fmt.Sprintf("--erc20-symbol=%s", symbol),
-			fmt.Sprintf("--erc20-name=%s", name),
 			fmt.Sprintf("--contract-address=%s", s.gravityContractAddr),
 			fmt.Sprintf("--ethereum-key=%s", s.chain.validators[0].ethereumKey.privateKey),
 			"--cosmos-prefix=umee",
@@ -70,7 +65,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom, name, symbol string, 
 	_, err = hexutil.Decode(erc20Addr)
 	s.Require().NoError(err)
 
-	s.T().Logf("deployed %s (%s) contract: %s", name, baseDenom, erc20Addr)
+	s.T().Logf("deployed %s contract: %s", baseDenom, erc20Addr)
 
 	return erc20Addr
 }
@@ -128,22 +123,24 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
 	txHash = fmt.Sprintf("%X", common.FromHex(txHash)) // remove 0x
 
-	s.Require().Eventually(
+	s.Require().Eventuallyf(
 		func() bool {
 			return queryUmeeTx(endpoint, txHash) == nil
 		},
 		time.Minute,
 		5*time.Second,
+		"stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
 	)
 }
 
-func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, toEthAddr, amount, fees string) {
+func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, toEthAddr, amount, umeeFee, gravityFee string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	s.T().Logf(
-		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, fees: %s",
-		s.chain.validators[valIdx].keyInfo.GetAddress(), toEthAddr, amount, fees,
+		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, umeeFee: %s, gravityFee: %s",
+		s.chain.validators[valIdx].keyInfo.GetAddress(), toEthAddr, amount, umeeFee, gravityFee,
 	)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
@@ -159,9 +156,10 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, toEthAddr, amount, 
 			"send-to-etheruem",
 			toEthAddr,
 			amount,
-			fees,
-			fmt.Sprintf("--from=%s", s.chain.validators[valIdx].keyInfo.GetName()),
-			fmt.Sprintf("--chain-id=%s", s.chain.id),
+			gravityFee,
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, s.chain.validators[valIdx].keyInfo.GetName()),
+			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
 			"--broadcast-mode=sync",
 			"-y",
@@ -188,12 +186,14 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, toEthAddr, amount, 
 	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
 	txHash := broadcastResp["txhash"].(string)
 
-	s.Require().Eventually(
+	s.Require().Eventuallyf(
 		func() bool {
 			return queryUmeeTx(endpoint, txHash) == nil
 		},
 		time.Minute,
 		5*time.Second,
+		"stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
 	)
 }
 

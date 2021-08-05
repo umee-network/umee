@@ -60,9 +60,6 @@ func TestIntegrationTestSuite(t *testing.T) {
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.T().Log("setting up e2e integration test suite...")
 
-	// set bech32 prefixes
-	app.SetAddressConfig()
-
 	var err error
 	s.chain, err = newChain()
 	s.Require().NoError(err)
@@ -297,11 +294,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
-		// TODO: Re-enable minimum gas prices once gorc allows configurable gas
-		// prices. Otherwise, relaying will fail as min fees are never met.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/11
-		// appConfig.MinGasPrices = "0.00001photon"
+		appConfig.MinGasPrices = "0.00001photon"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -502,6 +495,7 @@ rpc = "http://%s:8545"
 [cosmos]
 key_derivation_path = "m/44'/118'/0'/0/0"
 grpc = "http://%s:9090"
+gas_price = { amount = 0.00001, denom = "%s" }
 prefix = "umee"
 `,
 			s.gravityContractAddr,
@@ -509,6 +503,7 @@ prefix = "umee"
 			// NOTE: container names are prefixed with '/'
 			s.ethResource.Container.Name[1:],
 			s.valResources[i].Container.Name[1:],
+			photonDenom,
 		)
 
 		val := s.chain.validators[i]

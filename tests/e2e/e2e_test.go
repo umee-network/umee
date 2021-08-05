@@ -9,18 +9,18 @@ func (s *IntegrationTestSuite) TestTokenTransfers() {
 	// deploy umee ERC20 token contract
 	// var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
-		_ = s.deployERC20Token("uumee", "umee", "umee", 6)
+		_ = s.deployERC20Token("uumee")
 	})
 
 	// deploy photon ERC20 token contact
 	// var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
-		_ = s.deployERC20Token("photon", "photon", "photon", 0)
+		_ = s.deployERC20Token("photon")
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
 	s.Run("send_photon_tokens_to_eth", func() {
-		s.sendFromUmeeToEth(0, s.chain.validators[1].ethereumKey.address, "100photon", "3photon")
+		s.sendFromUmeeToEth(0, s.chain.validators[1].ethereumKey.address, "100photon", "10photon", "3photon")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
@@ -28,7 +28,7 @@ func (s *IntegrationTestSuite) TestTokenTransfers() {
 		// require the sender's (validator) balance decreased
 		balance, err := queryUmeeDenomBalance(endpoint, fromAddr.String(), "photon")
 		s.Require().NoError(err)
-		s.Require().Equal(balance, 99999999897)
+		s.Require().Equal(99999999887, balance)
 
 		// TODO/XXX: Test checking Ethereum account balance. This might require
 		// creating go bindings to the gravity contract. For now, we sleep enough
@@ -48,14 +48,14 @@ func (s *IntegrationTestSuite) TestTokenTransfers() {
 
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
-		s.sendFromUmeeToEth(0, s.chain.validators[1].ethereumKey.address, "300uumee", "7uumee")
+		s.sendFromUmeeToEth(0, s.chain.validators[1].ethereumKey.address, "300uumee", "10photon", "7uumee")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
 
 		balance, err := queryUmeeDenomBalance(endpoint, fromAddr.String(), "uumee")
 		s.Require().NoError(err)
-		s.Require().Equal(balance, 9999999693)
+		s.Require().Equal(9999999693, balance)
 
 		// TODO/XXX: Test checking Ethereum account balance. This might require
 		// creating go bindings to the gravity contract. For now, we sleep enough
