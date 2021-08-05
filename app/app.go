@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -83,7 +84,6 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
 	appparams "github.com/umee-network/umee/app/params"
@@ -96,6 +96,11 @@ const (
 
 	// BondDenom defines the native staking token denomination.
 	BondDenom = "uumee"
+
+	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
+	//
+	// NOTE: In the SDK, the default value is 255.
+	MaxAddrLen = 20
 )
 
 var (
@@ -264,6 +269,11 @@ func New(
 	// grant capabilities for the ibc and ibc-transfer modules
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+
+	// Applications that wish to enforce statically created ScopedKeepers should
+	// call `Seal` after creating their scoped modules in the app via
+	// `ScopeToModule`.
+	app.CapabilityKeeper.Seal()
 
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
@@ -438,6 +448,7 @@ func New(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	app.mm.SetOrderBeginBlockers(
 		upgradetypes.ModuleName,
+		capabilitytypes.ModuleName,
 		minttypes.ModuleName,
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
@@ -508,17 +519,6 @@ func New(
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
 		}
-
-		// Initialize and seal the capability keeper so all persistent capabilities
-		// are loaded in-memory and prevent any further modules from creating scoped
-		// sub-keepers.
-		//
-		// This must be done during creation of baseapp rather than in InitChain so
-		// that in-memory capabilities get regenerated on app restart.
-		// Note that since this reads from the store, we can only perform it when
-		// `loadLatest` is set to true.
-		ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
-		app.CapabilityKeeper.InitializeAndSeal(ctx)
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
@@ -690,4 +690,18 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
 	}
+}
+
+func VerifyAddressFormat(bz []byte) error {
+	if len(bz) == 0 {
+		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
+	}
+	if len(bz) != MaxAddrLen {
+		return sdkerrors.Wrapf(
+			sdkerrors.ErrUnknownAddress,
+			"invalid address length; got: %d, max: %d", len(bz), MaxAddrLen,
+		)
+	}
+
+	return nil
 }
