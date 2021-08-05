@@ -33,6 +33,7 @@ import (
 const (
 	photonDenom         = "photon"
 	initBalanceStr      = "110000000000uumee,100000000000photon"
+	minGasPrice         = "0.00001"
 	ethChainID     uint = 15
 )
 
@@ -294,7 +295,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
-		appConfig.MinGasPrices = "0.00001photon"
+		appConfig.MinGasPrices = fmt.Sprintf("%s%s", minGasPrice, photonDenom)
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -495,7 +496,7 @@ rpc = "http://%s:8545"
 [cosmos]
 key_derivation_path = "m/44'/118'/0'/0/0"
 grpc = "http://%s:9090"
-gas_price = { amount = 0.00001, denom = "%s" }
+gas_price = { amount = %s, denom = "%s" }
 prefix = "umee"
 `,
 			s.gravityContractAddr,
@@ -503,6 +504,7 @@ prefix = "umee"
 			// NOTE: container names are prefixed with '/'
 			s.ethResource.Container.Name[1:],
 			s.valResources[i].Container.Name[1:],
+			minGasPrice,
 			photonDenom,
 		)
 
