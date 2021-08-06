@@ -155,6 +155,10 @@ func init() {
 
 	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", Name))
 
+	// XXX: If other upstream or external application's depend on any of Umee's
+	// CLI or command functionality, then this would require us to move the
+	// SetAddressConfig call to somewhere external such as the root command
+	// constructor and anywhere else we contract the app.
 	SetAddressConfig()
 }
 
