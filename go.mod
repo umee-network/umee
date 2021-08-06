@@ -12,8 +12,6 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go v1.0.0-rc4
 	github.com/ethereum/go-ethereum v1.10.6
-	github.com/cosmos/ibc-go v1.0.0-rc4
-	github.com/ethereum/go-ethereum v1.9.25
 	github.com/gogo/protobuf v1.3.3
 	github.com/golangci/golangci-lint v1.41.1
 	github.com/google/go-cmp v0.5.6 // indirect
