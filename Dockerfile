@@ -12,7 +12,7 @@ RUN make install
 
 # Fetch gravity bridge binaries and contract
 FROM alpine:3.14 as gravity-builder
-ARG GRAVITY_VERSION=v0.1.15
+ARG GRAVITY_VERSION=v0.1.18
 # TODO: Enable checksum verification once version stabalizes
 # ARG GRAVITY_CLIENT_HASH=b52634eda7cc3c053f266b9b6f772095f5db7848051266b350d68b8136ba2040
 # ARG GRAVITY_CONTRACT_DEPLOYER_HASH=0177ed11f11a06d30fc72b6d930800a5e35481a7a8c63dae30ecaf4857c7ed27

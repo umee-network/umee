@@ -24,7 +24,7 @@ const (
 
 var (
 	encodingConfig params.EncodingConfig
-	cdc            codec.Marshaler
+	cdc            codec.Codec
 )
 
 func init() {

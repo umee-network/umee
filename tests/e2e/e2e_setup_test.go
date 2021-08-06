@@ -18,6 +18,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
@@ -25,7 +26,6 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	"github.com/ybbus/jsonrpc/v2"
 
 	"github.com/umee-network/umee/app"
 )
@@ -33,6 +33,7 @@ import (
 const (
 	photonDenom         = "photon"
 	initBalanceStr      = "110000000000uumee,100000000000photon"
+	minGasPrice         = "0.00001"
 	ethChainID     uint = 15
 )
 
@@ -59,9 +60,6 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.T().Log("setting up e2e integration test suite...")
-
-	// set bech32 prefixes
-	app.SetAddressConfig()
 
 	var err error
 	s.chain, err = newChain()
@@ -297,11 +295,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
-		// TODO: Re-enable minimum gas prices once gorc allows configurable gas
-		// prices. Otherwise, relaying will fail as min fees are never met.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/11
-		// appConfig.MinGasPrices = "0.00001photon"
+		appConfig.MinGasPrices = fmt.Sprintf("%s%s", minGasPrice, photonDenom)
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -333,30 +327,25 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 	s.Require().NoError(err)
 
+	ethClient, err := ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.Require().NoError(err)
+
 	// Wait for the Ethereum node to start producing blocks; DAG completion takes
 	// about two minutes.
-	rpcClient := jsonrpc.NewClient("http://localhost:8545")
 	s.Require().Eventually(
 		func() bool {
-			resp, err := rpcClient.Call("eth_blockNumber")
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			height, err := ethClient.BlockNumber(ctx)
 			if err != nil {
 				return false
 			}
 
-			heightStr := strings.Replace(resp.Result.(string), "0x", "", -1)
-			height, err := strconv.ParseInt(heightStr, 16, 64)
-			if err != nil {
-				return false
-			}
-
-			if height < 1 {
-				return false
-			}
-
-			return true
+			return height > 1
 		},
 		5*time.Minute,
-		time.Second,
+		10*time.Second,
 		"geth node failed to produce a block",
 	)
 
@@ -502,6 +491,7 @@ rpc = "http://%s:8545"
 [cosmos]
 key_derivation_path = "m/44'/118'/0'/0/0"
 grpc = "http://%s:9090"
+gas_price = { amount = %s, denom = "%s" }
 prefix = "umee"
 `,
 			s.gravityContractAddr,
@@ -509,6 +499,8 @@ prefix = "umee"
 			// NOTE: container names are prefixed with '/'
 			s.ethResource.Container.Name[1:],
 			s.valResources[i].Container.Name[1:],
+			minGasPrice,
+			photonDenom,
 		)
 
 		val := s.chain.validators[i]

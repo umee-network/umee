@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -47,14 +48,6 @@ import (
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	transfer "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer"
-	ibctransferkeeper "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
-	ibc "github.com/cosmos/cosmos-sdk/x/ibc/core"
-	ibcclient "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client"
-	porttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/05-port/types"
-	ibchost "github.com/cosmos/cosmos-sdk/x/ibc/core/24-host"
-	ibckeeper "github.com/cosmos/cosmos-sdk/x/ibc/core/keeper"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -73,6 +66,15 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ibctransfer "github.com/cosmos/ibc-go/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/modules/core/02-client"
+	ibcclienttypes "github.com/cosmos/ibc-go/modules/core/02-client/types"
+	ibcporttypes "github.com/cosmos/ibc-go/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/modules/core/keeper"
 	"github.com/peggyjv/gravity-bridge/module/x/gravity"
 	gravitykeeper "github.com/peggyjv/gravity-bridge/module/x/gravity/keeper"
 	gravitytypes "github.com/peggyjv/gravity-bridge/module/x/gravity/types"
@@ -81,7 +83,6 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
 	appparams "github.com/umee-network/umee/app/params"
@@ -94,6 +95,11 @@ const (
 
 	// BondDenom defines the native staking token denomination.
 	BondDenom = "uumee"
+
+	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
+	//
+	// NOTE: In the SDK, the default value is 255.
+	MaxAddrLen = 20
 )
 
 var (
@@ -122,7 +128,7 @@ var (
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
-		transfer.AppModuleBasic{},
+		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		umee.AppModuleBasic{},
 		gravity.AppModuleBasic{},
@@ -147,7 +153,9 @@ func init() {
 		panic(fmt.Sprintf("failed to get user home directory: %s", err))
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
+	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", Name))
+
+	SetAddressConfig()
 }
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
@@ -156,7 +164,7 @@ type UmeeApp struct {
 	*baseapp.BaseApp
 
 	legacyAmino       *codec.LegacyAmino
-	appCodec          codec.Marshaler
+	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
 
 	invCheckPeriod uint
@@ -213,7 +221,7 @@ func New(
 
 	base := baseapp.NewBaseApp(Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	base.SetCommitMultiStoreTracer(traceStore)
-	base.SetAppVersion(version.Version)
+	base.SetVersion(version.Version)
 	base.SetInterfaceRegistry(interfaceRegistry)
 
 	keys := sdk.NewKVStoreKeys(
@@ -259,6 +267,11 @@ func New(
 	// grant capabilities for the ibc and ibc-transfer modules
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+
+	// Applications that wish to enforce statically created ScopedKeepers should
+	// call `Seal` after creating their scoped modules in the app via
+	// `ScopeToModule`.
+	app.CapabilityKeeper.Seal()
 
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
@@ -317,6 +330,7 @@ func New(
 		keys[upgradetypes.StoreKey],
 		appCodec,
 		homePath,
+		app.BaseApp,
 	)
 	app.gravityKeeper = gravitykeeper.NewKeeper(
 		appCodec,
@@ -326,6 +340,7 @@ func New(
 		stakingKeeper,
 		app.BankKeeper,
 		app.SlashingKeeper,
+		sdk.DefaultPowerReduction,
 	)
 
 	// register the staking hooks
@@ -344,9 +359,9 @@ func New(
 		keys[ibchost.StoreKey],
 		app.GetSubspace(ibchost.ModuleName),
 		app.StakingKeeper,
+		app.UpgradeKeeper,
 		scopedIBCKeeper,
 	)
-
 	// register the proposal types
 	govRouter := govtypes.NewRouter()
 	govRouter.
@@ -354,7 +369,7 @@ func New(
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibchost.RouterKey, ibcclient.NewClientUpdateProposalHandler(app.IBCKeeper.ClientKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
 
 	// create transfer Keeper
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
@@ -367,10 +382,10 @@ func New(
 		app.BankKeeper,
 		scopedTransferKeeper,
 	)
-	transferModule := transfer.NewAppModule(app.TransferKeeper)
+	transferModule := ibctransfer.NewAppModule(app.TransferKeeper)
 
 	// create static IBC router, add transfer route, then set and seal it
-	ibcRouter := porttypes.NewRouter()
+	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -431,6 +446,7 @@ func New(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	app.mm.SetOrderBeginBlockers(
 		upgradetypes.ModuleName,
+		capabilitytypes.ModuleName,
 		minttypes.ModuleName,
 		distrtypes.ModuleName,
 		slashingtypes.ModuleName,
@@ -472,41 +488,35 @@ func New(
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-	app.mm.RegisterServices(module.NewConfigurator(app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	app.mm.RegisterServices(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
 
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(transientKeys)
 	app.MountMemoryStores(memKeys)
 
-	// initialize BaseApp
+	anteHandler, err := ante.NewAnteHandler(
+		ante.HandlerOptions{
+			AccountKeeper:   app.AccountKeeper,
+			BankKeeper:      app.BankKeeper,
+			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
+			FeegrantKeeper:  nil,
+			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+		},
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create ante handler: %s", err))
+	}
+
+	app.SetAnteHandler(anteHandler)
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.SetAnteHandler(
-		ante.NewAnteHandler(
-			app.AccountKeeper,
-			app.BankKeeper,
-			ante.DefaultSigVerificationGasConsumer,
-			encodingConfig.TxConfig.SignModeHandler(),
-		),
-	)
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
 		}
-
-		// Initialize and seal the capability keeper so all persistent capabilities
-		// are loaded in-memory and prevent any further modules from creating scoped
-		// sub-keepers.
-		//
-		// This must be done during creation of baseapp rather than in InitChain so
-		// that in-memory capabilities get regenerated on app restart.
-		// Note that since this reads from the store, we can only perform it when
-		// `loadLatest` is set to true.
-		ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
-		app.CapabilityKeeper.InitializeAndSeal(ctx)
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
@@ -567,7 +577,7 @@ func (app *UmeeApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *UmeeApp) AppCodec() codec.Marshaler {
+func (app *UmeeApp) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
@@ -649,7 +659,7 @@ func GetMaccPerms() map[string][]string {
 }
 
 func initParamsKeeper(
-	appCodec codec.BinaryMarshaler,
+	appCodec codec.Codec,
 	legacyAmino *codec.LegacyAmino,
 	key, tkey sdk.StoreKey,
 ) paramskeeper.Keeper {
@@ -678,4 +688,18 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
 	}
+}
+
+func VerifyAddressFormat(bz []byte) error {
+	if len(bz) == 0 {
+		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
+	}
+	if len(bz) != MaxAddrLen {
+		return sdkerrors.Wrapf(
+			sdkerrors.ErrUnknownAddress,
+			"invalid address length; got: %d, max: %d", len(bz), MaxAddrLen,
+		)
+	}
+
+	return nil
 }
