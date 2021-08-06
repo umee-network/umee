@@ -30,7 +30,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		ethEndpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
 
 		// require the Ethereum recipient balance increased
-		s.Eventually(
+		s.Require().Eventually(
 			func() bool {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -42,7 +42,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 				return b == expEthBalance
 			},
-			time.Minute,
+			2*time.Minute,
 			5*time.Second,
 		)
 	})
@@ -53,11 +53,21 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		toAddr := s.chain.validators[0].keyInfo.GetAddress()
+		expBalance := 99999999987
 
 		// require the original sender's (validator) balance increased
-		balance, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "photon")
-		s.Require().NoError(err)
-		s.Require().Equal(99999999887, balance)
+		s.Require().Eventually(
+			func() bool {
+				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "photon")
+				if err != nil {
+					return false
+				}
+
+				return b == expBalance
+			},
+			2*time.Minute,
+			5*time.Second,
+		)
 	})
 }
 
@@ -84,7 +94,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		ethEndpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
 
 		// require the Ethereum recipient balance increased
-		s.Eventually(
+		s.Require().Eventually(
 			func() bool {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
