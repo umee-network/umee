@@ -18,6 +18,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
@@ -25,7 +26,6 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	"github.com/ybbus/jsonrpc/v2"
 
 	"github.com/umee-network/umee/app"
 )
@@ -327,30 +327,25 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 	s.Require().NoError(err)
 
+	ethClient, err := ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.Require().NoError(err)
+
 	// Wait for the Ethereum node to start producing blocks; DAG completion takes
 	// about two minutes.
-	rpcClient := jsonrpc.NewClient("http://localhost:8545")
 	s.Require().Eventually(
 		func() bool {
-			resp, err := rpcClient.Call("eth_blockNumber")
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			height, err := ethClient.BlockNumber(ctx)
 			if err != nil {
 				return false
 			}
 
-			heightStr := strings.Replace(resp.Result.(string), "0x", "", -1)
-			height, err := strconv.ParseInt(heightStr, 16, 64)
-			if err != nil {
-				return false
-			}
-
-			if height < 1 {
-				return false
-			}
-
-			return true
+			return height > 1
 		},
 		5*time.Minute,
-		time.Second,
+		10*time.Second,
 		"geth node failed to produce a block",
 	)
 

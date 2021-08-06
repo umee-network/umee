@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
 )
 
@@ -120,12 +122,11 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 	_, err = hexutil.Decode(txHash)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
-	txHash = fmt.Sprintf("%X", common.FromHex(txHash)) // remove 0x
+	endpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
 
 	s.Require().Eventuallyf(
 		func() bool {
-			return queryUmeeTx(endpoint, txHash) == nil
+			return queryEthTx(ctx, endpoint, txHash) == nil
 		},
 		time.Minute,
 		5*time.Second,
@@ -240,4 +241,57 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (int, error) {
 	}
 
 	return amount, nil
+}
+
+func queryEthTx(ctx context.Context, endpoint, txHash string) error {
+	c, err := ethclient.Dial(endpoint)
+	if err != nil {
+		return fmt.Errorf("failed to create geth client: %w", err)
+	}
+
+	_, pending, err := c.TransactionByHash(ctx, common.HexToHash(txHash))
+	if err != nil {
+		return err
+	}
+
+	if pending {
+		return fmt.Errorf("ethereum tx %s is still pending", txHash)
+	}
+
+	return nil
+}
+
+func queryEthTokenBalance(ctx context.Context, endpoint, contractAddr, recipientAddr string) (int, error) {
+	c, err := ethclient.Dial(endpoint)
+	if err != nil {
+		return 0, err
+	}
+
+	// pad 20 bytes to the token holder (recipient) address to get 32 bytes
+	pad := bytes.Repeat([]byte{0}, 12)
+	data := append(pad, common.FromHex(recipientAddr)...)
+	if len(data) != 32 {
+		return 0, fmt.Errorf("unexpected data encoding length; expected: 32, got: %d", len(data))
+	}
+
+	funcSig := common.FromHex("0x70a08231") // keccak-256("balanceOf(address)")[:4]
+	data = append(funcSig, data...)
+	token := common.HexToAddress(contractAddr)
+
+	callMsg := ethereum.CallMsg{
+		To:   &token,
+		Data: data,
+	}
+
+	bz, err := c.CallContract(ctx, callMsg, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to call Ethereum contract: %w", err)
+	}
+
+	balance, err := strconv.ParseInt(common.Bytes2Hex(bz), 16, 32)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse balance: %w", err)
+	}
+
+	return int(balance), nil
 }
