@@ -14,5 +14,5 @@ updates:
       - alexanderbez
       - fedekunze
     labels:
-      - "A: Automerge"
-      - "T: Dependencies"
+      - "A:Automerge"
+      - "T:Dependencies"
