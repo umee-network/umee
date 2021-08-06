@@ -558,7 +558,7 @@ prefix = "umee"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
-		s.Eventuallyf(
+		s.Require().Eventuallyf(
 			func() bool {
 				var containerLogsBuf bytes.Buffer
 				s.Require().NoError(s.dkrPool.Client.Logs(
