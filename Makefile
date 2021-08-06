@@ -2,7 +2,7 @@
 
 BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
-BUILD_DIR      ?= $(CURDIR)/build
+BUILDDIR      ?= $(CURDIR)/build
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
@@ -63,13 +63,27 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
-build: go.sum
-	@echo "--> Building..."
-	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+BUILD_TARGETS := build install
 
-install: go.sum
-	@echo "--> Installing..."
-	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
+build: BUILD_ARGS=-o $(BUILDDIR)/
+
+$(BUILD_TARGETS): go.sum $(BUILDDIR)/
+	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+
+$(BUILDDIR)/:
+	mkdir -p $(BUILDDIR)/
+
+build-reproducible: go.sum
+	@docker rm latest-build || true
+	@docker run --volume=$(CURDIR):/sources:ro \
+        --env TARGET_PLATFORMS='linux/amd64 darwin/amd64 linux/arm64 darwin/arm64' \
+        --env APP=umeed \
+        --env VERSION=$(VERSION) \
+        --env COMMIT=$(COMMIT) \
+        --env LEDGER_ENABLED=$(LEDGER_ENABLED) \
+				--env DEBUG=true \
+        --name latest-build cosmossdk/rbuilder:latest
+	@docker cp -a latest-build:/home/builder/artifacts/ $(CURDIR)/
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
@@ -84,7 +98,7 @@ go.sum: go.mod
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/**
+	@rm -rf $(BUILDDIR)/**
 
 .PHONY: install build build-linux clean
 

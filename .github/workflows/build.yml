@@ -5,27 +5,18 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
-        targetos: [darwin, linux]
-    name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+    name: umee reproducible build
     steps:
       - uses: actions/checkout@v2
       - name: Setup go
         uses: actions/setup-go@v1
         with:
           go-version: 1.15
-        env:
-          GOOS: ${{ matrix.targetos }}
-          GOARCH: ${{ matrix.arch }}
 
       - name: Compile
         run: |
-          go mod download
-          cd cmd/umeed
-          go build .
-
+          make build-reproducible
+## TODO: upload the artifacts with the updated paths
       - uses: actions/upload-artifact@v2
         with:
           name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
