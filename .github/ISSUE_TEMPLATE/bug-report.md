@@ -4,14 +4,15 @@ about: Create a report to help us squash bugs!
 ---
 
 <!-- < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < ☺
-v                     ✰  Thanks for opening an issue! ✰                      v
-v       Before smashing the submit button please review the template.        v
-v       Also, please also ensure that this is not a duplicate issue :)       v
+v Thanks for opening an issue!
+v
+v Before smashing the submit button please review the template.
+v Also, please also ensure that this is not a duplicate issue :)
 ☺ > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >  -->
 
 ## Summary of Bug
 
-A clear and concise description of what the :ladybug: is.
+A clear and concise description of what the 🐞 is.
 
 ## Version
 
