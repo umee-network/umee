@@ -67,9 +67,9 @@ branch.
 
 ### PR & Merge Procedure
 
-- Ensure the PR branch is rebased on `main`
-- run `make test-unit test-e2e` to ensure that all tests pass.
-- Merge the PR.
+- Ensure the PR branch is rebased on `main`.
+- Run `make test-unit test-e2e` to ensure that all tests pass.
+- Merge the PR!
 
 ### Release Procedure
 
