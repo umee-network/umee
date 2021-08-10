@@ -11,6 +11,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
 		photonERC20Addr = s.deployERC20Token("photon")
+		s.Require().NotEmpty(photonERC20Addr)
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
@@ -76,6 +77,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
 		umeeERC20Addr = s.deployERC20Token("uumee")
+		s.Require().NotEmpty(umeeERC20Addr)
 	})
 
 	// send 300 umee tokens from Umee to Ethereum
