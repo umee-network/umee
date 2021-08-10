@@ -46,11 +46,11 @@ opening an [Issue](https://github.com/umee-network/umee/issues/new/choose) or a
 of the proposal.
 
 Once the proposal has been discussed and there is rough alignment on a high-level
-approach to the design, the [ADR creation process](https://github.com/umee-network/umee/blob/master/docs/architecture/PROCESS.md) can begin. We are following this process to ensure all involved parties
+approach to the design, the [ADR creation process](https://github.com/umee-network/umee/blob/main/docs/architecture/PROCESS.md) can begin. We are following this process to ensure all involved parties
 are in agreement before any party begins coding the proposed implementation.
 
 If you would like to see examples of how these are written, please refer to the
-current [ADRs](https://github.com/umee-network/umee/tree/master/docs/architecture).
+current [ADRs](https://github.com/umee-network/umee/tree/main/docs/architecture).
 
 ## Branching Model and Release
 
