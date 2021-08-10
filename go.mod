@@ -2,15 +2,13 @@ module github.com/umee-network/umee
 
 go 1.16
 
-// TODO: Use next point release of github.com/peggyjv/gravity-bridge/module
-// after v0.1.18 after it's released.
 require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
-	github.com/cosmos/cosmos-sdk v0.43.0-rc3
+	github.com/cosmos/cosmos-sdk v0.43.0
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go v1.0.0-rc4
+	github.com/cosmos/ibc-go v1.0.0
 	github.com/ethereum/go-ethereum v1.10.6
 	github.com/gogo/protobuf v1.3.3
 	github.com/golangci/golangci-lint v1.41.1
@@ -20,7 +18,7 @@ require (
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/opencontainers/runc v1.0.1 // indirect
 	github.com/ory/dockertest/v3 v3.7.0
-	github.com/peggyjv/gravity-bridge/module v0.1.19-0.20210806174644-f75251c7d6a0
+	github.com/peggyjv/gravity-bridge/module v0.1.20
 	github.com/spf13/cast v1.4.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5

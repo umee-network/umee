@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
@@ -11,6 +13,10 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
 		photonERC20Addr = s.deployERC20Token("photon")
+		s.Require().NotEmpty(photonERC20Addr)
+
+		_, err := hexutil.Decode(photonERC20Addr)
+		s.Require().NoError(err)
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
@@ -76,6 +82,10 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
 		umeeERC20Addr = s.deployERC20Token("uumee")
+		s.Require().NotEmpty(umeeERC20Addr)
+
+		_, err := hexutil.Decode(umeeERC20Addr)
+		s.Require().NoError(err)
 	})
 
 	// send 300 umee tokens from Umee to Ethereum
@@ -111,19 +121,13 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		)
 	})
 
-	// BUG / TODO: Currently, sending tokens from Ethereum back to the cosmos zone
-	// is broken in cases where the native token uses non-zero decimals.
-	//
-	// Ref: https://github.com/PeggyJV/gravity-bridge/issues/130
-	//
 	// send 300 umee tokens from Ethereum back to Umee
 	s.Run("send_uumee_tokens_from_eth", func() {
-		s.T().Skip("skipping; ref: https://github.com/PeggyJV/gravity-bridge/issues/130")
 		s.sendFromEthToUmee(1, umeeERC20Addr, s.chain.validators[0].keyInfo.GetAddress().String(), "300")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		toAddr := s.chain.validators[0].keyInfo.GetAddress()
-		expBalance := 99999999887
+		expBalance := 9999999993
 
 		// require the original sender's (validator) balance increased
 		s.Require().Eventually(

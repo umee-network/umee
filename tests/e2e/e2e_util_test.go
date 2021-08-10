@@ -48,9 +48,18 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 		errBuf bytes.Buffer
 	)
 
-	// TODO: This sometimes fails with "replacement transaction underpriced".
+	// TODO: This sometimes fails with "replacement transaction underpriced". We
+	// should:
+	//
+	// 1. Consider instead sending the raw Ethereum transaction ourselves instead
+	// of via the 'deploy-erc20-representation' command so we can control the
+	// nonce ourselves if this error happens.
+	//
+	// 2. Or, wrap this call in an eventually/retry block.
+	//
 	//
 	// Ref: https://github.com/umee-network/umee/issues/12
+	// Ref: https://ethereum.stackexchange.com/questions/27256/error-replacement-transaction-underpriced
 	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
 		Context:      ctx,
 		Detach:       false,

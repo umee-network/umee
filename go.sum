@@ -245,9 +245,8 @@ github.com/coreos/go-systemd v0.0.0-20190620071333-e64a0ec8b42a/go.mod h1:F5haX7
 github.com/coreos/go-systemd/v22 v22.3.2/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/coreos/pkg v0.0.0-20160727233714-3ac0863d7acf/go.mod h1:E3G3o1h8I7cfcXa63jLwjI0eiQQMgzzUDFVpN/nH/eA=
 github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f/go.mod h1:E3G3o1h8I7cfcXa63jLwjI0eiQQMgzzUDFVpN/nH/eA=
-github.com/cosmos/cosmos-sdk v0.43.0-rc2/go.mod h1:ctcrTEAhei9s8O3KSNvL0dxe+fVQGp07QyRb/7H9JYE=
-github.com/cosmos/cosmos-sdk v0.43.0-rc3 h1:vON4QgwSWCbDJF2brO/CqIjnMvjwAYXZS9p9on2qWcQ=
-github.com/cosmos/cosmos-sdk v0.43.0-rc3/go.mod h1:ctcrTEAhei9s8O3KSNvL0dxe+fVQGp07QyRb/7H9JYE=
+github.com/cosmos/cosmos-sdk v0.43.0 h1:l2GXJMDVtJyHb35pDUCw+uyr6eZtBo8vt+7PSsq+Fjo=
+github.com/cosmos/cosmos-sdk v0.43.0/go.mod h1:ctcrTEAhei9s8O3KSNvL0dxe+fVQGp07QyRb/7H9JYE=
 github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d/go.mod h1:tSxLoYXyBmiFeKpvmq4dzayMdCjCnu8uqmCysIGBT2Y=
 github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY=
 github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
@@ -256,9 +255,8 @@ github.com/cosmos/iavl v0.15.0-rc5/go.mod h1:WqoPL9yPTQ85QBMT45OOUzPxG/U/JcJoN7u
 github.com/cosmos/iavl v0.15.3/go.mod h1:OLjQiAQ4fGD2KDZooyJG9yz+p2ao2IAYSbke8mVvSA4=
 github.com/cosmos/iavl v0.16.0 h1:ICIOB8xysirTX27GmVAaoeSpeozzgSu9d49w36xkVJA=
 github.com/cosmos/iavl v0.16.0/go.mod h1:2A8O/Jz9YwtjqXMO0CjnnbTYEEaovE8jWcwrakH3PoE=
-github.com/cosmos/ibc-go v1.0.0-rc3/go.mod h1:MS2qxy0CmhLrh/FDu7lxaN5KgRrlktxn3XZkOp90Ya0=
-github.com/cosmos/ibc-go v1.0.0-rc4 h1:9xbRH+dtzHhUi/jZQuENBKi/xaAjE8FZEr7yYxVWZ5M=
-github.com/cosmos/ibc-go v1.0.0-rc4/go.mod h1:Fw3M2mAoPJNV67bgBvGFgDgB01alceX0gHweFsGMA+8=
+github.com/cosmos/ibc-go v1.0.0 h1:RtIRERSENyApp6WK7Germ3/wq8xvHxfsqfW/Xh+CJ2o=
+github.com/cosmos/ibc-go v1.0.0/go.mod h1:2wHKQUa+BLJMEyN635KrHfmTTwSNHBtXcqdY8JWGuXA=
 github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76 h1:DdzS1m6o/pCqeZ8VOAit/gyATedRgjvkVI+UCrLpyuU=
 github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76/go.mod h1:0mkLWIoZuQ7uBoospo5Q9zIpqq6rYCPJDSUdeCJvPM8=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
@@ -959,8 +957,8 @@ github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144T
 github.com/paulbellamy/ratecounter v0.2.0/go.mod h1:Hfx1hDpSGoqxkVVpBi/IlYD7kChlfo5C6hzIHwPqfFE=
 github.com/pborman/uuid v0.0.0-20170112150404-1b00554d8222/go.mod h1:VyrYX9gd7irzKovcSS6BIIEwPRkP2Wm2m9ufcdFSJ34=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
-github.com/peggyjv/gravity-bridge/module v0.1.19-0.20210806174644-f75251c7d6a0 h1:A5zVtB1PUa2RTqLE38hMT16aY2fkDGm4ZYc5hS6Lf2o=
-github.com/peggyjv/gravity-bridge/module v0.1.19-0.20210806174644-f75251c7d6a0/go.mod h1:Y/u39s1cqxYLIKaWK79kNIanHhiXNucXRKv0d83eVB8=
+github.com/peggyjv/gravity-bridge/module v0.1.20 h1:t2W8eWLVVDBGuGRdHrig7gE4RTbowobB6ks4+QUrA50=
+github.com/peggyjv/gravity-bridge/module v0.1.20/go.mod h1:Key1D2z/KaJ5A206L3EQW6RWo4q8w+Jpl+p5HMm896g=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.9.3 h1:zeC5b1GviRUyKYd6OJPvBU/mcVDVoL1OhT17FCt5dSQ=
 github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
