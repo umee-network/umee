@@ -49,9 +49,13 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	)
 
 	// TODO: This sometimes fails with "replacement transaction underpriced". We
-	// should consider instead sending the raw Ethereum transaction ourselves
-	// instead of via the 'deploy-erc20-representation' command so we can control
-	// the nonce ourselves if this error happens.
+	// should:
+	//
+	// 1. Consider instead sending the raw Ethereum transaction ourselves instead
+	// of via the 'deploy-erc20-representation' command so we can control the
+	// nonce ourselves if this error happens.
+	//
+	// 2. Or, wrap this call in an eventually/retry block.
 	//
 	//
 	// Ref: https://github.com/umee-network/umee/issues/12
