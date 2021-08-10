@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
@@ -12,6 +14,9 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	s.Run("deploy_photon_erc20", func() {
 		photonERC20Addr = s.deployERC20Token("photon")
 		s.Require().NotEmpty(photonERC20Addr)
+
+		_, err := hexutil.Decode(photonERC20Addr)
+		s.Require().NoError(err)
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
@@ -78,6 +83,9 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	s.Run("deploy_umee_erc20", func() {
 		umeeERC20Addr = s.deployERC20Token("uumee")
 		s.Require().NotEmpty(umeeERC20Addr)
+
+		_, err := hexutil.Decode(umeeERC20Addr)
+		s.Require().NoError(err)
 	})
 
 	// send 300 umee tokens from Umee to Ethereum
