@@ -46,6 +46,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	chain               *chain
+	ethClient           *ethclient.Client
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
@@ -327,7 +328,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 	s.Require().NoError(err)
 
-	ethClient, err := ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
 	s.Require().NoError(err)
 
 	// Wait for the Ethereum node to start producing blocks; DAG completion takes
@@ -337,7 +338,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			height, err := ethClient.BlockNumber(ctx)
+			height, err := s.ethClient.BlockNumber(ctx)
 			if err != nil {
 				return false
 			}
