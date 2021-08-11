@@ -6,7 +6,6 @@
 [![Version](https://img.shields.io/github/tag/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/github/license/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/blob/main/LICENSE)
 [![Lines Of Code](https://img.shields.io/tokei/lines/github/umee-network/umee?style=flat-square)](https://github.com/umee-network/umee)
-<!-- [![Lint Status](https://github.com/umee-network/umee/workflows/Lint/badge.svg)](https://tokei.rs/b1/github/umee-network/umee) -->
 
 > A Golang implementation of the Umee network, a decentralized universal capital
 facility in the Cosmos ecosystem.
@@ -22,53 +21,22 @@ Umee will allow a multitude of decentralized debt products.
 
 - [Dependencies](#dependencies)
 - [Active Networks](#active-networks)
-- [Build](#build)
+- [Install](#install)
 
 ## Dependencies
 
 - [Go 1.16+](https://golang.org/dl/)
-- [Cosmos SDK v0.42.0+](https://github.com/cosmos/cosmos-sdk/releases)
+- [Cosmos SDK v0.43.0+](https://github.com/cosmos/cosmos-sdk/releases)
 - [Starport](https://docs.starport.network/intro/install.html)
 
 ## Active Networks
 
 Coming soon...
 
-## Build
+## Install
 
 To install the `umeed` binary:
 
 ```shell
 $ make install
 ```
-
-To run the linter:
-
-```shell
-$ make lint
-```
-
-## Local Network
-
-You can launch a local network for development and testing purposes via two
-mechanisms:
-
-1. Docker
-
-   ```shell
-   $ make clean localnet-start
-   ```
-
-   Running the `localnet-start` target will launch a basic four validator network
-   with the umeed binary and artifacts residing in the `./build` directory. A local
-   build of the `umeed` binary can be used to interact with the network by using a
-   home directory of any of the four validator nodes, e.g. `--home ./build/node0/umeed`.
-
-2. Starport
-
-   ```shell
-   $ starport serve
-   ```
-
-   Using the `starport` framework, a configurable local network can be created
-   with exposed RPC and API endpoints, in addition to a faucet.
