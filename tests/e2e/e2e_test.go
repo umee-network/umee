@@ -33,7 +33,6 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.Require().Equal(99999999887, balance)
 
 		expEthBalance := 100
-		ethEndpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
 
 		// require the Ethereum recipient balance increased
 		s.Require().Eventually(
@@ -41,7 +40,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
-				b, err := queryEthTokenBalance(ctx, ethEndpoint, photonERC20Addr, ethRecipient)
+				b, err := queryEthTokenBalance(ctx, s.ethClient, photonERC20Addr, ethRecipient)
 				if err != nil {
 					return false
 				}
@@ -101,7 +100,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		s.Require().Equal(9999999693, balance)
 
 		expEthBalance := 300
-		ethEndpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
 
 		// require the Ethereum recipient balance increased
 		s.Require().Eventually(
@@ -109,7 +107,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
 
-				b, err := queryEthTokenBalance(ctx, ethEndpoint, umeeERC20Addr, ethRecipient)
+				b, err := queryEthTokenBalance(ctx, s.ethClient, umeeERC20Addr, ethRecipient)
 				if err != nil {
 					return false
 				}

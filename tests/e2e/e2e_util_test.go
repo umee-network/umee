@@ -131,11 +131,9 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 	_, err = hexutil.Decode(txHash)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp"))
-
 	s.Require().Eventuallyf(
 		func() bool {
-			return queryEthTx(ctx, endpoint, txHash) == nil
+			return queryEthTx(ctx, s.ethClient, txHash) == nil
 		},
 		time.Minute,
 		5*time.Second,
@@ -252,12 +250,7 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (int, error) {
 	return amount, nil
 }
 
-func queryEthTx(ctx context.Context, endpoint, txHash string) error {
-	c, err := ethclient.Dial(endpoint)
-	if err != nil {
-		return fmt.Errorf("failed to create geth client: %w", err)
-	}
-
+func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
 	_, pending, err := c.TransactionByHash(ctx, common.HexToHash(txHash))
 	if err != nil {
 		return err
@@ -270,23 +263,13 @@ func queryEthTx(ctx context.Context, endpoint, txHash string) error {
 	return nil
 }
 
-func queryEthTokenBalance(ctx context.Context, endpoint, contractAddr, recipientAddr string) (int, error) {
-	c, err := ethclient.Dial(endpoint)
+func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int, error) {
+	data, err := ethABI.Pack(abiMethodNameBalanceOf, common.HexToAddress(recipientAddr))
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
 	}
 
-	// pad 20 bytes to the token holder (recipient) address to get 32 bytes
-	pad := bytes.Repeat([]byte{0}, 12)
-	data := append(pad, common.FromHex(recipientAddr)...)
-	if len(data) != 32 {
-		return 0, fmt.Errorf("unexpected data encoding length; expected: 32, got: %d", len(data))
-	}
-
-	funcSig := common.FromHex("0x70a08231") // keccak-256("balanceOf(address)")[:4]
-	data = append(funcSig, data...)
 	token := common.HexToAddress(contractAddr)
-
 	callMsg := ethereum.CallMsg{
 		To:   &token,
 		Data: data,
