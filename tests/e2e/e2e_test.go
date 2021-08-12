@@ -114,7 +114,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 				return b == expEthBalance
 			},
-			time.Minute,
+			2*time.Minute,
 			5*time.Second,
 		)
 	})

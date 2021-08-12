@@ -43,11 +43,6 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	})
 	s.Require().NoError(err)
 
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
 	// TODO: This sometimes fails with "replacement transaction underpriced". We
 	// should:
 	//
@@ -60,21 +55,46 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	//
 	// Ref: https://github.com/umee-network/umee/issues/12
 	// Ref: https://ethereum.stackexchange.com/questions/27256/error-replacement-transaction-underpriced
-	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
-		Context:      ctx,
-		Detach:       false,
-		OutputStream: &outBuf,
-		ErrorStream:  &errBuf,
-	})
-	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
 
-	re := regexp.MustCompile(`has accepted new ERC20 representation (0[xX][0-9a-fA-F]+)`)
-	matches := re.FindStringSubmatch(outBuf.String())
-	s.Require().GreaterOrEqualf(len(matches), 2, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
+	var erc20Addr string
+	s.Require().Eventuallyf(
+		func() bool {
+			outBuf.Reset()
+			errBuf.Reset()
 
-	erc20Addr := matches[1]
-	_, err = hexutil.Decode(erc20Addr)
-	s.Require().NoError(err)
+			err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+				Context:      ctx,
+				Detach:       false,
+				OutputStream: &outBuf,
+				ErrorStream:  &errBuf,
+			})
+			if err != nil {
+				return false
+			}
+
+			re := regexp.MustCompile(`has accepted new ERC20 representation (0[xX][0-9a-fA-F]+)`)
+			matches := re.FindStringSubmatch(outBuf.String())
+			if len(matches) != 2 {
+				return false
+			}
+
+			erc20Addr = matches[1]
+
+			_, err = hexutil.Decode(erc20Addr)
+			if err != nil {
+				return false
+			}
+
+			return true
+		},
+		time.Minute,
+		5*time.Second,
+		"failed to deploy ERC20 token contract; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
+	)
 
 	s.T().Logf("deployed %s contract: %s", baseDenom, erc20Addr)
 
