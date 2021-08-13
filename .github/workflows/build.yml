@@ -11,13 +11,12 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.15
-
+          go-version: 1.16
       - name: Compile
         run: |
           make build-reproducible
-## TODO: upload the artifacts with the updated paths
       - uses: actions/upload-artifact@v2
         with:
-          name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
-          path: cmd/umeed/umeed
+          path: |
+            artifacts/
+            !artifacts/*.tar.gz

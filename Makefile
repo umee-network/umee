@@ -76,12 +76,11 @@ $(BUILDDIR)/:
 build-reproducible: go.sum
 	@docker rm latest-build || true
 	@docker run --volume=$(CURDIR):/sources:ro \
-        --env TARGET_PLATFORMS='linux/amd64 darwin/amd64 linux/arm64 darwin/arm64' \
+        --env TARGET_PLATFORMS='linux/amd64 darwin/amd64 linux/arm64' \
         --env APP=umeed \
         --env VERSION=$(VERSION) \
         --env COMMIT=$(COMMIT) \
         --env LEDGER_ENABLED=$(LEDGER_ENABLED) \
-				--env DEBUG=true \
         --name latest-build cosmossdk/rbuilder:latest
 	@docker cp -a latest-build:/home/builder/artifacts/ $(CURDIR)/
 
