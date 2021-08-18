@@ -10,7 +10,7 @@ require (
 	github.com/cosmos/ibc-go v1.0.0
 	github.com/ethereum/go-ethereum v1.10.7
 	github.com/gogo/protobuf v1.3.3
-	github.com/golangci/golangci-lint v1.41.1
+	github.com/golangci/golangci-lint v1.42.0
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
@@ -27,7 +27,6 @@ require (
 	github.com/tendermint/tm-db v0.6.4
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	golang.org/x/net v0.0.0-20210716203947-853a461950ff // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	google.golang.org/genproto v0.0.0-20210617175327-b9e0b3197ced
 	google.golang.org/grpc v1.40.0
 )
