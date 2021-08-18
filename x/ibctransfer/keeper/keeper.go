@@ -14,10 +14,10 @@ import (
 	"github.com/umee-network/umee/x/ibctransfer/types"
 )
 
-// Keeper embeds the ICS20 transfer keeper where we only override specific
+// Keeper embeds the ICS-20 transfer keeper where we only override specific
 // methods.
 type Keeper struct {
-	// embed the ICS20 transfer keeper
+	// embed the ICS-20 transfer keeper
 	ibctransferkeeper.Keeper
 
 	bankKeeper types.BankKeeper
@@ -43,7 +43,7 @@ func (k Keeper) SendTransfer(
 	timeoutTimestamp uint64,
 ) error {
 
-	// first, relay the SendTransfer to the real (embedded) ICS20 transfer keeper
+	// first, relay the SendTransfer to the real (embedded) ICS-20 transfer keeper
 	if err := k.Keeper.SendTransfer(
 		ctx,
 		sourcePort,
@@ -92,7 +92,22 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	// track metadata
+	k.PostOnRecvPacket(ctx, packet, data)
+
+	return nil
+}
+
+// PostOnRecvPacket executes arbitrary logic after a successful OnRecvPacket
+// call. Currently, it checks and adds denomination metadata upon receiving an
+// IBC asset.
+func (k Keeper) PostOnRecvPacket(
+	ctx sdk.Context,
+	packet channeltypes.Packet,
+	data ibctransfertypes.FungibleTokenPacketData,
+) {
+
 	var denomTrace ibctransfertypes.DenomTrace
+
 	if ibctransfertypes.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {
 		voucherPrefix := ibctransfertypes.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
 		unprefixedDenom := data.Denom[len(voucherPrefix):]
@@ -104,8 +119,6 @@ func (k Keeper) OnRecvPacket(
 	}
 
 	k.TrackDenomMetadata(ctx, denomTrace.BaseDenom)
-
-	return nil
 }
 
 // TrackDenomMetadata checks for the metadata existence of an IBC transferred

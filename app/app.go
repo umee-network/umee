@@ -92,6 +92,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	appparams "github.com/umee-network/umee/app/params"
+	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/x/umee"
 )
@@ -389,8 +390,8 @@ func New(
 		app.ScopedIBCKeeper,
 	)
 
-	// Create an original ICS20 transfer keeper and then use it to created an
-	// Umee wrapped ICS20 transfer keeper.
+	// Create an original ICS-20 transfer keeper and AppModule and then use it to
+	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
@@ -402,8 +403,10 @@ func New(
 		app.ScopedTransferKeeper,
 	)
 	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	// TODO: We need to override the IBC module
-	// transferModule := ibctransfer.NewAppModule(ibcTransferKeeper)
+	transferModule := uibctransfer.NewAppModule(
+		ibctransfer.NewAppModule(ibcTransferKeeper),
+		app.TransferKeeper,
+	)
 
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
