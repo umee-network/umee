@@ -680,6 +680,30 @@ func (app *UmeeApp) RegisterTendermintService(clientCtx client.Context) {
 	tmservice.RegisterTendermintService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.interfaceRegistry)
 }
 
+// GetBaseApp is used solely for testing purposes.
+func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
+	return app.BaseApp
+}
+
+// GetStakingKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetStakingKeeper() stakingkeeper.Keeper {
+	return app.StakingKeeper
+}
+
+// GetIBCKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetIBCKeeper() *ibckeeper.Keeper {
+	return app.IBCKeeper
+}
+
+// GetScopedIBCKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
+	return app.ScopedIBCKeeper
+}
+
+func (app *UmeeApp) GetTxConfig() client.TxConfig {
+	return MakeEncodingConfig().TxConfig
+}
+
 // GetMaccPerms returns a deep copy of the module account permissions.
 func GetMaccPerms() map[string][]string {
 	dupMaccPerms := make(map[string][]string)
@@ -690,12 +714,7 @@ func GetMaccPerms() map[string][]string {
 	return dupMaccPerms
 }
 
-func initParamsKeeper(
-	appCodec codec.Codec,
-	legacyAmino *codec.LegacyAmino,
-	key, tkey sdk.StoreKey,
-) paramskeeper.Keeper {
-
+func initParamsKeeper(appCodec codec.Codec, legacyAmino *codec.LegacyAmino, key, tkey sdk.StoreKey) paramskeeper.Keeper {
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)
@@ -726,6 +745,7 @@ func VerifyAddressFormat(bz []byte) error {
 	if len(bz) == 0 {
 		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
 	}
+
 	if len(bz) != MaxAddrLen {
 		return sdkerrors.Wrapf(
 			sdkerrors.ErrUnknownAddress,
