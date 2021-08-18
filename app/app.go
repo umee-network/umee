@@ -403,10 +403,7 @@ func New(
 		app.ScopedTransferKeeper,
 	)
 	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	transferModule := uibctransfer.NewAppModule(
-		ibctransfer.NewAppModule(ibcTransferKeeper),
-		app.TransferKeeper,
-	)
+	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
 
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
