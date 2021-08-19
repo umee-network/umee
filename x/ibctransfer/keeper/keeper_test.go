@@ -165,8 +165,6 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 	})
 
 	s.Run("SendTransfer", func() {
-		s.T().SkipNow()
-
 		denom := strings.Join([]string{
 			pathAtoB.EndpointA.ChannelConfig.PortID,
 			pathAtoB.EndpointA.ChannelID,
