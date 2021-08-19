@@ -714,7 +714,12 @@ func GetMaccPerms() map[string][]string {
 	return dupMaccPerms
 }
 
-func initParamsKeeper(appCodec codec.Codec, legacyAmino *codec.LegacyAmino, key, tkey sdk.StoreKey) paramskeeper.Keeper {
+func initParamsKeeper(
+	appCodec codec.Codec,
+	legacyAmino *codec.LegacyAmino,
+	key, tkey sdk.StoreKey,
+) paramskeeper.Keeper {
+
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)

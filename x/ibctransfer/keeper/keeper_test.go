@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -8,8 +9,12 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/ibc-go/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
 	ibctesting "github.com/cosmos/ibc-go/testing"
 	"github.com/stretchr/testify/suite"
+	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/umee-network/umee/app"
@@ -27,7 +32,7 @@ type KeeperTestSuite struct {
 
 func (s *KeeperTestSuite) SetupTest() {
 	s.coordinator = ibctesting.NewCoordinator(s.T(), 0)
-	ibctesting.DefaultTestingAppInit = setupTestingApp
+	ibctesting.DefaultTestingAppInit = SetupTestingApp
 
 	chains := make(map[string]*ibctesting.TestChain)
 	for i := 0; i < 2; i++ {
@@ -70,16 +75,16 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.chainA = s.coordinator.GetChain(ibctesting.GetChainID(0))
 	s.chainB = s.coordinator.GetChain(ibctesting.GetChainID(1))
 
-	umeeApp := s.getUmeeApp(s.chainA)
+	umeeApp := s.GetUmeeApp(s.chainA)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(s.chainA.GetContext(), umeeApp.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, umeeApp.TransferKeeper)
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
-func (suite *KeeperTestSuite) getUmeeApp(c *ibctesting.TestChain) *app.UmeeApp {
+func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *app.UmeeApp {
 	umeeApp, ok := c.App.(*app.UmeeApp)
-	suite.Require().True(ok)
+	s.Require().True(ok)
 
 	return umeeApp
 }
@@ -88,10 +93,140 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
 
-func (s *KeeperTestSuite) TestSendTransfer() {
+func (s *KeeperTestSuite) TestGetTransferAccount() {
+	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
+	macc := s.GetUmeeApp(s.chainA).TransferKeeper.GetTransferAccount(s.chainA.GetContext())
 
+	s.Require().NotNil(macc)
+	s.Require().Equal(types.ModuleName, macc.GetName())
+	s.Require().Equal(expectedModAccAddr, macc.GetAddress())
 }
 
-func (s *KeeperTestSuite) TestOnRecvPacket() {
+func (s *KeeperTestSuite) TestTrackMetadata() {
+	pathAtoB := NewTransferPath(s.chainA, s.chainB)
+	s.coordinator.Setup(pathAtoB)
 
+	s.Run("OnRecvPacketA", func() {
+		denom := strings.Join([]string{
+			s.chainB.ChainID,
+			s.chainA.ChainID,
+			"quark",
+		}, "/")
+
+		data := ibctransfertypes.NewFungibleTokenPacketData(
+			denom,
+			uint64(1),
+			AddressFromString("a3"),
+			AddressFromString("a4"),
+		)
+
+		packet := channeltypes.NewPacket(
+			data.GetBytes(),
+			uint64(1),
+			"transfer",
+			"channel-0",
+			"transfer",
+			"channel-0",
+			clienttypes.NewHeight(0, 100),
+			0,
+		)
+
+		err := s.GetUmeeApp(s.chainA).TransferKeeper.OnRecvPacket(s.chainA.GetContext(), packet, data)
+		s.Require().NoError(err)
+	})
+
+	s.Run("OnRecvPacketB", func() {
+		denom := strings.Join([]string{
+			s.chainA.ChainID,
+			s.chainB.ChainID,
+			"photon",
+		}, "/")
+
+		data := ibctransfertypes.NewFungibleTokenPacketData(
+			denom,
+			uint64(1),
+			AddressFromString("a2"),
+			AddressFromString("a1"),
+		)
+
+		packet := channeltypes.NewPacket(
+			data.GetBytes(),
+			uint64(1),
+			"transfer",
+			"channel-0",
+			"transfer",
+			"channel-0",
+			clienttypes.NewHeight(0, 100),
+			0,
+		)
+
+		err := s.GetUmeeApp(s.chainB).TransferKeeper.OnRecvPacket(s.chainB.GetContext(), packet, data)
+		s.Require().NoError(err)
+	})
+
+	s.Run("SendTransfer", func() {
+		s.T().SkipNow()
+
+		denom := strings.Join([]string{
+			pathAtoB.EndpointA.ChannelConfig.PortID,
+			pathAtoB.EndpointA.ChannelID,
+			s.chainA.ChainID,
+			s.chainB.ChainID,
+			"photon",
+		}, "/")
+
+		data := ibctransfertypes.NewFungibleTokenPacketData(
+			denom,
+			uint64(1),
+			AddressFromString("a1"),
+			AddressFromString("a2"),
+		)
+
+		packet := channeltypes.NewPacket(
+			data.GetBytes(),
+			uint64(1),
+			"transfer",
+			"channel-0",
+			"transfer",
+			"channel-0",
+			clienttypes.NewHeight(0, 100),
+			0,
+		)
+
+		sender, err := sdk.AccAddressFromBech32(data.Sender)
+		s.Require().NoError(err)
+
+		denomTrace := types.ParseDenomTrace(data.Denom)
+		ibcDenom := denomTrace.IBCDenom()
+
+		registerDenom := func() {
+			denomTrace := types.ParseDenomTrace(denom)
+			traceHash := denomTrace.Hash()
+			if !s.GetUmeeApp(s.chainB).TransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
+				s.GetUmeeApp(s.chainB).TransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
+			}
+		}
+
+		registerDenom()
+
+		err = s.GetUmeeApp(s.chainB).TransferKeeper.SendTransfer(
+			s.chainB.GetContext(),
+			packet.SourcePort,
+			packet.SourceChannel,
+			sdk.NewCoin(ibcDenom, sdk.NewIntFromUint64(data.Amount)),
+			sender,
+			data.Receiver,
+			clienttypes.NewHeight(0, 110),
+			0,
+		)
+		s.Require().NoError(err)
+	})
+
+	s.coordinator.CommitBlock(s.chainA, s.chainB)
+
+	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "quark")
+	s.Require().True(ok)
+
+	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "photon")
+	s.Require().True(ok)
 }
