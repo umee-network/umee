@@ -700,6 +700,7 @@ func (app *UmeeApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
 	return app.ScopedIBCKeeper
 }
 
+// GetTxConfig is used solely for testing purposes.
 func (app *UmeeApp) GetTxConfig() client.TxConfig {
 	return MakeEncodingConfig().TxConfig
 }
