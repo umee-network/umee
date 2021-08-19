@@ -92,6 +92,8 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	appparams "github.com/umee-network/umee/app/params"
+	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
+	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/x/umee"
 )
 
@@ -200,7 +202,7 @@ type UmeeApp struct {
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	EvidenceKeeper   evidencekeeper.Keeper
-	TransferKeeper   ibctransferkeeper.Keeper
+	TransferKeeper   uibctransferkeeper.Keeper
 	GravityKeeper    gravitykeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
@@ -279,8 +281,8 @@ func New(
 	)
 
 	// grant capabilities for the ibc and ibc-transfer modules
-	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
-	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+	app.ScopedIBCKeeper = app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
+	app.ScopedTransferKeeper = app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should
 	// call `Seal` after creating their scoped modules in the app via
@@ -368,6 +370,7 @@ func New(
 	)
 
 	// register the staking hooks
+	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
 	// these hooks.
 	app.StakingKeeper = *stakingKeeper.SetHooks(
@@ -384,8 +387,29 @@ func New(
 		app.GetSubspace(ibchost.ModuleName),
 		app.StakingKeeper,
 		app.UpgradeKeeper,
-		scopedIBCKeeper,
+		app.ScopedIBCKeeper,
 	)
+
+	// Create an original ICS-20 transfer keeper and AppModule and then use it to
+	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
+	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
+		appCodec,
+		keys[ibctransfertypes.StoreKey],
+		app.GetSubspace(ibctransfertypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.ScopedTransferKeeper,
+	)
+	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
+	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
+
+	// create static IBC router, add transfer route, then set and seal it
+	ibcRouter := ibcporttypes.NewRouter()
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
+	app.IBCKeeper.SetRouter(ibcRouter)
+
 	// register the proposal types
 	govRouter := govtypes.NewRouter()
 	govRouter.
@@ -394,24 +418,6 @@ func New(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
-
-	// create transfer Keeper
-	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec,
-		keys[ibctransfertypes.StoreKey],
-		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
-		scopedTransferKeeper,
-	)
-	transferModule := ibctransfer.NewAppModule(app.TransferKeeper)
-
-	// create static IBC router, add transfer route, then set and seal it
-	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
-	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -546,9 +552,6 @@ func New(
 		}
 	}
 
-	app.ScopedIBCKeeper = scopedIBCKeeper
-	app.ScopedTransferKeeper = scopedTransferKeeper
-
 	return app
 }
 
@@ -677,6 +680,31 @@ func (app *UmeeApp) RegisterTendermintService(clientCtx client.Context) {
 	tmservice.RegisterTendermintService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.interfaceRegistry)
 }
 
+// GetBaseApp is used solely for testing purposes.
+func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
+	return app.BaseApp
+}
+
+// GetStakingKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetStakingKeeper() stakingkeeper.Keeper {
+	return app.StakingKeeper
+}
+
+// GetIBCKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetIBCKeeper() *ibckeeper.Keeper {
+	return app.IBCKeeper
+}
+
+// GetScopedIBCKeeper is used solely for testing purposes.
+func (app *UmeeApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
+	return app.ScopedIBCKeeper
+}
+
+// GetTxConfig is used solely for testing purposes.
+func (app *UmeeApp) GetTxConfig() client.TxConfig {
+	return MakeEncodingConfig().TxConfig
+}
+
 // GetMaccPerms returns a deep copy of the module account permissions.
 func GetMaccPerms() map[string][]string {
 	dupMaccPerms := make(map[string][]string)
@@ -723,6 +751,7 @@ func VerifyAddressFormat(bz []byte) error {
 	if len(bz) == 0 {
 		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
 	}
+
 	if len(bz) != MaxAddrLen {
 		return sdkerrors.Wrapf(
 			sdkerrors.ErrUnknownAddress,
