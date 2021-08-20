@@ -27,16 +27,14 @@ Client Breaking: for breaking Protobuf, CLI, gRPC and REST routes used by client
 API Breaking: for breaking exported Go APIs used by developers.
 State Machine Breaking: for any changes that result in a divergent application state.
 
-To release a new version, all the relevant changelog entries from the Unreleased
-should be moved into a RELEASE_NOTES.md file and the version should be tagged
-and released.
-
-Once a version has been released, the changelog entries from RELEASE_NOTES.md
-should be moved into the CHANGELOG.md under the tagged released and removed
-from the Unreleased section. The tagged release in the CHANGELOG.md should take
-the format:
+To release a new version, ensure an appropriate release branch exists. Add a
+release version and date to the existing Unreleased section which takes the form
+of:
 
 ## [<version>](https://github.com/cosmos/cosmos-sdk/releases/tag/<version>) - YYYY-MM-DD
+
+Once the version is tagged and released, a PR should be made against the main
+branch to incorporate the new changelog updates.
 
 Ref: https://keepachangelog.com/en/1.0.0/
 -->
