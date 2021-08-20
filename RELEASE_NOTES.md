@@ -1,5 +1,3 @@
-# v0.1.0 Release Notes
-
 Initial release of the Umee network application daemon. The release includes
 support for the following:
 
