@@ -42,3 +42,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 # Changelog
 
 ## [Unreleased]
+
+## [v0.1.0](https://github.com/umee-network/umee/releases/tag/v0.1.0) - 2021-08-20
+
+### Features
+
+- Initial release!!!
