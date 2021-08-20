@@ -3,6 +3,7 @@
 BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
 BUILD_DIR      ?= $(CURDIR)/build
+DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 
@@ -84,7 +85,7 @@ go.sum: go.mod
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/**
+	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
 
 .PHONY: install build build-linux clean
 
