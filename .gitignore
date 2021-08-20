@@ -21,3 +21,5 @@ secret.yml
 
 # Build
 build
+
+dist/
