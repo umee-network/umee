@@ -44,7 +44,7 @@ Umee will allow a multitude of decentralized debt products.
 
 | Token 	| Display 	|                   Address                  	|
 |:-----:	|:-------:	|:------------------------------------------:	|
-| uumee 	|   umee  	| 0x29889b8e4785eEEb625848a9Fdc599Fb4569e292 	|
+| uumee 	|   umee  	| `0x29889b8e4785eEEb625848a9Fdc599Fb4569e292` 	|
 
 ## Install
 
