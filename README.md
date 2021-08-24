@@ -35,6 +35,7 @@ Umee will allow a multitude of decentralized debt products.
 
 - Chain ID: `umee-betanet-1`
 - Gravity Contract Address: `0xc846512f680a2161D2293dB04cbd6C294c5cFfA7`
+- Genesis: [genesis.json](./networks/umee-betanet-1/genesis.json)
 - Peers:
   - `a9a84866786013f75138388fbf12cdfc425bd39c@137.184.69.184:26656`
   - `684dd9ce7746041d0453322808cc5b238861e386@137.184.65.210:26656`
