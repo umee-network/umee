@@ -31,7 +31,23 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Active Networks
 
-Coming soon...
+### Betanet
+
+- Chain ID: `umee-betanet-1`
+- Gravity Bridge Orchestrator Version: `v0.1.20`
+- Gravity Contract Address: `0xc846512f680a2161D2293dB04cbd6C294c5cFfA7`
+- Genesis: [genesis.json](https://raw.githubusercontent.com/umee-network/umee/main/networks/umee-betanet-1/genesis.json)
+- Peers:
+  - `a9a84866786013f75138388fbf12cdfc425bd39c@137.184.69.184:26656`
+  - `684dd9ce7746041d0453322808cc5b238861e386@137.184.65.210:26656`
+  - `c4c425c66d2941ce4d5d98185aa90d2330de5efd@143.244.166.155:26656`
+  - `eb42bdbd821fad7bd0048a741237625b4d954d18@143.244.165.138:26656`
+
+#### Deployed Tokens
+
+| Token 	| Display 	|                   Address                  	|
+|:-----:	|:-------:	|:------------------------------------------:	|
+| uumee 	|   umee  	| `0x29889b8e4785eEEb625848a9Fdc599Fb4569e292` 	|
 
 ## Install
 
