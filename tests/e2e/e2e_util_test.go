@@ -31,30 +31,16 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 		Container:    s.orchResources[0].Container.ID,
 		User:         "root",
 		Cmd: []string{
-			"gravity-client",
-			"deploy-erc20-representation",
-			fmt.Sprintf("--ethereum-rpc=http://%s:8545", s.ethResource.Container.Name[1:]),
-			fmt.Sprintf("--cosmos-grpc=http://%s:9090", s.valResources[0].Container.Name[1:]),
-			fmt.Sprintf("--cosmos-denom=%s", baseDenom),
-			fmt.Sprintf("--contract-address=%s", s.gravityContractAddr),
-			fmt.Sprintf("--ethereum-key=%s", s.chain.validators[0].ethereumKey.privateKey),
-			"--cosmos-prefix=umee",
+			"gorc",
+			"--config=/root/gorc/config.toml",
+			"deploy",
+			"erc20",
+			baseDenom,
+			"--ethereum-key=orch-eth-key",
 		},
 	})
 	s.Require().NoError(err)
 
-	// TODO: This sometimes fails with "replacement transaction underpriced". We
-	// should:
-	//
-	// 1. Consider instead sending the raw Ethereum transaction ourselves instead
-	// of via the 'deploy-erc20-representation' command so we can control the
-	// nonce ourselves if this error happens.
-	//
-	// 2. Or, wrap this call in an eventually/retry block.
-	//
-	//
-	// Ref: https://github.com/umee-network/umee/issues/12
-	// Ref: https://ethereum.stackexchange.com/questions/27256/error-replacement-transaction-underpriced
 	var (
 		outBuf bytes.Buffer
 		errBuf bytes.Buffer
@@ -114,18 +100,18 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		Context:      ctx,
 		AttachStdout: true,
 		AttachStderr: true,
-		Container:    s.valResources[valIdx].Container.ID,
+		Container:    s.orchResources[valIdx].Container.ID,
 		User:         "root",
 		Cmd: []string{
-			"gravity-client",
+			"gorc",
+			"--config=/root/gorc/config.toml",
 			"eth-to-cosmos",
-			fmt.Sprintf("--ethereum-rpc=http://%s:8545", s.ethResource.Container.Name[1:]),
-			fmt.Sprintf("--amount=%s", amount),
-			fmt.Sprintf("--ethereum-key=%s", s.chain.validators[valIdx].ethereumKey.privateKey),
-			fmt.Sprintf("--contract-address=%s", s.gravityContractAddr),
-			fmt.Sprintf("--erc20-address=%s", tokenAddr),
-			fmt.Sprintf("--cosmos-destination=%s", toUmeeAddr),
-			"--cosmos-prefix=umee",
+			tokenAddr,
+			"orch-eth-key",
+			s.gravityContractAddr,
+			toUmeeAddr,
+			amount,
+			"1",
 		},
 	})
 	s.Require().NoError(err)
@@ -181,7 +167,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, toEthAddr, amount, 
 			"umeed",
 			"tx",
 			"gravity",
-			"send-to-etheruem",
+			"send-to-ethereum",
 			toEthAddr,
 			amount,
 			gravityFee,
