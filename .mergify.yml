@@ -9,3 +9,11 @@ pull_request_rules:
         method: squash
         strict: true
         commit_message: title+body
+  - name: Backport patches to release/v0.1.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v0.1.x
+    actions:
+      backport:
+        branches:
+          - release/v0.1.x
