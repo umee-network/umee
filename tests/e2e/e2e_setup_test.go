@@ -492,12 +492,14 @@ rpc = "http://%s:8545"
 [cosmos]
 key_derivation_path = "m/44'/118'/0'/0/0"
 grpc = "http://%s:9090"
-gas_price = { amount = %s, denom = "%s" }
 prefix = "umee"
 
+[cosmos.gas_price]
+amount = %s
+denom = "%s"
+
 [metrics]
-listen_addr = "127.0.0.1"
-listen_port = 3000
+listen_addr = "127.0.0.1:3000"
 `,
 			s.gravityContractAddr,
 			photonDenom,
