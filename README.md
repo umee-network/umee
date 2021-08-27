@@ -25,7 +25,7 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Dependencies
 
-- [Go 1.16+](https://golang.org/dl/)
+- [Go 1.17+](https://golang.org/dl/)
 - [Cosmos SDK v0.43.0+](https://github.com/cosmos/cosmos-sdk/releases)
 - [Starport](https://docs.starport.network/intro/install.html)
 

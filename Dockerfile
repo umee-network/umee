@@ -1,7 +1,7 @@
 ARG IMG_TAG=latest
 
 # Compile the umeed binary
-FROM golang:1.16-alpine AS umeed-builder
+FROM golang:1.17-alpine AS umeed-builder
 WORKDIR /src/app/
 COPY go.mod go.sum* ./
 RUN go mod download
@@ -12,7 +12,7 @@ RUN make install
 
 # Fetch gravity bridge binaries and contract
 FROM alpine:3.14 as gravity-builder
-ARG GRAVITY_VERSION=v0.1.23
+ARG GRAVITY_VERSION=v0.1.24
 # TODO: Enable checksum verification once version stabalizes
 # ARG GRAVITY_CONTRACT_DEPLOYER_HASH=
 # ARG GRAVITY_CONTRACT_HASH=
