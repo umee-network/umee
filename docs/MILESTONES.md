@@ -45,3 +45,13 @@ Notes:
 - At this milestone the borrower is not accruing interest on their borrow position.
 - This milestone requires PLACEHOLDER modules which the asset facility can read to determine token exchange rates and required overcollateralization ratios.
 - The simplest e2e test we could make for this would use 'uumee' Tokens and 'u-uumee' uTokens as the assets to borrow and the collateral, respectively. While this might not happen in practice often (using uumee as collateral to borrow a smaller amount of uumee), it allows us to keep the test from relying on multiple token types for now. (Also the uumee-to-itself exchange rate is always 1:1).
+
+### 3: "Placeholder modules"
+
+Various placeholder parts of the code should be created, which features being developed (e.g. borrow and lend) can read for required parameters (listed below). Later milestones should flesh out the code to derive real values instead of serving placeholders.
+
+- Interest rates (borrow)
+- Interest rates (lend)
+- Exchange rates
+- Overcollateralization requirements
+- Token whitelisting module
