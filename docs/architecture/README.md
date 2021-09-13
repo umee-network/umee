@@ -33,7 +33,3 @@ Note the context/background should be written in the present tense.
 ### Proposed
 - [ADR-001: Interest Stream](./ADR-001-interest-stream.md)
 - [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md)
-- [ADR-003: Token Whitelist](./ADR-003-token-whitelist.md)
-
-### Vanished
-- `ADR-001: Umee Module` was the original ADR in a not-merged branch. If we restore it, then the other ADRs present should be bumped up by one number.
