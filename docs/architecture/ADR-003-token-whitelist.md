@@ -10,7 +10,7 @@ Draft
 
 ## Context
 
-Both `ADR-001: Interest Stream` and `ADR-002: Deposit Assets` required the use of a placeholder token whitelist. Here are some parameters that must be known and potentially updated for each token type whitelisted by the asset facility:
+Both [ADR-001: Interest Stream](./ADR-001-interest-stream.md) and [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md) required the use of a placeholder token whitelist. Here are some parameters that must be known and potentially updated for each token type whitelisted by the asset facility:
 
 - Token (name/denomination)
 - Associated uToken (name/denomination)
