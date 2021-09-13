@@ -1,4 +1,4 @@
-# ADR 002: uToken Interest Stream
+# ADR 001: uToken Interest Stream
 
 ## Changelog
 
@@ -6,7 +6,7 @@
 
 ## Status
 
-Draft
+Proposed
 
 ## Context
 
@@ -45,32 +45,7 @@ As an alternative, transfer of uTokens via IBC could be forbidden or unsupported
 
 ## Decision
 
-(Draft) No decision reached
-
-## Alternatives
-
-Various implementation options (including ones that will not work) are explored here.
-
-### Option 1: "Automatically mint interest uTokens and send to holders"
-
-- Requirement: uTokens are not allowed to be sent to other Cosmos chains via IBC
-- Requirement: The Umee chain's state machine is capable of reading the uToken balances of every wallet that has uTokens
-- Requirement: Cosmos SDK allows minting transactions to be automatically triggered once per block or time interval
-
-In the most direct implementation, the Umee blockchain contains logic that periodically reads ALL outstanding uToken balances, mints additional uTokens, and sends the uTokens to the same wallets from which the balances were read. This requires one transaction per 'time interval' per wallet which has any uToken balance, per uToken type. This may prove cumbersome.
-
-The ERC20 contract could be treated like a single wallet - interest uTokens on the sum of all ERC20 uTokens would be sent to the contract, where the interest would be distributed on the ethereum side to individual holders.
-
-Pros:
-- uToken balances grow even if split or transferred
-- 1:1 uToken to asset redeem rate
-- Batches ERC20 interets transactions
-
-Cons:
-- Forbids IBC transfer of uTokens
-- Extreme number of periodic transactions could create overhead
-
-### Option 2: "uToken to base asset exchange rate grows over time"
+"uToken to base asset exchange rate grows over time". This method is inspired by the Compound model.
 
 - Requirement: Umee chain stores uAsset <-> Asset exchange rate for each asset (not 1:1)
 
@@ -103,32 +78,31 @@ Specifically, because uTokens balances stored as ERC20 or as IBC voucher tokens 
 
 The complication of this method is that a given token type (e.g. Atom) no longer maps 1:1 to uTokens of its given denomination (e.g. uAtoms), except for the very first transactions with that token type on the Umee network (Alice's first 1000 in the example).
 
-Pros:
-- uToken balances grow even if split or transferred
-- Allows IBC transfer of uTokens
-- No "send interest payments" overhead
-- Simplifies ERC20 implementation
+## Alternatives
 
-Cons:
-- 1:1 Asset:uAsset exchange rate is lost
+Various implementation options (including ones that will not work) are explored here.
 
-### Additional Options
-- Place additional interest stream implementation ideas here
-
-## Open Questions
-
-1. Will we allow uToken balances to be sent to other cosmos-ecosystem chains?
-2. If we allow uToken IBC transfer, how will we implement the interest stream on Cosmos chains?
-3. If uToken IBC transfer is forbidden, how will we implement the interest stream on the Umee chain?
-4. In either case, how will we implement the interest stream on ERC20 uTokens?
+Option 1: "Automatically mint interest uTokens and send to holders"
+> This behavior would match what was described in the whitepaper.
+>
+> Requirement: uTokens are not allowed to be sent to other Cosmos chains via IBC
+> Requirement: The Umee chain's state machine is capable of reading the uToken balances of every wallet that has uTokens
+> Requirement: Cosmos SDK allows minting transactions to be automatically triggered once per block or time interval
+>
+> In the most direct implementation, the Umee blockchain contains logic that periodically reads ALL outstanding uToken balances, mints additional uTokens, and sends the uTokens to the same wallets from which the balances were read. This requires one transaction per 'time interval' per wallet which has any uToken balance, per uToken type. This may prove cumbersome.
+>
+> The ERC20 contract could be treated like a single wallet - interest uTokens on the sum of all ERC20 uTokens would be sent to the contract, where the interest would be distributed on the ethereum side to individual holders.
 
 ## Consequences
-
-(Section reserved for selected option once decision is made.)
+Moving to exchange-rate-based implementation of the interest rate solves a good number of implementation problems.
 
 ### Positive
+- Allows IBC transfer of uTokens
+- No repetitive "distribute uToken interest payments" transactions
+- ERC20 uTokens do not need to implement interest rate mechanics for cosmos-based assets
 
 ### Negative
+- 1:1 Asset:uAsset exchange rate described in the whitepaper is lost
 
 ### Neutral
 
