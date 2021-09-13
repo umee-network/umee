@@ -10,9 +10,9 @@ Proposed
 
 ## Context
 
-One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets, and earn interest on their deposits. [Whitepaper](https://umee.cc/umee-whitepaper/)
+One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets, and earn interest on their deposits.
 
-The associated milestone “Lender deposits asset for uToken & redeems uToken for a single cosmos asset type" was initially discussed as follows:
+The associated feature “Lender deposits asset for uToken & redeems uToken for a single cosmos asset type" was initially discussed as follows:
 - Lender deposits (locks) a cosmos asset type (likely Atoms or uumee) into asset facilities
 - Facility mints and sends u-Assets in response (u-Atom, u-uumee)
 - Lender redeems u-Assets for original assets
@@ -34,20 +34,20 @@ The Cosmos `Banking` module can be used as the basis for the required capabiliti
 The [BaseKeeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md) of the Cosmos `Banking` module comes with the following capabilities:
 > The base keeper provides full-permission access: the ability to arbitrary modify any account's balance and mint or burn coins.
 
-Note that `BaseKeeper` also has functions which read the total coins of each asset type on all accounts on the chain, and can read individual account balances using its embedded `ViewKeeper`.
+Note that `BaseKeeper` also has functions which read the total coins of each asset type in circulation on the chain, and can also read individual account balances using its embedded `ViewKeeper`.
 
 ## Detailed Design
 
-The Asset Facility will have the capability to mint and burn uTokens (but not their corresponding original asset types). It will have access to a whitelist of said asset and uToken types.
+The Asset Facility will have the capability to mint and burn uTokens (but not their corresponding original asset types). It will have access to an allow-list of said asset and uToken types.
 
-The Asset Facility will possess a `Module Account` to store original assets, and that module account should be forbidden from being the recipient of transactions except those intended by the module. See the warning on [this page](https://docs.cosmos.network/master/modules/bank/)
+The Asset Facility will possess a `Module Account` to store original assets, and that module account should be forbidden from being the recipient of transactions except those intended by the module (see the warning on [this page](https://docs.cosmos.network/master/modules/bank/).)
 
 The Asset Facility should harness the Cosmos `banking` module's `BaseKeeper` for the following capabilities
-- Read the supply (chain-wide) of a given coin
-- Send coins from module to account (and vice versa)
-- Mint coins
-- Burn coins
-- `SendKeeper`: Use BlockedAddr feature to guard against unexpected transfers to module accounts
+- Read the supply (chain-wide) of a given coin (both base assets and uTokens)
+- Send coins (both base assets and uTokens) from module account to user account (and vice versa)
+- Mint uTokens
+- Burn uTokens
+- `SendKeeper`: Use BlockedAddr feature to guard against unexpected transfers to module account(s)
 - `ViewKeeper`: Read individual account balances
 
 ### Basic Message Types
@@ -72,7 +72,7 @@ type MsgDeposit struct {
 }
 // MsgWithdraw - a user wishes to redeem uAssets for original assets
 type MsgWithdraw struct {
-	ToAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
+	ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
 	Amount      sdk.Coins      `json:"amount" yaml:"amount"`
 }
 ```
@@ -89,62 +89,29 @@ It is necessary that `MsgDeposit` and `MsgWithdrawal` be signed by the owner's a
 
 Thus `MsgDeposit.GetSigners` should always return its `FromAddress` and `MsgWithdraw.GetSigners` should return its `ToAddress`.
 
-### Additional Message Types
-
-The action of whitelisting tokens might also require a message type, if it is to be done while the chain is running but without using more advanced governance features in the SDK. See open questions. Note that when an asset is whitelisted, a new uToken (uAsset) must be created to match.
+### APIs and Handlers
+Both CLI and gRPC must be supported when sending the above message types, and all necessary handlers must be created in order to process and validate them as transactions. As part of this initial feature, an exact list of such steps required when adding message types will be created and added to future issues.
 
 ### Testing
 
-Assuming a placeholder token whitelist of one element (e.g. `uumee`), and a uToken existing (e.g. `u-uumee`), an end-to-end test can be created in which one user account sends a `MsgDeposit` and a `MsgWithdraw` of the appropriate token types.
-
-> This section does not need to be filled in at the start of the ADR, but must
-> be completed prior to the merging of the implementation.
->
-> Here are some common questions that get answered as part of the detailed design:
->
-> - What are the user requirements?
->
-> - What systems will be affected?
->
-> - What new data structures are needed, what data structures will be changed?
->
-> - What new APIs will be needed, what APIs will be changed?
->
-> - What are the efficiency considerations (time/space)?
->
-> - What are the expected access patterns (load/throughput)?
->
-> - Are there any logging, monitoring or observability needs?
->
-> - Are there any security considerations?
->
-> - Are there any privacy considerations?
->
-> - How will the changes be tested?
->
-> - If the change is large, how will the changes be broken up for ease of review?
->
-> - Will these changes require a breaking (major) release?
->
-> - Does this change require coordination with the SDK or other?
+Assuming a placeholder token allow-list of one element (e.g. `uumee`), and a uToken existing (e.g. `u-uumee`), an end-to-end test can be created in which one user account sends a `MsgDeposit` and a `MsgWithdraw` of the appropriate token types.
 
 ## Open Questions
-- How will we whitelist asset types for deposit into the asset facilities?
+- How will we whitelist/allow asset types for deposit into the asset facilities?
 - How can IBC tokens be identified in such a way that they are unique, and immune to counterfeit? (e.g. someone makes a new Cosmos blockchain and Token with identical ChainID and token name to an existing one)
 - Should the asset facilities maintain a single `Account` in the Cosmos sense, to store deposited assets? An alternative would be to maintain a pool of accounts if the security of individual accounts were to be judged a risk.
 
 ## Consequences
 
-> This section describes the consequences, after applying the decision. All
-> consequences should be summarized here, not just the "positive" ones.
-
 ### Positive
+- Banking module already provides underlying functionality
 
 ### Negative
 
 ### Neutral
+- Asset facility will store base assets in a Module Account
+- Asset facility relies on an allow-list of token types, to be implemented later
 
 ## References
 
-- [Umee Whitepaper](https://umee.cc/umee-whitepaper/)
 - [Cosmos Bank Keeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md)
