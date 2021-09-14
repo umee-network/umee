@@ -25,7 +25,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
         if: env.GIT_DIFF
 
-  build:
+  super-linter:
     name: Run super-linter
     runs-on: ubuntu-latest
     steps:
