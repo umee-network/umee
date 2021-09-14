@@ -17,9 +17,16 @@ jobs:
             **/**.go
             go.mod
             go.sum
-      - uses: golangci/golangci-lint-action@master
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@master
         with:
           version: v1.41
           args: --timeout 10m
           github-token: ${{ secrets.github_token }}
         if: env.GIT_DIFF
+      - name: Run super-linter
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
