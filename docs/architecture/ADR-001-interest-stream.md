@@ -115,4 +115,4 @@ Moving to exchange-rate-based implementation of the interest rate solves a good 
 ## References
 
 - [Umee Whitepaper](https://umee.cc/umee-whitepaper/)
-- [Cosmos IBS tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/)
+- [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/)
