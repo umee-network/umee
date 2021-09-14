@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 -->
 ![Logo!](assets/umee-small-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
@@ -49,9 +50,9 @@ Umee will allow a multitude of decentralized debt products.
 
 #### Deployed Tokens
 
-| Token 	| Display 	|                   Address                  	|
-|:-----:	|:-------:	|:------------------------------------------:	|
-| uumee 	|   umee  	| [`0x29889b8e4785eEEb625848a9Fdc599Fb4569e292`](https://goerli.etherscan.io/address/0x29889b8e4785eEEb625848a9Fdc599Fb4569e292) 	|
+| Token | Display |                   Address                  |
+|:-----:|:-------:|:------------------------------------------:|
+| uumee |   umee  | [`0x29889b8e4785eEEb625848a9Fdc599Fb4569e292`](https://goerli.etherscan.io/address/0x29889b8e4785eEEb625848a9Fdc599Fb4569e292) |
 
 ## Install
 
