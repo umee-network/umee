@@ -6,6 +6,7 @@
 [![Version](https://img.shields.io/github/tag/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/github/license/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/blob/main/LICENSE)
 [![Lines Of Code](https://img.shields.io/tokei/lines/github/umee-network/umee?style=flat-square)](https://github.com/umee-network/umee)
+[![GitHub Super-Linter](https://github.com/umee-network/umee/workflows/Run%20super-linter/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 > A Golang implementation of the Umee network, a decentralized universal capital
 facility in the Cosmos ecosystem.
