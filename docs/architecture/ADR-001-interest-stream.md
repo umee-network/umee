@@ -14,9 +14,10 @@ One of the base functions of the Umee universal capital facility is to allow liq
 
 From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
->upon deposit of assets into the Asset Facilities, users will receive an amount of tokens called uTokens that map 1:1 with the asset deposited. uTokens are initially minted on Umee and can bridge over to Ethereum as ERC20 tokens. The balance of uTokens grows over time by the underlying interest rate applied to the deposits. uTokens will employ an interest stream mechanism which means that a balance of uTokens will constantly generate income even when split or transferred.
+> Upon deposit of assets into the Asset Facilities, users will receive an amount of tokens called uTokens that map 1:1 with the asset deposited. uTokens are initially minted on Umee and can bridge over to Ethereum as ERC20 tokens. The balance of uTokens grows over time by the underlying interest rate applied to the deposits. uTokens will employ an interest stream mechanism which means that a balance of uTokens will constantly generate income even when split or transferred.
 
 We need to find suitable ways to implement the interest stream on uTokens (which seems to require automatic minting or self-minting of tokens from existing balances). The method we choose should function in at least the following scenarios:
+
 - uToken balances held on Umee chain
 - uToken balances transferred or split between wallets on Umee chain
 - uToken balances sent to other Cosmos chains via IBC and held
@@ -27,7 +28,7 @@ We need to find suitable ways to implement the interest stream on uTokens (which
 
 This collection of scenarios combined with the underlying implementation of Cosmos IBC, will create implementation challenges for the interest stream feature.
 
-From [Cosmos IBS tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/):
+From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/):
 
 > The value that tokens represent can be transferred across chains, but the token itself cannot. When sending the tokens with IBC to another blockchain:
 >
@@ -52,6 +53,7 @@ As an alternative, transfer of uTokens via IBC could be forbidden or unsupported
 In this implementation, for each whitelisted Cosmos asset type, the Umee chain stores an "exchange rate" between the base asset and its associated uToken. The exchange rate starts equal to 1, and increases whenever interest would have been applied to uToken balances in the original implementation. Whenever a lender deposits or withdraws base assets for uToken, this exchange rate is used.
 
 Example scenario:
+
 > Two lenders Alice and Bob provide Atoms to the asset facility at different times and earn interest. Assume that for the duration of this scenario, the interest on deposited uAtoms is 0.1 percent per week (or 1 atom per week per 1000 deposited).
 >
 > The asset facility starts with 0 atoms in custody and 0 uAtoms in circulation. The exchange rate of Atom:uAtom starts at 1.
@@ -83,6 +85,7 @@ The complication of this method is that a given token type (e.g. Atom) no longer
 Various implementation options (including ones that will not work) are explored here.
 
 Option 1: "Automatically mint interest uTokens and send to holders"
+
 > This behavior would match what was described in the whitepaper.
 >
 > Requirement: uTokens are not allowed to be sent to other Cosmos chains via IBC
@@ -94,14 +97,17 @@ Option 1: "Automatically mint interest uTokens and send to holders"
 > The ERC20 contract could be treated like a single wallet - interest uTokens on the sum of all ERC20 uTokens would be sent to the contract, where the interest would be distributed on the ethereum side to individual holders.
 
 ## Consequences
+
 Moving to exchange-rate-based implementation of the interest rate solves a good number of implementation problems.
 
 ### Positive
+
 - Allows IBC transfer of uTokens
 - No repetitive "distribute uToken interest payments" transactions
 - ERC20 uTokens do not need to implement interest rate mechanics for cosmos-based assets
 
 ### Negative
+
 - 1:1 Asset:uAsset exchange rate described in the whitepaper is lost
 
 ### Neutral

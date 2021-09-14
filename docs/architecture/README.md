@@ -31,5 +31,6 @@ Note the context/background should be written in the present tense.
 ### Rejected
 
 ### Proposed
+
 - [ADR-001: Interest Stream](./ADR-001-interest-stream.md)
 - [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md)
