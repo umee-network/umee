@@ -25,7 +25,8 @@ Note that the exchange rate of Assets:uAssets will be a shifting exchange rate t
 
 ## Alternative Approaches
 
-While the proposed implementation will use the Cosmos banking module to simultaneously transfer assets and mint uTokens, it might also be possible to use a [Liquidity Pool](https://tutorials.cosmos.network/liquidity-module/) for the non-minting portion. The capital facility would be just another account which offers trades on Asset:uAsset pools (though it would still require a separate way of minting the uTokens it offers). This option should be considered if direct use of the banking module is rejected.
+While the proposed implementation will use the Cosmos banking module to simultaneously transfer assets and mint uTokens, it might also be possible to use a [Liquidity Pool](https://tutorials.cosmos.network/liquidity-module/) for the non-minting portion.
+The capital facility would be just another account which offers trades on Asset:uAsset pools (though it would still require a separate way of minting the uTokens it offers). This option should be considered if direct use of the banking module is rejected.
 
 ## Decision
 

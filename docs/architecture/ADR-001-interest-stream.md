@@ -44,7 +44,7 @@ From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-de
 
 This means that if uTokens are to be sent to other Cosmos blockchains, then the interest stream must apply equally to 'voucher tokens' on other chains. These chains are not likely to be running our code, so it is unclear how we would cause uToken balances sent vie IBC to generate interest.
 
-As an alternative, transfer of uTokens via IBC could be forbidden or unsupported - in that case, only the scenarios where uToken balances are held on Umee and Ethereum need to be addressed.
+As an alternative, transfer of uTokens via IBC could be forbidden or unsupported - in that case, only the scenarios where uToken balances are held on Umee and Ethereum need to be addressed. This is highly undesirable.
 
 ## Decision
 
@@ -114,6 +114,9 @@ Moving to exchange-rate-based implementation of the interest rate solves a good 
 - 1:1 Asset:uAsset exchange rate described in the whitepaper is lost
 
 ### Neutral
+
+- The exchange rates between Asset:uAsset (for each allowed asset type) must be set to initial values. The interest rate which increases the exchange rate will be derived from information in the borrowing module.
+
 
 ## References
 
