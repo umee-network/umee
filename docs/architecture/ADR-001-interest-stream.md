@@ -14,7 +14,9 @@ One of the base functions of the Umee universal capital facility is to allow liq
 
 From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
-> Upon deposit of assets into the Asset Facilities, users will receive an amount of tokens called uTokens that map 1:1 with the asset deposited. uTokens are initially minted on Umee and can bridge over to Ethereum as ERC20 tokens. The balance of uTokens grows over time by the underlying interest rate applied to the deposits. uTokens will employ an interest stream mechanism which means that a balance of uTokens will constantly generate income even when split or transferred.
+> Upon deposit of assets into the Asset Facilities, users will receive an amount of tokens called uTokens that map 1:1 with the asset deposited. uTokens are initially minted on Umee and can bridge over to Ethereum as ERC20 tokens.
+>
+> The balance of uTokens grows over time by the underlying interest rate applied to the deposits. uTokens will employ an interest stream mechanism which means that a balance of uTokens will constantly generate income even when split or transferred.
 
 We need to find suitable ways to implement the interest stream on uTokens (which seems to require automatic minting or self-minting of tokens from existing balances). The method we choose should function in at least the following scenarios:
 
@@ -46,7 +48,7 @@ As an alternative, transfer of uTokens via IBC could be forbidden or unsupported
 
 ## Decision
 
-"uToken to base asset exchange rate grows over time". This method is inspired by the Compound model.
+"uToken to base asset exchange rate grows over time". This method is inspired by the Compound model, as illustrated in [the example found here](https://compound.finance/docs/ctokens#introduction)
 
 - Requirement: Umee chain stores uAsset <-> Asset exchange rate for each asset (not 1:1)
 
@@ -76,7 +78,8 @@ Example scenario:
 
 This implementation sacrifices the "1:1 uToken to base asset exchange rate" and "uToken balances grow over time" facts promised in the whitepaper, while maintaining a mathematically identical incentive structure. In exchange, IBC transfer of uTokens becomes possible, interest transaction overhead is eliminated, and the ERC20 implementation becomes simplified.
 
-Specifically, because uTokens balances stored as ERC20 or as IBC voucher tokens do not need to grow in token amount, the question of how to "send new uTokens to all holders" disappears. A uToken's value increases no matter where it is held, by virtue of the Token:uToken exchange rate.
+Specifically, because uTokens balances stored as ERC20 or as IBC voucher tokens do not need to grow in token amount, the question of how to "send new uTokens to all holders" disappears.
+A uToken's value increases no matter where it is held, by virtue of the Token:uToken exchange rate.
 
 The complication of this method is that a given token type (e.g. Atom) no longer maps 1:1 to uTokens of its given denomination (e.g. uAtoms), except for the very first transactions with that token type on the Umee network (Alice's first 1000 in the example).
 
