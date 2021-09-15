@@ -58,9 +58,9 @@ For reference, here is the `Bank` module's built in coin transfer message as see
 ```go
 // MsgSend - high level transaction of the coin module
 type MsgSend struct {
-	FromAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
-	ToAddress   sdk.AccAddress `json:"to_address" yaml:"to_address"`
-	Amount      sdk.Coins      `json:"amount" yaml:"amount"`
+  FromAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
+  ToAddress   sdk.AccAddress `json:"to_address" yaml:"to_address"`
+  Amount      sdk.Coins      `json:"amount" yaml:"amount"`
 }
 ```
 The `sdk.Coins` type is a slice (ordered list) of `sdk.Coin` which contain a token type and amount.
@@ -69,13 +69,13 @@ To implement the deposit functionality of the Asset Facility, the two common mes
 ```go
 // MsgDepositAsset - a user wishes to deposit assets and receive uAssets
 type MsgDepositAsset struct {
-	FromAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
-	Amount      sdk.Coins      `json:"amount" yaml:"amount"`
+  FromAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
+  Amount      sdk.Coins      `json:"amount" yaml:"amount"`
 }
 // MsgWithdrawAsset - a user wishes to redeem uAssets for original assets
 type MsgWithdrawAsset struct {
-	ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
-	Amount      sdk.Coins      `json:"amount" yaml:"amount"`
+  ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
+  Amount      sdk.Coins      `json:"amount" yaml:"amount"`
 }
 ```
 This resembles the built-in MsgSend, but either ToAddress or FromAddress is removed because the module's address should be used automatically.
