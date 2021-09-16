@@ -107,6 +107,7 @@ Assuming a placeholder token allow-list of one element (e.g. `uumee`), and a uTo
 
 ### Positive
 - Banking module already provides underlying functionality
+Asset deposit does not require us to modify state beyond what is already done by the `x/bank` module (e.g. account balances): Deposit of assets into the module account is simultaneous with minting of uTokens to the sender's account, and uToken ownership is the sole requirement for asset withdrawal. We do not need to track individual user deposit history.
 
 ### Negative
 
