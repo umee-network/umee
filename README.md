@@ -37,7 +37,7 @@ Umee will allow a multitude of decentralized debt products.
 
 - Chain ID: `umee-betanet-2`
 - Gravity Bridge Orchestrator Version: [`v0.2.10`](https://github.com/PeggyJV/gravity-bridge/releases/tag/v0.2.10)
-- Gravity Ethereum Network: `Görli`
+- Gravity Ethereum Network: `Rinkeby`
 - Gravity Contract Address: [`0xc846512f680a2161D2293dB04cbd6C294c5cFfA7`](https://rinkeby.etherscan.io/address/0xc846512f680a2161D2293dB04cbd6C294c5cFfA7)
 - Genesis: [genesis.json](https://raw.githubusercontent.com/umee-network/umee/main/networks/umee-betanet-2/genesis.json)
 - Genesis Hash: `a0214294429982a0b2772648ae1f45b8dab9ec33d89f3fb1bfd35465a2164fa5`
