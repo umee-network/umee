@@ -28,7 +28,7 @@ const (
 )
 
 func KeyPrefix(p string) []byte {
-	return []byte(p) // Question: Is this currently used, and should we forceASCII?
+	return []byte(p)
 }
 
 // returns store key used to store a specific asset coin's associated utoken denom
@@ -52,7 +52,7 @@ func prefixDenomStoreKey(prefix byte, coin sdk.Coin) []byte {
 	}
 	// example: byte(0x01) + []byte("uatom")
 	key := []byte{prefix}
-	key = append(key, forceASCII(coin.Denom)...)
+	key = append(key, []byte(coin.Denom)...)
 	return key
 	// Note: After IBC enable, want a reliable way to convert token denominations to bytes, such that
 	//	a) Each token type (e.g. Atom) has only one prefix/key, regardless of the path it took via IBC
@@ -60,16 +60,3 @@ func prefixDenomStoreKey(prefix byte, coin sdk.Coin) []byte {
 	//	b) Tokens cannot be spoofed (e.g. EvilChain cannot name a token 'atom', mint their own, and deposit)
 }
 
-// TODO: Review if this is necessary
-// internal (string normalization): reliably convert denoms to ascii bytes, and strip non-ascii
-func forceASCII(s string) []byte {
-	// forceASCII("Hello, 世界!") // => []byte("Hello, !")
-	b := []byte{}
-	for _, r := range s {
-		// Iterates over 'runes', which are often UTF-8
-		if r <= 127 {
-			b = append(b, byte(r))
-		}
-	}
-	return b
-}
