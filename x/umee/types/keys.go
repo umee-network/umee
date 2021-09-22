@@ -21,11 +21,10 @@ const (
 	MemStoreKey = "mem_capability" // Question: Should this be "mem-leverage" instead?
 
 	// Prefixes to be used when storing info about individual asset or uToken types
-	// Temp note: The full list will likely be in ADR 003
-	AssetAssociatedUtokenPrefix = ModuleName + "_asset_utoken_" // Stores each asset denom's accepted uToken
-	UtokenAssociatedAssetPrefix = ModuleName + "_utoken_asset_" // Stores each uToken denom's accepted asset
+	// Note: The full list will likely be in ADR 003
+	AssetAssociatedUtokenPrefix = 0x01 // Stores each asset denom's accepted uToken
+	UtokenAssociatedAssetPrefix = 0x02 // Stores each uToken denom's accepted asset
 	// TODO: Add more prefixes, like AssetAssociatedOvercollatRequirement
-	// We could instead marshal all of an asset's stored info into a binary object, to avoid having one prefix per parameter
 )
 
 func KeyPrefix(p string) []byte {
@@ -44,21 +43,25 @@ func utokenAssociatedAssetKey(coin sdk.Coin) []byte {
 	// intent: store["leverage_utoken_asset_u/uatom"] = "uatom"
 }
 
-// prefixDenomStoreKey turns a coin to the key used to store specific info by appending a prefix to the denom. Returns empty bytes on invalid denom. Modeled after x/auth/types.AccountStoreKey
-func prefixDenomStoreKey(prefix string, coin sdk.Coin) []byte {
+// prefixDenomStoreKey turns a coin to the key used to store specific info by appending a prefix to the denom.
+// Returns empty bytes on invalid denom. Modeled after x/auth/types.AccountStoreKey
+func prefixDenomStoreKey(prefix byte, coin sdk.Coin) []byte {
 	if sdk.ValidateDenom(coin.Denom) != nil {
 		// Denom did not match ^[a-z][a-z0-9/]{2,63}$
 		return []byte{}
 	}
-	// example: "leverage_utoken_asset_" + "uatom"
-	return forceASCII(prefix + coin.Denom)
+	// example: byte(0x01) + []byte("uatom")
+	key := []byte{prefix}
+	key = append(key, forceASCII(coin.Denom)...)
+	return key
 	// Note: After IBC enable, want a reliable way to convert token denominations to bytes, such that
-	//	a) Each token type (e.g. Atom) has only one prefix/key, regardless of the path it took via IBC to get to umee
+	//	a) Each token type (e.g. Atom) has only one prefix/key, regardless of the path it took via IBC
+	//		to get to umee
 	//	b) Tokens cannot be spoofed (e.g. EvilChain cannot name a token 'atom', mint their own, and deposit)
 }
 
 // TODO: Review if this is necessary
-// internal (string normalization): reliably convert our denoms+prefixes to ascii bytes, and strip non-ascii
+// internal (string normalization): reliably convert denoms to ascii bytes, and strip non-ascii
 func forceASCII(s string) []byte {
 	// forceASCII("Hello, 世界!") // => []byte("Hello, !")
 	b := []byte{}

@@ -27,8 +27,9 @@ type BankKeeper interface {
 	// SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
 	// BlockedAddr(addr sdk.AccAddress) bool
 	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
-	// Question: When processing a deposit message, is it sufficient to use hasBalance, or must we iterate through spendableCoins?
-	// 	That would be the case, for example, if HasBalance counted locked coins in its total
+	// Question: When processing a deposit message, is it sufficient to use hasBalance,
+	//	or must we iterate through spendableCoins?
+	// 	That would be the case, for example, if HasBalance counted ibc-locked coins in its total
 	// SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 }
 
