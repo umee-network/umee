@@ -1,0 +1,20 @@
+syntax = "proto3";
+package umeenetwork.umee.umee;
+
+option go_package = "github.com/umee-network/umee/x/umee/types";
+
+// Generated when lender attempts to lend base assets to module
+message MsgLendAsset {
+  string denom = 1;
+  int64 amount = 2;
+  // Question: Does the lender address need to be part of the message?
+}
+
+
+// Generated when lender attempts to withdraw base assets from module
+message MsgWithdrawAsset {
+  string denom = 1;
+  int64 amount = 2;
+  // Question: Does the lender address need to be part of the message?
+}
+  

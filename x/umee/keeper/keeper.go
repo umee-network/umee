@@ -126,10 +126,10 @@ func (k Keeper) LendAssets(ctx sdk.Context, lender sdk.AccAddress, assets sdk.Co
 
 }
 
-// RedeemUtokens attempts to deposit uTokens into the leverage module in exchange for original assets.
+// WithdrawAssets attempts to deposit uTokens into the leverage module in exchange for original assets.
 // If utoken type is invalid or account balance insufficient on either side, does nothing and returns false.
 // TODO: Panic if partially executed then fail?
-func (k Keeper) RedeemUtokens(ctx sdk.Context, lender sdk.AccAddress, utokens sdk.Coin) bool {
+func (k Keeper) WithdrawAssets(ctx sdk.Context, lender sdk.AccAddress, utokens sdk.Coin) bool {
 	if !k.IsAcceptedUtoken(ctx, utokens.Denom) {
 		// Not an accepted utoken type
 		return false
