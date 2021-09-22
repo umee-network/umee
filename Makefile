@@ -6,6 +6,8 @@ BUILD_DIR      ?= $(CURDIR)/build
 DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
+DOCKER         := $(shell which docker)
+PROJECT_NAME   = $(shell git remote get-url origin | xargs basename -s .git)
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -134,3 +136,36 @@ lint:
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
 
 .PHONY: lint
+
+###############################################################################
+##                                 Protobuf                                  ##
+###############################################################################
+
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
+
+protoVer=v0.2
+protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
+containerProtoGen=$(PROJECT_NAME)-proto-gen-$(protoVer)
+containerProtoGenAny=$(PROJECT_NAME)-proto-gen-any-$(protoVer)
+containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(protoVer)
+containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(protoVer)
+
+proto-all: proto-format proto-lint proto-gen
+
+proto-format:
+	@echo "Formatting Protobuf files"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
+		find ./ -not -path "./third_party/*" -name "*.proto" -exec clang-format -i {} \; ; fi
+
+proto-gen:
+	@echo "Generating Protobuf files"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+		sh ./contrib/scripts/protocgen.sh; fi
+
+proto-lint:
+	@$(DOCKER_BUF) lint --error-format=json
+
+proto-check-breaking:
+	@$(DOCKER_BUF) breaking --against https://github.com/umee-network/umee.git#branch=main
+
+.PHONY: proto-all proto-gen proto-format proto-lint proto-check-breaking

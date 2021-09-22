@@ -1,12 +1,7 @@
 syntax = "proto3";
 package umeenetwork.umee.umee;
 
-// this line is used by starport scaffolding # genesis/proto/import
-
 option go_package = "github.com/umee-network/umee/x/umee/types";
 
 // GenesisState defines the capability module's genesis state.
-message GenesisState {
-    // this line is used by starport scaffolding # genesis/proto/state
-}
-
+message GenesisState {}
