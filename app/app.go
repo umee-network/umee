@@ -94,7 +94,7 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	umee "github.com/umee-network/umee/x/leverage"
+	leverage "github.com/umee-network/umee/x/leverage"
 )
 
 const (
@@ -140,7 +140,7 @@ var (
 		evidence.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-		umee.AppModuleBasic{},
+		leverage.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 	)
 
