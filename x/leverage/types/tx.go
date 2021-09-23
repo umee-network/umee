@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// This file adds the required GetSigners and ValidateBasic methods to the messages defined in lend.pb.go
+// This file adds the required GetSigners and ValidateBasic methods to the messages defined in tx.pb.go
 
 func (msg *MsgLendAsset) ValidateBasic() error {
 	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
