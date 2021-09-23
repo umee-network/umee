@@ -2,7 +2,6 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -31,11 +30,4 @@ type BankKeeper interface {
 	//	or must we iterate through spendableCoins?
 	// 	That would be the case, for example, if HasBalance counted ibc-locked coins in its total
 	// SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
-}
-
-// TODO: Add auth/account keeper methods we are using here
-type AuthKeeper interface {
-	// Question: how do we create module account on genesis?
-	NewEmptyModuleAccount(name string, permissions ...string) *authtypes.ModuleAccount
-	// Note: Could also use NewModuleAccount - not sure on requirements
 }

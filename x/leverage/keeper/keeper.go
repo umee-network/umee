@@ -12,10 +12,9 @@ import (
 
 type (
 	Keeper struct {
-		cdc      codec.Codec
-		storeKey sdk.StoreKey
-		memKey   sdk.StoreKey
-		// authKeeper types.AuthKeeper
+		cdc        codec.Codec
+		storeKey   sdk.StoreKey
+		memKey     sdk.StoreKey
 		bankKeeper types.BankKeeper
 	}
 )
