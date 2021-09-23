@@ -1,9 +1,5 @@
 package types
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
-
 const (
 	// ModuleName defines the module name
 	ModuleName = "leverage"
@@ -26,6 +22,10 @@ const (
 func KeyPrefix(p string) []byte {
 	return []byte(p)
 }
+
+/*
+
+// Comment back in when no longer hard-coding associations between tokens
 
 // returns store key used to store a specific asset coin's associated utoken denom
 func assetAssociatedUtokenKey(coin sdk.Coin) []byte {
@@ -55,3 +55,5 @@ func prefixDenomStoreKey(prefix byte, coin sdk.Coin) []byte {
 	//		to get to umee
 	//	b) Tokens cannot be spoofed (e.g. EvilChain cannot name a token 'atom', mint their own, and deposit)
 }
+
+*/
