@@ -6,7 +6,7 @@ import (
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "umee" // TODO: "leverage"
+	ModuleName = "leverage"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
@@ -17,11 +17,7 @@ const (
 	// QuerierRoute defines the module's query routing key
 	QuerierRoute = ModuleName
 
-	// MemStoreKey defines the in-memory store key
-	MemStoreKey = "mem_capability" // Question: Should this be "mem-leverage" instead?
-
 	// Prefixes to be used when storing info about individual asset or uToken types
-	// Note: The full list will likely be in ADR 003
 	AssetAssociatedUtokenPrefix = 0x01 // Stores each asset denom's accepted uToken
 	UtokenAssociatedAssetPrefix = 0x02 // Stores each uToken denom's accepted asset
 	// TODO: Add more prefixes, like AssetAssociatedOvercollatRequirement
@@ -34,13 +30,13 @@ func KeyPrefix(p string) []byte {
 // returns store key used to store a specific asset coin's associated utoken denom
 func assetAssociatedUtokenKey(coin sdk.Coin) []byte {
 	return prefixDenomStoreKey(AssetAssociatedUtokenPrefix, coin)
-	// intent: store["leverage_asset_utoken_uatom"] = "u/uatom"
+	// intent: store[0x01+"uatom"] = "u/uatom"
 }
 
 // returns store key used to store a specific utoken coin's associated asset denom
 func utokenAssociatedAssetKey(coin sdk.Coin) []byte {
 	return prefixDenomStoreKey(UtokenAssociatedAssetPrefix, coin)
-	// intent: store["leverage_utoken_asset_u/uatom"] = "uatom"
+	// intent: store[0x02+"u/uatom"] = "uatom"
 }
 
 // prefixDenomStoreKey turns a coin to the key used to store specific info by appending a prefix to the denom.
@@ -59,4 +55,3 @@ func prefixDenomStoreKey(prefix byte, coin sdk.Coin) []byte {
 	//		to get to umee
 	//	b) Tokens cannot be spoofed (e.g. EvilChain cannot name a token 'atom', mint their own, and deposit)
 }
-

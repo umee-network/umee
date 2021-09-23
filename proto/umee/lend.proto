@@ -1,20 +1,18 @@
 syntax = "proto3";
-package umeenetwork.umee.umee;
+package umeenetwork.umee.leverage;
 
-option go_package = "github.com/umee-network/umee/x/umee/types";
+option go_package = "github.com/umee-network/umee/x/leverage/types";
 
-// Generated when lender attempts to lend base assets to module
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
 message MsgLendAsset {
-  string denom = 1;
-  int64 amount = 2;
-  // Question: Does the lender address need to be part of the message?
+  string lender = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
 }
 
-
-// Generated when lender attempts to withdraw base assets from module
 message MsgWithdrawAsset {
-  string denom = 1;
-  int64 amount = 2;
-  // Question: Does the lender address need to be part of the message?
+  string lender = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
 }
   

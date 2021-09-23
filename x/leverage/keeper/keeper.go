@@ -7,15 +7,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/x/umee/types"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 type (
 	Keeper struct {
-		cdc        codec.Codec
-		storeKey   sdk.StoreKey
-		memKey     sdk.StoreKey
-		authKeeper types.AuthKeeper
+		cdc      codec.Codec
+		storeKey sdk.StoreKey
+		memKey   sdk.StoreKey
+		// authKeeper types.AuthKeeper
 		bankKeeper types.BankKeeper
 	}
 )
@@ -92,10 +92,16 @@ func (k Keeper) FromBaseAssetDenom(ctx sdk.Context, denom string) string {
 
 }
 
-// LendAssets attempts to deposit assets into the leverage module in exchange for uTokens.
+// LendAsset attempts to deposit assets into the leverage module in exchange for uTokens.
 // If asset type is invalid or account balance is insufficient, does nothing and returns false.
 // TODO: Panic if partially executed then fail?
-func (k Keeper) LendAssets(ctx sdk.Context, lender sdk.AccAddress, assets sdk.Coin) bool {
+func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) bool {
+	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
+	if err != nil {
+		// Could not unmarshal address (Bech32)
+		return false
+	}
+	assets := msg.GetAmount()
 	if !k.IsAcceptedAsset(ctx, assets.Denom) {
 		// Not an accepted asset type for lending
 		return false
@@ -126,10 +132,16 @@ func (k Keeper) LendAssets(ctx sdk.Context, lender sdk.AccAddress, assets sdk.Co
 
 }
 
-// WithdrawAssets attempts to deposit uTokens into the leverage module in exchange for original assets.
+// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange for original assets.
 // If utoken type is invalid or account balance insufficient on either side, does nothing and returns false.
 // TODO: Panic if partially executed then fail?
-func (k Keeper) WithdrawAssets(ctx sdk.Context, lender sdk.AccAddress, utokens sdk.Coin) bool {
+func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) bool {
+	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
+	if err != nil {
+		// Could not unmarshal address (Bech32)
+		return false
+	}
+	utokens := msg.GetAmount()
 	if !k.IsAcceptedUtoken(ctx, utokens.Denom) {
 		// Not an accepted utoken type
 		return false

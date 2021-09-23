@@ -94,7 +94,7 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	"github.com/umee-network/umee/x/umee"
+	umee "github.com/umee-network/umee/x/leverage"
 )
 
 const (

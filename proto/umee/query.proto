@@ -1,10 +1,10 @@
 syntax = "proto3";
-package umeenetwork.umee.umee;
+package umeenetwork.umee.leverage;
 
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 
-option go_package = "github.com/umee-network/umee/x/umee/types";
+option go_package = "github.com/umee-network/umee/x/leverage/types";
 
 // Query defines the gRPC querier service.
 service Query {}
