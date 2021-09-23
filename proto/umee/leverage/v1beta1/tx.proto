@@ -12,8 +12,23 @@ message MsgLendAsset {
   cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgLendAsset represents a lender's request to withdraw a previously lent base asset type from the module
+// MsgWithdrawAsset represents a lender's request to withdraw a previously lent base asset type from the module
 message MsgWithdrawAsset {
   string lender = 1;
   cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgLendAssetResponse defines the Msg/Send response type.
+message MsgLendAssetResponse {}
+
+// MsgWithdrawAssetResponse defines the Msg/Send response type.
+message MsgWithdrawAssetResponse {}
+
+// Msg defines the leverage Msg service.
+service Msg {
+  // Lend defines a method for lending coins to the capital facility.
+  rpc Lend(MsgLendAsset) returns (MsgLendAssetResponse);
+
+  // Withdraw defines a method for withdrawing previously lent coins from the capital facility.
+  rpc Withdraw(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
 }
