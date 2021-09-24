@@ -1,9 +1,9 @@
-package umee
+package leverage
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/x/umee/keeper"
-	"github.com/umee-network/umee/x/umee/types"
+	"github.com/umee-network/umee/x/leverage/keeper"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 // InitGenesis initializes the capability module's state from a provided genesis

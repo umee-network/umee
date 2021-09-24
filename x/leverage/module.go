@@ -1,4 +1,4 @@
-package umee
+package leverage
 
 import (
 	"encoding/json"
@@ -14,10 +14,10 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/x/umee/client/cli"
-	"github.com/umee-network/umee/x/umee/client/rest"
-	"github.com/umee-network/umee/x/umee/keeper"
-	"github.com/umee-network/umee/x/umee/types"
+	"github.com/umee-network/umee/x/leverage/client/cli"
+	"github.com/umee-network/umee/x/leverage/client/rest"
+	"github.com/umee-network/umee/x/leverage/keeper"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 var (

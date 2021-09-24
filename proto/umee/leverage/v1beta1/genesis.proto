@@ -1,0 +1,7 @@
+syntax = "proto3";
+package umeenetwork.umee.leverage.v1beta1;
+
+option go_package = "github.com/umee-network/umee/x/leverage/types";
+
+// GenesisState defines the leverage module's genesis state.
+message GenesisState {}

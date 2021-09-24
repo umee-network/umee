@@ -1,0 +1,34 @@
+syntax = "proto3";
+package umeenetwork.umee.leverage.v1beta1;
+
+option go_package = "github.com/umee-network/umee/x/leverage/types";
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+// MsgLendAsset represents a lender's request to lend a base asset type to the module
+message MsgLendAsset {
+  string lender = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgWithdrawAsset represents a lender's request to withdraw a previously lent base asset type from the module
+message MsgWithdrawAsset {
+  string lender = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgLendAssetResponse defines the Msg/Send response type.
+message MsgLendAssetResponse {}
+
+// MsgWithdrawAssetResponse defines the Msg/Send response type.
+message MsgWithdrawAssetResponse {}
+
+// Msg defines the leverage Msg service.
+service Msg {
+  // Lend defines a method for lending coins to the capital facility.
+  rpc Lend(MsgLendAsset) returns (MsgLendAssetResponse);
+
+  // Withdraw defines a method for withdrawing previously lent coins from the capital facility.
+  rpc Withdraw(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
+}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/umee-network/umee/x/umee/types"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 // GetTxCmd returns the transaction commands for this module
