@@ -21,14 +21,22 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
 
-func (s msgServer) LendAsset(goCtx context.Context, req *types.MsgLendAsset) (*types.MsgLendAssetResponse, error) {
+func (s msgServer) LendAsset(
+	goCtx context.Context,
+	req *types.MsgLendAsset,
+) (*types.MsgLendAssetResponse, error) {
+
 	// ctx := sdk.UnwrapSDKContext(goCtx)
 	// TODO: Implement...
 
 	return nil, status.Errorf(codes.Unimplemented, "method LendAsset not implemented")
 }
 
-func (s msgServer) WithdrawAsset(goCtx context.Context, req *types.MsgWithdrawAsset) (*types.MsgWithdrawAssetResponse, error) {
+func (s msgServer) WithdrawAsset(
+	goCtx context.Context,
+	req *types.MsgWithdrawAsset,
+) (*types.MsgWithdrawAssetResponse, error) {
+
 	// ctx := sdk.UnwrapSDKContext(goCtx)
 	// TODO: Implement...
 
