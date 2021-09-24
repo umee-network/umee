@@ -1,10 +1,20 @@
 syntax = "proto3";
 package umeenetwork.umee.leverage.v1beta1;
 
-option go_package = "github.com/umee-network/umee/x/leverage/types";
-
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/x/leverage/types";
+
+// Msg defines the x/leverage module's Msg service.
+service Msg {
+  // LendAsset defines a method for lending coins to the capital facility.
+  rpc LendAsset(MsgLendAsset) returns (MsgLendAssetResponse);
+
+  // WithdrawAsset defines a method for withdrawing previously lent coins from
+  // the capital facility.
+  rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
+}
 
 // MsgLendAsset represents a lender's request to lend a base asset type to the
 // module
@@ -25,13 +35,3 @@ message MsgLendAssetResponse {}
 
 // MsgWithdrawAssetResponse defines the Msg/Send response type.
 message MsgWithdrawAssetResponse {}
-
-// Msg defines the leverage Msg service.
-service Msg {
-  // Lend defines a method for lending coins to the capital facility.
-  rpc Lend(MsgLendAsset) returns (MsgLendAssetResponse);
-
-  // Withdraw defines a method for withdrawing previously lent coins from the
-  // capital facility.
-  rpc Withdraw(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
-}
