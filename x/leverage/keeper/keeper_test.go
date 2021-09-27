@@ -79,6 +79,14 @@ func (suite *IntegrationTestSuite) TestLendAsset_Valid() {
 	suite.Require().Equal(expected, supply)
 }
 
+func (suite *IntegrationTestSuite) TestWithdrawAsset_InvalidAsset() {
+	panic("not implemented")
+}
+
+func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
+	panic("not implemented")
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
