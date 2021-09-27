@@ -24,13 +24,8 @@ require (
 	github.com/tendermint/tendermint v0.34.13
 	github.com/tendermint/tm-db v0.6.4
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
-<<<<<<< HEAD
-	google.golang.org/genproto v0.0.0-20210617175327-b9e0b3197ced
-	google.golang.org/grpc v1.40.0
-=======
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
 	google.golang.org/grpc v1.41.0
->>>>>>> a8875d8 (build(deps): Bump google.golang.org/grpc from 1.40.0 to 1.41.0 (#119))
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
