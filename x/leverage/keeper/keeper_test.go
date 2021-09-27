@@ -11,6 +11,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 const (
@@ -51,8 +52,31 @@ func (suite *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
 	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
 
+	// lending should fail as we have not set what tokens can be lent
 	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
 	suite.Require().Error(err)
+}
+
+func (suite *IntegrationTestSuite) TestLendAsset_Valid() {
+	app, ctx := suite.app, suite.ctx
+
+	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
+
+	lenderAddr := sdk.AccAddress([]byte("addr________________"))
+	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
+	app.AccountKeeper.SetAccount(ctx, lenderAcc)
+
+	// mint and send coins
+	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
+
+	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
+	suite.Require().NoError(err)
+
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	supply := app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000)
+	suite.Require().Equal(expected, supply)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
