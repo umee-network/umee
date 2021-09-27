@@ -53,7 +53,7 @@ func (suite *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
 
 	// lending should fail as we have not set what tokens can be lent
-	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
+	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	suite.Require().Error(err)
 }
 
@@ -70,12 +70,12 @@ func (suite *IntegrationTestSuite) TestLendAsset_Valid() {
 	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
 
-	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
+	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	suite.Require().NoError(err)
 
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 	supply := app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
-	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000)
+	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k umee
 	suite.Require().Equal(expected, supply)
 }
 
