@@ -81,17 +81,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 // WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
 // for the original tokens lent. If the uToken type is invalid or account balance
 // insufficient on either side, we return an error.
-func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) error {
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.GetLender())
-	if err != nil {
-		return err
-	}
-
-	uToken := msg.GetAmount()
-	if !k.IsAcceptedUToken(ctx, uToken.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
-	}
-
+func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken sdk.Coin) error {
 	if !k.bankKeeper.HasBalance(ctx, lenderAddr, uToken) {
 		// Lender does not have the uTokens they intend to redeem
 		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
@@ -108,18 +98,18 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) error
 
 	// send the uTokens from the lender to the module account
 	uTokens := sdk.NewCoins(uToken)
-	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens) != nil {
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
 	// send the original lent tokens back to lender
 	tokens := sdk.NewCoins(token)
-	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens) != nil {
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
 		return err
 	}
 
 	// burn the minted uTokens
-	if k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens) != nil {
+	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
