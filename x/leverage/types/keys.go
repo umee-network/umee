@@ -23,13 +23,17 @@ var (
 // CreateTokenDenomKey returns a KVStore key for getting and storing a token's
 // associated uToken denomination.
 func CreateTokenDenomKey(tokenDenom string) []byte {
-	key := append(KeyPrefixTokenDenom, []byte(tokenDenom)...)
+	var key []byte
+	key = append(key, KeyPrefixTokenDenom...)
+	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
 
 // CreateUTokenDenomKey returns a KVStore key for getting and storing a uToken's
 // associated token denomination.
 func CreateUTokenDenomKey(uTokenDenom string) []byte {
-	key := append(KeyPrefixUTokenDenom, []byte(uTokenDenom)...)
+	var key []byte
+	key = append(key, KeyPrefixUTokenDenom...)
+	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
