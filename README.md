@@ -34,30 +34,11 @@ Umee will allow a multitude of decentralized debt products.
 ## Active Networks
 
 ### Betanet
-**quickstart**
-
-```bash
-git clone https://github.com/ethereum/go-ethereum
-cd go-ethereum
-git checkout v1.10.8
-make
-cp build/bin/geth /usr/bin
-
-# Start geth in a separate screen session like
-screen -s "geth --rinkeby"
-
-gorc
-
-git clone https://github.com/umee-network/umee/
+**[Install Guide](https://docs.umee.cc/umee/umee-basics/running-a-node/full-node)**
 
 
 
-umeed start --p2p.persistnt_peers a9a84866786013f75138388fbf12cdfc425bd39c@137.184.69.184:26656,684dd9ce7746041d0453322808cc5b238861e386@137.184.65.210:26656,c4c425c66d2941ce4d5d98185aa90d2330de5efd@143.244.166.155:26656,eb42bdbd821fad7bd0048a741237625b4d954d18@143.244.165.138:26656
-```
-
-
-
-
+**Vital Inforation**
 - Chain ID: `umee-betanet-2`
 - Umee Version: [`v0.2.x`](https://github.com/umee-network/umee/releases)
 - Gravity Bridge Orchestrator Version: [`v0.2.10`](https://github.com/PeggyJV/gravity-bridge/releases/tag/v0.2.10)
