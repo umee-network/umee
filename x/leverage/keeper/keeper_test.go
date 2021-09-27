@@ -70,13 +70,22 @@ func (suite *IntegrationTestSuite) TestLendAsset_Valid() {
 	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
 
+	// lend asset
 	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	suite.Require().NoError(err)
 
+	// verify the total supply of the minted uToken
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 	supply := app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k umee
 	suite.Require().Equal(expected, supply)
+
+	// verify the balance of the lender's balances
+	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(initTokens.Sub(sdk.NewInt(1000000000)), tokenBalance.Amount)
+
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, uTokenDenom)
+	suite.Require().Equal(int64(1000000000), uTokenBalance.Amount.Int64())
 }
 
 func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
@@ -92,20 +101,31 @@ func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
 
+	// lend asset
 	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	suite.Require().NoError(err)
 
+	// verify the total supply of the minted uToken
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 	supply := app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k umee
 	suite.Require().Equal(expected, supply)
 
+	// withdraw the total amount of assets lent
 	uToken := expected
 	err = app.LeverageKeeper.WithdrawAsset(ctx, lenderAddr, uToken)
 	suite.Require().NoError(err)
 
+	// verify total supply of the uTokens
 	supply = app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
-	suite.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 0), supply)
+	suite.Require().Equal(int64(0), supply.Amount.Int64())
+
+	// verify the balance of the lender's balances
+	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(initTokens, tokenBalance.Amount)
+
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, uTokenDenom)
+	suite.Require().Equal(int64(0), uTokenBalance.Amount.Int64())
 }
 
 func TestKeeperTestSuite(t *testing.T) {
