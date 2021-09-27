@@ -59,17 +59,22 @@ func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) strin
 	return string(bz)
 }
 
-// IsAcceptedAsset returns true if a given (nonUToken) token denom is an
+// IsAcceptedToken returns true if a given (non-UToken) token denom is an
 // accepted asset type.
-func (k Keeper) IsAcceptedAsset(ctx sdk.Context, denom string) bool {
-	// Has an associated utoken iff it's an accepted asset
-	return k.FromBaseAssetDenom(ctx, denom) != ""
+func (k Keeper) IsAcceptedToken(ctx sdk.Context, tokenDenom string) bool {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateTokenDenomKey(tokenDenom)
+
+	return store.Has(key)
 }
 
-// IsAcceptedUtoken returns true if a given denom is an accepted uToken (not asset) type.
-func (k Keeper) IsAcceptedUtoken(ctx sdk.Context, denom string) bool {
-	// Has an associated asset iff it's an accepted utoken
-	return k.ToBaseAssetDenom(ctx, denom) != ""
+// IsAcceptedUToken returns true if a given uToken denom is an accepted asset
+// type.
+func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateUTokenDenomKey(uTokenDenom)
+
+	return store.Has(key)
 }
 
 // TotalUtokenSupply returns an sdk.Coin representing the total balance of a given uToken type if valid.
