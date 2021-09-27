@@ -18,23 +18,23 @@ It might be worth considering adding a message type which does steps 1 and 2 bel
 
 ## Decision
 
-The Cosmos `x/bank` module and the existing `leverage` deposit features are prerequisites for these new capabilities.
+The Cosmos `x/bank` module and the existing `umee/x/leverage` deposit features are prerequisites for these new capabilities.
 
 The flow of events is as follows:
-- Borrower has already used `leverage` module to deposit base assets and receive uTokens
-- Borrower deposits uTokens into asset facility as collateral - facility remembers position
-- Borrower requests to borrow assets from capital facility - facility remembers position
+- Borrower has already used `umee/x/leverage` module to deposit base assets and receive uTokens
+- Borrower deposits uTokens into asset facility as collateral - facility remembers collateral position
+- Borrower requests to borrow assets from capital facility - facility checks request, disburses tokens if acceptable, and remembers borrow position
 - Eventually, borrower pays repayment amount (in full or in part) using borrowed asset denomination
-- Borrower may withdraw collateral uTokens at any time as long as overcollateralization remains satisfied
-- On asset repayment amount zero, facility forgets loan.
-- On uToken collateral amount zero, facility forgets collateral.
+- Borrower may withdraw collateral uTokens at any time as long as minimum overcollateralization requirement remains satisfied
+- On asset repayment amount = 0 for a given borrow position, facility forgets loan.
+- On uToken collateral amount = 0 for a given collateral position, facility forgets collateral.
 
 Additionally, the following events occur periodically (at the end of every block):
 - Repayment amounts for open borrow positions increases by a borrowed-token-specific interest rate
 - Open borrow positions are checked to see if they fall below liquidation threshold
 
-The `umee/x/leverage` module `keeper` will be responsible for remembering each open borrow or collateral position.
-If the same user account opens multiple of the same type of position in the same token, they should be added together.
+The `umee/x/leverage` module keeper will be responsible for remembering each open borrow or collateral position.
+If the same user account opens multiple of the same type of position (e.g. borrow) in the same token denomination, the second position simply increases the amount of the first.
 
 Additionally it has been discussed that, rather than an account's specific collateral positions being tied to specific borrow positions, the sum of all borrow and collateral positions related to an account is used to check the account's overcollateralization levels and mark its positions for liquidation.
 
@@ -48,7 +48,7 @@ Note also that as a consequence of uToken interest, the asset value of uToken co
 
 ## Detailed Design
 
-For the purposes of borrowing and repaying assets, as well as depositing and withdrawing uToken collateral, the `leverage` module does not mint or burn tokens. It uses its module account to store collateral uTokens, its keeper to remember open positions, and the `x/bank` module to perform all necessary balance checks and token transfers.
+For the purposes of borrowing and repaying assets, as well as depositing and withdrawing uToken collateral, the `umee/x/leverage` module does not mint or burn tokens. It uses its module account to store collateral uTokens, its keeper to remember open positions, and the `x/bank` module to perform all necessary balance checks and token transfers.
 
 ### Basic Message Types
 
@@ -77,7 +77,7 @@ type MsgRepayAsset struct {
 ```
 Messages must use only whitelisted denominations. Collateral is always a uToken denomination, and assets are never uTokens.
 
-Asset borrowing compares collateral uTokens associated with one base asset, to borrowed assets of a second base asset type. Price oracles must be used to compare such values.
+Asset borrowing compares collateral uTokens associated with one base asset, to borrowed assets of a second base asset type. Price oracles must be used to compare the values of base assets (e.g. Atoms:Ether.)
 
 _Note: The `Coins` type seen in the `Amount` fields can contain multiple token types. The messages above should fail if even one of the coin types fails or is invalid, rather than partially succeeding._
 
@@ -85,12 +85,13 @@ It is necessary that messages be signed by the borrower's account. Thus the meth
 
 ### Keeper additions
 
-Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the keeper may roughly remember open borrow and collateral positions as follows:
+Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` keeper may roughly remember open borrow and collateral positions as follows:
 
 ```go
-//pseudo-code
-keeper[collateralPrefix + address] = CollateralCoins
-keeper[borrowPrefix + address] = BorrowedCoins
+// pseudocode
+// for each borrower address, combine all open positions of each type (borrower/collateral) into one sdk.Coins object:
+keeper[collateralPrefix + borrowerAddress] = CollateralCoins
+keeper[borrowPrefix + borrowerAddress] = BorrowedCoins
 ```
 
 This will be accomplished by adding new prefixes and helper functions to `x/leverage/types/keys.go`, and using the proper codec to marshal `sdk.Coins` into bytes when storing them as values.
@@ -100,7 +101,7 @@ Both CLI and gRPC must be supported when sending the above message types, and al
 
 ### Testing
 
-Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`uatom`), and uTokens existing (e.g. `u/uumee`,`u/uatom`), an integration test can be created in which one user account sends a `MsgBorrow` and a `MsgRepay` of the appropriate token types.
+Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`uatom`), and uTokens existing (e.g. `u/uumee`,`u/uatom`), an integration test can be created in which one user account sends a `MsgBorrowAsset` and a `MsgRepayAsset` of the appropriate token types.
 
 ## Open Questions
 - See ADR-002 open questions on whitelisting asset types and uniquely identifying ibc/ assets regardless of ibc path.
