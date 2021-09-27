@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -12,22 +13,32 @@ import (
 var _ types.MsgServer = msgServer{}
 
 type msgServer struct {
-	Keeper
+	keeper Keeper
 }
 
 // NewMsgServerImpl returns an implementation of MsgServer for the x/leverage
 // module.
 func NewMsgServerImpl(keeper Keeper) types.MsgServer {
-	return &msgServer{Keeper: keeper}
+	return &msgServer{keeper: keeper}
 }
 
 func (s msgServer) LendAsset(
 	goCtx context.Context,
-	req *types.MsgLendAsset,
+	msg *types.MsgLendAsset,
 ) (*types.MsgLendAssetResponse, error) {
 
-	// ctx := sdk.UnwrapSDKContext(goCtx)
-	// TODO: Implement...
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.LendAsset(ctx, lenderAddr, msg.Amount); err != nil {
+		return nil, err
+	}
+
+	// TODO: Events + Logging
 
 	return nil, status.Errorf(codes.Unimplemented, "method LendAsset not implemented")
 }
