@@ -12,14 +12,10 @@ import (
 	"github.com/umee-network/umee/app"
 )
 
-type EmptyAppOptions struct{}
-
-func (_ EmptyAppOptions) Get(o string) interface{} { return nil }
-
 func SetupTestingApp() (ibctesting.TestingApp, map[string]json.RawMessage) {
 	db := dbm.NewMemDB()
 	encConfig := app.MakeEncodingConfig()
-	umeeApp := app.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, app.DefaultNodeHome, 5, encConfig, EmptyAppOptions{})
+	umeeApp := app.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, app.DefaultNodeHome, 5, encConfig, app.EmptyAppOptions{})
 	genesisState := app.NewDefaultGenesisState(encConfig.Marshaler)
 
 	return umeeApp, genesisState

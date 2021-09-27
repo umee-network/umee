@@ -6,7 +6,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// x/umee module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrInvalidAsset        = sdkerrors.Register(ModuleName, 1100, "invalid asset")
+	ErrInsufficientBalance = sdkerrors.Register(ModuleName, 1101, "insufficient balance")
 )

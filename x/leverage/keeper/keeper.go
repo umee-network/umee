@@ -5,25 +5,24 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-type (
-	Keeper struct {
-		cdc        codec.Codec
-		storeKey   sdk.StoreKey
-		memKey     sdk.StoreKey
-		bankKeeper types.BankKeeper
-	}
-)
+type Keeper struct {
+	cdc        codec.Codec
+	storeKey   sdk.StoreKey
+	bankKeeper types.BankKeeper
+}
 
-func NewKeeper(cdc codec.Codec, storeKey, memKey sdk.StoreKey) *Keeper {
-	return &Keeper{
-		cdc:      cdc,
-		storeKey: storeKey,
-		memKey:   memKey,
+func NewKeeper(cdc codec.Codec, storeKey sdk.StoreKey, bk types.BankKeeper) Keeper {
+	return Keeper{
+		cdc:        cdc,
+		storeKey:   storeKey,
+		bankKeeper: bk,
 	}
 }
 
@@ -31,147 +30,88 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// IsAcceptedAsset returns true if a given denom is an accepted asset (not uToken) type.
-func (k Keeper) IsAcceptedAsset(ctx sdk.Context, denom string) bool {
-	// Has an associated utoken iff it's an accepted asset
-	return k.FromBaseAssetDenom(ctx, denom) != ""
-}
-
-// IsAcceptedUtoken returns true if a given denom is an accepted uToken (not asset) type.
-func (k Keeper) IsAcceptedUtoken(ctx sdk.Context, denom string) bool {
-	// Has an associated asset iff it's an accepted utoken
-	return k.ToBaseAssetDenom(ctx, denom) != ""
-}
-
-// TotalUtokenSupply returns an sdk.Coin representing the total balance of a given uToken type if valid.
-// If the denom is not an accepted uToken type, the sdk.Coin returned will have a zero amount and the
-// input denom.
-func (k Keeper) TotalUtokenSupply(ctx sdk.Context, denom string) sdk.Coin {
-	if k.IsAcceptedUtoken(ctx, denom) {
-		return k.bankKeeper.GetSupply(ctx, denom)
+// TotalUTokenSupply returns an sdk.Coin representing the total balance of a
+// given uToken type if valid. If the denom is not an accepted uToken type,
+// we return a zero amount.
+func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin {
+	if k.IsAcceptedUToken(ctx, uTokenDenom) {
+		return k.bankKeeper.GetSupply(ctx, uTokenDenom)
 		// Question: Does bank module still track balances sent (locked) via IBC? If it doesn't
 		// then the balance returned here would decrease when the tokens are sent off, which is not
 		// what we want. In that case, the keeper should keep an sdk.Int total supply for each uToken type.
 	}
-	// Return zero amount on not existing uToken type
-	return sdk.NewCoin(denom, sdk.ZeroInt())
+
+	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
 }
 
-// TotalAssetBalance returns an sdk.Coin representing the total balance of a given asset type if valid.
-// If the denom is not an accepted asset type, the sdk.Coin returned will have a zero amount and the input
-// denom.
-func (k Keeper) TotalAssetBalance(ctx sdk.Context, denom string) sdk.Coin {
-	if k.IsAcceptedAsset(ctx, denom) {
-		return sdk.NewCoin(denom, sdk.ZeroInt()) // TODO: Amount = module account total balance of this token type
+// LendAsset attempts to deposit assets into the leverage module account in
+// exchange for uTokens. If asset type is invalid or account balance is
+// insufficient, we return an error.
+func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
+	if !k.IsAcceptedToken(ctx, loan.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
 	}
-	// Return zero amount on not accepted asset
-	return sdk.NewCoin(denom, sdk.ZeroInt())
+
+	if !k.bankKeeper.HasBalance(ctx, lenderAddr, loan) {
+		// lender does not have the assets they intend to lend
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, loan.String())
+	}
+
+	// send token balance to leverage module account
+	loanTokens := sdk.NewCoins(loan)
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
+		return err
+	}
+
+	// mint uTokens
+	// TODO: Use exchange rate instead of 1:1 redeeming
+	uToken := sdk.NewCoin(k.FromTokenToUTokenDenom(ctx, loan.Denom), loan.Amount)
+	uTokens := sdk.NewCoins(uToken)
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
+		return err
+	}
+
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// ToBaseAssetDenom returns the asset type associated with a given uToken. Empty string on non-uToken
-// input.
-func (k Keeper) ToBaseAssetDenom(ctx sdk.Context, denom string) string {
-	// TODO: Remove hard-coding, and store this for each uToken denom using keeper
-	// 	under UtokenAssociatedAssetPrefix+denom
-	if denom == "u/uumee" {
-		return "uumee"
-	}
-	return ""
-}
-
-// FromBaseAssetDenom returns the uToken type associated with a given asset. Empty string on
-// non-accepted-asset input.
-func (k Keeper) FromBaseAssetDenom(ctx sdk.Context, denom string) string {
-	// TODO: Remove hard-coding, and store this for each accepted asset denom using keeper
-	// 	under AssetAssociatedUtokenPrefix+denom
-	if denom == "uumee" {
-		return "u/uumee"
-	}
-	return ""
-
-}
-
-// LendAsset attempts to deposit assets into the leverage module in exchange for uTokens.
-// If asset type is invalid or account balance is insufficient, does nothing and returns false.
-// TODO: Panic if partially executed then fail?
-func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) bool {
-	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
-	if err != nil {
-		// Could not unmarshal address (Bech32)
-		return false
-	}
-	assets := msg.GetAmount()
-	if !k.IsAcceptedAsset(ctx, assets.Denom) {
-		// Not an accepted asset type for lending
-		return false
-	}
-	utokenDenom := k.FromBaseAssetDenom(ctx, assets.Denom)
-	if !k.bankKeeper.HasBalance(ctx, lender, assets) {
-		// Lender does not have the assets they intend to lend
-		return false
-	}
-	utokens := sdk.NewCoin(utokenDenom, assets.Amount) // TODO: Use exchange rate instead of 1:1 redeeming
-	// TODO: Add additional checks to be sure tokens/accounts are good to send from before doing the
-	// irreversible
-	if k.bankKeeper.MintCoins(ctx, "leverage", sdk.Coins{utokens}) != nil {
-		// Error minting utokens
-		return false
-	}
-	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lender, "leverage", sdk.Coins{assets}) != nil {
-		// Error depositing assets
-		// TODO: Either make this a panic, or reverse the minting of uTokens above with a burn
-		return false
-	}
-	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, "leverage", lender, sdk.Coins{utokens}) != nil {
-		// Error granting utokens
-		// TODO: Either make this a panic, or reverse both the minting of uTokens and the transfer of assets
-		return false
-	}
-	return false
-
-}
-
-// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange for original assets.
-// If utoken type is invalid or account balance insufficient on either side, does nothing and returns false.
-// TODO: Panic if partially executed then fail?
-func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) bool {
-	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
-	if err != nil {
-		// Could not unmarshal address (Bech32)
-		return false
-	}
-	utokens := msg.GetAmount()
-	if !k.IsAcceptedUtoken(ctx, utokens.Denom) {
-		// Not an accepted utoken type
-		return false
-	}
-	assetDenom := k.ToBaseAssetDenom(ctx, utokens.Denom)
-	if !k.bankKeeper.HasBalance(ctx, lender, utokens) {
+// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
+// for the original tokens lent. If the uToken type is invalid or account balance
+// insufficient on either side, we return an error.
+func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken sdk.Coin) error {
+	if !k.bankKeeper.HasBalance(ctx, lenderAddr, uToken) {
 		// Lender does not have the uTokens they intend to redeem
-		return false
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 	}
-	assets := sdk.NewCoin(assetDenom, utokens.Amount) // TODO: Use exchange rate instead of 1:1 redeeming
-	/*
-		TODO: once we have leverage module's account address
-		if k.bankKeeper.HasBalance(ctx,module_account_address,assets) == false {
-			return false
-		}
-	*/
-	// TODO: Add additional checks to be sure tokens/accounts are good to send from before doing the
-	// irreversible
-	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lender, "leverage", sdk.Coins{utokens}) != nil {
-		// Error depositing utokens
-		return false
+
+	// ensure the tokens exist in the leverage module account's balance
+	// TODO: Use exchange rate instead of 1:1 redeeming
+	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
+	token := sdk.NewCoin(tokenDenom, uToken.Amount)
+	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), token) {
+		// TODO: We should never enter this case -- consider a panic
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, token.String())
 	}
-	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, "leverage", lender, sdk.Coins{assets}) != nil {
-		// Error releasing assets
-		// TODO: Either make this a panic, or reverse the sending of uTokens
-		return false
+
+	// send the uTokens from the lender to the module account
+	uTokens := sdk.NewCoins(uToken)
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
+		return err
 	}
-	if k.bankKeeper.BurnCoins(ctx, "leverage", sdk.Coins{utokens}) != nil {
-		// Error burning utokens
-		// TODO: Either make this a panic, or reverse the depositing or utokens and releasing of assets
-		return false
+
+	// send the original lent tokens back to lender
+	tokens := sdk.NewCoins(token)
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
+		return err
 	}
-	return false
+
+	// burn the minted uTokens
+	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens); err != nil {
+		return err
+	}
+
+	return nil
 }
