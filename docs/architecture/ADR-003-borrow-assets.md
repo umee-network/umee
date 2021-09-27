@@ -14,7 +14,7 @@ One of the base functions of the Umee universal capital facility is to allow use
 
 ## Alternative Approaches
 
-It might be worth considering adding a message type which does steps 1 and 2 below (asset1->uToken1, then uToken1->asset2) into a single message. Even with such a message type, we would still have the original separate message types, though, as they must be able to be done independently as well. Therefore the combined message type is only an optional convenience/gas-saver feature.
+It might be worth considering adding message types which do two or more of the steps below at once (e.g. deposit base asset, convert to uToken collateral, and receive loan all at once). The individual steps to need to be possible in isolation, though.
 
 ## Decision
 
