@@ -95,6 +95,8 @@ import (
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	leverage "github.com/umee-network/umee/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 )
 
 const (
@@ -154,6 +156,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -206,6 +209,7 @@ type UmeeApp struct {
 	GravityKeeper    gravitykeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
+	LeverageKeeper   leveragekeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -245,7 +249,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		gravitytypes.StoreKey, feegrant.StoreKey, authzkeeper.StoreKey,
+		gravitytypes.StoreKey, feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -368,6 +372,11 @@ func New(
 		app.SlashingKeeper,
 		sdk.DefaultPowerReduction,
 	)
+	app.LeverageKeeper = leveragekeeper.NewKeeper(
+		appCodec,
+		keys[leveragetypes.ModuleName],
+		app.BankKeeper,
+	)
 
 	// register the staking hooks
 	//
@@ -468,6 +477,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
+		leverage.NewAppModule(appCodec, app.LeverageKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -485,6 +495,7 @@ func New(
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
 		gravitytypes.ModuleName,
+		leveragetypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -492,6 +503,7 @@ func New(
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
+		leveragetypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -517,6 +529,7 @@ func New(
 		gravitytypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
+		leveragetypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)

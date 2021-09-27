@@ -15,15 +15,14 @@ import (
 type Keeper struct {
 	cdc        codec.Codec
 	storeKey   sdk.StoreKey
-	memKey     sdk.StoreKey
 	bankKeeper types.BankKeeper
 }
 
-func NewKeeper(cdc codec.Codec, storeKey, memKey sdk.StoreKey) *Keeper {
-	return &Keeper{
-		cdc:      cdc,
-		storeKey: storeKey,
-		memKey:   memKey,
+func NewKeeper(cdc codec.Codec, storeKey sdk.StoreKey, bk types.BankKeeper) Keeper {
+	return Keeper{
+		cdc:        cdc,
+		storeKey:   storeKey,
+		bankKeeper: bk,
 	}
 }
 
@@ -45,27 +44,10 @@ func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin 
 	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
 }
 
-// TotalTokenSupply returns an sdk.Coin representing the total balance of a
-// given asset type if valid. If the denom is not an accepted asset type, we
-// return a zero amount.
-func (k Keeper) TotalTokenSupply(ctx sdk.Context, tokenDenom string) sdk.Coin {
-	if k.IsAcceptedToken(ctx, tokenDenom) {
-		return sdk.NewCoin(tokenDenom, sdk.ZeroInt())
-	}
-
-	return sdk.NewCoin(tokenDenom, sdk.ZeroInt())
-}
-
 // LendAsset attempts to deposit assets into the leverage module account in
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
-func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) error {
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.GetLender())
-	if err != nil {
-		return err
-	}
-
-	loan := msg.GetAmount()
+func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
 	if !k.IsAcceptedToken(ctx, loan.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
 	}
@@ -77,7 +59,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) error {
 
 	// send token balance to leverage module account
 	loanTokens := sdk.NewCoins(loan)
-	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens) != nil {
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
 		return err
 	}
 
@@ -85,11 +67,11 @@ func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) error {
 	// TODO: Use exchange rate instead of 1:1 redeeming
 	uToken := sdk.NewCoin(k.FromTokenToUTokenDenom(ctx, loan.Denom), loan.Amount)
 	uTokens := sdk.NewCoins(uToken)
-	if k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens) != nil {
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
-	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens) != nil {
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
 		return err
 	}
 
