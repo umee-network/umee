@@ -79,12 +79,33 @@ func (suite *IntegrationTestSuite) TestLendAsset_Valid() {
 	suite.Require().Equal(expected, supply)
 }
 
-func (suite *IntegrationTestSuite) TestWithdrawAsset_InvalidAsset() {
-	panic("not implemented")
-}
-
 func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
-	panic("not implemented")
+	app, ctx := suite.app, suite.ctx
+
+	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
+
+	lenderAddr := sdk.AccAddress([]byte("addr________________"))
+	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
+	app.AccountKeeper.SetAccount(ctx, lenderAcc)
+
+	// mint and send coins
+	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
+
+	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	suite.Require().NoError(err)
+
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	supply := app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k umee
+	suite.Require().Equal(expected, supply)
+
+	uToken := expected
+	err = app.LeverageKeeper.WithdrawAsset(ctx, lenderAddr, uToken)
+	suite.Require().NoError(err)
+
+	supply = app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	suite.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 0), supply)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
