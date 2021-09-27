@@ -120,8 +120,8 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) error
 	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
 	token := sdk.NewCoin(tokenDenom, uToken.Amount)
 	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), token) {
-		// TODO: We should never enter this case -- considering a panic
-		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
+		// TODO: We should never enter this case -- consider a panic
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, token.String())
 	}
 
 	// send the uTokens from the lender to the module account
