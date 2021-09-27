@@ -10,14 +10,12 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-type (
-	Keeper struct {
-		cdc        codec.Codec
-		storeKey   sdk.StoreKey
-		memKey     sdk.StoreKey
-		bankKeeper types.BankKeeper
-	}
-)
+type Keeper struct {
+	cdc        codec.Codec
+	storeKey   sdk.StoreKey
+	memKey     sdk.StoreKey
+	bankKeeper types.BankKeeper
+}
 
 func NewKeeper(cdc codec.Codec, storeKey, memKey sdk.StoreKey) *Keeper {
 	return &Keeper{
@@ -31,7 +29,38 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// IsAcceptedAsset returns true if a given denom is an accepted asset (not uToken) type.
+// FromUTokenToTokenDenom returns the associated token denom for the given uToken
+// denom. If the uToken denom does not exist, we assume the association is
+// invalid and we return an empty string.
+func (k Keeper) FromUTokenToTokenDenom(ctx sdk.Context, uTokenDenom string) string {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateUTokenDenomKey(uTokenDenom)
+
+	bz := store.Get(key)
+	if len(bz) == 0 {
+		return ""
+	}
+
+	return string(bz)
+}
+
+// FromTokenToUTokenDenom returns the associated uToken denom for the given token
+// denom. If the token denom does not exist, we assume the association is invalid
+// and we return an empty string.
+func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) string {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateTokenDenomKey(tokenDenom)
+
+	bz := store.Get(key)
+	if len(bz) == 0 {
+		return ""
+	}
+
+	return string(bz)
+}
+
+// IsAcceptedAsset returns true if a given (nonUToken) token denom is an
+// accepted asset type.
 func (k Keeper) IsAcceptedAsset(ctx sdk.Context, denom string) bool {
 	// Has an associated utoken iff it's an accepted asset
 	return k.FromBaseAssetDenom(ctx, denom) != ""
@@ -66,29 +95,6 @@ func (k Keeper) TotalAssetBalance(ctx sdk.Context, denom string) sdk.Coin {
 	}
 	// Return zero amount on not accepted asset
 	return sdk.NewCoin(denom, sdk.ZeroInt())
-}
-
-// ToBaseAssetDenom returns the asset type associated with a given uToken. Empty string on non-uToken
-// input.
-func (k Keeper) ToBaseAssetDenom(ctx sdk.Context, denom string) string {
-	// TODO: Remove hard-coding, and store this for each uToken denom using keeper
-	// 	under UtokenAssociatedAssetPrefix+denom
-	if denom == "u/uumee" {
-		return "uumee"
-	}
-	return ""
-}
-
-// FromBaseAssetDenom returns the uToken type associated with a given asset. Empty string on
-// non-accepted-asset input.
-func (k Keeper) FromBaseAssetDenom(ctx sdk.Context, denom string) string {
-	// TODO: Remove hard-coding, and store this for each accepted asset denom using keeper
-	// 	under AssetAssociatedUtokenPrefix+denom
-	if denom == "uumee" {
-		return "u/uumee"
-	}
-	return ""
-
 }
 
 // LendAsset attempts to deposit assets into the leverage module in exchange for uTokens.

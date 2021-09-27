@@ -20,16 +20,16 @@ var (
 	KeyPrefixUTokenDenom = []byte{0x02}
 )
 
-// CreateTokenDenomPrefix returns a KVStore prefix for getting and storing a
-// token's uToken denomination.
-func CreateTokenDenomPrefix(tokenDenom string) []byte {
+// CreateTokenDenomKey returns a KVStore key for getting and storing a token's
+// associated uToken denomination.
+func CreateTokenDenomKey(tokenDenom string) []byte {
 	key := append(KeyPrefixTokenDenom, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateUTokenDenomPrefix returns a KVStore prefix for getting and storing a
-// uToken's token denomination.
-func CreateUTokenDenomPrefix(uTokenDenom string) []byte {
+// CreateUTokenDenomKey returns a KVStore key for getting and storing a uToken's
+// associated token denomination.
+func CreateUTokenDenomKey(uTokenDenom string) []byte {
 	key := append(KeyPrefixUTokenDenom, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
