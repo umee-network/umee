@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/x/leverage/types"
@@ -143,47 +144,50 @@ func (k Keeper) LendAsset(ctx sdk.Context, msg types.MsgLendAsset) error {
 	return nil
 }
 
-// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange for original assets.
-// If utoken type is invalid or account balance insufficient on either side, does nothing and returns false.
-// TODO: Panic if partially executed then fail?
-func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) bool {
-	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
+// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
+// for the original tokens lent. If the uToken type is invalid or account balance
+// insufficient on either side, we return an error.
+func (k Keeper) WithdrawAsset(ctx sdk.Context, msg types.MsgWithdrawAsset) error {
+	lenderAddr, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
-		// Could not unmarshal address (Bech32)
-		return false
+		return err
 	}
-	utokens := msg.GetAmount()
-	if !k.IsAcceptedUtoken(ctx, utokens.Denom) {
-		// Not an accepted utoken type
-		return false
+
+	uToken := msg.GetAmount()
+	if !k.IsAcceptedUToken(ctx, uToken.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
 	}
-	assetDenom := k.ToBaseAssetDenom(ctx, utokens.Denom)
-	if !k.bankKeeper.HasBalance(ctx, lender, utokens) {
+
+	if !k.bankKeeper.HasBalance(ctx, lenderAddr, uToken) {
 		// Lender does not have the uTokens they intend to redeem
-		return false
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 	}
-	assets := sdk.NewCoin(assetDenom, utokens.Amount) // TODO: Use exchange rate instead of 1:1 redeeming
-	/*
-		TODO: once we have leverage module's account address
-		if k.bankKeeper.HasBalance(ctx,module_account_address,assets) == false {
-			return false
-		}
-	*/
-	// TODO: Add additional checks to be sure tokens/accounts are good to send from before doing the
-	// irreversible
-	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lender, "leverage", sdk.Coins{utokens}) != nil {
-		// Error depositing utokens
-		return false
+
+	// ensure the tokens exist in the leverage module account's balance
+	// TODO: Use exchange rate instead of 1:1 redeeming
+	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
+	token := sdk.NewCoin(tokenDenom, uToken.Amount)
+	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), token) {
+		// TODO: We should never enter this case -- considering a panic
+		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 	}
-	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, "leverage", lender, sdk.Coins{assets}) != nil {
-		// Error releasing assets
-		// TODO: Either make this a panic, or reverse the sending of uTokens
-		return false
+
+	// send the uTokens from the lender to the module account
+	uTokens := sdk.NewCoins(uToken)
+	if k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens) != nil {
+		return err
 	}
-	if k.bankKeeper.BurnCoins(ctx, "leverage", sdk.Coins{utokens}) != nil {
-		// Error burning utokens
-		// TODO: Either make this a panic, or reverse the depositing or utokens and releasing of assets
-		return false
+
+	// send the original lent tokens back to lender
+	tokens := sdk.NewCoins(token)
+	if k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens) != nil {
+		return err
 	}
-	return false
+
+	// burn the minted uTokens
+	if k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens) != nil {
+		return err
+	}
+
+	return nil
 }
