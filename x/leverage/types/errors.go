@@ -7,5 +7,6 @@ import (
 )
 
 var (
-	ErrInvalidAsset = sdkerrors.Register(ModuleName, 1100, "invalid asset")
+	ErrInvalidAsset        = sdkerrors.Register(ModuleName, 1100, "invalid asset")
+	ErrInsufficientBalance = sdkerrors.Register(ModuleName, 1101, "insufficient balance")
 )
