@@ -13,10 +13,8 @@ const (
 	// QuerierRoute defines the module's query routing key
 	QuerierRoute = ModuleName
 
-	// Prefixes to be used when storing info about individual asset or uToken types
-	AssetAssociatedUtokenPrefix = 0x01 // Stores each asset denom's accepted uToken
-	UtokenAssociatedAssetPrefix = 0x02 // Stores each uToken denom's accepted asset
-	// TODO: Add more prefixes, like AssetAssociatedOvercollatRequirement
+	PrefixAssetAssociatedUtokenPrefix = 0x01 // Stores each asset denom's accepted uToken
+	// UtokenAssociatedAssetPrefix = 0x02 // Stores each uToken denom's accepted asset
 )
 
 func KeyPrefix(p string) []byte {
