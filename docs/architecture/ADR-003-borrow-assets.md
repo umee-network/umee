@@ -52,7 +52,7 @@ For the purposes of borrowing and repaying assets, as well as depositing and wit
 
 ### Basic Message Types
 
-To implement the deposit functionality of the Asset Facility, the two common message types will be:
+To implement the borrow/repay/collateral functionality of the Asset Facility, the four common message types will be:
 ```go
 // MsgDepositCollateral - a user wishes to deposit uToken collateral of one or more types
 type MsgDepositCollateral struct {
@@ -116,5 +116,6 @@ Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`
 ### Neutral
 - Borrow feature relies on allow-list of token types
 - Borrow feature relies on price oracles for base asset types
+- Borrow interest will rely on not-yet-implemented dynamic rates
 
 ## References
