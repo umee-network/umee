@@ -9,7 +9,6 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
     - errcheck
     - goconst
     - gocritic
