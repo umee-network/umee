@@ -27,11 +27,6 @@ require (
 	google.golang.org/grpc v1.41.0
 )
 
-<<<<<<< HEAD
-replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
-
-replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-=======
 require (
 	4d63.com/gochecknoglobals v0.0.0-20201008074935-acfc0b28355a // indirect
 	filippo.io/edwards25519 v1.0.0-beta.2 // indirect
@@ -356,7 +351,6 @@ require (
 	mvdan.cc/unparam v0.0.0-20210104141923-aac4ce9116a7 // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
 )
->>>>>>> ec7d3bb (chore: bump Go to 1.17 and downgrade TM to v0.34.12)
 
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
