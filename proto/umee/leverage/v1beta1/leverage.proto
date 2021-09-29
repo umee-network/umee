@@ -1,0 +1,9 @@
+syntax = "proto3";
+package umeenetwork.umee.leverage.v1beta1;
+
+option go_package = "github.com/umee-network/umee/x/leverage/types";
+
+// Params defines the parameters for the leverage module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+}

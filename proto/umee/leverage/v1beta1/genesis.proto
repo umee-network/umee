@@ -3,5 +3,7 @@ package umeenetwork.umee.leverage.v1beta1;
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
-// GenesisState defines the leverage module's genesis state.
-message GenesisState {}
+message GenesisState {
+  // params defines all the paramaters of the levearge module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
