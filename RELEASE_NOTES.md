@@ -1,25 +1,12 @@
 # Release Notes
 
-Release v0.2.0 of the Umee application. The release includes the following changes:
+Release v0.2.1 of the Umee application. The release includes the following changes:
 
-## Features
+## Bug Fixes
 
-- Cosmos SDK version bumped to [v0.44.0](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.44.0)
-- Full IBC compatibility based on ibc-go [v1.2.0](https://github.com/cosmos/ibc-go/releases/tag/v1.2.0)
-- Gravity Bridge version bumped to [v0.2.7](https://github.com/PeggyJV/gravity-bridge/releases/tag/v0.2.7)
+- Downgrade Tendermint to release [v0.34.12](https://github.com/tendermint/tendermint/releases/tag/v0.34.12)
+  - This resolves the `concurrent map read and map write` issue
 
-## Breaking Changes
+## Improvements
 
-- The `gorc` process for Gravity Bridge contains modifications to the configuration.
-  See the release for further details.
-
-e.g.
-
-```toml
-[cosmos.gas_price]
-amount = 0.00001
-denom = "uumee"
-
-[metrics]
-listen_addr = "127.0.0.1:3000"
-```
+- Upgrade to Golang [v1.17](https://golang.org/doc/go1.17)
