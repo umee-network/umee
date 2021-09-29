@@ -10,14 +10,26 @@ message Params {
   option (gogoproto.goproto_stringer) = false;
 }
 
-// Asset defines a token in the capital facility that can be loaned and borrowed.
+// Asset defines a token in the Umee capital facility that can be loaned and
+// borrowed.
 message Asset {
-  string base_denom    = 1;
-  string exchange_rate = 2
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string collateral_weight = 3
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string base_borrow_rate = 4
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  bool collateral_enabled = 5;
+  option (gogoproto.equal) = true;
+
+  string base_denom    = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
+  string exchange_rate = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"exchange_rate\""
+  ];
+  string collateral_weight = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+  ];
+  string base_borrow_rate = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"base_borrow_rate\""
+  ];
+  bool collateral_enabled = 5 [(gogoproto.moretags) = "yaml:\"collateral_enabled\""];
 }
