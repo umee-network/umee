@@ -33,11 +33,6 @@ The capital facility would be just another account which offers trades on Asset:
 
 The Cosmos `x/bank` module can be used as the basis for the required capabilities.
 
-The [BaseKeeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md) of the Cosmos `Banking` module comes with the following capabilities:
-> The base keeper provides full-permission access: the ability to arbitrary modify any account's balance and mint or burn coins.
-
-Note that `BaseKeeper` also has functions which read the total coins of each asset type in circulation on the chain, and can also read individual account balances using its embedded `ViewKeeper`.
-
 ## Detailed Design
 
 The Asset Facility will have the capability to mint and burn uTokens (but not their corresponding original asset types). It will have access to an allow-list of said asset and uToken types.
@@ -52,6 +47,11 @@ The Asset Facility should harness the Cosmos `x/bank` module's `BaseKeeper` for 
 - Burn uTokens
 - `SendKeeper`: Use BlockedAddr feature to guard against unexpected transfers to module account(s)
 - `ViewKeeper`: Read individual account balances
+
+The [BaseKeeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md) of the Cosmos `x/bank` module comes with the following capabilities:
+> The base keeper provides full-permission access: the ability to arbitrary modify any account's balance and mint or burn coins.
+
+Note that `BaseKeeper` also has functions which read the total coins of each asset type in circulation on the chain, and can also read individual account balances using its embedded `ViewKeeper`.
 
 ### Basic Message Types
 
