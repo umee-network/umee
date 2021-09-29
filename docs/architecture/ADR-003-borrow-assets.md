@@ -33,7 +33,7 @@ Additionally, the following events occur at `EndBlock`:
 - Repayment amounts for open borrow positions increases by a borrowed-token-specific interest rate
 - Open borrow positions are checked to see if they fall below liquidation threshold
 
-The `umee/x/leverage` module keeper will be responsible for remembering each open borrow position.
+The `umee/x/leverage` module will be responsible for remembering each open borrow position.
 If the same user account opens multiple borrow positions in the same token denomination, the second position simply increases the amount of the first.
 
 Additionally it has been discussed that, rather than an account's specific uToken denoms being tied to specific borrow positions, the sum of all borrow positions and collateral uTokens related to an account is used to check the account's overcollateralization levels and mark its positions for liquidation.
@@ -52,22 +52,22 @@ For the purposes of borrowing and repaying assets, as well as marking uTokens as
 
 Additionally, the `x/bank` module must be extended to prevent users from transferring uTokens when doing so would lower their borrow limit below thir current total borrowed amount.
 
-Because borrow limits weight the value of different token types together, the calculation will require the use of price oracles (and placeholder functions before those are available).
+Because borrow limits weight the value of different token denominations together, the calculation will require the use of price oracles (and placeholder functions before those are available).
 
 ### Basic Message Types
 
-To implement the borrow/repay/collateral functionality of the Asset Facility, the four common message types will be:
+To implement the borrow/repay functionality of the Asset Facility, the two common message types will be:
 
 ```go
-// MsgBorrowAsset - a user wishes to borrow assets of one or more allowed types
+// MsgBorrowAsset - a user wishes to borrow assets of an allowed type
 type MsgBorrowAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coins      `json:"amount" yaml:"amount"`
+  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
 }
-// MsgRepayAsset - a user wishes to repay assets of one or more borrowed types
+// MsgRepayAsset - a user wishes to repay assets of a borrowed type
 type MsgRepayAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coins      `json:"amount" yaml:"amount"`
+  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
 }
 ```
 Messages must use denominations only in the allow-list. Collateral is always a uToken denomination, and assets are never uTokens.
@@ -78,9 +78,9 @@ _Note: The `Coins` type seen in the `Amount` fields can contain multiple token t
 
 It is necessary that messages be signed by the borrower's account. Thus the method `GetSigners` should return the `Borrower` address for all message types above.
 
-### Keeper Additions
+### Module State (Keeper) Additions
 
-Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` keeper may roughly remember open borrow and collateral positions as follows:
+Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` module may remember open borrow and collateral positions as follows:
 
 ```go
 // pseudocode
@@ -100,7 +100,7 @@ Both CLI and gRPC must be supported when sending the above message types, and al
 Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`uatom`), and uTokens existing (e.g. `u/uumee`,`u/uatom`), an integration test can be created in which one user account sends a `MsgBorrowAsset` and a `MsgRepayAsset` of the appropriate token types. It is also possible to use a single asset type for both the collateral and the borrowed asset.
 
 ## Open Questions
-- See ADR-002 open questions on whitelisting asset types and uniquely identifying ibc/ assets regardless of ibc path.
+- See ADR-002 open questions on allow-listing asset types and uniquely identifying ibc/ assets regardless of ibc path.
 
 ## Consequences
 
@@ -109,7 +109,7 @@ Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`
 - UX of enabling/disabling token types as collateral is simpler than depositing specific amounts
 
 ### Negative
-- `x/bank` module must extend to prohibit peer-to-peer transfers of uTokens when they would violate `x/leverage` borrowing limit.
+- `x/bank` module must be extended to prohibit peer-to-peer transfers of uTokens when they would violate `x/leverage` borrowing limit.
 
 ### Neutral
 - Borrow feature relies on allow-list of token types
