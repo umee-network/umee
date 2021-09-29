@@ -15,12 +15,14 @@ message Params {
 message Asset {
   option (gogoproto.equal) = true;
 
-  string base_denom    = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
-  string exchange_rate = 2 [
+  string base_token_denom = 1 [(gogoproto.moretags) = "yaml:\"base_token_denom\""];
+  string exchange_rate    = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"exchange_rate\""
   ];
+  // If the collateral_weight is zero, using this asset as collateral against
+  // borrowing will be disabled.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -31,5 +33,4 @@ message Asset {
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"base_borrow_rate\""
   ];
-  bool collateral_enabled = 5 [(gogoproto.moretags) = "yaml:\"collateral_enabled\""];
 }

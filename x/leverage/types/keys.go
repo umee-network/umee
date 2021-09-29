@@ -18,6 +18,7 @@ const (
 var (
 	KeyPrefixTokenDenom  = []byte{0x01}
 	KeyPrefixUTokenDenom = []byte{0x02}
+	KeyPrefixAsset       = []byte{0x03}
 )
 
 // CreateTokenDenomKey returns a KVStore key for getting and storing a token's
@@ -35,5 +36,13 @@ func CreateUTokenDenomKey(uTokenDenom string) []byte {
 	var key []byte
 	key = append(key, KeyPrefixUTokenDenom...)
 	key = append(key, []byte(uTokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateAssetKey returns a KVStore key for getting and setting an Asset.
+func CreateAssetKey(baseTokenDenom string) []byte {
+	var key []byte
+	key = append(key, KeyPrefixAsset...)
+	key = append(key, []byte(baseTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }

@@ -1,8 +1,11 @@
 package types
 
-// DefaultGenesis returns the default Capability genesis state
+// DefaultGenesis returns the default genesis state of the x/leverage module.
 func DefaultGenesis() *GenesisState {
-	return &GenesisState{}
+	return &GenesisState{
+		Params: Params{},
+		Assets: []Asset{},
+	}
 }
 
 // Validate performs basic genesis state validation returning an error upon any
