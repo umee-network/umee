@@ -7,6 +7,6 @@ import "umee/leverage/v1beta1/leverage.proto";
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
 message GenesisState {
-  // params defines all the paramaters of the levearge module.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params         params = 1 [(gogoproto.nullable) = false];
+  repeated Asset assets = 2;
 }

@@ -9,3 +9,14 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 message Params {
   option (gogoproto.goproto_stringer) = false;
 }
+
+// Asset defines a token in the capital facility that can be loaned and borrowed.
+message Asset {
+  string base_denom    = 1;
+  string exchange_rate = 2
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string collateral_weight = 3
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string base_borrow_rate = 4
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
