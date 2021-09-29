@@ -59,12 +59,6 @@ Because borrow limits weight the value of different token types together, the ca
 
 To implement the borrow/repay/collateral functionality of the Asset Facility, the four common message types will be:
 ```go
-// MsgSetCollateral - a borrower enables or disables a specific utoken type in their wallet to be used as collateral
-type MsgSetCollateral struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Denom    string         `json:"denom" yaml:"denom"`
-  Enable   bool           `json:"enable" yaml:"enable"`
-}
 // MsgBorrowAsset - a user wishes to borrow assets of one or more allowed types
 type MsgBorrowAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
