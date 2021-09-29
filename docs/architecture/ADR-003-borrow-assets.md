@@ -25,7 +25,6 @@ The Cosmos `x/bank` module and the existing `umee/x/leverage` deposit features a
 The flow of events is as follows:
 - Borrower already has uTokens in their account
 - Borrower marks those uTokens as eligible for use as collateral
-- Borrower deposits uTokens into asset facility as collateral - module remembers collateral position
 - Borrower requests to borrow assets from `leverage` module - module checks request, disburses tokens if acceptable, and remembers borrow position
 - While borrow position is open, modified `x/bank` module prevents transactions that would result in the ownging account's borrow position being higher than its calculated borrow limit (e.g. sending too many uTokens that are being used as collateral)
 - Eventually, borrower pays repayment amount (in full or in part) in the same asset denomination that was borrowed.
@@ -58,6 +57,7 @@ Because borrow limits weight the value of different token types together, the ca
 ### Basic Message Types
 
 To implement the borrow/repay/collateral functionality of the Asset Facility, the four common message types will be:
+
 ```go
 // MsgBorrowAsset - a user wishes to borrow assets of one or more allowed types
 type MsgBorrowAsset struct {
@@ -70,7 +70,7 @@ type MsgRepayAsset struct {
   Amount   sdk.Coins      `json:"amount" yaml:"amount"`
 }
 ```
-Messages must use only whitelisted denominations. Collateral is always a uToken denomination, and assets are never uTokens.
+Messages must use denominations only in the allow-list. Collateral is always a uToken denomination, and assets are never uTokens.
 
 Asset borrowing respects the user's borrowing limit, which compares collateral uTokens associated with one base asset, to borrowed assets of a second base asset type. Price oracles must be used to compare the values of base assets (e.g. Atoms:Ether.)
 
@@ -78,7 +78,7 @@ _Note: The `Coins` type seen in the `Amount` fields can contain multiple token t
 
 It is necessary that messages be signed by the borrower's account. Thus the method `GetSigners` should return the `Borrower` address for all message types above.
 
-### Keeper additions
+### Keeper Additions
 
 Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` keeper may roughly remember open borrow and collateral positions as follows:
 
