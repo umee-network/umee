@@ -197,7 +197,7 @@ jobs:
             go.sum
       - name: Install Starport
         run: |
-          curl https://get.starport.network/starport@v0.17.3! | bash
+          curl https://get.starport.network/starport@v0.18.0! | bash
         if: env.GIT_DIFF
       - name: Start Local Network via Starport
         run: |
