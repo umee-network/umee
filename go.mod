@@ -3,7 +3,7 @@ module github.com/umee-network/umee
 go 1.17
 
 require (
-	github.com/cosmos/cosmos-sdk v0.44.0
+	github.com/cosmos/cosmos-sdk v0.44.1
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go v1.2.0
 	github.com/ethereum/go-ethereum v1.10.8
@@ -81,7 +81,7 @@ require (
 	github.com/containerd/console v1.0.2 // indirect
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
-	github.com/cosmos/iavl v0.16.0 // indirect
+	github.com/cosmos/iavl v0.17.1 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/daixiang0/gci v0.2.9 // indirect
@@ -190,7 +190,7 @@ require (
 	github.com/hdevalence/ed25519consensus v0.0.0-20210204194344-59a8610d2b87 // indirect
 	github.com/iancoleman/strcase v0.1.3 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/improbable-eng/grpc-web v0.14.0 // indirect
+	github.com/improbable-eng/grpc-web v0.14.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jgautheron/goconst v1.5.1 // indirect
@@ -224,7 +224,7 @@ require (
 	github.com/maratori/testpackage v1.0.1 // indirect
 	github.com/matoous/godox v0.0.0-20210227103229-6504466cf951 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/mattn/go-zglob v0.0.3 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
