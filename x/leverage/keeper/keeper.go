@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/x/leverage/types"
@@ -15,13 +16,20 @@ import (
 type Keeper struct {
 	cdc        codec.Codec
 	storeKey   sdk.StoreKey
+	paramStore paramtypes.Subspace
 	bankKeeper types.BankKeeper
 }
 
-func NewKeeper(cdc codec.Codec, storeKey sdk.StoreKey, bk types.BankKeeper) Keeper {
+func NewKeeper(
+	cdc codec.Codec,
+	storeKey sdk.StoreKey,
+	paramStore paramtypes.Subspace,
+	bk types.BankKeeper,
+) Keeper {
 	return Keeper{
 		cdc:        cdc,
 		storeKey:   storeKey,
+		paramStore: paramStore,
 		bankKeeper: bk,
 	}
 }

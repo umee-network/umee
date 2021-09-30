@@ -1,0 +1,19 @@
+syntax = "proto3";
+package umeenetwork.umee.leverage.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "umee/leverage/v1beta1/leverage.proto";
+
+option go_package = "github.com/umee-network/umee/x/leverage/types";
+
+// UpdateAssetsProposal defines a governance proposal type where assets can be
+// added, removed or modified in the Umee capital facility.
+message UpdateAssetsProposal {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+
+  string         title       = 1;
+  string         description = 2;
+  repeated Asset assets      = 3 [(gogoproto.nullable) = false];
+}
