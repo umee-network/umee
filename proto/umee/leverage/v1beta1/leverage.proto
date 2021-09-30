@@ -12,6 +12,8 @@ message Params {
 
 // Asset defines a token in the Umee capital facility that can be loaned and
 // borrowed.
+//
+// TODO: Determine what additional parameters might be needed.
 message Asset {
   option (gogoproto.equal) = true;
 

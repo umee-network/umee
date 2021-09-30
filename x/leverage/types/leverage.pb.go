@@ -62,6 +62,8 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 
 // Asset defines a token in the Umee capital facility that can be loaned and
 // borrowed.
+//
+// TODO: Determine what additional parameters might be needed.
 type Asset struct {
 	// The base_token_denom defines the denomination of the underlying base token.
 	BaseTokenDenom string `protobuf:"bytes,1,opt,name=base_token_denom,json=baseTokenDenom,proto3" json:"base_token_denom,omitempty" yaml:"base_token_denom"`
