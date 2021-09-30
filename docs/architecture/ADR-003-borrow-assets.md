@@ -83,9 +83,9 @@ Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pair
 ```go
 // pseudocode
 // for each borrower address, combine all open borrow positions into one sdk.Coins object:
-keeper[borrowPrefix + borrowerAddress] = BorrowedCoins
-// additionally user collateral settings are stored as a slice of enabled denoms
-keeper[collateralPrefix + borrowerAddress] = []string{denom1,denom2...}
+borrowPrefix | lengthPrefixed(borrowerAddress) = BorrowedCoins
+// additionally borrower collateral settings are stored for enabled denoms
+collateralPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true/false
 ```
 
 This will be accomplished by adding new prefixes and helper functions to `x/leverage/types/keys.go`, and using the proper codec to marshal `sdk.Coins` and `[]string` into bytes when storing them as values.
