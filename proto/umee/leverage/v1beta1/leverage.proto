@@ -15,19 +15,25 @@ message Params {
 message Asset {
   option (gogoproto.equal) = true;
 
+  // The base_token_denom defines the denomination of the underlying base token.
   string base_token_denom = 1 [(gogoproto.moretags) = "yaml:\"base_token_denom\""];
-  string exchange_rate    = 2 [
+  // The exchange_rate rate defines the rate which this asset can be exchanged
+  // for the asset's uToken.
+  string exchange_rate = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"exchange_rate\""
   ];
-  // If the collateral_weight is zero, using this asset as collateral against
-  // borrowing will be disabled.
+  // The collateral_weight defines what amount of the total value of the asset
+  // can contribute to a users bowering power. If the collateral_weight is zero,
+  // using this asset as collateral against borrowing will be disabled.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"collateral_weight\""
   ];
+  // The base_borrow_rate defines the base interest rate for borrowing this
+  // asset.
   string base_borrow_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,

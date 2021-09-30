@@ -63,12 +63,18 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 // Asset defines a token in the Umee capital facility that can be loaned and
 // borrowed.
 type Asset struct {
-	BaseTokenDenom string                                 `protobuf:"bytes,1,opt,name=base_token_denom,json=baseTokenDenom,proto3" json:"base_token_denom,omitempty" yaml:"base_token_denom"`
-	ExchangeRate   github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=exchange_rate,json=exchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"exchange_rate" yaml:"exchange_rate"`
-	// If the collateral_weight is zero, using this asset as collateral against
-	// borrowing will be disabled.
+	// The base_token_denom defines the denomination of the underlying base token.
+	BaseTokenDenom string `protobuf:"bytes,1,opt,name=base_token_denom,json=baseTokenDenom,proto3" json:"base_token_denom,omitempty" yaml:"base_token_denom"`
+	// The exchange_rate rate defines the rate which this asset can be exchanged
+	// for the asset's uToken.
+	ExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=exchange_rate,json=exchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"exchange_rate" yaml:"exchange_rate"`
+	// The collateral_weight defines what amount of the total value of the asset
+	// can contribute to a users bowering power. If the collateral_weight is zero,
+	// using this asset as collateral against borrowing will be disabled.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
-	BaseBorrowRate   github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
+	// The base_borrow_rate defines the base interest rate for borrowing this
+	// asset.
+	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
 }
 
 func (m *Asset) Reset()         { *m = Asset{} }
