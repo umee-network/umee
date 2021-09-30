@@ -375,6 +375,7 @@ func New(
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
+		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 	)
 
@@ -747,6 +748,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
+	paramsKeeper.Subspace(leveragetypes.ModuleName)
 
 	return paramsKeeper
 }
@@ -757,6 +759,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
+		// TODO: Add handler for UpdateAssetsProposal
 	}
 }
 

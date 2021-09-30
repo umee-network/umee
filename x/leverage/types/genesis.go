@@ -11,5 +11,11 @@ func DefaultGenesis() *GenesisState {
 // Validate performs basic genesis state validation returning an error upon any
 // failure.
 func (gs GenesisState) Validate() error {
+	for _, asset := range gs.Assets {
+		if err := asset.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

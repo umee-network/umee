@@ -128,6 +128,16 @@ func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	suite.Require().Equal(int64(0), uTokenBalance.Amount.Int64())
 }
 
+func (suite *IntegrationTestSuite) TestParams() {
+	app, ctx := suite.app, suite.ctx
+
+	params := types.DefaultParams()
+	app.LeverageKeeper.SetParams(ctx, params)
+
+	got := app.LeverageKeeper.GetParams(ctx)
+	suite.Require().Equal(params, got)
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
