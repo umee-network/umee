@@ -34,3 +34,4 @@ Note the context/background should be written in the present tense.
 
 - [ADR-001: Interest Stream](./ADR-001-interest-stream.md)
 - [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md)
+- [ADR-003: Borrow Assets](./ADR-003-borrow-assets.md)
