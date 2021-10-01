@@ -4,6 +4,7 @@
 
 - September 27, 2021: Initial Draft (@toteki)
 - September 29, 2021: Changed design after review suggestions (@toteki, @alexanderbez, @brentxu)
+- October 1, 2021: Restore MsgSetCollateral (@toteki)
 
 ## Status
 
@@ -56,18 +57,24 @@ Because borrow limits weight the value of different token denominations together
 
 ### Basic Message Types
 
-To implement the borrow/repay functionality of the Asset Facility, the two common message types will be:
+To implement the borrow/repay functionality of the Asset Facility, the three common message types will be:
 
 ```go
+// MsgSetCollateral - a borrower enables or disables a specific utoken type in their wallet to be used as collateral
+type MsgSetCollateral struct {
+  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
+  Denom    string         `json:"denom" yaml:"denom"`
+  Enable   bool           `json:"enable" yaml:"enable"`
+}
 // MsgBorrowAsset - a user wishes to borrow assets of an allowed type
 type MsgBorrowAsset struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
+  Borrower sdk.AccAddress   `json:"borrower" yaml:"borrower"`
+  Amount   sdk.Coin         `json:"amount" yaml:"amount"`
 }
 // MsgRepayAsset - a user wishes to repay assets of a borrowed type
 type MsgRepayAsset struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
+  Borrower sdk.AccAddress   `json:"borrower" yaml:"borrower"`
+  Amount   sdk.Coin         `json:"amount" yaml:"amount"`
 }
 ```
 Messages must use denominations only in the allow-list. Collateral is always a uToken denomination, and assets are never uTokens.

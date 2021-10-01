@@ -95,3 +95,60 @@ func (s msgServer) WithdrawAsset(
 
 	return &types.MsgWithdrawAssetResponse{}, nil
 }
+
+func (s msgServer) SetCollateral(
+	goCtx context.Context,
+	msg *types.MsgSetCollateral,
+) (*types.MsgSetCollateralResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.SetCollateral(ctx, borrowerAddr, msg.Denom, msg.Enable); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgSetCollateralResponse{}, nil
+}
+
+func (s msgServer) BorrowAsset(
+	goCtx context.Context,
+	msg *types.MsgBorrowAsset,
+) (*types.MsgBorrowAssetResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.BorrowAsset(ctx, borrowerAddr, msg.Amount); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgBorrowAssetResponse{}, nil
+}
+
+func (s msgServer) RepayAsset(
+	goCtx context.Context,
+	msg *types.MsgRepayAsset,
+) (*types.MsgRepayAssetResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgRepayAssetResponse{}, nil
+}

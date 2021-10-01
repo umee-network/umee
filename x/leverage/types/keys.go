@@ -1,5 +1,9 @@
 package types
 
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
 const (
 	// ModuleName defines the module name
 	ModuleName = "leverage"
@@ -16,9 +20,11 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixTokenDenom  = []byte{0x01}
-	KeyPrefixUTokenDenom = []byte{0x02}
-	KeyPrefixAsset       = []byte{0x03}
+	KeyPrefixTokenDenom        = []byte{0x01}
+	KeyPrefixUTokenDenom       = []byte{0x02}
+	KeyPrefixAsset             = []byte{0x03}
+	KeyPrefixLoan              = []byte{0x04}
+	KeyPrefixCollateralSetting = []byte{0x05}
 )
 
 // CreateTokenDenomKey returns a KVStore key for getting and storing a token's
@@ -44,5 +50,25 @@ func CreateAssetKey(baseTokenDenom string) []byte {
 	var key []byte
 	key = append(key, KeyPrefixAsset...)
 	key = append(key, []byte(baseTokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateLoanKey returns a KVStore key for getting and setting a Loan (using borrower address)
+func CreateLoanKey(borrowerAddr sdk.AccAddress) []byte {
+	var key []byte
+	key = append(key, KeyPrefixLoan...)
+	key = append(key, []byte(borrowerAddr.String())...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateCollateralSettingKey returns a KVStore key for getting and setting a borrower's
+// collateral setting for a single uToken
+func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string) []byte {
+	var key []byte
+	key = append(key, KeyPrefixCollateralSetting...)
+	addr := []byte(borrowerAddr.String())
+	key = append(key, byte(len(addr))) // simple length prefix since len(addr.String()) is always < 255
+	key = append(key, addr...)
+	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }

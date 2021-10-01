@@ -123,3 +123,74 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 	return nil
 }
+
+// SetCollateral enables or disables a uToken denom for use as collateral by a single borrower.
+func (k Keeper) SetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, enable bool) error {
+	if !k.IsAcceptedUToken(ctx, denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	}
+
+	// TODO: Enable sets to true; disable removes from KVstore rather than setting false
+
+	return nil
+}
+
+// BorrowAsset attempts to borrow assets from the leverage module account using
+// collateral uTokens. If asset type is invalid, collateral is insufficient,
+// or module balance is insufficient, we return an error.
+func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan sdk.Coin) error {
+	if !k.IsAcceptedToken(ctx, loan.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
+	}
+	// ensure module account has sufficient assets to loan out
+	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), loan) {
+		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, loan.String())
+	}
+
+	loanTokens := sdk.NewCoins(loan)
+	// TODO: Calculate loan value (oracle placeholder)
+
+	// TODO: Calculate borrow limit (params + account + oracle placeholder)
+
+	// TODO: Calculate borrow limit already used (keeper + oracle placeholder)
+
+	// TODO: Loan is rejected if (borrow limit used + loan value > borrow limit)
+	// use ErrBorrowLimitLow
+
+	// send borrowed assets from module account to borrower
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RepayAsset attempts to repay an open borrow position with base assets. If asset type is invalid,
+// account balance is insufficient, or no open borrow position exists, we return an error.
+// Additionally, if the amount provided is greater than the full repayment amount, only the
+// necessary amount is transferred.
+func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) error {
+	if !k.IsAcceptedToken(ctx, payment.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
+	}
+
+	/*
+		TODO: Detect nonexistent borrow case
+		if // borrower has no open borrows in payment denom {
+			// borrower has no open borrows in the denom presented as payment
+			return sdkerrors.Wrap(types.ErrRepayNonexistentBorrow, payment.String())
+		}
+	*/
+
+	// TODO: Determine borrower's full repayment amount in selected denomination
+
+	// TODO: If full repayment amount < repayment offered, set payment = full repayment amount
+
+	// send payment to leverage module account
+	paymentTokens := sdk.NewCoins(payment)
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, paymentTokens); err != nil {
+		return err
+	}
+
+	return nil
+}
