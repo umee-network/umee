@@ -68,13 +68,13 @@ type MsgSetCollateral struct {
 }
 // MsgBorrowAsset - a user wishes to borrow assets of an allowed type
 type MsgBorrowAsset struct {
-  Borrower sdk.AccAddress   `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coin         `json:"amount" yaml:"amount"`
+  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
+  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
 }
 // MsgRepayAsset - a user wishes to repay assets of a borrowed type
 type MsgRepayAsset struct {
-  Borrower sdk.AccAddress   `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coin         `json:"amount" yaml:"amount"`
+  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
+  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
 }
 ```
 Messages must use denominations only in the allow-list. Collateral is always a uToken denomination, and assets are never uTokens.
