@@ -8,6 +8,6 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 
 // GenesisState defines the x/leverage module's genesis state.
 message GenesisState {
-  Params         params = 1 [(gogoproto.nullable) = false];
-  repeated Asset assets = 2 [(gogoproto.nullable) = false];
+  Params         params   = 1 [(gogoproto.nullable) = false];
+  repeated Token registry = 2 [(gogoproto.nullable) = false];
 }
