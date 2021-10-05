@@ -6,14 +6,15 @@ import "umee/leverage/v1beta1/leverage.proto";
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
-// UpdateAssetsProposal defines a governance proposal type where assets can be
-// added, removed or modified in the Umee capital facility.
-message UpdateAssetsProposal {
+// UpdateRegistryProposal defines a governance proposal type where the token
+// registry can be updated in the Umee capital facility. Note, the registry
+// defined in the proposal replaces the current registry in its entirety.
+message UpdateRegistryProposal {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
 
   string         title       = 1;
   string         description = 2;
-  repeated Asset assets      = 3 [(gogoproto.nullable) = false];
+  repeated Token registry    = 3 [(gogoproto.nullable) = false];
 }

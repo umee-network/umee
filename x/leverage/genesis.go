@@ -12,8 +12,8 @@ import (
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
-	for _, asset := range genState.Assets {
-		k.SetAsset(ctx, asset)
+	for _, token := range genState.Registry {
+		k.SetRegisteredToken(ctx, token)
 	}
 }
 
