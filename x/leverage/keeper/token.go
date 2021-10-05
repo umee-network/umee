@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
@@ -64,4 +66,17 @@ func (k Keeper) SetTokenDenom(ctx sdk.Context, tokenDenom string) {
 
 	uTokenKey := types.CreateUTokenDenomKey(uTokenDenom)
 	store.Set(uTokenKey, []byte(tokenDenom))
+}
+
+// SetRegisteredToken stores a token into the x/leverage module's KVStore.
+func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
+	store := ctx.KVStore(k.storeKey)
+	tokenKey := types.CreateRegisteredTokenKey(token.BaseDenom)
+
+	bz, err := token.Marshal()
+	if err != nil {
+		panic(fmt.Sprintf("failed to encode token: %s", err))
+	}
+
+	store.Set(tokenKey, bz)
 }

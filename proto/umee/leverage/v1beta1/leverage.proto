@@ -10,15 +10,15 @@ message Params {
   option (gogoproto.goproto_stringer) = false;
 }
 
-// Asset defines a token in the Umee capital facility that can be loaned and
-// borrowed.
+// Token defines a token, along with its capital metadata, in the Umee capital
+// facility that can be loaned and borrowed.
 //
 // TODO: Determine what additional parameters might be needed.
-message Asset {
+message Token {
   option (gogoproto.equal) = true;
 
-  // The base_token_denom defines the denomination of the underlying base token.
-  string base_token_denom = 1 [(gogoproto.moretags) = "yaml:\"base_token_denom\""];
+  // The base_denom defines the denomination of the underlying base token.
+  string base_denom = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
   // The exchange_rate rate defines the rate which this asset can be exchanged
   // for the asset's uToken.
   string exchange_rate = 2 [
