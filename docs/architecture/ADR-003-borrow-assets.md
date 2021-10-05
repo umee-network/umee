@@ -114,13 +114,15 @@ Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`
 ## Consequences
 
 ### Positive
+
 - uTokens used as collateral increase in base asset value in the same way that lend positions do. This counteracts borrow position interest.
 - UX of enabling/disabling token types as collateral is simpler than depositing specific amounts
-- lengthPrefixed(borrowerAddress) | tokenDenom key pattern facilitates sorting open positions by user
+- `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern facilitates getting open borrow positions by account address.
 
 ### Negative
+
 - `x/bank` module must be extended to prohibit peer-to-peer transfers of uTokens when they would violate `x/leverage` borrowing limit.
-- lengthPrefixed(borrowerAddress) | tokenDenom key pattern makes it more difficult to sort all open positions by token type.
+- `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern makes it more difficult to get all open borrow positions by token denomination.
 
 ### Neutral
 - Borrow feature relies on allow-list of token types
