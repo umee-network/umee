@@ -4,6 +4,7 @@
 
 - September 27, 2021: Initial Draft (@toteki)
 - September 29, 2021: Changed design after review suggestions (@toteki, @alexanderbez, @brentxu)
+- October 5, 2021: MsgSetCollateral and borrower-address-prefixed store keys (@toteki)
 
 ## Status
 
@@ -56,9 +57,15 @@ Because borrow limits weight the value of different token denominations together
 
 ### Basic Message Types
 
-To implement the borrow/repay functionality of the Asset Facility, the two common message types will be:
+To implement the borrow/repay functionality of the Asset Facility, the three common message types will be:
 
 ```go
+// MsgSetCollateral - a borrower enables or disables a specific utoken type in their wallet to be used as collateral
+type MsgSetCollateral struct {
+  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
+  Denom    string         `json:"denom" yaml:"denom"`
+  Enable   bool           `json:"enable" yaml:"enable"`
+}
 // MsgBorrowAsset - a user wishes to borrow assets of an allowed type
 type MsgBorrowAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
@@ -82,13 +89,17 @@ Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pair
 
 ```go
 // pseudocode
-// for each borrower address, combine all open borrow positions into one sdk.Coins object:
-borrowPrefix | lengthPrefixed(borrowerAddress) = BorrowedCoins
+// for each borrower address store open borrows 
+borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 // additionally borrower collateral settings are stored for enabled denoms
 collateralPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true/false
 ```
 
-This will be accomplished by adding new prefixes and helper functions to `x/leverage/types/keys.go`, and using the proper codec to marshal `sdk.Coins` and `[]string` into bytes when storing them as values.
+This will be accomplished by adding new prefixes and helper functions to `x/leverage/types/keys.go`.
+
+The use of borrowerAddress before tokenDenom in the store keys allows the KVstore's "iterate by prefix" functionality to perform operations on all keys of a type relating to a specific address, e.g. "all open borrow positions belonging to an individual user".
+
+In contrast, if we had put tokenDenom before borrower address, it would favor operations on the set of all keys associated with a given token.
 
 ### APIs and Handlers
 Both CLI and gRPC must be supported when sending the above message types, and all necessary handlers must be created in order to process and validate them as transactions.
@@ -105,9 +116,11 @@ Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`
 ### Positive
 - uTokens used as collateral increase in base asset value in the same way that lend positions do. This counteracts borrow position interest.
 - UX of enabling/disabling token types as collateral is simpler than depositing specific amounts
+- lengthPrefixed(borrowerAddress) | tokenDenom key pattern facilitates sorting open positions by user
 
 ### Negative
 - `x/bank` module must be extended to prohibit peer-to-peer transfers of uTokens when they would violate `x/leverage` borrowing limit.
+- lengthPrefixed(borrowerAddress) | tokenDenom key pattern makes it more difficult to sort all open positions by token type.
 
 ### Neutral
 - Borrow feature relies on allow-list of token types
