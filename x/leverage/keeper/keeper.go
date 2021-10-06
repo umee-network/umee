@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -154,17 +156,16 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
 	currentlyBorrowed := sdk.NewCoins()
 	store := ctx.KVStore(k.storeKey)
-	start, end := types.LoanKeyRange(borrowerAddr)
-	iter := store.Iterator(start, end) // Iterates over all loans associated with borrowerAddr
-	defer iter.Close()                 // Iterator must be closed by caller
-	if !iter.Valid() {
-		// If startkey > endkey initially, address.String() must have ended in 0xFF, which shouldn't happen.
-		return sdk.NewCoins(), sdkerrors.Wrap(types.ErrInvalidAddress, borrowerAddr.String())
-	}
+	var key []byte
+	key = append(key, types.KeyPrefixLoanToken...)
+	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
+	prefixStore := prefix.NewStore(store, key)
+	iter := prefixStore.Iterator(nil, nil)
+	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		// Key is starting key | denom
+		// Key is denom | 0x00
 		k, v := iter.Key(), iter.Value()
-		denom := string(k[len(start):])
+		denom := string(k[:len(k)-1]) // remove denom null-terminator
 		amount := sdk.ZeroInt()
 		if err := amount.Unmarshal(v); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
