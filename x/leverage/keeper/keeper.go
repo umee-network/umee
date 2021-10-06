@@ -135,6 +135,54 @@ func (k Keeper) SetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, deno
 	return nil
 }
 
+// GetLoan returns an sdk.Coin representing how much of a given denom a borrower currently owes.
+func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
+	store := ctx.KVStore(k.storeKey)
+	owed := sdk.NewCoin(denom, sdk.ZeroInt())
+	key := types.CreateLoanKey(borrowerAddr, denom)
+	if store.Has(key) {
+		err := owed.Amount.Unmarshal(store.Get(key))
+		if err != nil {
+			// Should never happen
+			panic(err)
+		}
+	}
+	return owed
+}
+
+// GetAllLoans returns an sdk.Coins object containing all open borrows associated with an address
+func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
+	currentlyBorrowed := sdk.NewCoins()
+	store := ctx.KVStore(k.storeKey)
+	start, end := types.LoanKeyRange(borrowerAddr)
+	iter := store.Iterator(start, end) // Iterates over all loans associated with borrowerAddr
+	defer iter.Close()                 // Iterator must be closed by caller
+	if !iter.Valid() {
+		// If startkey > endkey initially, address.String() must have ended in 0xFF, which shouldn't happen.
+		return sdk.NewCoins(), sdkerrors.Wrap(types.ErrInvalidAddress, borrowerAddr.String())
+	}
+	for ; iter.Valid(); iter.Next() {
+		// Key is starting key | denom
+		k, v := iter.Key(), iter.Value()
+		denom := string(k[len(start):])
+		amount := sdk.ZeroInt()
+		if err := amount.Unmarshal(v); err != nil {
+			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
+		}
+		// For each loan found, add it to currentlyBorrowed
+		currentlyBorrowed = currentlyBorrowed.Add(sdk.NewCoin(denom, amount))
+	}
+	if err := iter.Error(); err != nil {
+		return sdk.NewCoins(), err
+	}
+	currentlyBorrowed.Sort() // to ensure IsValid
+	if !currentlyBorrowed.IsValid() {
+		// Should never happen, but if it does we can return an error and an empty coins object
+		return sdk.NewCoins(), sdkerrors.Wrap(types.ErrInvalidAsset, currentlyBorrowed.String())
+	}
+	return currentlyBorrowed, nil
+}
+
 // BorrowAsset attempts to borrow assets from the leverage module account using
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
@@ -147,21 +195,35 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, loan.String())
 	}
 
-	loanTokens := sdk.NewCoins(loan)
-	// TODO: Calculate loan value (oracle placeholder)
-
-	// TODO: Calculate borrow limit (params + account + oracle placeholder)
-
-	// TODO: Calculate borrow limit already used (keeper + oracle placeholder)
-
-	// TODO: Loan is rejected if (borrow limit used + loan value > borrow limit)
-	// use ErrBorrowLimitLow
-
-	// send borrowed assets from module account to borrower
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
+	// Determine amount of all tokens currently borrowed
+	currentlyBorrowed, err := k.GetAllLoans(ctx, borrowerAddr)
+	if err != nil {
 		return err
 	}
 
+	// Retrieve borrower's account balance.
+	// accountBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
+
+	// TODO (Oracle+Params+CollateralSettings): Calculate borrow limit from uTokens in borrower's account
+	// TODO (Oracle): Calculate borrow limit already used (from currentlyBorrowed)
+	// TODO (Oracle): Calculate loanTokens value
+	// TODO: ErrBorrowLimitLow if (borrow limit used + loan value > borrow limit)
+
+	// Note: Prior to oracle implementation, we cannot compare loan value to borrow limit
+	loanTokens := sdk.NewCoins(loan)
+	// Send borrowed assets from module account to borrower
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
+		return err
+	}
+	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
+	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
+	// Store the new borrowed amount in keeper
+	store := ctx.KVStore(k.storeKey)
+	b, err := totalBorrowed.Marshal()
+	if err != nil {
+		return err
+	}
+	store.Set(types.CreateLoanKey(borrowerAddr, loan.Denom), b)
 	return nil
 }
 
@@ -174,23 +236,43 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
 	}
 
-	/*
-		TODO: Detect nonexistent borrow case
-		if // borrower has no open borrows in payment denom {
-			// borrower has no open borrows in the denom presented as payment
-			return sdkerrors.Wrap(types.ErrRepayNonexistentBorrow, payment.String())
-		}
-	*/
+	// Determine amount of selected denom currently owed
+	owed := k.GetLoan(ctx, borrowerAddr, payment.Denom)
+	if owed.IsZero() {
+		// Borrower has no open borrows in the denom presented as payment
+		return sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+	}
 
-	// TODO: Determine borrower's full repayment amount in selected denomination
+	// Prevent overpaying
+	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
 
-	// TODO: If full repayment amount < repayment offered, set payment = full repayment amount
+	if !payment.IsValid() {
+		// Catch invalid payments (e.g. from payment.Amount < 0)
+		return sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+	}
 
 	// send payment to leverage module account
-	paymentTokens := sdk.NewCoins(payment)
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, paymentTokens); err != nil {
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(
+		ctx, borrowerAddr,
+		types.ModuleName,
+		sdk.NewCoins(payment),
+	); err != nil {
 		return err
 	}
 
+	// Subtract repaid amount from borrowed amount
+	owed.Amount.Sub(payment.Amount)
+	// Store the new total borrowed amount in keeper
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateLoanKey(borrowerAddr, payment.Denom)
+	if owed.IsZero() {
+		store.Delete(key) // Completely repaid
+	} else {
+		b, err := owed.Amount.Marshal()
+		if err != nil {
+			return err
+		}
+		store.Set(key, b) // Partially repaid
+	}
 	return nil
 }

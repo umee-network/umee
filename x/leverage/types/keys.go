@@ -23,7 +23,7 @@ var (
 	KeyPrefixTokenDenom        = []byte{0x01}
 	KeyPrefixUTokenDenom       = []byte{0x02}
 	KeyPrefixRegisteredToken   = []byte{0x03}
-	KeyPrefixLoan              = []byte{0x04}
+	KeyPrefixLoanToken         = []byte{0x04}
 	KeyPrefixCollateralSetting = []byte{0x05}
 )
 
@@ -53,12 +53,36 @@ func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateLoanKey returns a KVStore key for getting and setting a Loan (using borrower address)
-func CreateLoanKey(borrowerAddr sdk.AccAddress) []byte {
+// CreateLoanKey returns a KVStore key for getting and setting a Loan in a single denom and borrower address
+func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
+	// loanprefix | lengthprefixed(borrowerAddr) | denom
 	var key []byte
-	key = append(key, KeyPrefixLoan...)
-	key = append(key, []byte(borrowerAddr.String())...)
+	key = append(key, KeyPrefixLoanToken...)
+	addr := []byte(borrowerAddr.String())
+	key = append(key, byte(len(addr))) // simple length prefix since len(addr.String()) is always < 255
+	key = append(key, addr...)
+	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// LoanKeyRange returns start/end keys for creating an iterator over all of an account's open loans.
+func LoanKeyRange(borrowerAddr sdk.AccAddress) ([]byte, []byte) {
+	//	Question: Is this the right way to derive a range for an sdk.Iterator?
+	//
+	//	e.g. if KeyPrefixLoanToken | lengthPrefixed(borrowerAddr.String()) were resolved to
+	//		0x04 | 0x03 0x41 0x42 0x43 (example address string simplified to "ABC")
+	//	then the iterator start/end would be
+	//		0x04 | 0x03 0x41 0x42 0x43 (inclusive start)
+	//		0x04 | 0x03 0x41 0x42 0x44 (exclusive end)
+	//	and keys like the following would fall within the range
+	//		0x04 | 0x03 0x41 0x42 0x43 | ... (any key that has prefix)
+	//
+	//	I couldn't find documentation on this behavior but it seems like
+	//		how it would reasonably work if sdk.Iterators are prefix-friendly.
+	startkey := CreateLoanKey(borrowerAddr, "") // loanprefix | lengthprefixed(borrowerAddr)
+	endkey := CreateLoanKey(borrowerAddr, "")   // loanprefix | lengthprefixed(borrowerAddr)
+	endkey[len(endkey)-1]++                     // last byte of borrowerAddr.String() shouldn't ever be 255
+	return startkey, endkey
 }
 
 // CreateCollateralSettingKey returns a KVStore key for getting and setting a borrower's
