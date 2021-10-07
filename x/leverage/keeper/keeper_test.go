@@ -188,6 +188,59 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Invalid() {
 	suite.Require().Error(err)
 }
 
+/*
+// TODO: Ready to be commented in once borrowing limits exist.
+func (suite *IntegrationTestSuite) TestBorrowAsset_InsufficientCollateral() {
+	_, _, bumAddr := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx            // get ctx after init
+
+	// The "bum" user from the init scenario is being used because it
+	// possesses no assets or collateral.
+
+	// bum attempts to borrow 200 u/umee, fails because of insufficient collateral
+	err := app.LeverageKeeper.BorrowAsset(ctx,
+		bumAddr,
+		sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000), // 200 u/umee
+	)
+	suite.Require().Error(err)
+}
+*/
+
+func (suite *IntegrationTestSuite) TestBorrowAsset_InsufficientLendingPool() {
+	lenderAddr, _, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx               // get ctx after init
+
+	// Any user from the init scenario can perform this test, because it errors on module balance
+
+	// lender attempts to borrow 20000 u/umee, fails because of insufficient module account balance
+	err := app.LeverageKeeper.BorrowAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 20000000000), // 20000 u/umee
+	)
+	suite.Require().Error(err)
+}
+
+func (suite *IntegrationTestSuite) TestRepayAsset_Invalid() {
+	lenderAddr, _, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx               // get ctx after init
+
+	// Any user from the init scenario can be used for this test.
+
+	// lender attempts to repay 200 abcd, fails because "abcd" is not an accepted asset type
+	err := app.LeverageKeeper.RepayAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin("abcd", 200000000), // 200 abcd
+	)
+	suite.Require().Error(err)
+
+	// lender attempts to repay 200 u/umee, fails because utokens are not loanable assets
+	err = app.LeverageKeeper.RepayAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000), // 200 u/umee
+	)
+	suite.Require().Error(err)
+}
+
 func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	lenderAddr, _, _ := suite.initBorrowScenario() // create initial conditions
 	app, ctx := suite.app, suite.ctx               // get ctx after init
@@ -217,6 +270,81 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	// verify lender's uToken balance remains at 1k from initial conditions
 	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
 	suite.Require().Equal(int64(1000000000), uTokenBalance.Amount.Int64())
+}
+
+func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
+	lenderAddr, _, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx               // get ctx after init
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// lender borrows 200 umee
+	err := app.LeverageKeeper.BorrowAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin(umeeapp.BondDenom, 200000000), // 200 umee
+	)
+	suite.Require().NoError(err)
+
+	// lender repays 80 umee
+	err = app.LeverageKeeper.RepayAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin(umeeapp.BondDenom, 80000000), // 80 umee
+	)
+	suite.Require().NoError(err)
+
+	// verify lender's new loan amount in the correct denom
+	bal := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(bal, sdk.NewInt64Coin(umeeapp.BondDenom, 120000000)) // 120 umee
+
+	// verify lender's new umee balance (10 - 1k from initial + 200 from loan - 80 repaid = 9120)
+	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(initTokens.Sub(sdk.NewInt(880000000)), tokenBalance.Amount)
+
+	// verify lender's uToken balance remains at 1k from initial conditions
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	suite.Require().Equal(int64(1000000000), uTokenBalance.Amount.Int64())
+}
+
+func (suite *IntegrationTestSuite) TestRepayAsset_Overpay() {
+	lenderAddr, _, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx               // get ctx after init
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// lender borrows 200 umee
+	err := app.LeverageKeeper.BorrowAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin(umeeapp.BondDenom, 200000000), // 200 umee
+	)
+	suite.Require().NoError(err)
+
+	// lender repays 300 umee - should automatically be reduced to 200 (the repay amount) and succeed
+	err = app.LeverageKeeper.RepayAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin(umeeapp.BondDenom, 300000000), // 300 umee
+	)
+	suite.Require().NoError(err)
+
+	// verify lender's new loan amount is zero
+	bal := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(bal, sdk.NewInt64Coin(umeeapp.BondDenom, 0)) // 0 umee
+
+	// verify lender's new umee balance (10 - 1k from initial + 200 from loan - 200 repaid = 9000)
+	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
+	suite.Require().Equal(initTokens.Sub(sdk.NewInt(1000000000)), tokenBalance.Amount)
+
+	// verify lender's uToken balance remains at 1k from initial conditions
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	suite.Require().Equal(int64(1000000000), uTokenBalance.Amount.Int64())
+
+	// lender repays 300 umee - this time it fails because the loan no longer exists
+	err = app.LeverageKeeper.RepayAsset(ctx,
+		lenderAddr,
+		sdk.NewInt64Coin(umeeapp.BondDenom, 300000000), // 300 umee
+	)
+	suite.Require().Error(err)
 }
 
 func (suite *IntegrationTestSuite) TestParams() {
