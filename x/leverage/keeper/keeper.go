@@ -160,7 +160,9 @@ func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.C
 	key = append(key, types.KeyPrefixLoanToken...)
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	prefixStore := prefix.NewStore(store, key)
-	iter := prefixStore.Iterator(nil, nil)
+	iter := prefixStore.Iterator(nil, nil) // TODO: Find out why iter starts with valid = false
+	//	Alternative:
+	//  iter := sdk.KVStorePrefixIterator(store, key) // TODO: Same problem
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		// Key is denom | 0x00
