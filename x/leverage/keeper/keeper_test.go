@@ -166,14 +166,12 @@ func (suite *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddr
 	// lender lends 1k umee and receives 1k u/umee
 	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, tCoin("umee", 1000))
 	suite.Require().NoError(err)
-	// ensure suite's context remembers the events above
-	suite.ctx = ctx
 	// return the three account addresses
 	return lenderAddr, bumAddr
 	// The starting scenario is thus:
 	// - umee and u/umee are accepted assets
 	// - a "lender" user has 9k umee and 1k u/umee
-	// - the leverage module has 1k umee due to lender's activity
+	// - the leverage module has 1k umee due to lender's lending
 	// - a "bum" user has an address but no assets
 }
 
@@ -375,6 +373,86 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Overpay() {
 		tCoin("umee", 50),
 	)
 	suite.Require().Error(err)
+}
+
+func (suite *IntegrationTestSuite) TestSetCollateral_Valid() {
+	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx            // get ctx after init
+
+	// Any user from the starting scenario can be used, since they are only toggling
+	// collateral settings.
+
+	// lender disables u/umee as collateral
+	err := app.LeverageKeeper.SetCollateralSetting(ctx,
+		lenderAddr,
+		"u/uumee",
+		false,
+	)
+	suite.Require().NoError(err)
+	enabled := app.LeverageKeeper.GetCollateralSetting(ctx,
+		lenderAddr,
+		"u/uumee",
+	)
+	suite.Require().Equal(enabled, false)
+
+	// lender enables u/umee as collateral
+	err = app.LeverageKeeper.SetCollateralSetting(ctx,
+		lenderAddr,
+		"u/uumee",
+		true,
+	)
+	suite.Require().NoError(err)
+	enabled = app.LeverageKeeper.GetCollateralSetting(ctx,
+		lenderAddr,
+		"u/uumee",
+	)
+	suite.Require().Equal(enabled, true)
+}
+
+func (suite *IntegrationTestSuite) TestSetCollateral_Invalid() {
+	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx            // get ctx after init
+
+	// Any user from the starting scenario can be used, since they are only toggling
+	// collateral settings.
+
+	// lender disables u/abcd as collateral - fails because "u/abcd" is not a recognized uToken
+	err := app.LeverageKeeper.SetCollateralSetting(ctx,
+		lenderAddr,
+		"u/abcd",
+		false,
+	)
+	suite.Require().Error(err)
+
+	// lender disables uumee as collateral - fails because "uumee" is an asset, not a uToken
+	err = app.LeverageKeeper.SetCollateralSetting(ctx,
+		lenderAddr,
+		"uumee",
+		false,
+	)
+	suite.Require().Error(err)
+}
+
+func (suite *IntegrationTestSuite) TestGetCollateral_Invalid() {
+	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
+	app, ctx := suite.app, suite.ctx            // get ctx after init
+
+	// Any user from the starting scenario can be used, since we are only viewing
+	// collateral settings.
+
+	// Regular assets always return false, because only uTokens can be collateral
+	enabled := app.LeverageKeeper.GetCollateralSetting(ctx,
+		lenderAddr,
+		"uumee",
+	)
+	suite.Require().Equal(enabled, false)
+
+	// Invalid or unrecognized assets always return false
+	enabled = app.LeverageKeeper.GetCollateralSetting(ctx,
+		lenderAddr,
+		"abcd",
+	)
+	suite.Require().Equal(enabled, false)
 }
 
 func (suite *IntegrationTestSuite) TestParams() {

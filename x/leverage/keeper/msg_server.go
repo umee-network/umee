@@ -108,7 +108,7 @@ func (s msgServer) SetCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.SetCollateral(ctx, borrowerAddr, msg.Denom, msg.Enable); err != nil {
+	if err := s.keeper.SetCollateralSetting(ctx, borrowerAddr, msg.Denom, msg.Enable); err != nil {
 		return nil, err
 	}
 

@@ -125,15 +125,39 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	return nil
 }
 
-// SetCollateral enables or disables a uToken denom for use as collateral by a single borrower.
-func (k Keeper) SetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, enable bool) error {
+// SetCollateralSetting enables or disables a uToken denom for use as collateral by a single borrower.
+func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, enable bool) error {
 	if !k.IsAcceptedUToken(ctx, denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	// TODO: Enable sets to true; disable removes from KVstore rather than setting false
-
+	// Enable sets to true; disable removes from KVstore rather than setting false
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
+	if enable {
+		store.Set(key, []byte("true"))
+	} else {
+		store.Delete(key)
+	}
 	return nil
+}
+
+// GetCollateralSetting checks if a uToken denom is enabled for use as collateral by a single borrower.
+func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) bool {
+	if !k.IsAcceptedUToken(ctx, denom) {
+		return false
+	}
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
+	if store.Has(key) {
+		setting := string(store.Get(key))
+		if setting != "true" {
+			// Should never happen - we remove keys from KVstore rather than setting "false"
+			panic("Collateral setting should either be \"true\" or not exist in KVstore")
+		}
+		return true
+	}
+	return false
 }
 
 // GetLoan returns an sdk.Coin representing how much of a given denom a borrower currently owes.
