@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -156,27 +155,21 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
 	currentlyBorrowed := sdk.NewCoins()
 	store := ctx.KVStore(k.storeKey)
-	var key []byte
-	key = append(key, types.KeyPrefixLoanToken...)
-	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
-	prefixStore := prefix.NewStore(store, key)
-	iter := prefixStore.Iterator(nil, nil) // TODO: Find out why iter starts with valid = false
-	//	Alternative:
-	//  iter := sdk.KVStorePrefixIterator(store, key) // TODO: Same problem
+	var prefix []byte
+	prefix = append(prefix, types.KeyPrefixLoanToken...)
+	prefix = append(prefix, address.MustLengthPrefix(borrowerAddr)...)
+	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		// Key is denom | 0x00
+		// k is prefix | denom | 0x00
 		k, v := iter.Key(), iter.Value()
-		denom := string(k[:len(k)-1]) // remove denom null-terminator
+		denom := string(k[len(prefix) : len(k)-1]) // remove prefix and null-terminator
 		amount := sdk.ZeroInt()
 		if err := amount.Unmarshal(v); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
 		}
 		// For each loan found, add it to currentlyBorrowed
 		currentlyBorrowed = currentlyBorrowed.Add(sdk.NewCoin(denom, amount))
-	}
-	if err := iter.Error(); err != nil {
-		return sdk.NewCoins(), err
 	}
 	currentlyBorrowed.Sort() // to ensure IsValid
 	if !currentlyBorrowed.IsValid() {
@@ -264,7 +257,7 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	}
 
 	// Subtract repaid amount from borrowed amount
-	owed.Amount.Sub(payment.Amount)
+	owed.Amount = owed.Amount.Sub(payment.Amount)
 	// Store the new total borrowed amount in keeper
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateLoanKey(borrowerAddr, payment.Denom)
