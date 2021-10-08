@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -112,6 +113,27 @@ func (s msgServer) SetCollateral(
 		return nil, err
 	}
 
+	s.keeper.Logger(ctx).Debug(
+		"collateral setting set",
+		"borrower", borrowerAddr.String(),
+		"denom", msg.Denom,
+		"enable", strconv.FormatBool(msg.Enable),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeSetCollateralSetting,
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(types.EventAttrDenom, msg.Denom),
+			sdk.NewAttribute(types.EventAttrEnable, strconv.FormatBool(msg.Enable)),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
+		),
+	})
+
 	return &types.MsgSetCollateralResponse{}, nil
 }
 
@@ -131,6 +153,25 @@ func (s msgServer) BorrowAsset(
 		return nil, err
 	}
 
+	s.keeper.Logger(ctx).Debug(
+		"assets borrowed",
+		"borrower", borrowerAddr.String(),
+		"amount", msg.Amount.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeBorrowAsset,
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
+		),
+	})
+
 	return &types.MsgBorrowAssetResponse{}, nil
 }
 
@@ -149,6 +190,25 @@ func (s msgServer) RepayAsset(
 	if err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount); err != nil {
 		return nil, err
 	}
+
+	s.keeper.Logger(ctx).Debug(
+		"borrowed assets repaid",
+		"borrower", borrowerAddr.String(),
+		"amount", msg.Amount.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeRepayBorrowedAsset,
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
+		),
+	})
 
 	return &types.MsgRepayAssetResponse{}, nil
 }
