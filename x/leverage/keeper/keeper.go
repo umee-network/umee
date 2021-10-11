@@ -135,7 +135,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
 	if enable {
-		store.Set(key, []byte("true"))
+		store.Set(key, []byte{0x01})
 	} else {
 		store.Delete(key)
 	}
@@ -148,16 +148,9 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		return false
 	}
 	store := ctx.KVStore(k.storeKey)
+	// Any value (expected = 0x01) found at key will be interpreted as true.
 	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
-	if store.Has(key) {
-		setting := string(store.Get(key))
-		if setting != "true" {
-			// Should never happen - we remove keys from KVstore rather than setting "false"
-			panic("Collateral setting should either be \"true\" or not exist in KVstore")
-		}
-		return true
-	}
-	return false
+	return store.Has(key)
 }
 
 // GetLoan returns an sdk.Coin representing how much of a given denom a borrower currently owes.
@@ -165,8 +158,9 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 	store := ctx.KVStore(k.storeKey)
 	owed := sdk.NewCoin(denom, sdk.ZeroInt())
 	key := types.CreateLoanKey(borrowerAddr, denom)
-	if store.Has(key) {
-		err := owed.Amount.Unmarshal(store.Get(key))
+	bz := store.Get(key)
+	if bz != nil {
+		err := owed.Amount.Unmarshal(bz)
 		if err != nil {
 			// Should never happen
 			panic(err)
@@ -175,9 +169,9 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 	return owed
 }
 
-// GetAllLoans returns an sdk.Coins object containing all open borrows associated with an address
-func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
-	currentlyBorrowed := sdk.NewCoins()
+// GetAllBorrowerLoans returns an sdk.Coins object containing all open borrows associated with an address
+func (k Keeper) GetAllBorrowerLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
+	totalBorrowed := sdk.NewCoins()
 	store := ctx.KVStore(k.storeKey)
 	var prefix []byte
 	prefix = append(prefix, types.KeyPrefixLoanToken...)
@@ -189,19 +183,15 @@ func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.C
 		// k is prefix | denom | 0x00
 		k, v := iter.Key(), iter.Value()
 		denom := string(k[len(prefix) : len(k)-1]) // remove prefix and null-terminator
-		amount := sdk.ZeroInt()
+		var amount sdk.Int
 		if err := amount.Unmarshal(v); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
 		}
-		// For each loan found, add it to currentlyBorrowed
-		currentlyBorrowed = currentlyBorrowed.Add(sdk.NewCoin(denom, amount))
+		// For each loan found, add it to totalBorrowed
+		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
 	}
-	currentlyBorrowed.Sort() // to ensure IsValid
-	if !currentlyBorrowed.IsValid() {
-		// Should never happen, but if it does we can return an error and an empty coins object
-		return sdk.NewCoins(), sdkerrors.Wrap(types.ErrInvalidAsset, currentlyBorrowed.String())
-	}
-	return currentlyBorrowed, nil
+	totalBorrowed.Sort()
+	return totalBorrowed, nil
 }
 
 // BorrowAsset attempts to borrow assets from the leverage module account using
@@ -217,7 +207,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 	}
 
 	// Determine amount of all tokens currently borrowed
-	currentlyBorrowed, err := k.GetAllLoans(ctx, borrowerAddr)
+	currentlyBorrowed, err := k.GetAllBorrowerLoans(ctx, borrowerAddr)
 	if err != nil {
 		return err
 	}
@@ -238,11 +228,11 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
 	store := ctx.KVStore(k.storeKey)
-	b, err := totalBorrowed.Marshal()
+	bz, err := totalBorrowed.Marshal()
 	if err != nil {
 		return err
 	}
-	store.Set(types.CreateLoanKey(borrowerAddr, loan.Denom), b)
+	store.Set(types.CreateLoanKey(borrowerAddr, loan.Denom), bz)
 	return nil
 }
 
@@ -286,11 +276,11 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	if owed.IsZero() {
 		store.Delete(key) // Completely repaid
 	} else {
-		b, err := owed.Amount.Marshal()
+		bz, err := owed.Amount.Marshal()
 		if err != nil {
 			return err
 		}
-		store.Set(key, b) // Partially repaid
+		store.Set(key, bz) // Partially repaid
 	}
 	return nil
 }

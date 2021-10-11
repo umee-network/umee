@@ -269,7 +269,7 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	suite.Require().Equal(loanBalance, tCoin("umee", 200))
 
 	// verify lender's total loan balance (sdk.Coins) is also correct (no other coins present)
-	totalLoanBalance, err := app.LeverageKeeper.GetAllLoans(ctx, lenderAddr)
+	totalLoanBalance, err := app.LeverageKeeper.GetAllBorrowerLoans(ctx, lenderAddr)
 	suite.Require().Equal(totalLoanBalance, tCoins("umee", 200))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan = 9200)
