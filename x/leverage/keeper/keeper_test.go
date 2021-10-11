@@ -176,8 +176,8 @@ func (suite *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddr
 }
 
 func (suite *IntegrationTestSuite) TestBorrowAsset_Invalid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral

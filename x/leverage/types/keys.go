@@ -48,7 +48,7 @@ func CreateUTokenDenomKey(uTokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateRegisteredTokenKey returns a KVStore key for getting and setting an Asset.
+// CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
 func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 	// assetprefix | denom | 0x00
 	var key []byte
@@ -57,7 +57,8 @@ func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateLoanKey returns a KVStore key for getting and setting a Loan in a single denom and borrower address
+// CreateLoanKey returns a KVStore key for getting and setting a Loan for a denom
+// and borrower address.
 func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 	// loanprefix | lengthprefixed(borrowerAddr) | denom | 0x00
 	var key []byte

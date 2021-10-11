@@ -184,6 +184,7 @@ func (k Keeper) GetAllLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.C
 	prefix = append(prefix, address.MustLengthPrefix(borrowerAddr)...)
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
+
 	for ; iter.Valid(); iter.Next() {
 		// k is prefix | denom | 0x00
 		k, v := iter.Key(), iter.Value()
@@ -231,13 +232,11 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 
 	// Note: Prior to oracle implementation, we cannot compare loan value to borrow limit
 	loanTokens := sdk.NewCoins(loan)
-	// Send borrowed assets from module account to borrower
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
 		return err
 	}
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
-	// Store the new borrowed amount in keeper
 	store := ctx.KVStore(k.storeKey)
 	b, err := totalBorrowed.Marshal()
 	if err != nil {
@@ -265,7 +264,6 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 
 	// Prevent overpaying
 	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
-
 	if !payment.IsValid() {
 		// Catch invalid payments (e.g. from payment.Amount < 0)
 		return sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
