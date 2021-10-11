@@ -33,8 +33,8 @@ func tCoin(denom string, amount int) sdk.Coin {
 		denom = "u" + denom
 	}
 	return sdk.NewCoin(denom, sdk.NewInt(int64(amount*1000000)))
-	// coin("umee", 900) = sdk.NewInt64Coin("uumee", 900000000)
-	// coin("u/umee", 900) = sdk.NewInt64Coin("u/uumee", 900000000)
+	// tCoin("umee", 900) = sdk.NewInt64Coin("uumee", 900000000)
+	// tCoin("u/umee", 900) = sdk.NewInt64Coin("u/uumee", 900000000)
 }
 
 // makes sdk.Coins (with one element) for testing
