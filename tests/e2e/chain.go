@@ -122,7 +122,7 @@ func (c *chain) createAndInitValidatorsWithMnemonics(count int, mnemonics []stri
 }
 
 func (c *chain) createAndInitGaiaValidator() error {
-	// create orchestrator
+	// create gaia validator
 	gaiaVal := c.createGaiaValidator(0)
 
 	// create keys
