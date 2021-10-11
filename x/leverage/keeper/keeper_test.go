@@ -147,32 +147,36 @@ func (suite *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	suite.Require().Equal(int64(0), uTokenBalance.Amount.Int64())
 }
 
-// Helper function: Initialize the common starting scenario from which borrow and repay tests stem:
+// initialize the common starting scenario from which borrow and repay tests stem:
+// Umee and u/umee are registered assets; a "lender" account has 9k umee and 1k u/umee;
+// the leverage module has 1k umee in its lending pool (module account); and a "bum"
+// account has been created with no assets.
 func (suite *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddress) {
 	app, ctx := suite.app, suite.ctx
+
 	// register uumee and u/uumee as an accepted asset+utoken pair
 	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
+
 	// create an account and address which will represent a lender
 	lenderAddr := sdk.AccAddress([]byte("addr______________00"))
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
 	app.AccountKeeper.SetAccount(ctx, lenderAcc)
+
 	// create an account and address which will represent a user with no assets
 	bumAddr := sdk.AccAddress([]byte("addr______________02"))
 	bumAcc := app.AccountKeeper.NewAccountWithAddress(ctx, bumAddr)
 	app.AccountKeeper.SetAccount(ctx, bumAcc)
+
 	// mint and send 10k umee to lender
 	suite.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, tCoins("umee", 10000)))
 	suite.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, tCoins("umee", 10000)))
+
 	// lender lends 1k umee and receives 1k u/umee
 	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, tCoin("umee", 1000))
 	suite.Require().NoError(err)
-	// return the three account addresses
+
+	// return the account addresses
 	return lenderAddr, bumAddr
-	// The starting scenario is thus:
-	// - umee and u/umee are accepted assets
-	// - a "lender" user has 9k umee and 1k u/umee
-	// - the leverage module has 1k umee due to lender's lending
-	// - a "bum" user has an address but no assets
 }
 
 func (suite *IntegrationTestSuite) TestBorrowAsset_Invalid() {
@@ -183,17 +187,11 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Invalid() {
 	// already has 1k u/umee for collateral
 
 	// lender attempts to borrow 200 u/umee, fails because uTokens cannot be borrowed
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("u/umee", 200),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("u/umee", 200))
 	suite.Require().Error(err)
 
 	// lender attempts to borrow 200 abcd, fails because "abcd" is not a valid denom
-	err = app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("abcd", 200),
-	)
+	err = app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("abcd", 200))
 	suite.Require().Error(err)
 }
 
@@ -207,61 +205,46 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_InsufficientCollateral() {
 	// possesses no assets or collateral.
 
 	// bum attempts to borrow 200 umee, fails because of insufficient collateral
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		bumAddr,
-		tCoin("umee",200),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx,bumAddr,tCoin("umee",200))
 	suite.Require().Error(err)
 }
 */
 
 func (suite *IntegrationTestSuite) TestBorrowAsset_InsufficientLendingPool() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// Any user from the init scenario can perform this test, because it errors on module balance
 
 	// lender attempts to borrow 20k umee, fails because of insufficient module account balance
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 20000),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("umee", 20000))
 	suite.Require().Error(err)
 }
 
 func (suite *IntegrationTestSuite) TestRepayAsset_Invalid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// Any user from the init scenario can be used for this test.
 
 	// lender attempts to repay 200 abcd, fails because "abcd" is not an accepted asset type
-	err := app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("abcd", 200),
-	)
+	err := app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("abcd", 200))
 	suite.Require().Error(err)
 
 	// lender attempts to repay 200 u/umee, fails because utokens are not loanable assets
-	err = app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("u/umee", 200),
-	)
+	err = app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("u/umee", 200))
 	suite.Require().Error(err)
 }
 
 func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
 	// lender borrows 200 umee
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 200),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("umee", 200))
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount in the correct denom
@@ -282,27 +265,21 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
 }
 
 func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
 	// lender borrows 200 umee
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 200),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("umee", 200))
 	suite.Require().NoError(err)
 
 	// lender repays 80 umee
-	err = app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 80),
-	)
+	err = app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("umee", 80))
 	suite.Require().NoError(err)
 
-	// verify lender's new loan amount in the correct denom
+	// verify lender's new loan amount (120 umee)
 	loanBalance := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, tCoin("umee", 120))
 
@@ -314,14 +291,11 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
 	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
 	suite.Require().Equal(tCoin("u/umee", 1000), uTokenBalance)
 
-	// lender repays 120 umee
-	err = app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 120),
-	)
+	// lender repays 120 umee (loan repaid in full)
+	err = app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("umee", 120))
 	suite.Require().NoError(err)
 
-	// verify lender's new loan amount in the correct denom (zero, because fully repaid)
+	// verify lender's new loan amount in the correct denom (zero)
 	loanBalance = app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, tCoin("umee", 0))
 
@@ -335,24 +309,18 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
 }
 
 func (suite *IntegrationTestSuite) TestRepayAsset_Overpay() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
 	// lender borrows 200 umee
-	err := app.LeverageKeeper.BorrowAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 200),
-	)
+	err := app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, tCoin("umee", 200))
 	suite.Require().NoError(err)
 
-	// lender repays 300 umee - should automatically be reduced to 200 (the loan amount) and succeed
-	err = app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 300),
-	)
+	// lender repays 300 umee - should automatically reduce to 200 (the loan amount) and succeed
+	err = app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("umee", 300))
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount is zero
@@ -368,16 +336,13 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	suite.Require().Equal(uTokenBalance, tCoin("u/umee", 1000))
 
 	// lender repays 50 umee - this time it fails because the loan no longer exists
-	err = app.LeverageKeeper.RepayAsset(ctx,
-		lenderAddr,
-		tCoin("umee", 50),
-	)
+	err = app.LeverageKeeper.RepayAsset(ctx, lenderAddr, tCoin("umee", 50))
 	suite.Require().Error(err)
 }
 
 func (suite *IntegrationTestSuite) TestSetCollateral_Valid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// Any user from the starting scenario can be used, since they are only toggling
 	// collateral settings.
@@ -410,8 +375,8 @@ func (suite *IntegrationTestSuite) TestSetCollateral_Valid() {
 }
 
 func (suite *IntegrationTestSuite) TestSetCollateral_Invalid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// Any user from the starting scenario can be used, since they are only toggling
 	// collateral settings.
@@ -434,8 +399,8 @@ func (suite *IntegrationTestSuite) TestSetCollateral_Invalid() {
 }
 
 func (suite *IntegrationTestSuite) TestGetCollateral_Invalid() {
-	lenderAddr, _ := suite.initBorrowScenario() // create initial conditions
-	app, ctx := suite.app, suite.ctx            // get ctx after init
+	lenderAddr, _ := suite.initBorrowScenario()
+	app, ctx := suite.app, suite.ctx
 
 	// Any user from the starting scenario can be used, since we are only viewing
 	// collateral settings.
