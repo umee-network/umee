@@ -604,6 +604,12 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
+	_, err = copyFile(
+		filepath.Join("./", "gaia.Dockerfile"),
+		filepath.Join(s.chain.configDir(), "gaia.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
 	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "gaia.Dockerfile",
@@ -616,16 +622,10 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 				fmt.Sprintf("%s/:/root/gaia", gaiaCfgPath),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"1317/tcp":  {{HostIP: "", HostPort: "1317"}},
-				"6060/tcp":  {{HostIP: "", HostPort: "6060"}},
-				"6061/tcp":  {{HostIP: "", HostPort: "6061"}},
-				"6062/tcp":  {{HostIP: "", HostPort: "6062"}},
-				"6063/tcp":  {{HostIP: "", HostPort: "6063"}},
-				"6064/tcp":  {{HostIP: "", HostPort: "6064"}},
-				"6065/tcp":  {{HostIP: "", HostPort: "6065"}},
-				"9090/tcp":  {{HostIP: "", HostPort: "9090"}},
-				"26656/tcp": {{HostIP: "", HostPort: "26656"}},
-				"26657/tcp": {{HostIP: "", HostPort: "26657"}},
+				"1317/tcp":  {{HostIP: "", HostPort: "1417"}},
+				"9090/tcp":  {{HostIP: "", HostPort: "9190"}},
+				"26656/tcp": {{HostIP: "", HostPort: "27656"}},
+				"26657/tcp": {{HostIP: "", HostPort: "27657"}},
 			},
 			Env: []string{
 				fmt.Sprintf("GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
