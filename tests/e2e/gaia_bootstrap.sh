@@ -1,0 +1,3 @@
+#!/busybox/sh
+
+set -ex

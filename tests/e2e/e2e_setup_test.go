@@ -50,6 +50,7 @@ type IntegrationTestSuite struct {
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
+	gaiaResource        *dockertest.Resource
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
@@ -81,10 +82,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	s.runEthContainer()
+	// s.runEthContainer()
 	s.runValidators()
-	s.runContractDeployment()
-	s.runOrchestrators()
+	// s.runContractDeployment()
+	// s.runOrchestrators()
+
+	s.runGaiaNetwork()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -116,6 +119,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 func (s *IntegrationTestSuite) initNodes() {
 	s.Require().NoError(s.chain.createAndInitValidators(4))
 	s.Require().NoError(s.chain.createAndInitOrchestrators(4))
+	s.Require().NoError(s.chain.createAndInitGaiaValidator())
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.chain.validators[0].configDir()
@@ -585,6 +589,62 @@ listen_addr = "127.0.0.1:3000"
 			resource.Container.ID,
 		)
 	}
+}
+
+func (s *IntegrationTestSuite) runGaiaNetwork() {
+	s.T().Log("starting Gaia network container...")
+
+	gaiaVal := s.chain.gaiaValidators[0]
+	gaiaCfgPath := path.Join(fmt.Sprintf("%s/%s", s.chain.configDir(), gaiaVal.instanceName()), "gaia")
+
+	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
+	_, err := copyFile(
+		filepath.Join("./", "gaia_bootstrap.sh"),
+		filepath.Join(gaiaCfgPath, "gaia_bootstrap.sh"),
+	)
+	s.Require().NoError(err)
+
+	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "gaia.Dockerfile",
+			ContextDir: s.chain.configDir(),
+		},
+		&dockertest.RunOptions{
+			Name:      "gaiaval0",
+			NetworkID: s.dkrNet.Network.ID,
+			Mounts: []string{
+				fmt.Sprintf("%s/:/root/gaia", gaiaCfgPath),
+			},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"1317/tcp":  {{HostIP: "", HostPort: "1317"}},
+				"6060/tcp":  {{HostIP: "", HostPort: "6060"}},
+				"6061/tcp":  {{HostIP: "", HostPort: "6061"}},
+				"6062/tcp":  {{HostIP: "", HostPort: "6062"}},
+				"6063/tcp":  {{HostIP: "", HostPort: "6063"}},
+				"6064/tcp":  {{HostIP: "", HostPort: "6064"}},
+				"6065/tcp":  {{HostIP: "", HostPort: "6065"}},
+				"9090/tcp":  {{HostIP: "", HostPort: "9090"}},
+				"26656/tcp": {{HostIP: "", HostPort: "26656"}},
+				"26657/tcp": {{HostIP: "", HostPort: "26657"}},
+			},
+			Env: []string{
+				fmt.Sprintf("GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
+			},
+			Entrypoint: []string{
+				"sh",
+				"-c",
+				"chmod +x /root/gaia/gaia_bootstrap.sh && /root/gaia/gaia_bootstrap.sh",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	// TODO:
+	// 1. Check healthy
+	// 2. create RPC and API client
+
+	s.T().Logf("started gaia network container: %s", s.gaiaResource.Container.ID)
 }
 
 func noRestart(config *docker.HostConfig) {
