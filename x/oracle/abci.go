@@ -4,8 +4,8 @@ import (
 	"time"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/keeper"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"

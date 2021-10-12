@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 func TestLegacyNewLegacyQuerier(t *testing.T) {

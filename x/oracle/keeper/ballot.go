@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

@@ -12,8 +12,8 @@ import (
 
 	"github.com/terra-money/core/app"
 	core "github.com/terra-money/core/types"
-	v04oracle "github.com/terra-money/core/x/oracle/legacy/v04"
-	v05oracle "github.com/terra-money/core/x/oracle/legacy/v05"
+	v04oracle "github.com/umee-network/umee/x/oracle/legacy/v04"
+	v05oracle "github.com/umee-network/umee/x/oracle/legacy/v05"
 )
 
 func TestMigrate(t *testing.T) {

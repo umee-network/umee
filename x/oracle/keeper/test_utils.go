@@ -11,7 +11,7 @@ import (
 	customparams "github.com/terra-money/core/custom/params"
 	customstaking "github.com/terra-money/core/custom/staking"
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	"time"
 

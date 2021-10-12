@@ -12,8 +12,8 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/keeper"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 func TestOracleFilters(t *testing.T) {

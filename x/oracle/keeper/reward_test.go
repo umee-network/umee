@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Test a reward giving mechanism

@@ -15,8 +15,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/keeper"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Simulation operation weights constants

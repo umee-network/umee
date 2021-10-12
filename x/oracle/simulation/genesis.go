@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Simulation parameter constants

@@ -7,7 +7,7 @@ import (
 
 	core "github.com/terra-money/core/types"
 	"github.com/terra-money/core/x/oracle"
-	"github.com/terra-money/core/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"

@@ -13,9 +13,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/kv"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/keeper"
-	sim "github.com/terra-money/core/x/oracle/simulation"
-	"github.com/terra-money/core/x/oracle/types"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	sim "github.com/umee-network/umee/x/oracle/simulation"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 var (

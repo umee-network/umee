@@ -2,7 +2,7 @@
 //DONTCOVER
 package exported
 
-import "github.com/terra-money/core/x/oracle/types"
+import "github.com/umee-network/umee/x/oracle/types"
 
 type (
 	MsgAggregateExchangeRatePrevote = types.MsgAggregateExchangeRatePrevote

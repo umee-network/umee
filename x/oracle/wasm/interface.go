@@ -8,7 +8,7 @@ import (
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 
-	"github.com/terra-money/core/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/keeper"
 	wasm "github.com/terra-money/core/x/wasm/exported"
 )
 

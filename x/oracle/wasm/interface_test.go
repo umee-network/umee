@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/terra-money/core/x/oracle/keeper"
-	"github.com/terra-money/core/x/oracle/wasm"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/wasm"
 )
 
 func TestQueryExchangeRates(t *testing.T) {
