@@ -87,8 +87,11 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.runValidators()
 	// s.runContractDeployment()
 	// s.runOrchestrators()
-
 	s.runGaiaNetwork()
+
+	// TODO:
+	// 1. run Hermes container
+	// 2. Connect chains
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
