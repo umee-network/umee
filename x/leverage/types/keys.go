@@ -68,6 +68,16 @@ func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
+// CreateLoanKeyNoDenom returns the common prefix used by all loans associated with a given
+// borrower address.
+func CreateLoanKeyNoDenom(borrowerAddr sdk.AccAddress) []byte {
+	// loanprefix | lengthprefixed(borrowerAddr)
+	var key []byte
+	key = append(key, KeyPrefixLoanToken...)
+	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
+	return key
+}
+
 // CreateCollateralSettingKey returns a KVStore key for getting and setting a borrower's
 // collateral setting for a single uToken
 func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string) []byte {

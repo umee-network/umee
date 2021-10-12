@@ -5,7 +5,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/address"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -173,9 +172,7 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 func (k Keeper) GetAllBorrowerLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
 	totalBorrowed := sdk.NewCoins()
 	store := ctx.KVStore(k.storeKey)
-	var prefix []byte
-	prefix = append(prefix, types.KeyPrefixLoanToken...)
-	prefix = append(prefix, address.MustLengthPrefix(borrowerAddr)...)
+	prefix := types.CreateLoanKeyNoDenom(borrowerAddr)
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 
