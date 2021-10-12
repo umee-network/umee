@@ -47,6 +47,7 @@ type IntegrationTestSuite struct {
 
 	chain               *chain
 	ethClient           *ethclient.Client
+	gaiaRPC             *rpchttp.HTTP
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
@@ -595,7 +596,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
 	gaiaVal := s.chain.gaiaValidators[0]
-	gaiaCfgPath := path.Join(fmt.Sprintf("%s/%s", s.chain.configDir(), gaiaVal.instanceName()), "gaia")
+	gaiaCfgPath := path.Join(s.chain.configDir(), "gaia")
 
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
 	_, err := copyFile(
@@ -640,9 +641,28 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
-	// TODO:
-	// 1. Check healthy
-	// 2. create RPC and API client
+	endpoint := fmt.Sprintf("tcp://%s", s.gaiaResource.GetHostPort("26657/tcp"))
+	s.gaiaRPC, err = rpchttp.New(endpoint, "/websocket")
+	s.Require().NoError(err)
+
+	s.Require().Eventually(
+		func() bool {
+			status, err := s.gaiaRPC.Status(context.Background())
+			if err != nil {
+				return false
+			}
+
+			// let the node produce a few blocks
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 5 {
+				return false
+			}
+
+			return true
+		},
+		5*time.Minute,
+		time.Second,
+		"gaia node failed to produce blocks",
+	)
 
 	s.T().Logf("started gaia network container: %s", s.gaiaResource.Container.ID)
 }
