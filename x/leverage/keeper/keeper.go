@@ -161,7 +161,6 @@ func (k Keeper) GetLoan(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom stri
 	if bz != nil {
 		err := owed.Amount.Unmarshal(bz)
 		if err != nil {
-			// Should never happen
 			panic(err)
 		}
 	}
