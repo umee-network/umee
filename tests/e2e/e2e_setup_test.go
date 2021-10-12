@@ -35,6 +35,7 @@ const (
 	initBalanceStr      = "110000000000uumee,100000000000photon"
 	minGasPrice         = "0.00001"
 	ethChainID     uint = 15
+	gaiaChainID         = "test-gaia-chain"
 )
 
 var (
@@ -52,6 +53,7 @@ type IntegrationTestSuite struct {
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
 	gaiaResource        *dockertest.Resource
+	hermesResource      *dockertest.Resource
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
@@ -105,6 +107,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 	os.RemoveAll(s.chain.dataDir)
 	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
+	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
+	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
 
 	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
@@ -406,7 +410,7 @@ func (s *IntegrationTestSuite) runValidators() {
 			}
 
 			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 5 {
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
 				return false
 			}
 
@@ -629,7 +633,8 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 				"26657/tcp": {{HostIP: "", HostPort: "27657"}},
 			},
 			Env: []string{
-				fmt.Sprintf("GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 			},
 			Entrypoint: []string{
 				"sh",
@@ -653,7 +658,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 			}
 
 			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 5 {
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
 				return false
 			}
 
@@ -664,11 +669,59 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 		"gaia node failed to produce blocks",
 	)
 
-	s.T().Logf("started gaia network container: %s", s.gaiaResource.Container.ID)
+	s.T().Logf("started Gaia network container: %s", s.gaiaResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runIBCRelayer() {
+	s.T().Log("starting Hermes relayer container...")
 
+	gaiaVal := s.chain.gaiaValidators[0]
+	umeeVal := s.chain.validators[0]
+	hermesCfgPath := path.Join(s.chain.configDir(), "hermes")
+
+	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0755))
+	_, err := copyFile(
+		filepath.Join("./scripts/", "hermes_bootstrap.sh"),
+		filepath.Join(hermesCfgPath, "hermes_bootstrap.sh"),
+	)
+	s.Require().NoError(err)
+
+	s.hermesResource, err = s.dkrPool.RunWithOptions(
+		&dockertest.RunOptions{
+			Name:      "umee-gaia-relayer",
+			NetworkID: s.dkrNet.Network.ID,
+			Mounts: []string{
+				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
+			},
+			ExposedPorts: []string{
+				"3031",
+			},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
+			},
+			Repository: "informalsystems/hermes",
+			Tag:        "0.7.3",
+			Env: []string{
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
+				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.gaiaResource.Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+			},
+			Entrypoint: []string{
+				"sh",
+				"-c",
+				"chmod +x /home/hermes/hermes_bootstrap.sh && /home/hermes/hermes_bootstrap.sh",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	// TODO: Add health check for hermes
+
+	s.T().Logf("started Hermes relayer container: %s", s.hermesResource.Container.ID)
 }
 
 func noRestart(config *docker.HostConfig) {
