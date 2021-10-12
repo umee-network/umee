@@ -3,7 +3,6 @@ package oracle
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
 )

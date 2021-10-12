@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/terra-money/core/x/oracle"
+	"github.com/umee-network/umee/x/oracle"
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
 

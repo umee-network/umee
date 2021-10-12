@@ -37,7 +37,6 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
-	github.com/CosmWasm/wasmvm v0.16.1
 	github.com/DataDog/zstd v1.4.5 // indirect
 	github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
@@ -355,6 +354,8 @@ require (
 	mvdan.cc/unparam v0.0.0-20210104141923-aac4ce9116a7 // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
 )
+
+require github.com/CosmWasm/wasmvm v0.16.1 // indirect
 
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76

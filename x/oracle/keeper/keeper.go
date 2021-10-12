@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tendermint/tendermint/libs/log"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	gogotypes "github.com/gogo/protobuf/types"
 
@@ -14,7 +15,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Keeper of the oracle store

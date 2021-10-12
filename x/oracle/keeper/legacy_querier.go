@@ -2,13 +2,12 @@ package keeper
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // NewLegacyQuerier is the module level router for state queries

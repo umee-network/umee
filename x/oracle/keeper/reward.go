@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // RewardBallotWinners implements

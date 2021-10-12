@@ -5,10 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/umee-network/umee/x/oracle/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // OrganizeBallotByDenom collects all oracle votes for the period, categorized by the votes' denom parameter

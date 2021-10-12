@@ -7,11 +7,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/umee-network/umee/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	core "github.com/terra-money/core/types"
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 func TestLegacyNewLegacyQuerier(t *testing.T) {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
 )
