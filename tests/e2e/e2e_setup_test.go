@@ -88,10 +88,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// s.runContractDeployment()
 	// s.runOrchestrators()
 	s.runGaiaNetwork()
-
-	// TODO:
-	// 1. run Hermes container
-	// 2. Connect chains
+	s.runIBCRelayer()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -121,8 +118,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) initNodes() {
-	s.Require().NoError(s.chain.createAndInitValidators(4))
-	s.Require().NoError(s.chain.createAndInitOrchestrators(4))
+	s.Require().NoError(s.chain.createAndInitValidators(3))
+	s.Require().NoError(s.chain.createAndInitOrchestrators(3))
 	s.Require().NoError(s.chain.createAndInitGaiaValidator())
 
 	// initialize a genesis file for the first validator
@@ -314,7 +311,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
 
 	_, err := copyFile(
-		filepath.Join("./", "eth.Dockerfile"),
+		filepath.Join("./docker/", "eth.Dockerfile"),
 		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
 	)
 	s.Require().NoError(err)
@@ -535,7 +532,7 @@ listen_addr = "127.0.0.1:3000"
 		// NOTE: If the Docker build changes, the script might have to be modified
 		// as it relies on busybox.
 		_, err := copyFile(
-			filepath.Join("./", "gorc_bootstrap.sh"),
+			filepath.Join("./scripts/", "gorc_bootstrap.sh"),
 			filepath.Join(gorcCfgPath, "gorc_bootstrap.sh"),
 		)
 		s.Require().NoError(err)
@@ -603,13 +600,13 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
 	_, err := copyFile(
-		filepath.Join("./", "gaia_bootstrap.sh"),
+		filepath.Join("./scripts/", "gaia_bootstrap.sh"),
 		filepath.Join(gaiaCfgPath, "gaia_bootstrap.sh"),
 	)
 	s.Require().NoError(err)
 
 	_, err = copyFile(
-		filepath.Join("./", "gaia.Dockerfile"),
+		filepath.Join("./docker/", "gaia.Dockerfile"),
 		filepath.Join(s.chain.configDir(), "gaia.Dockerfile"),
 	)
 	s.Require().NoError(err)
@@ -668,6 +665,10 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 
 	s.T().Logf("started gaia network container: %s", s.gaiaResource.Container.ID)
+}
+
+func (s *IntegrationTestSuite) runIBCRelayer() {
+
 }
 
 func noRestart(config *docker.HostConfig) {
