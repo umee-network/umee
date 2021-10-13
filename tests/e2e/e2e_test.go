@@ -146,3 +146,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		)
 	})
 }
+
+func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
+
+}

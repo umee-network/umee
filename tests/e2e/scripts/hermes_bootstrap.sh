@@ -36,9 +36,9 @@ account_prefix = 'umee'
 key_name = 'val01-umee'
 store_prefix = 'ibc'
 max_gas = 3000000
-gas_price = { price = 0.001, denom = 'uumee' }
+gas_price = { price = 0.001, denom = 'photon' }
 gas_adjustment = 0.1
-clock_drift = '5s'
+clock_drift = '1m' # to accomdate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 
@@ -54,7 +54,7 @@ store_prefix = 'ibc'
 max_gas = 3000000
 gas_price = { price = 0.001, denom = 'stake' }
 gas_adjustment = 0.1
-clock_drift = '5s'
+clock_drift = '1m' # to accomdate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 EOF

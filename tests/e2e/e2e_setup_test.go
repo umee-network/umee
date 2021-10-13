@@ -752,6 +752,9 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	)
 
 	s.T().Logf("started Hermes relayer container: %s", s.hermesResource.Container.ID)
+
+	// create the client, connection and channel between the Umee and Gaia chains
+	s.connectIBCChains()
 }
 
 func noRestart(config *docker.HostConfig) {
