@@ -148,5 +148,19 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
+	s.Run("send_stake_to_umee", func() {
 
+	})
+
+	s.Run("deploy_stake_erc20", func() {
+
+	})
+
+	s.Run("send_photon_tokens_to_eth", func() {
+
+	})
+
+	s.Run("send_photon_tokens_from_eth", func() {
+
+	})
 }
