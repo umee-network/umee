@@ -9,6 +9,8 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
+	s.T().SkipNow()
+
 	// deploy photon ERC20 token contact
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
@@ -77,6 +79,8 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
+	s.T().SkipNow()
+
 	// deploy umee ERC20 token contract
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
