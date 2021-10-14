@@ -14,6 +14,16 @@ service Msg {
   // WithdrawAsset defines a method for withdrawing previously lent coins from
   // the capital facility.
   rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
+
+  // SetCollateral defines a method for users to enable or disable a uToken
+  // denomination in their wallet for use as collateral.
+  rpc SetCollateral(MsgSetCollateral) returns (MsgSetCollateralResponse);
+
+  // BorrowAsset defines a method for borrowing coins from the capital facility.
+  rpc BorrowAsset(MsgBorrowAsset) returns (MsgBorrowAssetResponse);
+
+  // RepayAsset defines a method for repaying borrowed coins to the capital facility.
+  rpc RepayAsset(MsgRepayAsset) returns (MsgRepayAssetResponse);
 }
 
 // MsgLendAsset represents a lender's request to lend a base asset type to the
@@ -30,8 +40,39 @@ message MsgWithdrawAsset {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgLendAssetResponse defines the Msg/Send response type.
+// MsgSetCollateral represents a lender's request to enable or disable
+// a uToken type in their possession as collateral.
+message MsgSetCollateral {
+  string borrower = 1;
+  string denom = 2;
+  bool   enable = 3;
+}
+
+// MsgBorrowAsset represents a lender's request to borrow a base asset type
+// from the module.
+message MsgBorrowAsset {
+  string                   borrower = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgRepayAsset represents a lender's request to repay a borrowed base asset type
+// to the module.
+message MsgRepayAsset {
+  string                   borrower = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgLendAssetResponse defines the Msg/LendAsset response type.
 message MsgLendAssetResponse {}
 
-// MsgWithdrawAssetResponse defines the Msg/Send response type.
+// MsgWithdrawAssetResponse defines the Msg/WithdrawAsset response type.
 message MsgWithdrawAssetResponse {}
+
+// MsgSetCollateralResponse defines the Msg/SetCollateral response type.
+message MsgSetCollateralResponse {}
+
+// MsgBorrowAssetResponse defines the Msg/BorrowAsset response type.
+message MsgBorrowAssetResponse {}
+
+// MsgRepayAssetResponse defines the Msg/RepayAsset response type.
+message MsgRepayAssetResponse {}
