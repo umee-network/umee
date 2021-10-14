@@ -84,7 +84,7 @@ Example scenario:
 >
 > Alice has borrowed 2000 `atom`, which is 2 * 10^9 `uatom` internally. (Note: These are not utokens, just the smallest units of the token. 1 atom = 10^6 uatom.)
 >
-> On the next `EndBlock`, interest is accrued on the borrow. Using the exampke interest rate in this example, Alice's amount owed goes from 2 * 10^9 `uatom` to 2.000002 * 10^9. In other words, it increases by 2000 `uatom`.
+> On the next `EndBlock`, interest is accrued on the borrow. Using the example interest rate in this example, Alice's amount owed goes from 2 * 10^9 `uatom` to 2.000002. In other words, it increases by 2000 `uatom`.
 >
 > Because of the `ReserveFactor` of 0.05, the `x/leverage` module's reserved amount of `uatom` increases by 100 (which is 2000 * 0.05) due to the interest accruing on Alice's loan.
 >
