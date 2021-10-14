@@ -5,12 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -59,6 +62,54 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 	)
 
 	s.T().Logf("connected %s and %s chains via IBC", s.chain.id, gaiaChainID)
+}
+
+func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recipient)
+
+	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
+		Context:      ctx,
+		AttachStdout: true,
+		AttachStderr: true,
+		Container:    s.hermesResource.Container.ID,
+		User:         "hermes",
+		Cmd: []string{
+			"hermes",
+			"tx",
+			"raw",
+			"ft-transfer",
+			dstChainID,
+			srcChainID,
+			"transfer",  // source chain port ID
+			"channel-0", // since only one connection/channel exists, assume 0
+			token.Amount.String(),
+			fmt.Sprintf("--denom=%s", token.Denom),
+			fmt.Sprintf("--receiver=%s", recipient),
+			"--timeout-height-offset=1000",
+		},
+	})
+	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+		Context:      ctx,
+		Detach:       false,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+	s.Require().NoErrorf(
+		err,
+		"failed to send IBC tokens; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
+	)
+
+	s.T().Log("successfully sent IBC tokens")
 }
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
@@ -279,24 +330,48 @@ func queryUmeeTx(endpoint, txHash string) error {
 	return nil
 }
 
-func queryUmeeDenomBalance(endpoint, addr, denom string) (int, error) {
+func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s", endpoint, addr))
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	bz, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var balancesResp banktypes.QueryAllBalancesResponse
+	if err := cdc.UnmarshalJSON(bz, &balancesResp); err != nil {
+		return nil, err
+	}
+
+	return balancesResp.Balances, nil
+}
+
+func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
+	var zeroCoin sdk.Coin
+
 	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s/%s", endpoint, addr, denom))
 	if err != nil {
-		return 0, fmt.Errorf("failed to execute HTTP request: %w", err)
+		return zeroCoin, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return 0, fmt.Errorf("failed to read response body: %w", err)
-	}
+	defer resp.Body.Close()
 
-	balance := result["balance"].(map[string]interface{})
-	amount, err := strconv.Atoi(balance["amount"].(string))
+	bz, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return zeroCoin, err
 	}
 
-	return amount, nil
+	var balanceResp banktypes.QueryBalanceResponse
+	if err := cdc.UnmarshalJSON(bz, &balanceResp); err != nil {
+		return zeroCoin, err
+	}
+
+	return *balanceResp.Balance, nil
 }
 
 func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
