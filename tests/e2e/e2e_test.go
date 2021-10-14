@@ -150,7 +150,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
-	var ibcDenom string
+	var ibcStakeDenom string
 	s.Run("send_stake_to_umee", func() {
 		recipient := s.chain.validators[0].keyInfo.GetAddress().String()
 		token := sdk.NewInt64Coin("stake", 3300000000)
@@ -176,16 +176,21 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 		for _, c := range balances {
 			if strings.Contains(c.Denom, "ibc/") {
-				ibcDenom = c.Denom
+				ibcStakeDenom = c.Denom
 				break
 			}
 		}
 
-		s.Require().NotEmpty(ibcDenom)
+		s.Require().NotEmpty(ibcStakeDenom)
 	})
 
+	var ibcStakeERC20Addr string
 	s.Run("deploy_stake_erc20", func() {
+		ibcStakeERC20Addr = s.deployERC20Token(ibcStakeDenom)
+		s.Require().NotEmpty(ibcStakeERC20Addr)
 
+		_, err := hexutil.Decode(ibcStakeERC20Addr)
+		s.Require().NoError(err)
 	})
 
 	s.Run("send_photon_tokens_to_eth", func() {

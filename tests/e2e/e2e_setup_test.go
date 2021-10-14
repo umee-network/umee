@@ -87,10 +87,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	// s.runEthContainer()
+	s.runEthContainer()
 	s.runValidators()
-	// s.runContractDeployment()
-	// s.runOrchestrators()
+	s.runContractDeployment()
+	s.runOrchestrators()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
 }
