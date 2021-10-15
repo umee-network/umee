@@ -692,8 +692,6 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 				return false
 			}
 
-			fmt.Println("STATUS SYNC INFO:", status.SyncInfo)
-
 			// let the node produce a few blocks
 			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
 				return false
