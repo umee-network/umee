@@ -87,8 +87,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	s.runValidators()
 	s.runGaiaNetwork()
+	s.runValidators()
 	s.runIBCRelayer()
 	s.runEthContainer()
 	s.runContractDeployment()
@@ -613,14 +613,14 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	_, err = copyFile(
 		filepath.Join("./docker/", "gaia.Dockerfile"),
-		filepath.Join(gaiaVal.configDir(), "gaia.Dockerfile"),
+		filepath.Join(gaiaCfgPath, "gaia.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "gaia.Dockerfile",
-			ContextDir: gaiaVal.configDir(),
+			ContextDir: gaiaCfgPath,
 		},
 		&dockertest.RunOptions{
 			Name:      gaiaVal.instanceName(),
@@ -647,6 +647,19 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 		noRestart,
 	)
 	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+	_ = s.dkrPool.Client.Logs(docker.LogsOptions{
+		Container:    s.gaiaResource.Container.ID,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+
+	fmt.Println("GAIA STDOUT:", outBuf.String())
+	fmt.Println("GAIA STDERR:", errBuf.String())
 
 	endpoint := fmt.Sprintf("tcp://%s", s.gaiaResource.GetHostPort("26657/tcp"))
 	s.gaiaRPC, err = rpchttp.New(endpoint, "/websocket")
