@@ -1,3 +1,5 @@
+//nolint
+// Denomination constants
 package types
 
 const (
