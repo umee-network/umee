@@ -15,9 +15,6 @@ When interest accrues, the sum of all assets owed by all users increases for eac
 
 The mechanism by which interest is calculated, and then split between incentivizing lenders as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
 
-## Alternative Approaches
-
-- Setting aside a separate account (or even separate module account, for example by making `x/reserve`) would separate reserve balances from the lending pool.
 
 ## Decision
 
@@ -31,7 +28,7 @@ Additionally, a governance parameter must be kept which specifies the portion of
 
 > TODO: Decide on the above.
 
-Regarding the actual increasing of reserves when interest accrues on borrow positions, the following approach can be used (which interacts with the lender interest stream defined in [ADR-001](./ADR-001-interest-stream.md).)
+Regarding the actual increasing of reserves when interest accrues on borrow positions, the following approach can be used (which interacts with the lender interest stream defined in [ADR-001](./ADR-001-interest-stream.md)).
 
 For each token type:
 
@@ -50,8 +47,8 @@ Then:
 
 The `x/leverage` module account can be used without modification to store reserves.
 
-The `x/leverage` module keeper must store, for each token denom, store an `sdk.Int` representing the amount of of that token which is reserved (i.e. may not be borrowed or withdrawn from the module account.) The keeper will work as follows:
-
+The `x/leverage` module keeper must store, for each token denom, an `sdk.Int` representing the amount of that token which is reserved (i.e. may not be borrowed or withdrawn from the module account.) The keeper will work as follows:
+The key to store the reserve amount per unique denomination is formed by:
 ```go
 // pseudocode
 reservePrefix | tokenDenom = sdk.Int
