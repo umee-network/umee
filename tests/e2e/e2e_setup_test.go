@@ -659,6 +659,21 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 				return false
 			}
 
+			fmt.Println("STATUS SYNC INFO:", status.SyncInfo)
+
+			var (
+				outBuf bytes.Buffer
+				errBuf bytes.Buffer
+			)
+			_ = s.dkrPool.Client.Logs(docker.LogsOptions{
+				Container:    s.gaiaResource.Container.ID,
+				OutputStream: &outBuf,
+				ErrorStream:  &errBuf,
+			})
+
+			fmt.Println("GAIA STDOUT:", outBuf.String())
+			fmt.Println("GAIA STDERR:", errBuf.String())
+
 			// let the node produce a few blocks
 			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
 				return false
