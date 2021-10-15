@@ -44,7 +44,7 @@ func (pb ExchangeRateBallot) ToMap() map[string]sdk.Dec {
 	return exchangeRateMap
 }
 
-// ToCrossRate return cross_rate(base/exchange_rate) ballot
+// ToCrossRate return cross_rate(base/exchange_rate) ballot.
 func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeRateBallot) {
 	for i := range pb {
 		vote := pb[i]
