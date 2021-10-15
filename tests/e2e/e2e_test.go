@@ -153,7 +153,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	var ibcStakeDenom string
 	s.Run("send_stake_to_umee", func() {
 		recipient := s.chain.validators[0].keyInfo.GetAddress().String()
-		token := sdk.NewInt64Coin("stake", 3300000000)
+		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.sendIBC(gaiaChainID, s.chain.id, recipient, token)
 
 		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))

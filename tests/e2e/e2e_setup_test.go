@@ -87,12 +87,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	s.runEthContainer()
 	s.runValidators()
-	s.runContractDeployment()
-	s.runOrchestrators()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
+	s.runEthContainer()
+	s.runContractDeployment()
+	s.runOrchestrators()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -124,8 +124,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) initNodes() {
-	s.Require().NoError(s.chain.createAndInitValidators(3))
-	s.Require().NoError(s.chain.createAndInitOrchestrators(3))
+	s.Require().NoError(s.chain.createAndInitValidators(2))
+	s.Require().NoError(s.chain.createAndInitOrchestrators(2))
 	s.Require().NoError(s.chain.createAndInitGaiaValidator())
 
 	// initialize a genesis file for the first validator
@@ -365,7 +365,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 }
 
 func (s *IntegrationTestSuite) runValidators() {
-	s.T().Log("starting validator containers...")
+	s.T().Log("starting Umee validator containers...")
 
 	s.valResources = make([]*dockertest.Resource, len(s.chain.validators))
 	for i, val := range s.chain.validators {
@@ -398,7 +398,7 @@ func (s *IntegrationTestSuite) runValidators() {
 		s.Require().NoError(err)
 
 		s.valResources[i] = resource
-		s.T().Logf("started validator container: %s", resource.Container.ID)
+		s.T().Logf("started Umee validator container: %s", resource.Container.ID)
 	}
 
 	rpcClient, err := rpchttp.New("tcp://localhost:26657", "/websocket")
