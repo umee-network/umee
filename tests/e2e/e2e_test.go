@@ -193,11 +193,58 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().NoError(err)
 	})
 
-	s.Run("send_photon_tokens_to_eth", func() {
+	// send 300 stake tokens from Umee to Ethereum
+	s.Run("send_stake_tokens_to_eth", func() {
+		ethRecipient := s.chain.validators[1].ethereumKey.address
+		s.sendFromUmeeToEth(0, ethRecipient, fmt.Sprintf("300%s", ibcStakeDenom), "10photon", fmt.Sprintf("7%s", ibcStakeDenom))
 
+		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
+
+		balance, err := queryUmeeDenomBalance(endpoint, fromAddr.String(), ibcStakeDenom)
+		s.Require().NoError(err)
+		s.Require().Equal(9999999693, balance)
+
+		expEthBalance := 300
+
+		// require the Ethereum recipient balance increased
+		s.Require().Eventually(
+			func() bool {
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				defer cancel()
+
+				b, err := queryEthTokenBalance(ctx, s.ethClient, ibcStakeERC20Addr, ethRecipient)
+				if err != nil {
+					return false
+				}
+
+				return b == expEthBalance
+			},
+			2*time.Minute,
+			5*time.Second,
+		)
 	})
 
-	s.Run("send_photon_tokens_from_eth", func() {
+	// send 300 stake tokens from Ethereum back to Umee
+	s.Run("send_stake_tokens_from_eth", func() {
+		s.sendFromEthToUmee(1, ibcStakeERC20Addr, s.chain.validators[0].keyInfo.GetAddress().String(), "300")
 
+		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+		toAddr := s.chain.validators[0].keyInfo.GetAddress()
+		expBalance := int64(9999999993)
+
+		// require the original sender's (validator) balance increased
+		s.Require().Eventually(
+			func() bool {
+				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), ibcStakeDenom)
+				if err != nil {
+					return false
+				}
+
+				return b.Amount.Int64() == expBalance
+			},
+			2*time.Minute,
+			5*time.Second,
+		)
 	})
 }
