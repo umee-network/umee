@@ -667,7 +667,10 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	s.Require().Eventually(
 		func() bool {
-			status, err := s.gaiaRPC.Status(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			status, err := s.gaiaRPC.Status(ctx)
 			if err != nil {
 				return false
 			}
