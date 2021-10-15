@@ -51,11 +51,10 @@ The `x/leverage` module keeper must store, for each token denom, an `sdk.Int` re
 The key to store the reserve amount per unique denomination is formed by:
 ```go
     // reserveprefix | denom
-	var key []byte
-	key = append(key, KeyPrefixReserveAmount...)
-	key = append(key, []byte(tokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
-```
+    var key []byte
+    key = append(key, KeyPrefixReserveAmount...)
+    key = append(key, []byte(tokenDenom)...)
+    return append(key, 0) // append 0 for null-termination
 
 The logic for increasing the reserved amount of each token will occur in the EndBlock function, simultaneous with interest accrual:
 
