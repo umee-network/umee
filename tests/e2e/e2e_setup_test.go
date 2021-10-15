@@ -602,7 +602,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
 	gaiaVal := s.chain.gaiaValidators[0]
-	gaiaCfgPath := path.Join(s.chain.configDir(), "gaia")
+	gaiaCfgPath := path.Join(gaiaVal.configDir(), "cfg")
 
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
 	_, err := copyFile(
@@ -613,20 +613,20 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	_, err = copyFile(
 		filepath.Join("./docker/", "gaia.Dockerfile"),
-		filepath.Join(s.chain.configDir(), "gaia.Dockerfile"),
+		filepath.Join(gaiaVal.configDir(), "gaia.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "gaia.Dockerfile",
-			ContextDir: s.chain.configDir(),
+			ContextDir: gaiaVal.configDir(),
 		},
 		&dockertest.RunOptions{
-			Name:      "gaiaval0",
+			Name:      gaiaVal.instanceName(),
 			NetworkID: s.dkrNet.Network.ID,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/gaia", gaiaCfgPath),
+				fmt.Sprintf("%s/:/root/.gaia", gaiaVal.configDir()),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"1317/tcp":  {{HostIP: "", HostPort: "1417"}},
@@ -641,7 +641,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 			Entrypoint: []string{
 				"sh",
 				"-c",
-				"chmod +x /root/gaia/gaia_bootstrap.sh && /root/gaia/gaia_bootstrap.sh",
+				"chmod +x /root/.gaia/cfg/gaia_bootstrap.sh && /root/.gaia/cfg/gaia_bootstrap.sh",
 			},
 		},
 		noRestart,
