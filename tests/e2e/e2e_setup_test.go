@@ -652,43 +652,16 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-	_ = s.dkrPool.Client.Logs(docker.LogsOptions{
-		Container:    s.gaiaResource.Container.ID,
-		OutputStream: &outBuf,
-		ErrorStream:  &errBuf,
-	})
-
-	fmt.Println("GAIA STDOUT:", outBuf.String())
-	fmt.Println("GAIA STDERR:", errBuf.String())
-
 	endpoint := fmt.Sprintf("tcp://%s", s.gaiaResource.GetHostPort("26657/tcp"))
 	s.gaiaRPC, err = rpchttp.New(endpoint, "/websocket")
 	s.Require().NoError(err)
 
 	s.Require().Eventually(
 		func() bool {
-			var (
-				outBuf bytes.Buffer
-				errBuf bytes.Buffer
-			)
-			_ = s.dkrPool.Client.Logs(docker.LogsOptions{
-				Container:    s.gaiaResource.Container.ID,
-				OutputStream: &outBuf,
-				ErrorStream:  &errBuf,
-			})
-
-			fmt.Println("GAIA STDOUT:", outBuf.String())
-			fmt.Println("GAIA STDERR:", errBuf.String())
-
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
 			status, err := s.gaiaRPC.Status(ctx)
-			fmt.Println("STATUS ERROR:", err)
 			if err != nil {
 				return false
 			}
