@@ -1,4 +1,4 @@
-name: CI
+name: debug
 on:
   pull_request:
   push:
@@ -7,9 +7,10 @@ on:
       - release/**
 
 jobs:
-  build:
+  ssh-debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 60
