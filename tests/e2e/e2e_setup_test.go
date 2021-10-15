@@ -406,7 +406,10 @@ func (s *IntegrationTestSuite) runValidators() {
 
 	s.Require().Eventually(
 		func() bool {
-			status, err := rpcClient.Status(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			status, err := rpcClient.Status(ctx)
 			if err != nil {
 				return false
 			}
@@ -667,16 +670,6 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	s.Require().Eventually(
 		func() bool {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			status, err := s.gaiaRPC.Status(ctx)
-			if err != nil {
-				return false
-			}
-
-			fmt.Println("STATUS SYNC INFO:", status.SyncInfo)
-
 			var (
 				outBuf bytes.Buffer
 				errBuf bytes.Buffer
@@ -689,6 +682,16 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 			fmt.Println("GAIA STDOUT:", outBuf.String())
 			fmt.Println("GAIA STDERR:", errBuf.String())
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			status, err := s.gaiaRPC.Status(ctx)
+			if err != nil {
+				return false
+			}
+
+			fmt.Println("STATUS SYNC INFO:", status.SyncInfo)
 
 			// let the node produce a few blocks
 			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
