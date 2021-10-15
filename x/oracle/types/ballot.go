@@ -11,7 +11,7 @@ import (
 // NOTE: we don't need to implement proto interface on this file
 //       these are not used in store or rpc response
 
-// VoteForTally is a convenience wrapper to reduce redundant lookup cost
+// VoteForTally is a convenience wrapper to reduce redundant lookup cost.
 type VoteForTally struct {
 	Denom        string
 	ExchangeRate sdk.Dec
@@ -19,7 +19,7 @@ type VoteForTally struct {
 	Power        int64
 }
 
-// NewVoteForTally returns a new VoteForTally instance
+// NewVoteForTally returns a new VoteForTally instance.
 func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
 	return VoteForTally{
 		ExchangeRate: rate,
@@ -29,15 +29,15 @@ func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress, power int
 	}
 }
 
-// ExchangeRateBallot is a convenience wrapper around a ExchangeRateVote slice
+// ExchangeRateBallot is a convenience wrapper around a ExchangeRateVote slice.
 type ExchangeRateBallot []VoteForTally
 
-// ToMap return organized exchange rate map by validator
+// ToMap return organized exchange rate map by validator.
 func (pb ExchangeRateBallot) ToMap() map[string]sdk.Dec {
 	exchangeRateMap := make(map[string]sdk.Dec)
 	for _, vote := range pb {
 		if vote.ExchangeRate.IsPositive() {
-			exchangeRateMap[string(vote.Voter)] = vote.ExchangeRate
+			exchangeRateMap[vote.Voter.String()] = vote.ExchangeRate
 		}
 	}
 
@@ -49,7 +49,7 @@ func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeR
 	for i := range pb {
 		vote := pb[i]
 
-		if exchangeRateRT, ok := bases[string(vote.Voter)]; ok && vote.ExchangeRate.IsPositive() {
+		if exchangeRateRT, ok := bases[vote.Voter.String()]; ok && vote.ExchangeRate.IsPositive() {
 			vote.ExchangeRate = exchangeRateRT.Quo(vote.ExchangeRate)
 		} else {
 			// If we can't get reference terra exchange rate, we just convert the vote as abstain vote
@@ -65,7 +65,7 @@ func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeR
 
 // Power returns the total amount of voting power in the ballot
 func (pb ExchangeRateBallot) Power() int64 {
-	totalPower := int64(0)
+	var totalPower int64
 	for _, vote := range pb {
 		totalPower += vote.Power
 	}
@@ -78,7 +78,7 @@ func (pb ExchangeRateBallot) Power() int64 {
 func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 	totalPower := pb.Power()
 	if pb.Len() > 0 {
-		pivot := int64(0)
+		var pivot int64
 		for _, v := range pb {
 			votePower := v.Power
 
@@ -88,6 +88,7 @@ func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 			}
 		}
 	}
+
 	return sdk.ZeroDec()
 }
 
