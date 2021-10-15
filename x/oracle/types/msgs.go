@@ -25,7 +25,9 @@ const (
 //-------------------------------------------------
 
 // NewMsgAggregateExchangeRatePrevote returns MsgAggregateExchangeRatePrevote instance
-func NewMsgAggregateExchangeRatePrevote(hash AggregateVoteHash, feeder sdk.AccAddress, validator sdk.ValAddress) *MsgAggregateExchangeRatePrevote {
+func NewMsgAggregateExchangeRatePrevote(hash AggregateVoteHash,
+	feeder sdk.AccAddress,
+	validator sdk.ValAddress) *MsgAggregateExchangeRatePrevote {
 	return &MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    feeder.String(),
@@ -81,7 +83,10 @@ func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
 }
 
 // NewMsgAggregateExchangeRateVote returns MsgAggregateExchangeRateVote instance
-func NewMsgAggregateExchangeRateVote(salt string, exchangeRates string, feeder sdk.AccAddress, validator sdk.ValAddress) *MsgAggregateExchangeRateVote {
+func NewMsgAggregateExchangeRateVote(salt string,
+	exchangeRates string,
+	feeder sdk.AccAddress,
+	validator sdk.ValAddress) *MsgAggregateExchangeRateVote {
 	return &MsgAggregateExchangeRateVote{
 		Salt:          salt,
 		ExchangeRates: exchangeRates,

@@ -67,14 +67,30 @@ func ParamKeyTable() paramstypes.KeyTable {
 // pairs of oracle module's parameters.
 func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 	return paramstypes.ParamSetPairs{
-		paramstypes.NewParamSetPair(KeyVotePeriod, &p.VotePeriod, validateVotePeriod),
-		paramstypes.NewParamSetPair(KeyVoteThreshold, &p.VoteThreshold, validateVoteThreshold),
-		paramstypes.NewParamSetPair(KeyRewardBand, &p.RewardBand, validateRewardBand),
-		paramstypes.NewParamSetPair(KeyRewardDistributionWindow, &p.RewardDistributionWindow, validateRewardDistributionWindow),
-		paramstypes.NewParamSetPair(KeyWhitelist, &p.Whitelist, validateWhitelist),
-		paramstypes.NewParamSetPair(KeySlashFraction, &p.SlashFraction, validateSlashFraction),
-		paramstypes.NewParamSetPair(KeySlashWindow, &p.SlashWindow, validateSlashWindow),
-		paramstypes.NewParamSetPair(KeyMinValidPerWindow, &p.MinValidPerWindow, validateMinValidPerWindow),
+		paramstypes.NewParamSetPair(KeyVotePeriod,
+			&p.VotePeriod,
+			validateVotePeriod),
+		paramstypes.NewParamSetPair(KeyVoteThreshold,
+			&p.VoteThreshold,
+			validateVoteThreshold),
+		paramstypes.NewParamSetPair(KeyRewardBand,
+			&p.RewardBand,
+			validateRewardBand),
+		paramstypes.NewParamSetPair(KeyRewardDistributionWindow,
+			&p.RewardDistributionWindow,
+			validateRewardDistributionWindow),
+		paramstypes.NewParamSetPair(KeyWhitelist,
+			&p.Whitelist,
+			validateWhitelist),
+		paramstypes.NewParamSetPair(KeySlashFraction,
+			&p.SlashFraction,
+			validateSlashFraction),
+		paramstypes.NewParamSetPair(KeySlashWindow,
+			&p.SlashWindow,
+			validateSlashWindow),
+		paramstypes.NewParamSetPair(KeyMinValidPerWindow,
+			&p.MinValidPerWindow,
+			validateMinValidPerWindow),
 	}
 }
 

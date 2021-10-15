@@ -1,6 +1,6 @@
+//nolint
 package types
 
-//nolint
 const (
 	MicroLunaDenom  = "uluna"
 	MicroUSDDenom   = "uusd"

@@ -9,12 +9,21 @@ import (
 
 // StakingKeeper is expected keeper for staking module
 type StakingKeeper interface {
-	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI // get validator by operator address; nil when validator not found
-	TotalBondedTokens(sdk.Context) sdk.Int                                     // total bonded tokens within the validator set
-	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)                 // slash the validator and delegators of the validator, specifying offence height, offence power, and slash fraction
-	Jail(sdk.Context, sdk.ConsAddress)                                         // jail a validator
-	ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator                 // an iterator for the current validator power store
-	MaxValidators(sdk.Context) uint32                                          // MaxValidators returns the maximum amount of bonded validators
+	// get validator by operator address; nil when validator not found
+	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI
+	// total bonded tokens within the validator set
+	TotalBondedTokens(sdk.Context) sdk.Int
+	// slash the validator and delegators of the validator,
+	// specifying offense height, offense
+	// power, and slash fraction
+	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)
+	// jail a validator
+	Jail(sdk.Context, sdk.ConsAddress)
+	// an iterator for the current validator power store
+	ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator
+	// MaxValidators returns the
+	// maximum amount of bonded validators
+	MaxValidators(sdk.Context) uint32
 	PowerReduction(ctx sdk.Context) (res sdk.Int)
 }
 

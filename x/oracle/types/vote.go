@@ -10,7 +10,9 @@ import (
 )
 
 // NewAggregateExchangeRatePrevote returns AggregateExchangeRatePrevote object
-func NewAggregateExchangeRatePrevote(hash AggregateVoteHash, voter sdk.ValAddress, submitBlock uint64) AggregateExchangeRatePrevote {
+func NewAggregateExchangeRatePrevote(hash AggregateVoteHash,
+	voter sdk.ValAddress,
+	submitBlock uint64) AggregateExchangeRatePrevote {
 	return AggregateExchangeRatePrevote{
 		Hash:        hash.String(),
 		Voter:       voter.String(),
@@ -25,7 +27,8 @@ func (v AggregateExchangeRatePrevote) String() string {
 }
 
 // NewAggregateExchangeRateVote creates a AggregateExchangeRateVote instance
-func NewAggregateExchangeRateVote(exchangeRateTuples ExchangeRateTuples, voter sdk.ValAddress) AggregateExchangeRateVote {
+func NewAggregateExchangeRateVote(exchangeRateTuples ExchangeRateTuples,
+	voter sdk.ValAddress) AggregateExchangeRateVote {
 	return AggregateExchangeRateVote{
 		ExchangeRateTuples: exchangeRateTuples,
 		Voter:              voter.String(),
