@@ -687,6 +687,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 			defer cancel()
 
 			status, err := s.gaiaRPC.Status(ctx)
+			fmt.Println("STATUS ERROR:", err)
 			if err != nil {
 				return false
 			}
