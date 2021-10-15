@@ -605,9 +605,10 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
 	gaiaVal := s.chain.gaiaValidators[0]
-	gaiaCfgPath := path.Join(gaiaVal.configDir(), "cfg")
 
+	gaiaCfgPath := path.Join(gaiaVal.configDir(), "cfg")
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
+
 	_, err := copyFile(
 		filepath.Join("./scripts/", "gaia_bootstrap.sh"),
 		filepath.Join(gaiaCfgPath, "gaia_bootstrap.sh"),
@@ -616,14 +617,14 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	_, err = copyFile(
 		filepath.Join("./docker/", "gaia.Dockerfile"),
-		filepath.Join(gaiaCfgPath, "gaia.Dockerfile"),
+		filepath.Join(s.chain.configDir(), "gaia.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "gaia.Dockerfile",
-			ContextDir: gaiaCfgPath,
+			ContextDir: s.chain.configDir(),
 		},
 		&dockertest.RunOptions{
 			Name:      gaiaVal.instanceName(),
