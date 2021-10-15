@@ -5,8 +5,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	core "github.com/terra-money/core/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
@@ -25,9 +23,9 @@ var (
 
 // Default parameter values
 const (
-	DefaultVotePeriod               = core.BlocksPerMinute / 2 // 30 seconds
-	DefaultSlashWindow              = core.BlocksPerWeek       // window for a week
-	DefaultRewardDistributionWindow = core.BlocksPerYear       // window for a year
+	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
+	DefaultSlashWindow              = BlocksPerWeek       // window for a week
+	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
 )
 
 // Default parameter values
@@ -36,10 +34,10 @@ var (
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
 	DefaultTobinTax      = sdk.NewDecWithPrec(25, 4) // 0.25%
 	DefaultWhitelist     = DenomList{
-		{Name: core.MicroKRWDenom, TobinTax: DefaultTobinTax},
-		{Name: core.MicroSDRDenom, TobinTax: DefaultTobinTax},
-		{Name: core.MicroUSDDenom, TobinTax: DefaultTobinTax},
-		{Name: core.MicroMNTDenom, TobinTax: DefaultTobinTax.MulInt64(8)}}
+		{Name: MicroKRWDenom, TobinTax: DefaultTobinTax},
+		{Name: MicroSDRDenom, TobinTax: DefaultTobinTax},
+		{Name: MicroUSDDenom, TobinTax: DefaultTobinTax},
+		{Name: MicroMNTDenom, TobinTax: DefaultTobinTax.MulInt64(8)}}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
 )

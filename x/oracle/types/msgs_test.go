@@ -3,8 +3,6 @@ package types
 import (
 	"testing"
 
-	core "github.com/terra-money/core/types"
-
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -42,7 +40,7 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 		sdk.AccAddress([]byte("addr1_______________")),
 	}
 
-	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(core.MicroSDRDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(core.MicroKRWDenom, sdk.NewDecWithPrec(32121, 1))}
+	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(MicroSDRDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(MicroKRWDenom, sdk.NewDecWithPrec(32121, 1))}
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(addrs[0]))
 
 	tests := []struct {
