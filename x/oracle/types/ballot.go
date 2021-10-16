@@ -93,9 +93,9 @@ func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 }
 
 // StandardDeviation returns the standard deviation by the power of the ExchangeRateVote.
-func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec) {
+func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec, err error) {
 	if len(pb) == 0 {
-		return sdk.ZeroDec()
+		return sdk.ZeroDec(), nil
 	}
 
 	median := pb.WeightedMedian()
@@ -108,7 +108,10 @@ func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec) {
 
 	variance := sum.QuoInt64(int64(len(pb)))
 
-	floatNum, _ := strconv.ParseFloat(variance.String(), 64)
+	floatNum, err := strconv.ParseFloat(variance.String(), 64)
+	if err != nil {
+		return sdk.Dec{}, err
+	}
 	floatNum = math.Sqrt(floatNum)
 	standardDeviation, _ = sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
 

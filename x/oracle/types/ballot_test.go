@@ -274,7 +274,8 @@ func TestPBStandardDeviation(t *testing.T) {
 
 			pb = append(pb, vote)
 		}
+		stdDev, _ := pb.StandardDeviation()
 
-		require.Equal(t, tc.standardDeviation, pb.StandardDeviation())
+		require.Equal(t, tc.standardDeviation, stdDev)
 	}
 }
