@@ -695,21 +695,26 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	)
 	s.Require().NoError(err)
 
-	s.hermesResource, err = s.dkrPool.RunWithOptions(
+	_, err = copyFile(
+		filepath.Join("./docker/", "hermes.Dockerfile"),
+		filepath.Join(s.chain.configDir(), "hermes.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	s.hermesResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "hermes.Dockerfile",
+			ContextDir: s.chain.configDir(),
+		},
 		&dockertest.RunOptions{
 			Name:      "umee-gaia-relayer",
 			NetworkID: s.dkrNet.Network.ID,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
-			},
-			ExposedPorts: []string{
-				"3031",
+				fmt.Sprintf("%s/:/root/hermes", hermesCfgPath),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
 			},
-			Repository: "informalsystems/hermes",
-			Tag:        "0.7.3",
 			Env: []string{
 				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
 				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.chain.id),
@@ -721,7 +726,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 			Entrypoint: []string{
 				"sh",
 				"-c",
-				"chmod +x /home/hermes/hermes_bootstrap.sh && /home/hermes/hermes_bootstrap.sh",
+				"chmod +x /root/hermes/hermes_bootstrap.sh && /root/hermes/hermes_bootstrap.sh",
 			},
 		},
 		noRestart,

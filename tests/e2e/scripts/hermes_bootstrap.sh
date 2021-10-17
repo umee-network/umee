@@ -3,11 +3,11 @@
 set -ex
 
 # initialize Hermes relayer configuration
-mkdir -p /home/hermes/.hermes/
-touch /home/hermes/.hermes/config.toml
+mkdir -p /root/.hermes/
+touch /root/.hermes/config.toml
 
 # setup Hermes relayer configuration
-tee /home/hermes/.hermes/config.toml <<EOF
+tee /root/.hermes/config.toml <<EOF
 
 [global]
 strategy = 'packets'
