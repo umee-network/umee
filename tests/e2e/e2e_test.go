@@ -79,8 +79,6 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().Equal(ibcStakeDenom, token.Denom)
 		s.Require().Equal(int64(3299999693), token.Amount.Int64())
 
-		expEthBalance := 307
-
 		// require the Ethereum recipient balance increased
 		s.Require().Eventually(
 			func() bool {
@@ -92,7 +90,9 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 					return false
 				}
 
-				return b == expEthBalance
+				// The balance could differ if the receiving address was the orchestrator
+				// the sent the batch tx and got the gravity fee.
+				return b >= 300 && b <= 307
 			},
 			2*time.Minute,
 			5*time.Second,
@@ -156,8 +156,6 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.Require().NoError(err)
 		s.Require().Equal(int64(99999999084), balance.Amount.Int64())
 
-		expEthBalance := 100
-
 		// require the Ethereum recipient balance increased
 		s.Require().Eventually(
 			func() bool {
@@ -169,7 +167,9 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 					return false
 				}
 
-				return b == expEthBalance
+				// The balance could differ if the receiving address was the orchestrator
+				// the sent the batch tx and got the gravity fee.
+				return b >= 100 && b <= 103
 			},
 			2*time.Minute,
 			5*time.Second,
@@ -223,8 +223,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		s.Require().NoError(err)
 		s.Require().Equal(int64(9999999693), balance.Amount.Int64())
 
-		expEthBalance := 300
-
 		// require the Ethereum recipient balance increased
 		s.Require().Eventually(
 			func() bool {
@@ -236,7 +234,9 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 					return false
 				}
 
-				return b == expEthBalance
+				// The balance could differ if the receiving address was the orchestrator
+				// the sent the batch tx and got the gravity fee.
+				return b >= 300 && b <= 307
 			},
 			2*time.Minute,
 			5*time.Second,
