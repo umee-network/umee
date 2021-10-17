@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 		AttachStdout: true,
 		AttachStderr: true,
 		Container:    s.hermesResource.Container.ID,
-		User:         "hermes",
+		User:         "root",
 		Cmd: []string{
 			"hermes",
 			"create",
@@ -75,7 +75,7 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 		AttachStdout: true,
 		AttachStderr: true,
 		Container:    s.hermesResource.Container.ID,
-		User:         "hermes",
+		User:         "root",
 		Cmd: []string{
 			"hermes",
 			"tx",
