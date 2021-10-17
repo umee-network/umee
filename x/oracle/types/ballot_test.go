@@ -49,8 +49,9 @@ func TestToMap(t *testing.T) {
 
 	pb := ExchangeRateBallot(tests.votes)
 	mapData := pb.ToMap()
+
 	for i, vote := range tests.votes {
-		exchangeRate, ok := mapData[string(vote.Voter)]
+		exchangeRate, ok := mapData[vote.Voter.String()]
 		if tests.isValid[i] {
 			require.True(t, ok)
 			require.Equal(t, exchangeRate, vote.ExchangeRate)
