@@ -1,4 +1,4 @@
-name: debug
+name: Debug
 on:
   workflow_dispatch:
     inputs:
