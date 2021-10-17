@@ -182,7 +182,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		toAddr := s.chain.validators[0].keyInfo.GetAddress()
-		expBalance := int64(99999999987)
+		expBalance := int64(99999999184)
 
 		// require the original sender's (validator) balance increased
 		s.Require().Eventually(
@@ -191,8 +191,6 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 				if err != nil {
 					return false
 				}
-
-				fmt.Printf("EXP: %v; GOT: %v\n", expBalance, b)
 
 				return b.Amount.Int64() == expBalance
 			},
