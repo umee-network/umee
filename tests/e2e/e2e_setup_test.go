@@ -201,10 +201,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
-		delKeysMsg := val.buildDelegateKeysMsg()
-		s.Require().NoError(err)
-
-		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
+		signedTx, err := val.signMsg(createValmsg)
 		s.Require().NoError(err)
 
 		txRaw, err := cdc.MarshalJSON(signedTx)
