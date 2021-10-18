@@ -6,7 +6,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.44.2
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go v1.2.2
-	github.com/ethereum/go-ethereum v1.10.9
+	github.com/ethereum/go-ethereum v1.10.10
 	github.com/gogo/protobuf v1.3.3
 	github.com/golangci/golangci-lint v1.42.1
 	github.com/gorilla/mux v1.8.0
@@ -97,7 +97,7 @@ require (
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
-	github.com/dlclark/regexp2 v1.2.0 // indirect
+	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/docker/cli v20.10.8+incompatible // indirect
 	github.com/docker/docker v20.10.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
