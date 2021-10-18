@@ -7,27 +7,25 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// ensure Msg interface compliance at compile time
 var (
 	_ sdk.Msg = &MsgDelegateFeedConsent{}
 	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
 )
 
-// oracle message types
+// Messages types constants
 const (
 	TypeMsgDelegateFeedConsent          = "delegate_feeder"
 	TypeMsgAggregateExchangeRatePrevote = "aggregate_exchange_rate_prevote"
 	TypeMsgAggregateExchangeRateVote    = "aggregate_exchange_rate_vote"
 )
 
-//-------------------------------------------------
-//-------------------------------------------------
-
-// NewMsgAggregateExchangeRatePrevote returns MsgAggregateExchangeRatePrevote instance
-func NewMsgAggregateExchangeRatePrevote(hash AggregateVoteHash,
+func NewMsgAggregateExchangeRatePrevote(
+	hash AggregateVoteHash,
 	feeder sdk.AccAddress,
-	validator sdk.ValAddress) *MsgAggregateExchangeRatePrevote {
+	validator sdk.ValAddress,
+) *MsgAggregateExchangeRatePrevote {
+
 	return &MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    feeder.String(),
@@ -58,10 +56,9 @@ func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic Implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
-
 	_, err := AggregateVoteHashFromHexString(msg.Hash)
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidHash, "Invalid vote hash (%s)", err)
+		return sdkerrors.Wrapf(ErrInvalidHash, "invalid vote hash (%s)", err)
 	}
 
 	// HEX encoding doubles the hash length
@@ -71,22 +68,24 @@ func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
 
 	_, err = sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid feeder address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid feeder address (%s)", err)
 	}
 
 	_, err = sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid operator address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	return nil
 }
 
-// NewMsgAggregateExchangeRateVote returns MsgAggregateExchangeRateVote instance
-func NewMsgAggregateExchangeRateVote(salt string,
+func NewMsgAggregateExchangeRateVote(
+	salt string,
 	exchangeRates string,
 	feeder sdk.AccAddress,
-	validator sdk.ValAddress) *MsgAggregateExchangeRateVote {
+	validator sdk.ValAddress,
+) *MsgAggregateExchangeRateVote {
+
 	return &MsgAggregateExchangeRateVote{
 		Salt:          salt,
 		ExchangeRates: exchangeRates,
@@ -118,15 +117,14 @@ func (msg MsgAggregateExchangeRateVote) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
-
 	_, err := sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid feeder address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid feeder address (%s)", err)
 	}
 
 	_, err = sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid operator address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	if l := len(msg.ExchangeRates); l == 0 {
@@ -141,7 +139,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	}
 
 	for _, exchangeRate := range exchangeRates {
-		// Check overflow bit length
+		// check overflow bit length
 		if exchangeRate.ExchangeRate.BigInt().BitLen() > 255+sdk.DecimalPrecisionBits {
 			return sdkerrors.Wrap(ErrInvalidExchangeRate, "overflow")
 		}
@@ -187,12 +185,12 @@ func (msg MsgDelegateFeedConsent) GetSigners() []sdk.AccAddress {
 func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 	_, err := sdk.ValAddressFromBech32(msg.Operator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid operator address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Delegate)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid delegate address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid delegate address (%s)", err)
 	}
 
 	return nil
