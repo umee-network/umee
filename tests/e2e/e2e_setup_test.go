@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -35,6 +38,7 @@ const (
 	initBalanceStr      = "110000000000uumee,100000000000photon"
 	minGasPrice         = "0.00001"
 	ethChainID     uint = 15
+	gaiaChainID         = "test-gaia-chain"
 )
 
 var (
@@ -45,11 +49,15 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
+	tmpDirs             []string
 	chain               *chain
 	ethClient           *ethclient.Client
+	gaiaRPC             *rpchttp.HTTP
 	dkrPool             *dockertest.Pool
 	dkrNet              *dockertest.Network
 	ethResource         *dockertest.Resource
+	gaiaResource        *dockertest.Resource
+	hermesResource      *dockertest.Resource
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
@@ -81,8 +89,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	s.runEthContainer()
 	s.runValidators()
+	s.runGaiaNetwork()
+	s.runIBCRelayer()
+	s.runEthContainer()
 	s.runContractDeployment()
 	s.runOrchestrators()
 }
@@ -100,7 +110,13 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.T().Log("tearing down e2e integration test suite...")
 
 	os.RemoveAll(s.chain.dataDir)
+	for _, td := range s.tmpDirs {
+		os.RemoveAll(td)
+	}
+
 	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
+	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
+	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
 
 	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
@@ -114,8 +130,9 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) initNodes() {
-	s.Require().NoError(s.chain.createAndInitValidators(4))
-	s.Require().NoError(s.chain.createAndInitOrchestrators(4))
+	s.Require().NoError(s.chain.createAndInitValidators(2))
+	s.Require().NoError(s.chain.createAndInitOrchestrators(2))
+	s.Require().NoError(s.chain.createAndInitGaiaValidator())
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.chain.validators[0].configDir()
@@ -305,16 +322,26 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
 
-	_, err := copyFile(
-		filepath.Join("./", "eth.Dockerfile"),
-		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	_, err = copyFile(
+		filepath.Join(s.chain.configDir(), "eth_genesis.json"),
+		filepath.Join(tmpDir, "eth_genesis.json"),
+	)
+	s.Require().NoError(err)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "eth.Dockerfile"),
+		filepath.Join(tmpDir, "eth.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "eth.Dockerfile",
-			ContextDir: s.chain.configDir(),
+			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:      "ethereum",
@@ -354,7 +381,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 }
 
 func (s *IntegrationTestSuite) runValidators() {
-	s.T().Log("starting validator containers...")
+	s.T().Log("starting Umee validator containers...")
 
 	s.valResources = make([]*dockertest.Resource, len(s.chain.validators))
 	for i, val := range s.chain.validators {
@@ -387,7 +414,7 @@ func (s *IntegrationTestSuite) runValidators() {
 		s.Require().NoError(err)
 
 		s.valResources[i] = resource
-		s.T().Logf("started validator container: %s", resource.Container.ID)
+		s.T().Logf("started Umee validator container: %s", resource.Container.ID)
 	}
 
 	rpcClient, err := rpchttp.New("tcp://localhost:26657", "/websocket")
@@ -395,13 +422,16 @@ func (s *IntegrationTestSuite) runValidators() {
 
 	s.Require().Eventually(
 		func() bool {
-			status, err := rpcClient.Status(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			status, err := rpcClient.Status(ctx)
 			if err != nil {
 				return false
 			}
 
 			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 5 {
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
 				return false
 			}
 
@@ -527,7 +557,7 @@ listen_addr = "127.0.0.1:3000"
 		// NOTE: If the Docker build changes, the script might have to be modified
 		// as it relies on busybox.
 		_, err := copyFile(
-			filepath.Join("./", "gorc_bootstrap.sh"),
+			filepath.Join("./scripts/", "gorc_bootstrap.sh"),
 			filepath.Join(gorcCfgPath, "gorc_bootstrap.sh"),
 		)
 		s.Require().NoError(err)
@@ -585,6 +615,182 @@ listen_addr = "127.0.0.1:3000"
 			resource.Container.ID,
 		)
 	}
+}
+
+func (s *IntegrationTestSuite) runGaiaNetwork() {
+	s.T().Log("starting Gaia network container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-gaia-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	gaiaVal := s.chain.gaiaValidators[0]
+
+	gaiaCfgPath := path.Join(tmpDir, "cfg")
+	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
+
+	_, err = copyFile(
+		filepath.Join("./scripts/", "gaia_bootstrap.sh"),
+		filepath.Join(gaiaCfgPath, "gaia_bootstrap.sh"),
+	)
+	s.Require().NoError(err)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "gaia.Dockerfile"),
+		filepath.Join(tmpDir, "gaia.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "gaia.Dockerfile",
+			ContextDir: tmpDir,
+		},
+		&dockertest.RunOptions{
+			Name:      gaiaVal.instanceName(),
+			NetworkID: s.dkrNet.Network.ID,
+			Mounts: []string{
+				fmt.Sprintf("%s/:/root/.gaia", tmpDir),
+			},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"1317/tcp":  {{HostIP: "", HostPort: "1417"}},
+				"9090/tcp":  {{HostIP: "", HostPort: "9190"}},
+				"26656/tcp": {{HostIP: "", HostPort: "27656"}},
+				"26657/tcp": {{HostIP: "", HostPort: "27657"}},
+			},
+			Env: []string{
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
+			},
+			Entrypoint: []string{
+				"sh",
+				"-c",
+				"chmod +x /root/.gaia/cfg/gaia_bootstrap.sh && /root/.gaia/cfg/gaia_bootstrap.sh",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	endpoint := fmt.Sprintf("tcp://%s", s.gaiaResource.GetHostPort("26657/tcp"))
+	s.gaiaRPC, err = rpchttp.New(endpoint, "/websocket")
+	s.Require().NoError(err)
+
+	s.Require().Eventually(
+		func() bool {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			status, err := s.gaiaRPC.Status(ctx)
+			if err != nil {
+				return false
+			}
+
+			// let the node produce a few blocks
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
+				return false
+			}
+
+			return true
+		},
+		5*time.Minute,
+		time.Second,
+		"gaia node failed to produce blocks",
+	)
+
+	s.T().Logf("started Gaia network container: %s", s.gaiaResource.Container.ID)
+}
+
+func (s *IntegrationTestSuite) runIBCRelayer() {
+	s.T().Log("starting Hermes relayer container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-hermes-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	gaiaVal := s.chain.gaiaValidators[0]
+	umeeVal := s.chain.validators[0]
+	hermesCfgPath := path.Join(tmpDir, "hermes")
+
+	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0755))
+	_, err = copyFile(
+		filepath.Join("./scripts/", "hermes_bootstrap.sh"),
+		filepath.Join(hermesCfgPath, "hermes_bootstrap.sh"),
+	)
+	s.Require().NoError(err)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "hermes.Dockerfile"),
+		filepath.Join(tmpDir, "hermes.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	s.hermesResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "hermes.Dockerfile",
+			ContextDir: tmpDir,
+		},
+		&dockertest.RunOptions{
+			Name:      "umee-gaia-relayer",
+			NetworkID: s.dkrNet.Network.ID,
+			Mounts: []string{
+				fmt.Sprintf("%s/:/root/hermes", hermesCfgPath),
+			},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
+			},
+			Env: []string{
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
+				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.gaiaResource.Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+			},
+			Entrypoint: []string{
+				"sh",
+				"-c",
+				"chmod +x /root/hermes/hermes_bootstrap.sh && /root/hermes/hermes_bootstrap.sh",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	endpoint := fmt.Sprintf("http://%s/state", s.hermesResource.GetHostPort("3031/tcp"))
+	s.Require().Eventually(
+		func() bool {
+			resp, err := http.Get(endpoint)
+			if err != nil {
+				return false
+			}
+
+			defer resp.Body.Close()
+
+			bz, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return false
+			}
+
+			var respBody map[string]interface{}
+			if err := json.Unmarshal(bz, &respBody); err != nil {
+				return false
+			}
+
+			status := respBody["status"].(string)
+			result := respBody["result"].(map[string]interface{})
+
+			return status == "success" && len(result["chains"].([]interface{})) == 2
+		},
+		5*time.Minute,
+		time.Second,
+		"hermes relayer not healthy",
+	)
+
+	s.T().Logf("started Hermes relayer container: %s", s.hermesResource.Container.ID)
+
+	// create the client, connection and channel between the Umee and Gaia chains
+	s.connectIBCChains()
 }
 
 func noRestart(config *docker.HostConfig) {

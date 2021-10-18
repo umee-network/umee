@@ -15,7 +15,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/umee-network/umee/x/leverage/client/cli"
-	"github.com/umee-network/umee/x/leverage/client/rest"
 	"github.com/umee-network/umee/x/leverage/keeper"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -69,9 +68,7 @@ func (AppModuleBasic) ValidateGenesis(
 }
 
 // RegisterRESTRoutes registers the capability module's REST service handlers.
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	rest.RegisterRoutes(clientCtx, rtr)
-}
+func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
