@@ -3,13 +3,11 @@ package types
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto/tmhash"
-
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/tendermint/tendermint/crypto/tmhash"
 )
 
-// Oracle Errors
-//nolint
+// Oracle sentinel errors
 var (
 	ErrInvalidExchangeRate   = sdkerrors.Register(ModuleName, 2, "invalid exchange rate")
 	ErrNoPrevote             = sdkerrors.Register(ModuleName, 3, "no prevote")
