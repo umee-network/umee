@@ -1,0 +1,21 @@
+name: Debug
+on:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: "Run workflow with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)"
+        required: false
+        default: "false"
+
+jobs:
+  ssh-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2.1.4
+        with:
+          go-version: 1.17
+      - uses: actions/checkout@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 90
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}

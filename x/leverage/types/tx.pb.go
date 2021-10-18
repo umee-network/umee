@@ -200,7 +200,7 @@ func (m *MsgSetCollateral) GetEnable() bool {
 }
 
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
-// from the module
+// from the module.
 type MsgBorrowAsset struct {
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -254,7 +254,7 @@ func (m *MsgBorrowAsset) GetAmount() types.Coin {
 }
 
 // MsgRepayAsset represents a lender's request to repay a borrowed base asset type
-// to the module
+// to the module.
 type MsgRepayAsset struct {
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
