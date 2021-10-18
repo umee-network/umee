@@ -9,12 +9,11 @@ const (
 	EventTypeAggregatePrevote   = "aggregate_prevote"
 	EventTypeAggregateVote      = "aggregate_vote"
 
-	AttributeKeyDenom         = "denom"
-	AttributeKeyVoter         = "voter"
-	AttributeKeyExchangeRate  = "exchange_rate"
-	AttributeKeyExchangeRates = "exchange_rates"
-	AttributeKeyOperator      = "operator"
-	AttributeKeyFeeder        = "feeder"
-
-	AttributeValueCategory = ModuleName
+	EventAttrKeyDenom         = "denom"
+	EventAttrKeyVoter         = "voter"
+	EventAttrKeyExchangeRate  = "exchange_rate"
+	EventAttrKeyExchangeRates = "exchange_rates"
+	EventAttrKeyOperator      = "operator"
+	EventAttrKeyFeeder        = "feeder"
+	EventAttrValueCategory    = ModuleName
 )
