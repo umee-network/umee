@@ -8,9 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NOTE: we don't need to implement proto interface on this file
-//       these are not used in store or rpc response
-
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
 type VoteForTally struct {
 	Denom        string
@@ -63,7 +60,7 @@ func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeR
 	return
 }
 
-// Power returns the total amount of voting power in the ballot
+// Power returns the total amount of voting power in the ballot.
 func (pb ExchangeRateBallot) Power() int64 {
 	var totalPower int64
 	for _, vote := range pb {
@@ -74,7 +71,7 @@ func (pb ExchangeRateBallot) Power() int64 {
 }
 
 // WeightedMedian returns the median weighted by the power of the ExchangeRateVote.
-// CONTRACT: ballot must be sorted
+// CONTRACT: The ballot must be sorted.
 func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 	totalPower := pb.Power()
 	if pb.Len() > 0 {
@@ -112,6 +109,7 @@ func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec, err
 	if err != nil {
 		return sdk.Dec{}, err
 	}
+
 	floatNum = math.Sqrt(floatNum)
 	standardDeviation, _ = sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
 
