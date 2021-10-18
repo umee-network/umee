@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestToMap(t *testing.T) {
@@ -23,21 +20,18 @@ func TestToMap(t *testing.T) {
 
 		[]VoteForTally{
 			{
-
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        MicroUmeeDenom,
 				ExchangeRate: sdk.NewDec(1600),
 				Power:        100,
 			},
 			{
-
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        MicroUmeeDenom,
 				ExchangeRate: sdk.ZeroDec(),
 				Power:        100,
 			},
 			{
-
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
 				Denom:        MicroUmeeDenom,
 				ExchangeRate: sdk.NewDec(1500),
@@ -135,7 +129,6 @@ func TestPBPower(t *testing.T) {
 		)
 
 		pb = append(pb, vote)
-
 		require.NotEqual(t, int64(0), vote.Power)
 
 		ballotPower += vote.Power
