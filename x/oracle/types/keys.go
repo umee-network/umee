@@ -19,58 +19,44 @@ const (
 	QuerierRoute = ModuleName
 )
 
-// Keys for oracle store
-// Items are stored with the following key: values
-//
-// - 0x01<denom_Bytes>: sdk.Dec
-//
-// - 0x02<valAddress_Bytes>: accAddress
-//
-// - 0x03<valAddress_Bytes>: int64
-//
-// - 0x04<valAddress_Bytes>: AggregateExchangeRatePrevote
-//
-// - 0x05<valAddress_Bytes>: AggregateExchangeRateVote
-//
-// - 0x06<denom_Bytes>: sdk.Dec
+// KVStore key prefixes
 var (
-	// Keys for store prefixes
-	ExchangeRateKey                 = []byte{0x01} // prefix for each key to a rate
-	FeederDelegationKey             = []byte{0x02} // prefix for each key to a feeder delegation
-	MissCounterKey                  = []byte{0x03} // prefix for each key to a miss counter
-	AggregateExchangeRatePrevoteKey = []byte{0x04} // prefix for each key to a aggregate prevote
-	AggregateExchangeRateVoteKey    = []byte{0x05} // prefix for each key to a aggregate vote
-	TobinTaxKey                     = []byte{0x06} // prefix for each key to a tobin tax
+	KeyPrefixExchangeRate                 = []byte{0x01} // prefix for each key to a rate
+	KeyPrefixFeederDelegation             = []byte{0x02} // prefix for each key to a feeder delegation
+	KeyPrefixMissCounter                  = []byte{0x03} // prefix for each key to a miss counter
+	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
+	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
+	KeyPrefixTobinTax                     = []byte{0x06} // prefix for each key to a tobin tax
 )
 
 // GetExchangeRateKey - stored by *denom*
 func GetExchangeRateKey(denom string) []byte {
-	return append(ExchangeRateKey, []byte(denom)...)
+	return append(KeyPrefixExchangeRate, []byte(denom)...)
 }
 
 // GetFeederDelegationKey - stored by *Validator* address
 func GetFeederDelegationKey(v sdk.ValAddress) []byte {
-	return append(FeederDelegationKey, address.MustLengthPrefix(v)...)
+	return append(KeyPrefixFeederDelegation, address.MustLengthPrefix(v)...)
 }
 
 // GetMissCounterKey - stored by *Validator* address
 func GetMissCounterKey(v sdk.ValAddress) []byte {
-	return append(MissCounterKey, address.MustLengthPrefix(v)...)
+	return append(KeyPrefixMissCounter, address.MustLengthPrefix(v)...)
 }
 
 // GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
 func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) []byte {
-	return append(AggregateExchangeRatePrevoteKey, address.MustLengthPrefix(v)...)
+	return append(KeyPrefixAggregateExchangeRatePrevote, address.MustLengthPrefix(v)...)
 }
 
 // GetAggregateExchangeRateVoteKey - stored by *Validator* address
 func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) []byte {
-	return append(AggregateExchangeRateVoteKey, address.MustLengthPrefix(v)...)
+	return append(KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v)...)
 }
 
 // GetTobinTaxKey - stored by *denom* bytes
 func GetTobinTaxKey(d string) []byte {
-	return append(TobinTaxKey, []byte(d)...)
+	return append(KeyPrefixTobinTax, []byte(d)...)
 }
 
 // ExtractDenomFromTobinTaxKey - split denom from the tobin tax key
