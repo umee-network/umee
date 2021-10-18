@@ -37,7 +37,7 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Borrow Interest Epoch
 
-> accrued interest = borrowed amount * (interest rate * time elapsed)
+> accrued interest = borrowed amount × (interest rate × time elapsed)
 
 A governance parameter `BorrowInterestEpoch` with type `int64` will determine the number blocks to wait between interest calculations. Whenever the number of blocks created since the last interest accrual reaches the desired value, interest accrues on all borrow positions simultaneously during `EndBlock`:
 
