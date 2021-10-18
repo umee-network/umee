@@ -322,16 +322,26 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
 
-	_, err := copyFile(
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	_, err = copyFile(
+		filepath.Join(s.chain.configDir(), "eth_genesis.json"),
+		filepath.Join(tmpDir, "eth_genesis.json"),
+	)
+	s.Require().NoError(err)
+
+	_, err = copyFile(
 		filepath.Join("./docker/", "eth.Dockerfile"),
-		filepath.Join(s.chain.configDir(), "eth.Dockerfile"),
+		filepath.Join(tmpDir, "eth.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "eth.Dockerfile",
-			ContextDir: s.chain.configDir(),
+			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:      "ethereum",
