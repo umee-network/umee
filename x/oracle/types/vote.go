@@ -9,10 +9,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewAggregateExchangeRatePrevote returns AggregateExchangeRatePrevote object
-func NewAggregateExchangeRatePrevote(hash AggregateVoteHash,
+func NewAggregateExchangeRatePrevote(
+	hash AggregateVoteHash,
 	voter sdk.ValAddress,
-	submitBlock uint64) AggregateExchangeRatePrevote {
+	submitBlock uint64,
+) AggregateExchangeRatePrevote {
+
 	return AggregateExchangeRatePrevote{
 		Hash:        hash.String(),
 		Voter:       voter.String(),
@@ -26,9 +28,11 @@ func (v AggregateExchangeRatePrevote) String() string {
 	return string(out)
 }
 
-// NewAggregateExchangeRateVote creates a AggregateExchangeRateVote instance
-func NewAggregateExchangeRateVote(exchangeRateTuples ExchangeRateTuples,
-	voter sdk.ValAddress) AggregateExchangeRateVote {
+func NewAggregateExchangeRateVote(
+	exchangeRateTuples ExchangeRateTuples,
+	voter sdk.ValAddress,
+) AggregateExchangeRateVote {
+
 	return AggregateExchangeRateVote{
 		ExchangeRateTuples: exchangeRateTuples,
 		Voter:              voter.String(),
@@ -73,6 +77,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 
 	tupleStrs := strings.Split(tuplesStr, ",")
 	tuples := make(ExchangeRateTuples, len(tupleStrs))
+
 	duplicateCheckMap := make(map[string]bool)
 	for i, tupleStr := range tupleStrs {
 		decCoin, err := sdk.ParseDecCoin(tupleStr)
