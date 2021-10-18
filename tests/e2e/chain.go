@@ -32,7 +32,6 @@ func init() {
 	encodingConfig.InterfaceRegistry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&stakingtypes.MsgCreateValidator{},
-		&gravitytypes.MsgDelegateKeys{},
 	)
 	encodingConfig.InterfaceRegistry.RegisterImplementations(
 		(*cryptotypes.PubKey)(nil),
