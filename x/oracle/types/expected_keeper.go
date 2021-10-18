@@ -7,42 +7,37 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-// StakingKeeper is expected keeper for staking module
+// StakingKeeper defines the expected interface contract defined by the x/staking
+// module.
 type StakingKeeper interface {
-	// get validator by operator address; nil when validator not found
 	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI
-	// total bonded tokens within the validator set
 	TotalBondedTokens(sdk.Context) sdk.Int
-	// slash the validator and delegators of the validator,
-	// specifying offense height, offense
-	// power, and slash fraction
 	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)
-	// jail a validator
 	Jail(sdk.Context, sdk.ConsAddress)
-	// an iterator for the current validator power store
 	ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator
-	// MaxValidators returns the
-	// maximum amount of bonded validators
 	MaxValidators(sdk.Context) uint32
 	PowerReduction(ctx sdk.Context) (res sdk.Int)
 }
 
-// DistributionKeeper is expected keeper for distribution module
+// DistributionKeeper defines the expected interface contract defined by the
+// x/distribution module.
 type DistributionKeeper interface {
 	AllocateTokensToValidator(ctx sdk.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins)
-
-	// only used for simulation
 	GetValidatorOutstandingRewardsCoins(ctx sdk.Context, val sdk.ValAddress) sdk.DecCoins
 }
 
-// AccountKeeper is expected keeper for auth module
+// AccountKeeper defines the expected interface contract defined by the x/auth
+// module.
 type AccountKeeper interface {
 	GetModuleAddress(name string) sdk.AccAddress
 	GetModuleAccount(ctx sdk.Context, moduleName string) authtypes.ModuleAccountI
-	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI // only used for simulation
+
+	// only used for simulation
+	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
 }
 
-// BankKeeper defines the expected interface needed to retrieve account balances.
+// BankKeeper defines the expected interface contract defined by the x/bank
+// module.
 type BankKeeper interface {
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
