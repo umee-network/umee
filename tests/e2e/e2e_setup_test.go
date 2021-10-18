@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -48,6 +49,7 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
+	tmpDirs             []string
 	chain               *chain
 	ethClient           *ethclient.Client
 	gaiaRPC             *rpchttp.HTTP
@@ -87,8 +89,8 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// container infrastructure
-	s.runGaiaNetwork()
 	s.runValidators()
+	s.runGaiaNetwork()
 	s.runIBCRelayer()
 	s.runEthContainer()
 	s.runContractDeployment()
@@ -108,6 +110,10 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.T().Log("tearing down e2e integration test suite...")
 
 	os.RemoveAll(s.chain.dataDir)
+	for _, td := range s.tmpDirs {
+		os.RemoveAll(td)
+	}
+
 	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
 	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
@@ -604,12 +610,16 @@ listen_addr = "127.0.0.1:3000"
 func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-gaia-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
 	gaiaVal := s.chain.gaiaValidators[0]
 
-	gaiaCfgPath := path.Join(gaiaVal.configDir(), "cfg")
+	gaiaCfgPath := path.Join(tmpDir, "cfg")
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
 
-	_, err := copyFile(
+	_, err = copyFile(
 		filepath.Join("./scripts/", "gaia_bootstrap.sh"),
 		filepath.Join(gaiaCfgPath, "gaia_bootstrap.sh"),
 	)
@@ -617,20 +627,20 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 
 	_, err = copyFile(
 		filepath.Join("./docker/", "gaia.Dockerfile"),
-		filepath.Join(s.chain.configDir(), "gaia.Dockerfile"),
+		filepath.Join(tmpDir, "gaia.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "gaia.Dockerfile",
-			ContextDir: s.chain.configDir(),
+			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:      gaiaVal.instanceName(),
 			NetworkID: s.dkrNet.Network.ID,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/.gaia", gaiaVal.configDir()),
+				fmt.Sprintf("%s/:/root/.gaia", tmpDir),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"1317/tcp":  {{HostIP: "", HostPort: "1417"}},
@@ -684,12 +694,16 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.T().Log("starting Hermes relayer container...")
 
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-hermes-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
 	gaiaVal := s.chain.gaiaValidators[0]
 	umeeVal := s.chain.validators[0]
-	hermesCfgPath := path.Join(s.chain.configDir(), "hermes")
+	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0755))
-	_, err := copyFile(
+	_, err = copyFile(
 		filepath.Join("./scripts/", "hermes_bootstrap.sh"),
 		filepath.Join(hermesCfgPath, "hermes_bootstrap.sh"),
 	)
@@ -697,14 +711,14 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 
 	_, err = copyFile(
 		filepath.Join("./docker/", "hermes.Dockerfile"),
-		filepath.Join(s.chain.configDir(), "hermes.Dockerfile"),
+		filepath.Join(tmpDir, "hermes.Dockerfile"),
 	)
 	s.Require().NoError(err)
 
 	s.hermesResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "hermes.Dockerfile",
-			ContextDir: s.chain.configDir(),
+			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:      "umee-gaia-relayer",

@@ -195,7 +195,6 @@ func (c *chain) createOrchestrator(index int) *orchestrator {
 
 func (c *chain) createGaiaValidator(index int) *gaiaValidator {
 	return &gaiaValidator{
-		chain: c,
 		index: index,
 	}
 }
