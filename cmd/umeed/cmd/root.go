@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
@@ -16,7 +15,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	bridgecmd "github.com/peggyjv/gravity-bridge/module/cmd/gravity/cmd"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -59,20 +57,6 @@ towards borrowing assets on another blockchain.`,
 }
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
-	// We allow two variants of the gentx command:
-	//
-	// 1. The standard one provided by the SDK, mainly motivated for testing
-	// and local network purposes.
-	// 2. The gravity bridge variant which allows validators to provide key
-	// delegation material.
-	bridgeGenTxCmd := bridgecmd.GenTxCmd(
-		app.ModuleBasics,
-		encodingConfig.TxConfig,
-		banktypes.GenesisBalancesIterator{},
-		app.DefaultNodeHome,
-	)
-	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
-
 	rootCmd.AddCommand(
 		addGenesisAccountCmd(app.DefaultNodeHome),
 		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
@@ -84,8 +68,6 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 			banktypes.GenesisBalancesIterator{},
 			app.DefaultNodeHome,
 		),
-		bridgeGenTxCmd,
-		bridgecmd.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 	)

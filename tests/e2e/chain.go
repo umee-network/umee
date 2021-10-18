@@ -10,7 +10,6 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	gravitytypes "github.com/peggyjv/gravity-bridge/module/x/gravity/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
 	"github.com/umee-network/umee/app"
