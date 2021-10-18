@@ -8,8 +8,10 @@ import (
 
 // NewGenesisState creates a new GenesisState object
 func NewGenesisState(
-	params Params, rates []ExchangeRateTuple,
-	feederDelegations []FeederDelegation, missCounters []MissCounter,
+	params Params,
+	rates []ExchangeRateTuple,
+	feederDelegations []FeederDelegation,
+	missCounters []MissCounter,
 	aggregateExchangeRatePrevotes []AggregateExchangeRatePrevote,
 	aggregateExchangeRateVotes []AggregateExchangeRateVote,
 	tobinTaxes []TobinTax,
@@ -26,7 +28,8 @@ func NewGenesisState(
 	}
 }
 
-// DefaultGenesisState - default GenesisState used by columbus-2
+// DefaultGenesisState returns the default genesesis state for the x/oracle
+// module.
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:                        DefaultParams(),
@@ -39,7 +42,7 @@ func DefaultGenesisState() *GenesisState {
 	}
 }
 
-// ValidateGenesis validates the oracle genesis state
+// ValidateGenesis validates the oracle genesis state.
 func ValidateGenesis(data *GenesisState) error {
 	return data.Params.Validate()
 }
