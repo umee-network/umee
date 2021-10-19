@@ -160,7 +160,6 @@ The portion of accrued interest set aside as reserves (an `sdk.Dec`) is determin
 
 Reserves are part of the module account's balance, but may not leave module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions outside the scope of this ADR may release or transfer reserves.
 
-The function to increase reserves of a denomination, after accrued interest on a borrow has already been
 
 To increase reserves whenever interest is accrued, the following must be added inside function `AccrueAllInterest`:
 
