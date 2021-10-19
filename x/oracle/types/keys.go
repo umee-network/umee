@@ -31,7 +31,8 @@ var (
 
 // GetExchangeRateKey - stored by *denom*
 func GetExchangeRateKey(denom string) []byte {
-	return append(KeyPrefixExchangeRate, []byte(denom)...)
+	KeyPrefixExchangeRate = append(KeyPrefixExchangeRate, []byte(denom)...)
+	return append(KeyPrefixExchangeRate, 0)
 }
 
 // GetFeederDelegationKey - stored by *Validator* address
@@ -56,7 +57,7 @@ func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) []byte {
 
 // GetTobinTaxKey - stored by *denom* bytes
 func GetTobinTaxKey(d string) []byte {
-	KeyPrefixTobinTax := append(KeyPrefixTobinTax, []byte(d)...)
+	KeyPrefixTobinTax = append(KeyPrefixTobinTax, []byte(d)...)
 	return append(KeyPrefixTobinTax, 0)
 }
 
