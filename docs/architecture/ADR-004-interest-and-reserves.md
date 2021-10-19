@@ -29,6 +29,8 @@ A governance parameter `ReserveFactor` must be kept which specifies the portion 
 
 Both the reserved amount of a given token, and the token:uToken exchange rate, increase when interest is _accrued_, rather then when it is _repaid_.
 
+This timing of reserve increases matches the behavior of the [Compound cToken smart contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/CToken.sol) we are using as a reference - see around line 410 in function accrueInterest.
+
 ## Detailed Design
 
 As noted in [ADR-003](./ADR-003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdk.Int`.
@@ -251,3 +253,5 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 - Asset reserve amounts are recorded directly by the `x/leverage` module
 
 ## References
+
+- [Compound cToken Contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/CToken.sol)
