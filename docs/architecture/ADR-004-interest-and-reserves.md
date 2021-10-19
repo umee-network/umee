@@ -40,12 +40,12 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 > accrued interest = borrowed amount × (interest rate × time elapsed)
 
-A governance parameter `BorrowInterestEpoch` with type `int64` will determine the number blocks to wait between interest calculations. Whenever the number of blocks created since the last interest accrual reaches the desired value, interest accrues on all borrow positions simultaneously during `EndBlock`:
+A governance parameter `BorrowInterestEpoch` with type `int64` will determine the number blocks to wait between interest calculations. Whenever the number of current block height is a multiple of the desired value, interest accrues on all borrow positions simultaneously during `EndBlock`:
 
 ```go
 // EndBlock
 // k is the x/leverage keeper and ctx contains information on the current block
-if ctx.BlockHeight() >= k.GetLastInterestBlock() + k.GetBorrowInterestEpoch() {
+if ctx.BlockHeight() % k.GetBorrowInterestEpoch() == 0 {
     // unix times (int64 values, measured in seconds)
     secondsElapsed := ctx.BlockTime.Unix() - k.GetLastInterestTime()
     // accrue interest to all borrow positions at once
@@ -56,11 +56,10 @@ if ctx.BlockHeight() >= k.GetLastInterestBlock() + k.GetBorrowInterestEpoch() {
 }
 ```
 
-To support the function above, the `x/leverage` module keeper must store the last unix time and block height at which interest accrued. Both values will be marshaled to binary from `sdk.Int`. Single byte prefixes can be used:
+To support the function above, the `x/leverage` module keeper must store the last unix time at which interest accrued. The value will be marshaled to binary from `sdk.Int`. A single byte prefix can be used:
 
 ```go
-key = interestLastHeightPrefix // e.g. 0x06
-key = interestLastTimePrefix // e.g. 0x07
+key = interestLastTimePrefix // e.g. 0x06
 ```
 
 ### Dynamic Borrow Interest Rates
