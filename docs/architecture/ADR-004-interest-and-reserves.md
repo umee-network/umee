@@ -254,4 +254,6 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 
 ## References
 
-- [Compound cToken Contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/CToken.sol)
+- [Compound cToken Contract on github](https://github.com/compound-finance/compound-protocol/blob/master/contracts/CToken.sol)
+- [Compound's JumpRateModelV2 model governance proposal](https://compound.finance/governance/proposals/20)
+- [Compound's JumpRateModelV2 contract on etherscan](https://etherscan.io/address/0xfb564da37b41b2f6b6edcc3e56fbf523bd9f2012#code)
