@@ -235,7 +235,7 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 
 - Requires governance parameter `ReserveFactor` defining the portion of interest that must go to reserves. This parameter is set _per token_.
 - Requires governance parameter `BorrowInterestEpoch` defining how many blocks to wait between interest calculations. This parameter is _global_ (not per-token).
-- Requires multiple givernance parameters to calculate dynamic interest rates.
+- Requires multiple governance parameters to calculate dynamic interest rates.
 - Asset reserve amounts are recorded directly by the `x/leverage` module
 
 ## References
