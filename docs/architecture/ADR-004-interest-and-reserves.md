@@ -65,12 +65,9 @@ key = interestLastTimePrefix // e.g. 0x07
 
 ### Dynamic Borrow Interest Rates
 
-Borrow interest rates are dynamic. They are calculated using the lending pool's current borrow utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. Even the model used for the interest rate (which determines what other governance parameters are required) must itself be governed.
+Borrow interest rates are dynamic. They are calculated using the lending pool's current borrow utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
-Here are some example initial governance parameters which would be stored for a single asset type:
 ```go
-InterestRateModel = 0x01 // enumeration. Which model (if multiple available) to use?
-// Model 0x01, based on Compound's JumpRateModelV2, requires the following per token:
 BaseAPY = sdk.NewDec("0.02")
 KinkAPY = sdk.NewDec("0.2")
 MaxAPY = sdk.NewDec("1.0")
@@ -80,9 +77,6 @@ KinkUtilization = sdk.NewDec("0.8")
 Each parameter, being stored per token, would need a keeper prefix:
 
 ```go
-// For the interest rate model enumeration, which always exists for each token
-interestModelPrefix | denom | 0x00
-// For other parameters, which only exist when the interest model is a certain value
 interestParamPrefix | lengthPrefixed(denom) | paramNumber
 // example paramNumbers
 //  BaseInterest: 0x00
@@ -91,22 +85,19 @@ interestParamPrefix | lengthPrefixed(denom) | paramNumber
 //  KinkUtilization: 0x03
 ```
 
-The `0x01` interest model shown above, based on [Compound's JumpRateModelV2 model](https://compound.finance/governance/proposals/20) defined in [this contract](https://etherscan.io/address/0xfb564da37b41b2f6b6edcc3e56fbf523bd9f2012#code), can be summarized as follows:
+The initial interest rate model, based on [Compound's JumpRateModelV2](https://compound.finance/governance/proposals/20) defined in [this contract](https://etherscan.io/address/0xfb564da37b41b2f6b6edcc3e56fbf523bd9f2012#code), can be summarized as follows:
 
 > The (x,y) = (utilization, interest rate) graph is a line with a kink in it, defined by three points
 > At 0% utilization, there is a base interest rate `BaseInterest`
 > The kink at `KinkUtilization` utilization has interest rate `KinkInterest`
 > At 100% utilization, the interest rate is `MaxInterest`
 
-Because parameters can cease to be necessary when the interest model changes (e.g. if an interest model 0x02 only required two parameters instead of four), the governance process should delete unused parameters from the keeper when changing models if deemed necessary.
-
 The `x/leverage` module keeper will contain a function which derives the current interest rate of an asset type:
 
 ```go
 func (k Keeper) DeriveInterestRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
-    // Implementation must detect which InterestRateModel has been assigned to the denom,
-    // then calculate the denom's borrowing utilization, and return the resulting
-    // annual interest rate as a decimal.
+    // Implementation must calculate the denom's borrowing utilization
+    // then calculate and return annual interest rate as a decimal.
 }
 ```
 
@@ -157,7 +148,7 @@ The portion of accrued interest set aside as reserves (an `sdk.Dec`) is determin
     return append(key, 0) // append 0 for null-termination
 ```
 
-Reserves are part of the module account's balance, but may not leave module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions outside the scope of this ADR may release or transfer reserves.
+Reserves are part of the module account's balance, but may not leave module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions (outside the scope of this ADR) may release or transfer reserves.
 
 
 To increase reserves whenever interest is accrued, the following must be added inside function `AccrueAllInterest`:
@@ -247,7 +238,7 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 
 - Requires governance parameter `ReserveFactor` defining the portion of interest that must go to reserves
 - Requires governance parameter `BorrowInterestEpoch` defining how many blocks to wait between interest calculations
-- Requires governance paramater `InterestRateModel` and multiple model-specific parameters to calculate dynamic interest rates.
+- Requires multiple givernance parameters to calculate dynamic interest rates.
 - Asset reserve amounts are recorded directly by the `x/leverage` module
 
 ## References
