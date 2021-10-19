@@ -3,7 +3,6 @@
 ## Changelog
 
 - October 14, 2021: Initial Draft (@toteki)
-- October 18, 2021: More Details on Interest (@toteki)
 
 ## Status
 
