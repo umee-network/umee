@@ -22,9 +22,7 @@ Interest on all open borrow positions will be applied every X blocks during `End
 
 Reserves are implemented as a per-token value attached to the `x/leverage` module account.  The module account also holds the lending pool of base assets. As an example, if the module account contains 2000 `uatom` and its `uatom ReserveAmount` is 500, then only 1500 of its `uatom` are available for borrowing or withdrawal.
 
-A governance parameter `ReserveFactor` must be kept which specifies the portion of borrow interest that will be funnelled into reserves. This parameter will either be decided per token, or as a single value for all asset types.
-
-> TODO: Decide on the above.
+A governance parameter `ReserveFactor` must be kept which specifies the portion of borrow interest that will be funnelled into reserves. This parameter is set _per token_, which allows it to be set differently for riskier assets vs stablecoins, for example.
 
 Both the reserved amount of a given token, and the token:uToken exchange rate, increase when interest is _accrued_, rather then when it is _repaid_.
 
@@ -235,8 +233,8 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 
 ### Neutral
 
-- Requires governance parameter `ReserveFactor` defining the portion of interest that must go to reserves
-- Requires governance parameter `BorrowInterestEpoch` defining how many blocks to wait between interest calculations
+- Requires governance parameter `ReserveFactor` defining the portion of interest that must go to reserves. This parameter is set _per token_.
+- Requires governance parameter `BorrowInterestEpoch` defining how many blocks to wait between interest calculations. This parameter is _global_ (not per-token).
 - Requires multiple givernance parameters to calculate dynamic interest rates.
 - Asset reserve amounts are recorded directly by the `x/leverage` module
 
