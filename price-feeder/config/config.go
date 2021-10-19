@@ -18,13 +18,18 @@ var (
 
 var (
 	defaultListenAddr = "0.0.0.0:7171"
+
+	supportedProviders = map[string]struct{}{
+		"kraken":   {},
+		"bitfinex": {},
+	}
 )
 
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
 		ListenAddr    string         `toml:"listen_addr"`
-		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,dive,required"`
+		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
@@ -61,6 +66,14 @@ func ParseConfig(configPath string) (Config, error) {
 
 	if cfg.ListenAddr == "" {
 		cfg.ListenAddr = defaultListenAddr
+	}
+
+	for _, cp := range cfg.CurrencyPairs {
+		for _, provider := range cp.Providers {
+			if _, ok := supportedProviders[provider]; !ok {
+				return cfg, fmt.Errorf("unsupported provider: %s", provider)
+			}
+		}
 	}
 
 	return cfg, cfg.Validate()

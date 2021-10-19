@@ -26,6 +26,14 @@ func TestValidate(t *testing.T) {
 			false,
 		},
 		{
+			"empty pairs",
+			config.Config{
+				ListenAddr:    "0.0.0.0:7171",
+				CurrencyPairs: []config.CurrencyPair{},
+			},
+			true,
+		},
+		{
 			"invalid base",
 			config.Config{
 				ListenAddr: "0.0.0.0:7171",
@@ -101,4 +109,35 @@ providers = [
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 2)
 	require.Equal(t, "kraken", cfg.CurrencyPairs[0].Providers[0])
 	require.Equal(t, "bitfinex", cfg.CurrencyPairs[0].Providers[1])
+}
+
+func TestParseConfig_InvalidProvider(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	content := []byte(`
+listen_addr = ""
+
+[[currency_pairs]]
+base = "ATOM"
+quote = "USDT"
+providers = [
+	"kraken",
+	"bitfinex"
+]
+
+[[currency_pairs]]
+base = "UMEE"
+quote = "USDT"
+providers = [
+	"kraken",
+	"foobar"
+]
+`)
+	_, err = tmpFile.Write(content)
+	require.NoError(t, err)
+
+	_, err = config.ParseConfig(tmpFile.Name())
+	require.Error(t, err)
 }
