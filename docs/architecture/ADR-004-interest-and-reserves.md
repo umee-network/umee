@@ -21,7 +21,7 @@ The mechanism by which interest is calculated, and then split between incentiviz
 
 Interest on all open borrow positions will be applied every X blocks during `EndBlock`, where X is a governance parameter called `BorrowInterestEpoch`.
 
-Reserves are implemented as a per-token value attached to the `x/leaverage` module account.  The module account also holds the lending pool of base assets. As an example, if the module account contains 2000 `uatom` and its `uatom ReserveAmount` is 500, then only 1500 of its `uatom` are available for borrowing or withdrawal.
+Reserves are implemented as a per-token value attached to the `x/leverage` module account.  The module account also holds the lending pool of base assets. As an example, if the module account contains 2000 `uatom` and its `uatom ReserveAmount` is 500, then only 1500 of its `uatom` are available for borrowing or withdrawal.
 
 A governance parameter `ReserveFactor` must be kept which specifies the portion of borrow interest that will be funnelled into reserves. This parameter will either be decided per token, or as a single value for all asset types.
 
@@ -39,7 +39,7 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Borrow Interest Epoch
 
-> accrued interest = borrowed amount * (interest rate * time elapsed)
+> accrued interest = borrowed amount × (interest rate × time elapsed)
 
 A governance parameter `BorrowInterestEpoch` with type `int64` will determine the number blocks to wait between interest calculations. Whenever the number of blocks created since the last interest accrual reaches the desired value, interest accrues on all borrow positions simultaneously during `EndBlock`:
 
