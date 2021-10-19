@@ -112,6 +112,8 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
+// TODO: This function started in goroutine is currently only boilerplate. It
+// is subject to change in structure and behavior.
 func startPriceFeeder(ctx context.Context, cfg config.Config) {
 	wg.Add(1)
 	defer wg.Done()
@@ -126,6 +128,8 @@ func startPriceFeeder(ctx context.Context, cfg config.Config) {
 	}
 }
 
+// TODO: This function started in goroutine is currently only boilerplate. It
+// is subject to change in structure and behavior.
 func startPriceOracle(ctx context.Context, cfg config.Config) {
 	wg.Add(1)
 	defer wg.Done()
