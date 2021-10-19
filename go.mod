@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/cosmos/cosmos-sdk v0.44.2
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go v1.2.1
+	github.com/cosmos/ibc-go v1.2.2
 	github.com/ethereum/go-ethereum v1.10.9
 	github.com/gogo/protobuf v1.3.3
 	github.com/golangci/golangci-lint v1.42.1
@@ -13,14 +13,14 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/ory/dockertest/v3 v3.8.0
-	github.com/peggyjv/gravity-bridge/module v0.2.17
+	github.com/peggyjv/gravity-bridge/module v0.2.20
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/starport v0.18.0
-	github.com/tendermint/tendermint v0.34.13
+	github.com/tendermint/tendermint v0.34.14
 	github.com/tendermint/tm-db v0.6.4
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
@@ -217,6 +217,7 @@ require (
 	github.com/kyoh86/exportloopref v0.1.8 // indirect
 	github.com/ldez/gomoddirectives v0.2.2 // indirect
 	github.com/ldez/tagliatelle v0.2.0 // indirect
+	github.com/lib/pq v1.10.2 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a // indirect
