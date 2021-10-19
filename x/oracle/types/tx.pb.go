@@ -28,8 +28,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgAggregateExchangeRatePrevote represents a message to submit
-// aggregate exchange rate prevote.
+// MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
+// exchange rate prevote.
 type MsgAggregateExchangeRatePrevote struct {
 	Hash      string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty" yaml:"hash"`
 	Feeder    string `protobuf:"bytes,2,opt,name=feeder,proto3" json:"feeder,omitempty" yaml:"feeder"`
@@ -109,8 +109,8 @@ func (m *MsgAggregateExchangeRatePrevoteResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAggregateExchangeRatePrevoteResponse proto.InternalMessageInfo
 
-// MsgAggregateExchangeRateVote represents a message to submit
-// aggregate exchange rate vote.
+// MsgAggregateExchangeRateVote represents a message to submit anaggregate
+// exchange rate vote.
 type MsgAggregateExchangeRateVote struct {
 	Salt          string `protobuf:"bytes,1,opt,name=salt,proto3" json:"salt,omitempty" yaml:"salt"`
 	ExchangeRates string `protobuf:"bytes,2,opt,name=exchange_rates,json=exchangeRates,proto3" json:"exchange_rates,omitempty" yaml:"exchange_rates"`
@@ -189,8 +189,8 @@ func (m *MsgAggregateExchangeRateVoteResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAggregateExchangeRateVoteResponse proto.InternalMessageInfo
 
-// MsgDelegateFeedConsent represents a message to
-// delegate oracle voting rights to another address.
+// MsgDelegateFeedConsent represents a message to delegate oracle voting rights
+// to another address.
 type MsgDelegateFeedConsent struct {
 	Operator string `protobuf:"bytes,1,opt,name=operator,proto3" json:"operator,omitempty" yaml:"operator"`
 	Delegate string `protobuf:"bytes,2,opt,name=delegate,proto3" json:"delegate,omitempty" yaml:"delegate"`
@@ -326,13 +326,13 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// AggregateExchangeRatePrevote defines a method for submitting
-	// aggregate exchange rate prevote
+	// AggregateExchangeRatePrevote defines a method for submitting an aggregate
+	// exchange rate prevote.
 	AggregateExchangeRatePrevote(ctx context.Context, in *MsgAggregateExchangeRatePrevote, opts ...grpc.CallOption) (*MsgAggregateExchangeRatePrevoteResponse, error)
-	// AggregateExchangeRateVote defines a method for submitting
-	// aggregate exchange rate vote
+	// AggregateExchangeRateVote defines a method for submitting an aggregate
+	// exchange rate vote.
 	AggregateExchangeRateVote(ctx context.Context, in *MsgAggregateExchangeRateVote, opts ...grpc.CallOption) (*MsgAggregateExchangeRateVoteResponse, error)
-	// DelegateFeedConsent defines a method for setting the feeder delegation
+	// DelegateFeedConsent defines a method for setting the feeder delegation.
 	DelegateFeedConsent(ctx context.Context, in *MsgDelegateFeedConsent, opts ...grpc.CallOption) (*MsgDelegateFeedConsentResponse, error)
 }
 
@@ -373,13 +373,13 @@ func (c *msgClient) DelegateFeedConsent(ctx context.Context, in *MsgDelegateFeed
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// AggregateExchangeRatePrevote defines a method for submitting
-	// aggregate exchange rate prevote
+	// AggregateExchangeRatePrevote defines a method for submitting an aggregate
+	// exchange rate prevote.
 	AggregateExchangeRatePrevote(context.Context, *MsgAggregateExchangeRatePrevote) (*MsgAggregateExchangeRatePrevoteResponse, error)
-	// AggregateExchangeRateVote defines a method for submitting
-	// aggregate exchange rate vote
+	// AggregateExchangeRateVote defines a method for submitting an aggregate
+	// exchange rate vote.
 	AggregateExchangeRateVote(context.Context, *MsgAggregateExchangeRateVote) (*MsgAggregateExchangeRateVoteResponse, error)
-	// DelegateFeedConsent defines a method for setting the feeder delegation
+	// DelegateFeedConsent defines a method for setting the feeder delegation.
 	DelegateFeedConsent(context.Context, *MsgDelegateFeedConsent) (*MsgDelegateFeedConsentResponse, error)
 }
 

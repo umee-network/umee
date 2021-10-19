@@ -7,20 +7,20 @@ option go_package = "github.com/umee-network/umee/x/oracle/types";
 
 // Msg defines the oracle Msg service.
 service Msg {
-  // AggregateExchangeRatePrevote defines a method for submitting
-  // aggregate exchange rate prevote
+  // AggregateExchangeRatePrevote defines a method for submitting an aggregate
+  // exchange rate prevote.
   rpc AggregateExchangeRatePrevote(MsgAggregateExchangeRatePrevote) returns (MsgAggregateExchangeRatePrevoteResponse);
 
-  // AggregateExchangeRateVote defines a method for submitting
-  // aggregate exchange rate vote
+  // AggregateExchangeRateVote defines a method for submitting an aggregate
+  // exchange rate vote.
   rpc AggregateExchangeRateVote(MsgAggregateExchangeRateVote) returns (MsgAggregateExchangeRateVoteResponse);
 
-  // DelegateFeedConsent defines a method for setting the feeder delegation
+  // DelegateFeedConsent defines a method for setting the feeder delegation.
   rpc DelegateFeedConsent(MsgDelegateFeedConsent) returns (MsgDelegateFeedConsentResponse);
 }
 
-// MsgAggregateExchangeRatePrevote represents a message to submit
-// aggregate exchange rate prevote.
+// MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
+// exchange rate prevote.
 message MsgAggregateExchangeRatePrevote {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
@@ -34,8 +34,8 @@ message MsgAggregateExchangeRatePrevote {
 // Msg/AggregateExchangeRatePrevote response type.
 message MsgAggregateExchangeRatePrevoteResponse {}
 
-// MsgAggregateExchangeRateVote represents a message to submit
-// aggregate exchange rate vote.
+// MsgAggregateExchangeRateVote represents a message to submit anaggregate
+// exchange rate vote.
 message MsgAggregateExchangeRateVote {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
@@ -50,8 +50,8 @@ message MsgAggregateExchangeRateVote {
 // Msg/AggregateExchangeRateVote response type.
 message MsgAggregateExchangeRateVoteResponse {}
 
-// MsgDelegateFeedConsent represents a message to
-// delegate oracle voting rights to another address.
+// MsgDelegateFeedConsent represents a message to delegate oracle voting rights
+// to another address.
 message MsgDelegateFeedConsent {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
