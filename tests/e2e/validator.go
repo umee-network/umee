@@ -22,7 +22,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	gravitytypes "github.com/peggyjv/gravity-bridge/module/x/gravity/types"
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	"github.com/tendermint/tendermint/p2p"
@@ -225,37 +224,6 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 		description,
 		commissionRates,
 		minSelfDelegation,
-	)
-}
-
-func (v *validator) buildDelegateKeysMsg() sdk.Msg {
-	privKeyBz, err := hexutil.Decode(v.ethereumKey.privateKey)
-	if err != nil {
-		panic(fmt.Sprintf("failed to HEX decode private key: %s", err))
-	}
-
-	privKey, err := crypto.ToECDSA(privKeyBz)
-	if err != nil {
-		panic(fmt.Sprintf("failed to convert private key: %s", err))
-	}
-
-	signMsg := gravitytypes.DelegateKeysSignMsg{
-		ValidatorAddress: sdk.ValAddress(v.keyInfo.GetAddress()).String(),
-		Nonce:            0,
-	}
-
-	signMsgBz := cdc.MustMarshal(&signMsg)
-	hash := crypto.Keccak256Hash(signMsgBz).Bytes()
-	ethSig, err := gravitytypes.NewEthereumSignature(hash, privKey)
-	if err != nil {
-		panic(fmt.Sprintf("failed to create Ethereum signature: %s", err))
-	}
-
-	return gravitytypes.NewMsgDelegateKeys(
-		sdk.ValAddress(v.keyInfo.GetAddress()),
-		v.chain.orchestrators[v.index].keyInfo.GetAddress(),
-		v.ethereumKey.address,
-		ethSig,
 	)
 }
 

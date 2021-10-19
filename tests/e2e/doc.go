@@ -6,10 +6,9 @@
 // A testing network is created dynamically and contains multiple Docker
 // containers:
 //
-// 1. A single Ethereum testnet process
+// 1. A single validator Gaia network
 // 2. A configurable number of Umee validator processes
-// 3. An orchestrator process for each validator
-// 4. A gravity contract deployer process
+// 3. A hermes relayer connecting the Umee and Gaia networks over IBC
 //
 // The file e2e_test.go contains the actual end-to-end integration tests that
 // utilize the testing suite.
