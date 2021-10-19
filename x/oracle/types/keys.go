@@ -30,35 +30,41 @@ var (
 )
 
 // GetExchangeRateKey - stored by *denom*
-func GetExchangeRateKey(denom string) []byte {
-	KeyPrefixExchangeRate = append(KeyPrefixExchangeRate, []byte(denom)...)
-	return append(KeyPrefixExchangeRate, 0)
+func GetExchangeRateKey(denom string) (key []byte) {
+	key = append(key, KeyPrefixExchangeRate...)
+	key = append(key, []byte(denom)...)
+	return append(key, 0) // append 0 for null-termination
 }
 
 // GetFeederDelegationKey - stored by *Validator* address
-func GetFeederDelegationKey(v sdk.ValAddress) []byte {
-	return append(KeyPrefixFeederDelegation, address.MustLengthPrefix(v)...)
+func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
+	key = append(key, KeyPrefixFeederDelegation...)
+	return append(key, address.MustLengthPrefix(v)...)
 }
 
 // GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) []byte {
-	return append(KeyPrefixMissCounter, address.MustLengthPrefix(v)...)
+func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
+	key = append(key, KeyPrefixMissCounter...)
+	return append(key, address.MustLengthPrefix(v)...)
 }
 
 // GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
-func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) []byte {
-	return append(KeyPrefixAggregateExchangeRatePrevote, address.MustLengthPrefix(v)...)
+func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
+	key = append(key, KeyPrefixAggregateExchangeRatePrevote...)
+	return append(key, address.MustLengthPrefix(v)...)
 }
 
 // GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) []byte {
-	return append(KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v)...)
+func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
+	key = append(key, KeyPrefixAggregateExchangeRateVote...)
+	return append(key, address.MustLengthPrefix(v)...)
 }
 
 // GetTobinTaxKey - stored by *denom* bytes
-func GetTobinTaxKey(d string) []byte {
-	KeyPrefixTobinTax = append(KeyPrefixTobinTax, []byte(d)...)
-	return append(KeyPrefixTobinTax, 0)
+func GetTobinTaxKey(d string) (key []byte) {
+	key = append(key, KeyPrefixTobinTax...)
+	key = append(key, []byte(d)...)
+	return append(key, 0) // append 0 for null-termination
 }
 
 // ExtractDenomFromTobinTaxKey - split denom from the tobin tax key
