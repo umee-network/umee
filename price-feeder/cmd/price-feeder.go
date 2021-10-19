@@ -90,7 +90,8 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	trapSignal(cancel)
 
-	// block main process (signal capture will call WaitGroup's Done)
+	// Block main process until all spawned goroutines have gracefully exited and
+	// signal has been captured in the main process.
 	wg.Wait()
 	return nil
 }

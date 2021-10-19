@@ -20,10 +20,21 @@ var (
 	defaultListenAddr = "0.0.0.0:7171"
 )
 
-// Config defines all necessary price-feeder configuration parameters.
-type Config struct {
-	ListenAddr string `toml:"listen_addr"`
-}
+type (
+	// Config defines all necessary price-feeder configuration parameters.
+	Config struct {
+		ListenAddr    string         `toml:"listen_addr"`
+		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,dive,required"`
+	}
+
+	// CurrencyPair defines a price quote of the exchange rate for two different
+	// currencies and the supported providers for getting the exchange rate.
+	CurrencyPair struct {
+		Base      string   `toml:"base" validate:"required"`
+		Quote     string   `toml:"quote" validate:"required"`
+		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+	}
+)
 
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
@@ -48,7 +59,9 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, fmt.Errorf("failed to decode config: %w", err)
 	}
 
-	// TODO: set defaults if necessary...
+	if cfg.ListenAddr == "" {
+		cfg.ListenAddr = defaultListenAddr
+	}
 
 	return cfg, cfg.Validate()
 }
