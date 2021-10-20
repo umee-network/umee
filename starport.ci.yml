@@ -1,3 +1,6 @@
+build:
+  binary: "umeed"
+  main: "./cmd/umeed"
 genesis:
   chain_id: "umee-local-testnet"
   app_state:
