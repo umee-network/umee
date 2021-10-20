@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
@@ -17,7 +18,9 @@ var (
 )
 
 var (
-	defaultListenAddr = "0.0.0.0:7171"
+	defaultListenAddr      = "0.0.0.0:7171"
+	defaultSrvWriteTimeout = 15 * time.Second
+	defaultSrvReadTimeout  = 15 * time.Second
 
 	supportedProviders = map[string]struct{}{
 		"kraken":   {},
@@ -28,8 +31,10 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		ListenAddr    string         `toml:"listen_addr"`
-		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		ListenAddr         string         `toml:"listen_addr"`
+		ServerWriteTimeout string         `toml:"server_write_timeout"`
+		ServerReadTimeout  string         `toml:"server_read_timeout"`
+		CurrencyPairs      []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
@@ -66,6 +71,12 @@ func ParseConfig(configPath string) (Config, error) {
 
 	if cfg.ListenAddr == "" {
 		cfg.ListenAddr = defaultListenAddr
+	}
+	if len(cfg.ServerWriteTimeout) == 0 {
+		cfg.ServerWriteTimeout = defaultSrvWriteTimeout.String()
+	}
+	if len(cfg.ServerReadTimeout) == 0 {
+		cfg.ServerReadTimeout = defaultSrvReadTimeout.String()
 	}
 
 	for _, cp := range cfg.CurrencyPairs {

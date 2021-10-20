@@ -5,10 +5,13 @@ go 1.17
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/go-playground/validator/v10 v10.9.0
+	github.com/gorilla/mux v1.8.0
+	github.com/rs/cors v1.8.0
 	github.com/rs/zerolog v1.14.3
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
 )
 
