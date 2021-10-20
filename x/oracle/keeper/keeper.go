@@ -65,8 +65,9 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRatee gets the consensus exchange rate of Luna denominated in the denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
-
-	return sdk.OneDec(), nil
+	if denom == types.USDDenom {
+		return sdk.OneDec(), nil
+	}
 
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(types.GetExchangeRateKey(denom))
