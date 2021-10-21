@@ -31,10 +31,17 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		ListenAddr         string         `toml:"listen_addr"`
-		ServerWriteTimeout string         `toml:"server_write_timeout"`
-		ServerReadTimeout  string         `toml:"server_read_timeout"`
-		CurrencyPairs      []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Server        Server         `toml:"server"`
+		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+	}
+
+	// Server defines the API server configuration.
+	Server struct {
+		ListenAddr     string   `toml:"listen_addr"`
+		WriteTimeout   string   `toml:"write_timeout"`
+		ReadTimeout    string   `toml:"read_timeout"`
+		VerboseCORS    bool     `toml:"verbose_cors"`
+		AllowedOrigins []string `toml:"allowed_origins"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
@@ -69,14 +76,14 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, fmt.Errorf("failed to decode config: %w", err)
 	}
 
-	if cfg.ListenAddr == "" {
-		cfg.ListenAddr = defaultListenAddr
+	if cfg.Server.ListenAddr == "" {
+		cfg.Server.ListenAddr = defaultListenAddr
 	}
-	if len(cfg.ServerWriteTimeout) == 0 {
-		cfg.ServerWriteTimeout = defaultSrvWriteTimeout.String()
+	if len(cfg.Server.WriteTimeout) == 0 {
+		cfg.Server.WriteTimeout = defaultSrvWriteTimeout.String()
 	}
-	if len(cfg.ServerReadTimeout) == 0 {
-		cfg.ServerReadTimeout = defaultSrvReadTimeout.String()
+	if len(cfg.Server.ReadTimeout) == 0 {
+		cfg.Server.ReadTimeout = defaultSrvReadTimeout.String()
 	}
 
 	for _, cp := range cfg.CurrencyPairs {

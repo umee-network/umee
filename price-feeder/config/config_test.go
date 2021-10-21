@@ -18,7 +18,11 @@ func TestValidate(t *testing.T) {
 		{
 			"valid config",
 			config.Config{
-				ListenAddr: "0.0.0.0:7171",
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
 				CurrencyPairs: []config.CurrencyPair{
 					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
 				},
@@ -28,7 +32,11 @@ func TestValidate(t *testing.T) {
 		{
 			"empty pairs",
 			config.Config{
-				ListenAddr:    "0.0.0.0:7171",
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
 				CurrencyPairs: []config.CurrencyPair{},
 			},
 			true,
@@ -36,7 +44,11 @@ func TestValidate(t *testing.T) {
 		{
 			"invalid base",
 			config.Config{
-				ListenAddr: "0.0.0.0:7171",
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
 				CurrencyPairs: []config.CurrencyPair{
 					{Base: "", Quote: "USDT", Providers: []string{"kraken"}},
 				},
@@ -46,7 +58,11 @@ func TestValidate(t *testing.T) {
 		{
 			"invalid quote",
 			config.Config{
-				ListenAddr: "0.0.0.0:7171",
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
 				CurrencyPairs: []config.CurrencyPair{
 					{Base: "ATOM", Quote: "", Providers: []string{"kraken"}},
 				},
@@ -56,7 +72,11 @@ func TestValidate(t *testing.T) {
 		{
 			"empty providers",
 			config.Config{
-				ListenAddr: "0.0.0.0:7171",
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
 				CurrencyPairs: []config.CurrencyPair{
 					{Base: "ATOM", Quote: "USDT", Providers: []string{}},
 				},
@@ -78,7 +98,11 @@ func TestParseConfig_Valid(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 
 	content := []byte(`
-listen_addr = ""
+[server]
+listen_addr = "0.0.0.0:99999"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
 
 [[currency_pairs]]
 base = "ATOM"
@@ -102,7 +126,10 @@ providers = [
 	cfg, err := config.ParseConfig(tmpFile.Name())
 	require.NoError(t, err)
 
-	require.Equal(t, "0.0.0.0:7171", cfg.ListenAddr)
+	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
+	require.Equal(t, "20s", cfg.Server.WriteTimeout)
+	require.Equal(t, "20s", cfg.Server.ReadTimeout)
+	require.True(t, cfg.Server.VerboseCORS)
 	require.Len(t, cfg.CurrencyPairs, 2)
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)

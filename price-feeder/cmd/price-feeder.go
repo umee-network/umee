@@ -10,11 +10,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle"
+	"github.com/umee-network/umee/price-feeder/router"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -81,11 +82,13 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var oracle oracle.Oracle
+
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		return startPriceFeeder(ctx, cfg)
+		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
 		return startPriceOracle(ctx, cfg)
@@ -114,34 +117,30 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func startPriceFeeder(ctx context.Context, cfg config.Config) error {
-	router := mux.NewRouter()
-	corsHandler := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-	})
+func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Oracle) error {
+	rtr := mux.NewRouter()
+	rtrWrapper := router.New(cfg, rtr, oracle)
+	rtrWrapper.RegisterRoutes()
 
-	// TODO: ...
-	// server.RegisterRoutes(router)
-
-	writeTimeout, err := time.ParseDuration(cfg.ServerWriteTimeout)
+	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)
 	if err != nil {
 		return err
 	}
-	readTimeout, err := time.ParseDuration(cfg.ServerReadTimeout)
+	readTimeout, err := time.ParseDuration(cfg.Server.ReadTimeout)
 	if err != nil {
 		return err
 	}
 
 	srvErrCh := make(chan error, 1)
 	srv := &http.Server{
-		Handler:      corsHandler.Handler(router),
-		Addr:         cfg.ListenAddr,
+		Handler:      rtr,
+		Addr:         cfg.Server.ListenAddr,
 		WriteTimeout: writeTimeout,
 		ReadTimeout:  readTimeout,
 	}
 
 	go func() {
-		log.Info().Str("listen_addr", cfg.ListenAddr).Msg("starting price-feeder...")
+		log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder...")
 		srvErrCh <- srv.ListenAndServe()
 	}()
 
@@ -151,7 +150,7 @@ func startPriceFeeder(ctx context.Context, cfg config.Config) error {
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			log.Info().Str("listen_addr", cfg.ListenAddr).Msg("shutting down price-feeder...")
+			log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder...")
 			if err := srv.Shutdown(shutdownCtx); err != nil {
 				log.Error().Err(err).Msg("failed to gracefully shutdown price-feeder server")
 				return err
