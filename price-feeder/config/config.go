@@ -28,6 +28,8 @@ var (
 	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
 	ErrEmptyConfigPath = errors.New("empty configuration file path")
 
+	// SupportedProviders defines a lookup table of all the supported currency API
+	// providers.
 	SupportedProviders = map[string]struct{}{
 		ProviderKraken:  {},
 		ProviderBinance: {},
