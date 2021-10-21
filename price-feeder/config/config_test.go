@@ -109,7 +109,7 @@ base = "ATOM"
 quote = "USDT"
 providers = [
 	"kraken",
-	"bitfinex"
+	"binance"
 ]
 
 [[currency_pairs]]
@@ -117,7 +117,7 @@ base = "UMEE"
 quote = "USDT"
 providers = [
 	"kraken",
-	"bitfinex"
+	"binance"
 ]
 `)
 	_, err = tmpFile.Write(content)
@@ -135,7 +135,7 @@ providers = [
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 2)
 	require.Equal(t, "kraken", cfg.CurrencyPairs[0].Providers[0])
-	require.Equal(t, "bitfinex", cfg.CurrencyPairs[0].Providers[1])
+	require.Equal(t, "binance", cfg.CurrencyPairs[0].Providers[1])
 }
 
 func TestParseConfig_InvalidProvider(t *testing.T) {
@@ -151,7 +151,7 @@ base = "ATOM"
 quote = "USDT"
 providers = [
 	"kraken",
-	"bitfinex"
+	"binance"
 ]
 
 [[currency_pairs]]

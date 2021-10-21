@@ -11,21 +11,26 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var (
-	validate *validator.Validate = validator.New()
-
-	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
-	ErrEmptyConfigPath = errors.New("empty configuration file path")
-
+const (
 	denomUSD = "USD"
 
 	defaultListenAddr      = "0.0.0.0:7171"
 	defaultSrvWriteTimeout = 15 * time.Second
 	defaultSrvReadTimeout  = 15 * time.Second
 
-	supportedProviders = map[string]struct{}{
-		"kraken":   {},
-		"bitfinex": {},
+	ProviderKraken  = "kraken"
+	ProviderBinance = "binance"
+)
+
+var (
+	validate *validator.Validate = validator.New()
+
+	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
+	ErrEmptyConfigPath = errors.New("empty configuration file path")
+
+	SupportedProviders = map[string]struct{}{
+		ProviderKraken:  {},
+		ProviderBinance: {},
 	}
 )
 
@@ -88,12 +93,12 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for _, cp := range cfg.CurrencyPairs {
-		if strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
+		if !strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
 			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
 		}
 
 		for _, provider := range cp.Providers {
-			if _, ok := supportedProviders[provider]; !ok {
+			if _, ok := SupportedProviders[provider]; !ok {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
 		}

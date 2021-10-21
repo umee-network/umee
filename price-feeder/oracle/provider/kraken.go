@@ -102,7 +102,7 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 
 		closePrice, err := sdk.NewDecFromStr(pair.C[0])
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse close price for %s: %s", t, pair.C[0])
+			return nil, fmt.Errorf("failed to parse Kraken close price (%s) for %s", pair.C[0], t)
 		}
 
 		tickerPrices[t] = closePrice
