@@ -29,6 +29,7 @@ type (
 	}
 
 	// TickerPair defines the structure returned from Kraken for a ticker query.
+	//
 	// Note, we only care about 'c', which is the last trade
 	// closed [<price>, <lot volume>].
 	TickerPair struct {
@@ -38,7 +39,7 @@ type (
 	// TickerResponse defines the response structure of a Kraken ticker request.
 	// The response may contain one or more tickers.
 	TickerResponse struct {
-		Error  string
+		Error  []interface{}
 		Result map[string]TickerPair
 	}
 )
@@ -82,7 +83,7 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 	}
 
 	if len(tickerResp.Error) != 0 {
-		return nil, fmt.Errorf("received unexpected error from Kraken response: %s", tickerResp.Error)
+		return nil, fmt.Errorf("received unexpected error from Kraken response: %v", tickerResp.Error)
 	}
 
 	if len(tickers) != len(tickerResp.Result) {
@@ -93,10 +94,17 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 	}
 
 	tickerPrices := make(map[string]sdk.Dec, len(tickers))
-	for t, p := range tickerResp.Result {
-		closePrice, err := sdk.NewDecFromStr(p.C[0])
+	for _, t := range tickers {
+		// TODO: We may need to transform 't' prior to lookin it up in the response
+		// as Kraken may represent currencies differently.
+		pair, ok := tickerResp.Result[t]
+		if !ok {
+			return nil, fmt.Errorf("failed to find ticker in Kraken response: %s", t)
+		}
+
+		closePrice, err := sdk.NewDecFromStr(pair.C[0])
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse close price for %s: %s", t, p.C[0])
+			return nil, fmt.Errorf("failed to parse close price for %s: %s", t, pair.C[0])
 		}
 
 		tickerPrices[t] = closePrice

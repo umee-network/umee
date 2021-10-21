@@ -10,7 +10,7 @@ providers = [
   "kraken",
   "bitfinex",
 ]
-quote = "USDT"
+quote = "USD"
 
 [[currency_pairs]]
 base = "UMEE"
@@ -18,4 +18,4 @@ providers = [
   "kraken",
   "bitfinex",
 ]
-quote = "USDT"
+quote = "USD"
