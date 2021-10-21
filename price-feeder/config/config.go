@@ -88,8 +88,7 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for _, cp := range cfg.CurrencyPairs {
-		// TODO: Do we need to support stablecoin-based USD quotes?
-		if strings.ToUpper(cp.Quote) != denomUSD {
+		if strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
 			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
 		}
 

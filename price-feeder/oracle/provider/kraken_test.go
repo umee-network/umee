@@ -1,4 +1,4 @@
-package oracle
+package provider
 
 import (
 	"net/http"

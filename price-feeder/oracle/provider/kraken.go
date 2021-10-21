@@ -1,4 +1,4 @@
-package oracle
+package provider
 
 import (
 	"encoding/json"
@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	defaultTimeout = 10 * time.Second
-	krakenBaseURL  = "https://api.kraken.com"
+	krakenBaseURL = "https://api.kraken.com"
 )
 
 var _ Provider = (*KrakenProvider)(nil)
@@ -28,19 +27,18 @@ type (
 		client  *http.Client
 	}
 
-	// TickerPair defines the structure returned from Kraken for a ticker query.
+	// KrakenTickerPair defines the structure returned from Kraken for a ticker query.
 	//
-	// Note, we only care about 'c', which is the last trade
-	// closed [<price>, <lot volume>].
-	TickerPair struct {
+	// Note, we only care about 'c', which is the last trade closed [<price>, <lot volume>].
+	KrakenTickerPair struct {
 		C []string `json:"c"`
 	}
 
-	// TickerResponse defines the response structure of a Kraken ticker request.
+	// KrakenTickerResponse defines the response structure of a Kraken ticker request.
 	// The response may contain one or more tickers.
-	TickerResponse struct {
+	KrakenTickerResponse struct {
 		Error  []interface{}
-		Result map[string]TickerPair
+		Result map[string]KrakenTickerPair
 	}
 )
 
@@ -77,7 +75,7 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 		return nil, fmt.Errorf("failed to read Kraken response body: %w", err)
 	}
 
-	var tickerResp TickerResponse
+	var tickerResp KrakenTickerResponse
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal Kraken response body: %w", err)
 	}
@@ -95,7 +93,7 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 
 	tickerPrices := make(map[string]sdk.Dec, len(tickers))
 	for _, t := range tickers {
-		// TODO: We may need to transform 't' prior to lookin it up in the response
+		// TODO: We may need to transform 't' prior to looking it up in the response
 		// as Kraken may represent currencies differently.
 		pair, ok := tickerResp.Result[t]
 		if !ok {
