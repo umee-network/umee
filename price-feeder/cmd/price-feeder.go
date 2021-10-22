@@ -82,7 +82,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var oracle oracle.Oracle
+	oracle := oracle.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
@@ -91,7 +91,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
-		return startPriceOracle(ctx, cfg)
+		return startPriceOracle(ctx, oracle)
 	})
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
@@ -117,7 +117,7 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Oracle) error {
+func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Oracle) error {
 	rtr := mux.NewRouter()
 	rtrWrapper := router.New(cfg, rtr, oracle)
 	rtrWrapper.RegisterRoutes()
@@ -140,7 +140,7 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Orac
 	}
 
 	go func() {
-		log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder...")
+		log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder server...")
 		srvErrCh <- srv.ListenAndServe()
 	}()
 
@@ -150,7 +150,7 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Orac
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder...")
+			log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")
 			if err := srv.Shutdown(shutdownCtx); err != nil {
 				log.Error().Err(err).Msg("failed to gracefully shutdown price-feeder server")
 				return err
@@ -165,13 +165,14 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Orac
 	}
 }
 
-// TODO: This function started in goroutine is currently only boilerplate. It
-// is subject to change in structure and behavior.
-func startPriceOracle(ctx context.Context, cfg config.Config) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		}
-	}
+func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+	go func() {
+		log.Info().Msg("starting price-feeder oracle...")
+		oracle.Start(ctx)
+	}()
+
+	<-ctx.Done()
+	log.Info().Msg("shutting down price-feeder oracle...")
+	oracle.Stop()
+	return nil
 }
