@@ -82,7 +82,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New()
+	var oracle oracle.Oracle
 
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
@@ -91,9 +91,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
-		oracle.Start(ctx)
-		oracle.Stop()
-		return nil
+		return startPriceOracle(ctx, cfg)
 	})
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
@@ -119,7 +117,7 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Oracle) error {
+func startPriceFeeder(ctx context.Context, cfg config.Config, oracle oracle.Oracle) error {
 	rtr := mux.NewRouter()
 	rtrWrapper := router.New(cfg, rtr, oracle)
 	rtrWrapper.RegisterRoutes()
@@ -163,6 +161,17 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 		case err := <-srvErrCh:
 			log.Error().Err(err).Msg("failed to start price-feeder server")
 			return err
+		}
+	}
+}
+
+// TODO: This function started in goroutine is currently only boilerplate. It
+// is subject to change in structure and behavior.
+func startPriceOracle(ctx context.Context, cfg config.Config) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
 		}
 	}
 }
