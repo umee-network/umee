@@ -7,7 +7,7 @@ import (
 	"github.com/justinas/alice"
 
 	"github.com/umee-network/umee/price-feeder/oracle"
-	"github.com/umee-network/umee/price-feeder/router/httputil"
+	"github.com/umee-network/umee/price-feeder/pkg/httputil"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 )
 
 // RegisterRoutes register v1 API routes on the provided sub-router.
-func RegisterRoutes(v1SubRtr *mux.Router, oracle oracle.Oracle, mChain alice.Chain) {
+func RegisterRoutes(v1SubRtr *mux.Router, oracle *oracle.Oracle, mChain alice.Chain) {
 	v1SubRtr.Handle(
 		"/healthz",
 		mChain.Then(healthzHandler()),

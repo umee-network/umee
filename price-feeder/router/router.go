@@ -15,11 +15,11 @@ import (
 type Router struct {
 	logger zerolog.Logger
 	cfg    config.Config
-	oracle oracle.Oracle
+	oracle *oracle.Oracle
 	rtr    *mux.Router
 }
 
-func New(cfg config.Config, rtr *mux.Router, oracle oracle.Oracle) Router {
+func New(cfg config.Config, rtr *mux.Router, oracle *oracle.Oracle) Router {
 	return Router{
 		logger: log.With().Str("module", "router").Logger(),
 		cfg:    cfg,

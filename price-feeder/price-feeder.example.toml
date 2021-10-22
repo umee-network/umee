@@ -8,7 +8,7 @@ write_timeout = "20s"
 base = "ATOM"
 providers = [
   "kraken",
-  "bitfinex",
+  "binance",
 ]
 quote = "USD"
 
@@ -16,6 +16,6 @@ quote = "USD"
 base = "UMEE"
 providers = [
   "kraken",
-  "bitfinex",
+  "binance",
 ]
 quote = "USD"
