@@ -1,0 +1,21 @@
+[server]
+listen_addr = "0.0.0.0:7171"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "kraken",
+  "binance",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "UMEE"
+providers = [
+  "kraken",
+  "binance",
+]
+quote = "USD"
