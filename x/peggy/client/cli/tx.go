@@ -6,15 +6,13 @@ import (
 	"fmt"
 	"log"
 
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/x/peggy/types"
 )
@@ -133,7 +131,8 @@ func CmdSendToEth() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
 		},
 	}
-	cliflags.AddTxFlagsToCmd(cmd)
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -163,7 +162,8 @@ func CmdRequestBatch() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
 		},
 	}
-	cliflags.AddTxFlagsToCmd(cmd)
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -189,6 +189,7 @@ func CmdSetOrchestratorAddress() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
 		},
 	}
-	cliflags.AddTxFlagsToCmd(cmd)
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }

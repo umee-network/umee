@@ -4,9 +4,8 @@ import (
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-
-	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
 
 	"github.com/umee-network/umee/x/peggy/types"
 )
@@ -89,9 +88,9 @@ func CmdGetCurrentValset() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
-	cliflags.AddQueryFlagsToCmd(cmd)
-	return cmd
 
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
 }
 
 func CmdGetValsetRequest() *cobra.Command {
@@ -120,7 +119,8 @@ func CmdGetValsetRequest() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
-	cliflags.AddQueryFlagsToCmd(cmd)
+
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -151,7 +151,8 @@ func CmdGetValsetConfirm() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
-	cliflags.AddQueryFlagsToCmd(cmd)
+
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -177,7 +178,7 @@ func CmdGetPendingValsetRequest() *cobra.Command {
 		},
 	}
 
-	cliflags.AddQueryFlagsToCmd(cmd)
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -202,6 +203,7 @@ func CmdGetPendingOutgoingTXBatchRequest() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
-	cliflags.AddQueryFlagsToCmd(cmd)
+
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
