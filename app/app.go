@@ -368,13 +368,6 @@ func New(
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 	)
-	app.PeggyKeeper = peggykeeper.NewKeeper(
-		appCodec, keys[peggytypes.StoreKey],
-		app.GetSubspace(peggytypes.ModuleName),
-		app.StakingKeeper,
-		app.BankKeeper,
-		app.SlashingKeeper,
-	)
 
 	// register the staking hooks
 	//
@@ -395,6 +388,13 @@ func New(
 		app.StakingKeeper,
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
+	)
+	app.PeggyKeeper = peggykeeper.NewKeeper(
+		appCodec, keys[peggytypes.StoreKey],
+		app.GetSubspace(peggytypes.ModuleName),
+		app.StakingKeeper,
+		app.BankKeeper,
+		app.SlashingKeeper,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -500,9 +500,9 @@ func New(
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		stakingtypes.ModuleName,
 		leveragetypes.ModuleName,
 		peggytypes.ModuleName,
+		stakingtypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
