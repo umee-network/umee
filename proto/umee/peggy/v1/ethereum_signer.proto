@@ -1,0 +1,16 @@
+syntax = "proto3";
+package umeenetwork.umee.peggy.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/x/peggy/types";
+
+// SignType defines messages that have been signed by an orchestrator
+enum SignType {
+  option (gogoproto.goproto_enum_prefix)   = false;
+  option (gogoproto.goproto_enum_stringer) = false;
+
+  SIGN_TYPE_UNKNOWN                              = 0;
+  SIGN_TYPE_ORCHESTRATOR_SIGNED_MULTI_SIG_UPDATE = 1;
+  SIGN_TYPE_ORCHESTRATOR_SIGNED_WITHDRAW_BATCH   = 2;
+}

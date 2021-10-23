@@ -2,6 +2,10 @@ run:
   tests: false
   skip-dirs:
     - tests/e2e
+    # TODO: Remove x/peggy once we've settled on the bridge. This will require
+    # either using a public version of Injective Lab's version or fixing the
+    # linting issues ourselves.
+    - x/peggy
 
 linters:
   enable:

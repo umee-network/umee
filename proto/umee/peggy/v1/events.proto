@@ -1,0 +1,90 @@
+syntax = "proto3";
+package umeenetwork.umee.peggy.v1;
+
+import "umee/peggy/v1/attestation.proto";
+
+option go_package = "github.com/umee-network/umee/x/peggy/types";
+
+message EventAttestationObserved {
+  ClaimType attestation_type = 1;
+  string    bridge_contract  = 2;
+  uint64    bridge_chain_id  = 3;
+  bytes     attestation_id   = 4;
+  uint64    nonce            = 5;
+}
+
+message EventBridgeWithdrawCanceled {
+  string bridge_contract = 1;
+  uint64 bridge_chain_id = 2;
+}
+message EventBridgeWithdrawalReceived {
+  string bridge_contract = 1;
+  uint64 bridge_chain_id = 2;
+  uint64 outgoing_tx_id  = 3;
+  uint64 nonce           = 4;
+}
+
+message EventOutgoingBatch {
+  string bridge_contract = 1;
+  uint64 bridge_chain_id = 2;
+  uint64 batch_id        = 3;
+  uint64 nonce           = 4;
+}
+
+message EventOutgoingBatchCanceled {
+  string bridge_contract = 1;
+  uint64 bridge_chain_id = 2;
+  uint64 batch_id        = 3;
+  uint64 nonce           = 4;
+}
+
+message EventMultisigUpdateRequest {
+  string bridge_contract = 1;
+  uint64 bridge_chain_id = 2;
+  uint64 multisig_id     = 3;
+  uint64 nonce           = 4;
+}
+message EventSetOrchestratorAddresses {
+  bytes set_operator_address = 1;
+}
+
+message EventValsetConfirm {
+  bytes valset_confirm_key = 1;
+}
+
+message EventSendToEth {
+  uint64 outgoing_tx_id = 1;
+}
+
+message EventRequestBatch {
+  uint64 batch_nonce = 1;
+}
+
+message EventConfirmBatch {
+  bytes batch_confirm_key = 1;
+}
+
+message EventDepositClaim {
+  bytes attestation_id = 1;
+}
+
+message EventWithdrawClaim {
+  bytes attestation_id = 1;
+}
+
+message EventERC20DeployedClaim {
+  bytes attestation_id = 1;
+}
+
+message EventValsetUpdateClaim {
+  bytes attestation_id = 1;
+}
+
+message EventCancelSendToEth {
+  uint64 outgoing_tx_id = 1;
+}
+
+message EventSubmitBadSignatureEvidence {
+  string bad_eth_signature         = 1;
+  string bad_eth_signature_subject = 2;
+}
