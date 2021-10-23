@@ -3,11 +3,8 @@ package peggy
 import (
 	"sort"
 
-	"github.com/ethereum/go-ethereum/common"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/InjectiveLabs/injective-core/metrics"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/umee-network/umee/x/peggy/keeper"
 	"github.com/umee-network/umee/x/peggy/types"
@@ -15,26 +12,16 @@ import (
 
 type BlockHandler struct {
 	k keeper.Keeper
-
-	svcTags metrics.Tags
 }
 
 func NewBlockHandler(k keeper.Keeper) *BlockHandler {
 	return &BlockHandler{
 		k: k,
-
-		svcTags: metrics.Tags{
-			"svc": "peggy_b",
-		},
 	}
 }
 
 // EndBlocker is called at the end of every block
 func (h *BlockHandler) EndBlocker(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	params := h.k.GetParams(ctx)
 
 	h.slashing(ctx, params)
@@ -46,10 +33,6 @@ func (h *BlockHandler) EndBlocker(ctx sdk.Context) {
 }
 
 func (h *BlockHandler) createValsets(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	// Auto ValsetRequest Creation.
 	// WARNING: do not use k.GetLastObservedValset in this function, it *will* result in losing control of the bridge
 	// 1. If there are no valset requests, create a new one.
@@ -75,10 +58,6 @@ func (h *BlockHandler) createValsets(ctx sdk.Context) {
 // but (A) pruning keeps the iteration small in the first place and (B) there is
 // already enough nuance in the other handler that it's best not to complicate it further
 func (h *BlockHandler) pruneAttestations(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	attmap := h.k.GetAttestationMapping(ctx)
 
 	// We make a slice with all the event nonces that are in the attestation mapping
@@ -86,6 +65,7 @@ func (h *BlockHandler) pruneAttestations(ctx sdk.Context) {
 	for k := range attmap {
 		keys = append(keys, k)
 	}
+
 	// Then we sort it
 	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
 
@@ -107,10 +87,6 @@ func (h *BlockHandler) pruneAttestations(ctx sdk.Context) {
 }
 
 func (h *BlockHandler) slashing(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	// Slash validator for not confirming valset requests, batch requests and not attesting claims rightfully
 	h.valsetSlashing(ctx, params)
 	h.batchSlashing(ctx, params)
@@ -124,11 +100,8 @@ func (h *BlockHandler) slashing(ctx sdk.Context, params *types.Params) {
 // "Observe" those who have passed the threshold. Break the loop once we see
 // an attestation that has not passed the threshold
 func (h *BlockHandler) attestationTally(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	attmap := h.k.GetAttestationMapping(ctx)
+
 	// We make a slice with all the event nonces that are in the attestation mapping
 	keys := make([]uint64, 0, len(attmap))
 	for k := range attmap {
@@ -178,10 +151,6 @@ func (h *BlockHandler) attestationTally(ctx sdk.Context) {
 //    project, if we do a slowdown on ethereum could cause a double spend. Instead timeouts will *only* occur after the timeout period
 //    AND any deposit or withdraw has occurred to update the Ethereum block height.
 func (h *BlockHandler) cleanupTimedOutBatches(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	ethereumHeight := h.k.GetLastObservedEthereumBlockHeight(ctx).EthereumBlockHeight
 	batches := h.k.GetOutgoingTxBatches(ctx)
 
@@ -193,10 +162,6 @@ func (h *BlockHandler) cleanupTimedOutBatches(ctx sdk.Context) {
 }
 
 func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	maxHeight := uint64(0)
 
 	// don't slash in the beginning before there aren't even SignedValsetsWindow blocks yet
@@ -265,7 +230,6 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 			for _, valAddr := range unbondingValidators.Addresses {
 				addr, err := sdk.ValAddressFromBech32(valAddr)
 				if err != nil {
-					metrics.ReportFuncError(h.svcTags)
 					panic(err)
 				}
 
@@ -305,10 +269,6 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 }
 
 func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	// #2 condition
 	// We look through the full bonded set (not just the active set, include unbonding validators)
 	// and we slash users who haven't signed a batch confirmation that is >15hrs in blocks old
@@ -366,10 +326,6 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 }
 
 func (h *BlockHandler) claimsSlashing(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	// #3 condition
 	// Oracle events MsgDepositClaim, MsgWithdrawClaim
 
@@ -453,10 +409,6 @@ func (h *BlockHandler) claimsSlashing(ctx sdk.Context, params *types.Params) {
 }
 
 func (h *BlockHandler) pruneValsets(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	// Validator set pruning
 	// prune all validator sets with a nonce less than the
 	// last observed nonce, they can't be submitted any longer

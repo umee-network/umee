@@ -3,18 +3,17 @@ package peggy_test
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	v040auth "github.com/cosmos/cosmos-sdk/x/auth/legacy/v040"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	. "github.com/umee-network/umee/x/peggy"
+	"github.com/umee-network/umee/x/peggy/keeper"
 	"github.com/umee-network/umee/x/peggy/testpeggy"
 	"github.com/umee-network/umee/x/peggy/types"
-
-	v040auth "github.com/cosmos/cosmos-sdk/x/auth/legacy/v040"
 )
 
 // Have the validators put in a erc20<>denom relation with ERC20DeployedEvent
@@ -37,7 +36,7 @@ type testingVars struct {
 	denom              string
 	input              testpeggy.TestInput
 	ctx                sdk.Context
-	h                  sdk.Handler
+	ms                 types.MsgServer
 	t                  *testing.T
 }
 
@@ -56,7 +55,7 @@ func initializeTestingVars(t *testing.T) *testingVars {
 	tv.ctx = tv.input.Context
 	tv.input.PeggyKeeper.StakingKeeper = testpeggy.NewStakingKeeperMock(tv.myValAddr)
 	tv.input.PeggyKeeper.SetOrchestratorValidator(tv.ctx, tv.myValAddr, tv.myOrchestratorAddr)
-	tv.h = NewHandler(tv.input.PeggyKeeper)
+	tv.ms = keeper.NewMsgServerImpl(tv.input.PeggyKeeper)
 
 	return &tv
 }
@@ -87,7 +86,7 @@ func addDenomToERC20Relation(tv *testingVars) {
 		Orchestrator:  tv.myOrchestratorAddr.String(),
 	}
 
-	_, err := tv.h(tv.ctx, &ethClaim)
+	_, err := tv.ms.ERC20DeployedClaim(sdk.WrapSDKContext(tv.ctx), &ethClaim)
 	require.NoError(tv.t, err)
 
 	NewBlockHandler(tv.input.PeggyKeeper).EndBlocker(tv.ctx)
@@ -136,7 +135,7 @@ func lockCoinsInModule(tv *testingVars) {
 		BridgeFee: feeCoin,
 	}
 
-	_, err := tv.h(tv.ctx, msg)
+	_, err := tv.ms.SendToEth(sdk.WrapSDKContext(tv.ctx), msg)
 	require.NoError(tv.t, err)
 
 	// Check that user balance has gone down
@@ -173,7 +172,7 @@ func acceptDepositEvent(tv *testingVars) {
 		Orchestrator:   myOrchestratorAddr.String(),
 	}
 
-	_, err := tv.h(tv.ctx, &ethClaim)
+	_, err := tv.ms.DepositClaim(sdk.WrapSDKContext(tv.ctx), &ethClaim)
 	require.NoError(tv.t, err)
 	NewBlockHandler(tv.input.PeggyKeeper).EndBlocker(tv.ctx)
 
