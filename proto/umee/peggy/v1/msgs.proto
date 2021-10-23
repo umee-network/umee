@@ -1,45 +1,47 @@
 syntax = "proto3";
-package injective.peggy.v1;
+package umeenetwork.umee.peggy.v1;
+
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "injective/peggy/v1/types.proto";
+import "umee/peggy/v1/types.proto";
 import "google/protobuf/any.proto";
+
 option go_package = "github.com/umee-network/umee/x/peggy/types";
 
 service Msg {
   rpc ValsetConfirm(MsgValsetConfirm) returns (MsgValsetConfirmResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/valset_confirm";
+    option (google.api.http).post = "/umee/peggy/v1/valset_confirm";
   }
   rpc SendToEth(MsgSendToEth) returns (MsgSendToEthResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/send_to_eth";
+    option (google.api.http).post = "/umee/peggy/v1/send_to_eth";
   }
   rpc RequestBatch(MsgRequestBatch) returns (MsgRequestBatchResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/request_batch";
+    option (google.api.http).post = "/umee/peggy/v1/request_batch";
   }
   rpc ConfirmBatch(MsgConfirmBatch) returns (MsgConfirmBatchResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/confirm_batch";
+    option (google.api.http).post = "/umee/peggy/v1/confirm_batch";
   }
   rpc DepositClaim(MsgDepositClaim) returns (MsgDepositClaimResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/deposit_claim";
+    option (google.api.http).post = "/umee/peggy/v1/deposit_claim";
   }
   rpc WithdrawClaim(MsgWithdrawClaim) returns (MsgWithdrawClaimResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/withdraw_claim";
+    option (google.api.http).post = "/umee/peggy/v1/withdraw_claim";
   }
   rpc ValsetUpdateClaim(MsgValsetUpdatedClaim) returns (MsgValsetUpdatedClaimResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/valset_updated_claim";
+    option (google.api.http).post = "/umee/peggy/v1/valset_updated_claim";
   }
   rpc ERC20DeployedClaim(MsgERC20DeployedClaim) returns (MsgERC20DeployedClaimResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/erc20_deployed_claim";
+    option (google.api.http).post = "/umee/peggy/v1/erc20_deployed_claim";
   }
   rpc SetOrchestratorAddresses(MsgSetOrchestratorAddresses) returns (MsgSetOrchestratorAddressesResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/set_orchestrator_address";
+    option (google.api.http).post = "/umee/peggy/v1/set_orchestrator_address";
   }
   rpc CancelSendToEth(MsgCancelSendToEth) returns (MsgCancelSendToEthResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/cancel_send_to_eth";
+    option (google.api.http).post = "/umee/peggy/v1/cancel_send_to_eth";
   }
   rpc SubmitBadSignatureEvidence(MsgSubmitBadSignatureEvidence) returns (MsgSubmitBadSignatureEvidenceResponse) {
-    option (google.api.http).post = "/injective/peggy/v1/submit_bad_signature_evidence";
+    option (google.api.http).post = "/umee/peggy/v1/submit_bad_signature_evidence";
   }
 }
 

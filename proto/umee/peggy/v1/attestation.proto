@@ -1,5 +1,5 @@
 syntax = "proto3";
-package injective.peggy.v1;
+package umeenetwork.umee.peggy.v1;
 
 // TODO-JT: add ERC20DeployedEvent claim
 

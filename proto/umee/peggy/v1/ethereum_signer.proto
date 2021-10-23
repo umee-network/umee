@@ -1,6 +1,8 @@
 syntax = "proto3";
-package injective.peggy.v1;
+package umeenetwork.umee.peggy.v1;
+
 import "gogoproto/gogo.proto";
+
 option go_package = "github.com/umee-network/umee/x/peggy/types";
 
 // SignType defines messages that have been signed by an orchestrator

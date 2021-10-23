@@ -5,21 +5,13 @@ import (
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	log "github.com/xlab/suplog"
-
-	"github.com/InjectiveLabs/injective-core/metrics"
 
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func (k *Keeper) Attest(ctx sdk.Context, claim types.EthereumClaim, anyClaim *codectypes.Any) (*types.Attestation, error) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	valAddr, found := k.GetOrchestratorValidator(ctx, claim.GetClaimer())
 	if !found {
-		metrics.ReportFuncError(k.svcTags)
 		panic("Could not find ValAddr for delegate key, should be checked by now")
 	}
 
@@ -29,7 +21,6 @@ func (k *Keeper) Attest(ctx sdk.Context, claim types.EthereumClaim, anyClaim *co
 	// and prevents validators from submitting two claims with the same nonce
 	lastEvent := k.GetLastEventByValidator(ctx, valAddr)
 	if claim.GetEventNonce() != lastEvent.EthereumEventNonce+1 {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrNonContiguousEventNonce
 	}
 
@@ -58,15 +49,11 @@ func (k *Keeper) Attest(ctx sdk.Context, claim types.EthereumClaim, anyClaim *co
 // and has not already been marked Observed, then calls processAttestation to actually apply it to the state,
 // and then marks it Observed and emits an event.
 func (k *Keeper) TryAttestation(ctx sdk.Context, att *types.Attestation) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	claim, err := k.UnpackAttestationClaim(att)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		panic("could not cast to claim")
 	}
+
 	// If the attestation has not yet been Observed, sum up the votes and see if it is ready to apply to the state.
 	// This conditional stops the attestation from accidentally being applied twice.
 	if !att.Observed {
@@ -77,9 +64,9 @@ func (k *Keeper) TryAttestation(ctx sdk.Context, att *types.Attestation) {
 		for _, validator := range att.Votes {
 			val, err := sdk.ValAddressFromBech32(validator)
 			if err != nil {
-				metrics.ReportFuncError(k.svcTags)
 				panic(err)
 			}
+
 			validatorPower := k.StakingKeeper.GetLastValidatorPower(ctx, val)
 			// Add it to the attestation power's sum
 			attestationPower = attestationPower.Add(sdk.NewInt(validatorPower))
@@ -90,9 +77,9 @@ func (k *Keeper) TryAttestation(ctx sdk.Context, att *types.Attestation) {
 				// this check is performed at the next level up so this should never panic
 				// outside of programmer error.
 				if claim.GetEventNonce() != lastEventNonce+1 {
-					metrics.ReportFuncError(k.svcTags)
 					panic("attempting to apply events to state out of order")
 				}
+
 				k.setLastObservedEventNonce(ctx, claim.GetEventNonce())
 				k.SetLastObservedEthereumBlockHeight(ctx, claim.GetBlockHeight())
 
@@ -106,28 +93,25 @@ func (k *Keeper) TryAttestation(ctx sdk.Context, att *types.Attestation) {
 		}
 	} else {
 		// We panic here because this should never happen
-		metrics.ReportFuncError(k.svcTags)
 		panic("attempting to process observed attestation")
 	}
 }
 
 // processAttestation actually applies the attestation to the consensus state
 func (k *Keeper) processAttestation(ctx sdk.Context, claim types.EthereumClaim) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	// then execute in a new Tx so that we can store state on failure
 	xCtx, commit := ctx.CacheContext()
 	if err := k.AttestationHandler.Handle(xCtx, claim); err != nil { // execute with a transient storage
 		// If the attestation fails, something has gone wrong and we can't recover it. Log and move on
 		// The attestation will still be marked "Observed", and validators can still be slashed for not
 		// having voted for it.
-		k.logger.WithError(err).WithFields(log.Fields{
-			"claim_type": claim.GetType(),
-			"id":         types.GetAttestationKey(claim.GetEventNonce(), claim.ClaimHash()),
-			"nonce":      fmt.Sprint(claim.GetEventNonce()),
-		}).Warningln("attestation failed")
+		k.Logger(ctx).Error(
+			"attestation failed",
+			"err", err,
+			"claim_type", claim.GetType().String(),
+			"id", fmt.Sprintf("%X", types.GetAttestationKey(claim.GetEventNonce(), claim.ClaimHash())),
+			"nonce", claim.GetEventNonce(),
+		)
 	} else {
 		commit() // persist transient storage
 	}
@@ -136,10 +120,6 @@ func (k *Keeper) processAttestation(ctx sdk.Context, claim types.EthereumClaim) 
 // emitObservedEvent emits an event with information about an attestation that has been applied to
 // consensus state.
 func (k *Keeper) emitObservedEvent(ctx sdk.Context, att *types.Attestation, claim types.EthereumClaim) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	ctx.EventManager().EmitTypedEvent(&types.EventAttestationObserved{
 		AttestationType: claim.GetType(),
 		BridgeContract:  k.GetBridgeContractAddress(ctx).Hex(),
@@ -151,10 +131,6 @@ func (k *Keeper) emitObservedEvent(ctx sdk.Context, att *types.Attestation, clai
 
 // SetAttestation sets the attestation in the store
 func (k *Keeper) SetAttestation(ctx sdk.Context, eventNonce uint64, claimHash []byte, att *types.Attestation) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	aKey := types.GetAttestationKey(eventNonce, claimHash)
 	store.Set(aKey, k.cdc.MustMarshal(att))
@@ -162,10 +138,6 @@ func (k *Keeper) SetAttestation(ctx sdk.Context, eventNonce uint64, claimHash []
 
 // GetAttestation return an attestation given a nonce
 func (k *Keeper) GetAttestation(ctx sdk.Context, eventNonce uint64, claimHash []byte) *types.Attestation {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	aKey := types.GetAttestationKey(eventNonce, claimHash)
 	bz := store.Get(aKey)
@@ -181,13 +153,8 @@ func (k *Keeper) GetAttestation(ctx sdk.Context, eventNonce uint64, claimHash []
 
 // DeleteAttestation deletes an attestation given an event nonce and claim
 func (k *Keeper) DeleteAttestation(ctx sdk.Context, att *types.Attestation) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	claim, err := k.UnpackAttestationClaim(att)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		panic("Bad Attestation in DeleteAttestation")
 	}
 
@@ -197,15 +164,10 @@ func (k *Keeper) DeleteAttestation(ctx sdk.Context, att *types.Attestation) {
 
 // GetAttestationMapping returns a mapping of eventnonce -> attestations at that nonce
 func (k *Keeper) GetAttestationMapping(ctx sdk.Context) (out map[uint64][]*types.Attestation) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	out = make(map[uint64][]*types.Attestation)
 	k.IterateAttestations(ctx, func(_ []byte, attestation *types.Attestation) (stop bool) {
 		claim, err := k.UnpackAttestationClaim(attestation)
 		if err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			panic("couldn't UnpackAttestationClaim")
 		}
 
@@ -220,10 +182,6 @@ func (k *Keeper) GetAttestationMapping(ctx sdk.Context) (out map[uint64][]*types
 
 // IterateAttestations iterates through all attestations
 func (k *Keeper) IterateAttestations(ctx sdk.Context, cb func(k []byte, v *types.Attestation) (stop bool)) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.OracleAttestationKey
 
@@ -247,10 +205,6 @@ func (k *Keeper) IterateAttestations(ctx sdk.Context, cb func(k []byte, v *types
 // that AT ONE POINT was the one in the Gravity bridge on Ethereum. If you assume that it's up
 // to date you may break the bridge
 func (k *Keeper) GetLastObservedValset(ctx sdk.Context) *types.Valset {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LastObservedValsetKey)
 
@@ -266,20 +220,12 @@ func (k *Keeper) GetLastObservedValset(ctx sdk.Context) *types.Valset {
 
 // SetLastObservedValset updates the last observed validator set in the store
 func (k *Keeper) SetLastObservedValset(ctx sdk.Context, valset types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.LastObservedValsetKey, k.cdc.MustMarshal(&valset))
 }
 
 // GetLastObservedEventNonce returns the latest observed event nonce
 func (k *Keeper) GetLastObservedEventNonce(ctx sdk.Context) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LastObservedEventNonceKey)
 
@@ -293,10 +239,6 @@ func (k *Keeper) GetLastObservedEventNonce(ctx sdk.Context) uint64 {
 // GetLastObservedEthereumBlockHeight height gets the block height to of the last observed attestation from
 // the store
 func (k *Keeper) GetLastObservedEthereumBlockHeight(ctx sdk.Context) types.LastObservedEthereumBlockHeight {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LastObservedEthereumBlockHeightKey)
 
@@ -315,10 +257,6 @@ func (k *Keeper) GetLastObservedEthereumBlockHeight(ctx sdk.Context) types.LastO
 
 // SetLastObservedEthereumBlockHeight sets the block height in the store.
 func (k *Keeper) SetLastObservedEthereumBlockHeight(ctx sdk.Context, ethereumHeight uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	height := types.LastObservedEthereumBlockHeight{
 		EthereumBlockHeight: ethereumHeight,
@@ -330,19 +268,11 @@ func (k *Keeper) SetLastObservedEthereumBlockHeight(ctx sdk.Context, ethereumHei
 
 // setLastObservedEventNonce sets the latest observed event nonce
 func (k *Keeper) setLastObservedEventNonce(ctx sdk.Context, nonce uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.LastObservedEventNonceKey, types.UInt64Bytes(nonce))
 }
 
 func (k *Keeper) setLastEventByValidator(ctx sdk.Context, validator sdk.ValAddress, nonce uint64, blockHeight uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	lastClaimEvent := types.LastClaimEvent{
 		EthereumEventNonce:  nonce,
@@ -350,15 +280,10 @@ func (k *Keeper) setLastEventByValidator(ctx sdk.Context, validator sdk.ValAddre
 	}
 
 	store.Set(types.GetLastEventByValidatorKey(validator), k.cdc.MustMarshal(&lastClaimEvent))
-
 }
 
 // GetLastEventByValidator returns the latest event for a given validator
 func (k *Keeper) GetLastEventByValidator(ctx sdk.Context, validator sdk.ValAddress) (lastEvent types.LastClaimEvent) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.GetLastEventByValidatorKey(validator))
 
@@ -408,7 +333,6 @@ func (k *Keeper) GetLastEventByValidator(ctx sdk.Context, validator sdk.ValAddre
 				if atts[att].Observed && nonce < lowestObservedNonce {
 					claim, err := k.UnpackAttestationClaim(atts[att])
 					if err != nil {
-						metrics.ReportFuncError(k.svcTags)
 						panic("could not cast to claim")
 					}
 					lastEvent = types.LastClaimEvent{

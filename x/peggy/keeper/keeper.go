@@ -11,31 +11,24 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	log "github.com/xlab/suplog"
-
-	"github.com/InjectiveLabs/injective-core/metrics"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
-	StakingKeeper types.StakingKeeper
-
 	storeKey   sdk.StoreKey // Unexposed key to access store from sdk.Context
 	paramSpace paramtypes.Subspace
 
 	cdc            codec.BinaryCodec // The wire codec for binary encoding/decoding.
 	bankKeeper     types.BankKeeper
 	SlashingKeeper types.SlashingKeeper
+	StakingKeeper  types.StakingKeeper
 
 	AttestationHandler interface {
 		Handle(sdk.Context, types.EthereumClaim) error
 	}
-
-	svcTags  metrics.Tags
-	grpcTags metrics.Tags
-	logger   log.Logger
 }
 
 // NewKeeper returns a new instance of the peggy keeper
@@ -47,14 +40,6 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey sdk.StoreKey, paramSpace paramtyp
 		StakingKeeper:  stakingKeeper,
 		bankKeeper:     bankKeeper,
 		SlashingKeeper: slashingKeeper,
-
-		svcTags: metrics.Tags{
-			"svc": "peggy_k",
-		},
-		grpcTags: metrics.Tags{
-			"svc": "peggy_grpc",
-		},
-		logger: log.WithField("module", types.ModuleName),
 	}
 
 	k.AttestationHandler = NewAttestationHandler(bankKeeper, k)
@@ -71,13 +56,13 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey sdk.StoreKey, paramSpace paramtyp
 //     VALSET REQUESTS     //
 /////////////////////////////
 
+func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+	return ctx.Logger().With("module", "x/"+types.ModuleName)
+}
+
 // SetValsetRequest returns a new instance of the Peggy BridgeValidatorSet
 // i.e. {"nonce": 1, "memebers": [{"eth_addr": "foo", "power": 11223}]}
 func (k *Keeper) SetValsetRequest(ctx sdk.Context) *types.Valset {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	valset := k.GetCurrentValset(ctx)
 
 	// If none of the bonded validators has registered eth key, then valset.Members = 0.
@@ -101,10 +86,6 @@ func (k *Keeper) SetValsetRequest(ctx sdk.Context) *types.Valset {
 
 // StoreValset is for storing a valiator set at a given height
 func (k *Keeper) StoreValset(ctx sdk.Context, valset *types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	valset.Height = uint64(ctx.BlockHeight())
 	store.Set(types.GetValsetKey(valset.Nonce), k.cdc.MustMarshal(valset))
@@ -113,20 +94,12 @@ func (k *Keeper) StoreValset(ctx sdk.Context, valset *types.Valset) {
 
 //  SetLatestValsetNonce sets the latest valset nonce
 func (k *Keeper) SetLatestValsetNonce(ctx sdk.Context, nonce uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.LatestValsetNonce, types.UInt64Bytes(nonce))
 }
 
 // StoreValsetUnsafe is for storing a valiator set at a given height
 func (k *Keeper) StoreValsetUnsafe(ctx sdk.Context, valset *types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetValsetKey(valset.Nonce), k.cdc.MustMarshal(valset))
 	k.SetLatestValsetNonce(ctx, valset.Nonce)
@@ -134,29 +107,17 @@ func (k *Keeper) StoreValsetUnsafe(ctx sdk.Context, valset *types.Valset) {
 
 // HasValsetRequest returns true if a valset defined by a nonce exists
 func (k *Keeper) HasValsetRequest(ctx sdk.Context, nonce uint64) bool {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	return store.Has(types.GetValsetKey(nonce))
 }
 
 // DeleteValset deletes the valset at a given nonce from state
 func (k *Keeper) DeleteValset(ctx sdk.Context, nonce uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	ctx.KVStore(k.storeKey).Delete(types.GetValsetKey(nonce))
 }
 
 // GetLatestValsetNonce returns the latest valset nonce
 func (k *Keeper) GetLatestValsetNonce(ctx sdk.Context) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LatestValsetNonce)
 
@@ -169,10 +130,6 @@ func (k *Keeper) GetLatestValsetNonce(ctx sdk.Context) uint64 {
 
 // GetValset returns a valset by nonce
 func (k *Keeper) GetValset(ctx sdk.Context, nonce uint64) *types.Valset {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetValsetKey(nonce))
 	if bz == nil {
@@ -187,10 +144,6 @@ func (k *Keeper) GetValset(ctx sdk.Context, nonce uint64) *types.Valset {
 
 // IterateValsets retruns all valsetRequests
 func (k *Keeper) IterateValsets(ctx sdk.Context, cb func(key []byte, val *types.Valset) bool) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetRequestKey)
 	iter := prefixStore.ReverseIterator(nil, nil)
 	defer iter.Close()
@@ -207,10 +160,6 @@ func (k *Keeper) IterateValsets(ctx sdk.Context, cb func(key []byte, val *types.
 
 // GetValsets returns all the validator sets in state
 func (k *Keeper) GetValsets(ctx sdk.Context) (out []*types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	k.IterateValsets(ctx, func(_ []byte, val *types.Valset) bool {
 		out = append(out, val)
 		return false
@@ -223,10 +172,6 @@ func (k *Keeper) GetValsets(ctx sdk.Context) (out []*types.Valset) {
 
 // GetLatestValset returns the latest validator set in state
 func (k *Keeper) GetLatestValset(ctx sdk.Context) (out *types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	latestValsetNonce := k.GetLatestValsetNonce(ctx)
 	out = k.GetValset(ctx, latestValsetNonce)
 
@@ -235,20 +180,12 @@ func (k *Keeper) GetLatestValset(ctx sdk.Context) (out *types.Valset) {
 
 // setLastSlashedValsetNonce sets the latest slashed valset nonce
 func (k *Keeper) SetLastSlashedValsetNonce(ctx sdk.Context, nonce uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.LastSlashedValsetNonce, types.UInt64Bytes(nonce))
 }
 
 // GetLastSlashedValsetNonce returns the latest slashed valset nonce
 func (k *Keeper) GetLastSlashedValsetNonce(ctx sdk.Context) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LastSlashedValsetNonce)
 
@@ -261,20 +198,12 @@ func (k *Keeper) GetLastSlashedValsetNonce(ctx sdk.Context) uint64 {
 
 // SetLastUnbondingBlockHeight sets the last unbonding block height
 func (k *Keeper) SetLastUnbondingBlockHeight(ctx sdk.Context, unbondingBlockHeight uint64) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.LastUnbondingBlockHeight, types.UInt64Bytes(unbondingBlockHeight))
 }
 
 // GetLastUnbondingBlockHeight returns the last unbonding block height
 func (k *Keeper) GetLastUnbondingBlockHeight(ctx sdk.Context) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	bytes := store.Get(types.LastUnbondingBlockHeight)
 
@@ -287,10 +216,6 @@ func (k *Keeper) GetLastUnbondingBlockHeight(ctx sdk.Context) uint64 {
 
 // GetUnslashedValsets returns all the unslashed validator sets in state
 func (k *Keeper) GetUnslashedValsets(ctx sdk.Context, maxHeight uint64) (out []*types.Valset) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	lastSlashedValsetNonce := k.GetLastSlashedValsetNonce(ctx)
 
 	k.IterateValsetBySlashedValsetNonce(ctx, lastSlashedValsetNonce, maxHeight, func(_ []byte, valset *types.Valset) bool {
@@ -310,10 +235,6 @@ func (k *Keeper) IterateValsetBySlashedValsetNonce(
 	maxHeight uint64,
 	cb func(k []byte, v *types.Valset) (stop bool),
 ) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetRequestKey)
 	iter := prefixStore.Iterator(types.UInt64Bytes(lastSlashedValsetNonce), types.UInt64Bytes(maxHeight))
 	defer iter.Close()
@@ -334,10 +255,6 @@ func (k *Keeper) IterateValsetBySlashedValsetNonce(
 
 // GetValsetConfirm returns a valset confirmation by a nonce and validator address
 func (k *Keeper) GetValsetConfirm(ctx sdk.Context, nonce uint64, validator sdk.AccAddress) *types.MsgValsetConfirm {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	entity := store.Get(types.GetValsetConfirmKey(nonce, validator))
 	if entity == nil {
@@ -352,14 +269,9 @@ func (k *Keeper) GetValsetConfirm(ctx sdk.Context, nonce uint64, validator sdk.A
 
 // SetValsetConfirm sets a valset confirmation
 func (k *Keeper) SetValsetConfirm(ctx sdk.Context, valset *types.MsgValsetConfirm) []byte {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	addr, err := sdk.AccAddressFromBech32(valset.Orchestrator)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		panic(err)
 	}
 
@@ -371,10 +283,6 @@ func (k *Keeper) SetValsetConfirm(ctx sdk.Context, valset *types.MsgValsetConfir
 
 // GetValsetConfirms returns all validator set confirmations by nonce
 func (k *Keeper) GetValsetConfirms(ctx sdk.Context, nonce uint64) (valsetConfirms []*types.MsgValsetConfirm) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetConfirmKey)
 	start, end := PrefixRange(types.UInt64Bytes(nonce))
 	iterator := prefixStore.Iterator(start, end)
@@ -393,10 +301,6 @@ func (k *Keeper) GetValsetConfirms(ctx sdk.Context, nonce uint64) (valsetConfirm
 
 // IterateValsetConfirmByNonce iterates through all valset confirms by validator set nonce in ASC order
 func (k *Keeper) IterateValsetConfirmByNonce(ctx sdk.Context, nonce uint64, cb func(k []byte, v *types.MsgValsetConfirm) (stop bool)) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetConfirmKey)
 	iter := prefixStore.Iterator(PrefixRange(types.UInt64Bytes(nonce)))
 	defer iter.Close()
@@ -417,10 +321,6 @@ func (k *Keeper) IterateValsetConfirmByNonce(ctx sdk.Context, nonce uint64, cb f
 
 // GetBatchConfirm returns a batch confirmation given its nonce, the token contract, and a validator address
 func (k *Keeper) GetBatchConfirm(ctx sdk.Context, nonce uint64, tokenContract common.Address, validator sdk.AccAddress) *types.MsgConfirmBatch {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	entity := store.Get(types.GetBatchConfirmKey(tokenContract, nonce, validator))
 	if entity == nil {
@@ -435,10 +335,6 @@ func (k *Keeper) GetBatchConfirm(ctx sdk.Context, nonce uint64, tokenContract co
 
 // SetBatchConfirm sets a batch confirmation by a validator
 func (k *Keeper) SetBatchConfirm(ctx sdk.Context, batch *types.MsgConfirmBatch) []byte {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	// convert eth signer to hex string lol
 	batch.EthSigner = common.HexToAddress(batch.EthSigner).Hex()
 	tokenContract := common.HexToAddress(batch.TokenContract)
@@ -446,7 +342,6 @@ func (k *Keeper) SetBatchConfirm(ctx sdk.Context, batch *types.MsgConfirmBatch) 
 
 	acc, err := sdk.AccAddressFromBech32(batch.Orchestrator)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		panic(err)
 	}
 
@@ -463,10 +358,6 @@ func (k *Keeper) IterateBatchConfirmByNonceAndTokenContract(
 	tokenContract common.Address,
 	cb func(k []byte, v *types.MsgConfirmBatch) (stop bool),
 ) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.BatchConfirmKey)
 	prefix := append(tokenContract.Bytes(), types.UInt64Bytes(nonce)...)
 	iter := prefixStore.Iterator(PrefixRange(prefix))
@@ -484,10 +375,6 @@ func (k *Keeper) IterateBatchConfirmByNonceAndTokenContract(
 
 // GetBatchConfirmByNonceAndTokenContract returns the batch confirms
 func (k *Keeper) GetBatchConfirmByNonceAndTokenContract(ctx sdk.Context, nonce uint64, tokenContract common.Address) (out []*types.MsgConfirmBatch) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	k.IterateBatchConfirmByNonceAndTokenContract(ctx, nonce, tokenContract, func(_ []byte, msg *types.MsgConfirmBatch) (stop bool) {
 		out = append(out, msg)
 		return false
@@ -502,20 +389,12 @@ func (k *Keeper) GetBatchConfirmByNonceAndTokenContract(ctx sdk.Context, nonce u
 
 // SetOrchestratorValidator sets the Orchestrator key for a given validator
 func (k *Keeper) SetOrchestratorValidator(ctx sdk.Context, val sdk.ValAddress, orch sdk.AccAddress) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetOrchestratorAddressKey(orch), val.Bytes())
 }
 
 // GetOrchestratorValidator returns the validator key associated with an orchestrator key
 func (k *Keeper) GetOrchestratorValidator(ctx sdk.Context, orch sdk.AccAddress) (sdk.ValAddress, bool) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 
 	bz := store.Get(types.GetOrchestratorAddressKey(orch))
@@ -532,10 +411,6 @@ func (k *Keeper) GetOrchestratorValidator(ctx sdk.Context, orch sdk.AccAddress) 
 
 // SetEthAddressForValidator sets the ethereum address for a given validator
 func (k *Keeper) SetEthAddressForValidator(ctx sdk.Context, validator sdk.ValAddress, ethAddr common.Address) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetEthAddressByValidatorKey(validator), ethAddr.Bytes())
 	store.Set(types.GetValidatorByEthAddressKey(ethAddr), validator.Bytes())
@@ -543,10 +418,6 @@ func (k *Keeper) SetEthAddressForValidator(ctx sdk.Context, validator sdk.ValAdd
 
 // GetEthAddressByValidator returns the eth address for a given peggy validator
 func (k *Keeper) GetEthAddressByValidator(ctx sdk.Context, validator sdk.ValAddress) (common.Address, bool) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 
 	bz := store.Get(types.GetEthAddressByValidatorKey(validator))
@@ -559,15 +430,12 @@ func (k *Keeper) GetEthAddressByValidator(ctx sdk.Context, validator sdk.ValAddr
 
 // GetValidatorByEthAddress returns the validator for a given eth address
 func (k *Keeper) GetValidatorByEthAddress(ctx sdk.Context, ethAddr common.Address) (validator stakingtypes.Validator, found bool) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	valAddr := store.Get(types.GetValidatorByEthAddressKey(ethAddr))
 	if valAddr == nil {
 		return stakingtypes.Validator{}, false
 	}
+
 	validator, found = k.StakingKeeper.GetValidator(ctx, valAddr)
 	if !found {
 		return stakingtypes.Validator{}, false
@@ -598,9 +466,6 @@ func (k *Keeper) GetValidatorByEthAddress(ctx sdk.Context, ethAddr common.Addres
 // update the validator set again and the bridge and all its' funds are lost.
 // For this reason we exclude validators with unset eth keys from validator sets
 func (k *Keeper) GetCurrentValset(ctx sdk.Context) *types.Valset {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
 
 	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 	// allocate enough space for all validators, but len zero, we then append
@@ -648,10 +513,6 @@ func (k *Keeper) GetCurrentValset(ctx sdk.Context) *types.Valset {
 
 // GetParams returns the parameters from the store
 func (k *Keeper) GetParams(ctx sdk.Context) *types.Params {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	params := new(types.Params)
 
 	k.paramSpace.GetParamSet(ctx, params)
@@ -661,21 +522,12 @@ func (k *Keeper) GetParams(ctx sdk.Context) *types.Params {
 
 // SetParams sets the parameters in the store
 func (k *Keeper) SetParams(ctx sdk.Context, params *types.Params) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	k.paramSpace.SetParamSet(ctx, params)
 }
 
 // GetBridgeContractAddress returns the bridge contract address on ETH
 func (k *Keeper) GetBridgeContractAddress(ctx sdk.Context) common.Address {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var bridgeContractAddressHex string
-
 	k.paramSpace.Get(ctx, types.ParamsStoreKeyBridgeContractAddress, &bridgeContractAddressHex)
 
 	return common.HexToAddress(bridgeContractAddressHex)
@@ -683,10 +535,6 @@ func (k *Keeper) GetBridgeContractAddress(ctx sdk.Context) common.Address {
 
 // GetBridgeChainID returns the chain id of the ETH chain we are running against
 func (k *Keeper) GetBridgeChainID(ctx sdk.Context) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var bridgeChainID uint64
 
 	k.paramSpace.Get(ctx, types.ParamsStoreKeyBridgeContractChainID, &bridgeChainID)
@@ -695,33 +543,20 @@ func (k *Keeper) GetBridgeChainID(ctx sdk.Context) uint64 {
 }
 
 func (k *Keeper) GetPeggyID(ctx sdk.Context) string {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var peggyID string
-
 	k.paramSpace.Get(ctx, types.ParamsStoreKeyPeggyID, &peggyID)
 
 	return peggyID
 }
 
 func (k *Keeper) setPeggyID(ctx sdk.Context, v string) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
 
 	k.paramSpace.Set(ctx, types.ParamsStoreKeyPeggyID, v)
 }
 
 // GetCosmosCoinDenom returns native cosmos coin denom
 func (k *Keeper) GetCosmosCoinDenom(ctx sdk.Context) string {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var denom string
-
 	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinDenom, &denom)
 
 	return denom
@@ -729,32 +564,22 @@ func (k *Keeper) GetCosmosCoinDenom(ctx sdk.Context) string {
 
 // GetCosmosCoinERC20Contract returns the Cosmos coin ERC20 contract address
 func (k *Keeper) GetCosmosCoinERC20Contract(ctx sdk.Context) common.Address {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var contractAddress string
-
 	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinErc20Contract, &contractAddress)
 
 	return common.HexToAddress(contractAddress)
 }
 
 func (k *Keeper) UnpackAttestationClaim(attestation *types.Attestation) (types.EthereumClaim, error) {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	var msg types.EthereumClaim
 
 	err := k.cdc.UnpackAny(attestation.Claim, &msg)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		err = errors.Wrap(err, "failed to unpack EthereumClaim")
 		return nil, err
-	} else {
-		return msg, nil
 	}
+
+	return msg, nil
 }
 
 // GetOrchestratorAddresses iterates both the EthAddress and Orchestrator address indexes to produce
@@ -768,10 +593,6 @@ func (k *Keeper) UnpackAttestationClaim(attestation *types.Attestation) (types.E
 //
 // For the time being this will serve
 func (k *Keeper) GetOrchestratorAddresses(ctx sdk.Context) []*types.MsgSetOrchestratorAddresses {
-	metrics.ReportFuncCall(k.svcTags)
-	doneFn := metrics.ReportFuncTiming(k.svcTags)
-	defer doneFn()
-
 	store := ctx.KVStore(k.storeKey)
 	prefix := []byte(types.EthAddressByValidatorKey)
 	iter := store.Iterator(PrefixRange(prefix))
@@ -811,7 +632,6 @@ func (k *Keeper) GetOrchestratorAddresses(ctx sdk.Context) []*types.MsgSetOrches
 	for validatorAccount, ethAddress := range ethAddresses {
 		orchestratorAccount, ok := orchestratorAddresses[validatorAccount]
 		if !ok {
-			metrics.ReportFuncError(k.svcTags)
 			panic("cannot find validator account in orchestrator addresses mapping")
 		}
 
