@@ -134,7 +134,7 @@ func (h *BlockHandler) attestationTally(ctx sdk.Context) {
 			// we skip the other attestations and move on to the next nonce again.
 			// If no attestation becomes observed, when we get to the next nonce, every attestation in
 			// it will be skipped. The same will happen for every nonce after that.
-			if nonce == uint64(h.k.GetLastObservedEventNonce(ctx))+1 {
+			if nonce == h.k.GetLastObservedEventNonce(ctx)+1 {
 				h.k.TryAttestation(ctx, attestation)
 			}
 		}
@@ -233,7 +233,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 					panic(err)
 				}
 
-				validator, exist := h.k.StakingKeeper.GetValidator(ctx, sdk.ValAddress(addr))
+				validator, exist := h.k.StakingKeeper.GetValidator(ctx, addr)
 				valConsAddr, _ := validator.GetConsAddr()
 				valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, valConsAddr)
 
