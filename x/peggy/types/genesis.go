@@ -53,7 +53,7 @@ var (
 	// ParamsStoreKeyTargetBatchTimeout stores
 	ParamsStoreKeyTargetBatchTimeout = []byte("TargetBatchTimeout")
 
-	// ParamsStoreKeyAverageBlockTime stores the average block time of the Injective Chain in milliseconds
+	// ParamsStoreKeyAverageBlockTime stores the average block time of the Umee Chain in milliseconds
 	ParamsStoreKeyAverageBlockTime = []byte("AverageBlockTime")
 
 	// ParamsStoreKeyAverageEthereumBlockTime stores the average block time of Ethereum in milliseconds
@@ -107,7 +107,7 @@ func DefaultGenesisState() *GenesisState {
 // DefaultParams returns a copy of the default params
 func DefaultParams() *Params {
 	return &Params{
-		PeggyId:                       "injective-peggyid",
+		PeggyId:                       "umee-peggyid",
 		SignedValsetsWindow:           10000,
 		SignedBatchesWindow:           10000,
 		SignedClaimsWindow:            10000,
@@ -119,7 +119,7 @@ func DefaultParams() *Params {
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionBadEthSignature:  sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		CosmosCoinDenom:               "inj",
+		CosmosCoinDenom:               "uumee",
 		UnbondSlashingValsetsWindow:   10000,
 		ClaimSlashingEnabled:          false,
 	}
