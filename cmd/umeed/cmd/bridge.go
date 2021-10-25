@@ -91,8 +91,7 @@ func deployPeggyCmd() *cobra.Command {
 
 func initPeggyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "init-peggy [peggy-address]",
-		Args:  cobra.ExactArgs(1),
+		Use:   "init-peggy",
 		Short: "Initialize the Peggy (Gravity Bridge) smart contract on Ethereum",
 		Long: `Initialize the Peggy (Gravity Bridge) smart contract on Ethereum using
 the current validator set and their respective powers.
@@ -113,7 +112,12 @@ prior to initializing.`,
 				return fmt.Errorf("failed to dial Ethereum node: %w", err)
 			}
 
-			contract, err := peggysol.NewPeggy(ethcommon.HexToAddress(args[0]), ethClient)
+			peggyParams, err := peggyQueryClient.Params(cmd.Context(), &peggytypes.QueryParamsRequest{})
+			if err != nil {
+				return fmt.Errorf("failed to query for Peggy params: %w", err)
+			}
+
+			contract, err := peggysol.NewPeggy(ethcommon.HexToAddress(peggyParams.Params.BridgeEthereumAddress), ethClient)
 			if err != nil {
 				return fmt.Errorf("failed to create Peggy contract instance: %w", err)
 			}
@@ -129,11 +133,6 @@ prior to initializing.`,
 			}
 
 			powerThreshold := new(big.Int).SetUint64(powerThresholdInt)
-
-			peggyParams, err := peggyQueryClient.Params(cmd.Context(), &peggytypes.QueryParamsRequest{})
-			if err != nil {
-				return fmt.Errorf("failed to query for Peggy params: %w", err)
-			}
 
 			var peggyID [32]byte
 			copy(peggyID[:], peggyParams.Params.PeggyId)
