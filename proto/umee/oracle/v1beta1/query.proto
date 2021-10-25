@@ -89,8 +89,7 @@ message QueryExchangeRateRequest {
 // QueryExchangeRateResponse is response type for the
 // Query/ExchangeRate RPC method.
 message QueryExchangeRateResponse {
-  // exchange_rate defines the exchange rate of Luna denominated in various
-  // Terra
+  // exchange_rate defines the exchange rate of USD denominated in various crypto
   string exchange_rate = 1
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
