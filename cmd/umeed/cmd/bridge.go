@@ -31,7 +31,7 @@ const (
 func createBridgeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bridge",
-		Short: "Commands to interface with the Ethereum Peggy (Gravity Bridge)",
+		Short: "Commands to interface with Peggy (Gravity Bridge) Ethereum contract",
 	}
 
 	cmd.AddCommand(
