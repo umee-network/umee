@@ -84,8 +84,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		queryCommand(),
 		txCommand(),
 		keys.Commands(app.DefaultNodeHome),
-		deployPeggyCmd(),
-		initializePeggyCmd(),
+		createBridgeCommand(),
 	)
 }
 

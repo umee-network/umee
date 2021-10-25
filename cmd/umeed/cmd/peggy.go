@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	peggysol "github.com/InjectiveLabs/peggo/solidity/wrappers/Peggy.sol"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -16,7 +17,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/ethbinding/peggy"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
@@ -28,6 +28,23 @@ const (
 	flagPowerThreshold = "power-threshold"
 )
 
+func createBridgeCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "bridge",
+		Short: "Commands to interface with the Ethereum Peggy (Gravity Bridge)",
+	}
+
+	cmd.AddCommand(
+		deployPeggyCmd(),
+		initPeggyCmd(),
+		// TODO:
+		// - Deploy ERC20 command
+	)
+
+	return cmd
+}
+
+// TODO: Support --admin capabilities
 func deployPeggyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy-peggy",
@@ -48,7 +65,7 @@ func deployPeggyCmd() *cobra.Command {
 				return err
 			}
 
-			address, tx, _, err := peggy.DeploySolidity(auth, ethClient)
+			address, tx, _, err := peggysol.DeploySolidity(auth, ethClient)
 			if err != nil {
 				return fmt.Errorf("failed deploy Peggy (Gravity Bridge) contract: %w", err)
 			}
@@ -72,9 +89,9 @@ func deployPeggyCmd() *cobra.Command {
 	return cmd
 }
 
-func initializePeggyCmd() *cobra.Command {
+func initPeggyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "initialize-peggy [peggy-address]",
+		Use:   "init-peggy [peggy-address]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Initialize the Peggy (Gravity Bridge) smart contract on Ethereum",
 		Long: `Initialize the Peggy (Gravity Bridge) smart contract on Ethereum using
@@ -93,7 +110,7 @@ the current validator set.`,
 				return fmt.Errorf("failed to dial Ethereum node: %w", err)
 			}
 
-			contract, err := peggy.NewSolidity(ethcommon.HexToAddress(args[0]), ethClient)
+			contract, err := peggysol.NewSolidity(ethcommon.HexToAddress(args[0]), ethClient)
 			if err != nil {
 				return fmt.Errorf("failed to create Peggy contract instance: %w", err)
 			}
