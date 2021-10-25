@@ -107,7 +107,7 @@ docker-build-debug:
 ##                              Tests & Linting                              ##
 ###############################################################################
 
-PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/e2e' -e solidity)
+PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/e2e')
 PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-e2e
