@@ -60,7 +60,7 @@ func deployPeggyCmd() *cobra.Command {
 				return fmt.Errorf("failed to dial Ethereum node: %w", err)
 			}
 
-			auth, err := buildEthAuthBinding(cmd, ethClient)
+			auth, err := buildTransactOpts(cmd, ethClient)
 			if err != nil {
 				return err
 			}
@@ -95,7 +95,10 @@ func initPeggyCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Initialize the Peggy (Gravity Bridge) smart contract on Ethereum",
 		Long: `Initialize the Peggy (Gravity Bridge) smart contract on Ethereum using
-the current validator set.`,
+the current validator set and their respective powers.
+
+Note, each validator must have their Ethereum delegate keys registered on chain
+prior to initializing.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			peggyQueryClient := peggytypes.NewQueryClient(clientCtx)
@@ -115,7 +118,7 @@ the current validator set.`,
 				return fmt.Errorf("failed to create Peggy contract instance: %w", err)
 			}
 
-			auth, err := buildEthAuthBinding(cmd, ethClient)
+			auth, err := buildTransactOpts(cmd, ethClient)
 			if err != nil {
 				return err
 			}
@@ -143,10 +146,20 @@ the current validator set.`,
 			var (
 				validators = make([]ethcommon.Address, len(currValSet.Valset.Members))
 				powers     = make([]*big.Int, len(currValSet.Valset.Members))
+
+				totalPower uint64
 			)
 			for i, member := range currValSet.Valset.Members {
 				validators[i] = ethcommon.HexToAddress(member.EthereumAddress)
 				powers[i] = new(big.Int).SetUint64(member.Power)
+				totalPower += member.Power
+			}
+
+			if totalPower < powerThresholdInt {
+				return fmt.Errorf(
+					"refusing to deploy; total power (%d) < power threshold (%d)",
+					totalPower, powerThresholdInt,
+				)
 			}
 
 			tx, err := contract.Initialize(auth, peggyID, powerThreshold, validators, powers)
@@ -173,7 +186,7 @@ the current validator set.`,
 	return cmd
 }
 
-func buildEthAuthBinding(cmd *cobra.Command, ethClient *ethclient.Client) (*bind.TransactOpts, error) {
+func buildTransactOpts(cmd *cobra.Command, ethClient *ethclient.Client) (*bind.TransactOpts, error) {
 	ethPrivKeyHexStr, err := cmd.Flags().GetString(flagEthPrivKey)
 	if err != nil {
 		return nil, err
