@@ -169,13 +169,3 @@ proto-check-breaking:
 	@$(DOCKER_BUF) breaking --against https://github.com/umee-network/umee.git#branch=main
 
 .PHONY: proto-all proto-gen proto-format proto-lint proto-check-breaking
-
-###############################################################################
-##                                 Solidity                                  ##
-###############################################################################
-
-# TODO: Create a dockerfile that generates the Ethereum bindings.
-# abigen-ethbinding:
-# 	@abigen --abi solidity/peggy.abi -pkg solidity --out ./solidity/peggy.go
-
-# .PHONY: abigen-ethbinding

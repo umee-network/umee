@@ -65,7 +65,7 @@ func deployPeggyCmd() *cobra.Command {
 				return err
 			}
 
-			address, tx, _, err := peggysol.DeploySolidity(auth, ethClient)
+			address, tx, _, err := peggysol.DeployPeggy(auth, ethClient)
 			if err != nil {
 				return fmt.Errorf("failed deploy Peggy (Gravity Bridge) contract: %w", err)
 			}
@@ -110,7 +110,7 @@ the current validator set.`,
 				return fmt.Errorf("failed to dial Ethereum node: %w", err)
 			}
 
-			contract, err := peggysol.NewSolidity(ethcommon.HexToAddress(args[0]), ethClient)
+			contract, err := peggysol.NewPeggy(ethcommon.HexToAddress(args[0]), ethClient)
 			if err != nil {
 				return fmt.Errorf("failed to create Peggy contract instance: %w", err)
 			}
