@@ -167,8 +167,20 @@ prior to initializing.`,
 				return fmt.Errorf("failed to initialize Peggy (Gravity Bridge): %w", err)
 			}
 
-			_, _ = fmt.Fprintf(os.Stderr,
-				"Peggy (Gravity Bridge) contract successfully initialized!\nTransaction: %s\n",
+			_, _ = fmt.Fprintf(os.Stderr, `Peggy (Gravity Bridge) contract successfully initialized!
+PeggyID: %s
+Init Params:
+  Peggy ID: %X
+	Power Threshold: %d
+	Validator Set Size: %d
+	Validator Total Power: %d
+Transaction: %s
+`,
+				peggyParams.Params.PeggyId,
+				peggyID,
+				powerThresholdInt,
+				len(validators),
+				totalPower,
 				tx.Hash().Hex(),
 			)
 
