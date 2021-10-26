@@ -21,9 +21,7 @@ type BankKeeper interface {
 	SendCoinsFromAccountToModule(
 		ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins,
 	) error
-	// Question: Do we need the following (commented out)?
-	// SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
-	// BlockedAddr(addr sdk.AccAddress) bool
+	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
 	// Question: When processing a deposit message, is it sufficient to use hasBalance,
 	//	or must we iterate through spendableCoins?

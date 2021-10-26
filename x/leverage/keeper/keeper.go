@@ -95,13 +95,18 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 	}
 
-	// ensure the tokens exist in the leverage module account's balance
+	// TODO: Calculate lender's borrow limit and borrowed value, if any, to prevent
+	// borrowers from withdrawing assets that are being used as collateral.
+
 	// TODO: Use exchange rate instead of 1:1 redeeming
 	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
-	token := sdk.NewCoin(tokenDenom, uToken.Amount)
-	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), token) {
-		// TODO: We should never enter this case -- consider a panic
-		return sdkerrors.Wrap(types.ErrInsufficientBalance, token.String())
+	withdrawal := sdk.NewCoin(tokenDenom, uToken.Amount)
+
+	// Ensure module account has sufficient unreserved tokens to withdraw
+	reservedAmount := k.GetReserveAmount(ctx, withdrawal.Denom)
+	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), withdrawal.Denom).Amount
+	if withdrawal.Amount.GT(availableAmount.Sub(reservedAmount)) {
+		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, withdrawal.String())
 	}
 
 	// send the uTokens from the lender to the module account
@@ -111,7 +116,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	}
 
 	// send the original lent tokens back to lender
-	tokens := sdk.NewCoins(token)
+	tokens := sdk.NewCoins(withdrawal)
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
 		return err
 	}
@@ -190,15 +195,18 @@ func (k Keeper) GetAllBorrowerLoans(ctx sdk.Context, borrowerAddr sdk.AccAddress
 	return totalBorrowed, nil
 }
 
-// BorrowAsset attempts to borrow assets from the leverage module account using
+// BorrowAsset attempts to borrow tokens from the leverage module account using
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
 func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan sdk.Coin) error {
 	if !k.IsAcceptedToken(ctx, loan.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
 	}
-	// ensure module account has sufficient assets to loan out
-	if !k.bankKeeper.HasBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), loan) {
+
+	// Ensure module account has sufficient unreserved tokens to loan out
+	reservedAmount := k.GetReserveAmount(ctx, loan.Denom)
+	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), loan.Denom).Amount
+	if loan.Amount.GT(availableAmount.Sub(reservedAmount)) {
 		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, loan.String())
 	}
 
@@ -221,6 +229,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
 		return err
 	}
+
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
 	store := ctx.KVStore(k.storeKey)
@@ -278,5 +287,90 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 		}
 		store.Set(key, bz) // Partially repaid
 	}
+	return nil
+}
+
+// GetReserveAmount gets the amount reserved of a specified token. On invalid asset, the reserved amount is zero.
+func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateReserveAmountKey(denom)
+	amount := sdk.ZeroInt()
+	bz := store.Get(key)
+	if bz != nil {
+		err := amount.Unmarshal(bz)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return amount
+}
+
+// AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
+// It should accrue interest on all open borrows, increase reserves, and set LastInterestTime to BlockTime.
+func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
+	// Get last time at which interest was accrued
+	store := ctx.KVStore(k.storeKey)
+	timeKey := types.CreateLastInterestTimeKey()
+	prevInterestTime := sdk.ZeroInt()
+	bz := store.Get(timeKey)
+	err := prevInterestTime.Unmarshal(bz)
+	if err != nil {
+		panic(err)
+	}
+
+	// Calculate time elapsed since last interest accrual (measured in years)
+	currentTime := ctx.BlockTime().Unix()
+	// yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(31536000)
+
+	// Declare sdk.Coins to catch all reserve increases from various borrow positions
+	newReserves := sdk.NewCoins()
+
+	// - - - TODO - - -
+	// Iterate over all loans
+	//   + Calculate interest and increase amount owed
+	//   + Only derive interest rate once per token, then save and reuse
+	// - - - TODO - - -
+
+	// Apply all reserve increases accumulated when iterating over borrows
+	for _, coin := range newReserves {
+		err = k.IncreaseReserves(ctx, coin)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Set LastInterestTime
+	bz, err = sdk.NewInt(currentTime).Marshal()
+	if err != nil {
+		panic(err)
+	}
+	store.Set(timeKey, bz)
+	return nil
+}
+
+// IncreaseReserves adds an sdk.Coin (denom, amount) to the module's reserve requirements.
+func (k Keeper) IncreaseReserves(ctx sdk.Context, coin sdk.Coin) error {
+	store := ctx.KVStore(k.storeKey)
+	if !k.IsAcceptedToken(ctx, coin.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+	}
+
+	// Get current amount reserved for this asset type
+	reserveKey := types.CreateReserveAmountKey(coin.Denom)
+	currentReserve := sdk.ZeroInt()
+	bz := store.Get(reserveKey)
+	if bz != nil {
+		err := currentReserve.Unmarshal(bz)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Add the new reserve amount to the current one and save
+	bz, err := currentReserve.Add(coin.Amount).Marshal()
+	if err != nil {
+		panic(err)
+	}
+	store.Set(reserveKey, bz)
 	return nil
 }

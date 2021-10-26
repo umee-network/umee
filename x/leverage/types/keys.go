@@ -26,6 +26,8 @@ var (
 	KeyPrefixRegisteredToken   = []byte{0x03}
 	KeyPrefixLoanToken         = []byte{0x04}
 	KeyPrefixCollateralSetting = []byte{0x05}
+	KeyPrefixReserveAmount     = []byte{0x06}
+	KeyPrefixLastInterestTime  = []byte{0x07}
 )
 
 // CreateTokenDenomKey returns a KVStore key for getting and storing a token's
@@ -87,4 +89,21 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateReserveAmountKey returns a KVStore key for getting and setting the amount reserved of a a given token.
+func CreateReserveAmountKey(tokenDenom string) []byte {
+	// reserveamountprefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixReserveAmount...)
+	key = append(key, []byte(tokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateLastInterestTimeKey returns a KVStore key for getting and setting the amount reserved of a a given token.
+func CreateLastInterestTimeKey() []byte {
+	// lastinterestprefix
+	var key []byte
+	key = append(key, KeyPrefixLastInterestTime...)
+	return key
 }
