@@ -169,7 +169,7 @@ prior to initializing.`,
 			_, _ = fmt.Fprintf(os.Stderr, `Peggy (Gravity Bridge) contract successfully initialized!
 PeggyID: %s
 Init Params:
-  Peggy ID: %X
+  Peggy ID: 0x%X
 	Power Threshold: %d
 	Validator Set Size: %d
 	Validator Total Power: %d
