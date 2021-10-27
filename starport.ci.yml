@@ -11,8 +11,6 @@ genesis:
     #   params:
     #     bridge_ethereum_address: ""
     #     bridge_chain_id: ""
-    #     cosmos_coin_denom: ""
-    #     cosmos_coin_erc20_contract: ""
     bank:
       denom_metadata:
         - description: "The native staking token of Umee"
