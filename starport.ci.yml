@@ -10,6 +10,7 @@ genesis:
     # peggy:
     #   params:
     #     bridge_ethereum_address: ""
+    #     bridge_contract_start_height: ""
     #     bridge_chain_id: ""
     bank:
       denom_metadata:
