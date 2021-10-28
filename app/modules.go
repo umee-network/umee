@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,6 +12,8 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -63,6 +66,19 @@ func (govModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	minDeposit := sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens))
 	genState := govtypes.DefaultGenesisState()
 	genState.DepositParams.MinDeposit = minDeposit
+
+	return cdc.MustMarshalJSON(genState)
+}
+
+type slashingModule struct {
+	slashing.AppModuleBasic
+}
+
+// DefaultGenesis returns custom Umee x/slashing module genesis state.
+func (slashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	genState := slashingtypes.DefaultGenesisState()
+	genState.Params.SignedBlocksWindow = 10000
+	genState.Params.DowntimeJailDuration = 24 * time.Hour
 
 	return cdc.MustMarshalJSON(genState)
 }

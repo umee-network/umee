@@ -134,7 +134,7 @@ var (
 		govModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
 		params.AppModuleBasic{},
 		crisisModule{},
-		slashing.AppModuleBasic{},
+		slashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
