@@ -60,8 +60,9 @@ type govModule struct {
 
 // DefaultGenesis returns custom Umee x/gov module genesis state.
 func (govModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	minDeposit := sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens))
 	genState := govtypes.DefaultGenesisState()
-	genState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens))
+	genState.DepositParams.MinDeposit = minDeposit
 
 	return cdc.MustMarshalJSON(genState)
 }
