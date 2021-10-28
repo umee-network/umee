@@ -178,7 +178,7 @@ func (m *AggregateExchangeRatePrevote) XXX_DiscardUnknown() {
 var xxx_messageInfo_AggregateExchangeRatePrevote proto.InternalMessageInfo
 
 // MsgAggregateExchangeRateVote - struct for voting on
-// the exchange rates of Luna denominated in various Terra assets.
+// the exchange rates of USD denominated in various assets.
 type AggregateExchangeRateVote struct {
 	ExchangeRateTuples ExchangeRateTuples `protobuf:"bytes,1,rep,name=exchange_rate_tuples,json=exchangeRateTuples,proto3,castrepeated=ExchangeRateTuples" json:"exchange_rate_tuples" yaml:"exchange_rate_tuples"`
 	Voter              string             `protobuf:"bytes,2,opt,name=voter,proto3" json:"voter,omitempty" yaml:"voter"`
