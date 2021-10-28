@@ -13,6 +13,8 @@ about: Create a proposal to request a feature
 |       Also, please also ensure that this is not a duplicate issue :)
 ☺ ---------------------------------------------------------------------------->
 
+<!-- markdownlint-disable MD041 -->
+
 ## Summary
 
 <!-- Short, concise description of the proposed feature -->

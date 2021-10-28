@@ -10,6 +10,8 @@ about: Create a report to help us squash bugs!
 |       Also, please also ensure that this is not a duplicate issue :)
 ☺ ---------------------------------------------------------------------------->
 
+<!-- markdownlint-disable MD041 -->
+
 ## Summary of Bug
 
 A clear and concise description of what the 🐞 is.
