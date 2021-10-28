@@ -7,6 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -36,4 +40,28 @@ func (crisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
 		ConstantFee: sdk.NewCoin(BondDenom, sdk.NewInt(1000)),
 	})
+}
+
+type mintModule struct {
+	mint.AppModuleBasic
+}
+
+// DefaultGenesis returns custom Umee x/mint module genesis state.
+func (mintModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	genState := minttypes.DefaultGenesisState()
+	genState.Params.MintDenom = BondDenom
+
+	return cdc.MustMarshalJSON(genState)
+}
+
+type govModule struct {
+	gov.AppModuleBasic
+}
+
+// DefaultGenesis returns custom Umee x/gov module genesis state.
+func (govModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	genState := govtypes.DefaultGenesisState()
+	genState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens))
+
+	return cdc.MustMarshalJSON(genState)
 }
