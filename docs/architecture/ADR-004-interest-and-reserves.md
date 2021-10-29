@@ -168,9 +168,21 @@ for _, coin := range newReserves {
 
 ### uToken Exchange Rate Impact
 
-In financial terms, accrued interest is split between reserves and lender profits. Because reserve amounts are set explicitly in code but the uToken exchange rate is implicit, the uToken rate calculation depends on reserved amounts in practice:
+In financial terms, accrued interest is split between reserves and lender profits. Because reserve amounts are set explicitly in code but the uToken exchange rate is based on what's left, the uToken rate calculation depends on reserved amounts in practice:
 
 The token:uToken exchange rate, which would have previously calculated by `(total tokens borrowed + module account balance) / uTokens in circulation` for a given token type and associated uToken denomination, must now be computed as `(total tokens borrowed + module account balance - reserved amount) / uTokens in circulation`.
+
+Also, because Lend, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, the exchange rate only needs to be calculated for each token every BorrowInterestEpoch, and stored so it can be used during transacions.
+
+The exchange rate's keeper prefix is constructed as follows:
+
+```go
+    // exchangeRatePrefix | denom | 0
+    var key []byte
+    key = append(key, KeyPrefixExchangeRate...)
+    key = append(key, []byte(tokenDenom)...)
+    return append(key, 0) // append 0 for null-termination
+```
 
 ### Message Types
 

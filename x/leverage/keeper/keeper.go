@@ -48,7 +48,6 @@ func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin 
 		// then the balance returned here would decrease when the tokens are sent off, which is not
 		// what we want. In that case, the keeper should keep an sdk.Int total supply for each uToken type.
 	}
-
 	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
 }
 
@@ -290,87 +289,30 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	return nil
 }
 
-// GetReserveAmount gets the amount reserved of a specified token. On invalid asset, the reserved amount is zero.
-func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
+// GetTotalLoans returns total borrows across all borrowers and asset types as an sdk.Coins.
+// It is done for all asset types at once, rather than one denom at a time, because either case would require
+// iterating through all open borrows the way borrows are currently stored ( prefix | address | denom ).
+func (k Keeper) GetTotalLoans(ctx sdk.Context) (sdk.Coins, error) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateReserveAmountKey(denom)
-	amount := sdk.ZeroInt()
-	bz := store.Get(key)
-	if bz != nil {
-		err := amount.Unmarshal(bz)
-		if err != nil {
-			panic(err)
+	prefix := types.KeyPrefixLoanToken
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	defer iter.Close()
+
+	totalBorrowed := sdk.NewCoins()
+
+	for ; iter.Valid(); iter.Next() {
+		// k is prefix | lengthPrefixed(borrowerAddr) | denom | 0x00
+		k, v := iter.Key(), iter.Value()
+		// remove prefix | lengthPrefixed(addr) and null-terminator
+		denom := string(k[len(prefix)+int(k[len(prefix)]) : len(k)-1])
+		var amount sdk.Int
+		if err := amount.Unmarshal(v); err != nil {
+			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
 		}
-	}
-	return amount
-}
-
-// AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
-// It should accrue interest on all open borrows, increase reserves, and set LastInterestTime to BlockTime.
-func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
-	// Get last time at which interest was accrued
-	store := ctx.KVStore(k.storeKey)
-	timeKey := types.CreateLastInterestTimeKey()
-	prevInterestTime := sdk.ZeroInt()
-	bz := store.Get(timeKey)
-	err := prevInterestTime.Unmarshal(bz)
-	if err != nil {
-		panic(err)
+		// For each loan found, add it to totalBorrowed
+		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
 	}
 
-	// Calculate time elapsed since last interest accrual (measured in years)
-	currentTime := ctx.BlockTime().Unix()
-	// yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(31536000)
-
-	// Declare sdk.Coins to catch all reserve increases from various borrow positions
-	newReserves := sdk.NewCoins()
-
-	// - - - TODO - - -
-	// Iterate over all loans
-	//   + Calculate interest and increase amount owed
-	//   + Only derive interest rate once per token, then save and reuse
-	// - - - TODO - - -
-
-	// Apply all reserve increases accumulated when iterating over borrows
-	for _, coin := range newReserves {
-		err = k.IncreaseReserves(ctx, coin)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Set LastInterestTime
-	bz, err = sdk.NewInt(currentTime).Marshal()
-	if err != nil {
-		panic(err)
-	}
-	store.Set(timeKey, bz)
-	return nil
-}
-
-// IncreaseReserves adds an sdk.Coin (denom, amount) to the module's reserve requirements.
-func (k Keeper) IncreaseReserves(ctx sdk.Context, coin sdk.Coin) error {
-	store := ctx.KVStore(k.storeKey)
-	if !k.IsAcceptedToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
-	}
-
-	// Get current amount reserved for this asset type
-	reserveKey := types.CreateReserveAmountKey(coin.Denom)
-	currentReserve := sdk.ZeroInt()
-	bz := store.Get(reserveKey)
-	if bz != nil {
-		err := currentReserve.Unmarshal(bz)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// Add the new reserve amount to the current one and save
-	bz, err := currentReserve.Add(coin.Amount).Marshal()
-	if err != nil {
-		panic(err)
-	}
-	store.Set(reserveKey, bz)
-	return nil
+	totalBorrowed.Sort()
+	return totalBorrowed, nil
 }

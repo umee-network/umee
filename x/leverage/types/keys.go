@@ -28,6 +28,7 @@ var (
 	KeyPrefixCollateralSetting = []byte{0x05}
 	KeyPrefixReserveAmount     = []byte{0x06}
 	KeyPrefixLastInterestTime  = []byte{0x07}
+	KeyPrefixExchangeRate      = []byte{0x08}
 )
 
 // CreateTokenDenomKey returns a KVStore key for getting and storing a token's
@@ -106,4 +107,13 @@ func CreateLastInterestTimeKey() []byte {
 	var key []byte
 	key = append(key, KeyPrefixLastInterestTime...)
 	return key
+}
+
+// CreateExchangeRateKey returns a KVStore key for getting and setting the token:uToken rate for a a given token.
+func CreateExchangeRateKey(tokenDenom string) []byte {
+	// exchangeRatePrefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixExchangeRate...)
+	key = append(key, []byte(tokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
 }
