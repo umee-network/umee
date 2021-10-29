@@ -126,7 +126,7 @@ var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		genutil.AppModuleBasic{},
-		bank.AppModuleBasic{},
+		bankModule{},
 		capability.AppModuleBasic{},
 		stakingModule{},
 		mint.AppModuleBasic{},
