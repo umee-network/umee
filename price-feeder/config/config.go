@@ -4,9 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
+)
+
+const (
+	denomUSD = "USD"
+
+	defaultListenAddr      = "0.0.0.0:7171"
+	defaultSrvWriteTimeout = 15 * time.Second
+	defaultSrvReadTimeout  = 15 * time.Second
+
+	ProviderKraken  = "kraken"
+	ProviderBinance = "binance"
 )
 
 var (
@@ -14,22 +27,29 @@ var (
 
 	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
 	ErrEmptyConfigPath = errors.New("empty configuration file path")
-)
 
-var (
-	defaultListenAddr = "0.0.0.0:7171"
-
-	supportedProviders = map[string]struct{}{
-		"kraken":   {},
-		"bitfinex": {},
+	// SupportedProviders defines a lookup table of all the supported currency API
+	// providers.
+	SupportedProviders = map[string]struct{}{
+		ProviderKraken:  {},
+		ProviderBinance: {},
 	}
 )
 
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		ListenAddr    string         `toml:"listen_addr"`
+		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+	}
+
+	// Server defines the API server configuration.
+	Server struct {
+		ListenAddr     string   `toml:"listen_addr"`
+		WriteTimeout   string   `toml:"write_timeout"`
+		ReadTimeout    string   `toml:"read_timeout"`
+		VerboseCORS    bool     `toml:"verbose_cors"`
+		AllowedOrigins []string `toml:"allowed_origins"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
@@ -64,13 +84,23 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, fmt.Errorf("failed to decode config: %w", err)
 	}
 
-	if cfg.ListenAddr == "" {
-		cfg.ListenAddr = defaultListenAddr
+	if cfg.Server.ListenAddr == "" {
+		cfg.Server.ListenAddr = defaultListenAddr
+	}
+	if len(cfg.Server.WriteTimeout) == 0 {
+		cfg.Server.WriteTimeout = defaultSrvWriteTimeout.String()
+	}
+	if len(cfg.Server.ReadTimeout) == 0 {
+		cfg.Server.ReadTimeout = defaultSrvReadTimeout.String()
 	}
 
 	for _, cp := range cfg.CurrencyPairs {
+		if !strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
+			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
+		}
+
 		for _, provider := range cp.Providers {
-			if _, ok := supportedProviders[provider]; !ok {
+			if _, ok := SupportedProviders[provider]; !ok {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
 		}

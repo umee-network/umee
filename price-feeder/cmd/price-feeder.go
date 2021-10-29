@@ -3,15 +3,20 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
+	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle"
+	"github.com/umee-network/umee/price-feeder/router"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -22,8 +27,6 @@ const (
 var (
 	logLevel  string
 	logFormat string
-
-	wg sync.WaitGroup
 )
 
 var rootCmd = &cobra.Command{
@@ -79,21 +82,24 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// add for the main process
-	wg.Add(1)
+	oracle := oracle.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	g, ctx := errgroup.WithContext(ctx)
 
-	go startPriceFeeder(ctx, cfg)
-	go startPriceOracle(ctx, cfg)
+	g.Go(func() error {
+		return startPriceFeeder(ctx, cfg, oracle)
+	})
+	g.Go(func() error {
+		return startPriceOracle(ctx, oracle)
+	})
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	trapSignal(cancel)
 
 	// Block main process until all spawned goroutines have gracefully exited and
-	// signal has been captured in the main process.
-	wg.Wait()
-	return nil
+	// signal has been captured in the main process or if an error occurs.
+	return g.Wait()
 }
 
 // trapSignal will listen for any OS signal and invoke Done on the main
@@ -107,37 +113,66 @@ func trapSignal(cancel context.CancelFunc) {
 	go func() {
 		sig := <-sigCh
 		log.Info().Str("signal", sig.String()).Msg("caught signal; shutting down...")
-		wg.Done()
 		cancel()
 	}()
 }
 
-// TODO: This function started in goroutine is currently only boilerplate. It
-// is subject to change in structure and behavior.
-func startPriceFeeder(ctx context.Context, cfg config.Config) {
-	wg.Add(1)
-	defer wg.Done()
+func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Oracle) error {
+	rtr := mux.NewRouter()
+	rtrWrapper := router.New(cfg, rtr, oracle)
+	rtrWrapper.RegisterRoutes()
 
-	log.Info().Str("listen_addr", cfg.ListenAddr).Msg("starting price-feeder...")
+	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)
+	if err != nil {
+		return err
+	}
+	readTimeout, err := time.ParseDuration(cfg.Server.ReadTimeout)
+	if err != nil {
+		return err
+	}
+
+	srvErrCh := make(chan error, 1)
+	srv := &http.Server{
+		Handler:      rtr,
+		Addr:         cfg.Server.ListenAddr,
+		WriteTimeout: writeTimeout,
+		ReadTimeout:  readTimeout,
+	}
+
+	go func() {
+		log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder server...")
+		srvErrCh <- srv.ListenAndServe()
+	}()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")
+			if err := srv.Shutdown(shutdownCtx); err != nil {
+				log.Error().Err(err).Msg("failed to gracefully shutdown price-feeder server")
+				return err
+			}
+
+			return nil
+
+		case err := <-srvErrCh:
+			log.Error().Err(err).Msg("failed to start price-feeder server")
+			return err
 		}
 	}
 }
 
-// TODO: This function started in goroutine is currently only boilerplate. It
-// is subject to change in structure and behavior.
-func startPriceOracle(ctx context.Context, cfg config.Config) {
-	wg.Add(1)
-	defer wg.Done()
+func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+	go func() {
+		log.Info().Msg("starting price-feeder oracle...")
+		oracle.Start(ctx)
+	}()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		}
-	}
+	<-ctx.Done()
+	log.Info().Msg("shutting down price-feeder oracle...")
+	oracle.Stop()
+	return nil
 }

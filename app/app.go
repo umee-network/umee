@@ -91,9 +91,12 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	leverage "github.com/umee-network/umee/x/leverage"
+	"github.com/umee-network/umee/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/x/peggy"
+	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
+	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 const (
@@ -123,15 +126,15 @@ var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		genutil.AppModuleBasic{},
-		bank.AppModuleBasic{},
+		bankModule{},
 		capability.AppModuleBasic{},
 		stakingModule{},
-		mint.AppModuleBasic{},
+		mintModule{},
 		distr.AppModuleBasic{},
-		gov.NewAppModuleBasic(getGovProposalHandlers()...),
+		govModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
 		params.AppModuleBasic{},
 		crisisModule{},
-		slashing.AppModuleBasic{},
+		slashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
@@ -140,6 +143,7 @@ var (
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		leverage.AppModuleBasic{},
+		peggy.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -152,6 +156,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -204,6 +209,7 @@ type UmeeApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
+	PeggyKeeper      peggykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -243,7 +249,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey, peggytypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -371,6 +377,7 @@ func New(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
+			app.PeggyKeeper.Hooks(),
 		),
 	)
 
@@ -381,6 +388,13 @@ func New(
 		app.StakingKeeper,
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
+	)
+	app.PeggyKeeper = peggykeeper.NewKeeper(
+		appCodec, keys[peggytypes.StoreKey],
+		app.GetSubspace(peggytypes.ModuleName),
+		app.StakingKeeper,
+		app.BankKeeper,
+		app.SlashingKeeper,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -462,6 +476,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		leverage.NewAppModule(appCodec, app.LeverageKeeper),
+		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -479,13 +494,15 @@ func New(
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
 		leveragetypes.ModuleName,
+		peggytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		stakingtypes.ModuleName,
 		leveragetypes.ModuleName,
+		peggytypes.ModuleName,
+		stakingtypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -511,6 +528,7 @@ func New(
 		authz.ModuleName,
 		feegrant.ModuleName,
 		leveragetypes.ModuleName,
+		peggytypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -728,6 +746,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
+	paramsKeeper.Subspace(peggytypes.ModuleName)
 
 	return paramsKeeper
 }
