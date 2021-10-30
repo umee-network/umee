@@ -109,6 +109,7 @@ message Params {
   bool                     claim_slashing_enabled       = 17;
   uint64                   bridge_contract_start_height = 18;
   cosmos.base.v1beta1.Coin valset_reward                = 19 [(gogoproto.nullable) = false];
+  repeated ERC20ToDenom    erc20_mapping                = 20 [(gogoproto.nullable) = false];
 }
 
 // GenesisState struct
