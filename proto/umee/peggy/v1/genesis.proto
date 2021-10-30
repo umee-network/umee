@@ -10,31 +10,28 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/x/peggy/types";
 
-// Params represent the peggy genesis and store parameters
-// peggy_id:
-// a random 32 byte value to prevent signature reuse, for example if the
-// cosmos validators decided to use the same Ethereum keys for another chain
-// also running Peggy we would not want it to be possible to play a deposit
-// from chain A back on chain B's peggy. This value IS USED ON ETHEREUM so
-// it must be set in your genesis.json before launch and not changed after
-// deploying Peggy
+// Params represent the peggy genesis and store parameters.
 //
-// contract_hash:
-// the code hash of a known good version of the Peggy contract
-// solidity code. This can be used to verify the correct version
-// of the contract has been deployed. This is a reference value for
-// goernance action only it is never read by any Peggy code
+// peggy_id: A random 32 byte value to prevent signature reuse, for example if
+// the cosmos validators decided to use the same Ethereum keys for another chain
+// also running Peggy we would not want it to be possible to play a deposit from
+// chain A back on chain B's peggy. This value IS USED ON ETHEREUM so it must
+// be set in your genesis.json before launch and not changed after deploying
+// Peggy.
 //
-// bridge_ethereum_address:
-// is address of the bridge contract on the Ethereum side, this is a
-// reference value for governance only and is not actually used by any
-// Peggy code
+// contract_hash: The code hash of a known good version of the Peggy contract
+// solidity code. This can be used to verify the correct version of the contract
+// has been deployed. This is a reference value for governance action only it is
+// never read by any Peggy code.
 //
-// bridge_chain_id:
-// the unique identifier of the Ethereum chain, this is a reference value
-// only and is not actually used by any Peggy code
+// bridge_ethereum_address: The address of the bridge contract on the Ethereum
+// side. The orchestator uses this address in order to know what contract to
+// relay transactions to.
 //
-// These reference values may be used by future Peggy client implemetnations
+// bridge_chain_id: The unique identifier of the Ethereum chain, this is a
+// reference value only and is not actually used by any Peggy code.
+//
+// These reference values may be used by future Peggy client implementations
 // to allow for saftey features or convenience features like the peggy address
 // in your relayer. A relayer would require a configured peggy address if
 // governance had not set the address on the chain it was relaying for.
@@ -46,47 +43,45 @@ option go_package = "github.com/umee-network/umee/x/peggy/types";
 // These values represent the time in blocks that a validator has to submit
 // a signature for a batch or valset, or to submit a claim for a particular
 // attestation nonce. In the case of attestations this clock starts when the
-// attestation is created, but only allows for slashing once the event has passed
+// attestation is created, but only allows for slashing once the event has passed.
 //
-// target_batch_timeout:
-//
-// This is the 'target' value for when batches time out, this is a target becuase
-// Ethereum is a probabalistic chain and you can't say for sure what the block
-// frequency is ahead of time.
+// target_batch_timeout: This is the 'target' value for when batches time out,
+// this is a target becuase Ethereum is a probabalistic chain and you can't say
+// for sure what the block frequency is ahead of time.
 //
 // average_block_time
 // average_ethereum_block_time
 //
-// These values are the average Cosmos block time and Ethereum block time repsectively
-// and they are used to copute what the target batch timeout is. It is important that
-// governance updates these in case of any major, prolonged change in the time it takes
-// to produce a block
+// These values are the average Cosmos block time and Ethereum block time
+// repsectively and they are used to compute what the target batch timeout is.
+// It is important that governance updates these in case of any major, prolonged
+// change in the time it takes to produce a block.
 //
 // slash_fraction_valset
 // slash_fraction_batch
 // slash_fraction_claim
 // slash_fraction_conflicting_claim
 //
-// The slashing fractions for the various peggy related slashing conditions. The first three
-// refer to not submitting a particular message, the third for submitting a different claim
-// for the same Ethereum event
+// The slashing fractions for the various peggy related slashing conditions. The
+// first three refer to not submitting a particular message, the fourth for
+// submitting a different claim for the same Ethereum event.
 //
-// unbond_slashing_valsets_window
+// unbond_slashing_valsets_window: The unbond slashing valsets window is used to
+// determine how many blocks after starting to unbond a validator needs to
+// continue signing blocks. The goal of this paramater is that when a validator
+// leaves the set, if their leaving creates enough change in the validator set
+// to justify an update they will sign a validator set update for the Ethereum
+// bridge that does not include themselves. Allowing us to remove them from the
+// Ethereum bridge and replace them with the new set gracefully.
 //
-// The unbond slashing valsets window is used to determine how many blocks after starting to unbond
-// a validator needs to continue signing blocks. The goal of this paramater is that when a validator leaves
-// the set, if their leaving creates enough change in the validator set to justify an update they will sign
-// a validator set update for the Ethereum bridge that does not include themselves. Allowing us to remove them
-// from the Ethereum bridge and replace them with the new set gracefully.
-//
-// valset_reward
-//
-// Valset rewards are the amount of tokens this chain issues to relayers of validator sets.
-// These can be any ERC20 token in the bridge, but it's strongly advised that chains use only
-// Cosmos originated tokens, which the bridge effectively mints on Ethereum. If you run out of
-// the token you are using for validator set rewards valset updates will fail and the bridge
-// will be vulnerable to highjacking. For these paramaters the zero values are special and indicate
-// not to attempt any reward. This is the default for bootstrapping.
+// valset_reward: Valset rewards are the amount of tokens this chain issues to
+// relayers of validator sets. These can be any ERC20 token in the bridge, but
+// it's strongly advised that chains use only Cosmos originated tokens, which
+// the bridge effectively mints on Ethereum. If you run out of the token you
+// are using for validator set rewards valset updates will fail and the bridge
+// will be vulnerable to highjacking. For these paramaters the zero values are
+// special and indicate not to attempt any reward. This is the default for
+// bootstrapping.
 message Params {
   option (gogoproto.stringer) = false;
 
@@ -111,12 +106,9 @@ message Params {
   uint64 unbond_slashing_valsets_window   = 15;
   bytes  slash_fraction_bad_eth_signature = 16
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string cosmos_coin_denom            = 17;
-  string cosmos_coin_erc20_contract   = 18;
-  bool   claim_slashing_enabled       = 19;
-  uint64 bridge_contract_start_height = 20;
-
-  cosmos.base.v1beta1.Coin valset_reward = 21 [(gogoproto.nullable) = false];
+  bool                     claim_slashing_enabled       = 17;
+  uint64                   bridge_contract_start_height = 18;
+  cosmos.base.v1beta1.Coin valset_reward                = 19 [(gogoproto.nullable) = false];
 }
 
 // GenesisState struct
