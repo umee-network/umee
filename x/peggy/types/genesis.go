@@ -104,7 +104,7 @@ func DefaultGenesisState() *GenesisState {
 	}
 }
 
-// DefaultParams returns a copy of the default params
+// DefaultParams returns a copy of the default params.
 func DefaultParams() *Params {
 	return &Params{
 		PeggyId:                       "umee-peggyid",
@@ -119,9 +119,9 @@ func DefaultParams() *Params {
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionBadEthSignature:  sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		CosmosCoinDenom:               "uumee",
 		UnbondSlashingValsetsWindow:   10000,
 		ClaimSlashingEnabled:          false,
+		Erc20Mapping:                  []ERC20ToDenom{},
 	}
 }
 
@@ -142,11 +142,8 @@ func (p Params) ValidateBasic() error {
 	if err := validateBridgeChainID(p.BridgeChainId); err != nil {
 		return sdkerrors.Wrap(err, "bridge chain id")
 	}
-	if err := validateCosmosCoinDenom(p.CosmosCoinDenom); err != nil {
-		return sdkerrors.Wrap(err, "cosmos coin denom")
-	}
-	if err := validateCosmosCoinErc20Contract(p.CosmosCoinErc20Contract); err != nil {
-		return sdkerrors.Wrap(err, "cosmos coin erc20 contract address")
+	if err := validateERC20Mapping(p.Erc20Mapping); err != nil {
+		return sdkerrors.Wrap(err, "ERC20 mapping")
 	}
 	if err := validateTargetBatchTimeout(p.TargetBatchTimeout); err != nil {
 		return sdkerrors.Wrap(err, "Batch timeout")
@@ -204,8 +201,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreKeyContractHash, &p.ContractSourceHash, validateContractHash),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractAddress, &p.BridgeEthereumAddress, validateBridgeContractAddress),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractChainID, &p.BridgeChainId, validateBridgeChainID),
-		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinDenom, &p.CosmosCoinDenom, validateCosmosCoinDenom),
-		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinErc20Contract, &p.CosmosCoinErc20Contract, validateCosmosCoinErc20Contract),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedValsetsWindow, &p.SignedValsetsWindow, validateSignedValsetsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedBatchesWindow, &p.SignedBatchesWindow, validateSignedBatchesWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedClaimsWindow, &p.SignedClaimsWindow, validateSignedClaimsWindow),
@@ -221,6 +216,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamStoreClaimSlashingEnabled, &p.ClaimSlashingEnabled, validateClaimSlashingEnabled),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractStartHeight, &p.BridgeContractStartHeight, validateBridgeContractStartHeight),
 		paramtypes.NewParamSetPair(ParamStoreValsetRewardAmount, &p.ValsetReward, validateValsetReward),
+		paramtypes.NewParamSetPair(ParamStoreValsetRewardAmount, &p.Erc20Mapping, validateERC20Mapping),
 	}
 }
 
@@ -371,30 +367,37 @@ func strToFixByteArray(s string) ([32]byte, error) {
 	return out, nil
 }
 
-func validateCosmosCoinDenom(i interface{}) error {
-	v, ok := i.(string)
+func validateERC20Mapping(i interface{}) error {
+	v, ok := i.([]ERC20ToDenom)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if _, err := strToFixByteArray(v); err != nil {
-		return err
+	for _, m := range v {
+		switch {
+		case len(m.Denom) == 0 && len(m.Erc20) > 0:
+			return fmt.Errorf("empty denom supplied with non-empty ERC20 token contract")
+
+		case len(m.Denom) > 0 && len(m.Erc20) == 0:
+			return fmt.Errorf("non-empty denom supplied with empty ERC20 token contract")
+
+		case len(m.Denom) == 0 && len(m.Erc20) == 0:
+			return fmt.Errorf("empty denom and ERC20 token contract supplied")
+
+		default:
+			if _, err := strToFixByteArray(m.Denom); err != nil {
+				return err
+			}
+			if err := sdk.ValidateDenom(m.Denom); err != nil {
+				return err
+			}
+			if err := ValidateEthAddress(m.Erc20); err != nil {
+				return err
+			}
+		}
 	}
+
 	return nil
-}
-
-func validateCosmosCoinErc20Contract(i interface{}) error {
-	v, ok := i.(string)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
-	// empty address is valid
-	if v == "" {
-		return nil
-	}
-
-	return ValidateEthAddress(v)
 }
 
 func validateClaimSlashingEnabled(i interface{}) error {
