@@ -13,7 +13,6 @@ import (
 // in the keeper eventually, while having raw strings in them.
 func NormalizeGenesis(data *types.GenesisState) {
 	data.Params.BridgeEthereumAddress = common.HexToAddress(data.Params.BridgeEthereumAddress).Hex()
-	data.Params.CosmosCoinErc20Contract = common.HexToAddress(data.Params.CosmosCoinErc20Contract).Hex()
 
 	for _, valset := range data.Valsets {
 		for _, member := range valset.Members {
@@ -87,6 +86,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data *types.GenesisState) {
 
 		k.SetAttestation(ctx, claim.GetEventNonce(), claim.ClaimHash(), attestation)
 	}
+
 	k.setLastObservedEventNonce(ctx, data.LastObservedNonce)
 	k.SetLastObservedEthereumBlockHeight(ctx, data.LastObservedEthereumHeight)
 	k.SetLastOutgoingBatchID(ctx, data.LastOutgoingBatchId)
@@ -113,6 +113,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data *types.GenesisState) {
 			if err != nil {
 				panic(err)
 			}
+
 			lastEvent := k.GetLastEventByValidator(ctx, val)
 			if claim.GetEventNonce() > lastEvent.EthereumEventNonce {
 				k.setLastEventByValidator(ctx, val, claim.GetEventNonce(), claim.GetBlockHeight())
@@ -122,10 +123,10 @@ func InitGenesis(ctx sdk.Context, k Keeper, data *types.GenesisState) {
 
 	// reset delegate keys in state
 	for _, keys := range data.OrchestratorAddresses {
-		err := keys.ValidateBasic()
-		if err != nil {
-			panic("Invalid delegate key in Genesis!")
+		if err := keys.ValidateBasic(); err != nil {
+			panic("invalid delegate key in genesis")
 		}
+
 		validatorAccountAddress, _ := sdk.AccAddressFromBech32(keys.Sender)
 		valAddress := sdk.ValAddress(validatorAccountAddress.Bytes())
 		orchestrator, _ := sdk.AccAddressFromBech32(keys.Orchestrator)

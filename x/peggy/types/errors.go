@@ -17,4 +17,5 @@ var (
 	ErrNoUnbatchedTxsFound     = sdkerrors.Register(ModuleName, 10, "no unbatched txs found")
 	ErrResetDelegateKeys       = sdkerrors.Register(ModuleName, 11, "can not set orchestrator addresses more than once")
 	ErrSupplyOverflow          = sdkerrors.Register(ModuleName, 12, "supply cannot exceed max ERC20 value")
+	ErrInvalidERC20Event       = sdkerrors.Register(ModuleName, 13, "invalid ERC20 deployed event")
 )
