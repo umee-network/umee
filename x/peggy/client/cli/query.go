@@ -30,6 +30,8 @@ func GetQueryCmd() *cobra.Command {
 		// CmdGetAttestationRequest(),
 		QueryObserved(),
 		QueryApproved(),
+		CmdERC20ToDenom(),
+		CmdDenomToERC20(),
 	}...)
 
 	return peggyQueryCmd
@@ -196,6 +198,58 @@ func CmdGetPendingOutgoingTXBatchRequest() *cobra.Command {
 			}
 
 			res, err := queryClient.LastPendingBatchRequestByAddr(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdERC20ToDenom() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "erc20-to-denom [token-contract-address]",
+		Short: "Get the denomination that maps to an ERC20 token contract",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryERC20ToDenomRequest{
+				Erc20: args[0],
+			}
+
+			res, err := queryClient.ERC20ToDenom(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdDenomToERC20() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "denom-to-erc20 [denom]",
+		Short: "Get the ERC20 token contract that maps to a denomination",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryDenomToERC20Request{
+				Denom: args[0],
+			}
+
+			res, err := queryClient.DenomToERC20(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
