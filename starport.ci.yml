@@ -7,11 +7,11 @@ genesis:
     staking:
       params:
         bond_denom: "uumee"
-    peggy:
-      params:
-        bridge_ethereum_address: "0xC33B108Fb30da75C4aFF77e0932aEe1bA2Fccaa1"
-        bridge_contract_start_height: "0"
-        bridge_chain_id: "1337"
+    # peggy:
+    #   params:
+    #     bridge_ethereum_address: ""
+    #     bridge_contract_start_height: ""
+    #     bridge_chain_id: ""
 accounts:
   - name: alice
     coins: ["39000000000000uumee"]
