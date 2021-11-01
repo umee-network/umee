@@ -8,6 +8,12 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 // Params defines the parameters for the leverage module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
+  // The interest epoch determines how many blocks pass between borrow interest calculations.
+  string interest_epoch = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"interest_epoch\""
+  ];
 }
 
 // Token defines a token, along with its capital metadata, in the Umee capital
@@ -41,20 +47,20 @@ message Token {
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"base_borrow_rate\""
   ];
-  // The max_borrow_rate defines the interest rate for borrowing this
-  // asset (seen when utilization is 100%).
-  string max_borrow_rate = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"max_borrow_rate\""
-  ];
   // The kink_borrow_rate defines the interest rate for borrowing this
   // asset when utilization is at the 'kink' utilization value as defined
   // on the utilization:interest graph.
-  string kink_borrow_rate = 6 [
+  string kink_borrow_rate = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_borrow_rate\""
+  ];
+  // The max_borrow_rate defines the interest rate for borrowing this
+  // asset (seen when utilization is 100%).
+  string max_borrow_rate = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"max_borrow_rate\""
   ];
   // The kink_utilization_rate defines the borrow utilization rate for this
   // asset where the 'kink' on the utilization:interest graph occurs.

@@ -233,11 +233,11 @@ func (suite *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount in the correct denom (200 umee)
-	loanBalance := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	loanBalance := app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 
 	// verify lender's total loan balance (sdk.Coins) is also 200 umee (no other coins present)
-	totalLoanBalance, err := app.LeverageKeeper.GetAllBorrowerLoans(ctx, lenderAddr)
+	totalLoanBalance, err := app.LeverageKeeper.GetBorrowerBorrows(ctx, lenderAddr)
 	suite.Require().Equal(totalLoanBalance, sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 200000000)))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan = 9200 umee)
@@ -265,7 +265,7 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount (120 umee)
-	loanBalance := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	loanBalance := app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 120000000))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan - 80 repaid = 9120 umee)
@@ -281,7 +281,7 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Valid() {
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount in the correct denom (zero)
-	loanBalance = app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	loanBalance = app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan - 200 repaid = 9000 umee)
@@ -309,7 +309,7 @@ func (suite *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	suite.Require().NoError(err)
 
 	// verify lender's new loan amount is 0 umee
-	loanBalance := app.LeverageKeeper.GetLoan(ctx, lenderAddr, umeeapp.BondDenom)
+	loanBalance := app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
 	suite.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan - 200 repaid = 9000 umee)
