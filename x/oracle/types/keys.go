@@ -27,7 +27,17 @@ var (
 	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
 	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
 	KeyPrefixTobinTax                     = []byte{0x06} // prefix for each key to a tobin tax
+	// Keys for store prefixes
+	ExchangeRateKey                 = []byte{0x01} // prefix for each key to a rate
+	FeederDelegationKey             = []byte{0x02} // prefix for each key to a feeder delegation
+	MissCounterKey                  = []byte{0x03} // prefix for each key to a miss counter
+	AggregateExchangeRatePrevoteKey = []byte{0x04} // prefix for each key to a aggregate prevote
+	AggregateExchangeRateVoteKey    = []byte{0x05} // prefix for each key to a aggregate vote
+	TobinTaxKey                     = []byte{0x06} // prefix for each key to a tobin tax
+
 )
+
+var ()
 
 // GetExchangeRateKey - stored by *denom*
 func GetExchangeRateKey(denom string) (key []byte) {
