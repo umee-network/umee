@@ -31,8 +31,16 @@ type Keeper struct {
 	}
 }
 
-// NewKeeper returns a new instance of the peggy keeper
-func NewKeeper(cdc codec.BinaryCodec, storeKey sdk.StoreKey, paramSpace paramtypes.Subspace, stakingKeeper types.StakingKeeper, bankKeeper types.BankKeeper, slashingKeeper types.SlashingKeeper) Keeper {
+// NewKeeper returns a new instance of the peggy keeper.
+func NewKeeper(
+	cdc codec.BinaryCodec,
+	storeKey sdk.StoreKey,
+	paramSpace paramtypes.Subspace,
+	stakingKeeper types.StakingKeeper,
+	bankKeeper types.BankKeeper,
+	slashingKeeper types.SlashingKeeper,
+) Keeper {
+
 	k := Keeper{
 		cdc:            cdc,
 		paramSpace:     paramSpace,
@@ -552,22 +560,6 @@ func (k *Keeper) GetPeggyID(ctx sdk.Context) string {
 func (k *Keeper) setPeggyID(ctx sdk.Context, v string) {
 
 	k.paramSpace.Set(ctx, types.ParamsStoreKeyPeggyID, v)
-}
-
-// GetCosmosCoinDenom returns native cosmos coin denom
-func (k *Keeper) GetCosmosCoinDenom(ctx sdk.Context) string {
-	var denom string
-	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinDenom, &denom)
-
-	return denom
-}
-
-// GetCosmosCoinERC20Contract returns the Cosmos coin ERC20 contract address
-func (k *Keeper) GetCosmosCoinERC20Contract(ctx sdk.Context) common.Address {
-	var contractAddress string
-	k.paramSpace.Get(ctx, types.ParamsStoreKeyCosmosCoinErc20Contract, &contractAddress)
-
-	return common.HexToAddress(contractAddress)
 }
 
 func (k *Keeper) UnpackAttestationClaim(attestation *types.Attestation) (types.EthereumClaim, error) {
