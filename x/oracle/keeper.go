@@ -66,62 +66,50 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 //-----------------------------------
 // ExchangeRate logic
 
-// GetLunaExchangeRate gets the consensus exchange rate of Luna denominated in the denom asset from the store.
-// func (k Keeper) GetLunaExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
-// 	if denom == types.MicroLunaDenom {
-// 		return sdk.OneDec(), nil
-// 	}
+//GetExchangeRate gets the consensus exchange rate of Luna denominated in the denom asset from the store.
+func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	if denom == types.USDDenom {
+		return sdk.OneDec(), nil
+	}
 
-// 	store := ctx.KVStore(k.storeKey)
-// 	b := store.Get(types.GetExchangeRateKey(denom))
-// 	if b == nil {
-// 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
-// 	}
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.GetExchangeRateKey(denom))
+	if b == nil {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	}
 
-// 	dp := sdk.DecProto{}
-// 	k.cdc.MustUnmarshal(b, &dp)
-// 	return dp.Dec, nil
-// }
+	dp := sdk.DecProto{}
+	k.cdc.MustUnmarshal(b, &dp)
+	return dp.Dec, nil
+}
 
-// // SetLunaExchangeRate sets the consensus exchange rate of Luna denominated in the denom asset to the store.
-// func (k Keeper) SetLunaExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-// 	store := ctx.KVStore(k.storeKey)
-// 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-// 	store.Set(types.GetExchangeRateKey(denom), bz)
-// }
+// SetExchangeRate sets the consensus exchange rate of Luna denominated in the denom asset to the store.
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
+	store.Set(types.GetExchangeRateKey(denom), bz)
+}
 
-// // SetLunaExchangeRateWithEvent sets the consensus exchange rate of Luna
-// // denominated in the denom asset to the store with ABCI event
-// func (k Keeper) SetLunaExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-// 	k.SetLunaExchangeRate(ctx, denom, exchangeRate)
-// 	ctx.EventManager().EmitEvent(
-// 		sdk.NewEvent(types.EventTypeExchangeRateUpdate,
-// 			sdk.NewAttribute(types.AttributeKeyDenom, denom),
-// 			sdk.NewAttribute(types.AttributeKeyExchangeRate, exchangeRate.String()),
-// 		),
-// 	)
-// }
+// DeleteExchangeRate deletes the consensus exchange rate of Luna denominated in the denom asset from the store.
+func (k Keeper) DeleteExchangeRate(ctx sdk.Context, denom string) {
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.GetExchangeRateKey(denom))
+}
 
-// // DeleteLunaExchangeRate deletes the consensus exchange rate of Luna denominated in the denom asset from the store.
-// func (k Keeper) DeleteLunaExchangeRate(ctx sdk.Context, denom string) {
-// 	store := ctx.KVStore(k.storeKey)
-// 	store.Delete(types.GetExchangeRateKey(denom))
-// }
-
-// // IterateLunaExchangeRates iterates over luna rates in the store
-// func (k Keeper) IterateLunaExchangeRates(ctx sdk.Context, handler func(denom string, exchangeRate sdk.Dec) (stop bool)) {
-// 	store := ctx.KVStore(k.storeKey)
-// 	iter := sdk.KVStorePrefixIterator(store, types.ExchangeRateKey)
-// 	defer iter.Close()
-// 	for ; iter.Valid(); iter.Next() {
-// 		denom := string(iter.Key()[len(types.ExchangeRateKey):])
-// 		dp := sdk.DecProto{}
-// 		k.cdc.MustUnmarshal(iter.Value(), &dp)
-// 		if handler(denom, dp.Dec) {
-// 			break
-// 		}
-// 	}
-// }
+// IterateExchangeRates iterates over luna rates in the store
+func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(denom string, exchangeRate sdk.Dec) (stop bool)) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.ExchangeRateKey)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		denom := string(iter.Key()[len(types.ExchangeRateKey):])
+		dp := sdk.DecProto{}
+		k.cdc.MustUnmarshal(iter.Value(), &dp)
+		if handler(denom, dp.Dec) {
+			break
+		}
+	}
+}
 
 //-----------------------------------
 // Oracle delegation logic

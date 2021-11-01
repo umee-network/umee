@@ -4,6 +4,7 @@ package types
 const (
 	MicroAtomDenom  = "uatom"
 	MicroUmeeDenom  = "uumee"
+	USDDenom        = "USD"
 	BlocksPerMinute = uint64(10)
 	BlocksPerHour   = BlocksPerMinute * 60
 	BlocksPerDay    = BlocksPerHour * 24
