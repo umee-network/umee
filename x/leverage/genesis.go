@@ -1,6 +1,8 @@
 package leverage
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/x/leverage/keeper"
@@ -11,7 +13,8 @@ import (
 // state.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
-
+	fmt.Println("\nInitGenesis (set): " + genState.String())
+	fmt.Println("InitGenesis (get): " + k.GetParams(ctx).String())
 	for _, token := range genState.Registry {
 		k.SetRegisteredToken(ctx, token)
 	}
