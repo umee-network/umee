@@ -7,10 +7,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/ethereum/go-ethereum"
+	ethcmn "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
 )
 
@@ -172,4 +176,42 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 	}
 
 	return *balanceResp.Balance, nil
+}
+
+func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
+	_, pending, err := c.TransactionByHash(ctx, ethcmn.HexToHash(txHash))
+	if err != nil {
+		return err
+	}
+
+	if pending {
+		return fmt.Errorf("ethereum tx %s is still pending", txHash)
+	}
+
+	return nil
+}
+
+func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int, error) {
+	data, err := ethABI.Pack(abiMethodNameBalanceOf, ethcmn.HexToAddress(recipientAddr))
+	if err != nil {
+		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
+	}
+
+	token := ethcmn.HexToAddress(contractAddr)
+	callMsg := ethereum.CallMsg{
+		To:   &token,
+		Data: data,
+	}
+
+	bz, err := c.CallContract(ctx, callMsg, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to call Ethereum contract: %w", err)
+	}
+
+	balance, err := strconv.ParseInt(ethcmn.Bytes2Hex(bz), 16, 32)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse balance: %w", err)
+	}
+
+	return int(balance), nil
 }

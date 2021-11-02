@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -20,6 +22,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"github.com/spf13/viper"
@@ -32,11 +35,13 @@ import (
 )
 
 const (
-	photonDenom         = "photon"
-	initBalanceStr      = "110000000000uumee,100000000000photon"
-	minGasPrice         = "0.00001"
-	ethChainID     uint = 15
-	gaiaChainID         = "test-gaia-chain"
+	photonDenom    = "photon"
+	initBalanceStr = "110000000000uumee,100000000000photon"
+	minGasPrice    = "0.00001"
+	gaiaChainID    = "test-gaia-chain"
+
+	ethChainID uint = 15
+	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
 )
 
 var (
@@ -47,14 +52,18 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	tmpDirs        []string
-	chain          *chain
-	gaiaRPC        *rpchttp.HTTP
-	dkrPool        *dockertest.Pool
-	dkrNet         *dockertest.Network
-	gaiaResource   *dockertest.Resource
-	hermesResource *dockertest.Resource
-	valResources   []*dockertest.Resource
+	tmpDirs             []string
+	chain               *chain
+	ethClient           *ethclient.Client
+	gaiaRPC             *rpchttp.HTTP
+	dkrPool             *dockertest.Pool
+	dkrNet              *dockertest.Network
+	ethResource         *dockertest.Resource
+	gaiaResource        *dockertest.Resource
+	hermesResource      *dockertest.Resource
+	valResources        []*dockertest.Resource
+	orchResources       []*dockertest.Resource
+	gravityContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -70,21 +79,31 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.chain.id, s.chain.dataDir)
 
-	// initialization
-	s.initNodes()
-	s.initGenesis()
-	s.initValidatorConfigs()
-
 	s.dkrPool, err = dockertest.NewPool("")
 	s.Require().NoError(err)
 
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
+	// TODO: Describe the execution/bootstrapping flow.
+
+	s.initNodes()
+	s.initEthereum()
+	s.runEthContainer()
+	s.runContractDeployment()
+
+	// s.initGenesis()
+	// s.initValidatorConfigs()
+
 	// container infrastructure
-	s.runValidators()
-	s.runGaiaNetwork()
-	s.runIBCRelayer()
+	// s.runValidators()
+	// s.runGaiaNetwork()
+	// s.runIBCRelayer()
+
+	// TODO:
+	// 1. Register eth keys
+	// 2. Run orchestrators
+	// 3. Deploy umee ERC20 token
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -104,11 +123,16 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 		os.RemoveAll(td)
 	}
 
+	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
 	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
 
 	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
+	}
+
+	for _, oc := range s.orchResources {
+		s.Require().NoError(s.dkrPool.Purge(oc))
 	}
 
 	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
@@ -144,6 +168,32 @@ func (s *IntegrationTestSuite) initNodes() {
 	}
 }
 
+func (s *IntegrationTestSuite) initEthereum() {
+	// generate ethereum keys for validators add them to the ethereum genesis
+	ethGenesis := EthereumGenesis{
+		Difficulty: "0x400",
+		GasLimit:   "0xB71B00",
+		Config:     EthereumConfig{ChainID: ethChainID},
+		Alloc:      make(map[string]Allocation, len(s.chain.validators)+1),
+	}
+
+	alloc := Allocation{
+		Balance: "0x1337000000000000000000",
+	}
+
+	ethGenesis.Alloc["0xBf660843528035a5A4921534E156a27e64B231fE"] = alloc
+	for _, val := range s.chain.validators {
+		s.Require().NoError(val.generateEthereumKey())
+		ethGenesis.Alloc[val.ethereumKey.address] = alloc
+	}
+
+	ethGenBz, err := json.MarshalIndent(ethGenesis, "", "  ")
+	s.Require().NoError(err)
+
+	// write out the genesis file
+	s.Require().NoError(writeFile(filepath.Join(s.chain.configDir(), "eth_genesis.json"), ethGenBz))
+}
+
 func (s *IntegrationTestSuite) initGenesis() {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -158,24 +208,6 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 
-	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
-		Description: "The native staking token of the Umee network",
-		Display:     "umee",
-		Base:        app.BondDenom,
-		DenomUnits: []*banktypes.DenomUnit{
-			{
-				Denom:    app.BondDenom,
-				Exponent: 0,
-				Aliases: []string{
-					"microumee",
-				},
-			},
-			{
-				Denom:    "umee",
-				Exponent: 6,
-			},
-		},
-	})
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "An example stable token",
 		Display:     photonDenom,
@@ -273,6 +305,67 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
+}
+
+func (s *IntegrationTestSuite) runEthContainer() {
+	s.T().Log("starting Ethereum container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	_, err = copyFile(
+		filepath.Join(s.chain.configDir(), "eth_genesis.json"),
+		filepath.Join(tmpDir, "eth_genesis.json"),
+	)
+	s.Require().NoError(err)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "eth.Dockerfile"),
+		filepath.Join(tmpDir, "eth.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "eth.Dockerfile",
+			ContextDir: tmpDir,
+		},
+		&dockertest.RunOptions{
+			Name:      "ethereum",
+			NetworkID: s.dkrNet.Network.ID,
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
+			},
+			Env: []string{},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.Require().NoError(err)
+
+	// Wait for the Ethereum node to start producing blocks; DAG completion takes
+	// about two minutes.
+	s.Require().Eventually(
+		func() bool {
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			height, err := s.ethClient.BlockNumber(ctx)
+			if err != nil {
+				return false
+			}
+
+			return height > 1
+		},
+		5*time.Minute,
+		10*time.Second,
+		"geth node failed to produce a block",
+	)
+
+	s.T().Logf("started Ethereum container: %s", s.ethResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runValidators() {
@@ -512,6 +605,82 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 
 	// create the client, connection and channel between the Umee and Gaia chains
 	s.connectIBCChains()
+}
+
+func (s *IntegrationTestSuite) runContractDeployment() {
+	s.T().Log("starting contract deployer container...")
+
+	resource, err := s.dkrPool.RunWithOptions(
+		&dockertest.RunOptions{
+			Name:       "gravity-contract-deployer",
+			NetworkID:  s.dkrNet.Network.ID,
+			Repository: "umeenet/umeed",
+			// NOTE: container names are prefixed with '/'
+			Entrypoint: []string{
+				"peggo",
+				"bridge",
+				"deploy-peggy",
+				"--eth-pk",
+				ethMinerPK[2:],
+				"--eth-rpc",
+				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	s.T().Logf("started contract deployer: %s", resource.Container.ID)
+
+	// wait for the container to finish executing
+	container := resource.Container
+	for container.State.Running {
+		time.Sleep(10 * time.Second)
+
+		container, err = s.dkrPool.Client.InspectContainer(resource.Container.ID)
+		s.Require().NoError(err)
+	}
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	s.Require().NoErrorf(s.dkrPool.Client.Logs(
+		docker.LogsOptions{
+			Container:    resource.Container.ID,
+			OutputStream: &outBuf,
+			ErrorStream:  &errBuf,
+			Stdout:       true,
+			Stderr:       true,
+		},
+	),
+		"failed to start contract deployer; stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
+	)
+
+	re := regexp.MustCompile(`Address: (0x.+)`)
+	tokens := re.FindStringSubmatch(errBuf.String())
+	s.Require().Len(tokens, 2)
+
+	gravityContractAddr := tokens[1]
+	s.Require().NotEmpty(gravityContractAddr)
+
+	re = regexp.MustCompile(`Transaction: (0x.+)`)
+	tokens = re.FindStringSubmatch(errBuf.String())
+	s.Require().Len(tokens, 2)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	txHash := tokens[1]
+	s.Require().NotEmpty(txHash)
+	s.Require().NoError(queryEthTx(ctx, s.ethClient, txHash))
+
+	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
+
+	s.T().Logf("deployed gravity contract: %s", gravityContractAddr)
+	s.gravityContractAddr = gravityContractAddr
 }
 
 func noRestart(config *docker.HostConfig) {
