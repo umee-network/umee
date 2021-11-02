@@ -36,8 +36,6 @@ var (
 
 )
 
-var ()
-
 // GetExchangeRateKey - stored by *denom*
 func GetExchangeRateKey(denom string) (key []byte) {
 	key = append(key, KeyPrefixExchangeRate...)
