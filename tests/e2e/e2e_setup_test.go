@@ -32,6 +32,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	"github.com/umee-network/umee/app"
+	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 const (
@@ -52,18 +53,18 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	tmpDirs             []string
-	chain               *chain
-	ethClient           *ethclient.Client
-	gaiaRPC             *rpchttp.HTTP
-	dkrPool             *dockertest.Pool
-	dkrNet              *dockertest.Network
-	ethResource         *dockertest.Resource
-	gaiaResource        *dockertest.Resource
-	hermesResource      *dockertest.Resource
-	valResources        []*dockertest.Resource
-	orchResources       []*dockertest.Resource
-	gravityContractAddr string
+	tmpDirs           []string
+	chain             *chain
+	ethClient         *ethclient.Client
+	gaiaRPC           *rpchttp.HTTP
+	dkrPool           *dockertest.Pool
+	dkrNet            *dockertest.Network
+	ethResource       *dockertest.Resource
+	gaiaResource      *dockertest.Resource
+	hermesResource    *dockertest.Resource
+	valResources      []*dockertest.Resource
+	orchResources     []*dockertest.Resource
+	peggyContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -85,18 +86,27 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
-	// TODO: Describe the execution/bootstrapping flow.
+	// The boostrapping phase is as follows:
+	//
+	// 1. Initialize Umee validator nodes.
+	// 2. Launch an Ethereum container that mines.
+	// 3. Deploy the Peggy (Gravity Bridge) contract
+	// 4. Create and initialize Umee validator genesis files.
+	// 5. Start Umee network.
+	// 6. Register each validator's Ethereum key.
+	// 7. Invoke the initialize method on the Peggy contract.
+	// 8. Create and start peggo (orchestrator) containers.
+	// 9. Deploy umee and photon ERC20 token contracts
+	// 10. Create and run Gaia container(s).
+	// 11. Create and run IBC relayer (Hermes) containers.
 
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
 	s.runContractDeployment()
-
-	// s.initGenesis()
-	// s.initValidatorConfigs()
-
-	// container infrastructure
-	// s.runValidators()
+	s.initGenesis()
+	s.initValidatorConfigs()
+	s.runValidators()
 	// s.runGaiaNetwork()
 	// s.runIBCRelayer()
 
@@ -205,6 +215,17 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
+	var peggyGenState peggytypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[peggytypes.ModuleName], &peggyGenState))
+
+	peggyGenState.Params.BridgeEthereumAddress = s.peggyContractAddr
+	peggyGenState.Params.BridgeContractStartHeight = 0
+	peggyGenState.Params.BridgeChainId = uint64(ethChainID)
+
+	bz, err := cdc.MarshalJSON(&peggyGenState)
+	s.Require().NoError(err)
+	appGenState[peggytypes.ModuleName] = bz
+
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 
@@ -212,6 +233,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		Description: "An example stable token",
 		Display:     photonDenom,
 		Base:        photonDenom,
+		Symbol:      photonDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
 				Denom:    photonDenom,
@@ -220,7 +242,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		},
 	})
 
-	bz, err := cdc.MarshalJSON(&bankGenState)
+	bz, err = cdc.MarshalJSON(&bankGenState)
 	s.Require().NoError(err)
 	appGenState[banktypes.ModuleName] = bz
 
@@ -663,8 +685,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	tokens := re.FindStringSubmatch(errBuf.String())
 	s.Require().Len(tokens, 2)
 
-	gravityContractAddr := tokens[1]
-	s.Require().NotEmpty(gravityContractAddr)
+	peggyContractAddr := tokens[1]
+	s.Require().NotEmpty(peggyContractAddr)
 
 	re = regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens = re.FindStringSubmatch(errBuf.String())
@@ -679,8 +701,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
 
-	s.T().Logf("deployed gravity contract: %s", gravityContractAddr)
-	s.gravityContractAddr = gravityContractAddr
+	s.T().Logf("deployed Peggy (Gravity Bridge) contract: %s", peggyContractAddr)
+	s.peggyContractAddr = peggyContractAddr
 }
 
 func noRestart(config *docker.HostConfig) {
