@@ -107,7 +107,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context, secondsElapsed int64) error {
     // for each borrow, expressed as an sdk.Coin(Denom, Amount) associated with an sdk.Address
     {
         derivedInterest, err := k.DeriveInterestRate(denom)
-        // derived interest is annual, so we must conver time to years for the math to work
+        // derived interest is annual, so we must convert time to years for the math to work
         yearsElapsed := sdk.OneDec.MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
         // accruedInterest = interest rate * borrow amount * time elapsed
         accruedInterest = derivedInterest.Mul(borrow.Amount).Mul(yearsElapsed)

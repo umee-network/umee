@@ -40,7 +40,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 		denom := string(k[len(prefix)+int(k[len(prefix)]) : len(k)-1])
 		var amount sdk.Int
 		if err := amount.Unmarshal(v); err != nil {
-			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
+			return sdk.NewCoins(), err // improperly marshaled borrow amount should never happen
 		}
 		// For each loan found, add it to totalBorrowed
 		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
