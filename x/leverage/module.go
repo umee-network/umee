@@ -159,13 +159,11 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	height := ctx.BlockHeight()
-	k := am.keeper // need reference to x/leverage keeper.
-	epoch, err := k.GetBorrowInterestEpoch(ctx)
-	if err == nil && height%epoch.Int64() == 0 {
-		err = k.AccrueAllInterest(ctx)
-	}
-	if err != nil {
-		panic(err)
+	epoch := am.keeper.GetParams(ctx).InterestEpoch.Int64()
+	if height%epoch == 0 {
+		if err := am.keeper.AccrueAllInterest(ctx); err != nil {
+			panic(err)
+		}
 	}
 	return []abci.ValidatorUpdate{}
 }
