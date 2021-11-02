@@ -93,13 +93,13 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 3. Deploy the Peggy (Gravity Bridge) contract
 	// 4. Create and initialize Umee validator genesis files.
 	// 5. Start Umee network.
+
 	// 6. Register each validator's Ethereum key.
 	// 7. Invoke the initialize method on the Peggy contract.
 	// 8. Create and start peggo (orchestrator) containers.
 	// 9. Deploy umee and photon ERC20 token contracts
 	// 10. Create and run Gaia container(s).
 	// 11. Create and run IBC relayer (Hermes) containers.
-
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
@@ -107,13 +107,9 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
+	s.registerEthKeys()
 	// s.runGaiaNetwork()
 	// s.runIBCRelayer()
-
-	// TODO:
-	// 1. Register eth keys
-	// 2. Run orchestrators
-	// 3. Deploy umee ERC20 token
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -634,7 +630,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	resource, err := s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       "gravity-contract-deployer",
+			Name:       "peggy-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
 			Repository: "umeenet/umeed",
 			// NOTE: container names are prefixed with '/'
@@ -643,7 +639,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 				"bridge",
 				"deploy-peggy",
 				"--eth-pk",
-				ethMinerPK[2:],
+				ethMinerPK[2:], // remove 0x prefix
 				"--eth-rpc",
 				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 			},
@@ -692,17 +688,92 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	tokens = re.FindStringSubmatch(errBuf.String())
 	s.Require().Len(tokens, 2)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
 	txHash := tokens[1]
 	s.Require().NotEmpty(txHash)
-	s.Require().NoError(queryEthTx(ctx, s.ethClient, txHash))
+
+	s.Require().Eventually(
+		func() bool {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			if err := queryEthTx(ctx, s.ethClient, txHash); err != nil {
+				return false
+			}
+
+			return true
+		},
+		time.Minute,
+		time.Second,
+		"failed to confirm Peggy contract deployment transaction",
+	)
 
 	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
 
 	s.T().Logf("deployed Peggy (Gravity Bridge) contract: %s", peggyContractAddr)
 	s.peggyContractAddr = peggyContractAddr
+}
+
+func (s *IntegrationTestSuite) registerEthKeys() {
+	s.T().Log("registering Umee validator Ethereum keys...")
+
+	resources := make([]*dockertest.Resource, len(s.chain.validators))
+	for i, val := range s.chain.validators {
+		resource, err := s.dkrPool.RunWithOptions(
+			&dockertest.RunOptions{
+				Name:       fmt.Sprintf("peggy-key-registration-%d", i),
+				NetworkID:  s.dkrNet.Network.ID,
+				Repository: "umeenet/umeed",
+				Mounts: []string{
+					fmt.Sprintf("%s/:/root/.umee", val.configDir()),
+				},
+				// NOTE: container names are prefixed with '/'
+				Entrypoint: []string{
+					"peggo",
+					"tx",
+					"register-eth-key",
+					"--eth-pk",
+					val.ethereumKey.privateKey[2:], // remove 0x prefix
+					"--cosmos-chain-id",
+					s.chain.id,
+					"--cosmos-grpc",
+					fmt.Sprintf("tcp://%s:9090", s.valResources[i].Container.Name[1:]),
+					"--tendermint-rpc",
+					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
+					"--cosmos-keyring-dir",
+					"/root/.umee",
+					"--cosmos-from",
+					val.keyInfo.GetName(),
+					"--cosmos-keyring=test",
+					"--cosmos-gas-prices",
+					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					"-y",
+				},
+			},
+			noRestart,
+		)
+		s.Require().NoError(err)
+
+		resources[i] = resource
+		s.T().Logf("started Umee validator Ethereum key registration: %s", resource.Container.ID)
+	}
+
+	for i, r := range resources {
+		valName := s.valResources[i].Container.Name[1:]
+
+		var err error
+
+		// wait for the container to finish executing
+		container := r.Container
+		for container.State.Running {
+			time.Sleep(10 * time.Second)
+
+			container, err = s.dkrPool.Client.InspectContainer(r.Container.ID)
+			s.Require().NoError(err)
+		}
+
+		s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
+		s.T().Logf("registered Ethereum key for validator: %s", valName)
+	}
 }
 
 func noRestart(config *docker.HostConfig) {
