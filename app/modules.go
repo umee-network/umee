@@ -30,8 +30,8 @@ func (bankModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 		Description: "The native staking token of the Umee network.",
 		Base:        BondDenom,
 		Name:        BondDenom,
-		Display:     "umee",
-		Symbol:      "UMEE",
+		Display:     BondDenom,
+		Symbol:      BondDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
 				Denom:    BondDenom,

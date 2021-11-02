@@ -35,12 +35,6 @@ var (
 	// ParamsStoreKeyBridgeContractChainID stores the bridge chain id
 	ParamsStoreKeyBridgeContractChainID = []byte("BridgeChainID")
 
-	// ParamsStoreKeyCosmosCoinDenom stores native cosmos coin denom
-	ParamsStoreKeyCosmosCoinDenom = []byte("CosmosCoinDenom")
-
-	// ParamsStoreKeyCosmosCoinErc20Contract store L1 erc20 contract address of cosmos native coin
-	ParamsStoreKeyCosmosCoinErc20Contract = []byte("CosmosCoinErc20Contract")
-
 	// ParamsStoreKeySignedValsetsWindow stores the signed blocks window
 	ParamsStoreKeySignedValsetsWindow = []byte("SignedValsetsWindow")
 
@@ -88,12 +82,16 @@ var (
 	_ paramtypes.ParamSet = &Params{}
 )
 
-// ValidateBasic validates genesis state by looping through the params and
-// calling their validation functions
+// ValidateBasic validates genesis state. It returns an error if any parameter
+// is invalid or if the ERC20 mapping is invalid.
 func (s GenesisState) ValidateBasic() error {
 	if err := s.Params.ValidateBasic(); err != nil {
 		return sdkerrors.Wrap(err, "params")
 	}
+	if err := validateERC20Mapping(s.Erc20ToDenoms); err != nil {
+		return sdkerrors.Wrap(err, "ERC20 mapping")
+	}
+
 	return nil
 }
 
@@ -104,7 +102,7 @@ func DefaultGenesisState() *GenesisState {
 	}
 }
 
-// DefaultParams returns a copy of the default params
+// DefaultParams returns a copy of the default params.
 func DefaultParams() *Params {
 	return &Params{
 		PeggyId:                       "umee-peggyid",
@@ -119,7 +117,6 @@ func DefaultParams() *Params {
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionBadEthSignature:  sdk.NewDec(1).Quo(sdk.NewDec(1000)),
-		CosmosCoinDenom:               "uumee",
 		UnbondSlashingValsetsWindow:   10000,
 		ClaimSlashingEnabled:          false,
 	}
@@ -141,12 +138,6 @@ func (p Params) ValidateBasic() error {
 	}
 	if err := validateBridgeChainID(p.BridgeChainId); err != nil {
 		return sdkerrors.Wrap(err, "bridge chain id")
-	}
-	if err := validateCosmosCoinDenom(p.CosmosCoinDenom); err != nil {
-		return sdkerrors.Wrap(err, "cosmos coin denom")
-	}
-	if err := validateCosmosCoinErc20Contract(p.CosmosCoinErc20Contract); err != nil {
-		return sdkerrors.Wrap(err, "cosmos coin erc20 contract address")
 	}
 	if err := validateTargetBatchTimeout(p.TargetBatchTimeout); err != nil {
 		return sdkerrors.Wrap(err, "Batch timeout")
@@ -204,8 +195,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreKeyContractHash, &p.ContractSourceHash, validateContractHash),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractAddress, &p.BridgeEthereumAddress, validateBridgeContractAddress),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractChainID, &p.BridgeChainId, validateBridgeChainID),
-		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinDenom, &p.CosmosCoinDenom, validateCosmosCoinDenom),
-		paramtypes.NewParamSetPair(ParamsStoreKeyCosmosCoinErc20Contract, &p.CosmosCoinErc20Contract, validateCosmosCoinErc20Contract),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedValsetsWindow, &p.SignedValsetsWindow, validateSignedValsetsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedBatchesWindow, &p.SignedBatchesWindow, validateSignedBatchesWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedClaimsWindow, &p.SignedClaimsWindow, validateSignedClaimsWindow),
@@ -413,5 +402,33 @@ func validateSlashFractionBadEthSignature(i interface{}) error {
 }
 
 func validateValsetReward(i interface{}) error {
+	return nil
+}
+
+func validateERC20Mapping(erc20Mapping []*ERC20ToDenom) error {
+	for _, m := range erc20Mapping {
+		switch {
+		case len(m.Denom) == 0 && len(m.Erc20) > 0:
+			return fmt.Errorf("empty denom supplied with non-empty ERC20 token contract")
+
+		case len(m.Denom) > 0 && len(m.Erc20) == 0:
+			return fmt.Errorf("non-empty denom supplied with empty ERC20 token contract")
+
+		case len(m.Denom) == 0 && len(m.Erc20) == 0:
+			return fmt.Errorf("empty denom and ERC20 token contract supplied")
+
+		default:
+			if _, err := strToFixByteArray(m.Denom); err != nil {
+				return err
+			}
+			if err := sdk.ValidateDenom(m.Denom); err != nil {
+				return err
+			}
+			if err := ValidateEthAddress(m.Erc20); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

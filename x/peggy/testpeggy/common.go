@@ -183,8 +183,6 @@ var (
 		PeggyId:                       "testpeggyid",
 		ContractSourceHash:            "62328f7bc12efb28f86111d08c29b39285680a906ea0e524e0209d6f6657b713",
 		BridgeEthereumAddress:         common.HexToAddress("0x8858eeb3dfffa017d4bce9801d340d36cf895ccf").Hex(),
-		CosmosCoinErc20Contract:       common.HexToAddress("0x8f3798462111bd6d7fa4d32ba0ab4ee4899bd4b7").Hex(),
-		CosmosCoinDenom:               "inj",
 		BridgeChainId:                 11,
 		SignedBatchesWindow:           10,
 		SignedValsetsWindow:           10,

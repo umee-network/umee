@@ -87,7 +87,7 @@ func (k *Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, count
 
 // RemoveFromOutgoingPoolAndRefund
 // - checks that the provided tx actually exists
-// - deletes the unbatched tx from the pool
+// - deletes the un-batched tx from the pool
 // - issues the tokens back to the sender
 func (k *Keeper) RemoveFromOutgoingPoolAndRefund(ctx sdk.Context, txId uint64, sender sdk.AccAddress) error {
 	// check that we actually have a tx with that id and what it's details are
@@ -102,13 +102,14 @@ func (k *Keeper) RemoveFromOutgoingPoolAndRefund(ctx sdk.Context, txId uint64, s
 	}
 
 	if !sender.Equals(txSender) {
-		return sdkerrors.Wrapf(types.ErrInvalid, "Invalid sender address")
+		return sdkerrors.Wrapf(types.ErrInvalid, "invalid sender address")
 	}
 
-	// An inconsistent entry should never enter the store, but this is the ideal place to exploit
-	// it such a bug if it did ever occur, so we should double check to be really sure
+	// An inconsistent entry should never enter the store, but this is the ideal
+	// place to exploit it such a bug if it did ever occur, so we should double
+	// check to be really sure
 	if tx.Erc20Fee.Contract != tx.Erc20Token.Contract {
-		return sdkerrors.Wrapf(types.ErrInvalid, "Inconsistent tokens to cancel!: %s %s", tx.Erc20Fee.Contract, tx.Erc20Token.Contract)
+		return sdkerrors.Wrapf(types.ErrInvalid, "inconsistent tokens to cancel: %s %s", tx.Erc20Fee.Contract, tx.Erc20Token.Contract)
 	}
 
 	found := false
@@ -131,19 +132,12 @@ func (k *Keeper) RemoveFromOutgoingPoolAndRefund(ctx sdk.Context, txId uint64, s
 
 	// reissue the amount and the fee
 	totalToRefundCoins := sdk.Coins{}
-	isCosmosOriginated, denom := k.ERC20ToDenomLookup(ctx, common.HexToAddress(tx.Erc20Token.Contract))
+	isCosmosOriginated, _ := k.ERC20ToDenomLookup(ctx, common.HexToAddress(tx.Erc20Token.Contract))
+
 	// native cosmos coin denom
-	if denom == k.GetCosmosCoinDenom(ctx) {
-		// peggy denom
-		totalToRefund := sdk.NewCoin(denom, tx.Erc20Token.Amount)
-		totalToRefund.Amount = totalToRefund.Amount.Add(tx.Erc20Fee.Amount)
-		totalToRefundCoins = sdk.NewCoins(totalToRefund)
-	} else {
-		// peggy denom
-		totalToRefund := tx.Erc20Token.PeggyCoin()
-		totalToRefund.Amount = totalToRefund.Amount.Add(tx.Erc20Fee.Amount)
-		totalToRefundCoins = sdk.NewCoins(totalToRefund)
-	}
+	totalToRefund := tx.Erc20Token.PeggyCoin()
+	totalToRefund.Amount = totalToRefund.Amount.Add(tx.Erc20Fee.Amount)
+	totalToRefundCoins = sdk.NewCoins(totalToRefund)
 
 	// If it is a cosmos-originated the coins are in the module (see AddToOutgoingPool) so we can just take them out
 	if isCosmosOriginated {
