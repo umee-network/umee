@@ -15,4 +15,5 @@ var (
 	ErrInvalidAddress          = sdkerrors.Register(ModuleName, 1105, "invalid address")
 	ErrNegativeTotalBorrowed   = sdkerrors.Register(ModuleName, 1106, "total borrowed was negative")
 	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 1107, "invalid token utilization")
+	ErrInvalidEpoch            = sdkerrors.Register(ModuleName, 1108, "invalid interest epoch")
 )
