@@ -19,9 +19,7 @@ const (
 )
 
 type (
-	// GenesisState - all oracle state that must be provided at genesis
-
-	// ExchangeRatePrevote - struct to store a validator's prevote on the rate of Luna in the denom asset
+	// ExchangeRatePrevote -  Defines a structure to store a validator's prevote on the rate of USD in the denom asset
 	ExchangeRatePrevote struct {
 		Hash        VoteHash       `json:"hash"`  // Vote hex hash to protect centralize data source problem
 		Denom       string         `json:"denom"` // Ticker name of target fiat currency
@@ -29,7 +27,7 @@ type (
 		SubmitBlock int64          `json:"submit_block"`
 	}
 
-	// ExchangeRateVote - struct to store a validator's vote on the rate of Luna in the denom asset
+	// ExchangeRateVote - Defines structure to store a validator's vote on the rate of USD in the denom asset
 	ExchangeRateVote struct {
 		ExchangeRate sdk.Dec        `json:"exchange_rate"` // ExchangeRate of Luna in target fiat currency
 		Denom        string         `json:"denom"`         // Ticker name of target fiat currency

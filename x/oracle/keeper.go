@@ -110,9 +110,6 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(denom string,
 	}
 }
 
-//-----------------------------------
-// Oracle delegation logic
-
 // GetFeederDelegation gets the account address that the validator operator delegated oracle vote rights to.
 func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) sdk.AccAddress {
 	store := ctx.KVStore(k.storeKey)
@@ -147,9 +144,6 @@ func (k Keeper) IterateFeederDelegations(ctx sdk.Context,
 		}
 	}
 }
-
-//-----------------------------------
-// Miss counter logic
 
 // GetMissCounter retrieves the # of vote periods missed in this oracle slash window
 func (k Keeper) GetMissCounter(ctx sdk.Context, operator sdk.ValAddress) uint64 {
@@ -196,9 +190,6 @@ func (k Keeper) IterateMissCounters(ctx sdk.Context,
 		}
 	}
 }
-
-//-----------------------------------
-// AggregateExchangeRatePrevote logic
 
 // GetAggregateExchangeRatePrevote retrieves an oracle prevote from the store
 func (k Keeper) GetAggregateExchangeRatePrevote(ctx sdk.Context,
@@ -248,21 +239,21 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(ctx sdk.Context,
 	}
 }
 
-//-----------------------------------
-// AggregateExchangeRateVote logic
-
 // GetAggregateExchangeRateVote retrieves an oracle prevote from the store
 func (k Keeper) GetAggregateExchangeRateVote(ctx sdk.Context,
-	voter sdk.ValAddress) (aggregateVote types.AggregateExchangeRateVote,
-	err error) {
+	voter sdk.ValAddress) (types.AggregateExchangeRateVote,
+	error) {
+	var aggregateVote types.AggregateExchangeRateVote
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(types.GetAggregateExchangeRateVoteKey(voter))
 	if b == nil {
-		err = sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
-		return
+		err := sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
+		if err != nil {
+			return types.AggregateExchangeRateVote{}, err
+		}
 	}
 	k.cdc.MustUnmarshal(b, &aggregateVote)
-	return
+	return aggregateVote, nil
 }
 
 // SetAggregateExchangeRateVote adds an oracle aggregate prevote to the store
