@@ -745,7 +745,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
-	paramsKeeper.Subspace(leveragetypes.ModuleName)
+	paramsKeeper.Subspace(leveragetypes.ModuleName).WithKeyTable(leveragetypes.ParamKeyTable())
 	paramsKeeper.Subspace(peggytypes.ModuleName)
 
 	return paramsKeeper

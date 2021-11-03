@@ -25,7 +25,7 @@ func NewParams(epoch int64) Params {
 // pairs pairs of x/leverage module's parameters.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyInterestEpoch, p.InterestEpoch, validateInterestEpoch),
+		paramtypes.NewParamSetPair(KeyInterestEpoch, &p.InterestEpoch, validateInterestEpoch),
 	}
 }
 
