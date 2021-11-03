@@ -112,7 +112,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(denom string,
 //-----------------------------------
 // Oracle delegation logic
 
-// GetFeederDelegation gets the account address that the validator operator delegated oracle vote rights to
+// GetFeederDelegation gets the account address that the validator operator delegated oracle vote rights to.
 func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) sdk.AccAddress {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetFeederDelegationKey(operator))
