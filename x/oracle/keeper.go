@@ -271,10 +271,12 @@ func (k Keeper) DeleteAggregateExchangeRateVote(ctx sdk.Context, voter sdk.ValAd
 	store.Delete(types.GetAggregateExchangeRateVoteKey(voter))
 }
 
+type IterateExchangeRateVote = func(voterAddr sdk.ValAddress,
+	aggregateVote types.AggregateExchangeRateVote) (stop bool)
+
 // IterateAggregateExchangeRateVotes iterates rate over prevotes in the store
 func (k Keeper) IterateAggregateExchangeRateVotes(ctx sdk.Context,
-	handler func(voterAddr sdk.ValAddress,
-		aggregateVote types.AggregateExchangeRateVote) (stop bool)) {
+	handler IterateExchangeRateVote) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRateVoteKey)
 	defer iter.Close()
