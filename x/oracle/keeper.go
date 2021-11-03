@@ -3,16 +3,13 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/libs/log"
-
-	gogotypes "github.com/gogo/protobuf/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
+	gogotypes "github.com/gogo/protobuf/types"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
@@ -31,10 +28,14 @@ type Keeper struct {
 }
 
 // NewKeeper constructs a new keeper for oracle
-func NewKeeper(cdc codec.BinaryCodec, storeKey sdk.StoreKey,
-	paramspace paramstypes.Subspace, accountKeeper types.AccountKeeper,
-	bankKeeper types.BankKeeper, distrKeeper types.DistributionKeeper,
-	stakingKeeper types.StakingKeeper, distrName string) Keeper {
+func NewKeeper(cdc codec.BinaryCodec,
+	storeKey sdk.StoreKey,
+	paramspace paramstypes.Subspace,
+	accountKeeper types.AccountKeeper,
+	bankKeeper types.BankKeeper,
+	distrKeeper types.DistributionKeeper,
+	stakingKeeper types.StakingKeeper,
+	distrName string) Keeper {
 
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
@@ -62,9 +63,6 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey sdk.StoreKey,
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
-
-//-----------------------------------
-// ExchangeRate logic
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
@@ -282,8 +280,9 @@ func (k Keeper) DeleteAggregateExchangeRateVote(ctx sdk.Context, voter sdk.ValAd
 }
 
 // IterateAggregateExchangeRateVotes iterates rate over prevotes in the store
-func (k Keeper) IterateAggregateExchangeRateVotes(ctx sdk.Context, handler func(voterAddr sdk.ValAddress,
-	aggregateVote types.AggregateExchangeRateVote) (stop bool)) {
+func (k Keeper) IterateAggregateExchangeRateVotes(ctx sdk.Context,
+	handler func(voterAddr sdk.ValAddress,
+		aggregateVote types.AggregateExchangeRateVote) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRateVoteKey)
 	defer iter.Close()
@@ -320,7 +319,7 @@ func (k Keeper) SetTobinTax(ctx sdk.Context, denom string, tobinTax sdk.Dec) {
 	store.Set(types.GetTobinTaxKey(denom), bz)
 }
 
-// IterateTobinTaxes iterates rate over tobin taxes in the store
+// IterateTobinTaxes iterates rate over tobin taxes in the store.
 func (k Keeper) IterateTobinTaxes(ctx sdk.Context, handler func(denom string, tobinTax sdk.Dec) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.TobinTaxKey)
@@ -336,7 +335,7 @@ func (k Keeper) IterateTobinTaxes(ctx sdk.Context, handler func(denom string, to
 	}
 }
 
-// ClearTobinTaxes clears tobin taxes
+// ClearTobinTaxes clears tobin taxes.
 func (k Keeper) ClearTobinTaxes(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.TobinTaxKey)
@@ -346,7 +345,7 @@ func (k Keeper) ClearTobinTaxes(ctx sdk.Context) {
 	}
 }
 
-// ValidateFeeder return the given feeder is allowed to feed the message or not
+// ValidateFeeder returns the given feeder is allowed to feed the message or not.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, validatorAddr sdk.ValAddress) error {
 	if !feederAddr.Equals(validatorAddr) {
 		delegate := k.GetFeederDelegation(ctx, validatorAddr)
@@ -355,7 +354,7 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valid
 		}
 	}
 
-	// Check that the given validator exists
+	// check that the given validator exists
 	if val := k.StakingKeeper.Validator(ctx, validatorAddr); val == nil || !val.IsBonded() {
 		return sdkerrors.Wrapf(stakingtypes.ErrNoValidatorFound, "validator %s is not active set", validatorAddr.String())
 	}
