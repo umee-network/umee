@@ -128,10 +128,11 @@ func (k Keeper) SetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress, de
 	store.Set(types.GetFeederDelegationKey(operator), delegatedFeeder.Bytes())
 }
 
+type IterateFeederDelegationHandler = func(delegator sdk.ValAddress, delegate sdk.AccAddress) (stop bool)
+
 // IterateFeederDelegations iterates over the feed delegates and performs a callback function.
 func (k Keeper) IterateFeederDelegations(ctx sdk.Context,
-	handler func(delegator sdk.ValAddress, delegate sdk.AccAddress) (stop bool)) {
-
+	handler IterateFeederDelegationHandler) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.FeederDelegationKey)
 	defer iter.Close()
@@ -193,16 +194,19 @@ func (k Keeper) IterateMissCounters(ctx sdk.Context,
 
 // GetAggregateExchangeRatePrevote retrieves an oracle prevote from the store
 func (k Keeper) GetAggregateExchangeRatePrevote(ctx sdk.Context,
-	voter sdk.ValAddress) (aggregatePrevote types.AggregateExchangeRatePrevote,
-	err error) {
+	voter sdk.ValAddress) (types.AggregateExchangeRatePrevote, error) {
+	var aggregatePrevote types.AggregateExchangeRatePrevote
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))
 	if b == nil {
-		err = sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
-		return
+		err := sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
+		if err != nil {
+			return types.AggregateExchangeRatePrevote{}, err
+		}
+
 	}
 	k.cdc.MustUnmarshal(b, &aggregatePrevote)
-	return
+	return aggregatePrevote, nil
 }
 
 // SetAggregateExchangeRatePrevote set an oracle aggregate prevote to the store
