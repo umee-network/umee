@@ -94,7 +94,7 @@ func (k Keeper) DeleteExchangeRate(ctx sdk.Context, denom string) {
 	store.Delete(types.GetExchangeRateKey(denom))
 }
 
-// IterateExchangeRates iterates over USD rates in the store
+// IterateExchangeRates iterates over USD rates in the store.
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(denom string, exchangeRate sdk.Dec) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.ExchangeRateKey)
