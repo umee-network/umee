@@ -124,7 +124,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) sd
 	return sdk.AccAddress(bz)
 }
 
-// SetFeederDelegation sets the account address that the validator operator delegated oracle vote rights to
+// SetFeederDelegation sets the account address that the validator operator delegated oracle vote rights to.
 func (k Keeper) SetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress, delegatedFeeder sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.GetFeederDelegationKey(operator), delegatedFeeder.Bytes())
