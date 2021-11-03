@@ -159,7 +159,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	height := ctx.BlockHeight()
-	epoch := am.keeper.GetParams(ctx).InterestEpoch.Int64()
+	epoch := am.keeper.GetParams(ctx).InterestEpoch
 	if height%epoch == 0 {
 		if err := am.keeper.AccrueAllInterest(ctx); err != nil {
 			panic(err)

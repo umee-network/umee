@@ -1,15 +1,12 @@
 package types
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-)
+import fmt "fmt"
 
 // DefaultGenesis returns the default genesis state of the x/leverage module.
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params: Params{
-			InterestEpoch: sdk.NewInt(100),
+			InterestEpoch: 100,
 		},
 		Registry: []Token{},
 	}
@@ -19,8 +16,8 @@ func DefaultGenesis() *GenesisState {
 // failure.
 func (gs GenesisState) Validate() error {
 
-	if !gs.Params.InterestEpoch.IsPositive() {
-		return sdkerrors.Wrap(ErrInvalidEpoch, gs.Params.InterestEpoch.String())
+	if gs.Params.InterestEpoch <= 0 {
+		return fmt.Errorf("interest epoch must be positive: %d", gs.Params.InterestEpoch)
 	}
 
 	for _, token := range gs.Registry {
