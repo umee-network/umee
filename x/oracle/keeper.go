@@ -35,7 +35,8 @@ func NewKeeper(cdc codec.BinaryCodec,
 	bankKeeper types.BankKeeper,
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
-	distrName string) Keeper {
+	distrName string,
+) Keeper {
 
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
