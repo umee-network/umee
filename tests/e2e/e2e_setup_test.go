@@ -94,7 +94,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 4. Create and initialize Umee validator genesis files.
 	// 5. Start Umee network.
 	// 6. Register each validator's Ethereum key.
-
 	// 7. Invoke the initialize method on the Peggy contract.
 	// 8. Create and start peggo (orchestrator) containers.
 	// 9. Create and run Gaia container(s).
@@ -108,8 +107,9 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.runValidators()
 	s.registerEthKeys()
 	s.initPeggy()
-	// s.runGaiaNetwork()
-	// s.runIBCRelayer()
+	s.runOrchestrators()
+	s.runGaiaNetwork()
+	s.runIBCRelayer()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -739,13 +739,12 @@ func (s *IntegrationTestSuite) registerEthKeys() {
 					fmt.Sprintf("tcp://%s:9090", s.valResources[i].Container.Name[1:]),
 					"--tendermint-rpc",
 					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
-					"--cosmos-keyring-dir",
-					"/root/.umee",
 					"--cosmos-from",
 					val.keyInfo.GetName(),
-					"--cosmos-keyring=test",
 					"--cosmos-gas-prices",
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					"--cosmos-keyring-dir=/root/.umee",
+					"--cosmos-keyring=test",
 					"-y",
 				},
 			},
@@ -828,7 +827,7 @@ func (s *IntegrationTestSuite) initPeggy() {
 			Stderr:       true,
 		},
 	),
-		"failed to start Peggy initializer; stdout: %s, stderr: %s",
+		"failed to get Peggy initializer logs; stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
 	)
 
@@ -858,6 +857,87 @@ func (s *IntegrationTestSuite) initPeggy() {
 	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
 
 	s.T().Log("initialized Peggy (Gravity Bridge) contract")
+}
+
+func (s *IntegrationTestSuite) runOrchestrators() {
+	s.T().Log("starting orchestrator containers...")
+
+	s.orchResources = make([]*dockertest.Resource, len(s.chain.validators))
+	for i, val := range s.chain.validators {
+		resource, err := s.dkrPool.RunWithOptions(
+			&dockertest.RunOptions{
+				Name:       s.chain.orchestrators[i].instanceName(),
+				NetworkID:  s.dkrNet.Network.ID,
+				Repository: "umeenet/umeed",
+				Mounts: []string{
+					fmt.Sprintf("%s/:/root/.umee", val.configDir()),
+				},
+				// NOTE: container names are prefixed with '/'
+				Entrypoint: []string{
+					"peggo",
+					"orchestrator",
+					"--eth-pk",
+					val.ethereumKey.privateKey[2:], // remove 0x prefix
+					"--eth-rpc",
+					fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+					"--eth-chain-id",
+					fmt.Sprintf("%d", ethChainID),
+					"--cosmos-chain-id",
+					s.chain.id,
+					"--cosmos-grpc",
+					fmt.Sprintf("tcp://%s:9090", s.valResources[i].Container.Name[1:]),
+					"--tendermint-rpc",
+					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
+					"--cosmos-gas-prices",
+					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					"--cosmos-from",
+					val.keyInfo.GetName(),
+					"--cosmos-keyring-dir=/root/.umee",
+					"--cosmos-keyring=test",
+					"--relay-batches=true",
+					"--relay-valsets=true",
+				},
+			},
+			noRestart,
+		)
+		s.Require().NoError(err)
+
+		s.orchResources[i] = resource
+		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
+	}
+
+	match := "msg batch committed successfully"
+	for _, resource := range s.orchResources {
+		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
+
+		s.Require().Eventuallyf(
+			func() bool {
+				var (
+					outBuf bytes.Buffer
+					errBuf bytes.Buffer
+				)
+
+				s.Require().NoErrorf(s.dkrPool.Client.Logs(
+					docker.LogsOptions{
+						Container:    resource.Container.ID,
+						OutputStream: &outBuf,
+						ErrorStream:  &errBuf,
+						Stdout:       true,
+						Stderr:       true,
+					},
+				),
+					"failed to get orchestrator logs; stdout: %s, stderr: %s",
+					outBuf.String(), errBuf.String(),
+				)
+
+				return strings.Contains(errBuf.String(), match)
+			},
+			30*time.Second,
+			time.Second,
+			"orchestrator %s not healthy",
+			resource.Container.ID,
+		)
+	}
 }
 
 func noRestart(config *docker.HostConfig) {
