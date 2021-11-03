@@ -117,7 +117,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) sd
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetFeederDelegationKey(operator))
 	if bz == nil {
-		// By default the right is delegated to the validator itself
+		// by default the right is delegated to the validator itself
 		return sdk.AccAddress(operator)
 	}
 
