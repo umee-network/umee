@@ -19,7 +19,8 @@ const (
 )
 
 type (
-	// ExchangeRatePrevote defines a structure to store a validator's prevote on the rate of USD in the denom asset
+	// ExchangeRatePrevote defines a structure to store a validator's prevote on
+	// the rate of USD in the denom asset.
 	ExchangeRatePrevote struct {
 		Hash        VoteHash       `json:"hash"`  // Vote hex hash to protect centralize data source problem
 		Denom       string         `json:"denom"` // Ticker name of target fiat currency
