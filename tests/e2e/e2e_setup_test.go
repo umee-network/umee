@@ -105,11 +105,11 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
+	s.runGaiaNetwork()
+	s.runIBCRelayer()
 	s.registerEthKeys()
 	s.initPeggy()
 	s.runOrchestrators()
-	s.runGaiaNetwork()
-	s.runIBCRelayer()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {

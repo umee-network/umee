@@ -19,13 +19,10 @@ import (
 )
 
 func (s *IntegrationTestSuite) connectIBCChains() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
 	s.T().Logf("connecting %s and %s chains via IBC", s.chain.id, gaiaChainID)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
-		Context:      ctx,
+		Context:      context.Background(),
 		AttachStdout: true,
 		AttachStderr: true,
 		Container:    s.hermesResource.Container.ID,
@@ -46,6 +43,9 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 		outBuf bytes.Buffer
 		errBuf bytes.Buffer
 	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
 	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
 		Context:      ctx,
