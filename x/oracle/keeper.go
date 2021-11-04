@@ -132,8 +132,8 @@ type IterateFeederDelegationHandler = func(delegator sdk.ValAddress, delegate sd
 
 // IterateFeederDelegations iterates over the feed delegates and performs a callback function.
 func (k Keeper) IterateFeederDelegations(
-    ctx sdk.Context,
-    handler IterateFeederDelegationHandler,
+	ctx sdk.Context,
+	handler IterateFeederDelegationHandler,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.FeederDelegationKey)
