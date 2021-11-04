@@ -28,7 +28,8 @@ type (
 		SubmitBlock int64          `json:"submit_block"`
 	}
 
-	// ExchangeRateVote defines a structure to store a validator's vote on the rate of USD in the denom asset
+	// ExchangeRateVote defines a structure to store a validator's vote on the
+	// rate of USD in the denom asset.
 	ExchangeRateVote struct {
 		ExchangeRate sdk.Dec        `json:"exchange_rate"` // ExchangeRate of Luna in target fiat currency
 		Denom        string         `json:"denom"`         // Ticker name of target fiat currency
