@@ -12,16 +12,6 @@ genesis:
     #     bridge_ethereum_address: ""
     #     bridge_contract_start_height: ""
     #     bridge_chain_id: ""
-    bank:
-      denom_metadata:
-        - description: "The native staking token of Umee"
-          base: "uumee"
-          display: "uumee"
-          name: "umee"
-          symbol: "UMEE"
-          denom_units:
-            - denom: "uumee"
-              exponent: 0
 accounts:
   - name: alice
     coins: ["39000000000000uumee"]
