@@ -19,7 +19,7 @@ const (
 )
 
 type (
-	// ExchangeRatePrevote -  Defines a structure to store a validator's prevote on the rate of USD in the denom asset
+	// ExchangeRatePrevote defines a structure to store a validator's prevote on the rate of USD in the denom asset
 	ExchangeRatePrevote struct {
 		Hash        VoteHash       `json:"hash"`  // Vote hex hash to protect centralize data source problem
 		Denom       string         `json:"denom"` // Ticker name of target fiat currency
@@ -27,14 +27,14 @@ type (
 		SubmitBlock int64          `json:"submit_block"`
 	}
 
-	// ExchangeRateVote - Defines structure to store a validator's vote on the rate of USD in the denom asset
+	// ExchangeRateVote defines structure to store a validator's vote on the rate of USD in the denom asset
 	ExchangeRateVote struct {
 		ExchangeRate sdk.Dec        `json:"exchange_rate"` // ExchangeRate of Luna in target fiat currency
 		Denom        string         `json:"denom"`         // Ticker name of target fiat currency
 		Voter        sdk.ValAddress `json:"voter"`         // voter val address of validator
 	}
 
-	// VoteHash is hash value to hide vote exchange rate
+	// VoteHash defines a hash value to hide vote exchange rate
 	// which is formatted as hex string in SHA256("{salt}:{exchange_rate}:{denom}:{voter}")
 	VoteHash []byte
 )
