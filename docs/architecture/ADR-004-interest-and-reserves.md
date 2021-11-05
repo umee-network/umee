@@ -153,7 +153,7 @@ for _, coin := range newReserves {
 
 ### uToken Exchange Rate Impact
 
-In financial terms, accrued interest is split between reserves and lender profits. Because reserve amounts are set explicitly in code but the uToken exchange rate is based on what's left, the uToken rate calculation depends on reserved amounts in practice:
+In financial terms, accrued interest is split between reserves and lender profits.
 
 The token:uToken exchange rate, which would have previously calculated by `(total tokens borrowed + module account balance) / uTokens in circulation` for a given token type and associated uToken denomination, must now be computed as `(total tokens borrowed + module account balance - reserved amount) / uTokens in circulation`.
 
