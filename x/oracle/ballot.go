@@ -12,7 +12,10 @@ import (
 )
 
 // OrganizeBallotByDenom collects all oracle votes for the period, categorized by the votes' denom parameter
-func (k Keeper) OrganizeBallotByDenom(ctx sdk.Context, validatorClaimMap map[string]types.Claim) (votes map[string]types.ExchangeRateBallot) {
+func (k Keeper) OrganizeBallotByDenom(
+	ctx sdk.Context,
+	validatorClaimMap map[string]types.Claim) (
+	votes map[string]types.ExchangeRateBallot) {
 	votes = map[string]types.ExchangeRateBallot{}
 
 	// Organize aggregate votes
@@ -104,16 +107,14 @@ func (k Keeper) ApplyWhitelist(ctx sdk.Context, whitelist types.DenomList, voteT
 				display := base[1:]
 
 				k.bankKeeper.SetDenomMetaData(ctx, banktypes.Metadata{
-					Description: "The native stable token of the Terra Columbus.",
+					Description: "The national currency of the United states.",
 					DenomUnits: []*banktypes.DenomUnit{
-						{Denom: "u" + display, Exponent: uint32(0), Aliases: []string{"micro" + display}},
-						{Denom: "m" + display, Exponent: uint32(3), Aliases: []string{"milli" + display}},
 						{Denom: display, Exponent: uint32(6), Aliases: []string{}},
 					},
 					Base:    base,
 					Display: display,
-					Name:    fmt.Sprintf("%s TERRA", strings.ToUpper(display)),
-					Symbol:  fmt.Sprintf("%sT", strings.ToUpper(display[:len(display)-1])),
+					Name:    fmt.Sprintf("%s United States Dollar", strings.ToUpper(display)),
+					Symbol:  fmt.Sprintf("%sUSD", strings.ToUpper(display[:len(display)-1])),
 				})
 			}
 		}
