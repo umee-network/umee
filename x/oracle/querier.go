@@ -85,7 +85,11 @@ func (q querier) TobinTax(c context.Context, req *types.QueryTobinTaxRequest) (*
 }
 
 // TobinTaxes queries tobin taxes of all denoms
-func (q querier) TobinTaxes(c context.Context, req *types.QueryTobinTaxesRequest) (*types.QueryTobinTaxesResponse, error) {
+func (q querier) TobinTaxes(
+	c context.Context,
+	req *types.QueryTobinTaxesRequest) (
+	*types.QueryTobinTaxesResponse,
+	error) {
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var tobinTaxes types.DenomList
@@ -213,7 +217,11 @@ func (q querier) AggregateVote(c context.Context, req *types.QueryAggregateVoteR
 }
 
 // AggregateVotes queries aggregate votes of all validators
-func (q querier) AggregateVotes(c context.Context, req *types.QueryAggregateVotesRequest) (*types.QueryAggregateVotesResponse, error) {
+func (q querier) AggregateVotes(
+	c context.Context,
+	req *types.QueryAggregateVotesRequest) (
+	*types.QueryAggregateVotesResponse,
+	error) {
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var votes []types.AggregateExchangeRateVote
