@@ -79,6 +79,12 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 		panic(fmt.Sprintf("failed to encode token: %s", err))
 	}
 
+	// For tokens not previously registered, sets tokens:uToken to 1.0
+	err = k.InitializeExchangeRate(ctx, token.BaseDenom)
+	if err != nil {
+		panic(err)
+	}
+
 	store.Set(tokenKey, bz)
 }
 
@@ -141,7 +147,7 @@ func (k Keeper) GetInterestKinkUtilization(ctx sdk.Context, denom string) (sdk.D
 	return token.KinkUtilizationRate, nil
 }
 
-// GetCollateralWeight getscollateral weight of a given token.
+// GetCollateralWeight gets collateral weight of a given token.
 func (k Keeper) GetCollateralWeight(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {

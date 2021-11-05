@@ -86,12 +86,12 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	iter := sdk.KVStorePrefixIterator(store, borrowPrefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		// k is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
-		k, v := iter.Key(), iter.Value()
+		// key is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
+		key, val := iter.Key(), iter.Value()
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(k[len(borrowPrefix)+int(k[len(borrowPrefix)]) : len(k)-1])
+		denom := string(key[len(borrowPrefix)+int(key[len(borrowPrefix)]) : len(key)-1])
 		var currentBorrow sdk.Int
-		if err := currentBorrow.Unmarshal(v); err != nil {
+		if err := currentBorrow.Unmarshal(val); err != nil {
 			return err // improperly marshaled borrow amount should never happen
 		}
 		// use previously calculated interestToApply (interest rate * time elapsed) to accrue interest
@@ -100,7 +100,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		if err != nil {
 			return err
 		}
-		store.Set(k, bz)
+		store.Set(key, bz)
 		// a portion of amountToAccrue defined by the denom's reserve factor will be set aside as reserves
 		newReserves = newReserves.Add(sdk.NewCoin(denom, reserveFactors[denom].MulInt(amountToAccrue).TruncateInt()))
 	}

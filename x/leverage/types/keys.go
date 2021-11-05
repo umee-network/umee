@@ -125,3 +125,11 @@ func CreateExchangeRateKey(tokenDenom string) []byte {
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
+
+// CreateExchangeRateKeyNoDenom returns a safe copy of exchangeRatePrefix
+func CreateExchangeRateKeyNoDenom() []byte {
+	// exchangeRatePrefix
+	var key []byte
+	key = append(key, KeyPrefixExchangeRate...)
+	return key
+}

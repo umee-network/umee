@@ -34,12 +34,12 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 	totalBorrowed := sdk.NewCoins()
 
 	for ; iter.Valid(); iter.Next() {
-		// k is prefix | lengthPrefixed(borrowerAddr) | denom | 0x00
-		k, v := iter.Key(), iter.Value()
+		// key is prefix | lengthPrefixed(borrowerAddr) | denom | 0x00
+		key, val := iter.Key(), iter.Value()
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(k[len(prefix)+int(k[len(prefix)]) : len(k)-1])
+		denom := string(key[len(prefix)+int(key[len(prefix)]) : len(key)-1])
 		var amount sdk.Int
-		if err := amount.Unmarshal(v); err != nil {
+		if err := amount.Unmarshal(val); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled borrow amount should never happen
 		}
 		// For each loan found, add it to totalBorrowed
@@ -59,11 +59,11 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		// k is prefix | denom | 0x00
-		k, v := iter.Key(), iter.Value()
-		denom := string(k[len(prefix) : len(k)-1]) // remove prefix and null-terminator
+		// key is prefix | denom | 0x00
+		key, val := iter.Key(), iter.Value()
+		denom := string(key[len(prefix) : len(key)-1]) // remove prefix and null-terminator
 		var amount sdk.Int
-		if err := amount.Unmarshal(v); err != nil {
+		if err := amount.Unmarshal(val); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled loan amount should never happen
 		}
 		// For each loan found, add it to totalBorrowed

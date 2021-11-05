@@ -164,6 +164,9 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 		if err := am.keeper.AccrueAllInterest(ctx); err != nil {
 			panic(err)
 		}
+		if err := am.keeper.UpdateExchangeRates(ctx); err != nil {
+			panic(err)
+		}
 	}
 	return []abci.ValidatorUpdate{}
 }
