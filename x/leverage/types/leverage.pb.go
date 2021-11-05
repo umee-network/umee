@@ -71,8 +71,6 @@ func (m *Params) GetInterestEpoch() int64 {
 
 // Token defines a token, along with its capital metadata, in the Umee capital
 // facility that can be loaned and borrowed.
-//
-// TODO: Determine what additional parameters might be needed.
 type Token struct {
 	// The base_denom defines the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`

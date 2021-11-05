@@ -71,14 +71,16 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 	}
 
 	// mint uTokens
-	// TODO: Use exchange rate instead of 1:1 redeeming
-	uToken := sdk.NewCoin(k.FromTokenToUTokenDenom(ctx, loan.Denom), loan.Amount)
+	uToken, err := k.ExchangeTokens(ctx, loan)
+	if err != nil {
+		return err
+	}
 	uTokens := sdk.NewCoins(uToken)
-	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
+	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
 		return err
 	}
 
@@ -97,9 +99,10 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	// TODO: Calculate lender's borrow limit and borrowed value, if any, to prevent
 	// borrowers from withdrawing assets that are being used as collateral.
 
-	// TODO: Use exchange rate instead of 1:1 redeeming
-	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
-	withdrawal := sdk.NewCoin(tokenDenom, uToken.Amount)
+	withdrawal, err := k.ExchangeUTokens(ctx, uToken)
+	if err != nil {
+		return err
+	}
 
 	// Ensure module account has sufficient unreserved tokens to withdraw
 	reservedAmount := k.GetReserveAmount(ctx, withdrawal.Denom)
@@ -110,18 +113,18 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 	// send the uTokens from the lender to the module account
 	uTokens := sdk.NewCoins(uToken)
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
 	// send the original lent tokens back to lender
 	tokens := sdk.NewCoins(withdrawal)
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
 		return err
 	}
 
 	// burn the minted uTokens
-	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens); err != nil {
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 

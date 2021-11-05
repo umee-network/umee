@@ -37,6 +37,17 @@ func (suite *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
+	uumee := types.Token{
+		BaseDenom:           "uumee",
+		ReserveFactor:       sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:    sdk.MustNewDecFromStr("0.1"),
+		BaseBorrowRate:      sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:      sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:       sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate: sdk.MustNewDecFromStr("0.8"),
+	}
+	app.LeverageKeeper.SetRegisteredToken(ctx, uumee)
+
 	suite.app = app
 	suite.ctx = ctx
 }

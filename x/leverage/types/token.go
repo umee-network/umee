@@ -2,8 +2,10 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"gopkg.in/yaml.v3"
@@ -78,6 +80,10 @@ func (p *UpdateRegistryProposal) ValidateBasic() error {
 func (t Token) Validate() error {
 	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
 		return err
+	}
+	if strings.HasPrefix(t.BaseDenom, UTokenPrefix) {
+		// Prevents base asset denoms that start with "u/"
+		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
 	}
 
 	// Reserve factor and collateral weight range between 0 and 1, inclusive.

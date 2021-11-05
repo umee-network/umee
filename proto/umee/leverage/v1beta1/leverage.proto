@@ -14,8 +14,6 @@ message Params {
 
 // Token defines a token, along with its capital metadata, in the Umee capital
 // facility that can be loaned and borrowed.
-//
-// TODO: Determine what additional parameters might be needed.
 message Token {
   option (gogoproto.equal) = true;
 
