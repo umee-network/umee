@@ -24,7 +24,8 @@ func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
-// RewardDistributionWindow returns the number of vote periods during which seigiornage reward comes in and then is distributed.
+// RewardDistributionWindow returns the
+// number of vote periods during which seigiornage reward comes in and then is distributed.
 func (k Keeper) RewardDistributionWindow(ctx sdk.Context) (res uint64) {
 	k.paramSpace.Get(ctx, types.KeyRewardDistributionWindow, &res)
 	return
