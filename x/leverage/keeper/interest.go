@@ -121,3 +121,17 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	store.Set(timeKey, bz)
 	return nil
 }
+
+// InitializeLastInterestTime sets LastInterestTime to present if it does not exist (used for genesis)
+func (k *Keeper) InitializeLastInterestTime(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	timeKey := types.CreateLastInterestTimeKey()
+	currentTime := ctx.BlockTime().Unix()
+	if store.Get(timeKey) == nil {
+		bz, err := sdk.NewInt(currentTime).Marshal()
+		if err != nil {
+			panic(err)
+		}
+		store.Set(timeKey, bz)
+	}
+}
