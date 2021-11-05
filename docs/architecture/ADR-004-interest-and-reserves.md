@@ -52,7 +52,13 @@ if ctx.BlockHeight() % k.GetInterestEpoch() == 0 {
 }
 ```
 
-The `x/leverage` module parameter `InterestEpoch` will be governed using `x/params`.
+To support the function above, the `x/leverage` module keeper must store the last unix time at which interest accrued. The value will be marshaled to binary from `sdk.Int`. A single byte prefix can be used:
+
+```go
+key = interestLastTimePrefix // e.g. 0x06
+```
+
+The `InterestEpoch` parameter will be governed using `x/params`.
 
 ### Dynamic Borrow Interest Rates
 
