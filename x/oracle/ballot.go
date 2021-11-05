@@ -33,12 +33,7 @@ func (k Keeper) OrganizeBallotByDenom(
 				}
 
 				votes[tuple.Denom] = append(votes[tuple.Denom],
-					types.NewVoteForTally(
-						tuple.ExchangeRate,
-						tuple.Denom,
-						voterAddr,
-						tmpPower,
-					),
+					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr, tmpPower),
 				)
 			}
 
