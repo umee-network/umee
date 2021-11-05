@@ -12,7 +12,7 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-// AttestationHandler processes `observed` Attestations
+// AttestationHandler processes 'observed' attestations.
 type AttestationHandler struct {
 	keeper     Keeper
 	bankKeeper types.BankKeeper
@@ -66,7 +66,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 
 			addr, err := sdk.AccAddressFromBech32(claim.CosmosReceiver)
 			if err != nil {
-				return sdkerrors.Wrap(err, "invalid reciever address")
+				return sdkerrors.Wrap(err, "invalid receiver address")
 			}
 
 			if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, coins); err != nil {
