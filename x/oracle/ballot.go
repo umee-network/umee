@@ -107,7 +107,7 @@ func (k Keeper) ApplyWhitelist(ctx sdk.Context, whitelist types.DenomList, voteT
 				display := base[1:]
 
 				k.bankKeeper.SetDenomMetaData(ctx, banktypes.Metadata{
-					Description: "The national currency of the United states.",
+					Description: "The national currency of the United States.",
 					DenomUnits: []*banktypes.DenomUnit{
 						{Denom: display, Exponent: uint32(6), Aliases: []string{}},
 					},
