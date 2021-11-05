@@ -113,7 +113,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 }
 ```
 
-In the codebase, the function above will be written more efficiently with regards to calculated utilization and interest rates. Error handling and iterator details are also omitted for clarity here.
+In the codebase, the function above will be written more efficiently with regards to calculating utilization and interest rates. Error handling and iterator details are also omitted for clarity here.
 
 ### Storing Reserves
 
