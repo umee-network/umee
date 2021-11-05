@@ -230,6 +230,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		Display:     photonDenom,
 		Base:        photonDenom,
 		Symbol:      photonDenom,
+		Name:        photonDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
 				Denom:    photonDenom,
@@ -906,7 +907,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "msg batch committed successfully"
+	match := "oracle sent ValsetUpdate event successfully"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
@@ -917,7 +918,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					errBuf bytes.Buffer
 				)
 
-				s.Require().NoErrorf(s.dkrPool.Client.Logs(
+				err := s.dkrPool.Client.Logs(
 					docker.LogsOptions{
 						Container:    resource.Container.ID,
 						OutputStream: &outBuf,
@@ -925,14 +926,14 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 						Stdout:       true,
 						Stderr:       true,
 					},
-				),
-					"failed to get orchestrator logs; stdout: %s, stderr: %s",
-					outBuf.String(), errBuf.String(),
 				)
+				if err != nil {
+					return false
+				}
 
 				return strings.Contains(errBuf.String(), match)
 			},
-			30*time.Second,
+			2*time.Minute,
 			time.Second,
 			"orchestrator %s not healthy",
 			resource.Container.ID,
