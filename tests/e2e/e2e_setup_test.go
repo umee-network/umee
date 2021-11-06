@@ -897,6 +897,8 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-keyring=test",
 					"--relay-batches=true",
 					"--relay-valsets=true",
+					"--relayer-loop-duration=30s",
+					"--orch-loops-duration=30s",
 				},
 			},
 			noRestart,

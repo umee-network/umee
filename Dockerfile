@@ -13,7 +13,7 @@ RUN make install
 # Fetch peggo (gravity bridge) binary
 FROM golang:1.17-alpine AS peggo-builder
 # TODO: Use semantic version once tagged & released
-ARG PEGGO_VERSION=56350996584777fbbcc03e56869cc940ccda4777
+ARG PEGGO_VERSION=d46762537f4e9046550b45e985d1d53fec1711c9
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/

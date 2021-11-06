@@ -18,7 +18,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
-		ethRecipient := "0x4e13C68C22b46C47fb4cFB12492A56a2124902d3" // s.chain.validators[1].ethereumKey.address
+		ethRecipient := s.chain.validators[1].ethereumKey.address
 		s.sendFromUmeeToEth(0, ethRecipient, "300uumee", "10photon", "7uumee")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
@@ -39,8 +39,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 					return false
 				}
 
-				fmt.Printf("GOT UMEE ERC20 TOKEN ETH BALANCE; balance: %d, contract: %s, recipient: %s\n", b, umeeERC20Addr, ethRecipient)
-
 				// The balance could differ if the receiving address was the orchestrator
 				// the sent the batch tx and got the gravity fee.
 				return b >= 300 && b <= 307
@@ -52,10 +50,10 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Ethereum back to Umee
 	s.Run("send_uumee_tokens_from_eth", func() {
-		s.sendFromEthToUmee(1, umeeERC20Addr, s.chain.validators[0].keyInfo.GetAddress().String(), "300")
+		toAddr := s.chain.validators[0].keyInfo.GetAddress()
+		s.sendFromEthToUmee(1, umeeERC20Addr, toAddr.String(), "300")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		toAddr := s.chain.validators[0].keyInfo.GetAddress()
 		expBalance := int64(9999999993)
 
 		// require the original sender's (validator) balance increased
@@ -65,6 +63,8 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 				if err != nil {
 					return false
 				}
+
+				fmt.Printf("GOT: %d; EXPECTED: %d\n", b.Amount.Int64(), expBalance)
 
 				return b.Amount.Int64() == expBalance
 			},

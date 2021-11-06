@@ -87,7 +87,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 
 			return true
 		},
-		time.Minute,
+		2*time.Minute,
 		time.Second,
 		"failed to confirm ERC20 deployment transaction",
 	)
@@ -109,7 +109,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 
 			return false
 		},
-		time.Minute,
+		2*time.Minute,
 		time.Second,
 		"failed to query ERC20 contract address",
 	)
@@ -187,8 +187,8 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 	defer cancel()
 
 	s.T().Logf(
-		"sending tokens from Ethereum to Umee; to: %s, amount: %s, contract: %s",
-		toUmeeAddr, amount, tokenAddr,
+		"sending tokens from Ethereum to Umee; from: %s, to: %s, amount: %s, contract: %s",
+		s.chain.validators[valIdx].ethereumKey.address, toUmeeAddr, amount, tokenAddr,
 	)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
@@ -198,12 +198,22 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		Container:    s.orchResources[valIdx].Container.ID,
 		User:         "root",
 		Cmd: []string{
-			"peggy",
+			"peggo",
 			"bridge",
 			"send-to-cosmos",
 			tokenAddr,
 			toUmeeAddr,
 			amount,
+			"--eth-pk",
+			s.chain.validators[valIdx].ethereumKey.privateKey[2:], // remove 0x prefix
+			"--eth-rpc",
+			fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+			"--cosmos-chain-id",
+			s.chain.id,
+			"--cosmos-grpc",
+			fmt.Sprintf("tcp://%s:9090", s.valResources[valIdx].Container.Name[1:]),
+			"--tendermint-rpc",
+			fmt.Sprintf("http://%s:26657", s.valResources[valIdx].Container.Name[1:]),
 		},
 	})
 	s.Require().NoError(err)
@@ -232,7 +242,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		func() bool {
 			return queryEthTx(ctx, s.ethClient, txHash) == nil
 		},
-		time.Minute,
+		2*time.Minute,
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
