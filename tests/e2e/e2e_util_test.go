@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ethereum/go-ethereum"
@@ -116,6 +117,126 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	s.T().Logf("deployed %s contract: %s", baseDenom, erc20Addr)
 
 	return erc20Addr
+}
+
+func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, umeeFee, gravityFee string) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	s.T().Logf(
+		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, umeeFee: %s, gravityFee: %s",
+		s.chain.validators[valIdx].keyInfo.GetAddress(), ethDest, amount, umeeFee, gravityFee,
+	)
+
+	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
+		Context:      ctx,
+		AttachStdout: true,
+		AttachStderr: true,
+		Container:    s.valResources[valIdx].Container.ID,
+		User:         "root",
+		Cmd: []string{
+			"umeed",
+			"tx",
+			"peggy",
+			"send-to-eth",
+			ethDest,
+			amount,
+			gravityFee,
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, s.chain.validators[valIdx].keyInfo.GetName()),
+			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
+			"--keyring-backend=test",
+			"--broadcast-mode=sync",
+			"-y",
+		},
+	})
+	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+		Context:      ctx,
+		Detach:       false,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
+
+	var broadcastResp map[string]interface{}
+	s.Require().NoError(json.Unmarshal(outBuf.Bytes(), &broadcastResp))
+
+	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
+	txHash := broadcastResp["txhash"].(string)
+
+	s.Require().Eventuallyf(
+		func() bool {
+			return queryUmeeTx(endpoint, txHash) == nil
+		},
+		time.Minute,
+		5*time.Second,
+		"stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
+	)
+}
+
+func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAddr, amount string) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	s.T().Logf(
+		"sending tokens from Ethereum to Umee; to: %s, amount: %s, contract: %s",
+		toUmeeAddr, amount, tokenAddr,
+	)
+
+	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
+		Context:      ctx,
+		AttachStdout: true,
+		AttachStderr: true,
+		Container:    s.orchResources[valIdx].Container.ID,
+		User:         "root",
+		Cmd: []string{
+			"peggy",
+			"bridge",
+			"send-to-cosmos",
+			tokenAddr,
+			toUmeeAddr,
+			amount,
+		},
+	})
+	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+		Context:      ctx,
+		Detach:       false,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
+
+	re := regexp.MustCompile(`Transaction: (0x.+)`)
+	tokens := re.FindStringSubmatch(errBuf.String())
+	s.Require().Len(tokens, 2)
+
+	txHash := tokens[1]
+	s.Require().NotEmpty(txHash)
+
+	s.Require().Eventuallyf(
+		func() bool {
+			return queryEthTx(ctx, s.ethClient, txHash) == nil
+		},
+		time.Minute,
+		5*time.Second,
+		"stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
+	)
 }
 
 func (s *IntegrationTestSuite) connectIBCChains() {

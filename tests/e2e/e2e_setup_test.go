@@ -933,7 +933,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 
 				return strings.Contains(errBuf.String(), match)
 			},
-			2*time.Minute,
+			5*time.Minute,
 			time.Second,
 			"orchestrator %s not healthy",
 			resource.Container.ID,
