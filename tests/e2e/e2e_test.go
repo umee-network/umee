@@ -64,8 +64,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 					return false
 				}
 
-				fmt.Printf("GOT: %d; EXPECTED: %d\n", b.Amount.Int64(), expBalance)
-
 				return b.Amount.Int64() == expBalance
 			},
 			7*time.Minute,
