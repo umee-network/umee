@@ -45,6 +45,56 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 		s.Require().NotEmpty(ibcStakeDenom)
 	})
+
+	var ibcStakeERC20Addr string
+	s.Run("deploy_stake_erc20", func() {
+		ibcStakeERC20Addr = s.deployERC20Token(ibcStakeDenom)
+	})
+
+	// send 300 stake tokens from Umee to Ethereum
+	s.Run("send_stake_tokens_to_eth", func() {
+		ethRecipient := s.chain.validators[1].ethereumKey.address
+		s.sendFromUmeeToEth(0, ethRecipient, fmt.Sprintf("300%s", ibcStakeDenom), "10photon", fmt.Sprintf("7%s", ibcStakeDenom))
+
+		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
+
+		// NOTE: We have to query for all balances because currently querying by
+		// IBC denomination will result in an API error due to the denomination not
+		// being URI handled.
+		var token sdk.Coin
+		balances, err := queryUmeeAllBalances(umeeAPIEndpoint, fromAddr.String())
+		s.Require().NoError(err)
+
+		for _, c := range balances {
+			if c.Denom == ibcStakeDenom {
+				token = c
+				break
+			}
+		}
+
+		s.Require().Equal(ibcStakeDenom, token.Denom)
+		s.Require().Equal(int64(3299999693), token.Amount.Int64())
+
+		// require the Ethereum recipient balance increased
+		s.Require().Eventually(
+			func() bool {
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				defer cancel()
+
+				b, err := queryEthTokenBalance(ctx, s.ethClient, ibcStakeERC20Addr, ethRecipient)
+				if err != nil {
+					return false
+				}
+
+				// The balance could differ if the receiving address was the orchestrator
+				// the sent the batch tx and got the gravity fee.
+				return b >= 300 && b <= 307
+			},
+			2*time.Minute,
+			5*time.Second,
+		)
+	})
 }
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
