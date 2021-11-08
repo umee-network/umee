@@ -8,7 +8,7 @@ import (
 
 // GetDynamicBorrowInterest derives the current borrow interest rate on an asset type, using utilization and params.
 func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilization sdk.Dec) (sdk.Dec, error) {
-	if utilization.IsNegative() || utilization.GTE(sdk.OneDec()) {
+	if utilization.IsNegative() || utilization.GT(sdk.OneDec()) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidUtilization, utilization.String())
 	}
 	kinkUtilization, err := k.GetInterestKinkUtilization(ctx, denom)
@@ -89,7 +89,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		// key is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
 		key, val := iter.Key(), iter.Value()
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(key[len(borrowPrefix)+int(key[len(borrowPrefix)]) : len(key)-1])
+		denom := string(key[len(borrowPrefix)+int(key[len(borrowPrefix)]+1) : len(key)-1])
 		var currentBorrow sdk.Int
 		if err := currentBorrow.Unmarshal(val); err != nil {
 			return err // improperly marshaled borrow amount should never happen

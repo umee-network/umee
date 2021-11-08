@@ -168,12 +168,10 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
-	store := ctx.KVStore(k.storeKey)
-	bz, err := totalBorrowed.Marshal()
+	err = k.SetBorrow(ctx, borrowerAddr, loan.Denom, totalBorrowed)
 	if err != nil {
 		return err
 	}
-	store.Set(types.CreateLoanKey(borrowerAddr, loan.Denom), bz)
 	return nil
 }
 

@@ -22,6 +22,17 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
+// SetBorrow sets the amount borrowed by an address in a given denom to an amount
+func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, amount sdk.Int) error {
+	store := ctx.KVStore(k.storeKey)
+	bz, err := amount.Marshal()
+	if err != nil {
+		return err
+	}
+	store.Set(types.CreateLoanKey(borrowerAddr, denom), bz)
+	return nil
+}
+
 // GetTotalBorrows returns total borrows across all borrowers and asset types as an sdk.Coins.
 // It is done for all asset types at once, rather than one denom at a time, because either case would require
 // iterating through all open borrows the way borrows are currently stored ( prefix | address | denom ).
@@ -37,7 +48,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 		// key is prefix | lengthPrefixed(borrowerAddr) | denom | 0x00
 		key, val := iter.Key(), iter.Value()
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(key[len(prefix)+int(key[len(prefix)]) : len(key)-1])
+		denom := string(key[len(prefix)+int(key[len(prefix)]+1) : len(key)-1])
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
 			return sdk.NewCoins(), err // improperly marshaled borrow amount should never happen
@@ -78,9 +89,6 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
-	if totalBorrowed.IsZero() {
-		return sdk.ZeroDec(), nil // catch this 0% utilization case before reading balances and reserves
-	}
 	if totalBorrowed.IsNegative() {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNegativeTotalBorrowed, totalBorrowed.String()+" "+denom)
 	}
@@ -88,13 +96,13 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	// Token Utilization = Total Borrows / (Module Account Balance + Total Borrows - Reserve Requirement)
 	moduleBalance := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
 	reserveAmount := k.GetReserveAmount(ctx, denom)
-	denominator := sdk.NewDecFromInt(totalBorrowed.Add(moduleBalance).Sub(reserveAmount))
-	if sdk.NewDecFromInt(totalBorrowed).GTE(denominator) {
+	denominator := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
+	if totalBorrowed.GTE(denominator) {
 		// These edge cases can be safely interpreted as 100% utilization.
 		return sdk.OneDec(), nil // denominator < totalBorrows (denominator may even be zero or negative)
 	}
 	// After the checks above (on both totalBorrowed and denominator), utilization is always between 0 and 1
-	utilization := sdk.NewDecFromInt(totalBorrowed).Quo(denominator)
+	utilization := sdk.NewDecFromInt(totalBorrowed).Quo(sdk.NewDecFromInt(denominator))
 
 	return utilization, nil
 }

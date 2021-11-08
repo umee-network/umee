@@ -74,6 +74,18 @@ func TestToken_Validate(t *testing.T) {
 			},
 			expectErr: true,
 		},
+		"invalid base token (utoken)": {
+			input: types.Token{
+				BaseDenom:           "u/uumee",
+				ReserveFactor:       sdk.MustNewDecFromStr("0.25"),
+				CollateralWeight:    sdk.MustNewDecFromStr("0.50"),
+				BaseBorrowRate:      sdk.MustNewDecFromStr("0.01"),
+				KinkBorrowRate:      sdk.MustNewDecFromStr("0.05"),
+				MaxBorrowRate:       sdk.MustNewDecFromStr("1.0"),
+				KinkUtilizationRate: sdk.MustNewDecFromStr("0.75"),
+			},
+			expectErr: true,
+		},
 		"invalid reserve factor": {
 			input: types.Token{
 				BaseDenom:           "uumee",
