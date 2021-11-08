@@ -898,7 +898,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--relay-batches=true",
 					"--relay-valsets=true",
 					"--relayer-loop-duration=30s",
-					"--orch-loops-duration=30s",
+					"--orch-loop-duration=30s",
 				},
 			},
 			noRestart,
