@@ -77,7 +77,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().Equal(int64(3299999693), token.Amount.Int64())
 
 		// require the Ethereum recipient balance increased
-		s.Require().Eventually(
+		var latestBalance int
+		s.Require().Eventuallyf(
 			func() bool {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -87,12 +88,15 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 					return false
 				}
 
+				latestBalance = b
+
 				// The balance could differ if the receiving address was the orchestrator
 				// the sent the batch tx and got the gravity fee.
 				return b >= 300 && b <= 307
 			},
 			2*time.Minute,
 			5*time.Second,
+			"unexpected balance: %d", latestBalance,
 		)
 	})
 }
@@ -118,7 +122,8 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998429))
 
 		// require the Ethereum recipient balance increased
-		s.Require().Eventually(
+		var latestBalance int
+		s.Require().Eventuallyf(
 			func() bool {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -128,12 +133,15 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 					return false
 				}
 
+				latestBalance = b
+
 				// The balance could differ if the receiving address was the orchestrator
 				// that sent the batch tx and got the gravity fee.
 				return b >= 100 && b <= 103
 			},
 			7*time.Minute,
 			5*time.Second,
+			"unexpected balance: %d", latestBalance,
 		)
 	})
 
@@ -146,17 +154,21 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		expBalance := int64(99999998524)
 
 		// require the original sender's (validator) balance increased
-		s.Require().Eventually(
+		var latestBalance int64
+		s.Require().Eventuallyf(
 			func() bool {
 				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "photon")
 				if err != nil {
 					return false
 				}
 
-				return b.Amount.Int64() >= expBalance
+				latestBalance = b.Amount.Int64()
+
+				return latestBalance >= expBalance
 			},
 			7*time.Minute,
 			5*time.Second,
+			"unexpected balance: %d", latestBalance,
 		)
 	})
 }
@@ -181,7 +193,8 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		s.Require().Equal(int64(9999999693), balance.Amount.Int64())
 
 		// require the Ethereum recipient balance increased
-		s.Require().Eventually(
+		var latestBalance int
+		s.Require().Eventuallyf(
 			func() bool {
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				defer cancel()
@@ -191,12 +204,15 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 					return false
 				}
 
+				latestBalance = b
+
 				// The balance could differ if the receiving address was the orchestrator
 				// that sent the batch tx and got the gravity fee.
 				return b >= 300 && b <= 307
 			},
 			7*time.Minute,
 			5*time.Second,
+			"unexpected balance: %d", latestBalance,
 		)
 	})
 
@@ -209,17 +225,21 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		expBalance := int64(9999999993)
 
 		// require the original sender's (validator) balance increased
-		s.Require().Eventually(
+		var latestBalance int64
+		s.Require().Eventuallyf(
 			func() bool {
 				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "uumee")
 				if err != nil {
 					return false
 				}
 
-				return b.Amount.Int64() == expBalance
+				latestBalance = b.Amount.Int64()
+
+				return latestBalance == expBalance
 			},
 			7*time.Minute,
 			5*time.Second,
+			"unexpected balance: %d", latestBalance,
 		)
 	})
 }

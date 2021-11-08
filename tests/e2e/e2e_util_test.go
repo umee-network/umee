@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 
 	re := regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens := re.FindStringSubmatch(errBuf.String())
-	s.Require().Len(tokens, 2)
+	s.Require().Lenf(tokens, 2, "stderr: %s", errBuf.String())
 
 	txHash := tokens[1]
 	s.Require().NotEmpty(txHash)

@@ -73,7 +73,7 @@ func (k Keeper) SendTransfer(
 			return sdkerrors.Wrap(ibctransfertypes.ErrTraceNotFound, hexHash)
 		}
 
-		k.TrackDenomMetadata(ctx, denomTrace.BaseDenom)
+		k.TrackDenomMetadata(ctx, denomTrace)
 	}
 
 	return nil
@@ -118,22 +118,25 @@ func (k Keeper) PostOnRecvPacket(
 		denomTrace = ibctransfertypes.ParseDenomTrace(prefixedDenom)
 	}
 
-	k.TrackDenomMetadata(ctx, denomTrace.BaseDenom)
+	k.TrackDenomMetadata(ctx, denomTrace)
 }
 
 // TrackDenomMetadata checks for the metadata existence of an IBC transferred
 // asset and if it does not exist, it attempts to add it. Note, we cannot infer
-// the exponent or any units so we default to zero. We also cannot infer any
-// display or client-side related values so we default to the base denomination.
-func (k Keeper) TrackDenomMetadata(ctx sdk.Context, baseDenom string) {
-	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, baseDenom); !ok {
+// the exponent or any units so we default to zero.
+func (k Keeper) TrackDenomMetadata(ctx sdk.Context, denomTrace ibctransfertypes.DenomTrace) {
+	ibcHash := denomTrace.IBCDenom()
+
+	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, ibcHash); !ok {
 		denomMetadata := banktypes.Metadata{
 			Description: "IBC transferred asset",
-			Display:     baseDenom,
-			Base:        baseDenom,
+			Display:     denomTrace.BaseDenom,
+			Name:        denomTrace.BaseDenom,
+			Symbol:      denomTrace.BaseDenom,
+			Base:        ibcHash,
 			DenomUnits: []*banktypes.DenomUnit{
 				{
-					Denom:    baseDenom,
+					Denom:    ibcHash,
 					Exponent: 0,
 				},
 			},
