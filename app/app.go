@@ -106,6 +106,9 @@ const (
 	// BondDenom defines the native staking token denomination.
 	BondDenom = "uumee"
 
+	// DisplayDenom defines the name, symbol, and display value of the umee token.
+	DisplayDenom = "umee"
+
 	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
 	//
 	// NOTE: In the SDK, the default value is 255.
