@@ -222,9 +222,9 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 	s.coordinator.CommitBlock(s.chainA, s.chainB)
 
-	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "quark")
+	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "ibc/DB6D78EC2E51C8B6AAF6DA64E660911491DC1A67C64DA69ED6945FE6DB552A5C")
 	s.Require().True(ok)
 
-	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "photon")
+	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "ibc/10180B5BF0701A3E34A5F818607D7E57ECD35CD9D673ABCCD174F157DFC06C0F")
 	s.Require().True(ok)
 }
