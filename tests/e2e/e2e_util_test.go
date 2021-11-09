@@ -410,7 +410,7 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 }
 
 func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/peggy/v1/cosmos_originated/denom_to_erc20/%s", endpoint, denom))
+	resp, err := http.Get(fmt.Sprintf("%s/peggy/v1/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
 	if err != nil {
 		return "", false, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}

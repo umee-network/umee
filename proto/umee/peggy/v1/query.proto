@@ -43,11 +43,11 @@ service Query {
   }
 
   rpc ERC20ToDenom(QueryERC20ToDenomRequest) returns (QueryERC20ToDenomResponse) {
-    option (google.api.http).get = "/peggy/v1/cosmos_originated/erc20_to_denom/{erc20}";
+    option (google.api.http).get = "/peggy/v1/cosmos_originated/erc20_to_denom";
   }
 
   rpc DenomToERC20(QueryDenomToERC20Request) returns (QueryDenomToERC20Response) {
-    option (google.api.http).get = "/peggy/v1/cosmos_originated/denom_to_erc20/{denom}";
+    option (google.api.http).get = "/peggy/v1/cosmos_originated/denom_to_erc20";
   }
 
   rpc LastEventByAddr(QueryLastEventByAddrRequest) returns (QueryLastEventByAddrResponse) {
