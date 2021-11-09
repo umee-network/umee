@@ -124,11 +124,6 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 	s.T().Log("tearing down e2e integration test suite...")
 
-	os.RemoveAll(s.chain.dataDir)
-	for _, td := range s.tmpDirs {
-		os.RemoveAll(td)
-	}
-
 	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
 	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
@@ -142,6 +137,11 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	}
 
 	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
+
+	os.RemoveAll(s.chain.dataDir)
+	for _, td := range s.tmpDirs {
+		os.RemoveAll(td)
+	}
 }
 
 func (s *IntegrationTestSuite) initNodes() {
