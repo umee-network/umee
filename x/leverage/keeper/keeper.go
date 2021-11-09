@@ -97,13 +97,17 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 // for the original tokens lent. If the uToken type is invalid or account balance
 // insufficient on either side, we return an error.
 func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken sdk.Coin) error {
+	if !uToken.IsValid() {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
+	}
+
 	if !k.bankKeeper.HasBalance(ctx, lenderAddr, uToken) {
 		// Lender does not have the uTokens they intend to redeem
 		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 	}
 
-	// TODO: Calculate lender's borrow limit and borrowed value, if any, to prevent
-	// borrowers from withdrawing assets that are being used as collateral.
+	// TODO #213: Calculate lender's borrow limit and current borrowed value, if any.
+	// Prevent withdrawing assets when it would bring user borrow limit below current borrowed value.
 
 	withdrawal, err := k.ExchangeUTokens(ctx, uToken)
 	if err != nil {
@@ -140,16 +144,20 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 // BorrowAsset attempts to borrow tokens from the leverage module account using
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
-func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan sdk.Coin) error {
-	if !k.IsAcceptedToken(ctx, loan.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
+func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+	if !borrow.IsValid() {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
+	}
+
+	if !k.IsAcceptedToken(ctx, borrow.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
-	reservedAmount := k.GetReserveAmount(ctx, loan.Denom)
-	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), loan.Denom).Amount
-	if loan.Amount.GT(availableAmount.Sub(reservedAmount)) {
-		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, loan.String())
+	reservedAmount := k.GetReserveAmount(ctx, borrow.Denom)
+	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), borrow.Denom).Amount
+	if borrow.Amount.GT(availableAmount.Sub(reservedAmount)) {
+		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, borrow.String())
 	}
 
 	// Determine amount of all tokens currently borrowed
@@ -161,20 +169,18 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 	// Retrieve borrower's account balance.
 	// accountBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
 
-	// TODO (Oracle+Params+CollateralSettings): Calculate borrow limit from uTokens in borrower's account
-	// TODO (Oracle): Calculate borrow limit already used (from currentlyBorrowed)
-	// TODO (Oracle): Calculate loanTokens value
-	// TODO: ErrBorrowLimitLow if (borrow limit used + loan value > borrow limit)
+	// TODO #213: Use oracle to compute borrow limit and current borrowed value.
+	// Prevent borrows that exceed borrow limit.
 
 	// Note: Prior to oracle implementation, we cannot compare loan value to borrow limit
-	loanTokens := sdk.NewCoins(loan)
+	loanTokens := sdk.NewCoins(borrow)
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
 		return err
 	}
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
-	totalBorrowed := currentlyBorrowed.AmountOf(loan.Denom).Add(loan.Amount)
-	err = k.SetBorrow(ctx, borrowerAddr, loan.Denom, totalBorrowed)
+	totalBorrowed := currentlyBorrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
+	err = k.SetBorrow(ctx, borrowerAddr, borrow.Denom, totalBorrowed)
 	if err != nil {
 		return err
 	}
@@ -186,6 +192,10 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, loan s
 // Additionally, if the amount provided is greater than the full repayment amount, only the
 // necessary amount is transferred.
 func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) error {
+	if !payment.IsValid() {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
+	}
+
 	if !k.IsAcceptedToken(ctx, payment.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
 	}
@@ -235,6 +245,9 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if !k.IsAcceptedUToken(ctx, denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
+
+	// TODO #213: If enable=false, use oracle to compute current borrowed value and borrow limit after disable.
+	// Prevent disabling collateral when it would bring user borrow limit below current borrowed value.
 
 	// Enable sets to true; disable removes from KVstore rather than setting false
 	store := ctx.KVStore(k.storeKey)

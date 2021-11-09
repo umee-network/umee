@@ -18,6 +18,9 @@ func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
 			panic(err)
 		}
 	}
+	if amount.IsNegative() {
+		panic("negative reserve amount detected")
+	}
 	return amount
 }
 
