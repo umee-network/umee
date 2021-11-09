@@ -99,6 +99,42 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 			"unexpected balance: %d", latestBalance,
 		)
 	})
+
+	// send 300 stake tokens from Ethereum back to Umee
+	s.Run("send_stake_tokens_from_eth", func() {
+		s.sendFromEthToUmee(1, ibcStakeERC20Addr, s.chain.validators[0].keyInfo.GetAddress().String(), "300")
+
+		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+		toAddr := s.chain.validators[0].keyInfo.GetAddress()
+		expBalance := int64(3299999993)
+
+		// require the original sender's (validator) balance increased
+		var latestBalance int64
+		s.Require().Eventuallyf(
+			func() bool {
+				// NOTE: We have to query for all balances because currently querying by
+				// IBC denomination will result in an API error due to the denomination
+				// not being URI handled.
+				var token sdk.Coin
+				balances, err := queryUmeeAllBalances(umeeAPIEndpoint, toAddr.String())
+				s.Require().NoError(err)
+
+				for _, c := range balances {
+					if c.Denom == ibcStakeDenom {
+						token = c
+						break
+					}
+				}
+
+				latestBalance = token.Amount.Int64()
+
+				return latestBalance == expBalance
+			},
+			2*time.Minute,
+			5*time.Second,
+			"unexpected balance: %d", latestBalance,
+		)
+	})
 }
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
