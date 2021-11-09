@@ -155,7 +155,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		// require the sender's (validator) balance decreased
 		balance, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), "photon")
 		s.Require().NoError(err)
-		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998404))
+		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998403))
 
 		// require the Ethereum recipient balance increased
 		var latestBalance int
