@@ -6,7 +6,7 @@ import fmt "fmt"
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params: Params{
-			InterestEpoch: DefaultInterestEpoch,
+			InterestEpoch: defaultInterestEpoch,
 		},
 		Registry: []Token{},
 	}
