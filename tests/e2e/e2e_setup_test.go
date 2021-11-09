@@ -468,20 +468,12 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
-	_, err = copyFile(
-		filepath.Join("./docker/", "gaia.Dockerfile"),
-		filepath.Join(tmpDir, "gaia.Dockerfile"),
-	)
-	s.Require().NoError(err)
-
-	s.gaiaResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
-		&dockertest.BuildOptions{
-			Dockerfile: "gaia.Dockerfile",
-			ContextDir: tmpDir,
-		},
+	s.gaiaResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:      gaiaVal.instanceName(),
-			NetworkID: s.dkrNet.Network.ID,
+			Name:       gaiaVal.instanceName(),
+			Repository: "umeenet/gaia",
+			Tag:        "latest",
+			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.gaia", tmpDir),
 			},
