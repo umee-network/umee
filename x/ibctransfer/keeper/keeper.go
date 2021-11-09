@@ -125,18 +125,18 @@ func (k Keeper) PostOnRecvPacket(
 // asset and if it does not exist, it attempts to add it. Note, we cannot infer
 // the exponent or any units so we default to zero.
 func (k Keeper) TrackDenomMetadata(ctx sdk.Context, denomTrace ibctransfertypes.DenomTrace) {
-	ibcHash := denomTrace.IBCDenom()
+	ibcDenom := denomTrace.IBCDenom()
 
-	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, ibcHash); !ok {
+	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, ibcDenom); !ok {
 		denomMetadata := banktypes.Metadata{
 			Description: "IBC transferred asset",
 			Display:     denomTrace.BaseDenom,
 			Name:        denomTrace.BaseDenom,
 			Symbol:      denomTrace.BaseDenom,
-			Base:        ibcHash,
+			Base:        ibcDenom,
 			DenomUnits: []*banktypes.DenomUnit{
 				{
-					Denom:    ibcHash,
+					Denom:    ibcDenom,
 					Exponent: 0,
 				},
 			},

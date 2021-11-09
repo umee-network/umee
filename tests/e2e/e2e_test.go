@@ -155,7 +155,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		// require the sender's (validator) balance decreased
 		balance, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), "photon")
 		s.Require().NoError(err)
-		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998429))
+		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998404))
 
 		// require the Ethereum recipient balance increased
 		var latestBalance int
@@ -175,7 +175,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 				// that sent the batch tx and got the gravity fee.
 				return b >= 100 && b <= 103
 			},
-			7*time.Minute,
+			2*time.Minute,
 			5*time.Second,
 			"unexpected balance: %d", latestBalance,
 		)
@@ -187,7 +187,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.sendFromEthToUmee(1, photonERC20Addr, toAddr.String(), "100")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		expBalance := int64(99999998524)
+		expBalance := int64(99999998500)
 
 		// require the original sender's (validator) balance increased
 		var latestBalance int64
@@ -202,7 +202,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 				return latestBalance >= expBalance
 			},
-			7*time.Minute,
+			2*time.Minute,
 			5*time.Second,
 			"unexpected balance: %d", latestBalance,
 		)
@@ -246,7 +246,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 				// that sent the batch tx and got the gravity fee.
 				return b >= 300 && b <= 307
 			},
-			7*time.Minute,
+			2*time.Minute,
 			5*time.Second,
 			"unexpected balance: %d", latestBalance,
 		)
@@ -273,7 +273,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 				return latestBalance == expBalance
 			},
-			7*time.Minute,
+			2*time.Minute,
 			5*time.Second,
 			"unexpected balance: %d", latestBalance,
 		)
