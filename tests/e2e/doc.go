@@ -9,6 +9,8 @@
 // 1. A single validator Gaia network
 // 2. A configurable number of Umee validator processes
 // 3. A hermes relayer connecting the Umee and Gaia networks over IBC
+// 4. A single Ethereum node
+// 5. A configurable number of Peggy orchestrator processes
 //
 // The file e2e_test.go contains the actual end-to-end integration tests that
 // utilize the testing suite.
