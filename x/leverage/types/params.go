@@ -63,7 +63,7 @@ func validateInterestEpoch(i interface{}) error {
 	}
 
 	if v <= 0 {
-		return fmt.Errorf("interest epoch be positive: %d", v)
+		return fmt.Errorf("interest epoch must be positive: %d", v)
 	}
 	return nil
 }
