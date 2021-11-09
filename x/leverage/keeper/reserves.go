@@ -35,14 +35,14 @@ func (k Keeper) IncreaseReserves(ctx sdk.Context, coin sdk.Coin) error {
 	if bz != nil {
 		err := currentReserve.Unmarshal(bz)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
 	// Add the new reserve amount to the current one and save
 	bz, err := currentReserve.Add(coin.Amount).Marshal()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	store.Set(reserveKey, bz)
 	return nil

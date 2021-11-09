@@ -45,7 +45,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	bz := store.Get(timeKey)
 	err := prevInterestTime.Unmarshal(bz)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
@@ -116,7 +116,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	// Set LastInterestTime
 	bz, err = sdk.NewInt(currentTime).Marshal()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	store.Set(timeKey, bz)
 	return nil

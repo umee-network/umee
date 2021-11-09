@@ -46,7 +46,7 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 	}
 	err := amount.Unmarshal(bz)
 	if err != nil {
-		panic(err)
+		return sdk.ZeroDec(), err
 	}
 	return amount, nil
 }
@@ -60,7 +60,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) err
 	rateKey := types.CreateExchangeRateKey(denom)
 	bz, err := rate.Marshal()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	store.Set(rateKey, bz)
 	return nil
@@ -110,7 +110,7 @@ func (k Keeper) InitializeExchangeRate(ctx sdk.Context, denom string) error {
 	if !store.Has(rateKey) {
 		bz, err := sdk.OneDec().Marshal()
 		if err != nil {
-			panic(err)
+			return err
 		}
 		store.Set(rateKey, bz)
 	}
