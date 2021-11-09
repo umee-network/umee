@@ -16,20 +16,26 @@ import (
 type Keeper struct {
 	cdc        codec.Codec
 	storeKey   sdk.StoreKey
-	paramStore paramtypes.Subspace
+	paramSpace paramtypes.Subspace
 	bankKeeper types.BankKeeper
 }
 
 func NewKeeper(
 	cdc codec.Codec,
 	storeKey sdk.StoreKey,
-	paramStore paramtypes.Subspace,
+	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 ) Keeper {
+
+	// set KeyTable if it has not already been set
+	if !paramSpace.HasKeyTable() {
+		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
+	}
+
 	return Keeper{
 		cdc:        cdc,
 		storeKey:   storeKey,
-		paramStore: paramStore,
+		paramSpace: paramSpace,
 		bankKeeper: bk,
 	}
 }
