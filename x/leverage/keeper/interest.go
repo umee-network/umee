@@ -11,16 +11,17 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 	if utilization.IsNegative() || utilization.GT(sdk.OneDec()) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidUtilization, utilization.String())
 	}
-	
+
 	kinkUtilization, err := k.GetInterestKinkUtilization(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	
+
 	kinkRate, err := k.GetInterestAtKink(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	if utilization.GTE(kinkUtilization) {
 		// Utilization is between kink value and 100%
 		maxRate, err := k.GetInterestMax(ctx, denom)
@@ -29,6 +30,7 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 		}
 		return k.Interpolate(ctx, utilization, kinkUtilization, kinkRate, sdk.OneDec(), maxRate), nil
 	}
+
 	// Utilization is between 0% and kink value
 	baseRate, err := k.GetInterestBase(ctx, denom)
 	if err != nil {
