@@ -6,7 +6,7 @@ import fmt "fmt"
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params: Params{
-			InterestEpoch: 100,
+			InterestEpoch: DefaultInterestEpoch,
 		},
 		Registry: []Token{},
 	}
@@ -15,7 +15,6 @@ func DefaultGenesis() *GenesisState {
 // Validate performs basic genesis state validation returning an error upon any
 // failure.
 func (gs GenesisState) Validate() error {
-
 	if gs.Params.InterestEpoch <= 0 {
 		return fmt.Errorf("interest epoch must be positive: %d", gs.Params.InterestEpoch)
 	}

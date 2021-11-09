@@ -11,10 +11,12 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 	if utilization.IsNegative() || utilization.GT(sdk.OneDec()) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidUtilization, utilization.String())
 	}
+	
 	kinkUtilization, err := k.GetInterestKinkUtilization(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+	
 	kinkRate, err := k.GetInterestAtKink(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err

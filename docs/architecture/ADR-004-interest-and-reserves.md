@@ -98,7 +98,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
     // unix times (int64 values, measured in seconds)
     secondsElapsed := ctx.BlockTime.Unix() - k.GetLastInterestTime()
     // derived interest is annual, so we must convert time to years for the math to work
-    yearsElapsed := sdk.OneDec.MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
+    yearsElapsed := sdk.OneDec().MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
         
     // for each borrow, expressed as an sdk.Coin(Denom, Amount) associated with an sdk.Address
     {
