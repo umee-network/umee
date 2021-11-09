@@ -544,20 +544,12 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	)
 	s.Require().NoError(err)
 
-	_, err = copyFile(
-		filepath.Join("./docker/", "hermes.Dockerfile"),
-		filepath.Join(tmpDir, "hermes.Dockerfile"),
-	)
-	s.Require().NoError(err)
-
-	s.hermesResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
-		&dockertest.BuildOptions{
-			Dockerfile: "hermes.Dockerfile",
-			ContextDir: tmpDir,
-		},
+	s.hermesResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:      "umee-gaia-relayer",
-			NetworkID: s.dkrNet.Network.ID,
+			Name:       "umee-gaia-relayer",
+			Repository: "umeenet/hermes",
+			Tag:        "latest",
+			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/hermes", hermesCfgPath),
 			},
