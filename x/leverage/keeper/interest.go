@@ -28,7 +28,7 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
-		return k.Interpolate(ctx, utilization, kinkUtilization, kinkRate, sdk.OneDec(), maxRate), nil
+		return Interpolate(utilization, kinkUtilization, kinkRate, sdk.OneDec(), maxRate), nil
 	}
 
 	// Utilization is between 0% and kink value
@@ -36,7 +36,7 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	return k.Interpolate(ctx, utilization, sdk.ZeroDec(), baseRate, kinkUtilization, kinkRate), nil
+	return Interpolate(utilization, sdk.ZeroDec(), baseRate, kinkUtilization, kinkRate), nil
 }
 
 // AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.

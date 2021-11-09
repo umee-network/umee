@@ -6,7 +6,7 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 // point on that line for an input x-value. It will return yMin if xMin = xMax (i.e. a vertical line).
 // While this function is intended for interpolation (xMin < x < xMax), it works correctly even when x is outside
 // that range or when xMin > xMax.
-func (k Keeper) Interpolate(ctx sdk.Context, x, xMin, yMin, xMax, yMax sdk.Dec) sdk.Dec {
+func Interpolate(x, xMin, yMin, xMax, yMax sdk.Dec) sdk.Dec {
 	if xMin.Equal(xMax) {
 		return yMin
 	}
