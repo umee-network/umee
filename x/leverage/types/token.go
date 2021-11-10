@@ -2,8 +2,10 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"gopkg.in/yaml.v3"
@@ -79,20 +81,34 @@ func (t Token) Validate() error {
 	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
 		return err
 	}
-
-	// TODO: Evaluate if we need additional constraints on the exchange rate.
-	if t.ExchangeRate.IsNegative() || t.ExchangeRate.GT(sdk.OneDec()) {
-		return fmt.Errorf("invalid exchange rate: %s", t.ExchangeRate)
+	if strings.HasPrefix(t.BaseDenom, UTokenPrefix) {
+		// Prevents base asset denoms that start with "u/"
+		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
 	}
 
-	// TODO: Evaluate if we need additional constraints on the collateral rate.
+	// Reserve factor and collateral weight range between 0 and 1, inclusive.
+	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GT(sdk.OneDec()) {
+		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
+	}
 	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GT(sdk.OneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
 
-	// TODO: Evaluate if we need additional constraints on the base borrow rate.
-	if t.BaseBorrowRate.IsNegative() || t.BaseBorrowRate.GT(sdk.OneDec()) {
+	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents multiple interest rates being
+	// defined at exactly 0% or 100% utilization (e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.)
+	if !t.KinkUtilizationRate.IsPositive() || t.KinkUtilizationRate.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilizationRate)
+	}
+
+	// Interest rates are non-negative. They do not need to have a maximum value.
+	if t.BaseBorrowRate.IsNegative() {
 		return fmt.Errorf("invalid base borrow rate: %s", t.BaseBorrowRate)
+	}
+	if t.KinkBorrowRate.IsNegative() {
+		return fmt.Errorf("invalid kink borrow rate: %s", t.KinkBorrowRate)
+	}
+	if t.MaxBorrowRate.IsNegative() {
+		return fmt.Errorf("invalid max borrow rate: %s", t.MaxBorrowRate)
 	}
 
 	return nil
