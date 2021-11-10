@@ -72,7 +72,7 @@ func (k Keeper) RewardBallotWinners(
 	// Move distributed reward to distribution module
 	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.distrName, distributedReward)
 	if err != nil {
-		panic(fmt.Sprintf("[oracle] Failed to send coins to distribution module %s", err.Error()))
+		panic(fmt.Sprintf("failed to send coins to distribution module %s", err.Error()))
 	}
 
 }
