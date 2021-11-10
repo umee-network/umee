@@ -8,7 +8,6 @@ import (
 )
 
 func TestInterpolate(t *testing.T) {
-
 	// Define two points (x1,y1) and (x2,y2)
 	x1 := sdk.MustNewDecFromStr("3.0")
 	x2 := sdk.MustNewDecFromStr("6.0")
