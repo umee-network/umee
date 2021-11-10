@@ -27,7 +27,7 @@ func (k Keeper) RewardBallotWinners(
 	}
 
 	// Sum weight of the claims
-	ballotPowerSum := int64(0)
+	var ballotPowerSum int64
 	for _, winner := range ballotWinners {
 		ballotPowerSum += winner.Weight
 	}
