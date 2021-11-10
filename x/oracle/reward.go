@@ -54,7 +54,7 @@ func (k Keeper) RewardBallotWinners(
 		))
 	}
 
-	// Dole out rewards
+	// distribute rewards
 	var distributedReward sdk.Coins
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
