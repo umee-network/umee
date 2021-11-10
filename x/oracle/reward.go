@@ -7,9 +7,9 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-// RewardBallotWinners implements
-// at the end of every VotePeriod, we give out portion of seigniorage reward(reward-weight) to the
-// oracle voters that voted faithfully.
+// RewardBallotWinners is executed at the end of every voting period, where we
+// give out a portion of seigniorage reward(reward-weight) to the oracle voters
+// that voted correctly.
 func (k Keeper) RewardBallotWinners(
 	ctx sdk.Context,
 	votePeriod int64,
