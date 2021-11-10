@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -8,11 +9,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/ibc-go/modules/apps/transfer/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
-	ibctesting "github.com/cosmos/ibc-go/testing"
+	"github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
+	ibctesting "github.com/cosmos/ibc-go/v2/testing"
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -115,7 +116,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 		data := ibctransfertypes.NewFungibleTokenPacketData(
 			denom,
-			uint64(1),
+			strconv.Itoa(1),
 			AddressFromString("a3"),
 			AddressFromString("a4"),
 		)
@@ -144,7 +145,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 		data := ibctransfertypes.NewFungibleTokenPacketData(
 			denom,
-			uint64(1),
+			strconv.Itoa(1),
 			AddressFromString("a2"),
 			AddressFromString("a1"),
 		)
@@ -175,7 +176,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 		data := ibctransfertypes.NewFungibleTokenPacketData(
 			denom,
-			uint64(1),
+			strconv.Itoa(1),
 			AddressFromString("a1"),
 			AddressFromString("a2"),
 		)
@@ -207,11 +208,14 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 		registerDenom()
 
+		amount, err := strconv.Atoi(data.Amount)
+		s.Require().NoError(err)
+
 		err = s.GetUmeeApp(s.chainB).TransferKeeper.SendTransfer(
 			s.chainB.GetContext(),
 			packet.SourcePort,
 			packet.SourceChannel,
-			sdk.NewCoin(ibcDenom, sdk.NewIntFromUint64(data.Amount)),
+			sdk.NewCoin(ibcDenom, sdk.NewInt(int64(amount))),
 			sender,
 			data.Receiver,
 			clienttypes.NewHeight(0, 110),
@@ -222,9 +226,9 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 
 	s.coordinator.CommitBlock(s.chainA, s.chainB)
 
-	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "quark")
+	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "ibc/DB6D78EC2E51C8B6AAF6DA64E660911491DC1A67C64DA69ED6945FE6DB552A5C")
 	s.Require().True(ok)
 
-	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "photon")
+	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "ibc/10180B5BF0701A3E34A5F818607D7E57ECD35CD9D673ABCCD174F157DFC06C0F")
 	s.Require().True(ok)
 }

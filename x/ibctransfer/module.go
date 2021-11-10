@@ -2,10 +2,10 @@ package ibctransfer
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfer "github.com/cosmos/ibc-go/modules/apps/transfer"
-	ibctransfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
-	ibcexported "github.com/cosmos/ibc-go/modules/core/exported"
+	ibctransfer "github.com/cosmos/ibc-go/v2/modules/apps/transfer"
+	ibctransfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
+	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
 
 	"github.com/umee-network/umee/x/ibctransfer/keeper"
 )
