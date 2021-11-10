@@ -8,7 +8,6 @@ touch /root/.hermes/config.toml
 
 # setup Hermes relayer configuration
 tee /root/.hermes/config.toml <<EOF
-
 [global]
 strategy = 'packets'
 filter = false
@@ -35,9 +34,9 @@ rpc_timeout = '10s'
 account_prefix = 'umee'
 key_name = 'val01-umee'
 store_prefix = 'ibc'
-max_gas = 3000000
+max_gas = 6000000
 gas_price = { price = 0.001, denom = 'photon' }
-gas_adjustment = 0.1
+gas_adjustment = 1.0
 clock_drift = '1m' # to accomdate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
@@ -51,9 +50,9 @@ rpc_timeout = '10s'
 account_prefix = 'cosmos'
 key_name = 'val01-gaia'
 store_prefix = 'ibc'
-max_gas = 3000000
+max_gas = 6000000
 gas_price = { price = 0.001, denom = 'stake' }
-gas_adjustment = 0.1
+gas_adjustment = 1.0
 clock_drift = '1m' # to accomdate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
