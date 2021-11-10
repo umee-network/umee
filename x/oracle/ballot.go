@@ -50,7 +50,7 @@ func (k Keeper) OrganizeBallotByDenom(
 		votes[denom] = ballot
 	}
 
-	return
+	return votes
 }
 
 // ClearBallots clears all tallied prevotes and votes from the store
