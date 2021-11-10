@@ -31,8 +31,8 @@ func (k *Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress common.Ad
 	// lastBatch may be nil if there are no existing batches, we only need
 	// to perform this check if a previous batch exists
 	if lastBatch != nil {
-		// this traverses the current tx pool for this token type and determines what
-		// fees a hypothetical batch would have if created
+		// Traverse the current tx pool for this token type and determine what fees
+		// a hypothetical batch would have, if created.
 		currentFees := k.GetBatchFeesByTokenType(ctx, contractAddress)
 		if currentFees == nil {
 			return nil, sdkerrors.Wrap(types.ErrInvalid, "error getting fees from tx pool")

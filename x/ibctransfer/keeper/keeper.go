@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	ibctransferkeeper "github.com/cosmos/ibc-go/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 
 	"github.com/umee-network/umee/x/ibctransfer/types"
 )
@@ -73,7 +73,7 @@ func (k Keeper) SendTransfer(
 			return sdkerrors.Wrap(ibctransfertypes.ErrTraceNotFound, hexHash)
 		}
 
-		k.TrackDenomMetadata(ctx, denomTrace.BaseDenom)
+		k.TrackDenomMetadata(ctx, denomTrace)
 	}
 
 	return nil
@@ -118,22 +118,25 @@ func (k Keeper) PostOnRecvPacket(
 		denomTrace = ibctransfertypes.ParseDenomTrace(prefixedDenom)
 	}
 
-	k.TrackDenomMetadata(ctx, denomTrace.BaseDenom)
+	k.TrackDenomMetadata(ctx, denomTrace)
 }
 
 // TrackDenomMetadata checks for the metadata existence of an IBC transferred
 // asset and if it does not exist, it attempts to add it. Note, we cannot infer
-// the exponent or any units so we default to zero. We also cannot infer any
-// display or client-side related values so we default to the base denomination.
-func (k Keeper) TrackDenomMetadata(ctx sdk.Context, baseDenom string) {
-	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, baseDenom); !ok {
+// the exponent or any units so we default to zero.
+func (k Keeper) TrackDenomMetadata(ctx sdk.Context, denomTrace ibctransfertypes.DenomTrace) {
+	ibcDenom := denomTrace.IBCDenom()
+
+	if _, ok := k.bankKeeper.GetDenomMetaData(ctx, ibcDenom); !ok {
 		denomMetadata := banktypes.Metadata{
 			Description: "IBC transferred asset",
-			Display:     baseDenom,
-			Base:        baseDenom,
+			Display:     denomTrace.BaseDenom,
+			Name:        denomTrace.BaseDenom,
+			Symbol:      denomTrace.BaseDenom,
+			Base:        ibcDenom,
 			DenomUnits: []*banktypes.DenomUnit{
 				{
-					Denom:    baseDenom,
+					Denom:    ibcDenom,
 					Exponent: 0,
 				},
 			},
