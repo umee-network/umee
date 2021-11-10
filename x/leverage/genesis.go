@@ -15,6 +15,8 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	for _, token := range genState.Registry {
 		k.SetRegisteredToken(ctx, token)
 	}
+
+	k.InitializeLastInterestTime(ctx)
 }
 
 // ExportGenesis returns the x/leverage module's exported genesis.

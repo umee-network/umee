@@ -13,4 +13,6 @@ var (
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 1103, "lending pool insufficient")
 	ErrInvalidRepayment        = sdkerrors.Register(ModuleName, 1104, "invalid repayment")
 	ErrInvalidAddress          = sdkerrors.Register(ModuleName, 1105, "invalid address")
+	ErrNegativeTotalBorrowed   = sdkerrors.Register(ModuleName, 1106, "total borrowed was negative")
+	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 1107, "invalid token utilization")
 )
