@@ -126,6 +126,8 @@ func (k Keeper) ApplyWhitelist(
 						// are all equal. However, it is not currently clear if these assets
 						// will be bridged across to Ethereum. If not, we can uncomment below.
 						//
+						// ref: https://github.com/umee-network/umee/issues/225
+						//
 						// Name:    fmt.Sprintf("%s United States Dollar", strings.ToUpper(display)),
 						// Symbol:  fmt.Sprintf("%sUSD", strings.ToUpper(display[:len(display)-1])),
 					},
