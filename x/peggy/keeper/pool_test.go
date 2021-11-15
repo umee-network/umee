@@ -134,10 +134,9 @@ func TestTotalBatchFeeInPool(t *testing.T) {
 	}
 
 	batchFees := input.PeggyKeeper.GetAllBatchFees(ctx)
-	/*
-		tokenFeeMap should be
-		map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
-		**/
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
 	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
 	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(6050)))
 
@@ -149,10 +148,9 @@ func TestTotalBatchFeeInPool(t *testing.T) {
 	t.Logf("___ response: %#v", r)
 
 	batchFees = input.PeggyKeeper.GetAllBatchFees(ctx)
-	/*
-		tokenFeeMap should be
-		map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
-		**/
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
 	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
 	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(6050)))
 
@@ -164,11 +162,10 @@ func TestTotalBatchFeeInPool(t *testing.T) {
 	t.Logf("___ response: %#v", r)
 
 	batchFees = input.PeggyKeeper.GetAllBatchFees(ctx)
-	/*
-		tokenFeeMap should be
-		map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:7039]
-		The lowest fee from the previous batch (11) will be removed so 6050-11+1000=7039
-		**/
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:7039]
+	// The lowest fee from the previous batch (11) will be removed so 6050-11+1000=7039
 	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
 	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(7039)))
 
