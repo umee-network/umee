@@ -126,19 +126,48 @@ func TestTotalBatchFeeInPool(t *testing.T) {
 	// create outgoing pool
 	for i := 0; i < 110; i++ {
 		amount := types.NewERC20Token(uint64(i+100), myToken2ContractAddr).PeggyCoin()
-		fee := types.NewERC20Token(uint64(5), myToken2ContractAddr).PeggyCoin()
+		// use increasing fee to check for ordering. Only the top 100 will make it to the batch.
+		fee := types.NewERC20Token(uint64(i+1), myToken2ContractAddr).PeggyCoin()
 		r, err := input.PeggyKeeper.AddToOutgoingPool(ctx, mySender, myReceiver, amount, fee)
 		require.NoError(t, err)
 		t.Logf("___ response: %#v", r)
 	}
 
 	batchFees := input.PeggyKeeper.GetAllBatchFees(ctx)
-	/*
-		tokenFeeMap should be
-		map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:500]
-		**/
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
 	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
-	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(500)))
+	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(6050)))
+
+	// Add a tx with a very low fee. This shouldn't make it to the batch. So the total fee should be remains unchanged.
+	amount := types.NewERC20Token(uint64(100), myToken2ContractAddr).PeggyCoin()
+	fee := types.NewERC20Token(uint64(1), myToken2ContractAddr).PeggyCoin()
+	r, err := input.PeggyKeeper.AddToOutgoingPool(ctx, mySender, myReceiver, amount, fee)
+	require.NoError(t, err)
+	t.Logf("___ response: %#v", r)
+
+	batchFees = input.PeggyKeeper.GetAllBatchFees(ctx)
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:6050]
+	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
+	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(6050)))
+
+	// Add a tx with a very high fee. This should make it to the batch. So the total fee should change.
+	amount = types.NewERC20Token(uint64(100), myToken2ContractAddr).PeggyCoin()
+	fee = types.NewERC20Token(uint64(1000), myToken2ContractAddr).PeggyCoin()
+	r, err = input.PeggyKeeper.AddToOutgoingPool(ctx, mySender, myReceiver, amount, fee)
+	require.NoError(t, err)
+	t.Logf("___ response: %#v", r)
+
+	batchFees = input.PeggyKeeper.GetAllBatchFees(ctx)
+
+	// tokenFeeMap should be
+	// map[0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5:8 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0:7039]
+	// The lowest fee from the previous batch (11) will be removed so 6050-11+1000=7039
+	assert.Equal(t, batchFees[0].TotalFees.BigInt(), big.NewInt(int64(8)))
+	assert.Equal(t, batchFees[1].TotalFees.BigInt(), big.NewInt(int64(7039)))
 
 }
 
