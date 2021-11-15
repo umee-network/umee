@@ -339,7 +339,7 @@ func (k *Keeper) GetAllBatchFees(ctx sdk.Context) (batchFees []*types.BatchFees)
 // CreateBatchFees iterates over the outgoing pool and creates batch token fee map
 func (k *Keeper) createBatchFees(ctx sdk.Context) map[common.Address]*types.BatchFees {
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.SecondIndexOutgoingTXFeeKey)
-	iter := prefixStore.Iterator(nil, nil)
+	iter := prefixStore.ReverseIterator(nil, nil)
 	defer iter.Close()
 
 	batchFeesMap := make(map[common.Address]*types.BatchFees)
