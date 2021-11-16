@@ -395,6 +395,7 @@ func New(
 	app.PeggyKeeper = peggykeeper.NewKeeper(
 		appCodec, keys[peggytypes.StoreKey],
 		app.GetSubspace(peggytypes.ModuleName),
+		app.AccountKeeper,
 		app.StakingKeeper,
 		app.BankKeeper,
 		app.SlashingKeeper,

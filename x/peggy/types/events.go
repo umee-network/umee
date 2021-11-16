@@ -25,4 +25,7 @@ const (
 	AttributeKeySetOperatorAddr        = "set_operator_address"
 	AttributeKeyBadEthSignature        = "bad_eth_signature"
 	AttributeKeyBadEthSignatureSubject = "bad_eth_signature_subject"
+	AttributeKeySetOrchestratorAddr    = "set_orchestrator_address"
+	AttributeKeySetEthereumAddr        = "set_ethereum_address"
+	AttributeKeyValidatorAddr          = "validator_address"
 )

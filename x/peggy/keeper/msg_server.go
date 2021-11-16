@@ -15,6 +15,8 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
+var _ types.MsgServer = msgServer{}
+
 type msgServer struct {
 	Keeper
 }
@@ -26,8 +28,6 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 		Keeper: keeper,
 	}
 }
-
-var _ types.MsgServer = msgServer{}
 
 func (k msgServer) SetOrchestratorAddresses(c context.Context, msg *types.MsgSetOrchestratorAddresses) (*types.MsgSetOrchestratorAddressesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
@@ -71,14 +71,14 @@ func (k msgServer) SetOrchestratorAddresses(c context.Context, msg *types.MsgSet
 
 	var nonce uint64
 	if valAccSeq > 0 {
+		// We decrement since we process the message after the ante-handler which
+		// increments the nonce.
 		nonce = valAccSeq - 1
 	}
 
 	signMsgBz := k.cdc.MustMarshal(&types.SetOrchestratorAddressesSignMsg{
 		ValidatorAddress: valAddr.String(),
-		// We decrement since we process the message after the ante-handler which
-		// increments the nonce.
-		Nonce: nonce,
+		Nonce:            nonce,
 	})
 
 	hash := ethcrypto.Keccak256Hash(signMsgBz)
@@ -86,24 +86,23 @@ func (k msgServer) SetOrchestratorAddresses(c context.Context, msg *types.MsgSet
 	if err = types.ValidateEthereumSignature(hash, msg.EthSignature, ethAddr); err != nil {
 		return nil, sdkerrors.Wrapf(
 			types.ErrSetOrchAddresses,
-			"failed to validate delegate keys signature for Ethereum address %X; %s ;%d",
+			"failed to validate delegate keys signature for Ethereum address %X; %s; %d",
 			ethAddr, err, nonce,
 		)
 	}
 
-	// k.SetOrchestratorValidatorAddress(ctx, valAddr, orchAddr)
-	// k.setValidatorEthereumAddress(ctx, valAddr, ethAddr)
-	// k.setEthereumOrchestratorAddress(ctx, ethAddr, orchAddr)
+	k.SetOrchestratorValidator(ctx, valAddr, orchAddr)
+	k.SetEthAddressForValidator(ctx, valAddr, ethAddr)
 
-	// ctx.EventManager().EmitEvent(
-	// 	sdk.NewEvent(
-	// 		sdk.EventTypeMessage,
-	// 		sdk.NewAttribute(sdk.AttributeKeyModule, msg.Type()),
-	// 		sdk.NewAttribute(types.AttributeKeySetOrchestratorAddr, orchAddr.String()),
-	// 		sdk.NewAttribute(types.AttributeKeySetEthereumAddr, ethAddr.Hex()),
-	// 		sdk.NewAttribute(types.AttributeKeyValidatorAddr, valAddr.String()),
-	// 	),
-	// )
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, msg.Type()),
+			sdk.NewAttribute(types.AttributeKeySetOrchestratorAddr, orchAddr.String()),
+			sdk.NewAttribute(types.AttributeKeySetEthereumAddr, ethAddr.Hex()),
+			sdk.NewAttribute(types.AttributeKeyValidatorAddr, valAddr.String()),
+		),
+	)
 
 	return &types.MsgSetOrchestratorAddressesResponse{}, nil
 }
