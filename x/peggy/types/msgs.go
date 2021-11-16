@@ -25,11 +25,12 @@ var (
 )
 
 // NewMsgSetOrchestratorAddress returns a new MsgSetOrchestratorAddresses
-func NewMsgSetOrchestratorAddress(sender, orchestrator sdk.AccAddress, ethAddr common.Address) *MsgSetOrchestratorAddresses {
+func NewMsgSetOrchestratorAddress(sender, orchestrator sdk.AccAddress, ethAddr common.Address, ethSig []byte) *MsgSetOrchestratorAddresses {
 	return &MsgSetOrchestratorAddresses{
 		Sender:       sender.String(),
 		Orchestrator: orchestrator.String(),
 		EthAddress:   ethAddr.Hex(),
+		EthSignature: ethSig,
 	}
 }
 
@@ -44,12 +45,19 @@ func (msg *MsgSetOrchestratorAddresses) ValidateBasic() (err error) {
 	if _, err = sdk.AccAddressFromBech32(msg.Sender); err != nil {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
 	}
+
 	if _, err = sdk.AccAddressFromBech32(msg.Orchestrator); err != nil {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Orchestrator)
 	}
+
 	if err := ValidateEthAddress(msg.EthAddress); err != nil {
 		return sdkerrors.Wrap(err, "ethereum address")
 	}
+
+	if len(msg.EthSignature) == 0 {
+		return ErrEmptyEthSig
+	}
+
 	return nil
 }
 
