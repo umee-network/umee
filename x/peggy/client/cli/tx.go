@@ -11,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	ethcmn "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 
@@ -169,24 +171,40 @@ func CmdRequestBatch() *cobra.Command {
 
 func CmdSetOrchestratorAddress() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-orchestrator-address [validator-acc-address] [orchestrator-acc-address] [ethereum-address]",
+		Use:   "set-orchestrator-address [validator-acc-address] [orchestrator-acc-address] [ethereum-address] [ethereum-signature]",
 		Short: "Allows validators to delegate their voting responsibilities to a given key.",
-		Args:  cobra.ExactArgs(3),
+		Long: `Set a validator's Ethereum and orchestrator addresses. The delegate
+key owner must sign over a binary Proto-encoded SetOrchestratorAddressesSignMsg
+message. The message contains the delegated key owner's address and current
+account nonce.`,
+		Args: cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
-			msg := types.MsgSetOrchestratorAddresses{
-				Sender:       args[0],
-				Orchestrator: args[1],
-				EthAddress:   args[2],
+
+			valAccAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
 			}
+
+			orcAddr, err := sdk.AccAddressFromBech32(args[1])
+			if err != nil {
+				return err
+			}
+
+			ethSig, err := hexutil.Decode(args[3])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgSetOrchestratorAddress(valAccAddr, orcAddr, ethcmn.HexToAddress(args[2]), ethSig)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
-			// Send it
-			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+
+			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), msg)
 		},
 	}
 
