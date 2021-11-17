@@ -230,7 +230,7 @@ manually, the operator must use the current account nonce.`,
 				queryClient := authtypes.NewQueryClient(clientCtx)
 				res, err := queryClient.Account(cmd.Context(), &authtypes.QueryAccountRequest{Address: valAccAddr.String()})
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to query account: %w", err)
 				}
 
 				var acc authtypes.AccountI
