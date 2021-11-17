@@ -18,5 +18,5 @@ var (
 	ErrSetOrchAddresses        = sdkerrors.Register(ModuleName, 12, "failed to set orchestrator addresses")
 	ErrSupplyOverflow          = sdkerrors.Register(ModuleName, 13, "supply cannot exceed max ERC20 value")
 	ErrInvalidERC20Event       = sdkerrors.Register(ModuleName, 14, "invalid ERC20 deployed event")
-	ErrEmptyEthSig             = sdkerrors.Register(ModuleName, 15, "empty Ethereum signature")
+	ErrInvalidEthSig           = sdkerrors.Register(ModuleName, 15, "invalid Ethereum signature")
 )

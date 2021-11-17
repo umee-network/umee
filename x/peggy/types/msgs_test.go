@@ -2,6 +2,7 @@ package types_test
 
 import (
 	"bytes"
+	"crypto/rand"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,6 +20,9 @@ func TestValidateMsgSetOrchestratorAddresses(t *testing.T) {
 		valAddress    sdk.AccAddress = bytes.Repeat([]byte{0x1}, v040auth.AddrLen)
 	)
 
+	ethSig := make([]byte, 65)
+	rand.Read(ethSig)
+
 	specs := map[string]struct {
 		srcCosmosAddr sdk.AccAddress
 		srcValAddr    sdk.AccAddress
@@ -30,32 +34,32 @@ func TestValidateMsgSetOrchestratorAddresses(t *testing.T) {
 			srcCosmosAddr: cosmosAddress,
 			srcValAddr:    valAddress,
 			srcETHAddr:    ethAddress,
-			srcETHSig:     []byte{0x01},
+			srcETHSig:     ethSig,
 		},
 		"empty validator address": {
 			srcETHAddr:    ethAddress,
 			srcCosmosAddr: cosmosAddress,
-			srcETHSig:     []byte{0x01},
+			srcETHSig:     ethSig,
 			expErr:        true,
 		},
 		"invalid account address": {
 			srcValAddr:    nil,
 			srcCosmosAddr: cosmosAddress,
 			srcETHAddr:    ethAddress,
-			srcETHSig:     []byte{0x01},
+			srcETHSig:     ethSig,
 			expErr:        true,
 		},
 		"empty cosmos address": {
 			srcValAddr: valAddress,
 			srcETHAddr: ethAddress,
-			srcETHSig:  []byte{0x01},
+			srcETHSig:  ethSig,
 			expErr:     true,
 		},
 		"invalid cosmos address": {
 			srcCosmosAddr: nil,
 			srcValAddr:    valAddress,
 			srcETHAddr:    ethAddress,
-			srcETHSig:     []byte{0x01},
+			srcETHSig:     ethSig,
 			expErr:        true,
 		},
 		"empty ethereum signature": {

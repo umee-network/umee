@@ -54,8 +54,8 @@ func (msg *MsgSetOrchestratorAddresses) ValidateBasic() (err error) {
 		return sdkerrors.Wrap(err, "ethereum address")
 	}
 
-	if len(msg.EthSignature) == 0 {
-		return ErrEmptyEthSig
+	if len(msg.EthSignature) < 65 {
+		return ErrInvalidEthSig
 	}
 
 	return nil
