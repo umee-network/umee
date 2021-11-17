@@ -212,17 +212,17 @@ manually, the operator must use the current account nonce.`,
 					return err
 				}
 			} else {
-				ethPK, err := cmd.Flags().GetString(flagEthPrivKey)
+				ethPrivKeyStr, err := cmd.Flags().GetString(flagEthPrivKey)
 				if err != nil {
 					return err
 				}
 
-				privKeyBz, err := hexutil.Decode(ethPK)
+				privKeyBz, err := hexutil.Decode(ethPrivKeyStr)
 				if err != nil {
 					return fmt.Errorf("failed to parse Ethereum private key: %w", err)
 				}
 
-				privKey, err := ethcrypto.ToECDSA(privKeyBz)
+				ethPrivKey, err := ethcrypto.ToECDSA(privKeyBz)
 				if err != nil {
 					return fmt.Errorf("failed to convert private key: %w", err)
 				}
@@ -243,7 +243,7 @@ manually, the operator must use the current account nonce.`,
 					Nonce:            acc.GetSequence(),
 				})
 
-				ethSig, err = types.NewEthereumSignature(ethcrypto.Keccak256Hash(signMsgBz), privKey)
+				ethSig, err = types.NewEthereumSignature(ethcrypto.Keccak256Hash(signMsgBz), ethPrivKey)
 				if err != nil {
 					return fmt.Errorf("failed to create Ethereum signature: %w", err)
 				}
