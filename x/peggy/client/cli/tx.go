@@ -20,9 +20,10 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
+// Flag constants
 const (
-	flagOrchEthSig = "orch-eth-sig"
-	flagEthPrivKey = "eth-priv-key"
+	FlagOrchEthSig = "orch-eth-sig"
+	FlagEthPrivKey = "eth-priv-key"
 )
 
 func GetTxCmd(storeKey string) *cobra.Command {
@@ -206,13 +207,13 @@ manually, the operator must use the current account nonce.`,
 			}
 
 			var ethSig []byte
-			if s, err := cmd.Flags().GetString(flagOrchEthSig); len(s) > 0 && err == nil {
+			if s, err := cmd.Flags().GetString(FlagOrchEthSig); len(s) > 0 && err == nil {
 				ethSig, err = hexutil.Decode(s)
 				if err != nil {
 					return err
 				}
 			} else {
-				ethPrivKeyStr, err := cmd.Flags().GetString(flagEthPrivKey)
+				ethPrivKeyStr, err := cmd.Flags().GetString(FlagEthPrivKey)
 				if err != nil {
 					return err
 				}
@@ -258,8 +259,8 @@ manually, the operator must use the current account nonce.`,
 		},
 	}
 
-	cmd.Flags().String(flagOrchEthSig, "", "The Ethereum signature used to set the Orchestrator addresses")
-	cmd.Flags().String(flagEthPrivKey, "", "The Ethereum private key used to set the Orchestrator addresses")
+	cmd.Flags().String(FlagOrchEthSig, "", "The Ethereum signature used to set the Orchestrator addresses")
+	cmd.Flags().String(FlagEthPrivKey, "", "The Ethereum private key used to set the Orchestrator addresses")
 
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
