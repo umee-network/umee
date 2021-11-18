@@ -104,7 +104,7 @@ func CmdUnsafeETHAddr() *cobra.Command {
 func CmdSendToEth() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send-to-eth [eth-dest-addr] [amount] [bridge-fee]",
-		Short: "Adds a new entry to the transaction pool to withdraw an amount from the Ethereum bridge contract",
+		Short: "Create a new un-batched tx in the tx pool to withdraw funds from Cosmos to Ethereum",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx, err := client.GetClientTxContext(cmd)
