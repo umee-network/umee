@@ -15,7 +15,7 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-func TestMsgServer_RequestBatch_InvalidOrchestrator(t *testing.T) {
+func TestMsgServer_RequestBatch_InvalidSender(t *testing.T) {
 	var (
 		umeeApp = app.Setup(t, false, 0)
 		ctx     = umeeApp.NewContext(
