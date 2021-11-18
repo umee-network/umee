@@ -25,8 +25,13 @@ func NewEthereumSignature(hash common.Hash, privateKey *ecdsa.PrivateKey) ([]byt
 // returns an error if the signature isn't valid
 func EthAddressFromSignature(hash common.Hash, signature []byte) (common.Address, error) {
 	if len(signature) < 65 {
-		return common.Address{}, sdkerrors.Wrap(ErrInvalid, "signature too short")
+		return common.Address{}, sdkerrors.Wrapf(ErrInvalid, "signature too short: %X", signature)
 	}
+
+	// Copy to avoid mutating signature slice by accident
+	var sigCopy = make([]byte, len(signature))
+	copy(sigCopy, signature)
+
 	// To verify signature
 	// - use crypto.SigToPub to get the public key
 	// - use crypto.PubkeyToAddress to get the address
@@ -41,33 +46,30 @@ func EthAddressFromSignature(hash common.Hash, signature []byte) (common.Address
 	//
 	// We could attempt to break or otherwise exit early on obviously invalid values for this
 	// byte, but that's a task best left to go-ethereum
-	if signature[64] == 27 || signature[64] == 28 {
-		signature[64] -= 27
+	if sigCopy[64] == 27 || sigCopy[64] == 28 {
+		sigCopy[64] -= 27
 	}
 
-	protectedHash := crypto.Keccak256Hash(append([]byte(signaturePrefix), hash[:]...))
+	protectedHash := crypto.Keccak256Hash(append([]byte(signaturePrefix), hash.Bytes()...))
 
-	pubkey, err := crypto.SigToPub(protectedHash.Bytes(), signature)
+	pubkey, err := crypto.SigToPub(protectedHash.Bytes(), sigCopy)
 	if err != nil {
-		return common.Address{}, sdkerrors.Wrap(err, "signature to public key")
+		return common.Address{}, sdkerrors.Wrapf(err, "signature to public key sig (%X) hash (%X)", sigCopy, hash)
 	}
 
-	addr := crypto.PubkeyToAddress(*pubkey)
-
-	return addr, nil
+	return crypto.PubkeyToAddress(*pubkey), nil
 }
 
-// ValidateEthereumSignature takes a message, an associated signature and public key and
-// returns an error if the signature isn't valid
+// ValidateEthereumSignature takes a message, an associated signature and address
+// and returns an error if the signature isn't valid.
 func ValidateEthereumSignature(hash common.Hash, signature []byte, ethAddress common.Address) error {
 	addr, err := EthAddressFromSignature(hash, signature)
-
 	if err != nil {
-		return sdkerrors.Wrap(err, "")
+		return err
 	}
 
 	if addr != ethAddress {
-		return sdkerrors.Wrap(ErrInvalid, "signature not matching")
+		return sdkerrors.Wrap(ErrInvalid, "signature mismatch")
 	}
 
 	return nil

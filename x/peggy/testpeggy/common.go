@@ -401,7 +401,15 @@ func CreateTestEnv(t *testing.T) TestInput {
 		getSubspace(paramsKeeper, slashingtypes.ModuleName).WithKeyTable(slashingtypes.ParamKeyTable()),
 	)
 
-	k := peggyKeeper.NewKeeper(marshaler, peggyKey, getSubspace(paramsKeeper, types.DefaultParamspace), stakingKeeper, bankKeeper, slashingKeeper)
+	k := peggyKeeper.NewKeeper(
+		marshaler,
+		peggyKey,
+		getSubspace(paramsKeeper, types.DefaultParamspace),
+		accountKeeper,
+		stakingKeeper,
+		bankKeeper,
+		slashingKeeper,
+	)
 
 	stakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(

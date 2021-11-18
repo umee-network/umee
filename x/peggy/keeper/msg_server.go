@@ -10,9 +10,12 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/umee-network/umee/x/peggy/types"
 )
+
+var _ types.MsgServer = msgServer{}
 
 type msgServer struct {
 	Keeper
@@ -26,42 +29,82 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	}
 }
 
-var _ types.MsgServer = msgServer{}
-
 func (k msgServer) SetOrchestratorAddresses(c context.Context, msg *types.MsgSetOrchestratorAddresses) (*types.MsgSetOrchestratorAddressesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	validatorAccountAddr, _ := sdk.AccAddressFromBech32(msg.Sender)
-	validatorAddr := sdk.ValAddress(validatorAccountAddr.Bytes())
 
-	// get orchestrator address if available. otherwise default to validator address.
-	var orchestratorAddr sdk.AccAddress
-	if msg.Orchestrator != "" {
-		orchestratorAddr, _ = sdk.AccAddressFromBech32(msg.Orchestrator)
-	} else {
-		orchestratorAddr = validatorAccountAddr
+	valAccAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, err
 	}
 
-	_, foundExistingOrchestratorKey := k.GetOrchestratorValidator(ctx, orchestratorAddr)
-	_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, validatorAddr)
+	// get orchestrator address if available, otherwise default to validator address
+	var orchAddr sdk.AccAddress
+	if msg.Orchestrator != "" {
+		orchAddr, err = sdk.AccAddressFromBech32(msg.Orchestrator)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		orchAddr = valAccAddr
+	}
+
+	valAddr := sdk.ValAddress(valAccAddr)
+	ethAddr := common.HexToAddress(msg.EthAddress)
 
 	// ensure that the validator exists
-	if k.Keeper.StakingKeeper.Validator(ctx, validatorAddr) == nil {
-		return nil, sdkerrors.Wrap(stakingtypes.ErrNoValidatorFound, validatorAddr.String())
-	} else if foundExistingOrchestratorKey || foundExistingEthAddress {
-		return nil, sdkerrors.Wrap(types.ErrResetDelegateKeys, validatorAddr.String())
+	if k.Keeper.StakingKeeper.Validator(ctx, valAddr) == nil {
+		return nil, sdkerrors.Wrap(stakingtypes.ErrNoValidatorFound, valAddr.String())
 	}
 
-	// set the orchestrator address
-	k.SetOrchestratorValidator(ctx, validatorAddr, orchestratorAddr)
-	// set the ethereum address
-	k.SetEthAddressForValidator(ctx, validatorAddr, common.HexToAddress(msg.EthAddress))
+	if _, ok := k.GetOrchestratorValidator(ctx, orchAddr); ok {
+		return nil, sdkerrors.Wrapf(types.ErrSetOrchAddresses, "orchestrator address %s in use", orchAddr)
+	}
 
-	ctx.EventManager().EmitTypedEvent(&types.EventSetOrchestratorAddresses{
-		SetOperatorAddress: orchestratorAddr,
+	if _, ok := k.GetValidatorByEthAddress(ctx, ethAddr); ok {
+		return nil, sdkerrors.Wrapf(types.ErrSetOrchAddresses, "ethereum address %s in use", ethAddr)
+	}
+
+	valAccSeq, err := k.accountKeeper.GetSequence(ctx, valAccAddr)
+	if err != nil {
+		return nil, sdkerrors.Wrapf(types.ErrSetOrchAddresses, "failed to get sequence for validator account %s", valAccAddr)
+	}
+
+	var nonce uint64
+	if valAccSeq > 0 {
+		// We decrement since we process the message after the ante-handler which
+		// increments the nonce.
+		nonce = valAccSeq - 1
+	}
+
+	signMsgBz := k.cdc.MustMarshal(&types.SetOrchestratorAddressesSignMsg{
+		ValidatorAddress: valAddr.String(),
+		Nonce:            nonce,
 	})
 
-	return &types.MsgSetOrchestratorAddressesResponse{}, nil
+	hash := ethcrypto.Keccak256Hash(signMsgBz)
 
+	if err = types.ValidateEthereumSignature(hash, msg.EthSignature, ethAddr); err != nil {
+		return nil, sdkerrors.Wrapf(
+			types.ErrSetOrchAddresses,
+			"failed to validate delegate keys signature for Ethereum address %X; %s; %d",
+			ethAddr, err, nonce,
+		)
+	}
+
+	k.SetOrchestratorValidator(ctx, valAddr, orchAddr)
+	k.SetEthAddressForValidator(ctx, valAddr, ethAddr)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, msg.Type()),
+			sdk.NewAttribute(types.AttributeKeySetOrchestratorAddr, orchAddr.String()),
+			sdk.NewAttribute(types.AttributeKeySetEthereumAddr, ethAddr.Hex()),
+			sdk.NewAttribute(types.AttributeKeyValidatorAddr, valAddr.String()),
+		),
+	)
+
+	return &types.MsgSetOrchestratorAddressesResponse{}, nil
 }
 
 // ValsetConfirm handles MsgValsetConfirm

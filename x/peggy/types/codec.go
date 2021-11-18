@@ -61,5 +61,5 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&IDSet{}, "peggy/IDSet", nil)
 	cdc.RegisterConcrete(&Attestation{}, "peggy/Attestation", nil)
 	cdc.RegisterConcrete(&MsgSubmitBadSignatureEvidence{}, "peggy/MsgSubmitBadSignatureEvidence", nil)
-
+	cdc.RegisterConcrete(&SetOrchestratorAddressesSignMsg{}, "peggy/SetOrchestratorAddressesSignMsg", nil)
 }

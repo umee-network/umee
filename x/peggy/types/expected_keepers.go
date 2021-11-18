@@ -9,6 +9,12 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
+// AccountKeeper defines the interface contract required for account
+// functionality.
+type AccountKeeper interface {
+	GetSequence(ctx sdk.Context, addr sdk.AccAddress) (uint64, error)
+}
+
 // StakingKeeper defines the expected staking keeper methods
 type StakingKeeper interface {
 	GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator
