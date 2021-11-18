@@ -161,7 +161,7 @@ func CmdRequestBatch() *cobra.Command {
 
 func CmdSetOrchestratorAddress() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-orchestrator-address [validator-acc-address] [orchestrator-acc-address] [ethereum-address]",
+		Use:   "set-orchestrator-address [validator-acc-addr] [orchestrator-addr] [ethereum-addr]",
 		Short: "Allows validators to delegate their voting responsibilities to a given key.",
 		Long: `Set a validator's Ethereum and orchestrator addresses. The delegate
 key owner must sign over a binary Proto-encoded SetOrchestratorAddressesSignMsg
