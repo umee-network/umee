@@ -191,12 +191,11 @@ private key via the --eth-priv-key flag. If generating the Ethereum signature
 manually, the operator must use the current account nonce.`,
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
 			}
 
-			valAccAddr, err := sdk.AccAddressFromBech32(args[0])
+			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
@@ -205,6 +204,8 @@ manually, the operator must use the current account nonce.`,
 			if err != nil {
 				return err
 			}
+
+			valAccAddr := clientCtx.GetFromAddress()
 
 			var ethSig []byte
 			if s, err := cmd.Flags().GetString(FlagOrchEthSig); len(s) > 0 && err == nil {

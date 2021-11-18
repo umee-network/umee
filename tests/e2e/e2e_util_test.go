@@ -143,7 +143,6 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 			valAddr.String(),
 			s.chain.validators[valIdx].ethereumKey.address,
 			fmt.Sprintf("--%s=%s", peggycli.FlagEthPrivKey, s.chain.validators[valIdx].ethereumKey.privateKey),
-			fmt.Sprintf("--%s=%s", flags.FlagFrom, s.chain.validators[valIdx].keyInfo.GetName()),
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
