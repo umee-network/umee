@@ -174,12 +174,22 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 	return &types.MsgSendToEthResponse{}, nil
 }
 
-// RequestBatch handles MsgRequestBatch
+// RequestBatch implements the message handler for the MsgRequestBatch message.
 func (k msgServer) RequestBatch(c context.Context, msg *types.MsgRequestBatch) (*types.MsgRequestBatchResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 
-	// Check if the denom is a peggy coin, if not, check if there is a deployed ERC20 representing it.
-	// If not, error out
+	orchAddr, err := sdk.AccAddressFromBech32(msg.Orchestrator)
+	if err != nil {
+		return nil, err
+	}
+
+	// require that batches only be made by validator orchestrators
+	if _, ok := k.GetOrchestratorValidator(ctx, orchAddr); !ok {
+		return nil, sdkerrors.Wrapf(types.ErrInvalid, "%s is not an orchestrator", orchAddr)
+	}
+
+	// Check if the denom is a peggy coin, if not, check if there is a deployed
+	// ERC20 representing it. Otherwise, we return an error.
 	_, tokenContract, err := k.DenomToERC20Lookup(ctx, msg.Denom)
 	if err != nil {
 		return nil, err
