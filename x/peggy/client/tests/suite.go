@@ -161,3 +161,7 @@ func (s *IntegrationTestSuite) TestSetOrchestratorAddress() {
 		})
 	}
 }
+
+func (s *IntegrationTestSuite) TestDenomToERC20_NonExistant() {
+
+}
