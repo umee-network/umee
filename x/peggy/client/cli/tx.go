@@ -29,7 +29,7 @@ const (
 func GetTxCmd(storeKey string) *cobra.Command {
 	peggyTxCmd := &cobra.Command{
 		Use:                        types.ModuleName,
-		Short:                      "Peggy transaction subcommands",
+		Short:                      "Transaction commands for the peggy module",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -103,7 +103,7 @@ func CmdUnsafeETHAddr() *cobra.Command {
 
 func CmdSendToEth() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "send-to-eth [eth-dest] [amount] [bridge-fee]",
+		Use:   "send-to-eth [eth-dest-addr] [amount] [bridge-fee]",
 		Short: "Adds a new entry to the transaction pool to withdraw an amount from the Ethereum bridge contract",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -111,33 +111,23 @@ func CmdSendToEth() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			cosmosAddr := cliCtx.GetFromAddress()
 
-			amount, err := sdk.ParseCoinsNormalized(args[1])
+			amount, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
-				return sdkerrors.Wrap(err, "amount")
+				return sdkerrors.Wrap(err, "invalid amount")
 			}
-			bridgeFee, err := sdk.ParseCoinsNormalized(args[2])
+
+			bridgeFee, err := sdk.ParseCoinNormalized(args[2])
 			if err != nil {
-				return sdkerrors.Wrap(err, "bridge fee")
+				return sdkerrors.Wrap(err, "invalid bridge fee")
 			}
 
-			if len(amount) > 1 || len(bridgeFee) > 1 {
-				return fmt.Errorf("coin amounts too long, expecting just 1 coin amount for both amount and bridgeFee")
-			}
-
-			// Make the message
-			msg := types.MsgSendToEth{
-				Sender:    cosmosAddr.String(),
-				EthDest:   args[0],
-				Amount:    amount[0],
-				BridgeFee: bridgeFee[0],
-			}
+			msg := types.NewMsgSendToEth(cliCtx.GetFromAddress(), args[0], amount, bridgeFee)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
-			// Send it
-			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+
+			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), msg)
 		},
 	}
 
