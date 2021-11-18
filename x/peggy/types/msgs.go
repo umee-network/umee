@@ -171,10 +171,10 @@ func (msg MsgSendToEth) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{acc}
 }
 
-// NewMsgRequestBatch returns a new msgRequestBatch
-func NewMsgRequestBatch(orchestrator sdk.AccAddress) *MsgRequestBatch {
+func NewMsgRequestBatch(orchestrator sdk.AccAddress, denom string) *MsgRequestBatch {
 	return &MsgRequestBatch{
 		Orchestrator: orchestrator.String(),
+		Denom:        denom,
 	}
 }
 

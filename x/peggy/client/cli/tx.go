@@ -138,27 +138,20 @@ func CmdSendToEth() *cobra.Command {
 func CmdRequestBatch() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "build-batch [denom]",
-		Short: "Build a new batch on the cosmos side for pooled withdrawal transactions",
+		Short: "Build a new tx batch for pooled Cosmos withdrawal transactions",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
-			cosmosAddr := cliCtx.GetFromAddress()
 
-			denom := args[0]
-
-			msg := types.MsgRequestBatch{
-				Orchestrator: cosmosAddr.String(),
-				Denom:        denom,
-			}
-
+			msg := types.NewMsgRequestBatch(cliCtx.GetFromAddress(), args[0])
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
-			// Send it
-			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+
+			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), msg)
 		},
 	}
 
