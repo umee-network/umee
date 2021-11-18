@@ -15,6 +15,29 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
+func TestMsgServer_RequestBatch_InvalidSender(t *testing.T) {
+	var (
+		umeeApp = app.Setup(t, false, 0)
+		ctx     = umeeApp.NewContext(
+			false,
+			tmproto.Header{
+				Height: 1234567,
+				Time:   time.Date(2020, time.April, 22, 12, 0, 0, 0, time.UTC),
+			},
+		)
+
+		orcAddr1, _ = sdk.AccAddressFromBech32("umee1dkfhxs87adz9ll6jfr0jr5jet6u8tjaqx4z8rg")
+	)
+
+	msgServer := keeper.NewMsgServerImpl(umeeApp.PeggyKeeper)
+
+	// We have not registered a validator orchestrator yet, so the message should
+	// fail.
+	msg := &types.MsgRequestBatch{Orchestrator: orcAddr1.String()}
+	_, err := msgServer.RequestBatch(sdk.WrapSDKContext(ctx), msg)
+	require.Error(t, err)
+}
+
 func TestMsgServer_SetOrchestratorAddresses(t *testing.T) {
 	ethPrivKey1, err := ethcrypto.GenerateKey()
 	require.NoError(t, err)
