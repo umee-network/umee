@@ -31,6 +31,8 @@ func TestMsgServer_RequestBatch_InvalidSender(t *testing.T) {
 
 	msgServer := keeper.NewMsgServerImpl(umeeApp.PeggyKeeper)
 
+	// We have not registered a validator orchestrator yet, so the message should
+	// fail.
 	msg := &types.MsgRequestBatch{Orchestrator: orcAddr1.String()}
 	_, err := msgServer.RequestBatch(sdk.WrapSDKContext(ctx), msg)
 	require.Error(t, err)
