@@ -24,14 +24,19 @@ func GetQueryCmd() *cobra.Command {
 		CmdGetValsetConfirm(),
 		CmdGetPendingValsetRequest(),
 		CmdGetPendingOutgoingTXBatchRequest(),
+		CmdERC20ToDenom(),
+		CmdDenomToERC20(),
+		// TODO: Determine if the following sub-commands need to be implemented and
+		// enabled.
+		//
+		// ref: https://github.com/umee-network/umee/issues/232
+		//
 		// CmdGetAllOutgoingTXBatchRequest(),
 		// CmdGetOutgoingTXBatchByNonceRequest(),
 		// CmdGetAllAttestationsRequest(),
 		// CmdGetAttestationRequest(),
-		QueryObserved(),
-		QueryApproved(),
-		CmdERC20ToDenom(),
-		CmdDenomToERC20(),
+		// QueryObserved(),
+		// QueryApproved(),
 	}...)
 
 	return peggyQueryCmd
@@ -40,7 +45,7 @@ func GetQueryCmd() *cobra.Command {
 func QueryObserved() *cobra.Command {
 	testingTxCmd := &cobra.Command{
 		Use:                        "observed",
-		Short:                      "observed ETH events",
+		Short:                      "query for observed Ethereum events",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -57,7 +62,7 @@ func QueryObserved() *cobra.Command {
 func QueryApproved() *cobra.Command {
 	testingTxCmd := &cobra.Command{
 		Use:                        "approved",
-		Short:                      "approved cosmos operation",
+		Short:                      "query for approved Cosmos operations",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -80,9 +85,7 @@ func CmdGetCurrentValset() *cobra.Command {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryCurrentValsetRequest{}
-
-			res, err := queryClient.CurrentValset(cmd.Context(), req)
+			res, err := queryClient.CurrentValset(cmd.Context(), &types.QueryCurrentValsetRequest{})
 			if err != nil {
 				return err
 			}
@@ -128,8 +131,8 @@ func CmdGetValsetRequest() *cobra.Command {
 
 func CmdGetValsetConfirm() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "valset-confirm [nonce] [bech32 validator address]",
-		Short: "Get valset confirmation with a particular nonce from a particular validator",
+		Use:   "valset-confirm [nonce] [validator-addr]",
+		Short: "Get the valset confirmation with a particular nonce and validator tuple",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -160,7 +163,7 @@ func CmdGetValsetConfirm() *cobra.Command {
 
 func CmdGetPendingValsetRequest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "pending-valset-request [bech32 validator address]",
+		Use:   "pending-valset-request [validator-addr]",
 		Short: "Get the latest valset request which has not been signed by a particular validator",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -186,8 +189,8 @@ func CmdGetPendingValsetRequest() *cobra.Command {
 
 func CmdGetPendingOutgoingTXBatchRequest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "pending-batch-request [bech32 validator address]",
-		Short: "Get the latest outgoing TX batch request which has not been signed by a particular validator",
+		Use:   "pending-batch-request [validator-addr]",
+		Short: "Get the latest outgoing tx batch request which has not been signed by a particular validator",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -212,7 +215,7 @@ func CmdGetPendingOutgoingTXBatchRequest() *cobra.Command {
 
 func CmdERC20ToDenom() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "erc20-to-denom [token-contract-address]",
+		Use:   "erc20-to-denom [token-contract-addr]",
 		Short: "Get the denomination that maps to an ERC20 token contract",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
