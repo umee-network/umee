@@ -44,7 +44,7 @@ func (k Keeper) OrganizeBallotByDenom(
 
 	k.IterateAggregateExchangeRateVotes(ctx, aggregateHandler)
 
-	// sort created ballot
+	// sort created ballots
 	for denom, ballot := range votes {
 		sort.Sort(ballot)
 		votes[denom] = ballot
@@ -58,8 +58,8 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	// clear all aggregate prevotes
 	k.IterateAggregateExchangeRatePrevotes(
 		ctx,
-		func(voterAddr sdk.ValAddress, aggregatePrevote types.AggregateExchangeRatePrevote) bool {
-			if ctx.BlockHeight() > int64(aggregatePrevote.SubmitBlock+votePeriod) {
+		func(voterAddr sdk.ValAddress, aggPrevote types.AggregateExchangeRatePrevote) bool {
+			if ctx.BlockHeight() > int64(aggPrevote.SubmitBlock+votePeriod) {
 				k.DeleteAggregateExchangeRatePrevote(ctx, voterAddr)
 			}
 
@@ -70,7 +70,7 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	// clear all aggregate votes
 	k.IterateAggregateExchangeRateVotes(
 		ctx,
-		func(voterAddr sdk.ValAddress, aggregateVote types.AggregateExchangeRateVote) bool {
+		func(voterAddr sdk.ValAddress, _ types.AggregateExchangeRateVote) bool {
 			k.DeleteAggregateExchangeRateVote(ctx, voterAddr)
 			return false
 		},
