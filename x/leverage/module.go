@@ -124,7 +124,7 @@ func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 // LegacyQuerierHandler returns a no-op legacy querier.
 func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, nil
+		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
 	}
 }
 
