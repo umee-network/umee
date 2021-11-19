@@ -60,8 +60,47 @@ func NewKrakenProviderWithTimeout(timeout time.Duration) *KrakenProvider {
 	}
 }
 
+var translations = map[string]string{"ATOMUSDT": "ATOMUSD"}
+
+func tickerTranslator(tickers []string) []string {
+	// Translate kracken asset pairs
+	// (USDT -> USD)
+	translatedTickers := make([]string, len(tickers))
+	for k, t := range tickers {
+		if val, ok := translations[t]; ok {
+			translatedTickers[k] = val
+		}
+	}
+	return translatedTickers
+}
+
+var pricesTranslations = map[string]string{"ATOMUSD": "ATOMUSDT"}
+
+// Takes in the kraken-specific object, spits out the
+// Universal info
+func pricesTranslator(tickerPrices map[string]sdk.Dec) map[string]sdk.Dec {
+
+	translatedTickerPrices := make(map[string]sdk.Dec, len(tickerPrices))
+
+	for k, v := range tickerPrices {
+
+		if val, ok := pricesTranslations[k]; ok {
+			//do something here
+			translatedTickerPrices[val] = v
+		} else {
+			translatedTickerPrices[k] = v
+		}
+	}
+
+	return translatedTickerPrices
+
+}
+
 func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, error) {
-	path := fmt.Sprintf("%s/0/public/Ticker?pair=%s", p.baseURL, strings.Join(tickers, ","))
+
+	translatedTickers := tickerTranslator(tickers)
+
+	path := fmt.Sprintf("%s/0/public/Ticker?pair=%s", p.baseURL, strings.Join(translatedTickers, ","))
 
 	resp, err := p.client.Get(path)
 	if err != nil {
@@ -87,12 +126,12 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 	if len(tickers) != len(tickerResp.Result) {
 		return nil, fmt.Errorf(
 			"received unexpected number of tickers; expected: %d, got: %d",
-			len(tickers), len(tickerResp.Result),
+			len(translatedTickers), len(tickerResp.Result),
 		)
 	}
 
-	tickerPrices := make(map[string]sdk.Dec, len(tickers))
-	for _, t := range tickers {
+	tickerPrices := make(map[string]sdk.Dec, len(translatedTickers))
+	for _, t := range translatedTickers {
 		// TODO: We may need to transform 't' prior to looking it up in the response
 		// as Kraken may represent currencies differently.
 		pair, ok := tickerResp.Result[t]
@@ -107,6 +146,8 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 
 		tickerPrices[t] = closePrice
 	}
+
+	tickerPrices = pricesTranslator(tickerPrices)
 
 	return tickerPrices, nil
 }

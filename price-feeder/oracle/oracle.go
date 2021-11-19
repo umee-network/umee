@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 )
 
@@ -33,6 +33,73 @@ func (o *Oracle) Stop() {
 	<-o.closer.Done()
 }
 
+var denoms = []string{"ATOMUSDT"}
+
+// Should return a prices map that we can set
+// The oracle to. Needs to touch multiple providers,
+// And then average out.
+func GetPrices() map[string]sdk.Dec {
+
+	binanceProvider := provider.NewBinanceProvider()
+	krakenProvider := provider.NewKrakenProvider()
+
+	wg := new(sync.WaitGroup)
+
+	wg.Add(1)
+
+	binancePrices, err := binanceProvider.GetTickerPrices(denoms...)
+
+	// TODO : Fail silently when providers fail
+
+	if binancePrices == nil || err != nil {
+		panic("Unable to get binance prices")
+	}
+
+	wg.Done()
+
+	wg.Add(1)
+
+	krackenPrices, bigErr := krakenProvider.GetTickerPrices(denoms...)
+
+	if krackenPrices == nil || bigErr != nil {
+		panic("Unable to get kracken prices")
+	}
+
+	wg.Done()
+
+	wg.Wait()
+
+	// Create new map for averages
+
+	var averages = make(map[string]sdk.Dec, len(denoms))
+
+	half := sdk.MustNewDecFromStr("0.50")
+
+	for _, v := range denoms {
+		averages[v] = sdk.NewDec(0)
+		averages[v].Add(binancePrices[v])
+		averages[v].Add(krackenPrices[v])
+		averages[v].Mul(half)
+	}
+
+	return averages
+
+}
+
+func (o *Oracle) tick() {
+
+	pricesArray := GetPrices()
+
+	if pricesArray == nil {
+		panic("Unable to get prices")
+	}
+
+	o.prices = pricesArray
+
+	// TODO : Use multiple providers, pre-vote, and vote
+
+}
+
 func (o *Oracle) Start(ctx context.Context) {
 	for {
 		select {
@@ -41,7 +108,11 @@ func (o *Oracle) Start(ctx context.Context) {
 			return
 
 		default:
-			// TODO: ...
+			// TODO : Finish main loop
+			// ref : https://github.com/umee-network/umee/issues/178
+			o.tick()
+			time.Sleep(10 * time.Millisecond)
+
 		}
 	}
 }
@@ -61,8 +132,10 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	o.mtx.RLock()
 	defer o.mtx.RUnlock()
 
+	// Creates a new array for the prices in the oracle
 	prices := make(map[string]sdk.Dec, len(o.prices))
 	for k, v := range o.prices {
+		// Fills in the prices with each value in the oracle
 		prices[k] = v
 	}
 

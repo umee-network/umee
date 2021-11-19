@@ -31,10 +31,10 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		p.client = server.Client()
 		p.baseURL = server.URL
 
-		prices, err := p.GetTickerPrices("ATOMUSD")
+		prices, err := p.GetTickerPrices("ATOMUSDT")
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
-		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"])
+		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSDT"])
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
