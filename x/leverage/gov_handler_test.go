@@ -38,7 +38,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			Description: "test",
 			Registry: []types.Token{
 				{BaseDenom: "uumee"},
-				{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("2.0")},
+				{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.02")},
 			},
 		}
 		require.NoError(t, h(ctx, p))
