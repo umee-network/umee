@@ -55,6 +55,6 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		token, err := k.GetRegisteredToken(ctx, "uatom")
 		require.NoError(t, err)
-		require.Equal(t, "2.000000000000000000", token.BaseBorrowRate.String())
+		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
 	})
 }
