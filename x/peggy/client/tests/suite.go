@@ -17,8 +17,10 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/umee-network/umee/x/peggy/client/cli"
+	"github.com/umee-network/umee/x/peggy/types"
 )
 
 type IntegrationTestSuite struct {
@@ -148,16 +150,52 @@ func (s *IntegrationTestSuite) TestSetOrchestratorAddress() {
 		s.Run(tc.name, func() {
 			clientCtx := val.ClientCtx
 
-			bz, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdSetOrchestratorAddress(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdSetOrchestratorAddress(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
 			} else {
 				s.Require().NoError(err)
-				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(bz.Bytes(), tc.respType), bz.String())
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
 
 				txResp := tc.respType.(*sdk.TxResponse)
 				s.Require().Equal(tc.expectedCode, txResp.Code)
 			}
 		})
 	}
+}
+
+func (s *IntegrationTestSuite) TestDenomToERC20() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	s.Run("non_existent_denom", func() {
+		args := []string{
+			"foo",
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		}
+
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdDenomToERC20(), args)
+		s.Require().Error(err)
+		s.Require().Contains(out.String(), "denom (foo) not a peggy voucher coin")
+	})
+}
+
+func (s *IntegrationTestSuite) TestERC20ToDenom() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	s.Run("non_existent_token_contract", func() {
+		args := []string{
+			"0x000000",
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		}
+
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdERC20ToDenom(), args)
+		s.Require().NoError(err)
+
+		var resp types.QueryERC20ToDenomResponse
+		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+		s.Require().Equal("peggy0x0000000000000000000000000000000000000000", resp.Denom)
+		s.Require().False(resp.CosmosOriginated)
+	})
 }

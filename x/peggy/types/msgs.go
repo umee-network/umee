@@ -117,7 +117,6 @@ func (msg *MsgValsetConfirm) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{acc}
 }
 
-// NewMsgSendToEth returns a new msgSendToEth
 func NewMsgSendToEth(sender sdk.AccAddress, destAddress string, send sdk.Coin, bridgeFee sdk.Coin) *MsgSendToEth {
 	return &MsgSendToEth{
 		Sender:    sender.String(),
@@ -172,10 +171,10 @@ func (msg MsgSendToEth) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{acc}
 }
 
-// NewMsgRequestBatch returns a new msgRequestBatch
-func NewMsgRequestBatch(orchestrator sdk.AccAddress) *MsgRequestBatch {
+func NewMsgRequestBatch(orchestrator sdk.AccAddress, denom string) *MsgRequestBatch {
 	return &MsgRequestBatch{
 		Orchestrator: orchestrator.String(),
+		Denom:        denom,
 	}
 }
 
