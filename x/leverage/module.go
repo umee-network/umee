@@ -121,15 +121,17 @@ func (am AppModule) Route() sdk.Route {
 // QuerierRoute returns the x/leverage module's query routing key.
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
-// LegacyQuerierHandler returns the x/leverage module's Querier.
+// LegacyQuerierHandler returns a no-op legacy querier.
 func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return keeper.NewQuerier(am.keeper, legacyQuerierCdc)
+	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
+		return nil, nil
+	}
 }
 
 // RegisterServices registers gRPC services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
+	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
 // RegisterInvariants registers the x/leverage module's invariants.
