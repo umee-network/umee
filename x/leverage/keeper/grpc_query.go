@@ -21,7 +21,11 @@ func NewQuerier(k Keeper) Querier {
 	return Querier{Keeper: k}
 }
 
-func (q Querier) RegisteredTokens(goCtx context.Context, req *types.QueryRegisteredTokens) (*types.QueryRegisteredTokensResponse, error) {
+func (q Querier) RegisteredTokens(
+	goCtx context.Context,
+	req *types.QueryRegisteredTokens,
+) (*types.QueryRegisteredTokensResponse, error) {
+
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
