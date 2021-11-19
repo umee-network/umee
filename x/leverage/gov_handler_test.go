@@ -31,7 +31,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 	t.Run("valid proposal", func(t *testing.T) {
 		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uosmo"})
-		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("5.0")})
+		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.05")})
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
