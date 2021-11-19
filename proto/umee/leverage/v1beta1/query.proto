@@ -2,9 +2,25 @@ syntax = "proto3";
 package umeenetwork.umee.leverage.v1beta1;
 
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "umee/leverage/v1beta1/leverage.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
 // Query defines the gRPC querier service.
-service Query {}
+service Query {
+  // RegisteredTokens queries for all the registered tokens.
+  rpc RegisteredTokens(QueryRegisteredTokens) returns (QueryRegisteredTokensResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/registered_tokens";
+  }
+}
+
+// QueryRegisteredTokens defines the request structure for the RegisteredTokens
+// gRPC service handler.
+message QueryRegisteredTokens {}
+
+// QueryRegisteredTokensResponse defines the response structure for the
+// RegisteredTokens gRPC service handler.
+message QueryRegisteredTokensResponse {
+  repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
