@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -22,6 +23,7 @@ func NewQuerier(k Keeper) Querier {
 }
 
 func (q Querier) RegisteredTokens(goCtx context.Context, req *types.QueryRegisteredTokens) (*types.QueryRegisteredTokensResponse, error) {
+	fmt.Println("REQ:", req == nil)
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}

@@ -1,5 +1,37 @@
 package keeper_test
 
-func (suite *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
+import (
+	"context"
 
+	"github.com/umee-network/umee/x/leverage/types"
+)
+
+func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
+	testCases := []struct {
+		name         string
+		req          *types.QueryRegisteredTokens
+		registrySize int
+		expectErr    bool
+	}{
+		{
+			name:         "valid request",
+			req:          &types.QueryRegisteredTokens{},
+			registrySize: 1,
+			expectErr:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.Run(tc.name, func() {
+			resp, err := s.queryClient.RegisteredTokens(context.Background(), tc.req)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().Len(resp.Registry, tc.registrySize)
+			}
+		})
+	}
 }
