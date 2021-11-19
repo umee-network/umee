@@ -20,6 +20,7 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/umee-network/umee/x/peggy/client/cli"
+	"github.com/umee-network/umee/x/peggy/types"
 )
 
 type IntegrationTestSuite struct {
@@ -176,5 +177,25 @@ func (s *IntegrationTestSuite) TestDenomToERC20() {
 		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdDenomToERC20(), args)
 		s.Require().Error(err)
 		s.Require().Contains(out.String(), "denom (foo) not a peggy voucher coin")
+	})
+}
+
+func (s *IntegrationTestSuite) TestERC20ToDenom() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	s.Run("non_existent_token_contract", func() {
+		args := []string{
+			"0x000000",
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		}
+
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.CmdERC20ToDenom(), args)
+		s.Require().NoError(err)
+
+		var resp types.QueryERC20ToDenomResponse
+		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+		s.Require().Equal("peggy0x0000000000000000000000000000000000000000", resp.Denom)
+		s.Require().False(resp.CosmosOriginated)
 	})
 }
