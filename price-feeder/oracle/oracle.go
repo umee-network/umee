@@ -76,8 +76,7 @@ func GetPrices() map[string]sdk.Dec {
 	half := sdk.MustNewDecFromStr("0.50")
 
 	for _, v := range denoms {
-		averages[v] = sdk.NewDec(0)
-		averages[v].Add(binancePrices[v])
+		averages[v] = binancePrices[v]
 		averages[v].Add(krackenPrices[v])
 		averages[v].Mul(half)
 	}
@@ -96,8 +95,6 @@ func (o *Oracle) tick() {
 
 	o.prices = pricesArray
 
-	// TODO : Use multiple providers, pre-vote, and vote
-
 }
 
 func (o *Oracle) Start(ctx context.Context) {
@@ -111,6 +108,7 @@ func (o *Oracle) Start(ctx context.Context) {
 			// TODO : Finish main loop
 			// ref : https://github.com/umee-network/umee/issues/178
 			o.tick()
+			o.lastPriceSyncTS = time.Now()
 			time.Sleep(10 * time.Millisecond)
 
 		}

@@ -41,9 +41,9 @@ func NewKeeper(
 ) Keeper {
 
 	// ensure oracle module account is set
-	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
+	/*if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
-	}
+	}*/
 
 	// set KeyTable if it has not already been set
 	if !paramspace.HasKeyTable() {

@@ -94,6 +94,9 @@ import (
 	"github.com/umee-network/umee/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 	"github.com/umee-network/umee/x/peggy"
 	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
@@ -147,6 +150,7 @@ var (
 		vesting.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		peggy.AppModuleBasic{},
+		oracle.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -213,7 +217,7 @@ type UmeeApp struct {
 	AuthzKeeper      authzkeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
 	PeggyKeeper      peggykeeper.Keeper
-
+	OracleKeeper     oraclekeeper.Keeper
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
@@ -253,6 +257,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey, peggytypes.StoreKey,
+		oracletypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -400,6 +405,17 @@ func New(
 		app.BankKeeper,
 		app.SlashingKeeper,
 	)
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec, keys[oracletypes.StoreKey],
+		app.GetSubspace(oracletypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.DistrKeeper,
+		app.StakingKeeper,
+		distrtypes.ModuleName,
+	)
+
+	oracleModule := oracle.NewAppModule(appCodec, app.OracleKeeper)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
@@ -481,6 +497,7 @@ func New(
 		transferModule,
 		leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
+		oracleModule,
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -533,6 +550,7 @@ func New(
 		feegrant.ModuleName,
 		leveragetypes.ModuleName,
 		peggytypes.ModuleName,
+		oracletypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -751,6 +769,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(peggytypes.ModuleName)
+	paramsKeeper.Subspace(oracletypes.ModuleName)
 
 	return paramsKeeper
 }
