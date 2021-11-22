@@ -61,3 +61,37 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 	var resp types.QueryParamsResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
+
+func (s *IntegrationTestSuite) TestQueryBorrowed() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	s.Run("get_all_borrowed", func() {
+		// We need to setup borrowing first prior to testing this out.
+		flags := []string{
+			val.Address.String(),
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		}
+
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowed(), flags)
+		s.Require().NoError(err)
+
+		var resp types.QueryBorrowedResponse
+		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	})
+
+	s.Run("get_denom_borrowed", func() {
+		// We need to setup borrowing first prior to testing this out.
+		flags := []string{
+			val.Address.String(),
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+		}
+
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowed(), flags)
+		s.Require().NoError(err)
+
+		var resp types.QueryBorrowedResponse
+		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	})
+}
