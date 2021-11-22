@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
+	"github.com/umee-network/umee/price-feeder/oracle/broadcast"
 	"github.com/umee-network/umee/price-feeder/router"
 	"golang.org/x/sync/errgroup"
 )
@@ -30,8 +31,8 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "price-feeder [config-file]",
-	Args:  cobra.ExactArgs(1),
+	Use:   "price-feeder [config-file] [validator] [from] [chain-id] [keyring-backend] [keyring-pass] [keyring-dir] [rpc-endpoint] [rpc-timeout]",
+	Args:  cobra.ExactArgs(9),
 	Short: "price-feeder is a side-car process for providing Umee's on-chain oracle with price data",
 	Long: `A side-car process that Umee validators must run in order to provide
 Umee's on-chain price oracle with price information. The price-feeder performs
@@ -82,15 +83,59 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
 
+	// Get the flags from the user
+	validator := args[1]
+
+	from := args[2]
+
+	chainID := args[3]
+
+	keyringBackend := args[4]
+
+	KeyringDir := args[5]
+
+	rpcEndpoint := args[6]
+
+	rpcTimeout := args[7]
+
+	rpcTimeoutDuration, err := time.ParseDuration(rpcTimeout)
+
+	keyringPass := args[8]
+
+	// Set up chain
+
+	cosmosChain, chainErr := broadcast.NewCosmosChain(
+		chainID,
+		keyringBackend,
+		KeyringDir,
+		rpcEndpoint,
+		time.Duration(rpcTimeoutDuration),
+		from,
+		validator,
+	)
+
+	if chainErr != nil {
+		panic(chainErr)
+	}
+
+	b, broadcastErr := broadcast.NewBroadcast(cosmosChain, keyringPass)
+
+	if broadcastErr != nil {
+		panic(broadcastErr)
+	}
+
+	oracle := oracle.New(b)
+
 	g.Go(func() error {
+		// Starts the router that exports the oracle prices object
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
+		// Starts the process that calculates oracle prices
+		// And also votes
 		return startPriceOracle(ctx, oracle)
 	})
 

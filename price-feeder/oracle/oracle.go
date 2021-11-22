@@ -8,23 +8,25 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/umee-network/umee/price-feeder/oracle/broadcast"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 )
 
 type Oracle struct {
-	logger zerolog.Logger
-	closer *pfsync.Closer
-
+	logger          zerolog.Logger
+	closer          *pfsync.Closer
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
+	broadcast       *broadcast.Broadcast
 }
 
-func New() *Oracle {
+func New(b *broadcast.Broadcast) *Oracle {
 	return &Oracle{
-		logger: log.With().Str("module", "oracle").Logger(),
-		closer: pfsync.NewCloser(),
+		logger:    log.With().Str("module", "oracle").Logger(),
+		closer:    pfsync.NewCloser(),
+		broadcast: b,
 	}
 }
 
@@ -94,6 +96,16 @@ func (o *Oracle) tick() {
 	}
 
 	o.prices = pricesArray
+
+	/*
+		msg := &umeetypes.MsgAggregateExchangeRatePrevote{
+			Hash:      "hash", // Hash of prices from the oracle
+			Feeder:    o.broadcast.CosmosChain.OracleAddrString,
+			Validator: o.broadcast.CosmosChain.ValidatorAddr,
+		}
+
+		o.broadcast.Broadcast(msg)
+	*/
 
 }
 
