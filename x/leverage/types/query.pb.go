@@ -6,6 +6,8 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
@@ -197,42 +199,152 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryBorrowedRequest defines the request structure for the Borrowed gRPC
+// service handler.
+type QueryBorrowedRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryBorrowedRequest) Reset()         { *m = QueryBorrowedRequest{} }
+func (m *QueryBorrowedRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowedRequest) ProtoMessage()    {}
+func (*QueryBorrowedRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{4}
+}
+func (m *QueryBorrowedRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBorrowedRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBorrowedRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowedRequest.Merge(m, src)
+}
+func (m *QueryBorrowedRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBorrowedRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowedRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBorrowedRequest proto.InternalMessageInfo
+
+func (m *QueryBorrowedRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *QueryBorrowedRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryBorrowedResponse defines the response structure for the Borrowed gRPC
+// service handler.
+type QueryBorrowedResponse struct {
+	Borrowed github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
+}
+
+func (m *QueryBorrowedResponse) Reset()         { *m = QueryBorrowedResponse{} }
+func (m *QueryBorrowedResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowedResponse) ProtoMessage()    {}
+func (*QueryBorrowedResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{5}
+}
+func (m *QueryBorrowedResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBorrowedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBorrowedResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBorrowedResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowedResponse.Merge(m, src)
+}
+func (m *QueryBorrowedResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBorrowedResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowedResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBorrowedResponse proto.InternalMessageInfo
+
+func (m *QueryBorrowedResponse) GetBorrowed() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.Borrowed
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryRegisteredTokens)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokens")
 	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokensResponse")
 	proto.RegisterType((*QueryParamsRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryParamsResponse")
+	proto.RegisterType((*QueryBorrowedRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedRequest")
+	proto.RegisterType((*QueryBorrowedResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1beta1/query.proto", fileDescriptor_32bddfd5abbfa4dc) }
 
 var fileDescriptor_32bddfd5abbfa4dc = []byte{
-	// 385 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2c, 0xcd, 0x4d, 0x4d,
-	0xd5, 0xcf, 0x49, 0x2d, 0x4b, 0x2d, 0x4a, 0x4c, 0x4f, 0xd5, 0x2f, 0x33, 0x4c, 0x4a, 0x2d, 0x49,
-	0x34, 0xd4, 0x2f, 0x2c, 0x4d, 0x2d, 0xaa, 0xd4, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x02, 0x2b,
-	0xc9, 0x4b, 0x2d, 0x29, 0xcf, 0x2f, 0xca, 0xd6, 0x03, 0xb1, 0xf5, 0x60, 0xca, 0xf5, 0xa0, 0xca,
-	0xa5, 0x64, 0xd2, 0xf3, 0xf3, 0xd3, 0x73, 0x52, 0xf5, 0x13, 0x0b, 0x32, 0xf5, 0x13, 0xf3, 0xf2,
-	0xf2, 0x4b, 0x12, 0x4b, 0x32, 0xf3, 0xf3, 0x8a, 0x21, 0x06, 0x48, 0xa9, 0x60, 0xb7, 0x03, 0x6e,
-	0x0a, 0x44, 0x95, 0x48, 0x7a, 0x7e, 0x7a, 0x3e, 0x98, 0xa9, 0x0f, 0x62, 0x41, 0x44, 0x95, 0xc4,
-	0xb9, 0x44, 0x03, 0x41, 0x6e, 0x09, 0x4a, 0x4d, 0xcf, 0x2c, 0x2e, 0x49, 0x2d, 0x4a, 0x4d, 0x09,
-	0xc9, 0xcf, 0x4e, 0xcd, 0x2b, 0x56, 0xca, 0xe6, 0x92, 0xc5, 0x2a, 0x11, 0x94, 0x5a, 0x5c, 0x90,
-	0x9f, 0x57, 0x9c, 0x2a, 0xe4, 0xc5, 0xc5, 0x51, 0x04, 0x96, 0x2b, 0xaa, 0x94, 0x60, 0x54, 0x60,
-	0xd6, 0xe0, 0x36, 0xd2, 0xd0, 0x23, 0xe8, 0x13, 0x3d, 0xb0, 0x21, 0x4e, 0x2c, 0x27, 0xee, 0xc9,
-	0x33, 0x04, 0xc1, 0xf5, 0x2b, 0x89, 0x70, 0x09, 0x81, 0x2d, 0x0b, 0x48, 0x2c, 0x4a, 0xcc, 0x2d,
-	0x0e, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x51, 0x8a, 0xe3, 0x12, 0x46, 0x11, 0x85, 0x5a, 0xec,
-	0xce, 0xc5, 0x56, 0x00, 0x16, 0x91, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x36, 0xd2, 0x24, 0xc2, 0x5a,
-	0x88, 0x11, 0x50, 0x7b, 0xa1, 0xda, 0x8d, 0x5e, 0x33, 0x71, 0xb1, 0x82, 0x2d, 0x10, 0x3a, 0xc0,
-	0xc8, 0x25, 0x80, 0xee, 0x51, 0x21, 0x0b, 0x22, 0xcc, 0xc5, 0x1a, 0x44, 0x52, 0x0e, 0xe4, 0xea,
-	0x84, 0xf9, 0x51, 0xc9, 0xa0, 0xe9, 0xf2, 0x93, 0xc9, 0x4c, 0x5a, 0x42, 0x1a, 0xfa, 0xd8, 0xe3,
-	0xb6, 0x08, 0xae, 0x31, 0xbe, 0x04, 0xe2, 0xda, 0x79, 0x8c, 0x5c, 0x6c, 0x10, 0x5f, 0x0a, 0x99,
-	0x12, 0x6b, 0x3d, 0x4a, 0x70, 0x4b, 0x99, 0x91, 0xaa, 0x0d, 0xea, 0x56, 0x55, 0xb0, 0x5b, 0xe5,
-	0x85, 0x64, 0x71, 0xb8, 0x15, 0x12, 0xda, 0x4e, 0xee, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24,
-	0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78,
-	0x2c, 0xc7, 0x10, 0xa5, 0x9b, 0x9e, 0x59, 0x92, 0x51, 0x9a, 0xa4, 0x97, 0x9c, 0x9f, 0x0b, 0x36,
-	0x42, 0x17, 0xea, 0x06, 0x88, 0x79, 0x15, 0x08, 0x13, 0x4b, 0x2a, 0x0b, 0x52, 0x8b, 0x93, 0xd8,
-	0xc0, 0x29, 0xd7, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x1f, 0xca, 0x5d, 0x13, 0x5b, 0x03, 0x00,
-	0x00,
+	// 526 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x3f, 0x6f, 0xd3, 0x40,
+	0x14, 0xcf, 0x95, 0x36, 0x84, 0xeb, 0x82, 0x8e, 0x20, 0x42, 0x44, 0x9d, 0xd6, 0x02, 0x11, 0x90,
+	0xe2, 0x6b, 0x83, 0x80, 0x8e, 0x28, 0x48, 0x54, 0x62, 0x02, 0x8b, 0x89, 0x01, 0xe4, 0xc4, 0x4f,
+	0xc6, 0x4a, 0xed, 0xe7, 0xde, 0x5d, 0x5a, 0xb2, 0x21, 0x3e, 0x01, 0x12, 0xcc, 0x8c, 0x0c, 0x7c,
+	0x0a, 0xc6, 0x8e, 0x95, 0x58, 0x98, 0x00, 0x25, 0x7c, 0x10, 0xe4, 0xbb, 0xb3, 0x43, 0xab, 0x54,
+	0xa4, 0x9d, 0x72, 0xf7, 0xee, 0xfd, 0xfe, 0xe4, 0xbd, 0x9f, 0x4c, 0x37, 0x46, 0x09, 0x00, 0xdf,
+	0x85, 0x7d, 0x10, 0x41, 0x04, 0x7c, 0x7f, 0xab, 0x0f, 0x2a, 0xd8, 0xe2, 0x7b, 0x23, 0x10, 0x63,
+	0x2f, 0x13, 0xa8, 0x90, 0xe9, 0x96, 0x14, 0xd4, 0x01, 0x8a, 0xa1, 0x97, 0x9f, 0xbd, 0xa2, 0xdd,
+	0xb3, 0xed, 0xcd, 0x1b, 0x11, 0x62, 0xb4, 0x0b, 0x3c, 0xc8, 0x62, 0x1e, 0xa4, 0x29, 0xaa, 0x40,
+	0xc5, 0x98, 0x4a, 0x43, 0xd0, 0xbc, 0x39, 0x5f, 0xa3, 0x64, 0x31, 0x5d, 0xf5, 0x08, 0x23, 0xd4,
+	0x47, 0x9e, 0x9f, 0x6c, 0xd5, 0x19, 0xa0, 0x4c, 0x50, 0xf2, 0x7e, 0x20, 0x67, 0xc8, 0x01, 0xc6,
+	0xa9, 0x79, 0x77, 0xaf, 0xd1, 0xab, 0xcf, 0x73, 0xaf, 0x3e, 0x44, 0xb1, 0x54, 0x20, 0x20, 0x7c,
+	0x81, 0x43, 0x48, 0xa5, 0x3b, 0xa4, 0x6b, 0x73, 0x1f, 0x7c, 0x90, 0x19, 0xa6, 0x12, 0xd8, 0x53,
+	0x5a, 0x13, 0xfa, 0x4d, 0x8c, 0x1b, 0x64, 0xfd, 0x42, 0x7b, 0xb5, 0xdb, 0xf6, 0xfe, 0xfb, 0x4f,
+	0x3d, 0x4d, 0xd2, 0x5b, 0x3e, 0xfc, 0xd9, 0xaa, 0xf8, 0x25, 0xde, 0xad, 0x53, 0xa6, 0xc5, 0x9e,
+	0x05, 0x22, 0x48, 0xa4, 0x0f, 0x7b, 0x23, 0x90, 0xca, 0x7d, 0x45, 0xaf, 0x1c, 0xab, 0x5a, 0xe1,
+	0x1d, 0x5a, 0xcd, 0x74, 0xa5, 0x41, 0xd6, 0x49, 0x7b, 0xb5, 0x7b, 0x67, 0x01, 0x59, 0x43, 0x61,
+	0x75, 0x2d, 0xdc, 0x7d, 0x42, 0xeb, 0x9a, 0xbf, 0x87, 0x42, 0xe0, 0x01, 0x84, 0x56, 0x97, 0x35,
+	0xe8, 0xc5, 0x20, 0x0c, 0x05, 0x48, 0xa3, 0x70, 0xc9, 0x2f, 0xae, 0xac, 0x4e, 0x57, 0x42, 0x48,
+	0x31, 0x69, 0x2c, 0xe9, 0xba, 0xb9, 0xb8, 0xef, 0x88, 0x1d, 0xe2, 0x8c, 0xc8, 0x5a, 0x8d, 0x68,
+	0xad, 0x6f, 0x6b, 0x76, 0x46, 0xd7, 0x3d, 0xb3, 0x10, 0x2f, 0x5f, 0x48, 0x69, 0xef, 0x31, 0xc6,
+	0x69, 0x6f, 0x33, 0x37, 0xf7, 0xf5, 0x57, 0xab, 0x1d, 0xc5, 0xea, 0xcd, 0xa8, 0xef, 0x0d, 0x30,
+	0xe1, 0x76, 0x7b, 0xe6, 0xa7, 0x23, 0xc3, 0x21, 0x57, 0xe3, 0x0c, 0xa4, 0x06, 0x48, 0xbf, 0x24,
+	0xef, 0x7e, 0x5a, 0xa6, 0x2b, 0xda, 0x02, 0xfb, 0x46, 0xe8, 0xe5, 0x93, 0x3b, 0x63, 0xdb, 0x0b,
+	0x8c, 0x68, 0xee, 0xb6, 0x9b, 0x8f, 0xce, 0x8b, 0x2c, 0x66, 0xe0, 0x6e, 0xbe, 0xff, 0xfe, 0xe7,
+	0xe3, 0xd2, 0x5d, 0xd6, 0xe6, 0xf3, 0x63, 0x2c, 0x4a, 0xe0, 0x6b, 0x65, 0xdc, 0x7e, 0x26, 0xb4,
+	0x6a, 0x16, 0xc6, 0xee, 0x2f, 0x2a, 0x7f, 0x2c, 0x39, 0xcd, 0x07, 0x67, 0x85, 0x59, 0xaf, 0xb7,
+	0xb4, 0xd7, 0x16, 0x5b, 0x3b, 0xc5, 0xab, 0x09, 0x0e, 0xfb, 0x42, 0x68, 0xad, 0xd8, 0x35, 0x7b,
+	0xb8, 0xa8, 0xd6, 0x89, 0x98, 0x35, 0xb7, 0xcf, 0x0e, 0xb4, 0x36, 0x6f, 0x6b, 0x9b, 0x1b, 0xac,
+	0x75, 0x8a, 0xcd, 0x22, 0x16, 0xbd, 0x9d, 0xc3, 0x89, 0x43, 0x8e, 0x26, 0x0e, 0xf9, 0x3d, 0x71,
+	0xc8, 0x87, 0xa9, 0x53, 0x39, 0x9a, 0x3a, 0x95, 0x1f, 0x53, 0xa7, 0xf2, 0xb2, 0xf3, 0x4f, 0xc8,
+	0x72, 0x92, 0x8e, 0xf5, 0x61, 0x18, 0xdf, 0xce, 0x38, 0x75, 0xde, 0xfa, 0x55, 0xfd, 0xb5, 0xb8,
+	0xf7, 0x37, 0x00, 0x00, 0xff, 0xff, 0x64, 0x7e, 0x55, 0x84, 0xef, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -251,6 +363,10 @@ type QueryClient interface {
 	RegisteredTokens(ctx context.Context, in *QueryRegisteredTokens, opts ...grpc.CallOption) (*QueryRegisteredTokensResponse, error)
 	// Params queries the parameters of the x/leverage module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// Borrowed queries for the borrowed amount of a user by token denomination.
+	// If the denomination is not supplied, the total for each borrowed token is
+	// returned.
+	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
 }
 
 type queryClient struct {
@@ -279,12 +395,25 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
+func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
+	out := new(QueryBorrowedResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/Borrowed", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// RegisteredTokens queries for all the registered tokens.
 	RegisteredTokens(context.Context, *QueryRegisteredTokens) (*QueryRegisteredTokensResponse, error)
 	// Params queries the parameters of the x/leverage module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// Borrowed queries for the borrowed amount of a user by token denomination.
+	// If the denomination is not supplied, the total for each borrowed token is
+	// returned.
+	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -296,6 +425,9 @@ func (*UnimplementedQueryServer) RegisteredTokens(ctx context.Context, req *Quer
 }
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
+func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowedRequest) (*QueryBorrowedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Borrowed not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -338,6 +470,24 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryBorrowedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Borrowed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/Borrowed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umeenetwork.umee.leverage.v1beta1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -349,6 +499,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
+		},
+		{
+			MethodName: "Borrowed",
+			Handler:    _Query_Borrowed_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -471,6 +625,80 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryBorrowedRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBorrowedRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBorrowedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryBorrowedResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBorrowedResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBorrowedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Borrowed) > 0 {
+		for iNdEx := len(m.Borrowed) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Borrowed[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -523,6 +751,38 @@ func (m *QueryParamsResponse) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryBorrowedRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryBorrowedResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Borrowed) > 0 {
+		for _, e := range m.Borrowed {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -775,6 +1035,204 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBorrowedRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBorrowedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBorrowedResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBorrowedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Borrowed", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Borrowed = append(m.Borrowed, types.Coin{})
+			if err := m.Borrowed[len(m.Borrowed)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

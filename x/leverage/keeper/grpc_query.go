@@ -62,3 +62,36 @@ func (q Querier) Params(
 
 	return &types.QueryParamsResponse{Params: params}, nil
 }
+
+func (q Querier) Borrowed(
+	goCtx context.Context,
+	req *types.QueryBorrowedRequest,
+) (*types.QueryBorrowedResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(req.Denom) == 0 {
+		tokens, err := q.Keeper.GetBorrowerBorrows(ctx, borrower)
+		if err != nil {
+			return nil, err
+		}
+
+		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
+	}
+
+	token := q.Keeper.GetBorrow(ctx, borrower, req.Denom)
+
+	return &types.QueryBorrowedResponse{Borrowed: sdk.NewCoins(token)}, nil
+}

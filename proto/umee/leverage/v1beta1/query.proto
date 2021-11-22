@@ -4,6 +4,7 @@ package umeenetwork.umee.leverage.v1beta1;
 import "google/api/annotations.proto";
 import "umee/leverage/v1beta1/leverage.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
@@ -17,6 +18,13 @@ service Query {
   // Params queries the parameters of the x/leverage module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/params";
+  }
+
+  // Borrowed queries for the borrowed amount of a user by token denomination.
+  // If the denomination is not supplied, the total for each borrowed token is
+  // returned.
+  rpc Borrowed(QueryBorrowedRequest) returns (QueryBorrowedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
   }
 }
 
@@ -38,4 +46,18 @@ message QueryParamsRequest {}
 // service handler.
 message QueryParamsResponse {
   Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryBorrowedRequest defines the request structure for the Borrowed gRPC
+// service handler.
+message QueryBorrowedRequest {
+  string address = 1;
+  string denom   = 2;
+}
+
+// QueryBorrowedResponse defines the response structure for the Borrowed gRPC
+// service handler.
+message QueryBorrowedResponse {
+  repeated cosmos.base.v1beta1.Coin borrowed = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
 }
