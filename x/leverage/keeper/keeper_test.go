@@ -49,6 +49,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:       sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate: sdk.MustNewDecFromStr("0.8"),
 	}
+
 	// At the moment, SetRegisteredToken must be followed separately by SetTokenDenom
 	// to complete token registration. Therefore, this line does not break the InvalidAsset tests
 	// which require 'uumee' to be unregistered.

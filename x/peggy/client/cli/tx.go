@@ -26,7 +26,7 @@ const (
 func GetTxCmd(storeKey string) *cobra.Command {
 	peggyTxCmd := &cobra.Command{
 		Use:                        types.ModuleName,
-		Short:                      "Transaction commands for the peggy module",
+		Short:                      fmt.Sprintf("Transaction commands for the %s module", types.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
