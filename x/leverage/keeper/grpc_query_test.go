@@ -41,3 +41,13 @@ func (s *IntegrationTestSuite) TestQuerier_Params() {
 	s.Require().NoError(err)
 	s.Require().NotZero(resp.Params.InterestEpoch)
 }
+
+func (s *IntegrationTestSuite) TestQuerier_Borrowed() {
+	s.Run("get_all_borrowed", func() {
+		// We need to setup borrowing first prior to testing this out.
+	})
+
+	s.Run("get_denom_borrowed", func() {
+		// We need to setup borrowing first prior to testing this out.
+	})
+}
