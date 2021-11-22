@@ -131,7 +131,9 @@ func (am AppModule) QuerierRoute() string {
 
 // Deprecated: LegacyQuerierHandler returns the x/peggy module sdk.Querier.
 func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return nil
+	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
+		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
+	}
 }
 
 // RegisterServices registers x/peggy module services.
