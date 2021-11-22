@@ -46,3 +46,18 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 	var resp types.QueryRegisteredTokensResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
+
+func (s *IntegrationTestSuite) TestQueryParams() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	flags := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), flags)
+	s.Require().NoError(err)
+
+	var resp types.QueryParamsResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+}

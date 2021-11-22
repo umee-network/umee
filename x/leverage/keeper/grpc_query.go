@@ -47,3 +47,18 @@ func (q Querier) RegisteredTokens(
 
 	return resp, nil
 }
+
+func (q Querier) Params(
+	goCtx context.Context,
+	req *types.QueryParamsRequest,
+) (*types.QueryParamsResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := q.Keeper.GetParams(ctx)
+
+	return &types.QueryParamsResponse{Params: params}, nil
+}

@@ -13,6 +13,11 @@ service Query {
   rpc RegisteredTokens(QueryRegisteredTokens) returns (QueryRegisteredTokensResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/registered_tokens";
   }
+
+  // Params queries the parameters of the x/leverage module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/params";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -23,4 +28,14 @@ message QueryRegisteredTokens {}
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryParamsRequest defines the request structure for the Params gRPC service
+// handler.
+message QueryParamsRequest {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
 }

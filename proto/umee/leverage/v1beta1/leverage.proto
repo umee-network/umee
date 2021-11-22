@@ -9,7 +9,7 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 message Params {
   option (gogoproto.goproto_stringer) = false;
   // The interest epoch determines how many blocks pass between borrow interest calculations.
-  int64 interest_epoch = 1;
+  int64 interest_epoch = 1 [(gogoproto.moretags) = "yaml:\"interest_epoch\""];
 }
 
 // Token defines a token, along with its capital metadata, in the Umee capital
