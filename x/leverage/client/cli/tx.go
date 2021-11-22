@@ -9,7 +9,7 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// GetQueryCmd returns the CLI transaction commands for the x/leverage module.
+// GetTxCmd returns the CLI transaction commands for the x/leverage module.
 func GetTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
