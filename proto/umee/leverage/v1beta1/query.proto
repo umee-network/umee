@@ -26,6 +26,12 @@ service Query {
   rpc Borrowed(QueryBorrowedRequest) returns (QueryBorrowedResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
   }
+
+  // ReserveAmount queries for the amount reserved of a specified denomination.
+  // If the token is not valid, the reserved amount is zero.
+  rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/reserve_amount";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -60,4 +66,16 @@ message QueryBorrowedRequest {
 message QueryBorrowedResponse {
   repeated cosmos.base.v1beta1.Coin borrowed = 1
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+}
+
+// QueryReserveAmountRequest defines the request structure for the ReserveAmount
+// gRPC service handler.
+message QueryReserveAmountRequest {
+  string denom = 1;
+}
+
+// QueryReserveAmountResponse defines the response structure for the ReserveAmount
+// gRPC service handler.
+message QueryReserveAmountResponse {
+  string amount = 1 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
