@@ -7,6 +7,13 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+func NewMsgLendAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgLendAsset {
+	return &MsgLendAsset{
+		Lender: lender.String(),
+		Amount: amount,
+	}
+}
+
 func (msg *MsgLendAsset) ValidateBasic() error {
 	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
