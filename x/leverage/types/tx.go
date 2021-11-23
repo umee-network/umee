@@ -7,6 +7,13 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
+func NewMsgLendAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgLendAsset {
+	return &MsgLendAsset{
+		Lender: lender.String(),
+		Amount: amount,
+	}
+}
+
 func (msg *MsgLendAsset) ValidateBasic() error {
 	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
@@ -26,6 +33,13 @@ func (msg *MsgLendAsset) ValidateBasic() error {
 func (msg *MsgLendAsset) GetSigners() []sdk.AccAddress {
 	lender, _ := sdk.AccAddressFromBech32(msg.GetLender())
 	return []sdk.AccAddress{lender}
+}
+
+func NewMsgWithdrawAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
+	return &MsgWithdrawAsset{
+		Lender: lender.String(),
+		Amount: amount,
+	}
 }
 
 func (msg *MsgWithdrawAsset) ValidateBasic() error {
@@ -49,6 +63,14 @@ func (msg *MsgWithdrawAsset) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{lender}
 }
 
+func NewMsgSetCollateral(borrower sdk.AccAddress, denom string, enable bool) *MsgSetCollateral {
+	return &MsgSetCollateral{
+		Borrower: borrower.String(),
+		Denom:    denom,
+		Enable:   enable,
+	}
+}
+
 func (msg *MsgSetCollateral) ValidateBasic() error {
 	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
@@ -63,6 +85,13 @@ func (msg *MsgSetCollateral) ValidateBasic() error {
 func (msg *MsgSetCollateral) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
+}
+
+func NewMsgBorrowAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgBorrowAsset {
+	return &MsgBorrowAsset{
+		Borrower: borrower.String(),
+		Amount:   amount,
+	}
 }
 
 func (msg *MsgBorrowAsset) ValidateBasic() error {
@@ -84,6 +113,13 @@ func (msg *MsgBorrowAsset) ValidateBasic() error {
 func (msg *MsgBorrowAsset) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
+}
+
+func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
+	return &MsgRepayAsset{
+		Borrower: borrower.String(),
+		Amount:   amount,
+	}
 }
 
 func (msg *MsgRepayAsset) ValidateBasic() error {

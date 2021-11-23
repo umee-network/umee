@@ -35,3 +35,34 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 		})
 	}
 }
+
+func (s *IntegrationTestSuite) TestQuerier_Params() {
+	resp, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+	s.Require().NoError(err)
+	s.Require().NotZero(resp.Params.InterestEpoch)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_Borrowed() {
+	s.Run("get_all_borrowed", func() {
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/93
+	})
+
+	s.Run("get_denom_borrowed", func() {
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/93
+	})
+}
+
+func (s *IntegrationTestSuite) TestQuerier_ReserveAmount() {
+	// TODO: We need to setup borrowing first prior to testing this out.
+	//
+	// Ref: https://github.com/umee-network/umee/issues/93
+	s.Run("missing_denom", func() {
+		req := &types.QueryReserveAmountRequest{}
+		_, err := s.queryClient.ReserveAmount(context.Background(), req)
+		s.Require().Error(err)
+	})
+}

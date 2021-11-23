@@ -137,6 +137,7 @@ func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, 
 	if len(bz) == 0 {
 		return token, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
+
 	err := token.Unmarshal(bz)
 	return token, err
 }
@@ -147,6 +148,7 @@ func (k Keeper) GetReserveFactor(ctx sdk.Context, denom string) (sdk.Dec, error)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.ReserveFactor, nil
 }
 
@@ -156,6 +158,7 @@ func (k Keeper) GetInterestBase(ctx sdk.Context, denom string) (sdk.Dec, error) 
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.BaseBorrowRate, nil
 }
 
@@ -165,24 +168,29 @@ func (k Keeper) GetInterestMax(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.MaxBorrowRate, nil
 }
 
-// GetInterestAtKink gets the interest rate at the "kink" in the utilization:interest graph for a given token.
+// GetInterestAtKink gets the interest rate at the "kink" in the
+// utilization:interest graph for a given token.
 func (k Keeper) GetInterestAtKink(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.KinkBorrowRate, nil
 }
 
-// GetInterestKinkUtilization gets the utilization at the "kink" in the utilization:interest graph for a given token.
+// GetInterestKinkUtilization gets the utilization at the "kink" in the
+// utilization:interest graph for a given token.
 func (k Keeper) GetInterestKinkUtilization(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.KinkUtilizationRate, nil
 }
 
@@ -192,5 +200,6 @@ func (k Keeper) GetCollateralWeight(ctx sdk.Context, denom string) (sdk.Dec, err
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.CollateralWeight, nil
 }
