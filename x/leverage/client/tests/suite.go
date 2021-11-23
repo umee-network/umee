@@ -99,3 +99,22 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 	})
 }
+
+func (s *IntegrationTestSuite) TestQueryReserveAmount() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	// TODO: We need to setup borrowing first prior to testing this out.
+	//
+	// Ref: https://github.com/umee-network/umee/issues/94
+	flags := []string{
+		"uumee",
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryReserveAmount(), flags)
+	s.Require().NoError(err)
+
+	var resp types.QueryReserveAmountResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+}
