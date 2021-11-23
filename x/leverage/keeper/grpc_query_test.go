@@ -44,10 +44,14 @@ func (s *IntegrationTestSuite) TestQuerier_Params() {
 
 func (s *IntegrationTestSuite) TestQuerier_Borrowed() {
 	s.Run("get_all_borrowed", func() {
-		// We need to setup borrowing first prior to testing this out.
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/93
 	})
 
 	s.Run("get_denom_borrowed", func() {
-		// We need to setup borrowing first prior to testing this out.
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/93
 	})
 }

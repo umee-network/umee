@@ -67,7 +67,9 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	clientCtx := val.ClientCtx
 
 	s.Run("get_all_borrowed", func() {
-		// We need to setup borrowing first prior to testing this out.
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/94
 		flags := []string{
 			val.Address.String(),
 			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -81,7 +83,9 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	})
 
 	s.Run("get_denom_borrowed", func() {
-		// We need to setup borrowing first prior to testing this out.
+		// TODO: We need to setup borrowing first prior to testing this out.
+		//
+		// Ref: https://github.com/umee-network/umee/issues/94
 		flags := []string{
 			val.Address.String(),
 			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
