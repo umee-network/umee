@@ -30,6 +30,8 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
+// GetCmdLendAsset returns a CLI command handler to generate or broadcast a
+// transaction with a MsgLendAsset message.
 func GetCmdLendAsset() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lend-asset [lender] [amount]",
@@ -61,6 +63,8 @@ func GetCmdLendAsset() *cobra.Command {
 	return cmd
 }
 
+// GetCmdWithdrawAsset returns a CLI command handler to generate or broadcast a
+// transaction with a MsgWithdrawAsset message.
 func GetCmdWithdrawAsset() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "withdraw-asset [lender] [amount]",
