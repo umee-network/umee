@@ -63,6 +63,14 @@ func (msg *MsgWithdrawAsset) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{lender}
 }
 
+func NewMsgSetCollateral(borrower sdk.AccAddress, denom string, enable bool) *MsgSetCollateral {
+	return &MsgSetCollateral{
+		Borrower: borrower.String(),
+		Denom:    denom,
+		Enable:   enable,
+	}
+}
+
 func (msg *MsgSetCollateral) ValidateBasic() error {
 	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {

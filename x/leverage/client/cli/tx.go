@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -86,6 +87,39 @@ func GetCmdWithdrawAsset() *cobra.Command {
 			}
 
 			msg := types.NewMsgWithdrawAsset(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdSetCollateral returns a CLI command handler to generate or broadcast a
+// transaction with a MsgSetCollateral message.
+func GetCmdSetCollateral() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-collateral [borrower] [denom] [toggle]",
+		Args:  cobra.ExactArgs(3),
+		Short: "Enable or disable an asset type to be used as collateral",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			toggle, err := strconv.ParseBool(args[2])
+			if err != nil {
+				return fmt.Errorf("failed to parse toggle: %w", err)
+			}
+
+			msg := types.NewMsgSetCollateral(clientCtx.GetFromAddress(), args[1], toggle)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
