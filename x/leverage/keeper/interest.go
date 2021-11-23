@@ -69,13 +69,13 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		return err
 	}
 
+	interestToApply := map[string]sdk.Dec{}
+	reserveFactors := map[string]sdk.Dec{}
+
 	// Derive interest rate from utilization and parameters, for each denom found
 	// in totalBorrowed, then multiply it by YearsElapsed to create the amount of
 	// interest (expressed as a multiple of borrow amount) that will be applied to
 	// each borrow position. Also collect reserve factors.
-	interestToApply := map[string]sdk.Dec{}
-	reserveFactors := map[string]sdk.Dec{}
-
 	for _, coin := range totalBorrowed {
 		reserveFactor, err := k.GetReserveFactor(ctx, coin.Denom)
 		if err != nil {
