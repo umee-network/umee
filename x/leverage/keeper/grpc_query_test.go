@@ -60,7 +60,9 @@ func (s *IntegrationTestSuite) TestQuerier_ReserveAmount() {
 	// TODO: We need to setup borrowing first prior to testing this out.
 	//
 	// Ref: https://github.com/umee-network/umee/issues/93
-	req := &types.QueryReserveAmountRequest{Denom: "uumee"}
-	_, err := s.queryClient.ReserveAmount(context.Background(), req)
-	s.Require().NoError(err)
+	s.Run("missing_denom", func() {
+		req := &types.QueryReserveAmountRequest{}
+		_, err := s.queryClient.ReserveAmount(context.Background(), req)
+		s.Require().Error(err)
+	})
 }
