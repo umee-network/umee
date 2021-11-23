@@ -19,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
 
+	peggycli "github.com/umee-network/umee/x/peggy/client/cli"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
@@ -117,6 +118,68 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	s.T().Logf("deployed %s contract: %s", baseDenom, erc20Addr)
 
 	return erc20Addr
+}
+
+func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	valAddr := s.chain.validators[valIdx].keyInfo.GetAddress()
+
+	s.T().Logf("registering Ethereum Orchestrator addresses; validator: %s", sdk.ValAddress(valAddr))
+
+	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
+		Context:      ctx,
+		AttachStdout: true,
+		AttachStderr: true,
+		Container:    s.valResources[valIdx].Container.ID,
+		User:         "root",
+		Cmd: []string{
+			"umeed",
+			"tx",
+			"peggy",
+			"set-orchestrator-address",
+			valAddr.String(),
+			valAddr.String(),
+			s.chain.validators[valIdx].ethereumKey.address,
+			fmt.Sprintf("--%s=%s", peggycli.FlagEthPrivKey, s.chain.validators[valIdx].ethereumKey.privateKey),
+			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
+			"--keyring-backend=test",
+			"--broadcast-mode=sync",
+			"-y",
+		},
+	})
+	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+		Context:      ctx,
+		Detach:       false,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
+
+	var broadcastResp map[string]interface{}
+	s.Require().NoError(json.Unmarshal(outBuf.Bytes(), &broadcastResp))
+
+	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
+	txHash := broadcastResp["txhash"].(string)
+
+	s.Require().Eventuallyf(
+		func() bool {
+			return queryUmeeTx(endpoint, txHash) == nil
+		},
+		time.Minute,
+		5*time.Second,
+		"stdout: %s, stderr: %s",
+		outBuf.String(), errBuf.String(),
+	)
 }
 
 func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, umeeFee, gravityFee string) {

@@ -25,11 +25,12 @@ var (
 )
 
 // NewMsgSetOrchestratorAddress returns a new MsgSetOrchestratorAddresses
-func NewMsgSetOrchestratorAddress(sender, orchestrator sdk.AccAddress, ethAddr common.Address) *MsgSetOrchestratorAddresses {
+func NewMsgSetOrchestratorAddress(sender, orchestrator sdk.AccAddress, ethAddr common.Address, ethSig []byte) *MsgSetOrchestratorAddresses {
 	return &MsgSetOrchestratorAddresses{
 		Sender:       sender.String(),
 		Orchestrator: orchestrator.String(),
 		EthAddress:   ethAddr.Hex(),
+		EthSignature: ethSig,
 	}
 }
 
@@ -44,12 +45,19 @@ func (msg *MsgSetOrchestratorAddresses) ValidateBasic() (err error) {
 	if _, err = sdk.AccAddressFromBech32(msg.Sender); err != nil {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Sender)
 	}
+
 	if _, err = sdk.AccAddressFromBech32(msg.Orchestrator); err != nil {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Orchestrator)
 	}
+
 	if err := ValidateEthAddress(msg.EthAddress); err != nil {
 		return sdkerrors.Wrap(err, "ethereum address")
 	}
+
+	if len(msg.EthSignature) < 65 {
+		return ErrInvalidEthSig
+	}
+
 	return nil
 }
 
@@ -109,7 +117,6 @@ func (msg *MsgValsetConfirm) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{acc}
 }
 
-// NewMsgSendToEth returns a new msgSendToEth
 func NewMsgSendToEth(sender sdk.AccAddress, destAddress string, send sdk.Coin, bridgeFee sdk.Coin) *MsgSendToEth {
 	return &MsgSendToEth{
 		Sender:    sender.String(),
@@ -164,10 +171,10 @@ func (msg MsgSendToEth) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{acc}
 }
 
-// NewMsgRequestBatch returns a new msgRequestBatch
-func NewMsgRequestBatch(orchestrator sdk.AccAddress) *MsgRequestBatch {
+func NewMsgRequestBatch(orchestrator sdk.AccAddress, denom string) *MsgRequestBatch {
 	return &MsgRequestBatch{
 		Orchestrator: orchestrator.String(),
+		Denom:        denom,
 	}
 }
 

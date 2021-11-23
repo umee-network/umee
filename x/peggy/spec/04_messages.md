@@ -248,7 +248,7 @@ type MsgSetOrchestratorAddresses struct {
 	Sender       string
 	Orchestrator string
 	EthAddress   string
+	EthSignature []byte
 }
 ```
 This message sets the Orchestrator's delegate keys. 
-

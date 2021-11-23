@@ -19,7 +19,7 @@ func TestBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
+		mySender, _         = sdk.AccAddressFromBech32("umee1dkfhxs87adz9ll6jfr0jr5jet6u8tjaqx4z8rg")
 		myReceiver          = common.HexToAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr = common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		allVouchers         = sdk.NewCoins(
@@ -203,7 +203,7 @@ func TestBatchesFullCoins(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
+		mySender, _         = sdk.AccAddressFromBech32("umee1dkfhxs87adz9ll6jfr0jr5jet6u8tjaqx4z8rg")
 		myReceiver          = common.HexToAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr = common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		totalCoins, _       = sdk.NewIntFromString("1500000000000000000000")                    // 1,500 ETH worth
@@ -387,7 +387,7 @@ func TestPoolTxRefund(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                 = time.Now().UTC()
-		mySender, _         = sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
+		mySender, _         = sdk.AccAddressFromBech32("umee1dkfhxs87adz9ll6jfr0jr5jet6u8tjaqx4z8rg")
 		myReceiver          = common.HexToAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		myTokenContractAddr = common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5") // Pickle
 		allVouchers         = sdk.NewCoins(
@@ -415,7 +415,6 @@ func TestPoolTxRefund(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	// when
 	ctx = ctx.WithBlockTime(now)
 
 	// tx batch size is 2, so that some of them stay behind
@@ -442,7 +441,7 @@ func TestManyBatches(t *testing.T) {
 	ctx := input.Context
 	var (
 		now                = time.Now().UTC()
-		mySender, _        = sdk.AccAddressFromBech32("cosmos1ahx7f8wyertuus9r20284ej0asrs085case3kn")
+		mySender, _        = sdk.AccAddressFromBech32("umee1dkfhxs87adz9ll6jfr0jr5jet6u8tjaqx4z8rg")
 		myReceiver         = common.HexToAddress("0xd041c41EA1bf0F006ADBb6d2c9ef9D425dE5eaD7")
 		tokenContractAddr1 = common.HexToAddress("0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5")
 		tokenContractAddr2 = common.HexToAddress("0xF815240800ddf3E0be80e0d848B13ecaa504BF37")
