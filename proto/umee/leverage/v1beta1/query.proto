@@ -4,6 +4,7 @@ package umeenetwork.umee.leverage.v1beta1;
 import "google/api/annotations.proto";
 import "umee/leverage/v1beta1/leverage.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
@@ -12,6 +13,24 @@ service Query {
   // RegisteredTokens queries for all the registered tokens.
   rpc RegisteredTokens(QueryRegisteredTokens) returns (QueryRegisteredTokensResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/registered_tokens";
+  }
+
+  // Params queries the parameters of the x/leverage module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/params";
+  }
+
+  // Borrowed queries for the borrowed amount of a user by token denomination.
+  // If the denomination is not supplied, the total for each borrowed token is
+  // returned.
+  rpc Borrowed(QueryBorrowedRequest) returns (QueryBorrowedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
+  }
+
+  // ReserveAmount queries for the amount reserved of a specified denomination.
+  // If the token is not valid, the reserved amount is zero.
+  rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/reserve_amount";
   }
 }
 
@@ -23,4 +42,40 @@ message QueryRegisteredTokens {}
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryParamsRequest defines the request structure for the Params gRPC service
+// handler.
+message QueryParamsRequest {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryBorrowedRequest defines the request structure for the Borrowed gRPC
+// service handler.
+message QueryBorrowedRequest {
+  string address = 1;
+  string denom   = 2;
+}
+
+// QueryBorrowedResponse defines the response structure for the Borrowed gRPC
+// service handler.
+message QueryBorrowedResponse {
+  repeated cosmos.base.v1beta1.Coin borrowed = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+}
+
+// QueryReserveAmountRequest defines the request structure for the ReserveAmount
+// gRPC service handler.
+message QueryReserveAmountRequest {
+  string denom = 1;
+}
+
+// QueryReserveAmountResponse defines the response structure for the ReserveAmount
+// gRPC service handler.
+message QueryReserveAmountResponse {
+  string amount = 1 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
