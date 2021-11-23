@@ -27,6 +27,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdLendAsset(),
 		GetCmdWithdrawAsset(),
 		GetCmdSetCollateral(),
+		GetCmdBorrowAsset(),
 	)
 
 	return cmd
@@ -121,6 +122,39 @@ func GetCmdSetCollateral() *cobra.Command {
 			}
 
 			msg := types.NewMsgSetCollateral(clientCtx.GetFromAddress(), args[1], toggle)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdBorrowAsset returns a CLI command handler to generate or broadcast a
+// transaction with a MsgBorrowAsset message.
+func GetCmdBorrowAsset() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "borrow-asset [borrower] [amount]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Borrow a specified amount of a supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgBorrowAsset(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
