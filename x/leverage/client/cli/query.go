@@ -29,6 +29,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryAllRegisteredTokens(),
 		GetCmdQueryParams(),
 		GetCmdQueryBorrowed(),
+		GetCmdQueryReserveAmount(),
 	)
 
 	return cmd
@@ -124,6 +125,39 @@ func GetCmdQueryBorrowed() *cobra.Command {
 	}
 
 	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryReserveAmount returns a CLI command handler to query for the
+// reserved amount of a specific token.
+func GetCmdQueryReserveAmount() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "reserved [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the amount reserved of a specified denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryReserveAmountRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.ReserveAmount(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
 	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
