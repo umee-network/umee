@@ -41,7 +41,7 @@ To implement the liquidation functionality of the Asset Facility, one message ty
 type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
-  Repayment     sdk.Coin // denom + Amount
+  Repayment     sdk.Coin // denom + amount
   RewardDenom   string
 }
 ```
@@ -155,7 +155,7 @@ It should be possible to improve upon this aspect of the system by scaling one o
 > Dynamic close factor
 >
 > Close factor ranges from `0.0 = MinimumCloseFactor` to 1.0 when the borrower is between 0% and `20% = CompleteLiquidationThreshold` over borrow limit, then stays at 1.0
-> 
+>
 > | Borrow Limit (BL) |Borrowed Value (BV) | BV / BL | Close Factor |
 > | - | - | - | - |
 > | 100 | 100.1 | 1.001 | 0.005 |
