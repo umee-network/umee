@@ -26,6 +26,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdLendAsset(),
 		GetCmdWithdrawAsset(),
+		GetCmdSetCollateral(),
 	)
 
 	return cmd
