@@ -31,8 +31,8 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "price-feeder [config-file] [validator] [from] [chain-id] [keyring-backend] [keyring-pass] [keyring-dir] [rpc-endpoint] [rpc-timeout]",
-	Args:  cobra.ExactArgs(9),
+	Use:   "price-feeder [config-file] [validator] [from] [chain-id] [keyring-backend] [keyring-dir] [tmrpc-endpoint] [grpc-endpoint] [rpc-timeout] [keyring-pass]",
+	Args:  cobra.ExactArgs(10),
 	Short: "price-feeder is a side-car process for providing Umee's on-chain oracle with price data",
 	Long: `A side-car process that Umee validators must run in order to provide
 Umee's on-chain price oracle with price information. The price-feeder performs
@@ -97,13 +97,15 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 
 	KeyringDir := args[5]
 
-	rpcEndpoint := args[6]
+	tmrpcEndpoint := args[6]
 
-	rpcTimeout := args[7]
+	grpcEndpoint := args[7]
+
+	rpcTimeout := args[8]
 
 	rpcTimeoutDuration, err := time.ParseDuration(rpcTimeout)
 
-	keyringPass := args[8]
+	keyringPass := args[9]
 
 	// Set up chain
 
@@ -111,10 +113,11 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		chainID,
 		keyringBackend,
 		KeyringDir,
-		rpcEndpoint,
+		tmrpcEndpoint,
 		time.Duration(rpcTimeoutDuration),
 		from,
 		validator,
+		grpcEndpoint,
 	)
 
 	if chainErr != nil {

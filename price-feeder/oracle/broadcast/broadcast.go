@@ -2,8 +2,12 @@ package broadcast
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -17,6 +21,7 @@ import (
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	umeeapp "github.com/umee-network/umee/app"
 	umeeparams "github.com/umee-network/umee/app/params"
+	cosmosClient "github.com/umee-network/umee/price-feeder/oracle/broadcast/client"
 )
 
 type (
@@ -33,6 +38,7 @@ type (
 		Encoding            umeeparams.EncodingConfig
 		GasPrices           string
 		GasAdjustment       float64
+		GRPCEndpoint        string
 	}
 
 	passReader struct {
@@ -66,8 +72,102 @@ type Broadcast struct {
 	Factory           tx.Factory
 }
 
-func (b Broadcast) Broadcast(msgs ...sdk.Msg) error {
-	return tx.BroadcastTx(b.Ctx, b.Factory, msgs...)
+// Pre-vote and vote are separated out mainly for readability
+// Prevote doesn't need the timeout functionality that vote needs,
+// Because of the block timing validation on the node side
+
+// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
+
+func (b Broadcast) BroadcastPrevote(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+
+	daemonClient, err := cosmosClient.NewCosmosClient(b.Ctx, b.CosmosChain.GRPCEndpoint, b.Factory)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := daemonClient.SyncBroadcastMsg(msgs[0])
+
+	return res, err
+}
+
+// Need to try this continually, since err is either timing issue or whitelist error
+// Ref : https://github.com/terra-money/core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/msg_server.go#L89
+
+func (b Broadcast) BroadcastVote(nextBlockHeight int, timeoutHeight int, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+
+	daemonClient, err := cosmosClient.NewCosmosClient(b.Ctx, b.CosmosChain.GRPCEndpoint, b.Factory)
+	maxBlockHeight := nextBlockHeight + timeoutHeight
+	lastCheckHeight := nextBlockHeight - 1
+	height := 0
+	var res *sdk.TxResponse
+
+	for height == 0 && lastCheckHeight < maxBlockHeight {
+
+		time.Sleep(1500)
+
+		latestBlockHeight, _ := b.GetHeight()
+
+		if latestBlockHeight <= lastCheckHeight {
+			continue
+		}
+
+		// set last check height to latest block height
+		lastCheckHeight = latestBlockHeight
+
+		// wait for indexing (not sure; but just for safety)
+		time.Sleep(500)
+
+		res, err = daemonClient.SyncBroadcastMsg(msgs[0])
+
+		if err != nil {
+			continue
+		} else {
+			height = int(res.Height)
+		}
+	}
+
+	return res, err
+
+}
+
+func (b Broadcast) GetHeight() (int, error) {
+
+	type header struct {
+		Height string `json:"height"`
+	}
+
+	type block struct {
+		Header header `json:"header"`
+	}
+
+	type result struct {
+		Block block `json:"block"`
+	}
+
+	type getBlockResponse struct {
+		Result result `json:"result"`
+	}
+
+	resp, err := http.Get(fmt.Sprintf("%s/block", b.CosmosChain.TMRPC))
+	if err != nil {
+		return 0, err
+	}
+
+	//Create a variable of the same type as our model
+	var getBlockResp getBlockResponse
+	if err := json.NewDecoder(resp.Body).Decode(&getBlockResp); err != nil {
+		panic(err)
+	}
+
+	// Try to convert string to int
+	height, err := strconv.Atoi(getBlockResp.Result.Block.Header.Height)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return height, nil
+
 }
 
 func NewCosmosChain(ChainID string,
@@ -76,7 +176,8 @@ func NewCosmosChain(ChainID string,
 	TMRPC string,
 	RPCTimeout time.Duration,
 	OracleAddrString string,
-	ValidatorAddrString string) (*CosmosChain, error) {
+	ValidatorAddrString string,
+	GRPCEndpoint string) (*CosmosChain, error) {
 
 	var chain CosmosChain
 
@@ -96,6 +197,7 @@ func NewCosmosChain(ChainID string,
 	chain.Encoding = umeeapp.MakeEncodingConfig()
 	// Static gas adjustment
 	chain.GasAdjustment = 1.15
+	chain.GRPCEndpoint = GRPCEndpoint
 	return &chain, nil
 
 }

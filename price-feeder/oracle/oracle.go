@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"math"
 	"sync"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 	umeetypes "github.com/umee-network/umee/x/oracle/types"
+	"google.golang.org/grpc"
 )
 
 type Oracle struct {
@@ -54,8 +56,6 @@ func GetPrices() map[string]sdk.Dec {
 
 	binancePrices, err := binanceProvider.GetTickerPrices(denoms...)
 
-	// TODO : Fail silently when providers fail
-
 	if binancePrices == nil || err != nil {
 		panic("Unable to get binance prices")
 	}
@@ -87,25 +87,34 @@ func GetPrices() map[string]sdk.Dec {
 	}
 
 	return averages
-
 }
 
-func GetParams() (*umeetypes.QueryParamsResponse, error) {
+func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
 
-	var qc umeetypes.QueryClient
+	// Create a connection to the gRPC server.
+	grpcConn, err := grpc.Dial(
+		o.broadcast.CosmosChain.GRPCEndpoint, // your gRPC server address.
+		grpc.WithInsecure(),                  // The Cosmos SDK doesn't support any transport security mechanism.
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer grpcConn.Close()
+	queryClient := umeetypes.NewQueryClient(grpcConn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	daemonResp, err := qc.Params(ctx, &umeetypes.QueryParamsRequest{})
+	queryResponse, err := queryClient.Params(ctx, &umeetypes.QueryParamsRequest{})
 
 	if err != nil {
 		return nil, err
-	} else if daemonResp == nil {
+	} else if queryResponse == nil {
 		return nil, err
 	}
-
-	return daemonResp, nil
+	return queryResponse, nil
 }
 
 func (o *Oracle) generateSalt(length int) (string, error) {
@@ -120,6 +129,24 @@ func (o *Oracle) generateSalt(length int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
+var previousVotePeriod float64
+
+type PreviousPrevote struct {
+	ExchangeRates     string
+	Salt              string
+	SubmitBlockHeight int64
+}
+
+func NewPreviousPrevote() *PreviousPrevote {
+	return &PreviousPrevote{
+		Salt:              "",
+		ExchangeRates:     "",
+		SubmitBlockHeight: 0,
+	}
+}
+
+var previousPrevote *PreviousPrevote = nil
+
 func (o *Oracle) tick() {
 
 	pricesArray := GetPrices()
@@ -130,15 +157,42 @@ func (o *Oracle) tick() {
 
 	o.prices = pricesArray
 
-	/*oracleParams, err := GetParams()
+	oracleParams, err := o.GetParams()
 
-	if err != nil {
+	if err != nil || oracleParams == nil {
 		panic(err)
 	}
 
-	/oracleVotePeriod := oracleParams.Params.VotePeriod*/
+	blockHeight, err := o.broadcast.GetHeight()
 
-	// Get latest block info and do some maths
+	if err != nil || blockHeight == 0 {
+		panic(err)
+	}
+
+	// Get oracle vote period, next block height,
+	// Current vote period, index in vote period
+
+	oracleVotePeriod := oracleParams.Params.VotePeriod
+	nextBlockHeight := blockHeight + 1
+	currentVotePeriod := math.Floor(float64(nextBlockHeight) / float64(oracleVotePeriod))
+	indexInVotePeriod := nextBlockHeight % int(oracleVotePeriod)
+	// Skip until new voting period
+	// Skip when index [0, oracleVotePeriod - 1] is bigger than oracleVotePeriod - 2 or index is 0
+	if (previousVotePeriod != 0 && currentVotePeriod == previousVotePeriod) ||
+		int(oracleVotePeriod)-indexInVotePeriod < 2 {
+		return
+	}
+
+	// If we're past the voting period we needed to hit,
+	// Reset and submit another pre-vote
+	if previousVotePeriod != 0 && currentVotePeriod-previousVotePeriod != 1 {
+		// Reset
+		previousVotePeriod = 0
+		previousPrevote = nil
+		return
+	}
+
+	isPrevoteOnlyTx := previousPrevote == nil
 
 	exchangeRates := ""
 
@@ -171,27 +225,55 @@ func (o *Oracle) tick() {
 		Validator: valAddr.String(), //Hash accepts the actual addr
 	}
 
-	// Broadcast message
+	if isPrevoteOnlyTx {
+		// Broadcast message
 
-	prevoteErr := o.broadcast.Broadcast(msg)
-	if prevoteErr != nil {
-		panic(prevoteErr)
+		resp, prevoteErr := o.broadcast.BroadcastPrevote(msg)
+		if prevoteErr != nil {
+			panic(prevoteErr)
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		previousVotePeriod = math.Floor(float64(resp.Height) / float64(oracleVotePeriod))
+		previousPrevote = NewPreviousPrevote()
+		previousPrevote.Salt = salt
+		previousPrevote.ExchangeRates = exchangeRates
+		previousPrevote.SubmitBlockHeight = resp.Height
 	}
 
-	// Vote
+	// Is next voting period
 
-	voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
-		Salt:          salt,
-		ExchangeRates: exchangeRates,
-		Feeder:        o.broadcast.CosmosChain.OracleAddrString,
-		Validator:     valAddr.String(),
-	}
+	if !isPrevoteOnlyTx {
 
-	// Broadcast message
+		// Vote
 
-	voteErr := o.broadcast.Broadcast(voteMsg)
-	if voteErr != nil {
-		panic(voteErr)
+		voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
+			Salt:          previousPrevote.Salt,
+			ExchangeRates: previousPrevote.ExchangeRates,
+			Feeder:        o.broadcast.CosmosChain.OracleAddrString,
+			Validator:     valAddr.String(),
+		}
+
+		// Broadcast message
+
+		resp, voteErr := o.broadcast.BroadcastVote(nextBlockHeight,
+			int(oracleVotePeriod)-indexInVotePeriod,
+			voteMsg)
+
+		if voteErr != nil || resp == nil {
+			// This can happen if the voting is off-timed,
+			// Or the voting denoms are not currently on whitelist.
+			// We want to just reset and handle this silently :
+			previousPrevote = nil
+			previousVotePeriod = 0
+			return
+		}
+
+		previousPrevote = nil
+
 	}
 
 }
@@ -204,8 +286,6 @@ func (o *Oracle) Start(ctx context.Context) {
 			return
 
 		default:
-			// TODO : Finish main loop
-			// ref : https://github.com/umee-network/umee/issues/178
 			o.tick()
 			o.lastPriceSyncTS = time.Now()
 			time.Sleep(10 * time.Millisecond)
