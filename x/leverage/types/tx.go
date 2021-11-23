@@ -115,6 +115,13 @@ func (msg *MsgBorrowAsset) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{borrower}
 }
 
+func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
+	return &MsgRepayAsset{
+		Borrower: borrower.String(),
+		Amount:   amount,
+	}
+}
+
 func (msg *MsgRepayAsset) ValidateBasic() error {
 	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {

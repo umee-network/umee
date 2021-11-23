@@ -28,6 +28,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdWithdrawAsset(),
 		GetCmdSetCollateral(),
 		GetCmdBorrowAsset(),
+		GetCmdRepayAsset(),
 	)
 
 	return cmd
@@ -155,6 +156,39 @@ func GetCmdBorrowAsset() *cobra.Command {
 			}
 
 			msg := types.NewMsgBorrowAsset(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdRepayAsset returns a CLI command handler to generate or broadcast a
+// transaction with a MsgRepayAsset message.
+func GetCmdRepayAsset() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "repay-asset [borrower] [amount]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Repay a specified amount of a borrowed supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRepayAsset(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
