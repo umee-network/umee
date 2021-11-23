@@ -20,7 +20,7 @@ Additional parameters will be required which define the liquidation incentive an
 
 ## Decision
 
-Liquidation will require one message type (`MsdLiquidate`), one per-token parameter (`LiquidationIncentive`), and potentially other parameters if a dynamic liquidation incentive is used.
+Liquidation will require one message type (`MsgLiquidate`), one per-token parameter (`LiquidationIncentive`), and two global parameters (`MinimumCloseFactor` and `CompleteLiquidationThreshold`).
 
 There is no event type for when a borrower becomes a valid liquidation target, nor a list of valid targets stored in the module. Liquidators will have to use an off-chain tool to query their nodes periodically.
 
@@ -41,15 +41,13 @@ To implement the liquidation functionality of the Asset Facility, one message ty
 type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
-  RepayDenom    string
-  RepayAmount   sdk.Int
+  Repayment     sdk.Coin // denom + Amount
   RewardDenom   string
 }
 ```
 
-RepayDenom is the borrowed asset denom to be repaid (because the borrower may have multiple open borrows). It is always a base asset type (not a uToken).
-
-RepayAmount is the maximum amount of asset the liquidator is willing to repay. This field enables partial liquidation.
+Repayment's denom is the borrowed asset denom to be repaid (because the borrower may have multiple open borrows). It is always a base asset type (not a uToken).
+Its amount is the maximum amount of asset the liquidator is willing to repay. This field enables partial liquidation.
 
 RewardDenom is the collateral type which the liquidator will recieve in exchange for repaying the borrower's loan. It is always a uToken denomination.
 
@@ -57,11 +55,11 @@ It is necessary that messages be signed by the liquidator's account. Thus the me
 
 ### Partial Liquidation
 
-It is possible for the amount repaid by a liquidator to be less than the borrower's total borrow position in the target denom. Such partial liquidations can succeed without issue, reducing the borrowed amount by `RepayAmount` and rewarding collateral proportional to the amount repaid.
+It is possible for the amount repaid by a liquidator to be less than the borrower's total borrow position in the target denom. Such partial liquidations can succeed without issue, reducing the borrowed amount by `Repayment.Amount` and rewarding collateral proportional to the amount repaid.
 
-Additionally, the `RepayAmount` found in `MsgLiquidate` functions as a maximum the liquidator is willing to repay. There are multiple factors that may reduce the actual repayment below this amount:
+Additionally, the `Repayment.Amount` found in `MsgLiquidate` functions as a maximum the liquidator is willing to repay. There are multiple factors that may reduce the actual repayment below this amount:
 
-- Borrowed amount of `RepayDenom` is below `RepayAmount`
+- Borrowed amount of `Repayment.Denom` is below `Repayment.Amount`
 - Insufficient `RewardDenom` collateral to match repaid value plus liquidation incentive
 - Parameter-based maximum, e.g. if a parameter `LiquidationCap = 0.50` caps liquidated value in a single transaction at 50% of the total borrowed value.
 
@@ -102,12 +100,12 @@ After eligibility is confirmed, parameters governing liquidation can be fetched:
     liquidationIncentive, closeFactor := GetLiquidationParameters(rewardDenom, borrowValue, collateralValue)
 ```
 
-The liquidation incentive is the bonus collateral received when a liquidator repays a borrow position.
-(e.g. incentive=`0.2` means liquidator receives 120% the value of their repayment back in collateral)
+The liquidation incentive is the bonus collateral received when a liquidator repays a borrow position
+(e.g. incentive=`0.2` means liquidator receives 120% the value of their repayment back in collateral).
 
 The close factor is the portion of a borrow position eligible for liquidation in this single liquidation event.
 
-See _Alternatives_ section at the bottom of this document for multiple possible implementations of dynamic liquidation parameters. Any such feature can be isolated inside the function above.
+See _Dynamic Liquidation Parameters_ section at the bottom of this document.
 
 Once parameters are fetched, the final liquidation amounts (repayment and reward) must be calculated.
 
@@ -140,20 +138,7 @@ Once parameters are fetched, the final liquidation amounts (repayment and reward
 
 Then the borrow can be repaid and the collateral rewarded using the liquidator's account.
 
-## Consequences
-
-### Positive
-- Dynamic liquidation incentives can be supported
-
-### Negative
-- Offchain tool required to effectively scan for liquidation opportunities
-
-### Neutral
-- New message type `MsgLiquidate` is created
-- New per-token parameters will be created to determine liquidation incentives
-- New global parameters may be created if we choose to use dynamic close factors
-
-## Alternatives: Dynamic Liquidation Parameters
+## Dynamic Liquidation Parameters
 
 [Study](https://arxiv.org/pdf/2106.06389.pdf) of existing DeFi protocols with fixed incentive liquidation has concluded the following:
 
@@ -165,28 +150,9 @@ Examining one exising liquidation scheme ([Compound](https://zengo.com/understan
 When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% their borrowed value in a single liquidation event.
 That is, the liquidator pays off 50% of their borrow and receives collateral worth 55% of its value.
 
-It should be possible to improve upon this aspect of the system by scaling the two parameters shown above, based on how far a borrower is over their borrow limit. There are two basic possibilities:
+It should be possible to improve upon this aspect of the system by scaling one of the two parameters shown above, based on how far a borrower is over their borrow limit.
 
-> Option 1: Dynamic liquidation Incentive
->
-> Liquidation Incentive ranges from `0% = MinLiquidationIncentive` to `10% = MaxLiquidationIncentive` when the borrower is between 0% and `10% = FullLiquidationIncentiveThreshold` over their borrow limit, then stays at `MaxLiquidationIncentive`.
-> 
-> | Borrow Limit (BL) |Borrowed Value (BV) | BV / BL | Liquidation Incentive |
-> | - | - | - | - |
-> | 100 | 100.1 | 1.001 | 0.1% |
-> | 100 | 102 | 1.02 | 2% |
-> | 100 | 105 | 1.05 | 5% |
-> | 100 | 110 | 1.1 | 10% |
-> | 100 | 140 | 1.4 | 10% |
-
-The Dynamic liquidation Incentive option would take advantage of market forces to reduce the liquidation incentive to the lowest sustainable value.
-Liquidators would have a chance to liquidate for a lower incentive (e.g. 2%) if deemed profitable, otherwise the incentive continues to increase as the borrow accrues interest.
-
-The `CloseFactor` parameter can be any value without affecting this method.
-
-In this method, token-specific liquidation incentives (which incentivize liquidation of some asset types before others) would likely modify the parameter `MaxLiquidationIncentive`.
-
-> Option 2: Dynamic close factor
+> Dynamic close factor
 >
 > Close factor ranges from `0.0 = MinimumCloseFactor` to 1.0 when the borrower is between 0% and `20% = CompleteLiquidationThreshold` over borrow limit, then stays at 1.0
 > 
@@ -198,36 +164,26 @@ In this method, token-specific liquidation incentives (which incentivize liquida
 > | 100 | 130 | 1.2 | 1.0 |
 > | 100 | 140 | 1.4 | 1.0 |
 
-The Dynamic Close Factor option would again take advantage of market forces to reduce excessive collateral selloffs, by reducing the portion of collateral initially eligible for liquidation.
+The Dynamic Close Factor takes advantage of market forces to reduce excessive collateral selloffs, by reducing the portion of collateral initially eligible for liquidation.
 Liquidators would have the change to liquidate smaller portions of the borrow if profitable and bring the position back into health.
 Otherwise, close factor would continue to increase as the borrow accrues interest.
 
-This also allows borrows to be liquidated completely in one transaction, once they arr serverely over their borrow limit.
+This also allows borrows to be liquidated completely in one transaction, once they are serverely over their borrow limit.
 
-The `LiquidationIncentive` parameter can be any value, including varying from token to token, without affecting this method.
+The `LiquidationIncentive` parameter can be any value, varying from token to token, without affecting the close factor.
 
-> **++++++++++++++++++**
-> **DECISIONS REQUIRED**
-> **++++++++++++++++++**
-> 
-> Which strategy should we employ for dynamic liquidation parameters
-> 
-> a) No dynamic liquidation. Has parameters:
->    - Per-token `LiquidationIncentive`
->    - Global parameter `CloseFactor`
->
-> b) Dynamic incentive (option 1), with parameters:
->    - Per-token `MinLiquidationIncentive`
->    - Per-token `MaxLiquidationIncentive`
->    - Global parameter `FullLiquidationIncentiveThreshold`
->    - Global parameter `CloseFactor`
->
-> c) Dynamic close factor (option 2), with parameters:
->    - Per-token `LiquidationIncentive`
->    - Global parameter `MinimumCloseFactor`
->    - Global parameter `CompleteLiquidationThreshold`
->
-> Once this has a final decision, I can update the document appropriately.
+## Consequences
+
+### Positive
+- Dynamic close factors reduce excessive risk to collateral
+
+### Negative
+- Offchain tool required to effectively scan for liquidation opportunities
+
+### Neutral
+- New message type `MsgLiquidate` is created
+- New per-token parameter `LiquidationIncentive` will be created to determine liquidation incentives
+- New global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold` will be created for close factors
 
 ## References
 
