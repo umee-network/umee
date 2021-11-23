@@ -24,6 +24,7 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdLendAsset(),
+		GetCmdWithdrawAsset(),
 	)
 
 	return cmd
@@ -31,7 +32,7 @@ func GetTxCmd() *cobra.Command {
 
 func GetCmdLendAsset() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lend [lender] [amount]",
+		Use:   "lend-asset [lender] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Lend a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -50,6 +51,37 @@ func GetCmdLendAsset() *cobra.Command {
 			}
 
 			msg := types.NewMsgLendAsset(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func GetCmdWithdrawAsset() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "withdraw-asset [lender] [amount]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Withdraw a specified amount of a loaned supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgWithdrawAsset(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

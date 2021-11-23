@@ -35,6 +35,13 @@ func (msg *MsgLendAsset) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{lender}
 }
 
+func NewMsgWithdrawAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
+	return &MsgWithdrawAsset{
+		Lender: lender.String(),
+		Amount: amount,
+	}
+}
+
 func (msg *MsgWithdrawAsset) ValidateBasic() error {
 	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
