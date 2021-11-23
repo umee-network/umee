@@ -22,6 +22,8 @@ func NewUpdateRegistryProposalHandler(k keeper.Keeper) govtypes.Handler {
 }
 
 func handleUpdateRegistryProposalHandler(ctx sdk.Context, k keeper.Keeper, p *types.UpdateRegistryProposal) error {
+	k.DeleteRegisteredTokens(ctx)
+
 	for _, token := range p.Registry {
 		k.SetRegisteredToken(ctx, token)
 	}

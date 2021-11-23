@@ -59,12 +59,21 @@ service Msg {
 // This is a hex encoded 0x Ethereum public key that will be used by this validator
 // on Ethereum
 message MsgSetOrchestratorAddresses {
-  string sender       = 1;
-  string orchestrator = 2;
-  string eth_address  = 3;
+  string sender        = 1;
+  string orchestrator  = 2;
+  string eth_address   = 3;
+  bytes  eth_signature = 4;
 }
 
 message MsgSetOrchestratorAddressesResponse {}
+
+// SetOrchestratorAddressesSignMsg defines the message structure an operator is
+// expected to sign when submitting a MsgSetOrchestratorAddresses message. The
+// resulting signature should populate the eth_signature field.
+message SetOrchestratorAddressesSignMsg {
+  string validator_address = 1;
+  uint64 nonce             = 2;
+}
 
 // MsgValsetConfirm
 // this is the message sent by the validators when they wish to submit their

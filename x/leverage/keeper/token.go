@@ -88,6 +88,45 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 	store.Set(tokenKey, bz)
 }
 
+// DeleteRegisteredTokens deletes all registered tokens from the x/leverage
+// module's KVStore.
+func (k Keeper) DeleteRegisteredTokens(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixRegisteredToken)
+	defer iter.Close()
+
+	var keys [][]byte
+	for ; iter.Valid(); iter.Next() {
+		keys = append(keys, iter.Key())
+	}
+
+	for _, k := range keys {
+		store.Delete(k)
+	}
+}
+
+// GetAllRegisteredTokens returns all the registered tokens from the x/leverage
+// module's KVStore.
+func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) ([]types.Token, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixRegisteredToken)
+	defer iter.Close()
+
+	var tokens []types.Token
+	for ; iter.Valid(); iter.Next() {
+		var t types.Token
+		if err := t.Unmarshal(iter.Value()); err != nil {
+			return nil, err
+		}
+
+		tokens = append(tokens, t)
+	}
+
+	return tokens, nil
+}
+
 // GetRegisteredToken gets a token from the x/leverage module's KVStore.
 func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, error) {
 	store := ctx.KVStore(k.storeKey)
@@ -98,6 +137,7 @@ func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, 
 	if len(bz) == 0 {
 		return token, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
+
 	err := token.Unmarshal(bz)
 	return token, err
 }
@@ -108,6 +148,7 @@ func (k Keeper) GetReserveFactor(ctx sdk.Context, denom string) (sdk.Dec, error)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.ReserveFactor, nil
 }
 
@@ -117,6 +158,7 @@ func (k Keeper) GetInterestBase(ctx sdk.Context, denom string) (sdk.Dec, error) 
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.BaseBorrowRate, nil
 }
 
@@ -126,24 +168,29 @@ func (k Keeper) GetInterestMax(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.MaxBorrowRate, nil
 }
 
-// GetInterestAtKink gets the interest rate at the "kink" in the utilization:interest graph for a given token.
+// GetInterestAtKink gets the interest rate at the "kink" in the
+// utilization:interest graph for a given token.
 func (k Keeper) GetInterestAtKink(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.KinkBorrowRate, nil
 }
 
-// GetInterestKinkUtilization gets the utilization at the "kink" in the utilization:interest graph for a given token.
+// GetInterestKinkUtilization gets the utilization at the "kink" in the
+// utilization:interest graph for a given token.
 func (k Keeper) GetInterestKinkUtilization(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.KinkUtilizationRate, nil
 }
 
@@ -153,5 +200,6 @@ func (k Keeper) GetCollateralWeight(ctx sdk.Context, denom string) (sdk.Dec, err
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
+
 	return token.CollateralWeight, nil
 }

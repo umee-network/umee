@@ -107,7 +107,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.runValidators()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
-	s.registerEthKeys()
+	s.registerValidatorOrchAddresses()
 	s.initPeggy()
 	s.runOrchestrators()
 }
@@ -698,63 +698,11 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	s.peggyContractAddr = peggyContractAddr
 }
 
-func (s *IntegrationTestSuite) registerEthKeys() {
+func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
 	s.T().Log("registering Umee validator Ethereum keys...")
 
-	resources := make([]*dockertest.Resource, len(s.chain.validators))
-	for i, val := range s.chain.validators {
-		resource, err := s.dkrPool.RunWithOptions(
-			&dockertest.RunOptions{
-				Name:       fmt.Sprintf("peggy-key-registration-%d", i),
-				NetworkID:  s.dkrNet.Network.ID,
-				Repository: "umeenet/umeed",
-				Mounts: []string{
-					fmt.Sprintf("%s/:/root/.umee", val.configDir()),
-				},
-				// NOTE: container names are prefixed with '/'
-				Entrypoint: []string{
-					"peggo",
-					"tx",
-					"register-eth-key",
-					"--eth-pk",
-					val.ethereumKey.privateKey[2:], // remove 0x prefix
-					"--cosmos-chain-id",
-					s.chain.id,
-					"--cosmos-grpc",
-					fmt.Sprintf("tcp://%s:9090", s.valResources[i].Container.Name[1:]),
-					"--tendermint-rpc",
-					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
-					"--cosmos-from",
-					val.keyInfo.GetName(),
-					"--cosmos-gas-prices",
-					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
-					"--cosmos-keyring-dir=/root/.umee",
-					"--cosmos-keyring=test",
-					"-y",
-				},
-			},
-			noRestart,
-		)
-		s.Require().NoError(err)
-
-		resources[i] = resource
-		s.T().Logf("started Umee validator Ethereum key registration: %s", resource.Container.ID)
-	}
-
-	for i, r := range resources {
-		var err error
-
-		// wait for the container to finish executing
-		container := r.Container
-		for container.State.Running {
-			time.Sleep(10 * time.Second)
-
-			container, err = s.dkrPool.Client.InspectContainer(r.Container.ID)
-			s.Require().NoError(err)
-		}
-
-		s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
-		s.T().Logf("registered Ethereum key for validator: %s", s.valResources[i].Container.Name[1:])
+	for i := range s.chain.validators {
+		s.registerOrchAddresses(i, "10photon")
 	}
 }
 

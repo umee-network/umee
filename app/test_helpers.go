@@ -2,9 +2,14 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/cosmos/cosmos-sdk/testutil/network"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -77,4 +82,36 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 	}
 
 	return app, GenesisState{}
+}
+
+// IntegrationTestNetworkConfig returns a networking configuration used for
+// integration tests using the SDK's in-process network test suite.
+func IntegrationTestNetworkConfig() network.Config {
+	cfg := network.DefaultConfig()
+	encCfg := MakeEncodingConfig()
+
+	cfg.Codec = encCfg.Marshaler
+	cfg.TxConfig = encCfg.TxConfig
+	cfg.LegacyAmino = encCfg.Amino
+	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
+	cfg.GenesisState = ModuleBasics.DefaultGenesis(encCfg.Marshaler)
+	cfg.BondDenom = BondDenom
+	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", BondDenom)
+	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
+		return New(
+			val.Ctx.Logger,
+			dbm.NewMemDB(),
+			nil,
+			true,
+			make(map[int64]bool),
+			val.Ctx.Config.RootDir,
+			0,
+			encCfg,
+			EmptyAppOptions{},
+			baseapp.SetPruning(storetypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
+			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+		)
+	}
+
+	return cfg
 }
