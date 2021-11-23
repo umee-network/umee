@@ -2,6 +2,8 @@ package oracle
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"sync"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/broadcast"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	umeetypes "github.com/umee-network/umee/x/oracle/types"
 )
 
 type Oracle struct {
@@ -87,6 +90,36 @@ func GetPrices() map[string]sdk.Dec {
 
 }
 
+func GetParams() (*umeetypes.QueryParamsResponse, error) {
+
+	var qc umeetypes.QueryClient
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	daemonResp, err := qc.Params(ctx, &umeetypes.QueryParamsRequest{})
+
+	if err != nil {
+		return nil, err
+	} else if daemonResp == nil {
+		return nil, err
+	}
+
+	return daemonResp, nil
+}
+
+func (o *Oracle) generateSalt(length int) (string, error) {
+	if length == 0 {
+		panic("Cannot generate empty salt")
+	}
+	n := length / 2
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
 func (o *Oracle) tick() {
 
 	pricesArray := GetPrices()
@@ -97,15 +130,69 @@ func (o *Oracle) tick() {
 
 	o.prices = pricesArray
 
-	/*
-		msg := &umeetypes.MsgAggregateExchangeRatePrevote{
-			Hash:      "hash", // Hash of prices from the oracle
-			Feeder:    o.broadcast.CosmosChain.OracleAddrString,
-			Validator: o.broadcast.CosmosChain.ValidatorAddr,
-		}
+	/*oracleParams, err := GetParams()
 
-		o.broadcast.Broadcast(msg)
-	*/
+	if err != nil {
+		panic(err)
+	}
+
+	/oracleVotePeriod := oracleParams.Params.VotePeriod*/
+
+	// Get latest block info and do some maths
+
+	exchangeRates := ""
+
+	for k, v := range o.prices {
+		if exchangeRates != "" {
+			exchangeRates = exchangeRates + "," + v.String() + k
+		}
+		if exchangeRates == "" {
+			exchangeRates = v.String() + k
+		}
+	}
+
+	salt, err := o.generateSalt(2)
+
+	if err != nil {
+		panic(err)
+	}
+
+	valAddr, err := sdk.ValAddressFromBech32(o.broadcast.CosmosChain.ValidatorAddrString)
+
+	if err != nil {
+		panic(err)
+	}
+
+	hash := umeetypes.GetAggregateVoteHash(salt, exchangeRates, o.broadcast.CosmosChain.ValidatorAddr)
+
+	msg := &umeetypes.MsgAggregateExchangeRatePrevote{
+		Hash:      hash.String(), // Hash of prices from the oracle
+		Feeder:    o.broadcast.CosmosChain.OracleAddrString,
+		Validator: valAddr.String(), //Hash accepts the actual addr
+	}
+
+	// Broadcast message
+
+	prevoteErr := o.broadcast.Broadcast(msg)
+	if prevoteErr != nil {
+		panic(prevoteErr)
+	}
+
+	// Vote
+
+	voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
+		Salt:          salt,
+		ExchangeRates: exchangeRates,
+		Feeder:        o.broadcast.CosmosChain.OracleAddrString,
+		Validator:     valAddr.String(),
+	}
+
+	// Broadcast message
+
+	voteErr := o.broadcast.Broadcast(voteMsg)
+	if voteErr != nil {
+		panic(voteErr)
+	}
 
 }
 

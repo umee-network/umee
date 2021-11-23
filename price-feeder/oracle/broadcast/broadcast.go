@@ -21,17 +21,18 @@ import (
 
 type (
 	CosmosChain struct {
-		ChainID          string
-		KeyringBackend   string
-		KeyringDir       string
-		TMRPC            string
-		RPCTimeout       time.Duration
-		OracleAddr       sdk.AccAddress
-		OracleAddrString string
-		ValidatorAddr    string
-		Encoding         umeeparams.EncodingConfig
-		GasPrices        string
-		GasAdjustment    float64
+		ChainID             string
+		KeyringBackend      string
+		KeyringDir          string
+		TMRPC               string
+		RPCTimeout          time.Duration
+		OracleAddr          sdk.AccAddress
+		OracleAddrString    string
+		ValidatorAddr       sdk.ValAddress
+		ValidatorAddrString string
+		Encoding            umeeparams.EncodingConfig
+		GasPrices           string
+		GasAdjustment       float64
 	}
 
 	passReader struct {
@@ -75,12 +76,13 @@ func NewCosmosChain(ChainID string,
 	TMRPC string,
 	RPCTimeout time.Duration,
 	OracleAddrString string,
-	ValidatorAddr string) (*CosmosChain, error) {
+	ValidatorAddrString string) (*CosmosChain, error) {
 
 	var chain CosmosChain
 
 	chain.ChainID = ChainID
 	chain.KeyringBackend = KeyringBackend
+	chain.KeyringDir = KeyringDir
 	chain.TMRPC = TMRPC
 	chain.RPCTimeout = RPCTimeout
 	var err error
@@ -89,9 +91,11 @@ func NewCosmosChain(ChainID string,
 	if err != nil {
 		return nil, err
 	}
-	chain.ValidatorAddr = ValidatorAddr
+	chain.ValidatorAddr = sdk.ValAddress(ValidatorAddrString)
+	chain.ValidatorAddrString = ValidatorAddrString
 	chain.Encoding = umeeapp.MakeEncodingConfig()
-
+	// Static gas adjustment
+	chain.GasAdjustment = 1.15
 	return &chain, nil
 
 }
@@ -121,9 +125,9 @@ func NewBroadcast(cc *CosmosChain, keyringPassphrase string) (*Broadcast, error)
 		return nil, err
 	}
 
-	keyInfo, keyerr := kr.KeyByAddress(cc.OracleAddr)
+	keyInfo, err := kr.KeyByAddress(cc.OracleAddr)
 
-	if keyerr != nil {
+	if err != nil {
 		return nil, err
 	}
 
