@@ -174,6 +174,16 @@ This also allows borrows to be liquidated completely in one transaction, once th
 
 The `LiquidationIncentive` parameter can be any value, varying from token to token, without affecting the close factor.
 
+## Querying for Eligible Liquidation Targets
+
+The offchain liquidation tool employed by liquidators will need several queries to be supported in order to periodically scan for and act on liquidation opportunities:
+
+- GetLiquidationTargets: Return a list of all borrower addresses that are over their borrow limits
+- GetTotalBorrows(borrower): Returns an `sdk.Coins` containing all assets borrowed by a single borrower
+- GetTotalCollateral(borrower): Returns an `sdk.Coins` containing all uTokens in borrower's balance that are enabled as collateral
+
+In addition to the above, the liquidation tool should be able to read any global or per-token parameters in order to finish calculating borrow limits and potential liquidation rewards.
+
 ## Consequences
 
 ### Positive
