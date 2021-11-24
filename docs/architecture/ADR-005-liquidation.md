@@ -10,9 +10,9 @@ Proposed
 
 ## Context
 
-When borrowers on Umee exceed their borrow limit due to interest accrual or asset price fluctuations, their positions become eligible for liquidation by other users.
+When borrowers on Umee exceed their borrow limit due to interest accrual or asset price fluctuations, their positions become eligible for liquidation.
 
-Such users (Liquidators) pay off part of all of the borrower's loan, in exchange for a value of collateral equal to the amount paid off plus an additional percentage (the liquidation incentive).
+Third party liquidators pay off part of all of the borrower's loan, in exchange for a value of collateral equal to the amount paid off plus an additional percentage (the liquidation incentive).
 
 We must build the features necessary for liquidators to continuously look out for liquidation opportunities, then carry out chosen liquidations.
 
@@ -26,13 +26,13 @@ There is no event type for when a borrower becomes a valid liquidation target, n
 
 ## Detailed Design
 
-A function `IsLiquidationEligible(borrowerAddr)` can be created to determine if a borrower is currently exceeding their borrow limit. Any liquidation attempt against a borrower not over their limit should fail.
+A function `IsLiquidationEligible(borrowerAddr)` can be created to determine if a borrower is currently exceeding their borrow limit. Any liquidation attempt against a borrower not over their limit will fail.
 
-A borrower's total borrower value (expressed in USD) can be computed from their total borrowed tokens and a price oracle.
+A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
 
-Their borrow limit is calculated similarly using borrower uToken balances, borrower collateral settings, current uToken exchange rates, and token collateral weights.
+Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights.
 
-### Basic Message Type
+### Message Types
 
 To implement the liquidation functionality of the Asset Facility, one message type is required:
 
