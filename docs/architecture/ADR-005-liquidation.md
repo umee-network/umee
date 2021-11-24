@@ -20,7 +20,7 @@ Additional parameters will be required which define the liquidation incentive an
 
 ## Decision
 
-Liquidation will require one message type (`MsgLiquidate`), one per-token parameter (`LiquidationIncentive`), and two global parameters (`MinimumCloseFactor` and `CompleteLiquidationThreshold`).
+Liquidation will require one message type `MsgLiquidate`, one per-token parameter `LiquidationIncentive`, and two global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold`.
 
 There is no event type for when a borrower becomes a valid liquidation target, nor a list of valid targets stored in the module. Liquidators will have to use an off-chain tool to query their nodes periodically.
 
