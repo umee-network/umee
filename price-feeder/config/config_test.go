@@ -26,6 +26,21 @@ func TestValidate(t *testing.T) {
 				CurrencyPairs: []config.CurrencyPair{
 					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
 				},
+				Account: config.Account{
+					From:      "fromaddr",
+					Validator: "valaddr",
+					ChainID:   "chain-id",
+				},
+				Keyring: config.Keyring{
+					Backend: "test",
+					Pass:    "salmon swamp front quit borrow",
+					Dir:     "/Users/username/.umee",
+				},
+				Rpc: config.Rpc{
+					TMRPCEndpoint: "http://localhost:26657",
+					GRPCEndpoint:  "localhost:9090",
+					RPCTimeout:    "100",
+				},
 			},
 			false,
 		},
@@ -119,6 +134,21 @@ providers = [
 	"kraken",
 	"binance"
 ]
+
+[account]
+from = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
+chain_id = "umee-local-testnet"
+
+[key_ring]
+backend = "test"
+dir = "/Users/username/.umee"
+pass = "salmon swamp front"
+
+[rpc]
+tmrpc_endpoint = "http://localhost:26657"
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100"
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
