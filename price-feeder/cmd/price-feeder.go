@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
+	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/router"
 	"golang.org/x/sync/errgroup"
 )
@@ -82,15 +84,48 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
 
+	// Set up chain
+
+	timeout, err := strconv.Atoi(cfg.Rpc.RPCTimeout)
+
+	if err != nil {
+		panic("Invalid gRPC Timeout in config file")
+	}
+
+	cosmosChain, err := client.NewCosmosChain(
+		cfg.ChainID,
+		cfg.Keyring.Backend,
+		cfg.Keyring.Dir,
+		cfg.Keyring.Pass,
+		cfg.Rpc.TMRPCEndpoint,
+		time.Duration(timeout),
+		cfg.Account.From,
+		cfg.Account.Validator,
+		cfg.GRPCEndpoint,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	oc, err := client.NewOracleClient(cosmosChain)
+
+	if err != nil {
+		panic(err)
+	}
+
+	oracle := oracle.New(oc)
+
 	g.Go(func() error {
+		// start the process that observes and publishes exchange prices
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
+		// Starts the process that calculates oracle prices
+		// And also votes
 		return startPriceOracle(ctx, oracle)
 	})
 

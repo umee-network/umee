@@ -41,6 +41,9 @@ type (
 	Config struct {
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Account       `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring       `toml:"key_ring" validate:"required,gt=0,dive,required"`
+		Rpc           `toml:"rpc" validate:"required,gt=0,dive,required"`
 	}
 
 	// Server defines the API server configuration.
@@ -58,6 +61,24 @@ type (
 		Base      string   `toml:"base" validate:"required"`
 		Quote     string   `toml:"quote" validate:"required"`
 		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+	}
+
+	Account struct {
+		ChainID   string `toml:"chain_id" validate:"required"`
+		From      string `toml:"from" validate:"required"`
+		Validator string `toml:"validator" validate:"required"`
+	}
+
+	Keyring struct {
+		Backend string `toml:"backend" validate:"required"`
+		Pass    string `toml:"pass" validate:"required"`
+		Dir     string `toml:"dir" validate:"required"`
+	}
+
+	Rpc struct {
+		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
+		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
+		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
 	}
 )
 
