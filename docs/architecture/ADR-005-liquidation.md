@@ -122,6 +122,7 @@ Once parameters are fetched, the final liquidation amounts (repayment and reward
    }
 
    // Collateral reward assuming current repayment amount
+   // given repay denom and amount, calculate the amount of rewardDenom that would have equal value
    rewardAmount := oracle.EquivalentValue(repayDenom, repayAmount, rewardDenom.ToBaseAssetDenom) // price oracle
    rewardAmount = rewardAmount / (GetExchangeRate(rewardDenom)) // apply uToken exchange rate
    rewardAmount = rewardAmount * (1 + liquidationIncentive) // apply liquidation incentive, e.g. +10%
