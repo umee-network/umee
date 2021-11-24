@@ -37,7 +37,8 @@ Their borrow limit is calculated similarly using the borrower's uToken balance, 
 To implement the liquidation functionality of the Asset Facility, one message type is required:
 
 ```go
-// MsgLiquidate - a liquidator targets a specific borrower, asset type, and collateral type for complete or partial liquidation
+// MsgLiquidate - a liquidator targets a specific borrower, asset type, and
+// collateral type for complete or partial liquidation
 type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
@@ -88,15 +89,15 @@ When a `MsgLiquidate` is received, the `x/leverage` module must determine if the
     collateralValue := oracle.TotalValue(collateral) // price oracle
 
     if borrowValue > collateralValue {
-      // borrower is over their borrow limit, and therefore eligible for liquidation
+      // borrower is over borrow limit, and therefore eligible for liquidation
     }
 ```
 
 After eligibility is confirmed, parameters governing liquidation can be fetched:
 
 ```go
-    // This function allows for the possibility of dynamic liquidation parameters
-    // based on collateral denomination, borrowed value, and collateral value
+    // This function allows for dynamic liquidation parameters based on
+    // collateral denomination, borrowed value, and collateral value
     liquidationIncentive, closeFactor := GetLiquidationParameters(rewardDenom, borrowValue, collateralValue)
 ```
 
@@ -121,8 +122,8 @@ Once parameters are fetched, the final liquidation amounts (repayment and reward
      repayAmount = repayAmount * partial
    }
 
-   // Collateral reward assuming current repayment amount
-   // given repay denom and amount, calculate the amount of rewardDenom that would have equal value
+   // Given repay denom and amount, calculate the amount of rewardDenom
+   // that would have equal value
    rewardAmount := oracle.EquivalentValue(repayDenom, repayAmount, rewardDenom.ToBaseAssetDenom) // price oracle
    rewardAmount = rewardAmount / (GetExchangeRate(rewardDenom)) // apply uToken exchange rate
    rewardAmount = rewardAmount * (1 + liquidationIncentive) // apply liquidation incentive, e.g. +10%
