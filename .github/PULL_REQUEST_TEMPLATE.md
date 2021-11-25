@@ -17,6 +17,7 @@ please add links to any relevant follow up issues.*
 I have...
 
 - [ ] included the correct [type prefix](https://github.com/commitizen/conventional-commit-types/blob/v3.0.0/index.json) in the PR title
+- [ ] added appropriate labels to the PR
 - [ ] added `!` to the type prefix if API or client breaking change
 - [ ] targeted the correct branch (see [PR Targeting](https://github.com/umee-network/umee/blob/main/CONTRIBUTING.md#pr-targeting))
 - [ ] provided a link to the relevant issue or specification
