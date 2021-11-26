@@ -123,8 +123,8 @@ func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 	return tx.BroadcastTx(*ctx, *factory, msgs...)
 }
 
-// Need to try this continually, since err is either timing issue or whitelist error
-// Ref : https://github.com/terra-money/core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/msg_server.go#L89
+// Broadcast vote - tries to vote within the next voting period
+// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
 
 	maxBlockHeight := nextBlockHeight + timeoutHeight
@@ -142,8 +142,7 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		return err
 	}
 
-	// Goes and tries to vote within the right block height
-	// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
+	// Re-try voting until timeout
 	for height == 0 && lastCheckHeight < maxBlockHeight {
 
 		latestBlockHeight, _ := rpcClient.GetChainHeight(*ctx)
