@@ -89,35 +89,37 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 
 	// Set up chain
 
-	timeout, err := strconv.Atoi(cfg.Rpc.RPCTimeout)
-
+	timeout, err := strconv.Atoi(cfg.RPC.RPCTimeout)
 	if err != nil {
-		panic("Invalid gRPC Timeout in config file")
+		trapSignal(cancel)
+		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
-	cosmosChain, err := client.NewCosmosChain(
+	gasAdjustment, err := strconv.ParseFloat(cfg.Gas.Adjustment, 32)
+	if err != nil {
+		trapSignal(cancel)
+		return fmt.Errorf("failed to parse Gas Adjustment: %w", err)
+	}
+
+	oracleClient, err := client.NewOracleClient(
 		cfg.ChainID,
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
 		cfg.Keyring.Pass,
-		cfg.Rpc.TMRPCEndpoint,
+		cfg.RPC.TMRPCEndpoint,
 		time.Duration(timeout),
-		cfg.Account.From,
+		cfg.Account.Address,
 		cfg.Account.Validator,
 		cfg.GRPCEndpoint,
+		gasAdjustment,
 	)
 
 	if err != nil {
-		panic(err)
+		trapSignal(cancel)
+		return err
 	}
 
-	oc, err := client.NewOracleClient(cosmosChain)
-
-	if err != nil {
-		panic(err)
-	}
-
-	oracle := oracle.New(oc)
+	oracle := oracle.New(oracleClient)
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices

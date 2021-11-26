@@ -2,16 +2,13 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +21,7 @@ import (
 )
 
 type (
-	CosmosChain struct {
+	OracleClient struct {
 		ChainID             string
 		KeyringBackend      string
 		KeyringDir          string
@@ -39,6 +36,7 @@ type (
 		GasPrices           string
 		GasAdjustment       float64
 		GRPCEndpoint        string
+		KeyringPassphrase   string
 	}
 
 	passReader struct {
@@ -46,6 +44,47 @@ type (
 		buf  *bytes.Buffer
 	}
 )
+
+func NewOracleClient(ChainID string,
+	KeyringBackend string,
+	KeyringDir string,
+	KeyringPass string,
+	TMRPC string,
+	RPCTimeout time.Duration,
+	OracleAddrString string,
+	ValidatorAddrString string,
+	GRPCEndpoint string,
+	GasAdjustment float64) (*OracleClient, error) {
+
+	oracleAddr, err := sdk.AccAddressFromBech32(OracleAddrString)
+
+	if err != nil {
+		return nil, err
+	}
+
+	validatorAddr := sdk.ValAddress(ValidatorAddrString)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &OracleClient{
+		ChainID:             ChainID,
+		KeyringBackend:      KeyringBackend,
+		KeyringDir:          KeyringDir,
+		KeyringPass:         KeyringPass,
+		TMRPC:               TMRPC,
+		RPCTimeout:          RPCTimeout,
+		OracleAddr:          oracleAddr,
+		OracleAddrString:    OracleAddrString,
+		ValidatorAddr:       validatorAddr,
+		ValidatorAddrString: ValidatorAddrString,
+		Encoding:            umeeapp.MakeEncodingConfig(),
+		GasAdjustment:       GasAdjustment,
+		GRPCEndpoint:        GRPCEndpoint,
+	}, nil
+
+}
 
 func newPassReader(pass string) io.Reader {
 	return &passReader{
@@ -65,38 +104,52 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-type OracleClient struct {
-	CosmosChain       CosmosChain
-	KeyringPassphrase string
-	Ctx               client.Context
-	Factory           tx.Factory
-}
-
 // Pre-vote and vote are separated out mainly for readability
 // Prevote doesn't need the timeout functionality that vote needs,
 // Because of the block timing validation on the node side
 
 // Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
-
 func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
-	return tx.BroadcastTx(oc.Ctx, oc.Factory, msgs...)
+	ctx, err := oc.CreateContext()
+	if err != nil {
+		return err
+	}
+
+	factory, err := oc.CreateTxFactory()
+	if err != nil {
+		return err
+	}
+
+	return tx.BroadcastTx(*ctx, *factory, msgs...)
 }
 
 // Need to try this continually, since err is either timing issue or whitelist error
 // Ref : https://github.com/terra-money/core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/msg_server.go#L89
+func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
 
-func (oc OracleClient) BroadcastVote(nextBlockHeight int, timeoutHeight int, msgs ...sdk.Msg) error {
-
-	var err error
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
-	height := 0
+	height := int64(0)
 
+	// Create Context, factory
+	ctx, err := oc.CreateContext()
+	if err != nil {
+		return err
+	}
+
+	factory, err := oc.CreateTxFactory()
+	if err != nil {
+		return err
+	}
+
+	// Goes through and re-tries the voting - this method can be
+	// Reached before the next appropriate voting period
+	// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 	for height == 0 && lastCheckHeight < maxBlockHeight {
 
 		time.Sleep(1500)
 
-		latestBlockHeight, _ := oc.GetHeight()
+		latestBlockHeight, _ := rpcClient.GetChainHeight(*ctx)
 
 		if latestBlockHeight <= lastCheckHeight {
 			continue
@@ -108,142 +161,69 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int, timeoutHeight int, msg
 		// wait for indexing (not sure; but just for safety)
 		time.Sleep(500)
 
-		err = tx.BroadcastTx(oc.Ctx, oc.Factory, msgs...)
+		err := tx.BroadcastTx(*ctx, *factory, msgs...)
 
 		if err != nil {
 			continue
 		} else {
-			height, err = oc.GetHeight()
+			height, err = rpcClient.GetChainHeight(*ctx)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 	}
 
-	return err
+	return nil
 
 }
 
-func (oc OracleClient) GetHeight() (int, error) {
+func (oc *OracleClient) CreateContext() (*client.Context, error) {
 
-	type header struct {
-		Height string `json:"height"`
-	}
-
-	type block struct {
-		Header header `json:"header"`
-	}
-
-	type result struct {
-		Block block `json:"block"`
-	}
-
-	type getBlockResponse struct {
-		Result result `json:"result"`
-	}
-
-	resp, err := http.Get(fmt.Sprintf("%s/block", oc.CosmosChain.TMRPC))
-	if err != nil {
-		return 0, err
-	}
-
-	//Create a variable of the same type as our model
-	var getBlockResp getBlockResponse
-	if err := json.NewDecoder(resp.Body).Decode(&getBlockResp); err != nil {
-		panic(err)
-	}
-
-	// Try to convert string to int
-	height, err := strconv.Atoi(getBlockResp.Result.Block.Header.Height)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return height, nil
-
-}
-
-func NewCosmosChain(ChainID string,
-	KeyringBackend string,
-	KeyringDir string,
-	KeyringPass string,
-	TMRPC string,
-	RPCTimeout time.Duration,
-	OracleAddrString string,
-	ValidatorAddrString string,
-	GRPCEndpoint string) (*CosmosChain, error) {
-
-	var chain CosmosChain
-
-	chain.ChainID = ChainID
-	chain.KeyringBackend = KeyringBackend
-	chain.KeyringDir = KeyringDir
-	chain.KeyringPass = KeyringPass
-	chain.TMRPC = TMRPC
-	chain.RPCTimeout = RPCTimeout
-	var err error
-	chain.OracleAddr, err = sdk.AccAddressFromBech32(OracleAddrString)
-	chain.OracleAddrString = OracleAddrString
-	if err != nil {
-		return nil, err
-	}
-	chain.ValidatorAddr = sdk.ValAddress(ValidatorAddrString)
-	chain.ValidatorAddrString = ValidatorAddrString
-	chain.Encoding = umeeapp.MakeEncodingConfig()
-	// Static gas adjustment
-	chain.GasAdjustment = 1.15
-	chain.GRPCEndpoint = GRPCEndpoint
-	return &chain, nil
-
-}
-
-func NewOracleClient(cc *CosmosChain) (*OracleClient, error) {
 	var keyringInput io.Reader
-	if len(cc.KeyringPass) > 0 {
-		keyringInput = newPassReader(cc.KeyringPass)
+	if len(oc.KeyringPass) > 0 {
+		keyringInput = newPassReader(oc.KeyringPass)
 	} else {
 		keyringInput = os.Stdin
 	}
 
-	kr, err := keyring.New("oracle", cc.KeyringBackend, cc.KeyringDir, keyringInput)
+	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput)
 	if err != nil {
 		return nil, err
 	}
 
-	httpClient, err := tmjsonclient.DefaultHTTPClient(cc.TMRPC)
+	httpClient, err := tmjsonclient.DefaultHTTPClient(oc.TMRPC)
 	if err != nil {
 		return nil, err
 	}
 
-	httpClient.Timeout = cc.RPCTimeout
+	httpClient.Timeout = oc.RPCTimeout
 
-	tmRPC, err := rpchttp.NewWithClient(cc.TMRPC, "/websocket", httpClient)
+	tmRPC, err := rpchttp.NewWithClient(oc.TMRPC, "/websocket", httpClient)
 	if err != nil {
 		return nil, err
 	}
 
-	keyInfo, err := kr.KeyByAddress(cc.OracleAddr)
+	keyInfo, err := kr.KeyByAddress(oc.OracleAddr)
 
 	if err != nil {
 		return nil, err
 	}
 
 	clientCtx := client.Context{
-		ChainID:           cc.ChainID,
-		JSONCodec:         cc.Encoding.Marshaler,
-		InterfaceRegistry: cc.Encoding.InterfaceRegistry,
+		ChainID:           oc.ChainID,
+		JSONCodec:         oc.Encoding.Marshaler,
+		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
-		TxConfig:          cc.Encoding.TxConfig,
+		TxConfig:          oc.Encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             cc.Encoding.Marshaler,
-		LegacyAmino:       cc.Encoding.Amino,
+		Codec:             oc.Encoding.Marshaler,
+		LegacyAmino:       oc.Encoding.Amino,
 		Input:             os.Stdin,
-		NodeURI:           cc.TMRPC,
+		NodeURI:           oc.TMRPC,
 		Client:            tmRPC,
 		Keyring:           kr,
-		FromAddress:       cc.OracleAddr,
+		FromAddress:       oc.OracleAddr,
 		FromName:          keyInfo.GetName(),
 		From:              keyInfo.GetName(),
 		OutputFormat:      "json",
@@ -254,21 +234,27 @@ func NewOracleClient(cc *CosmosChain) (*OracleClient, error) {
 		SkipConfirm:       true,
 	}
 
+	return &clientCtx, nil
+
+}
+
+func (oc *OracleClient) CreateTxFactory() (*tx.Factory, error) {
+
+	clientCtx, err := oc.CreateContext()
+
+	if err != nil {
+		return nil, err
+	}
+
 	txFactory := tx.Factory{}.
 		WithAccountRetriever(clientCtx.AccountRetriever).
-		WithChainID(cc.ChainID).
+		WithChainID(oc.ChainID).
 		WithTxConfig(clientCtx.TxConfig).
-		WithGasAdjustment(cc.GasAdjustment).
-		WithGasPrices(cc.GasPrices).
+		WithGasAdjustment(oc.GasAdjustment).
+		WithGasPrices(oc.GasPrices).
 		WithKeybase(clientCtx.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
 		WithSimulateAndExecute(true)
 
-	oc := OracleClient{
-		Factory:     txFactory,
-		Ctx:         clientCtx,
-		CosmosChain: *cc,
-	}
-
-	return &oc, nil
+	return &txFactory, nil
 }

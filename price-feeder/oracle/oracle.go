@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -93,8 +94,8 @@ func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
 
 	// Create a connection to the gRPC server.
 	grpcConn, err := grpc.Dial(
-		o.oracleClient.CosmosChain.GRPCEndpoint, // your gRPC server address.
-		grpc.WithInsecure(),                     // The Cosmos SDK doesn't support any transport security mechanism.
+		o.oracleClient.GRPCEndpoint, // your gRPC server address.
+		grpc.WithInsecure(),         // The Cosmos SDK doesn't support any transport security mechanism.
 	)
 
 	if err != nil {
@@ -149,6 +150,12 @@ var previousPrevote *PreviousPrevote = nil
 
 func (o *Oracle) tick() {
 
+	ctx, err := o.oracleClient.CreateContext()
+
+	if err != nil {
+		panic(err)
+	}
+
 	pricesArray := GetPrices()
 
 	if pricesArray == nil {
@@ -163,7 +170,7 @@ func (o *Oracle) tick() {
 		panic(err)
 	}
 
-	blockHeight, err := o.oracleClient.GetHeight()
+	blockHeight, err := rpcClient.GetChainHeight(*ctx)
 
 	if err != nil || blockHeight == 0 {
 		panic(err)
@@ -172,14 +179,14 @@ func (o *Oracle) tick() {
 	// Get oracle vote period, next block height,
 	// Current vote period, index in vote period
 
-	oracleVotePeriod := oracleParams.Params.VotePeriod
+	oracleVotePeriod := int64(oracleParams.Params.VotePeriod)
 	nextBlockHeight := blockHeight + 1
 	currentVotePeriod := math.Floor(float64(nextBlockHeight) / float64(oracleVotePeriod))
-	indexInVotePeriod := nextBlockHeight % int(oracleVotePeriod)
+	indexInVotePeriod := nextBlockHeight % oracleVotePeriod
 	// Skip until new voting period
 	// Skip when index [0, oracleVotePeriod - 1] is bigger than oracleVotePeriod - 2 or index is 0
 	if (previousVotePeriod != 0 && currentVotePeriod == previousVotePeriod) ||
-		int(oracleVotePeriod)-indexInVotePeriod < 2 {
+		oracleVotePeriod-indexInVotePeriod < 2 {
 		return
 	}
 
@@ -211,17 +218,17 @@ func (o *Oracle) tick() {
 		panic(err)
 	}
 
-	valAddr, err := sdk.ValAddressFromBech32(o.oracleClient.CosmosChain.ValidatorAddrString)
+	valAddr, err := sdk.ValAddressFromBech32(o.oracleClient.ValidatorAddrString)
 
 	if err != nil {
 		panic(err)
 	}
 
-	hash := umeetypes.GetAggregateVoteHash(salt, exchangeRates, o.oracleClient.CosmosChain.ValidatorAddr)
+	hash := umeetypes.GetAggregateVoteHash(salt, exchangeRates, o.oracleClient.ValidatorAddr)
 
 	msg := &umeetypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // Hash of prices from the oracle
-		Feeder:    o.oracleClient.CosmosChain.OracleAddrString,
+		Feeder:    o.oracleClient.OracleAddrString,
 		Validator: valAddr.String(), //Hash accepts the actual addr
 	}
 
@@ -237,7 +244,7 @@ func (o *Oracle) tick() {
 			panic(err)
 		}
 
-		currentHeight, err := o.oracleClient.GetHeight()
+		currentHeight, err := rpcClient.GetChainHeight(*ctx)
 
 		if err != nil {
 			panic(err)
@@ -259,14 +266,14 @@ func (o *Oracle) tick() {
 		voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
 			Salt:          previousPrevote.Salt,
 			ExchangeRates: previousPrevote.ExchangeRates,
-			Feeder:        o.oracleClient.CosmosChain.OracleAddrString,
+			Feeder:        o.oracleClient.OracleAddrString,
 			Validator:     valAddr.String(),
 		}
 
 		// Broadcast message
 
 		err := o.oracleClient.BroadcastVote(nextBlockHeight,
-			int(oracleVotePeriod)-indexInVotePeriod,
+			oracleVotePeriod-indexInVotePeriod,
 			voteMsg)
 
 		if err != nil {
