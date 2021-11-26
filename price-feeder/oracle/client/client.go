@@ -142,12 +142,9 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		return err
 	}
 
-	// Goes through and re-tries the voting - this method can be
-	// Reached before the next appropriate voting period
+	// Goes and tries to vote within the right block height
 	// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 	for height == 0 && lastCheckHeight < maxBlockHeight {
-
-		time.Sleep(1500)
 
 		latestBlockHeight, _ := rpcClient.GetChainHeight(*ctx)
 
@@ -158,19 +155,17 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		// set last check height to latest block height
 		lastCheckHeight = latestBlockHeight
 
-		// wait for indexing (not sure; but just for safety)
-		time.Sleep(500)
-
 		err := tx.BroadcastTx(*ctx, *factory, msgs...)
 
 		if err != nil {
-			continue
-		} else {
-			height, err = rpcClient.GetChainHeight(*ctx)
-			if err != nil {
-				return err
-			}
+			return err
 		}
+
+		height, err = rpcClient.GetChainHeight(*ctx)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil
