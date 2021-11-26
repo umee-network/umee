@@ -128,7 +128,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	g.Go(func() error {
 		// Starts the process that calculates oracle prices
 		// And also votes
-		return startPriceOracle(ctx, oracle)
+		return startPriceOracle(ctx, oracle, cancel)
 	})
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
@@ -202,10 +202,14 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 	}
 }
 
-func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+func startPriceOracle(ctx context.Context, oracle *oracle.Oracle, cancel context.CancelFunc) error {
 	go func() {
 		log.Info().Msg("starting price-feeder oracle...")
-		oracle.Start(ctx)
+		err := oracle.Start(ctx)
+		if err != nil {
+			log.Err(err).Msg("error starting the price-feeder oracle")
+			cancel()
+		}
 	}()
 
 	<-ctx.Done()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"math"
 	"sync"
 	"time"
@@ -46,7 +47,7 @@ var denoms = []string{"ATOMUSDT"}
 // Should return a prices map that we can set
 // The oracle to. Needs to touch multiple providers,
 // And then average out.
-func GetPrices() map[string]sdk.Dec {
+func GetPrices() (map[string]sdk.Dec, error) {
 
 	binanceProvider := provider.NewBinanceProvider()
 	krakenProvider := provider.NewKrakenProvider()
@@ -58,7 +59,7 @@ func GetPrices() map[string]sdk.Dec {
 	binancePrices, err := binanceProvider.GetTickerPrices(denoms...)
 
 	if binancePrices == nil || err != nil {
-		panic("Unable to get binance prices")
+		return nil, err
 	}
 
 	wg.Done()
@@ -68,7 +69,7 @@ func GetPrices() map[string]sdk.Dec {
 	krackenPrices, bigErr := krakenProvider.GetTickerPrices(denoms...)
 
 	if krackenPrices == nil || bigErr != nil {
-		panic("Unable to get kracken prices")
+		return nil, err
 	}
 
 	wg.Done()
@@ -87,7 +88,7 @@ func GetPrices() map[string]sdk.Dec {
 		averages[v].Mul(half)
 	}
 
-	return averages
+	return averages, nil
 }
 
 func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
@@ -99,7 +100,7 @@ func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
 	)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	defer grpcConn.Close()
@@ -120,7 +121,7 @@ func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
 
 func (o *Oracle) generateSalt(length int) (string, error) {
 	if length == 0 {
-		panic("Cannot generate empty salt")
+		return "", fmt.Errorf("Can't generate empty salt")
 	}
 	n := length / 2
 	bytes := make([]byte, n)
@@ -148,18 +149,18 @@ func NewPreviousPrevote() *PreviousPrevote {
 
 var previousPrevote *PreviousPrevote = nil
 
-func (o *Oracle) tick() {
+func (o *Oracle) tick() error {
 
 	ctx, err := o.oracleClient.CreateContext()
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	pricesArray := GetPrices()
+	pricesArray, err := GetPrices()
 
-	if pricesArray == nil {
-		panic("Unable to get prices")
+	if err != nil {
+		return err
 	}
 
 	o.prices = pricesArray
@@ -167,13 +168,13 @@ func (o *Oracle) tick() {
 	oracleParams, err := o.GetParams()
 
 	if err != nil || oracleParams == nil {
-		panic(err)
+		return err
 	}
 
 	blockHeight, err := rpcClient.GetChainHeight(*ctx)
 
 	if err != nil || blockHeight == 0 {
-		panic(err)
+		return err
 	}
 
 	// Get oracle vote period, next block height,
@@ -187,7 +188,7 @@ func (o *Oracle) tick() {
 	// Skip when index [0, oracleVotePeriod - 1] is bigger than oracleVotePeriod - 2 or index is 0
 	if (previousVotePeriod != 0 && currentVotePeriod == previousVotePeriod) ||
 		oracleVotePeriod-indexInVotePeriod < 2 {
-		return
+		return nil
 	}
 
 	// If we're past the voting period we needed to hit,
@@ -196,7 +197,7 @@ func (o *Oracle) tick() {
 		// Reset
 		previousVotePeriod = 0
 		previousPrevote = nil
-		return
+		return nil
 	}
 
 	isPrevoteOnlyTx := previousPrevote == nil
@@ -215,13 +216,13 @@ func (o *Oracle) tick() {
 	salt, err := o.generateSalt(2)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(o.oracleClient.ValidatorAddrString)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	hash := umeetypes.GetAggregateVoteHash(salt, exchangeRates, o.oracleClient.ValidatorAddr)
@@ -237,17 +238,17 @@ func (o *Oracle) tick() {
 
 		err := o.oracleClient.BroadcastPrevote(msg)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		currentHeight, err := rpcClient.GetChainHeight(*ctx)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		previousVotePeriod = math.Floor(float64(currentHeight) / float64(oracleVotePeriod))
@@ -282,27 +283,30 @@ func (o *Oracle) tick() {
 			// We want to just reset and handle this silently :
 			previousPrevote = nil
 			previousVotePeriod = 0
-			return
+			return nil
 		}
 
 		previousPrevote = nil
 
 	}
 
+	return nil
+
 }
 
-func (o *Oracle) Start(ctx context.Context) {
+func (o *Oracle) Start(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
 			o.closer.Close()
-			return
 
 		default:
-			o.tick()
+			err := o.tick()
+			if err != nil {
+				return err
+			}
 			o.lastPriceSyncTS = time.Now()
 			time.Sleep(10 * time.Millisecond)
-
 		}
 	}
 }
