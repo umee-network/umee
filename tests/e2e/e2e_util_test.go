@@ -452,7 +452,11 @@ func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
 func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 	var zeroCoin sdk.Coin
 
-	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s/%s", endpoint, addr, denom))
+	path := fmt.Sprintf(
+		"%s/cosmos/bank/v1beta1/balances/by_denom?address=%s&denom=%s",
+		endpoint, addr, denom,
+	)
+	resp, err := http.Get(path)
 	if err != nil {
 		return zeroCoin, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}
