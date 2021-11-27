@@ -59,22 +59,10 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
 
-		// NOTE: We have to query for all balances because currently querying by
-		// IBC denomination will result in an API error due to the denomination not
-		// being URI handled.
-		var token sdk.Coin
-		balances, err := queryUmeeAllBalances(umeeAPIEndpoint, fromAddr.String())
+		// require the sender's (validator) balance decreased
+		balance, err := queryUmeeDenomBalance(umeeAPIEndpoint, fromAddr.String(), ibcStakeDenom)
 		s.Require().NoError(err)
-
-		for _, c := range balances {
-			if c.Denom == ibcStakeDenom {
-				token = c
-				break
-			}
-		}
-
-		s.Require().Equal(ibcStakeDenom, token.Denom)
-		s.Require().Equal(int64(3299999693), token.Amount.Int64())
+		s.Require().Equal(int64(3299999693), balance.Amount.Int64())
 
 		// require the Ethereum recipient balance increased
 		var latestBalance int
@@ -112,22 +100,12 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		var latestBalance int64
 		s.Require().Eventuallyf(
 			func() bool {
-				// NOTE: We have to query for all balances because currently querying by
-				// IBC denomination will result in an API error due to the denomination
-				// not being URI handled.
-				var token sdk.Coin
-				balances, err := queryUmeeAllBalances(umeeAPIEndpoint, toAddr.String())
-				s.Require().NoError(err)
-
-				for _, c := range balances {
-					if c.Denom == ibcStakeDenom {
-						token = c
-						break
-					}
+				balance, err := queryUmeeDenomBalance(umeeAPIEndpoint, toAddr.String(), ibcStakeDenom)
+				if err != nil {
+					return false
 				}
 
-				latestBalance = token.Amount.Int64()
-
+				latestBalance = balance.Amount.Int64()
 				return latestBalance == expBalance
 			},
 			2*time.Minute,
