@@ -453,7 +453,7 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 	var zeroCoin sdk.Coin
 
 	path := fmt.Sprintf(
-		"%s/cosmos/bank/v1beta1/balances/by_denom?address=%s&denom=%s",
+		"%s/cosmos/bank/v1beta1/balances/%s/by_denom?denom=%s",
 		endpoint, addr, denom,
 	)
 	resp, err := http.Get(path)
