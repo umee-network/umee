@@ -82,11 +82,13 @@ When a `MsgLiquidate` is received, the `x/leverage` module must determine if the
     // from MsgLiquidate (liquidatorAddr, borrowerAddr, repayDenom, repayAmount, rewardDenom)
 
     borrowed := GetTotalBorrows(borrowerAddr)
-    borrowValue := oracle.TotalValue(borrowed) // price oracle
+    // sum over the value of every sdk.Coin in the total borrowed sdk.Coins
+    borrowValue := TotalValue(borrowed) // price oracle
 
     collateral := GetCollateralBalance(borrowerAddr)
     collateral = MultiplyByCollateralWeight(collateral)
-    collateralValue := oracle.TotalValue(collateral) // price oracle
+    // sum over the value of every sdk.Coin in the total collateral sdk.Coins
+    collateralValue := TotalValue(collateral) // price oracle
 
     if borrowValue > collateralValue {
       // borrower is over borrow limit, and therefore eligible for liquidation
@@ -124,7 +126,7 @@ Once parameters are fetched, the final liquidation amounts (repayment and reward
 
    // Given repay denom and amount, calculate the amount of rewardDenom
    // that would have equal value
-   rewardAmount := oracle.EquivalentValue(repayDenom, repayAmount, rewardDenom.ToBaseAssetDenom) // price oracle
+   rewardAmount := EquivalentValue(repayDenom, repayAmount, rewardDenom.ToBaseAssetDenom) // price oracle
    rewardAmount = rewardAmount / (GetExchangeRate(rewardDenom)) // apply uToken exchange rate
    rewardAmount = rewardAmount * (1 + liquidationIncentive) // apply liquidation incentive, e.g. +10%
 
