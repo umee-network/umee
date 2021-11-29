@@ -20,9 +20,9 @@ import (
 	umeeparams "github.com/umee-network/umee/app/params"
 )
 
+// OracleClient defines a structure that interfaces
+// with the umee node
 type (
-	//OracleClient defines a structure that interfaces
-	//with the umee node
 	OracleClient struct {
 		ChainID             string
 		KeyringBackend      string
