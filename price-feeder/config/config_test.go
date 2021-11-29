@@ -41,9 +41,7 @@ func TestValidate(t *testing.T) {
 					GRPCEndpoint:  "localhost:9090",
 					RPCTimeout:    "100",
 				},
-				Gas: config.Gas{
-					Adjustment: "1.5",
-				},
+				GasAdjustment: "1.5",
 			},
 			false,
 		},
@@ -116,6 +114,8 @@ func TestParseConfig_Valid(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 
 	content := []byte(`
+gas_adjustment = "1.5"
+
 [server]
 listen_addr = "0.0.0.0:99999"
 read_timeout = "20s"
@@ -152,9 +152,6 @@ pass = "salmon swamp front"
 tmrpc_endpoint = "http://localhost:26657"
 grpc_endpoint = "localhost:9090"
 rpc_timeout = "100"
-
-[gas]
-adjustment = "100"
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)

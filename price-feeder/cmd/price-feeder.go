@@ -87,22 +87,21 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
 
-	// Set up chain
+	// listen for and trap any OS signal to gracefully shutdown and exit
+	trapSignal(cancel)
 
 	timeout, err := strconv.Atoi(cfg.RPC.RPCTimeout)
 	if err != nil {
-		trapSignal(cancel)
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
-	gasAdjustment, err := strconv.ParseFloat(cfg.Gas.Adjustment, 32)
+	gasAdjustment, err := strconv.ParseFloat(cfg.GasAdjustment, 32)
 	if err != nil {
-		trapSignal(cancel)
 		return fmt.Errorf("failed to parse Gas Adjustment: %w", err)
 	}
 
 	oracleClient, err := client.NewOracleClient(
-		cfg.ChainID,
+		cfg.Account.ChainID,
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
 		cfg.Keyring.Pass,
@@ -110,12 +109,10 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		time.Duration(timeout),
 		cfg.Account.Address,
 		cfg.Account.Validator,
-		cfg.GRPCEndpoint,
+		cfg.RPC.GRPCEndpoint,
 		gasAdjustment,
 	)
-
 	if err != nil {
-		trapSignal(cancel)
 		return err
 	}
 
@@ -126,13 +123,9 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
-		// Starts the process that calculates oracle prices
-		// And also votes
-		return startPriceOracle(ctx, oracle, cancel)
+		// start the process that calculates oracle prices and votes
+		return startPriceOracle(ctx, oracle)
 	})
-
-	// listen for and trap any OS signal to gracefully shutdown and exit
-	trapSignal(cancel)
 
 	// Block main process until all spawned goroutines have gracefully exited and
 	// signal has been captured in the main process or if an error occurs.
@@ -202,18 +195,23 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 	}
 }
 
-func startPriceOracle(ctx context.Context, oracle *oracle.Oracle, cancel context.CancelFunc) error {
+func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+	srvErrCh := make(chan error, 1)
+
 	go func() {
 		log.Info().Msg("starting price-feeder oracle...")
-		err := oracle.Start(ctx)
-		if err != nil {
-			log.Err(err).Msg("error starting the price-feeder oracle")
-			cancel()
-		}
+		srvErrCh <- oracle.Start(ctx)
 	}()
 
-	<-ctx.Done()
-	log.Info().Msg("shutting down price-feeder oracle...")
-	oracle.Stop()
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info().Msg("shutting down price-feeder oracle...")
+			return nil
+		case err := <-srvErrCh:
+			log.Err(err).Msg("error starting the price-feeder oracle")
+			oracle.Stop()
+			return err
+		}
+	}
 }

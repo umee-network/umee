@@ -41,10 +41,10 @@ type (
 	Config struct {
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Account       `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       `toml:"key_ring" validate:"required,gt=0,dive,required"`
-		RPC           `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Gas           `toml:"gas" validate:"required,gt=0,dive,required"`
+		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring        `toml:"key_ring" validate:"required,gt=0,dive,required"`
+		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
+		GasAdjustment string         `toml:"gas_adjustment" validate:"required"`
 	}
 
 	// Server defines the API server configuration.
@@ -80,10 +80,6 @@ type (
 		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
 		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
 		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
-	}
-
-	Gas struct {
-		Adjustment string `toml:"adjustment" validate:"required"`
 	}
 )
 
