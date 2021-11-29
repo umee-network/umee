@@ -65,7 +65,6 @@ func getVersionCmd() *cobra.Command {
 			default:
 				bz, err = yaml.Marshal(&verInfo)
 			}
-
 			if err != nil {
 				return err
 			}

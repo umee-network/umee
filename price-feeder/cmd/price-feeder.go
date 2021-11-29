@@ -100,7 +100,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		cfg.Keyring.Dir,
 		cfg.Keyring.Pass,
 		cfg.RPC.TMRPCEndpoint,
-		time.Duration(timeout),
+		timeout,
 		cfg.Account.Address,
 		cfg.Account.Validator,
 		cfg.RPC.GRPCEndpoint,
@@ -110,7 +110,8 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New(oracleClient)
+	oracle := oracle.New(oracleClient,
+		cfg.CurrencyPairs)
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices

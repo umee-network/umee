@@ -21,6 +21,8 @@ import (
 )
 
 type (
+	//OracleClient defines a structure that interfaces
+	//with the umee node
 	OracleClient struct {
 		ChainID             string
 		KeyringBackend      string
@@ -57,13 +59,11 @@ func NewOracleClient(ChainID string,
 	GasAdjustment float64) (*OracleClient, error) {
 
 	oracleAddr, err := sdk.AccAddressFromBech32(OracleAddrString)
-
 	if err != nil {
 		return nil, err
 	}
 
 	validatorAddr := sdk.ValAddress(ValidatorAddrString)
-
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,6 @@ func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 // Broadcast vote - tries to vote within the next voting period
 // Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
-
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
 	height := int64(0)
@@ -155,7 +154,6 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		lastCheckHeight = latestBlockHeight
 
 		err := tx.BroadcastTx(*ctx, *factory, msgs...)
-
 		if err != nil {
 			return err
 		}
@@ -172,7 +170,6 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 }
 
 func (oc *OracleClient) CreateContext() (*client.Context, error) {
-
 	var keyringInput io.Reader
 	if len(oc.KeyringPass) > 0 {
 		keyringInput = newPassReader(oc.KeyringPass)
@@ -198,7 +195,6 @@ func (oc *OracleClient) CreateContext() (*client.Context, error) {
 	}
 
 	keyInfo, err := kr.KeyByAddress(oc.OracleAddr)
-
 	if err != nil {
 		return nil, err
 	}
@@ -233,9 +229,7 @@ func (oc *OracleClient) CreateContext() (*client.Context, error) {
 }
 
 func (oc *OracleClient) CreateTxFactory() (*tx.Factory, error) {
-
 	clientCtx, err := oc.CreateContext()
-
 	if err != nil {
 		return nil, err
 	}

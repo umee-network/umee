@@ -13,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
@@ -27,13 +28,26 @@ type Oracle struct {
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
 	oracleClient    *client.OracleClient
+	providerPairs   map[string][]string
 }
 
-func New(oc *client.OracleClient) *Oracle {
+func New(oc *client.OracleClient,
+	CurrencyPairs []config.CurrencyPair) *Oracle {
+
+	providerPairs := make(map[string][]string)
+
+	for _, pair := range CurrencyPairs {
+		for _, provider := range pair.Providers {
+			providerPairs[provider] = append(providerPairs[provider], pair.Base+pair.Quote)
+		}
+
+	}
+
 	return &Oracle{
-		logger:       log.With().Str("module", "oracle").Logger(),
-		closer:       pfsync.NewCloser(),
-		oracleClient: oc,
+		logger:        log.With().Str("module", "oracle").Logger(),
+		closer:        pfsync.NewCloser(),
+		oracleClient:  oc,
+		providerPairs: providerPairs,
 	}
 }
 
@@ -42,63 +56,70 @@ func (o *Oracle) Stop() {
 	<-o.closer.Done()
 }
 
-var denoms = []string{"ATOMUSDT"}
+// SetPrices retrieve all the prices from
+// our set of providers as determined in the config,
+// average them out, and update the oracle object
+func (o *Oracle) SetPrices() error {
 
-// Should return a prices map that we can set
-// The oracle to. Needs to touch multiple providers,
-// And then average out.
-func GetPrices() (map[string]sdk.Dec, error) {
-
-	binanceProvider := provider.NewBinanceProvider()
-	krakenProvider := provider.NewKrakenProvider()
-
+	providerPrices := make(map[string]map[string]sdk.Dec)
 	wg := new(sync.WaitGroup)
 
-	wg.Add(1)
+	for providerName, tickerList := range o.providerPairs {
+		var priceProvider provider.Provider
+		wg.Add(1)
 
-	binancePrices, err := binanceProvider.GetTickerPrices(denoms...)
+		switch providerName {
+		case "binance":
+			priceProvider = provider.NewBinanceProvider()
+		case "kraken":
+			priceProvider = provider.NewKrakenProvider()
+		}
 
-	if binancePrices == nil || err != nil {
-		return nil, err
+		prices, err := priceProvider.GetTickerPrices(tickerList...)
+		if err != nil {
+			return err
+		}
+
+		providerPrices[providerName] = prices
+		wg.Done()
 	}
-
-	wg.Done()
-
-	wg.Add(1)
-
-	krackenPrices, bigErr := krakenProvider.GetTickerPrices(denoms...)
-
-	if krackenPrices == nil || bigErr != nil {
-		return nil, err
-	}
-
-	wg.Done()
 
 	wg.Wait()
 
-	// Create new map for averages
+	// consolidate the different provider maps into one
+	// for each exchange rate
+	var priceAverages = make(map[string]sdk.Dec)
+	var priceCounts = make(map[string]int)
 
-	var averages = make(map[string]sdk.Dec, len(denoms))
-
-	half := sdk.MustNewDecFromStr("0.50")
-
-	for _, v := range denoms {
-		averages[v] = binancePrices[v]
-		averages[v].Add(krackenPrices[v])
-		averages[v].Mul(half)
+	for _, provider := range providerPrices {
+		for k, price := range provider {
+			if _, ok := priceAverages[k]; !ok {
+				priceAverages[k] = sdk.NewDec(0)
+			}
+			priceAverages[k] = priceAverages[k].Add(price)
+			priceCounts[k]++
+		}
 	}
 
-	return averages, nil
+	// Average out each one
+	for k, average := range priceAverages {
+		floatToMultiply := float64(1) / float64(priceCounts[k])
+		stringToMultiply := fmt.Sprintf("%f", floatToMultiply)
+		decToMultiply := sdk.MustNewDecFromStr(stringToMultiply)
+		average = average.Mul(decToMultiply)
+	}
+
+	o.prices = priceAverages
+
+	return nil
 }
 
 func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
-
 	// Create a connection to the gRPC server.
 	grpcConn, err := grpc.Dial(
 		o.oracleClient.GRPCEndpoint, // your gRPC server address.
 		grpc.WithInsecure(),         // The Cosmos SDK doesn't support any transport security mechanism.
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -110,18 +131,16 @@ func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
 	defer cancel()
 
 	queryResponse, err := queryClient.Params(ctx, &umeetypes.QueryParamsRequest{})
-
 	if err != nil {
 		return nil, err
-	} else if queryResponse == nil {
-		return nil, err
 	}
+
 	return queryResponse, nil
 }
 
 func (o *Oracle) generateSalt(length int) (string, error) {
 	if length == 0 {
-		return "", fmt.Errorf("Can't generate empty salt")
+		return "", fmt.Errorf("can't generate empty salt")
 	}
 	n := length / 2
 	bytes := make([]byte, n)
@@ -150,29 +169,22 @@ func NewPreviousPrevote() *PreviousPrevote {
 var previousPrevote *PreviousPrevote = nil
 
 func (o *Oracle) tick() error {
-
 	ctx, err := o.oracleClient.CreateContext()
-
 	if err != nil {
 		return err
 	}
 
-	pricesArray, err := GetPrices()
-
+	err = o.SetPrices()
 	if err != nil {
 		return err
 	}
-
-	o.prices = pricesArray
 
 	oracleParams, err := o.GetParams()
-
 	if err != nil || oracleParams == nil {
 		return err
 	}
 
 	blockHeight, err := rpcClient.GetChainHeight(*ctx)
-
 	if err != nil || blockHeight == 0 {
 		return err
 	}
@@ -214,13 +226,11 @@ func (o *Oracle) tick() error {
 	}
 
 	salt, err := o.generateSalt(2)
-
 	if err != nil {
 		return err
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(o.oracleClient.ValidatorAddrString)
-
 	if err != nil {
 		return err
 	}
@@ -241,12 +251,7 @@ func (o *Oracle) tick() error {
 			return err
 		}
 
-		if err != nil {
-			return err
-		}
-
 		currentHeight, err := rpcClient.GetChainHeight(*ctx)
-
 		if err != nil {
 			return err
 		}
@@ -276,7 +281,6 @@ func (o *Oracle) tick() error {
 		err := o.oracleClient.BroadcastVote(nextBlockHeight,
 			oracleVotePeriod-indexInVotePeriod,
 			voteMsg)
-
 		if err != nil {
 			// This can happen if the voting is off-timed,
 			// Or the voting denoms are not currently on whitelist.
