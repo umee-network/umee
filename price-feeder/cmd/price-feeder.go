@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -90,14 +89,9 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	trapSignal(cancel)
 
-	timeout, err := strconv.Atoi(cfg.RPC.RPCTimeout)
+	timeout, err := time.ParseDuration(cfg.RPC.RPCTimeout)
 	if err != nil {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
-	}
-
-	gasAdjustment, err := strconv.ParseFloat(cfg.GasAdjustment, 32)
-	if err != nil {
-		return fmt.Errorf("failed to parse Gas Adjustment: %w", err)
 	}
 
 	oracleClient, err := client.NewOracleClient(
@@ -110,7 +104,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		cfg.Account.Address,
 		cfg.Account.Validator,
 		cfg.RPC.GRPCEndpoint,
-		gasAdjustment,
+		cfg.GasAdjustment,
 	)
 	if err != nil {
 		return err

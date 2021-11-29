@@ -44,7 +44,7 @@ type (
 		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
 		Keyring       Keyring        `toml:"key_ring" validate:"required,gt=0,dive,required"`
 		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
-		GasAdjustment string         `toml:"gas_adjustment" validate:"required"`
+		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
 	}
 
 	// Server defines the API server configuration.

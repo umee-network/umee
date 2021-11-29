@@ -1,4 +1,4 @@
-gas_adjustment = "1.5"
+gas_adjustment = 1.5
 
 [server]
 listen_addr = "0.0.0.0:7171"
@@ -35,4 +35,4 @@ pass = "salmon swamp front quit borrow rebuild indoor print adult marble market 
 [rpc]
 tmrpc_endpoint = "http://localhost:26657"
 grpc_endpoint = "localhost:9090"
-rpc_timeout = "100"
+rpc_timeout = "100ms"
