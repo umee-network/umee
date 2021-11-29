@@ -60,13 +60,12 @@ func (o *Oracle) Stop() {
 // our set of providers as determined in the config,
 // average them out, and update the oracle object
 func (o *Oracle) SetPrices() error {
-
 	providerPrices := make(map[string]map[string]sdk.Dec)
 	wg := new(sync.WaitGroup)
 
 	for providerName, tickerList := range o.providerPairs {
-		var priceProvider provider.Provider
 		wg.Add(1)
+		var priceProvider provider.Provider
 
 		switch providerName {
 		case "binance":
