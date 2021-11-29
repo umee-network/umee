@@ -29,7 +29,7 @@ chain_id = "umee-local-testnet"
 
 [key_ring]
 backend = "test"
-dir = "/Users/adamwozniak/.umee"
+dir = "/Users/usrname/.umee"
 pass = "salmon swamp front quit borrow rebuild indoor print adult marble market catch length lumber tone pluck method extra tent aim trigger truly arrest attract"
 
 [rpc]
