@@ -21,7 +21,7 @@ We've already decided to import a large chunk of this from [Terra's oracle](http
 
 ## Alternative Approaches
 
-- Cloning the x/oracle module completely. This would leave our code dirty, and we'd later have issues interfacing with Terra's [Cross Exchange Rate](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), since it's designed for getting the exchange rate of only Terra. 
+- Cloning the x/oracle module completely. This would leave our code dirty, and we'd later have issues interfacing with Terra's [Cross Exchange Rate](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), since it's designed for getting the exchange rate of only Terra.
 - Using something like Band or Chainlink. This would be additional overhead, and we'd [have less control](https://github.com/umee-network/umee/issues/97#issuecomment-923914840) over how our oracle works.
 
 ## Decision
