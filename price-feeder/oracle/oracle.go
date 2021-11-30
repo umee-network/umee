@@ -102,10 +102,7 @@ func (o *Oracle) SetPrices() error {
 
 	// Average out each one
 	for k, average := range priceAverages {
-		floatToMultiply := float64(1) / float64(priceCounts[k])
-		stringToMultiply := fmt.Sprintf("%f", floatToMultiply)
-		decToMultiply := sdk.MustNewDecFromStr(stringToMultiply)
-		average = average.Mul(decToMultiply)
+		average = average.QuoInt64(int64(priceCounts[k]))
 	}
 
 	o.prices = priceAverages
