@@ -101,7 +101,13 @@ docker-build:
 docker-build-debug:
 	@docker build -t umeenet/umeed --build-arg IMG_TAG=debug .
 
-.PHONY: docker-build docker-build-debug
+docker-push-hermes:
+	@cd tests/e2e/docker; docker build -t umeenet/hermes:latest -f hermes.Dockerfile .; docker push umeenet/hermes:latest
+
+docker-push-gaia:
+	@cd tests/e2e/docker; docker build -t umeenet/gaia:latest -f gaia.Dockerfile .; docker push umeenet/gaia:latest
+
+.PHONY: docker-build docker-build-debug docker-push-hermes docker-push-gaia
 
 ###############################################################################
 ##                              Tests & Linting                              ##

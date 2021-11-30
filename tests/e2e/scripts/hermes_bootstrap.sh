@@ -9,7 +9,6 @@ touch /root/.hermes/config.toml
 # setup Hermes relayer configuration
 tee /root/.hermes/config.toml <<EOF
 [global]
-filter = false
 log_level = 'info'
 
 [mode]
