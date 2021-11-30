@@ -180,7 +180,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	blockHeight, err := rpcClient.GetChainHeight(*ctx)
+	blockHeight, err := rpcClient.GetChainHeight(ctx)
 	if err != nil || blockHeight == 0 {
 		return err
 	}
@@ -247,7 +247,7 @@ func (o *Oracle) tick() error {
 			return err
 		}
 
-		currentHeight, err := rpcClient.GetChainHeight(*ctx)
+		currentHeight, err := rpcClient.GetChainHeight(ctx)
 		if err != nil {
 			return err
 		}
@@ -291,7 +291,6 @@ func (o *Oracle) tick() error {
 	}
 
 	return nil
-
 }
 
 func (o *Oracle) Start(ctx context.Context) error {

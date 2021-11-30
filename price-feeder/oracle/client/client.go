@@ -20,9 +20,8 @@ import (
 	umeeparams "github.com/umee-network/umee/app/params"
 )
 
-// OracleClient defines a structure that interfaces
-// with the umee node
 type (
+	// OracleClient defines a structure that interfaces with the Umee node.
 	OracleClient struct {
 		ChainID             string
 		KeyringBackend      string
@@ -47,43 +46,44 @@ type (
 	}
 )
 
-func NewOracleClient(ChainID string,
-	KeyringBackend string,
-	KeyringDir string,
-	KeyringPass string,
-	TMRPC string,
-	RPCTimeout time.Duration,
-	OracleAddrString string,
-	ValidatorAddrString string,
-	GRPCEndpoint string,
-	GasAdjustment float64) (*OracleClient, error) {
+func NewOracleClient(
+	chainID string,
+	keyringBackend string,
+	keyringDir string,
+	keyringPass string,
+	tmrpc string,
+	rpcTimeout time.Duration,
+	oracleAddrString string,
+	validatorAddrString string,
+	grpcEndpoint string,
+	gasAdjustment float64,
+) (*OracleClient, error) {
 
-	oracleAddr, err := sdk.AccAddressFromBech32(OracleAddrString)
+	oracleAddr, err := sdk.AccAddressFromBech32(oracleAddrString)
 	if err != nil {
 		return nil, err
 	}
 
-	validatorAddr := sdk.ValAddress(ValidatorAddrString)
+	validatorAddr := sdk.ValAddress(validatorAddrString)
 	if err != nil {
 		return nil, err
 	}
 
 	return &OracleClient{
-		ChainID:             ChainID,
-		KeyringBackend:      KeyringBackend,
-		KeyringDir:          KeyringDir,
-		KeyringPass:         KeyringPass,
-		TMRPC:               TMRPC,
-		RPCTimeout:          RPCTimeout,
+		ChainID:             chainID,
+		KeyringBackend:      keyringBackend,
+		KeyringDir:          keyringDir,
+		KeyringPass:         keyringPass,
+		TMRPC:               tmrpc,
+		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,
-		OracleAddrString:    OracleAddrString,
+		OracleAddrString:    oracleAddrString,
 		ValidatorAddr:       validatorAddr,
-		ValidatorAddrString: ValidatorAddrString,
+		ValidatorAddrString: validatorAddrString,
 		Encoding:            umeeapp.MakeEncodingConfig(),
-		GasAdjustment:       GasAdjustment,
-		GRPCEndpoint:        GRPCEndpoint,
+		GasAdjustment:       gasAdjustment,
+		GRPCEndpoint:        grpcEndpoint,
 	}, nil
-
 }
 
 func newPassReader(pass string) io.Reader {
@@ -120,7 +120,7 @@ func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 		return err
 	}
 
-	return tx.BroadcastTx(*ctx, *factory, msgs...)
+	return tx.BroadcastTx(ctx, factory, msgs...)
 }
 
 // Broadcast vote - tries to vote within the next voting period
@@ -128,9 +128,8 @@ func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
-	height := int64(0)
+	var height int64
 
-	// Create Context, factory
 	ctx, err := oc.CreateContext()
 	if err != nil {
 		return err
@@ -143,8 +142,10 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 
 	// Re-try voting until timeout
 	for height == 0 && lastCheckHeight < maxBlockHeight {
-
-		latestBlockHeight, _ := rpcClient.GetChainHeight(*ctx)
+		latestBlockHeight, err := rpcClient.GetChainHeight(ctx)
+		if err != nil {
+			return err
+		}
 
 		if latestBlockHeight <= lastCheckHeight {
 			continue
@@ -153,23 +154,21 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		// set last check height to latest block height
 		lastCheckHeight = latestBlockHeight
 
-		err := tx.BroadcastTx(*ctx, *factory, msgs...)
+		err = tx.BroadcastTx(ctx, factory, msgs...)
 		if err != nil {
 			return err
 		}
 
-		height, err = rpcClient.GetChainHeight(*ctx)
+		height, err = rpcClient.GetChainHeight(ctx)
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return nil
-
 }
 
-func (oc *OracleClient) CreateContext() (*client.Context, error) {
+func (oc OracleClient) CreateContext() (client.Context, error) {
 	var keyringInput io.Reader
 	if len(oc.KeyringPass) > 0 {
 		keyringInput = newPassReader(oc.KeyringPass)
@@ -179,24 +178,24 @@ func (oc *OracleClient) CreateContext() (*client.Context, error) {
 
 	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput)
 	if err != nil {
-		return nil, err
+		return client.Context{}, err
 	}
 
 	httpClient, err := tmjsonclient.DefaultHTTPClient(oc.TMRPC)
 	if err != nil {
-		return nil, err
+		return client.Context{}, err
 	}
 
 	httpClient.Timeout = oc.RPCTimeout
 
 	tmRPC, err := rpchttp.NewWithClient(oc.TMRPC, "/websocket", httpClient)
 	if err != nil {
-		return nil, err
+		return client.Context{}, err
 	}
 
 	keyInfo, err := kr.KeyByAddress(oc.OracleAddr)
 	if err != nil {
-		return nil, err
+		return client.Context{}, err
 	}
 
 	clientCtx := client.Context{
@@ -224,14 +223,14 @@ func (oc *OracleClient) CreateContext() (*client.Context, error) {
 		SkipConfirm:       true,
 	}
 
-	return &clientCtx, nil
+	return clientCtx, nil
 
 }
 
-func (oc *OracleClient) CreateTxFactory() (*tx.Factory, error) {
+func (oc OracleClient) CreateTxFactory() (tx.Factory, error) {
 	clientCtx, err := oc.CreateContext()
 	if err != nil {
-		return nil, err
+		return tx.Factory{}, err
 	}
 
 	txFactory := tx.Factory{}.
@@ -244,5 +243,5 @@ func (oc *OracleClient) CreateTxFactory() (*tx.Factory, error) {
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
 		WithSimulateAndExecute(true)
 
-	return &txFactory, nil
+	return txFactory, nil
 }

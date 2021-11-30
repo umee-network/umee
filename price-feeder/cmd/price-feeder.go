@@ -110,8 +110,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New(oracleClient,
-		cfg.CurrencyPairs)
+	oracle := oracle.New(oracleClient, cfg.CurrencyPairs)
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
