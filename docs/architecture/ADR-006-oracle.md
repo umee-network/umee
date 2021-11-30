@@ -1,4 +1,4 @@
-# ADR {ADR-NUMBER}: {TITLE}
+# ADR 006: Oracle
 
 ## Changelog
 
@@ -14,10 +14,10 @@ Umee needs an oracle to determine the price of assets.
 
 From section 5.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
->  Oracle reads asset price and updates the state to the Asset Facility Coordination
+> Oracle reads asset price and updates the state to the Asset Facility Coordination
 Protocol
 
-We've already decided to import a large chunk of this from [Terra's oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html), although a few parts of this are specific to Terra's protocol and do not need to be implemeneted.
+We've already decided to import a large chunk of this from [Terra's oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html), although a few parts of this are specific to Terra's protocol and do not need to be implemented.
 
 ## Alternative Approaches
 
@@ -35,7 +35,7 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 
 ## Detailed Design
 
-...
+- Terra's design for the voting procedure as documented [here](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#voting-procedure)
 
 ## Consequences
 
@@ -50,7 +50,7 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 - More time spent on `x/oracle` development 
 
 ### Neutral
-- Requires us to [evaluate whitelist](https://github.com/umee-network/umee/issues/225) for the oracle as
+- Requires us to [evaluate the whitelist](https://github.com/umee-network/umee/issues/225) for the oracle as we're not sure whether or not we want to accept all of the operators' exchange rates
 
 ## References
 
