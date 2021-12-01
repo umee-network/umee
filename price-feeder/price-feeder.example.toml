@@ -1,3 +1,5 @@
+gas_adjustment = 1.5
+
 [server]
 listen_addr = "0.0.0.0:7171"
 read_timeout = "20s"
@@ -19,3 +21,18 @@ providers = [
   "binance",
 ]
 quote = "USD"
+
+[account]
+address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
+chain_id = "umee-local-testnet"
+
+[key_ring]
+backend = "test"
+dir = "/Users/usrname/.umee"
+pass = "keyringPassword"
+
+[rpc]
+tmrpc_endpoint = "http://localhost:26657"
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100ms"
