@@ -11,6 +11,7 @@ import (
 
 	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/neilotoole/errgroup"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/umee-network/umee/price-feeder/config"
@@ -21,6 +22,15 @@ import (
 	"google.golang.org/grpc"
 )
 
+type CurrencyPair struct {
+	Base  string
+	Quote string
+}
+
+func (cp CurrencyPair) String() string {
+	return cp.Base + cp.Quote
+}
+
 type Oracle struct {
 	logger          zerolog.Logger
 	closer          *pfsync.Closer
@@ -28,19 +38,19 @@ type Oracle struct {
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
 	oracleClient    *client.OracleClient
-	providerPairs   map[string][]string
+	providerPairs   map[string][]CurrencyPair
 }
 
-func New(oc *client.OracleClient,
-	CurrencyPairs []config.CurrencyPair) *Oracle {
-
-	providerPairs := make(map[string][]string)
+func New(oc *client.OracleClient, CurrencyPairs []config.CurrencyPair) *Oracle {
+	providerPairs := make(map[string][]CurrencyPair)
 
 	for _, pair := range CurrencyPairs {
 		for _, provider := range pair.Providers {
-			providerPairs[provider] = append(providerPairs[provider], pair.Base+pair.Quote)
+			providerPairs[provider] = append(providerPairs[provider], CurrencyPair{
+				Base:  pair.Base,
+				Quote: pair.Quote,
+			})
 		}
-
 	}
 
 	return &Oracle{
@@ -56,51 +66,76 @@ func (o *Oracle) Stop() {
 	<-o.closer.Done()
 }
 
-// SetPrices retrieve all the prices from
-// our set of providers as determined in the config,
-// average them out, and update the oracle object
+// SetPrices retrieve all the prices from our set of providers as determined
+// in the config, average them out, and update the oracle object
 func (o *Oracle) SetPrices() error {
+	g := new(errgroup.Group)
+	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]sdk.Dec)
-	wg := new(sync.WaitGroup)
 
-	for providerName, tickerList := range o.providerPairs {
-		wg.Add(1)
+	for providerName, currencyPairs := range o.providerPairs {
 		var priceProvider provider.Provider
 
 		switch providerName {
-		case "binance":
+		case config.ProviderBinance:
 			priceProvider = provider.NewBinanceProvider()
-		case "kraken":
+
+		case config.ProviderKraken:
 			priceProvider = provider.NewKrakenProvider()
 		}
 
-		prices, err := priceProvider.GetTickerPrices(tickerList...)
-		if err != nil {
-			return err
-		}
-
-		providerPrices[providerName] = prices
-		wg.Done()
-	}
-
-	wg.Wait()
-
-	// consolidate the different provider maps into one
-	// for each exchange rate
-	var priceAverages = make(map[string]sdk.Dec)
-	var priceCounts = make(map[string]int)
-
-	for _, provider := range providerPrices {
-		for k, price := range provider {
-			if _, ok := priceAverages[k]; !ok {
-				priceAverages[k] = sdk.NewDec(0)
+		g.Go(func() error {
+			var ticker []string
+			for _, cp := range currencyPairs {
+				ticker = append(ticker, cp.String())
 			}
-			priceAverages[k] = priceAverages[k].Add(price)
-			priceCounts[k]++
+
+			prices, err := priceProvider.GetTickerPrices(ticker...)
+			if err != nil {
+				return err
+			}
+
+			// flatten and collect prices based on the base currency per provider
+			//
+			// e.g.: {ProviderKraken: {"ATOM": 34.03, "UMEE": 6.3}}
+			mtx.Lock()
+			for _, cp := range currencyPairs {
+				if _, ok := providerPrices[providerName]; !ok {
+					providerPrices[providerName] = make(map[string]sdk.Dec)
+				}
+				if p, ok := prices[cp.String()]; ok {
+					providerPrices[providerName][cp.Base] = p
+				}
+			}
+			mtx.Unlock()
+
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	// consolidate the different provider maps into one for each exchange rate
+	var (
+		priceAverages = make(map[string]sdk.Dec)
+		priceCounts   = make(map[string]int)
+	)
+
+	// TODO: Consider using Volume Weighted Average Price (VWAP).
+	//
+	// Ref: https://github.com/umee-network/umee/issues/251
+	for _, prices := range providerPrices {
+		for base, price := range prices {
+			if _, ok := priceAverages[base]; !ok {
+				priceAverages[base] = sdk.NewDec(0)
+			}
+			priceAverages[base] = priceAverages[base].Add(price)
+			priceCounts[base]++
 		}
 	}
 
-	// Average out each one
 	for k, average := range priceAverages {
 		average = average.QuoInt64(int64(priceCounts[k]))
 	}

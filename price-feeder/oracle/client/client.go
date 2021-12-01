@@ -224,7 +224,6 @@ func (oc OracleClient) CreateContext() (client.Context, error) {
 	}
 
 	return clientCtx, nil
-
 }
 
 func (oc OracleClient) CreateTxFactory() (tx.Factory, error) {
