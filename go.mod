@@ -20,7 +20,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	github.com/tendermint/starport v0.18.5
+	github.com/tendermint/starport v0.18.6
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tendermint/tm-db v0.6.6
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
@@ -297,7 +297,7 @@ require (
 	github.com/tendermint/flutter v1.0.2 // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tendermint/spm v0.1.8 // indirect
-	github.com/tendermint/vue v0.1.54 // indirect
+	github.com/tendermint/vue v0.1.55 // indirect
 	github.com/tetafro/godot v1.4.9 // indirect
 	github.com/timakin/bodyclose v0.0.0-20200424151742-cb6215831a94 // indirect
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
