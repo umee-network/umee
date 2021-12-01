@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -16,11 +15,7 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-var (
-	_ types.MsgServer = msgServer{}
-
-	emptyEthAddr = common.Address{}
-)
+var _ types.MsgServer = msgServer{}
 
 type msgServer struct {
 	Keeper
@@ -169,12 +164,7 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 		return nil, err
 	}
 
-	ethRecipient := common.HexToAddress(msg.EthDest)
-	if bytes.Equal(ethRecipient.Bytes(), emptyEthAddr.Bytes()) {
-		return nil, sdkerrors.Wrapf(types.ErrInvalid, "cannot send to (%s) empty Ethereum Address", emptyEthAddr)
-	}
-
-	txID, err := k.AddToOutgoingPool(ctx, sender, ethRecipient, msg.Amount, msg.BridgeFee)
+	txID, err := k.AddToOutgoingPool(ctx, sender, common.HexToAddress(msg.EthDest), msg.Amount, msg.BridgeFee)
 	if err != nil {
 		return nil, err
 	}

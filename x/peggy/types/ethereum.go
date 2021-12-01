@@ -33,11 +33,12 @@ func EthAddrLessThan(e, o string) bool {
 // ValidateEthAddress validates the ethereum address strings
 func ValidateEthAddress(address string) error {
 	if address == "" {
-		return fmt.Errorf("empty")
+		return fmt.Errorf("empty Ethereum address")
 	}
 	if !common.IsHexAddress(address) {
-		return fmt.Errorf("%s is not a valid ETH address", address)
+		return fmt.Errorf("%s is not a valid Ethereum address", address)
 	}
+
 	return nil
 }
 
