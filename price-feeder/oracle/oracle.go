@@ -31,14 +31,30 @@ func (cp CurrencyPair) String() string {
 	return cp.Base + cp.Quote
 }
 
+type PreviousPrevote struct {
+	ExchangeRates     string
+	Salt              string
+	SubmitBlockHeight int64
+}
+
+func NewPreviousPrevote() *PreviousPrevote {
+	return &PreviousPrevote{
+		Salt:              "",
+		ExchangeRates:     "",
+		SubmitBlockHeight: 0,
+	}
+}
+
 type Oracle struct {
-	logger          zerolog.Logger
-	closer          *pfsync.Closer
-	mtx             sync.RWMutex
-	lastPriceSyncTS time.Time
-	prices          map[string]sdk.Dec
-	oracleClient    *client.OracleClient
-	providerPairs   map[string][]CurrencyPair
+	logger             zerolog.Logger
+	closer             *pfsync.Closer
+	mtx                sync.RWMutex
+	lastPriceSyncTS    time.Time
+	prices             map[string]sdk.Dec
+	oracleClient       *client.OracleClient
+	providerPairs      map[string][]CurrencyPair
+	previousPrevote    *PreviousPrevote
+	previousVotePeriod float64
 }
 
 func New(oc *client.OracleClient, CurrencyPairs []config.CurrencyPair) *Oracle {
@@ -54,10 +70,11 @@ func New(oc *client.OracleClient, CurrencyPairs []config.CurrencyPair) *Oracle {
 	}
 
 	return &Oracle{
-		logger:        log.With().Str("module", "oracle").Logger(),
-		closer:        pfsync.NewCloser(),
-		oracleClient:  oc,
-		providerPairs: providerPairs,
+		logger:          log.With().Str("module", "oracle").Logger(),
+		closer:          pfsync.NewCloser(),
+		oracleClient:    oc,
+		providerPairs:   providerPairs,
+		previousPrevote: nil,
 	}
 }
 
@@ -145,59 +162,43 @@ func (o *Oracle) SetPrices() error {
 	return nil
 }
 
-func (o *Oracle) GetParams() (*umeetypes.QueryParamsResponse, error) {
-	// Create a connection to the gRPC server.
+func (o *Oracle) GetParams() (umeetypes.Params, error) {
 	grpcConn, err := grpc.Dial(
-		o.oracleClient.GRPCEndpoint, // your gRPC server address.
-		grpc.WithInsecure(),         // The Cosmos SDK doesn't support any transport security mechanism.
+		o.oracleClient.GRPCEndpoint,
+		grpc.WithInsecure(), // The Cosmos SDK doesn't support any transport security mechanism.
 	)
 	if err != nil {
-		return nil, err
+		return umeetypes.Params{}, err
 	}
 
 	defer grpcConn.Close()
 	queryClient := umeetypes.NewQueryClient(grpcConn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	queryResponse, err := queryClient.Params(ctx, &umeetypes.QueryParamsRequest{})
 	if err != nil {
-		return nil, err
+		return umeetypes.Params{}, err
 	}
 
-	return queryResponse, nil
+	return queryResponse.Params, nil
 }
 
 func (o *Oracle) generateSalt(length int) (string, error) {
 	if length == 0 {
-		return "", fmt.Errorf("can't generate empty salt")
+		return "", fmt.Errorf("failed to generate salt: zero length")
 	}
+
 	n := length / 2
 	bytes := make([]byte, n)
+
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(bytes), nil
 }
-
-var previousVotePeriod float64
-
-type PreviousPrevote struct {
-	ExchangeRates     string
-	Salt              string
-	SubmitBlockHeight int64
-}
-
-func NewPreviousPrevote() *PreviousPrevote {
-	return &PreviousPrevote{
-		Salt:              "",
-		ExchangeRates:     "",
-		SubmitBlockHeight: 0,
-	}
-}
-
-var previousPrevote *PreviousPrevote = nil
 
 func (o *Oracle) tick() error {
 	ctx, err := o.oracleClient.CreateContext()
@@ -205,13 +206,12 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	err = o.SetPrices()
-	if err != nil {
+	if err := o.SetPrices(); err != nil {
 		return err
 	}
 
 	oracleParams, err := o.GetParams()
-	if err != nil || oracleParams == nil {
+	if err != nil {
 		return err
 	}
 
@@ -223,27 +223,27 @@ func (o *Oracle) tick() error {
 	// Get oracle vote period, next block height,
 	// Current vote period, index in vote period
 
-	oracleVotePeriod := int64(oracleParams.Params.VotePeriod)
+	oracleVotePeriod := int64(oracleParams.VotePeriod)
 	nextBlockHeight := blockHeight + 1
 	currentVotePeriod := math.Floor(float64(nextBlockHeight) / float64(oracleVotePeriod))
 	indexInVotePeriod := nextBlockHeight % oracleVotePeriod
 	// Skip until new voting period
 	// Skip when index [0, oracleVotePeriod - 1] is bigger than oracleVotePeriod - 2 or index is 0
-	if (previousVotePeriod != 0 && currentVotePeriod == previousVotePeriod) ||
+	if (o.previousVotePeriod != 0 && currentVotePeriod == o.previousVotePeriod) ||
 		oracleVotePeriod-indexInVotePeriod < 2 {
 		return nil
 	}
 
 	// If we're past the voting period we needed to hit,
 	// Reset and submit another pre-vote
-	if previousVotePeriod != 0 && currentVotePeriod-previousVotePeriod != 1 {
+	if o.previousVotePeriod != 0 && currentVotePeriod-o.previousVotePeriod != 1 {
 		// Reset
-		previousVotePeriod = 0
-		previousPrevote = nil
+		o.previousVotePeriod = 0
+		o.previousPrevote = nil
 		return nil
 	}
 
-	isPrevoteOnlyTx := previousPrevote == nil
+	isPrevoteOnlyTx := o.previousPrevote == nil
 
 	exchangeRates := ""
 
@@ -287,22 +287,20 @@ func (o *Oracle) tick() error {
 			return err
 		}
 
-		previousVotePeriod = math.Floor(float64(currentHeight) / float64(oracleVotePeriod))
-		previousPrevote = NewPreviousPrevote()
-		previousPrevote.Salt = salt
-		previousPrevote.ExchangeRates = exchangeRates
-		previousPrevote.SubmitBlockHeight = int64(currentHeight)
+		o.previousVotePeriod = math.Floor(float64(currentHeight) / float64(oracleVotePeriod))
+		o.previousPrevote = &PreviousPrevote{
+			Salt:              salt,
+			ExchangeRates:     exchangeRates,
+			SubmitBlockHeight: int64(currentHeight),
+		}
 	}
 
-	// Is next voting period
+	// Is next voting period, vote
 
 	if !isPrevoteOnlyTx {
-
-		// Vote
-
 		voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
-			Salt:          previousPrevote.Salt,
-			ExchangeRates: previousPrevote.ExchangeRates,
+			Salt:          o.previousPrevote.Salt,
+			ExchangeRates: o.previousPrevote.ExchangeRates,
 			Feeder:        o.oracleClient.OracleAddrString,
 			Validator:     valAddr.String(),
 		}
@@ -316,15 +314,12 @@ func (o *Oracle) tick() error {
 			// This can happen if the voting is off-timed,
 			// Or the voting denoms are not currently on whitelist.
 			// We want to just reset and handle this silently :
-			previousPrevote = nil
-			previousVotePeriod = 0
+			o.previousPrevote = nil
+			o.previousVotePeriod = 0
 			return nil
 		}
-
-		previousPrevote = nil
-
+		o.previousPrevote = nil
 	}
-
 	return nil
 }
 
