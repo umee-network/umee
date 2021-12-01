@@ -13,10 +13,12 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
+	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/router"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -82,20 +84,43 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	g, ctx := errgroup.WithContext(ctx)
 
+	// listen for and trap any OS signal to gracefully shutdown and exit
+	trapSignal(cancel)
+
+	timeout, err := time.ParseDuration(cfg.RPC.RPCTimeout)
+	if err != nil {
+		return fmt.Errorf("failed to parse RPC timeout: %w", err)
+	}
+
+	oracleClient, err := client.NewOracleClient(
+		cfg.Account.ChainID,
+		cfg.Keyring.Backend,
+		cfg.Keyring.Dir,
+		cfg.Keyring.Pass,
+		cfg.RPC.TMRPCEndpoint,
+		timeout,
+		cfg.Account.Address,
+		cfg.Account.Validator,
+		cfg.RPC.GRPCEndpoint,
+		cfg.GasAdjustment,
+	)
+	if err != nil {
+		return err
+	}
+
+	oracle := oracle.New(oracleClient, cfg.CurrencyPairs)
+
 	g.Go(func() error {
+		// start the process that observes and publishes exchange prices
 		return startPriceFeeder(ctx, cfg, oracle)
 	})
 	g.Go(func() error {
+		// start the process that calculates oracle prices and votes
 		return startPriceOracle(ctx, oracle)
 	})
-
-	// listen for and trap any OS signal to gracefully shutdown and exit
-	trapSignal(cancel)
 
 	// Block main process until all spawned goroutines have gracefully exited and
 	// signal has been captured in the main process or if an error occurs.
@@ -166,13 +191,23 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 }
 
 func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+	srvErrCh := make(chan error, 1)
+
 	go func() {
 		log.Info().Msg("starting price-feeder oracle...")
-		oracle.Start(ctx)
+		srvErrCh <- oracle.Start(ctx)
 	}()
 
-	<-ctx.Done()
-	log.Info().Msg("shutting down price-feeder oracle...")
-	oracle.Stop()
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info().Msg("shutting down price-feeder oracle...")
+			return nil
+
+		case err := <-srvErrCh:
+			log.Err(err).Msg("error starting the price-feeder oracle")
+			oracle.Stop()
+			return err
+		}
+	}
 }
