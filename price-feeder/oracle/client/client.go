@@ -16,6 +16,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+
 	umeeapp "github.com/umee-network/umee/app"
 	umeeparams "github.com/umee-network/umee/app/params"
 )
@@ -104,11 +105,12 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-// Pre-vote and vote are separated out mainly for readability
-// Prevote doesn't need the timeout functionality that vote needs,
-// Because of the block timing validation on the node side
-
-// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
+// BroadcastPrevote attempts to broadcast a pre-vote transaction. Note, submiting
+// a pre-vote transaction does not require timeout functionality that vote
+// transactions require due to the fact that block timing validation exists on
+// the Umee node.
+//
+// Ref: https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 	ctx, err := oc.CreateContext()
 	if err != nil {
@@ -123,12 +125,15 @@ func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
 	return tx.BroadcastTx(ctx, factory, msgs...)
 }
 
-// Broadcast vote - tries to vote within the next voting period
-// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
+// BroadcastVote attempts to broadcast a vote transaction within the next voting
+// period.
+//
+// Ref: https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
+	var height int64
+
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
-	var height int64
 
 	ctx, err := oc.CreateContext()
 	if err != nil {
@@ -140,7 +145,7 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 		return err
 	}
 
-	// Re-try voting until timeout
+	// re-try voting until timeout
 	for height == 0 && lastCheckHeight < maxBlockHeight {
 		latestBlockHeight, err := rpcClient.GetChainHeight(ctx)
 		if err != nil {
@@ -168,6 +173,8 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 	return nil
 }
 
+// CreateContext creates an SDK client Context instance used for transaction
+// generation, signing and broadcasting.
 func (oc OracleClient) CreateContext() (client.Context, error) {
 	var keyringInput io.Reader
 	if len(oc.KeyringPass) > 0 {
@@ -226,6 +233,8 @@ func (oc OracleClient) CreateContext() (client.Context, error) {
 	return clientCtx, nil
 }
 
+// CreateTxFactory creates an SDK Factory instance used for transaction
+// generation, signing and broadcasting.
 func (oc OracleClient) CreateTxFactory() (tx.Factory, error) {
 	clientCtx, err := oc.CreateContext()
 	if err != nil {
