@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 
@@ -22,6 +23,8 @@ var (
 	_ sdk.Msg = &MsgCancelSendToEth{}
 	_ sdk.Msg = &MsgValsetUpdatedClaim{}
 	_ sdk.Msg = &MsgSubmitBadSignatureEvidence{}
+
+	emptyEthAddr = common.Address{}
 )
 
 // NewMsgSetOrchestratorAddress returns a new MsgSetOrchestratorAddresses
@@ -153,6 +156,12 @@ func (msg MsgSendToEth) ValidateBasic() error {
 	if err := ValidateEthAddress(msg.EthDest); err != nil {
 		return sdkerrors.Wrap(err, "ethereum address")
 	}
+
+	ethRecipient := common.HexToAddress(msg.EthDest)
+	if bytes.Equal(ethRecipient.Bytes(), emptyEthAddr.Bytes()) {
+		return fmt.Errorf("cannot send to (%s) empty Ethereum Address", emptyEthAddr)
+	}
+
 	return nil
 }
 

@@ -83,3 +83,31 @@ func TestValidateMsgSetOrchestratorAddresses(t *testing.T) {
 		})
 	}
 }
+
+func TestMsgSendToEth_ValidateBasic(t *testing.T) {
+	testCases := []struct {
+		name      string
+		msg       types.MsgSendToEth
+		expectErr bool
+	}{
+		{
+			name: "invalid Ethereum address",
+			msg: types.MsgSendToEth{
+				Sender:    "umee1jgsy5wnugmqjlx0cnn4cttfz68gjwk4exskzay",
+				EthDest:   "0x0000000000000000000000000000000000000000",
+				Amount:    sdk.NewInt64Coin("foo", 433),
+				BridgeFee: sdk.NewInt64Coin("foo", 3),
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.msg.ValidateBasic()
+			require.Equal(t, tc.expectErr, err != nil, err)
+		})
+	}
+}
