@@ -42,7 +42,6 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 The `x/oracle` module will provide the following methods on its keeper, to be used by `x/leverage`:
 
 ```go
-    // example - we should discuss if this is the best way to do things
     GetValue(asset sdk.Coin) (sdk.Dec, error) // get the USD value of an input sdk.Coin
     GetTotalValue(asset sdk.Coin) (sdk.Dec, error) // return the total USD value of all coins in an sdk.Coins
 ```
