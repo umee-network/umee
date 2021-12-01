@@ -31,7 +31,7 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 - Combine the `price-feeder` and `feeder` into a single binary [Ref](https://github.com/umee-network/umee/issues/97#issuecomment-939610302)
 - Only support MsgAggregateExchangeRate(Pre)Vote, i.e. not allow individual price updates [Ref](https://github.com/umee-network/umee/issues/97#issuecomment-939610302)
 - Skip the logic for the [Cross Exchange Rate](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), and record simplified exchange rates like `ATOM`
-  -  We'll store multiple exchange rates with a base of USD, [instead of a single coin's exchange rate](https://github.com/terra-money/core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/keeper.go#L88)
+-  We'll store multiple exchange rates with a base of USD, [instead of a single coin's exchange rate](https://github.com/terra-money/core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/keeper.go#L88)
 - Remove support for the [Tobin Tax](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-market.html#tobintax), a Terra-specific fee for when users spot trade.
 
 ## Detailed Design
