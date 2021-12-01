@@ -11,7 +11,6 @@ import (
 // state.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
-
 }
 
 // ExportGenesis returns the x/oracle module's exported genesis.
