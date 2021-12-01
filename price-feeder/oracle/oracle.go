@@ -104,6 +104,11 @@ func (o *Oracle) Start(ctx context.Context) error {
 			}
 
 			o.lastPriceSyncTS = time.Now()
+
+			// XXX/TODO: We need to evaluate if this is the correct value to wait for
+			// between loop executions.
+			//
+			// Ref: https://github.com/umee-network/umee/issues/256
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
