@@ -6,31 +6,41 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
-	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
+	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/neilotoole/errgroup"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
-	umeetypes "github.com/umee-network/umee/x/oracle/types"
-	"google.golang.org/grpc"
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
+// CurrencyPair defines a currency exchange pair consisting of a base and a quote.
+// We primarily utilize the base for broadcasting exchange rates and use the
+// pair for querying for the ticker prices.
 type CurrencyPair struct {
 	Base  string
 	Quote string
 }
 
+// String implements the Stringer interface and defines a ticker symbol for
+// querying the exchange rate.
 func (cp CurrencyPair) String() string {
 	return cp.Base + cp.Quote
 }
 
+// PreviousPrevote defines a structure for defining the previous prevote
+// submitted on-chain.
 type PreviousPrevote struct {
 	ExchangeRates     string
 	Salt              string
@@ -45,6 +55,9 @@ func NewPreviousPrevote() *PreviousPrevote {
 	}
 }
 
+// Oracle implements the core component responsible for fetching exchange rates
+// for a given set of currency pairs and determining the correct exchange rates
+// to submit to the on-chain price oracle adhering the oracle specification.
 type Oracle struct {
 	logger             zerolog.Logger
 	closer             *pfsync.Closer
@@ -57,10 +70,10 @@ type Oracle struct {
 	previousVotePeriod float64
 }
 
-func New(oc *client.OracleClient, CurrencyPairs []config.CurrencyPair) *Oracle {
+func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	providerPairs := make(map[string][]CurrencyPair)
 
-	for _, pair := range CurrencyPairs {
+	for _, pair := range currencyPairs {
 		for _, provider := range pair.Providers {
 			providerPairs[provider] = append(providerPairs[provider], CurrencyPair{
 				Base:  pair.Base,
@@ -78,19 +91,68 @@ func New(oc *client.OracleClient, CurrencyPairs []config.CurrencyPair) *Oracle {
 	}
 }
 
+// Start starts the oracle process in a blocking fashion.
+func (o *Oracle) Start(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			o.closer.Close()
+
+		default:
+			if err := o.tick(); err != nil {
+				return err
+			}
+
+			o.lastPriceSyncTS = time.Now()
+			// TODO: Use ticker???
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+}
+
+// Stop stops the oracle process and waits for it to gracefully exit.
 func (o *Oracle) Stop() {
 	o.closer.Close()
 	<-o.closer.Done()
 }
 
+// GetLastPriceSyncTimestamp returns the latest timestamp at which prices where
+// fetched from the oracle's set of exchange rate providers.
+func (o *Oracle) GetLastPriceSyncTimestamp() time.Time {
+	o.mtx.RLock()
+	defer o.mtx.RUnlock()
+
+	return o.lastPriceSyncTS
+}
+
+// GetPrices returns a copy of the current prices fetched from the oracle's
+// set of exchange rate providers.
+func (o *Oracle) GetPrices() map[string]sdk.Dec {
+	o.mtx.RLock()
+	defer o.mtx.RUnlock()
+
+	// Creates a new array for the prices in the oracle
+	prices := make(map[string]sdk.Dec, len(o.prices))
+	for k, v := range o.prices {
+		// Fills in the prices with each value in the oracle
+		prices[k] = v
+	}
+
+	return prices
+}
+
 // SetPrices retrieve all the prices from our set of providers as determined
-// in the config, average them out, and update the oracle object
+// in the config, average them out, and update the oracle's current exchange
+// rates.
 func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]sdk.Dec)
 
 	for providerName, currencyPairs := range o.providerPairs {
+		providerName := providerName
+		currencyPairs := currencyPairs
+
 		var priceProvider provider.Provider
 
 		switch providerName {
@@ -148,13 +210,14 @@ func (o *Oracle) SetPrices() error {
 			if _, ok := priceAverages[base]; !ok {
 				priceAverages[base] = sdk.NewDec(0)
 			}
+
 			priceAverages[base] = priceAverages[base].Add(price)
 			priceCounts[base]++
 		}
 	}
 
-	for k, average := range priceAverages {
-		average = average.QuoInt64(int64(priceCounts[k]))
+	for base, price := range priceAverages {
+		priceAverages[base] = price.QuoInt64(int64(priceCounts[base]))
 	}
 
 	o.prices = priceAverages
@@ -162,24 +225,26 @@ func (o *Oracle) SetPrices() error {
 	return nil
 }
 
-func (o *Oracle) GetParams() (umeetypes.Params, error) {
+// GetParams returns the current on-chain parameters of the x/oracle module.
+func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	grpcConn, err := grpc.Dial(
 		o.oracleClient.GRPCEndpoint,
-		grpc.WithInsecure(), // The Cosmos SDK doesn't support any transport security mechanism.
+		// the Cosmos SDK doesn't support any transport security mechanism
+		grpc.WithInsecure(),
 	)
 	if err != nil {
-		return umeetypes.Params{}, err
+		return oracletypes.Params{}, err
 	}
 
 	defer grpcConn.Close()
-	queryClient := umeetypes.NewQueryClient(grpcConn)
+	queryClient := oracletypes.NewQueryClient(grpcConn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	queryResponse, err := queryClient.Params(ctx, &umeetypes.QueryParamsRequest{})
+	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
 	if err != nil {
-		return umeetypes.Params{}, err
+		return oracletypes.Params{}, err
 	}
 
 	return queryResponse.Params, nil
@@ -215,46 +280,46 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	blockHeight, err := rpcClient.GetChainHeight(ctx)
-	if err != nil || blockHeight == 0 {
-		return err
+	blockHeight, err := rpcclient.GetChainHeight(ctx)
+	if err != nil {
+		return nil
+	}
+	if blockHeight == 0 {
+		return fmt.Errorf("expected non-zero block height")
 	}
 
-	// Get oracle vote period, next block height,
-	// Current vote period, index in vote period
-
+	// Get oracle vote period, next block height, current vote period, and index
+	// in the vote period.
 	oracleVotePeriod := int64(oracleParams.VotePeriod)
 	nextBlockHeight := blockHeight + 1
 	currentVotePeriod := math.Floor(float64(nextBlockHeight) / float64(oracleVotePeriod))
 	indexInVotePeriod := nextBlockHeight % oracleVotePeriod
-	// Skip until new voting period
-	// Skip when index [0, oracleVotePeriod - 1] is bigger than oracleVotePeriod - 2 or index is 0
+
+	// Skip until new voting period. Specifically, skip when:
+	// index [0, oracleVotePeriod - 1] > oracleVotePeriod - 2 OR index is 0
 	if (o.previousVotePeriod != 0 && currentVotePeriod == o.previousVotePeriod) ||
 		oracleVotePeriod-indexInVotePeriod < 2 {
 		return nil
 	}
 
-	// If we're past the voting period we needed to hit,
-	// Reset and submit another pre-vote
+	// If we're past the voting period we needed to hit, reset and submit another
+	// prevote.
 	if o.previousVotePeriod != 0 && currentVotePeriod-o.previousVotePeriod != 1 {
-		// Reset
 		o.previousVotePeriod = 0
 		o.previousPrevote = nil
 		return nil
 	}
 
 	isPrevoteOnlyTx := o.previousPrevote == nil
+	exchangeRates := make([]string, len(o.prices))
 
-	exchangeRates := ""
-
-	for k, v := range o.prices {
-		if exchangeRates != "" {
-			exchangeRates = exchangeRates + "," + v.String() + k
-		}
-		if exchangeRates == "" {
-			exchangeRates = v.String() + k
-		}
+	// aggregate exchange rates as "<base>:<price>"
+	for base, avgPrice := range o.prices {
+		exchangeRates = append(exchangeRates, fmt.Sprintf("%s:%s", base, avgPrice.String()))
 	}
+
+	sort.Strings(exchangeRates)
+	exchangeRatesStr := strings.Join(exchangeRates, ",")
 
 	salt, err := o.generateSalt(2)
 	if err != nil {
@@ -266,23 +331,19 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	hash := umeetypes.GetAggregateVoteHash(salt, exchangeRates, o.oracleClient.ValidatorAddr)
-
-	msg := &umeetypes.MsgAggregateExchangeRatePrevote{
-		Hash:      hash.String(), // Hash of prices from the oracle
+	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, o.oracleClient.ValidatorAddr)
+	msg := &oracletypes.MsgAggregateExchangeRatePrevote{
+		Hash:      hash.String(), // hash of prices from the oracle
 		Feeder:    o.oracleClient.OracleAddrString,
-		Validator: valAddr.String(), //Hash accepts the actual addr
+		Validator: valAddr.String(),
 	}
 
 	if isPrevoteOnlyTx {
-		// Broadcast message
-
-		err := o.oracleClient.BroadcastPrevote(msg)
-		if err != nil {
+		if err := o.oracleClient.BroadcastPrevote(msg); err != nil {
 			return err
 		}
 
-		currentHeight, err := rpcClient.GetChainHeight(ctx)
+		currentHeight, err := rpcclient.GetChainHeight(ctx)
 		if err != nil {
 			return err
 		}
@@ -290,77 +351,32 @@ func (o *Oracle) tick() error {
 		o.previousVotePeriod = math.Floor(float64(currentHeight) / float64(oracleVotePeriod))
 		o.previousPrevote = &PreviousPrevote{
 			Salt:              salt,
-			ExchangeRates:     exchangeRates,
-			SubmitBlockHeight: int64(currentHeight),
+			ExchangeRates:     exchangeRatesStr,
+			SubmitBlockHeight: currentHeight,
 		}
 	}
 
-	// Is next voting period, vote
-
+	// if we're in the next voting period, vote
 	if !isPrevoteOnlyTx {
-		voteMsg := &umeetypes.MsgAggregateExchangeRateVote{
+		voteMsg := &oracletypes.MsgAggregateExchangeRateVote{
 			Salt:          o.previousPrevote.Salt,
 			ExchangeRates: o.previousPrevote.ExchangeRates,
 			Feeder:        o.oracleClient.OracleAddrString,
 			Validator:     valAddr.String(),
 		}
 
-		// Broadcast message
-
-		err := o.oracleClient.BroadcastVote(nextBlockHeight,
-			oracleVotePeriod-indexInVotePeriod,
-			voteMsg)
+		err := o.oracleClient.BroadcastVote(nextBlockHeight, oracleVotePeriod-indexInVotePeriod, voteMsg)
 		if err != nil {
-			// This can happen if the voting is off-timed,
-			// Or the voting denoms are not currently on whitelist.
-			// We want to just reset and handle this silently :
+			// This can happen if the voting is off-timed, or the voting denoms are
+			// not currently in the whitelist. We want to just reset and handle this
+			// silently.
 			o.previousPrevote = nil
 			o.previousVotePeriod = 0
 			return nil
 		}
+
 		o.previousPrevote = nil
 	}
+
 	return nil
-}
-
-func (o *Oracle) Start(ctx context.Context) error {
-	for {
-		select {
-		case <-ctx.Done():
-			o.closer.Close()
-
-		default:
-			err := o.tick()
-			if err != nil {
-				return err
-			}
-			o.lastPriceSyncTS = time.Now()
-			time.Sleep(10 * time.Millisecond)
-		}
-	}
-}
-
-// GetLastPriceSyncTimestamp returns the latest timestamp at which prices where
-// fetched from the oracle's set of exchange rate providers.
-func (o *Oracle) GetLastPriceSyncTimestamp() time.Time {
-	o.mtx.RLock()
-	defer o.mtx.RUnlock()
-
-	return o.lastPriceSyncTS
-}
-
-// GetPrices returns a copy of the current prices fetched from the oracle's
-// set of exchange rate providers.
-func (o *Oracle) GetPrices() map[string]sdk.Dec {
-	o.mtx.RLock()
-	defer o.mtx.RUnlock()
-
-	// Creates a new array for the prices in the oracle
-	prices := make(map[string]sdk.Dec, len(o.prices))
-	for k, v := range o.prices {
-		// Fills in the prices with each value in the oracle
-		prices[k] = v
-	}
-
-	return prices
 }

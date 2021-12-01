@@ -105,8 +105,8 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-// BroadcastPrevote attempts to broadcast a pre-vote transaction. Note, submiting
-// a pre-vote transaction does not require timeout functionality that vote
+// BroadcastPrevote attempts to broadcast a prevote transaction. Note, submiting
+// a prevote transaction does not require timeout functionality that vote
 // transactions require due to the fact that block timing validation exists on
 // the Umee node.
 //
