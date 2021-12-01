@@ -104,7 +104,6 @@ func (o *Oracle) Start(ctx context.Context) error {
 			}
 
 			o.lastPriceSyncTS = time.Now()
-			// TODO: Use ticker???
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
@@ -312,10 +311,12 @@ func (o *Oracle) tick() error {
 
 	isPrevoteOnlyTx := o.previousPrevote == nil
 	exchangeRates := make([]string, len(o.prices))
+	i := 0
 
 	// aggregate exchange rates as "<base>:<price>"
 	for base, avgPrice := range o.prices {
-		exchangeRates = append(exchangeRates, fmt.Sprintf("%s:%s", base, avgPrice.String()))
+		exchangeRates[i] = fmt.Sprintf("%s:%s", base, avgPrice.String())
+		i++
 	}
 
 	sort.Strings(exchangeRates)
