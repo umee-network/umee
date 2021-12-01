@@ -9,10 +9,26 @@ touch /root/.hermes/config.toml
 # setup Hermes relayer configuration
 tee /root/.hermes/config.toml <<EOF
 [global]
-strategy = 'packets'
-filter = false
 log_level = 'info'
-clear_packets_interval = 100
+
+[mode]
+
+[mode.clients]
+enabled = true
+refresh = true
+misbehaviour = true
+
+[mode.connections]
+enabled = false
+
+[mode.channels]
+enabled = false
+
+[mode.packets]
+enabled = true
+clear_interval = 100
+clear_on_start = true
+filter = false
 tx_confirmation = true
 
 [rest]
