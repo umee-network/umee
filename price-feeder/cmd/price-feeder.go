@@ -13,11 +13,12 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/router"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -202,6 +203,7 @@ func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
 		case <-ctx.Done():
 			log.Info().Msg("shutting down price-feeder oracle...")
 			return nil
+
 		case err := <-srvErrCh:
 			log.Err(err).Msg("error starting the price-feeder oracle")
 			oracle.Stop()
