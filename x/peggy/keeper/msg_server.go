@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -15,7 +16,11 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-var _ types.MsgServer = msgServer{}
+var (
+	_ types.MsgServer = msgServer{}
+
+	emptyEthAddr = common.Address{}
+)
 
 type msgServer struct {
 	Keeper
@@ -158,11 +163,18 @@ func (k msgServer) ValsetConfirm(c context.Context, msg *types.MsgValsetConfirm)
 // SendToEth handles MsgSendToEth
 func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types.MsgSendToEthResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
+
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
-	txID, err := k.AddToOutgoingPool(ctx, sender, common.HexToAddress(msg.EthDest), msg.Amount, msg.BridgeFee)
+
+	ethRecipient := common.HexToAddress(msg.EthDest)
+	if bytes.Equal(ethRecipient.Bytes(), emptyEthAddr.Bytes()) {
+		return nil, sdkerrors.Wrapf(types.ErrInvalid, "cannot send to (%s) empty Ethereum Address", emptyEthAddr)
+	}
+
+	txID, err := k.AddToOutgoingPool(ctx, sender, ethRecipient, msg.Amount, msg.BridgeFee)
 	if err != nil {
 		return nil, err
 	}
