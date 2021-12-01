@@ -146,7 +146,7 @@ chain_id = "umee-local-testnet"
 [key_ring]
 backend = "test"
 dir = "/Users/username/.umee"
-pass = "salmon swamp front"
+pass = "keyringPassword"
 
 [rpc]
 tmrpc_endpoint = "http://localhost:26657"
