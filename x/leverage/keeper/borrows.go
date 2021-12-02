@@ -134,8 +134,8 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 
 	fullBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
 	for _, coin := range fullBalance {
-		// If a denom is valid and enabled as collateral by this borrower addr
-		if k.GetCollateralSetting(ctx, borrowerAddr, coin.Denom) {
+		// If a denom is a valid uToken and enabled as collateral by this borrower addr
+		if k.IsAcceptedUToken(ctx, coin.Denom) && k.GetCollateralSetting(ctx, borrowerAddr, coin.Denom) {
 			collateral = collateral.Add(coin)
 		}
 	}
