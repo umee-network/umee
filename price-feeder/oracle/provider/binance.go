@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	binanceBaseURL = "https://api.binance.com"
+	binanceBaseURL        = "https://api.binance.com"
+	binanceTickerEndpoint = "/api/v3/ticker/24hr"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -73,7 +74,7 @@ func (p BinanceProvider) GetTickerPrices(tickers ...string) (map[string]TickerPr
 }
 
 func (p BinanceProvider) getTickerPrice(ticker string) (TickerPrice, error) {
-	path := fmt.Sprintf("%s/api/v3/ticker/24hr?symbol=%s", p.baseURL, ticker)
+	path := fmt.Sprintf("%s%s?symbol=%s", p.baseURL, binanceTickerEndpoint, ticker)
 
 	resp, err := p.client.Get(path)
 	if err != nil {

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	krakenBaseURL  = "https://api.kraken.com"
-	tickerEndpoint = "/0/public/Ticker"
+	krakenBaseURL        = "https://api.kraken.com"
+	krakenTickerEndpoint = "/0/public/Ticker"
 )
 
 var _ Provider = (*KrakenProvider)(nil)
@@ -64,7 +64,7 @@ func NewKrakenProviderWithTimeout(timeout time.Duration) *KrakenProvider {
 }
 
 func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice, error) {
-	path := fmt.Sprintf("%s%s?pair=%s", p.baseURL, tickerEndpoint, strings.Join(tickers, ","))
+	path := fmt.Sprintf("%s%s?pair=%s", p.baseURL, krakenTickerEndpoint, strings.Join(tickers, ","))
 
 	resp, err := p.client.Get(path)
 	if err != nil {
