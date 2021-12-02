@@ -1,6 +1,7 @@
 package leverage
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -72,12 +73,14 @@ func (AppModuleBasic) ValidateGenesis(
 
 // Deprecated: RegisterRESTRoutes performs a no-op. Querying is delegated to the
 // gRPC service.
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {}
+func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for x/leverage
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/leverage
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	// this line is used by starport scaffolding # 2
+	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+		panic(err)
+	}
 }
 
 // GetTxCmd returns the x/leverage module's root tx command.
