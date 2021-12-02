@@ -25,7 +25,7 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
-// SetBorrow sets the amount borrowed by an address in a given denom
+// SetBorrow sets the amount borrowed by an address in a given denom.
 func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, amount sdk.Int) error {
 	store := ctx.KVStore(k.storeKey)
 	bz, err := amount.Marshal()
