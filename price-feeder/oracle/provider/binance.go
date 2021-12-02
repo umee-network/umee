@@ -111,8 +111,8 @@ func (p BinanceProvider) getTickerPrice(ticker string) (TickerPrice, error) {
 		return TickerPrice{}, fmt.Errorf("failed to parse Binance price (%s) for %s", tickerResp.LastPrice, ticker)
 	}
 
-	volume, ok := sdk.NewIntFromString(tickerResp.Volume)
-	if !ok {
+	volume, err := sdk.NewDecFromStr(tickerResp.Volume)
+	if err != nil {
 		return TickerPrice{}, fmt.Errorf("failed to parse Binance volume (%s) for %s", tickerResp.Volume, ticker)
 	}
 

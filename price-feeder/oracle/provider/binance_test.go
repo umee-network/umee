@@ -18,7 +18,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 			resp := `{
 				"symbol": "ATOMUSDT",
 				"lastPrice": "34.69000000",
-				"volume": "2342352"
+				"volume": "2396974.02000000"
 			}			
 			`
 			rw.Write([]byte(resp))
@@ -32,7 +32,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
 		require.Equal(t, sdk.MustNewDecFromStr("34.69000000"), prices["ATOMUSDT"].Price)
-		require.Equal(t, sdk.NewInt(2342352), prices["ATOMUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("2396974.02000000"), prices["ATOMUSDT"].Volume)
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 				resp := `{
 					"symbol": "ATOMUSDT",
 					"lastPrice": "34.69000000",
-					"volume": "2342352"
+					"volume": "2396974.02000000"
 				}			
 				`
 				rw.Write([]byte(resp))
@@ -52,7 +52,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 				resp := `{
 					"symbol": "LUNAUSDT",
 					"lastPrice": "41.35000000",
-					"volume": "7842352"
+					"volume": "2396974.02000000"
 				}			
 				`
 				rw.Write([]byte(resp))
@@ -69,9 +69,9 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
 		require.Equal(t, sdk.MustNewDecFromStr("34.69000000"), prices["ATOMUSDT"].Price)
-		require.Equal(t, sdk.NewInt(2342352), prices["ATOMUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("2396974.02000000"), prices["ATOMUSDT"].Volume)
 		require.Equal(t, sdk.MustNewDecFromStr("41.35000000"), prices["LUNAUSDT"].Price)
-		require.Equal(t, sdk.NewInt(7842352), prices["LUNAUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("2396974.02000000"), prices["LUNAUSDT"].Volume)
 	})
 
 	t.Run("invalid_request_bad_response", func(t *testing.T) {

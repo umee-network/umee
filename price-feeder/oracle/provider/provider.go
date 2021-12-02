@@ -19,5 +19,5 @@ type Provider interface {
 // exchange rate.
 type TickerPrice struct {
 	Price  sdk.Dec // last trade price
-	Volume sdk.Int // 24h volume
+	Volume sdk.Dec // 24h volume
 }

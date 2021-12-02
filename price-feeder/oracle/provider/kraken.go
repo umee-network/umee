@@ -107,8 +107,8 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]TickerPri
 			return nil, fmt.Errorf("failed to parse Kraken price (%s) for %s", pair.C[0], t)
 		}
 
-		volume, ok := sdk.NewIntFromString(pair.V[1])
-		if !ok {
+		volume, err := sdk.NewDecFromStr(pair.V[1])
+		if err != nil {
 			return nil, fmt.Errorf("failed to parse Kraken volume (%s) for %s", pair.V[1], t)
 		}
 
