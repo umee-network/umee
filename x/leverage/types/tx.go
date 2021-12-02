@@ -142,3 +142,44 @@ func (msg *MsgRepayAsset) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
+
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, reward string) *MsgLiquidate {
+	return &MsgLiquidate{
+		Liquidator: borrower.String(),
+		Borrower:   borrower.String(),
+		Repayment:  repayment,
+		Reward:     reward,
+	}
+}
+
+func (msg *MsgLiquidate) ValidateBasic() error {
+	liquidator, err := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	if err != nil {
+		return err
+	}
+	if liquidator.Empty() {
+		return errors.New("empty liquidator address")
+	}
+	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	if err != nil {
+		return err
+	}
+	if borrower.Empty() {
+		return errors.New("empty borrower address")
+	}
+
+	if asset := msg.GetRepayment(); !asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	}
+
+	if msg.GetReward() == "" {
+		return errors.New("empty reward denom")
+	}
+
+	return nil
+}
+
+func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
+	liquidator, _ := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	return []sdk.AccAddress{liquidator}
+}

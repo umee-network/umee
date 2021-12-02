@@ -8,8 +8,22 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 // Params defines the parameters for the leverage module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
-  // The interest epoch determines how many blocks pass between borrow interest calculations.
+  // The interest_epoch determines how many blocks pass between borrow interest calculations.
   int64 interest_epoch = 1 [(gogoproto.moretags) = "yaml:\"interest_epoch\""];
+  // The complete_liquidation_threshold determines how far over their borrow limit a borrower
+  // must be in order for their positions to be liquidated fully in a single event.
+  string complete_liquidation_threshold = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"complete_liquidation_threshold\""
+  ];
+  // The minimum_close_factor determines the portion of a borrower's position that can be
+  // liquidated in a single event, when the borrower is just barely over their borrow limit
+  string minimum_close_factor = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"minimum_close_factor\""
+  ];
 }
 
 // Token defines a token, along with its capital metadata, in the Umee capital
@@ -62,5 +76,12 @@ message Token {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_utilization_rate\""
+  ];
+  // The liquidation_incentive determines the portion of bonus collateral of
+  // a token type liquidators receive as a liquidation reward.
+  string liquidation_incentive = 8 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"liquidation_incentive\""
   ];
 }

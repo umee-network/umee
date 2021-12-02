@@ -270,3 +270,166 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
 	return store.Has(key)
 }
+
+// LiquidateBorrow attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
+// for a selected denomination of uToken collateral. If the borrower is not over their borrow limit, or
+// the repayment or reward denominations are invalid, an error is returned. If the attempted repayment
+// is greater than the amount owed or the maximum that can be repaid due to parameters (close factor)
+// then a partial liquidation, equal to the maximum valid amount, is performed. The same occurs if the
+// value of collateral in the selected reward denomination cannot cover the proposed repayment.
+func (k Keeper) LiquidateBorrow(
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayment sdk.Coin, rewardDenom string,
+) error {
+	if !repayment.IsValid() {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
+	}
+	if !k.IsAcceptedUToken(ctx, rewardDenom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, rewardDenom)
+	}
+
+	// Get total borrowed by borrower (all denoms)
+	borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
+	if err != nil {
+		return err
+	}
+
+	// Get borrower uToken balances, for all uToken denoms enabled as collateral
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	if err != nil {
+		return err
+	}
+
+	// Use oracle helper functions to find total borrowed value in USD
+	borrowValue, err := k.GetTotalValue(ctx, borrowed)
+	if err != nil {
+		return err
+	}
+
+	// Use collateral weights to compute borrow limit from enabled collateral
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
+	if err != nil {
+		return err
+	}
+
+	// Confirm borrower's eligibility for liquidation
+	if borrowLimit.GTE(borrowValue) {
+		return sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
+	}
+
+	// Get reward-specific incentive and dynamic close factor
+	baseRewardDenom := k.FromUTokenToTokenDenom(ctx, rewardDenom)
+	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, borrowLimit)
+	if err != nil {
+		return err
+	}
+
+	// Repayment cannot exceed liquidator's available balance
+	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
+	if repayment.Amount.GTE(liquidatorBalance.Amount) {
+		repayment.Amount = liquidatorBalance.Amount
+	}
+
+	// Repayment cannot exceed borrower's borrowed amount of selected denom
+	if repayment.Amount.GTE(borrowed.AmountOf(repayment.Denom)) {
+		repayment.Amount = borrowed.AmountOf(repayment.Denom)
+	}
+
+	// Repayment cannot exceed borrowed value * close factor
+	repayValue, err := k.GetValue(ctx, repayment)
+	if err != nil {
+		return err
+	}
+	if repayValue.GTE(borrowValue.Mul(closeFactor)) {
+		maxRepayValue := borrowValue.Mul(closeFactor)
+		// repayment *= (maxRepayValue / repayValue)
+		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
+		repayValue = maxRepayValue
+	}
+
+	// Given repay denom and amount, use oracle to find equivalent amount of rewardDenom's base asset
+	baseReward, err := k.EquivalentValue(ctx, repayment, baseRewardDenom)
+	if err != nil {
+		return err
+	}
+
+	// Convert reward tokens back to uTokens
+	reward, err := k.ExchangeTokens(ctx, baseReward)
+	if err != nil {
+		return err
+	}
+
+	// Apply liquidation incentive
+	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
+
+	// Reward amount cannot exceed available collateral
+	if reward.Amount.GTE(collateral.AmountOf(rewardDenom)) {
+		// only pay what can be correctly compensated
+		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
+		// use all collateral of selected denom
+		reward.Amount = collateral.AmountOf(rewardDenom)
+	}
+
+	// Send repayment to leverage module account
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(
+		ctx, liquidatorAddr,
+		types.ModuleName,
+		sdk.NewCoins(repayment),
+	); err != nil {
+		return err
+	}
+
+	// Store the remaining borrowed amount in keeper
+	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateLoanKey(borrowerAddr, repayment.Denom)
+	if owed.IsZero() {
+		store.Delete(key) // Completely repaid
+	} else {
+		bz, err := owed.Marshal()
+		if err != nil {
+			return err
+		}
+		store.Set(key, bz) // Partially repaid
+	}
+
+	// Transfer uToken collateral reward from borrower to liquidator
+	if err := k.bankKeeper.SendCoins(ctx, borrowerAddr, liquidatorAddr, sdk.NewCoins(reward)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// LiquidationParams allows for dynamic liquidation parameters based on collateral denomination,
+// borrowed value, and borrow limit
+func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limit sdk.Dec) (sdk.Dec, sdk.Dec, error) {
+	if borrowed.IsNegative() {
+		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
+	}
+	if limit.IsNegative() {
+		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
+	}
+
+	// liquidation incentive is determined by collateral reward denom
+	liquidationIncentive, err := k.GetLiquidationIncentive(ctx, reward)
+	if err != nil {
+		return sdk.ZeroDec(), sdk.ZeroDec(), err
+	}
+
+	// close factor scales linearly between MinimumCloseFactor and 1.0,
+	// reaching max value when (borrowed / limit) = CompleteLiquidationThreshold
+	closeFactor := k.GetParams(ctx).MinimumCloseFactor
+	completeLiquidationThreshold := k.GetParams(ctx).CompleteLiquidationThreshold
+	closeFactor = Interpolate(
+		borrowed.Quo(limit),          // x
+		sdk.ZeroDec(),                // xMin
+		closeFactor,                  // yMin
+		completeLiquidationThreshold, // xMax
+		sdk.OneDec(),                 // yMax
+	)
+	if closeFactor.GTE(sdk.OneDec()) {
+		closeFactor = sdk.OneDec()
+	}
+
+	return liquidationIncentive, closeFactor, nil
+}

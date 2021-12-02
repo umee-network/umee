@@ -191,6 +191,8 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
+	// TODO #257: Log actual repaid amount, not attempted (in case of overpay)
+
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
@@ -211,4 +213,53 @@ func (s msgServer) RepayAsset(
 	})
 
 	return &types.MsgRepayAssetResponse{}, nil
+}
+
+func (s msgServer) Liquidate(
+	goCtx context.Context,
+	msg *types.MsgLiquidate,
+) (*types.MsgLiquidateResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	liquidatorAddr, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
+		return nil, err
+	}
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.Reward); err != nil {
+		return nil, err
+	}
+
+	/*
+		// TODO #257: Additional return values on Liquidate, or some other solution, are required
+		// in order to get some desired information like reward amounts.
+
+		s.keeper.Logger(ctx).Debug(
+			"borrowed assets repaid by liquidator",
+			"borrower", borrowerAddr.String(),
+			"amount", msg.Amount.String(),
+			"reward", msg.Reward,
+		)
+
+		ctx.EventManager().EmitEvents(sdk.Events{
+			sdk.NewEvent(
+				types.EventTypeLiquidate,
+				// sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+				// sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+			),
+			sdk.NewEvent(
+				sdk.EventTypeMessage,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+				sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
+			),
+		})
+	*/
+
+	return &types.MsgLiquidateResponse{}, nil
 }

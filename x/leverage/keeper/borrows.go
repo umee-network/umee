@@ -25,7 +25,7 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
-// SetBorrow sets the amount borrowed by an address in a given denom to an amount
+// SetBorrow sets the amount borrowed by an address in a given denom
 func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, amount sdk.Int) error {
 	store := ctx.KVStore(k.storeKey)
 	bz, err := amount.Marshal()
@@ -125,4 +125,46 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	utilization := sdk.NewDecFromInt(totalBorrowed).Quo(sdk.NewDecFromInt(denominator))
 
 	return utilization, nil
+}
+
+// GetBorrowerCollateral returns an sdk.Coins containing all uTokens in borrower's balance
+// which have been enabled as collateral.
+func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
+	collateral := sdk.NewCoins()
+
+	fullBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
+	for _, coin := range fullBalance {
+		// If a denom is valid and enabled as collateral by this borrower addr
+		if k.GetCollateralSetting(ctx, borrowerAddr, coin.Denom) {
+			collateral = collateral.Add(coin)
+		}
+	}
+
+	return collateral
+}
+
+// CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
+// collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
+func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+	limit := sdk.ZeroDec()
+
+	for _, coin := range collateral {
+		// Convert uToken collateral to baseAssets assets
+		baseAssets, err := k.ExchangeUTokens(ctx, coin)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+		// Get USD value of base assets
+		value, err := k.GetValue(ctx, baseAssets)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+		weight, err := k.GetCollateralWeight(ctx, baseAssets.Denom)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+		// Add each collateral coin's weighted value to borrow limit
+		limit.Add(value.Mul(weight))
+	}
+	return limit, nil
 }
