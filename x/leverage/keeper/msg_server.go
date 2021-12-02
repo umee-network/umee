@@ -236,30 +236,32 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	/*
-		// TODO #257: Additional return values on Liquidate, or some other solution, are required
-		// in order to get some desired information like reward amounts.
+	// TODO #257: Additional return values on Liquidate, or some other solution, are required
+	// in order to get some desired information like reward amounts.
+	var actualRepayment, actualReward sdk.Coin
 
-		s.keeper.Logger(ctx).Debug(
-			"borrowed assets repaid by liquidator",
-			"borrower", borrowerAddr.String(),
-			"amount", msg.Amount.String(),
-			"reward", msg.Reward,
-		)
+	s.keeper.Logger(ctx).Debug(
+		"borrowed assets repaid by liquidator",
+		"liquidator", liquidatorAddr.String(),
+		"borrower", borrowerAddr.String(),
+		"amount", actualRepayment.String(),
+		"reward", actualReward.String(),
+	)
 
-		ctx.EventManager().EmitEvents(sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeLiquidate,
-				// sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-				// sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-			),
-			sdk.NewEvent(
-				sdk.EventTypeMessage,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-				sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
-			),
-		})
-	*/
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeLiquidate,
+			sdk.NewAttribute(types.EventAttrLiquidator, liquidatorAddr.String()),
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, actualRepayment.String()),
+			sdk.NewAttribute(types.EventAttrReward, actualReward.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
+		),
+	})
 
 	return &types.MsgLiquidateResponse{}, nil
 }
