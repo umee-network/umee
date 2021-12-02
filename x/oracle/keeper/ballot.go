@@ -84,7 +84,6 @@ func (k Keeper) ApplyWhitelist(
 	whitelist types.DenomList,
 	voteTargets map[string]sdk.Dec,
 ) {
-
 	// check is there any update in whitelist params
 	updateRequired := false
 	if len(voteTargets) != len(whitelist) {

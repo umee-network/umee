@@ -74,5 +74,4 @@ func (k Keeper) RewardBallotWinners(
 	if err != nil {
 		panic(fmt.Sprintf("failed to send coins to distribution module %s", err.Error()))
 	}
-
 }

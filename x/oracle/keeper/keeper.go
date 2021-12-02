@@ -237,7 +237,6 @@ func (k Keeper) SetAggregateExchangeRatePrevote(
 	voter sdk.ValAddress,
 	prevote types.AggregateExchangeRatePrevote,
 ) {
-
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&prevote)
 
@@ -255,7 +254,6 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(
 	ctx sdk.Context,
 	handler func(sdk.ValAddress, types.AggregateExchangeRatePrevote) bool,
 ) {
-
 	store := ctx.KVStore(k.storeKey)
 
 	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRatePrevoteKey)
@@ -317,7 +315,6 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	ctx sdk.Context,
 	handler IterateExchangeRateVote,
 ) {
-
 	store := ctx.KVStore(k.storeKey)
 
 	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRateVoteKey)

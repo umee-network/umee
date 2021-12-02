@@ -1,4 +1,4 @@
-package leverage
+package oracle
 
 import (
 	"context"
@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/x/leverage/client/cli"
-	"github.com/umee-network/umee/x/leverage/keeper"
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/x/oracle/client/cli"
+	"github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 var (
@@ -25,38 +25,41 @@ var (
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
-// AppModuleBasic implements the AppModuleBasic interface for the x/leverage
-// module.
+// AppModuleBasic implements the AppModuleBasic interface for the x/oracle module.
 type AppModuleBasic struct {
 	cdc codec.Codec
+}
+
+// RegisterLegacyAminoCodec registers the x/oracle module's types with a legacy
+// Amino codec.
+func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	types.RegisterLegacyAminoCodec(cdc)
 }
 
 func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 	return AppModuleBasic{cdc: cdc}
 }
 
-// Name returns the x/leverage module's name.
+// Name returns the x/oracle module's name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// RegisterLegacyAminoCodec registers the x/leverage module's types with a legacy
-// Amino codec.
-func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	types.RegisterLegacyAminoCodec(cdc)
+func (AppModuleBasic) ConsensusVersion() uint64 {
+	return 1
 }
 
-// RegisterInterfaces registers the module's interface types.
-func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
+// RegisterInterfaces registers the x/oracle module's interface types.
+func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns the x/leverage module's default genesis state.
+// DefaultGenesis returns the x/oracle module's default genesis state.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesis())
+	return cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
-// ValidateGenesis performs genesis state validation for the x/leverage module.
+// ValidateGenesis performs genesis state validation for the x/oracle module.
 func (AppModuleBasic) ValidateGenesis(
 	cdc codec.JSONCodec,
 	config client.TxEncodingConfig,
@@ -68,14 +71,14 @@ func (AppModuleBasic) ValidateGenesis(
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
 	}
 
-	return genState.Validate()
+	return nil
 }
 
 // Deprecated: RegisterRESTRoutes performs a no-op. Querying is delegated to the
 // gRPC service.
-func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
+func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {}
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/leverage
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/oracle
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
@@ -83,17 +86,17 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 	}
 }
 
-// GetTxCmd returns the x/leverage module's root tx command.
-func (a AppModuleBasic) GetTxCmd() *cobra.Command {
+// GetTxCmd returns the x/oracle module's root tx command.
+func (AppModuleBasic) GetTxCmd() *cobra.Command {
 	return cli.GetTxCmd()
 }
 
-// GetQueryCmd returns the x/leverage module's root query command.
+// GetQueryCmd returns the x/oracle module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 	return cli.GetQueryCmd(types.StoreKey)
 }
 
-// AppModule implements the AppModule interface for the x/leverage module.
+// AppModule implements the AppModule interface for the x/oracle module.
 type AppModule struct {
 	AppModuleBasic
 
@@ -107,21 +110,17 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
 	}
 }
 
-// Name returns the x/leverage module's name.
+// Name returns the x/oracle module's name.
 func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
 }
 
-func (AppModule) ConsensusVersion() uint64 {
-	return 1
-}
-
-// Deprecated: Route returns the message routing key for the x/leverage module.
+// Deprecated: Route returns the message routing key for the x/oracle module.
 func (am AppModule) Route() sdk.Route {
 	return sdk.Route{}
 }
 
-// QuerierRoute returns the x/leverage module's query routing key.
+// QuerierRoute returns the x/oracle module's query routing key.
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
 // LegacyQuerierHandler returns a no-op legacy querier.
@@ -133,45 +132,36 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 
 // RegisterServices registers gRPC services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+	// types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	// types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
-// RegisterInvariants registers the x/leverage module's invariants.
+// RegisterInvariants registers the x/oracle module's invariants.
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// InitGenesis performs the x/leverage module's genesis initialization. It returns
+// InitGenesis performs the x/oracle module's genesis initialization. It returns
 // no validator updates.
-func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
-	cdc.MustUnmarshalJSON(data, &genState)
+
+	cdc.MustUnmarshalJSON(gs, &genState)
 	InitGenesis(ctx, am.keeper, genState)
 
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the x/leverage module's exported genesis state as raw
+// ExportGenesis returns the x/oracle module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	genState := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(genState)
 }
 
-// BeginBlock executes all ABCI BeginBlock logic respective to the x/leverage module.
+// BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
 func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
-// EndBlock executes all ABCI EndBlock logic respective to the x/leverage module.
+// EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	height := ctx.BlockHeight()
-	epoch := am.keeper.GetParams(ctx).InterestEpoch
-	if height%epoch == 0 {
-		if err := am.keeper.AccrueAllInterest(ctx); err != nil {
-			panic(err)
-		}
-		if err := am.keeper.UpdateExchangeRates(ctx); err != nil {
-			panic(err)
-		}
-	}
+func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }

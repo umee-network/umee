@@ -113,7 +113,6 @@ func TestSqrt(t *testing.T) {
 }
 
 func TestPBPower(t *testing.T) {
-
 	ctx := sdk.NewContext(nil, tmproto.Header{}, false, nil)
 	_, valAccAddrs, sk := GenerateRandomTestCase()
 	pb := ExchangeRateBallot{}
