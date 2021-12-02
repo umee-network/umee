@@ -232,7 +232,7 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	if err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.Reward); err != nil {
+	if err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom); err != nil {
 		return nil, err
 	}
 

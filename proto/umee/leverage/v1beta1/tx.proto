@@ -72,7 +72,9 @@ message MsgLiquidate {
   string                   liquidator = 1;
   string                   borrower = 2;
   cosmos.base.v1beta1.Coin repayment = 3 [(gogoproto.nullable) = false];
-  string                   reward = 4;
+  string                   reward_denom = 4 [
+    (gogoproto.moretags)   = "yaml:\"reward_denom\""
+  ];
 }
 
 // MsgLendAssetResponse defines the Msg/LendAsset response type.

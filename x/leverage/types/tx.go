@@ -143,12 +143,12 @@ func (msg *MsgRepayAsset) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{borrower}
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, reward string) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
 	return &MsgLiquidate{
-		Liquidator: borrower.String(),
-		Borrower:   borrower.String(),
-		Repayment:  repayment,
-		Reward:     reward,
+		Liquidator:  borrower.String(),
+		Borrower:    borrower.String(),
+		Repayment:   repayment,
+		RewardDenom: rewardDenom,
 	}
 }
 
@@ -172,7 +172,7 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 
-	if msg.GetReward() == "" {
+	if msg.GetRewardDenom() == "" {
 		return errors.New("empty reward denom")
 	}
 
