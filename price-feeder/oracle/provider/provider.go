@@ -12,12 +12,12 @@ const (
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
-	GetTickerPrices(ticker ...string) (map[string]sdk.Dec, error)
+	GetTickerPrices(ticker ...string) (map[string]TickerPrice, error)
 }
 
-// SymbolPrice defines price and volume information for a symbol or ticker
+// TickerPrice defines price and volume information for a symbol or ticker
 // exchange rate.
-type SymbolPrice struct {
+type TickerPrice struct {
 	Price  sdk.Dec
 	Volume sdk.Int
 }
