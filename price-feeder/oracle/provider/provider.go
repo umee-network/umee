@@ -14,3 +14,10 @@ const (
 type Provider interface {
 	GetTickerPrices(ticker ...string) (map[string]sdk.Dec, error)
 }
+
+// SymbolPrice defines price and volume information for a symbol or ticker
+// exchange rate.
+type SymbolPrice struct {
+	Price  sdk.Dec
+	Volume sdk.Int
+}
