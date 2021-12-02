@@ -41,6 +41,10 @@ type (
 	Config struct {
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring        `toml:"key_ring" validate:"required,gt=0,dive,required"`
+		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
+		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
 	}
 
 	// Server defines the API server configuration.
@@ -58,6 +62,28 @@ type (
 		Base      string   `toml:"base" validate:"required"`
 		Quote     string   `toml:"quote" validate:"required"`
 		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+	}
+
+	// Account defines account related configuration that is related to the Umee
+	// network and transaction signing functionality.
+	Account struct {
+		ChainID   string `toml:"chain_id" validate:"required"`
+		Address   string `toml:"address" validate:"required"`
+		Validator string `toml:"validator" validate:"required"`
+	}
+
+	// Keyring defines the required Umee keyring configuration.
+	Keyring struct {
+		Backend string `toml:"backend" validate:"required"`
+		Pass    string `toml:"pass" validate:"required"`
+		Dir     string `toml:"dir" validate:"required"`
+	}
+
+	// RPC defines RPC configuration of both the Umee gRPC and Tendermint nodes.
+	RPC struct {
+		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
+		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
+		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
 	}
 )
 

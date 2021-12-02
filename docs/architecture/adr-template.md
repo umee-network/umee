@@ -19,12 +19,6 @@
 > and why there is a problem. It should be as succinct as possible and introduce
 > the high level idea behind the solution.
 
-## Alternative Approaches
-
-> This section contains information around alternative options that are considered
-> before making a decision. It should contain a explanation on why the alternative
-> approach(es) were not chosen.
-
 ## Decision
 
 > This section records the decision that was made.
@@ -63,6 +57,12 @@
 > - Will these changes require a breaking (major) release?
 >
 > - Does this change require coordination with the SDK or other?
+
+## Alternative Approaches
+
+> This section contains information around alternative options that are considered
+> before making a decision. It should contain a explanation on why the alternative
+> approach(es) were not chosen.
 
 ## Consequences
 
