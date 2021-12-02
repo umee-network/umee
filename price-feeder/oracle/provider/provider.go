@@ -18,6 +18,6 @@ type Provider interface {
 // TickerPrice defines price and volume information for a symbol or ticker
 // exchange rate.
 type TickerPrice struct {
-	Price  sdk.Dec
-	Volume sdk.Int
+	Price  sdk.Dec // last trade price
+	Volume sdk.Int // 24h volume
 }

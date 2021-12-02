@@ -29,9 +29,11 @@ type (
 
 	// KrakenTickerPair defines the structure returned from Kraken for a ticker query.
 	//
-	// Note, we only care about 'c', which is the last trade closed [<price>, <lot volume>].
+	// Note, we only care about 'c', which is the last trade closed [<price>, <lot volume>]
+	// and 'v', the volume.
 	KrakenTickerPair struct {
 		C []string `json:"c"`
+		V []string `json:"v"`
 	}
 
 	// KrakenTickerResponse defines the response structure of a Kraken ticker request.
@@ -60,7 +62,7 @@ func NewKrakenProviderWithTimeout(timeout time.Duration) *KrakenProvider {
 	}
 }
 
-func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, error) {
+func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice, error) {
 	path := fmt.Sprintf("%s/0/public/Ticker?pair=%s", p.baseURL, strings.Join(tickers, ","))
 
 	resp, err := p.client.Get(path)
@@ -91,7 +93,7 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 		)
 	}
 
-	tickerPrices := make(map[string]sdk.Dec, len(tickers))
+	tickerPrices := make(map[string]TickerPrice, len(tickers))
 	for _, t := range tickers {
 		// TODO: We may need to transform 't' prior to looking it up in the response
 		// as Kraken may represent currencies differently.
@@ -100,12 +102,17 @@ func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]sdk.Dec, 
 			return nil, fmt.Errorf("failed to find ticker in Kraken response: %s", t)
 		}
 
-		closePrice, err := sdk.NewDecFromStr(pair.C[0])
+		price, err := sdk.NewDecFromStr(pair.C[0])
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse Kraken close price (%s) for %s", pair.C[0], t)
+			return nil, fmt.Errorf("failed to parse Kraken price (%s) for %s", pair.C[0], t)
 		}
 
-		tickerPrices[t] = closePrice
+		volume, ok := sdk.NewIntFromString(pair.V[1])
+		if !ok {
+			return nil, fmt.Errorf("failed to parse Kraken volume (%s) for %s", pair.V[1], t)
+		}
+
+		tickerPrices[t] = TickerPrice{Price: price, Volume: volume}
 	}
 
 	return tickerPrices, nil
