@@ -400,7 +400,7 @@ func (k Keeper) LiquidateBorrow(
 	return nil
 }
 
-// LiquidationParams allows for dynamic liquidation parameters based on collateral denomination,
+// LiquidationParams computes dynamic liquidation parameters based on collateral denomination,
 // borrowed value, and borrow limit
 func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limit sdk.Dec) (sdk.Dec, sdk.Dec, error) {
 	if borrowed.IsNegative() {
