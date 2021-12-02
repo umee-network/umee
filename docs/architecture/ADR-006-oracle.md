@@ -57,6 +57,7 @@ The `x/oracle` module will provide the following method on its keeper, to be use
 - More time spent on `x/oracle` development
 
 ### Neutral
+
 - Requires us to [evaluate the whitelist](https://github.com/umee-network/umee/issues/225) for the oracle as we're not sure whether or not we want to accept all of the operators' exchange rates
 
 ## References
