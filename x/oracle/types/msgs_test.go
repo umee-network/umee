@@ -39,7 +39,7 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 		sdk.AccAddress([]byte("addr1_______________")),
 	}
 
-	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(MicroAtomDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(MicroUmeeDenom, sdk.NewDecWithPrec(32121, 1))}
+	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(AtomDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(UmeeDenom, sdk.NewDecWithPrec(32121, 1))}
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(addrs[0]))
 
 	tests := []struct {

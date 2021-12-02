@@ -16,7 +16,6 @@ message GenesisState {
   repeated MissCounter                  miss_counters                    = 4 [(gogoproto.nullable) = false];
   repeated AggregateExchangeRatePrevote aggregate_exchange_rate_prevotes = 5 [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote    aggregate_exchange_rate_votes    = 6 [(gogoproto.nullable) = false];
-  repeated TobinTax                     tobin_taxes                      = 7 [(gogoproto.nullable) = false];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are
@@ -32,12 +31,4 @@ message FeederDelegation {
 message MissCounter {
   string validator_address = 1;
   uint64 miss_counter      = 2;
-}
-
-// TobinTax defines an denom and tobin_tax pair used in
-// oracle module's genesis state
-message TobinTax {
-  string denom     = 1;
-  string tobin_tax = 2
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }

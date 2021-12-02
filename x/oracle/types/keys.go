@@ -26,13 +26,11 @@ var (
 	KeyPrefixMissCounter                  = []byte{0x03} // prefix for each key to a miss counter
 	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
 	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
-	KeyPrefixTobinTax                     = []byte{0x06} // prefix for each key to a tobin tax
 	ExchangeRateKey                       = []byte{0x01} // prefix for each key to a rate
 	FeederDelegationKey                   = []byte{0x02} // prefix for each key to a feeder delegation
 	MissCounterKey                        = []byte{0x03} // prefix for each key to a miss counter
 	AggregateExchangeRatePrevoteKey       = []byte{0x04} // prefix for each key to a aggregate prevote
 	AggregateExchangeRateVoteKey          = []byte{0x05} // prefix for each key to a aggregate vote
-	TobinTaxKey                           = []byte{0x06} // prefix for each key to a tobin tax
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -64,17 +62,4 @@ func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
 func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixAggregateExchangeRateVote...)
 	return append(key, address.MustLengthPrefix(v)...)
-}
-
-// GetTobinTaxKey - stored by *denom* bytes
-func GetTobinTaxKey(d string) (key []byte) {
-	key = append(key, KeyPrefixTobinTax...)
-	key = append(key, []byte(d)...)
-	return append(key, 0) // append 0 for null-termination
-}
-
-// ExtractDenomFromTobinTaxKey - split denom from the tobin tax key
-func ExtractDenomFromTobinTaxKey(key []byte) (denom string) {
-	denom = string(key[1:])
-	return
 }
