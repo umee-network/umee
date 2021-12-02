@@ -93,9 +93,6 @@ func validateLiquidationThreshold(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("complete liquidation threshold cannot be negative: %d", v)
 	}
-	if v.GT(sdk.MustNewDecFromStr("0.1")) {
-		return fmt.Errorf("complete liquidation threshold cannot exceed 0.1: %d", v)
-	}
 	return nil
 }
 
