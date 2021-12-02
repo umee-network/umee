@@ -37,6 +37,7 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 - Terra's design for the voting procedure as documented [here](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#voting-procedure)
 
 ### API
+
 The `x/oracle` module will provide the following method on its keeper, to be used by `x/leverage`:
 ```go
     GetExchangeRate(base string) (sdk.Dec, error) // get the USD value of an input base denomination
