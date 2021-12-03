@@ -122,7 +122,7 @@ func TestPBPower(t *testing.T) {
 		power := sk.Validator(ctx, valAccAddrs[i]).GetConsensusPower(sdk.DefaultPowerReduction)
 		vote := NewVoteForTally(
 			sdk.ZeroDec(),
-			AtomDenom,
+			UmeeDenom,
 			valAccAddrs[i],
 			power,
 		)
@@ -140,7 +140,7 @@ func TestPBPower(t *testing.T) {
 	faceValAddr := sdk.ValAddress(pubKey.Address())
 	fakeVote := NewVoteForTally(
 		sdk.OneDec(),
-		AtomDenom,
+		UmeeDenom,
 		faceValAddr,
 		0,
 	)
@@ -198,7 +198,7 @@ func TestPBWeightedMedian(t *testing.T) {
 
 			vote := NewVoteForTally(
 				sdk.NewDec(int64(input)),
-				AtomDenom,
+				UmeeDenom,
 				valAddr,
 				power,
 			)
