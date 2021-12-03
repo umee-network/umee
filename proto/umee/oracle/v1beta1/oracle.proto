@@ -48,11 +48,6 @@ message Denom {
   option (gogoproto.goproto_stringer) = false;
 
   string name      = 1 [(gogoproto.moretags) = "yaml:\"name\""];
-  string tobin_tax = 2 [
-    (gogoproto.moretags)   = "yaml:\"tobin_tax\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
 }
 
 // struct for aggregate prevoting on the ExchangeRateVote.

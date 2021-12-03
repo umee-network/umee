@@ -20,16 +20,6 @@ service Query {
     option (google.api.http).get = "/umee/oracle/v1beta1/denoms/exchange_rates";
   }
 
-  // TobinTax returns tobin tax of a denom
-  rpc TobinTax(QueryTobinTaxRequest) returns (QueryTobinTaxResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/{denom}/tobin_tax";
-  }
-
-  // TobinTaxes returns tobin taxes of all denoms
-  rpc TobinTaxes(QueryTobinTaxesRequest) returns (QueryTobinTaxesResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/tobin_taxes";
-  }
-
   // Actives returns all active denoms
   rpc Actives(QueryActivesRequest) returns (QueryActivesResponse) {
     option (google.api.http).get = "/umee/oracle/v1beta1/denoms/actives";
@@ -107,37 +97,6 @@ message QueryExchangeRatesResponse {
       [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", (gogoproto.nullable) = false];
 }
 
-// QueryTobinTaxRequest is the request type for the Query/TobinTax RPC method.
-message QueryTobinTaxRequest {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-
-  // denom defines the denomination to query for.
-  string denom = 1;
-}
-
-// QueryTobinTaxResponse is response type for the
-// Query/TobinTax RPC method.
-message QueryTobinTaxResponse {
-  // tobin_taxe defines the tobin tax of a denom
-  string tobin_tax = 1
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-}
-
-// QueryTobinTaxesRequest is the request type for the Query/TobinTaxes RPC
-// method.
-message QueryTobinTaxesRequest {}
-
-// QueryTobinTaxesResponse is response type for the
-// Query/TobinTaxes RPC method.
-message QueryTobinTaxesResponse {
-  // tobin_taxes defines a list of the tobin tax of all whitelisted denoms
-  repeated Denom tobin_taxes = 1 [
-    (gogoproto.moretags)     = "yaml:\"tobin_taxes\"",
-    (gogoproto.castrepeated) = "DenomList",
-    (gogoproto.nullable)     = false
-  ];
-}
 
 // QueryActivesRequest is the request type for the Query/Actives RPC method.
 message QueryActivesRequest {}

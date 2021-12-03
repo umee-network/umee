@@ -332,64 +332,6 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	}
 }
 
-// GetTobinTax return tobin tax for the denom.
-func (k Keeper) GetTobinTax(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
-
-	bz := store.Get(types.GetTobinTaxKey(denom))
-	if bz == nil {
-		err := sdkerrors.Wrap(types.ErrNoTobinTax, denom)
-		return sdk.Dec{}, err
-	}
-
-	tobinTax := sdk.DecProto{}
-	k.cdc.MustUnmarshal(bz, &tobinTax)
-
-	return tobinTax.Dec, nil
-}
-
-// SetTobinTax updates tobin tax for the denom
-func (k Keeper) SetTobinTax(ctx sdk.Context, denom string, tobinTax sdk.Dec) {
-	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: tobinTax})
-	store.Set(types.GetTobinTaxKey(denom), bz)
-}
-
-// IterateTobinTaxes iterates rate over tobin taxes in the store.
-func (k Keeper) IterateTobinTaxes(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, types.TobinTaxKey)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		denom := types.ExtractDenomFromTobinTaxKey(iter.Key())
-
-		var tobinTax sdk.DecProto
-		k.cdc.MustUnmarshal(iter.Value(), &tobinTax)
-		if handler(denom, tobinTax.Dec) {
-			break
-		}
-	}
-}
-
-// ClearTobinTaxes clears tobin taxes.
-func (k Keeper) ClearTobinTaxes(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, types.TobinTaxKey)
-	defer iter.Close()
-
-	var keys [][]byte
-	for ; iter.Valid(); iter.Next() {
-		keys = append(keys, iter.Key())
-	}
-
-	for _, k := range keys {
-		store.Delete(k)
-	}
-}
-
 // ValidateFeeder returns the given feeder is allowed to feed the message or not.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	if !feederAddr.Equals(valAddr) {

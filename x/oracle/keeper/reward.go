@@ -18,7 +18,7 @@ func (k Keeper) RewardBallotWinners(
 	ballotWinners map[string]types.Claim,
 ) {
 	rewardDenoms := make([]string, len(voteTargets)+1)
-	rewardDenoms[0] = types.MicroUmeeDenom
+	rewardDenoms[0] = types.UmeeDenom
 
 	i := 1
 	for denom := range voteTargets {
