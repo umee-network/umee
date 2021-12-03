@@ -151,7 +151,7 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
-	providerPrices := make(map[string]map[string]sdk.Dec)
+	providerPrices := make(map[string]map[string]provider.TickerPrice)
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
@@ -180,14 +180,14 @@ func (o *Oracle) SetPrices() error {
 
 			// flatten and collect prices based on the base currency per provider
 			//
-			// e.g.: {ProviderKraken: {"ATOM": 34.03, "UMEE": 6.3}}
+			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
 			for _, cp := range currencyPairs {
 				if _, ok := providerPrices[providerName]; !ok {
-					providerPrices[providerName] = make(map[string]sdk.Dec)
+					providerPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
-				if p, ok := prices[cp.String()]; ok {
-					providerPrices[providerName][cp.Base] = p
+				if tp, ok := prices[cp.String()]; ok {
+					providerPrices[providerName][cp.Base] = tp
 				}
 			}
 			mtx.Unlock()
@@ -200,31 +200,7 @@ func (o *Oracle) SetPrices() error {
 		return err
 	}
 
-	// consolidate the different provider maps into one for each exchange rate
-	var (
-		priceAverages = make(map[string]sdk.Dec)
-		priceCounts   = make(map[string]int)
-	)
-
-	// TODO: Consider using Volume Weighted Average Price (VWAP).
-	//
-	// Ref: https://github.com/umee-network/umee/issues/251
-	for _, prices := range providerPrices {
-		for base, price := range prices {
-			if _, ok := priceAverages[base]; !ok {
-				priceAverages[base] = sdk.NewDec(0)
-			}
-
-			priceAverages[base] = priceAverages[base].Add(price)
-			priceCounts[base]++
-		}
-	}
-
-	for base, price := range priceAverages {
-		priceAverages[base] = price.QuoInt64(int64(priceCounts[base]))
-	}
-
-	o.prices = priceAverages
+	o.prices = ComputeVWAP(providerPrices)
 
 	return nil
 }
