@@ -300,7 +300,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Use oracle helper functions to find total borrowed value in USD
-	borrowValue, err := k.GetTotalValue(ctx, borrowed)
+	borrowValue, err := k.GetTotalPrice(ctx, borrowed)
 	if err != nil {
 		return err
 	}
@@ -335,7 +335,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Repayment cannot exceed borrowed value * close factor
-	repayValue, err := k.GetValue(ctx, repayment)
+	repayValue, err := k.GetPrice(ctx, repayment)
 	if err != nil {
 		return err
 	}
