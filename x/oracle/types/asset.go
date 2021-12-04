@@ -8,6 +8,7 @@ import (
 const (
 	UmeeDenom       string = "uumee"
 	USDDenom        string = "uusd"
+	AtomSign        string = "ATOM"
 	BlocksPerMinute        = uint64(10)
 	BlocksPerHour          = BlocksPerMinute * 60
 	BlocksPerDay           = BlocksPerHour * 24

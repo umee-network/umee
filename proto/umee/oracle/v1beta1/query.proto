@@ -25,11 +25,6 @@ service Query {
     option (google.api.http).get = "/umee/oracle/v1beta1/denoms/actives";
   }
 
-  // VoteTargets returns all vote target denoms
-  rpc VoteTargets(QueryVoteTargetsRequest) returns (QueryVoteTargetsResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/vote_targets";
-  }
-
   // FeederDelegation returns feeder delegation of a validator
   rpc FeederDelegation(QueryFeederDelegationRequest) returns (QueryFeederDelegationResponse) {
     option (google.api.http).get = "/umee/oracle/v1beta1/validators/{validator_addr}/feeder";
@@ -109,17 +104,6 @@ message QueryActivesResponse {
   repeated string actives = 1;
 }
 
-// QueryVoteTargetsRequest is the request type for the Query/VoteTargets RPC
-// method.
-message QueryVoteTargetsRequest {}
-
-// QueryVoteTargetsResponse is response type for the
-// Query/VoteTargets RPC method.
-message QueryVoteTargetsResponse {
-  // vote_targets defines a list of the denomination in which everyone
-  // should vote in the current vote period.
-  repeated string vote_targets = 1;
-}
 
 // QueryFeederDelegationRequest is the request type for the
 // Query/FeederDelegation RPC method.
