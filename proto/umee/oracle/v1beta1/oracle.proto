@@ -50,6 +50,7 @@ message Denom {
   string name      = 1 [(gogoproto.moretags) = "yaml:\"name\""];
 }
 
+// AggregateExchangeRatePrevote -
 // struct for aggregate prevoting on the ExchangeRateVote.
 // The purpose of aggregate prevote is to hide vote exchange rates with hash
 // which is formatted as hex string in SHA256("{salt}:{exchange
@@ -64,7 +65,7 @@ message AggregateExchangeRatePrevote {
   uint64 submit_block = 3 [(gogoproto.moretags) = "yaml:\"submit_block\""];
 }
 
-// MsgAggregateExchangeRateVote - struct for voting on
+// AggregateExchangeRateVote - struct for voting on
 // the exchange rates of USD denominated in various assets.
 message AggregateExchangeRateVote {
   option (gogoproto.equal)            = false;

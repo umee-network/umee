@@ -28,14 +28,14 @@ func (ms msgServer) AggregateExchangeRatePrevote(goCtx context.Context, msg *typ
 		return nil, err
 	}
 
-	/*feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
+	feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
 		return nil, err
 	}
 
 	if err := ms.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
 		return nil, err
-	}*/
+	}
 
 	// Convert hex string to votehash
 	voteHash, err := types.AggregateVoteHashFromHexString(msg.Hash)
