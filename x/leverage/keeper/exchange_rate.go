@@ -8,7 +8,7 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// ExchangeTokens converts an sdk.Coin containing a base asset to its value as a
+// ExchangeToken converts an sdk.Coin containing a base asset to its value as a
 // uToken.
 func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 	uTokenDenom := k.FromTokenToUTokenDenom(ctx, token.Denom)
@@ -27,7 +27,7 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 
 // ExchangeUToken converts an sdk.Coin containing a uToken to its value in a base
 // token.
-func (k Keeper) ExchangeUTokens(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
 	if tokenDenom == "" {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.Denom)

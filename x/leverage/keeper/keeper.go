@@ -110,7 +110,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	// TODO #213: Calculate lender's borrow limit and current borrowed value, if any.
 	// Prevent withdrawing assets when it would bring user borrow limit below current borrowed value.
 
-	withdrawal, err := k.ExchangeUTokens(ctx, uToken)
+	withdrawal, err := k.ExchangeUToken(ctx, uToken)
 	if err != nil {
 		return err
 	}
@@ -354,7 +354,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Convert reward tokens back to uTokens
-	reward, err := k.ExchangeTokens(ctx, baseReward)
+	reward, err := k.ExchangeToken(ctx, baseReward)
 	if err != nil {
 		return err
 	}
