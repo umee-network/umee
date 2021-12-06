@@ -20,7 +20,10 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
 
-func (ms msgServer) AggregateExchangeRatePrevote(goCtx context.Context, msg *types.MsgAggregateExchangeRatePrevote) (*types.MsgAggregateExchangeRatePrevoteResponse, error) {
+func (ms msgServer) AggregateExchangeRatePrevote(
+	goCtx context.Context,
+	msg *types.MsgAggregateExchangeRatePrevote,
+) (*types.MsgAggregateExchangeRatePrevoteResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
@@ -62,7 +65,10 @@ func (ms msgServer) AggregateExchangeRatePrevote(goCtx context.Context, msg *typ
 	return &types.MsgAggregateExchangeRatePrevoteResponse{}, nil
 }
 
-func (ms msgServer) AggregateExchangeRateVote(goCtx context.Context, msg *types.MsgAggregateExchangeRateVote) (*types.MsgAggregateExchangeRateVoteResponse, error) {
+func (ms msgServer) AggregateExchangeRateVote(
+	goCtx context.Context,
+	msg *types.MsgAggregateExchangeRateVote,
+) (*types.MsgAggregateExchangeRateVoteResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
@@ -122,7 +128,10 @@ func (ms msgServer) AggregateExchangeRateVote(goCtx context.Context, msg *types.
 	return &types.MsgAggregateExchangeRateVoteResponse{}, nil
 }
 
-func (ms msgServer) DelegateFeedConsent(goCtx context.Context, msg *types.MsgDelegateFeedConsent) (*types.MsgDelegateFeedConsentResponse, error) {
+func (ms msgServer) DelegateFeedConsent(
+	goCtx context.Context,
+	msg *types.MsgDelegateFeedConsent,
+) (*types.MsgDelegateFeedConsentResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	operatorAddr, err := sdk.ValAddressFromBech32(msg.Operator)
