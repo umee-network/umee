@@ -15,5 +15,6 @@ const (
 	EventAttrLiquidator = "liquidator"
 	EventAttrDenom      = "denom"
 	EventAttrEnable     = "enabled"
+	EventAttrAttempted  = "attempted"
 	EventAttrReward     = "reward"
 )

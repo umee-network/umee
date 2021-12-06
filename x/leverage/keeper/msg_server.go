@@ -187,24 +187,26 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
-	_, err = s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount)
+	repaid, err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO #257: Log actual repaid amount, not attempted (in case of overpay)
+	actualRepayment := sdk.NewCoin(msg.Amount.Denom, repaid)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Amount.String(),
+		"amount", actualRepayment.String(),
+		"attempted", msg.Amount.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepayBorrowedAsset,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, actualRepayment.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Amount.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -233,14 +235,13 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	_, _, err = s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
+	repaid, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO #257: Additional return values on Liquidate, or some other solution, are required
-	// in order to get some desired information like reward amounts.
-	var actualRepayment, actualReward sdk.Coin
+	actualRepayment := sdk.NewCoin(msg.Repayment.Denom, repaid)
+	actualReward := sdk.NewCoin(msg.RewardDenom, reward)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid by liquidator",
@@ -248,6 +249,7 @@ func (s msgServer) Liquidate(
 		"borrower", borrowerAddr.String(),
 		"amount", actualRepayment.String(),
 		"reward", actualReward.String(),
+		"attempted", msg.Repayment.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -257,6 +259,7 @@ func (s msgServer) Liquidate(
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, actualRepayment.String()),
 			sdk.NewAttribute(types.EventAttrReward, actualReward.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
