@@ -398,7 +398,9 @@ func (k Keeper) LiquidateBorrow(
 }
 
 // LiquidationParams computes dynamic liquidation parameters based on collateral denomination,
-// borrowed value, and borrow limit
+// borrowed value, and borrow limit. Returns liquidationIncentive (the ratio of bonus collateral
+// awarded during Liquidate transactions, and closeFactor (the fraction of a borrower's total
+// borrowed value that can be repaid by a liquidator in a single liquidation event.)
 func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limit sdk.Dec) (sdk.Dec, sdk.Dec, error) {
 	if borrowed.IsNegative() {
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
@@ -414,18 +416,21 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 	}
 
 	// close factor scales linearly between MinimumCloseFactor and 1.0,
-	// reaching max value when (borrowed / limit) = CompleteLiquidationThreshold
-	closeFactor := k.GetParams(ctx).MinimumCloseFactor
-	completeLiquidationThreshold := k.GetParams(ctx).CompleteLiquidationThreshold
+	// reaching max value when (borrowed / limit) = 1 + CompleteLiquidationThreshold
+	var closeFactor sdk.Dec
+	params := k.GetParams(ctx)
 	closeFactor = Interpolate(
-		borrowed.Quo(limit),          // x
-		sdk.ZeroDec(),                // xMin
-		closeFactor,                  // yMin
-		completeLiquidationThreshold, // xMax
-		sdk.OneDec(),                 // yMax
+		borrowed.Quo(limit).Sub(sdk.OneDec()), // x
+		sdk.ZeroDec(),                         // xMin
+		params.MinimumCloseFactor,             // yMin
+		params.CompleteLiquidationThreshold,   // xMax
+		sdk.OneDec(),                          // yMax
 	)
 	if closeFactor.GTE(sdk.OneDec()) {
 		closeFactor = sdk.OneDec()
+	}
+	if closeFactor.IsNegative() {
+		closeFactor = sdk.ZeroDec()
 	}
 
 	return liquidationIncentive, closeFactor, nil
