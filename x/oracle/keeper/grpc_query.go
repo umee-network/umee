@@ -25,34 +25,15 @@ func NewQuerier(keeper Keeper) types.QueryServer {
 var _ types.QueryServer = querier{}
 
 // Params queries params of x/oracle module
-func (q querier) Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
+func (q querier) Params(
+	c context.Context,
+	req *types.QueryParamsRequest,
+) (*types.QueryParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 	var params types.Params
 	q.paramSpace.GetParamSet(ctx, &params)
 
 	return &types.QueryParamsResponse{Params: params}, nil
-}
-
-// ExchangeRate queries exchange rate of a denom
-func (q querier) ExchangeRate(
-	c context.Context,
-	req *types.QueryExchangeRateRequest,
-) (*types.QueryExchangeRateResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
-	}
-
-	if len(req.Denom) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "empty denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(c)
-	exchangeRate, err := q.GetExchangeRate(ctx, req.Denom)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryExchangeRateResponse{ExchangeRate: exchangeRate}, nil
 }
 
 // ExchangeRates queries exchange rates of all denoms
@@ -63,19 +44,29 @@ func (q querier) ExchangeRates(
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var exchangeRates sdk.DecCoins
-	q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-		exchangeRates = append(exchangeRates, sdk.NewDecCoinFromDec(denom, rate))
-		return false
-	})
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.GetExchangeRate(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+
+		exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+	} else {
+		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
+			exchangeRates = append(exchangeRates, sdk.NewDecCoinFromDec(denom, rate))
+			return false
+		})
+	}
 
 	return &types.QueryExchangeRatesResponse{ExchangeRates: exchangeRates}, nil
 }
 
-// Actives queries all denoms for which exchange rates exist
-func (q querier) Actives(
+// ActiveExchangeRates queries all denoms for which exchange rates exist
+func (q querier) ActiveExchangeRates(
 	c context.Context,
-	req *types.QueryActivesRequest,
-) (*types.QueryActivesResponse, error) {
+	req *types.QueryActiveExchangeRatesRequest,
+) (*types.QueryActiveExchangeRatesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 
 	denoms := []string{}
@@ -84,7 +75,7 @@ func (q querier) Actives(
 		return false
 	})
 
-	return &types.QueryActivesResponse{Actives: denoms}, nil
+	return &types.QueryActiveExchangeRatesResponse{ActiveRates: denoms}, nil
 }
 
 // FeederDelegation queries the account address that the validator operator delegated oracle vote rights to

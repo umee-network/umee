@@ -78,28 +78,21 @@ $ umeed query oracle aggregate-votes umeevaloper...
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
+			query := types.QueryAggregateVoteRequest{}
 
-			if len(args) == 0 {
-				res, err := queryClient.AggregateVotes(
-					context.Background(),
-					&types.QueryAggregateVotesRequest{},
-				)
+			if len(args) > 0 {
+				valString := args[0]
+				validator, err := sdk.ValAddressFromBech32(valString)
 				if err != nil {
 					return err
 				}
 
-				return clientCtx.PrintProto(res)
-			}
-
-			valString := args[0]
-			validator, err := sdk.ValAddressFromBech32(valString)
-			if err != nil {
-				return err
+				query.ValidatorAddr = validator.String()
 			}
 
 			res, err := queryClient.AggregateVote(
 				context.Background(),
-				&types.QueryAggregateVoteRequest{ValidatorAddr: validator.String()},
+				&query,
 			)
 			if err != nil {
 				return err
@@ -134,28 +127,21 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
+			query := types.QueryAggregatePrevoteRequest{}
 
-			if len(args) == 0 {
-				res, err := queryClient.AggregatePrevotes(
-					context.Background(),
-					&types.QueryAggregatePrevotesRequest{},
-				)
+			if len(args) > 0 {
+				valString := args[0]
+				validator, err := sdk.ValAddressFromBech32(valString)
 				if err != nil {
 					return err
 				}
 
-				return clientCtx.PrintProto(res)
-			}
-
-			valString := args[0]
-			validator, err := sdk.ValAddressFromBech32(valString)
-			if err != nil {
-				return err
+				query.ValidatorAddr = validator.String()
 			}
 
 			res, err := queryClient.AggregatePrevote(
 				context.Background(),
-				&types.QueryAggregatePrevoteRequest{ValidatorAddr: validator.String()},
+				&query,
 			)
 			if err != nil {
 				return err
