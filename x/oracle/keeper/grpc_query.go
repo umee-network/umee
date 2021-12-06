@@ -30,8 +30,7 @@ func (q querier) Params(
 	req *types.QueryParamsRequest,
 ) (*types.QueryParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	var params types.Params
-	q.paramSpace.GetParamSet(ctx, &params)
+	params := q.GetParams(ctx)
 
 	return &types.QueryParamsResponse{Params: params}, nil
 }
