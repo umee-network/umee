@@ -150,17 +150,17 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 	limit := sdk.ZeroDec()
 
 	for _, coin := range collateral {
-		// Convert uToken collateral to baseAssets assets
-		baseAssets, err := k.ExchangeUTokens(ctx, coin)
+		// Convert uToken collateral to base assets
+		baseAsset, err := k.ExchangeUTokens(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 		// Get USD value of base assets
-		value, err := k.Price(ctx, baseAssets)
+		value, err := k.Price(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
-		weight, err := k.GetCollateralWeight(ctx, baseAssets.Denom)
+		weight, err := k.GetCollateralWeight(ctx, baseAsset.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
