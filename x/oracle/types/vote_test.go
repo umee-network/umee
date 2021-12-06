@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseExchangeRateTuples(t *testing.T) {
-	valid := "uumee:123.0,uatom123.123"
+	valid := "uumee:123.0,uatom:123.123"
 	_, err := ParseExchangeRateTuples(valid)
 	require.NoError(t, err)
 
