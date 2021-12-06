@@ -80,7 +80,6 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 
 	duplicateCheckMap := make(map[string]bool)
 	for i, tupleStr := range tupleStrs {
-		// Get denom and amount
 		denomAmountStr := strings.Split(tupleStr, ":")
 		if len(denomAmountStr) < 2 {
 			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
