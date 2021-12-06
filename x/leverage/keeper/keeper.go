@@ -317,8 +317,13 @@ func (k Keeper) LiquidateBorrow(
 		return err
 	}
 
-	// Repayment cannot exceed liquidator's available balance
+	// Get liquidator's available balance of base asset to repay
 	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
+	// Return specific error on zero liquidator balance
+	if liquidatorBalance.Amount.IsZero() {
+		return sdkerrors.Wrap(types.ErrLiquidatorBalanceZero, liquidatorBalance.String())
+	}
+	// Repayment cannot exceed liquidator's available balance
 	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance.Amount)
 
 	// Repayment cannot exceed borrower's borrowed amount of selected denom
@@ -357,6 +362,11 @@ func (k Keeper) LiquidateBorrow(
 		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
 		// Use all collateral of reward denom
 		reward.Amount = collateral.AmountOf(rewardDenom)
+	}
+
+	// Final check for invalid liquidation (negative/zero value after reductions above)
+	if !repayment.Amount.IsPositive() {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
 	}
 
 	// Send repayment to leverage module account
@@ -400,10 +410,20 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 		return sdk.ZeroDec(), sdk.ZeroDec(), err
 	}
 
-	// close factor scales linearly between MinimumCloseFactor and 1.0,
+	// special case: If borrow limit is zero, close factor is always 1
+	if limit.IsZero() {
+		return liquidationIncentive, sdk.OneDec(), nil
+	}
+
+	params := k.GetParams(ctx)
+	// special case: If complete liquidation threshold is zero, close factor is always 1
+	if params.CompleteLiquidationThreshold.IsZero() {
+		return liquidationIncentive, sdk.OneDec(), nil
+	}
+
+	// outside of special cases, close factor scales linearly between MinimumCloseFactor and 1.0,
 	// reaching max value when (borrowed / limit) = 1 + CompleteLiquidationThreshold
 	var closeFactor sdk.Dec
-	params := k.GetParams(ctx)
 	closeFactor = Interpolate(
 		borrowed.Quo(limit).Sub(sdk.OneDec()), // x
 		sdk.ZeroDec(),                         // xMin

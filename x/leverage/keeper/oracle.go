@@ -32,9 +32,15 @@ func (k Keeper) TotalPrice(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
 // EquivalentValue returns the amount of a selected denom which would have equal
 // USD value to a provided sdk.Coin
 func (k Keeper) EquivalentValue(ctx sdk.Context, coin sdk.Coin, toDenom string) (sdk.Coin, error) {
+	// get total USD price of input coin (denom, amount)
 	value, err := k.Price(ctx, coin)
 	if err != nil {
 		return sdk.Coin{}, err
+	}
+
+	// return immediately on zero value input
+	if value.IsZero() {
+		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
 	}
 
 	// first derive USD value of new denom if amount was unchanged

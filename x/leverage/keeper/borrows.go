@@ -25,7 +25,8 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
-// SetBorrow sets the amount borrowed by an address in a given denom. If the amount is zero, any stored value is cleared.
+// SetBorrow sets the amount borrowed by an address in a given denom.
+// If the amount is zero, any stored value is cleared.
 func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, amount sdk.Int) error {
 	bz, err := amount.Marshal()
 	if err != nil {
@@ -170,7 +171,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 			return sdk.ZeroDec(), err
 		}
 		// Add each collateral coin's weighted value to borrow limit
-		limit.Add(value.Mul(weight))
+		limit = limit.Add(value.Mul(weight))
 	}
 	return limit, nil
 }

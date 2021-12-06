@@ -17,4 +17,5 @@ var (
 	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 1107, "invalid token utilization")
 	ErrLiquidationIneligible   = sdkerrors.Register(ModuleName, 1108, "borrower not eligible for liquidation")
 	ErrBadValue                = sdkerrors.Register(ModuleName, 1109, "bad USD value")
+	ErrLiquidatorBalanceZero   = sdkerrors.Register(ModuleName, 1110, "liquidator base asset balance is zero")
 )
