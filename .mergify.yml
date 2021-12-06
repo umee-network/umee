@@ -1,3 +1,8 @@
+queue_rules:
+  - name: default
+    conditions:
+      - "#approved-reviews-by>1"
+
 pull_request_rules:
   - name: Automatic merge on approval
     conditions:
@@ -5,10 +10,13 @@ pull_request_rules:
       - base=main
       - label=A:Automerge
     actions:
+      queue:
+        name: default
       merge:
         method: squash
-        strict: true
-        commit_message: title+body
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+          {{ body }}
 
   - name: Backport patches to release/v0.3.x branch
     conditions:
