@@ -11,7 +11,7 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-// querier is used as Keeper will have duplicate methods if used directly, and gRPC names take precedence over q
+// Querier implements a QueryServer for the x/oracle module
 type querier struct {
 	Keeper
 }
@@ -77,7 +77,7 @@ func (q querier) ActiveExchangeRates(
 	return &types.QueryActiveExchangeRatesResponse{ActiveRates: denoms}, nil
 }
 
-// FeederDelegation queries the account address that the validator operator delegated oracle vote rights to
+// FeederDelegation queries the account address to which the validator operator delegated oracle vote rights
 func (q querier) FeederDelegation(
 	c context.Context,
 	req *types.QueryFeederDelegationRequest,
