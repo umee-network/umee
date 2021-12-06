@@ -76,11 +76,12 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return err
 	}
 
-	// mint uTokens
-	uToken, err := k.ExchangeTokens(ctx, loan)
+	// mint uToken
+	uToken, err := k.ExchangeToken(ctx, loan)
 	if err != nil {
 		return err
 	}
+
 	uTokens := sdk.NewCoins(uToken)
 	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
