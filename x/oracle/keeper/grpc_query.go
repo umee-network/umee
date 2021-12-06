@@ -24,7 +24,7 @@ func NewQuerier(keeper Keeper) types.QueryServer {
 
 var _ types.QueryServer = querier{}
 
-// Params queries params of distribution module
+// Params queries params of x/oracle module
 func (q querier) Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 	var params types.Params
