@@ -187,7 +187,8 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
-	if err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount); err != nil {
+	_, err = s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount)
+	if err != nil {
 		return nil, err
 	}
 
@@ -232,7 +233,8 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	if err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom); err != nil {
+	_, _, err = s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
+	if err != nil {
 		return nil, err
 	}
 

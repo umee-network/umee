@@ -191,28 +191,29 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 // RepayAsset attempts to repay an open borrow position with base assets. If asset type is invalid,
 // account balance is insufficient, or no open borrow position exists, we return an error.
 // Additionally, if the amount provided is greater than the full repayment amount, only the
-// necessary amount is transferred.
-func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) error {
+// necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
+// RepayAsset returns the actual amount repaid.
+func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
 	if !payment.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
+		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
 	}
 
 	if !k.IsAcceptedToken(ctx, payment.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
+		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
 	}
 
 	// Determine amount of selected denom currently owed
 	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
 	if owed.IsZero() {
 		// Borrower has no open borrows in the denom presented as payment
-		return sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
 	}
 
 	// Prevent overpaying
 	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
 	if !payment.IsValid() {
 		// Catch invalid payments (e.g. from payment.Amount < 0)
-		return sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
 	}
 
 	// send payment to leverage module account
@@ -221,7 +222,7 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 		types.ModuleName,
 		sdk.NewCoins(payment),
 	); err != nil {
-		return err
+		return sdk.ZeroInt(), err
 	}
 
 	// Subtract repaid amount from borrowed amount
@@ -229,9 +230,9 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 
 	// Store the remaining borrowed amount in keeper
 	if err := k.SetBorrow(ctx, borrowerAddr, owed.Denom, owed.Amount); err != nil {
-		return err
+		return sdk.ZeroInt(), err
 	}
-	return nil
+	return payment.Amount, nil
 }
 
 // SetCollateralSetting enables or disables a uToken denom for use as collateral by a single borrower.
@@ -271,57 +272,59 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 // is greater than the amount owed or the maximum that can be repaid due to parameters (close factor)
 // then a partial liquidation, equal to the maximum valid amount, is performed. The same occurs if the
 // value of collateral in the selected reward denomination cannot cover the proposed repayment.
+// Because partial liquidation is possible and exchange rates vary, LiquidateBorrow returns the actual
+// amount of tokens repaid and uTokens rewarded (in that order).
 func (k Keeper) LiquidateBorrow(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayment sdk.Coin, rewardDenom string,
-) error {
+) (sdk.Int, sdk.Int, error) {
 	if !repayment.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
 	}
 	if !k.IsAcceptedUToken(ctx, rewardDenom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, rewardDenom)
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, rewardDenom)
 	}
 
 	// Get total borrowed by borrower (all denoms)
 	borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Get borrower uToken balances, for all uToken denoms enabled as collateral
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Use oracle helper functions to find total borrowed value in USD
 	borrowValue, err := k.TotalPrice(ctx, borrowed)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Use collateral weights to compute borrow limit from enabled collateral
 	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Confirm borrower's eligibility for liquidation
 	if borrowLimit.GTE(borrowValue) {
-		return sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
 	}
 
 	// Get reward-specific incentive and dynamic close factor
 	baseRewardDenom := k.FromUTokenToTokenDenom(ctx, rewardDenom)
 	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, borrowLimit)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Get liquidator's available balance of base asset to repay
 	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
 	// Return specific error on zero liquidator balance
 	if liquidatorBalance.Amount.IsZero() {
-		return sdkerrors.Wrap(types.ErrLiquidatorBalanceZero, liquidatorBalance.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidatorBalanceZero, liquidatorBalance.String())
 	}
 	// Repayment cannot exceed liquidator's available balance
 	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance.Amount)
@@ -333,7 +336,7 @@ func (k Keeper) LiquidateBorrow(
 	maxRepayValue := borrowValue.Mul(closeFactor)
 	repayValue, err := k.Price(ctx, repayment)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 	if repayValue.GTE(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
@@ -344,13 +347,13 @@ func (k Keeper) LiquidateBorrow(
 	// Given repay denom and amount, use oracle to find equivalent amount of rewardDenom's base asset
 	baseReward, err := k.EquivalentValue(ctx, repayment, baseRewardDenom)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Convert reward tokens back to uTokens
 	reward, err := k.ExchangeToken(ctx, baseReward)
 	if err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Apply liquidation incentive
@@ -366,7 +369,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// Final check for invalid liquidation (negative/zero value after reductions above)
 	if !repayment.Amount.IsPositive() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
 	}
 
 	// Send repayment to leverage module account
@@ -375,21 +378,21 @@ func (k Keeper) LiquidateBorrow(
 		types.ModuleName,
 		sdk.NewCoins(repayment),
 	); err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
 	if err := k.SetBorrow(ctx, borrowerAddr, repayment.Denom, owed); err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Transfer uToken collateral reward from borrower to liquidator
 	if err := k.bankKeeper.SendCoins(ctx, borrowerAddr, liquidatorAddr, sdk.NewCoins(reward)); err != nil {
-		return err
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	return nil
+	return repayment.Amount, reward.Amount, nil
 }
 
 // LiquidationParams computes dynamic liquidation parameters based on collateral denomination,
