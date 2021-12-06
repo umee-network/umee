@@ -77,34 +77,20 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	)
 }
 
-// ApplyWhitelist updates vote targets denom list and set tobin tax with params
-// whitelist.
+// ApplyWhitelist updates vote targets denom list whitelist.
 func (k Keeper) ApplyWhitelist(
 	ctx sdk.Context,
 	whitelist types.DenomList,
 	voteTargets map[string]sdk.Dec,
 ) {
-
 	// check is there any update in whitelist params
 	updateRequired := false
 	if len(voteTargets) != len(whitelist) {
 		updateRequired = true
-	} else {
-		for _, item := range whitelist {
-			tobinTax, ok := voteTargets[item.Name]
-			if !ok || !tobinTax.Equal(item.TobinTax) {
-				updateRequired = true
-				break
-			}
-		}
 	}
 
 	if updateRequired {
-		k.ClearTobinTaxes(ctx)
-
 		for _, item := range whitelist {
-			k.SetTobinTax(ctx, item.Name, item.TobinTax)
-
 			// register metadata to bank module
 			if _, ok := k.bankKeeper.GetDenomMetaData(ctx, item.Name); !ok {
 				base := item.Name

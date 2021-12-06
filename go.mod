@@ -3,7 +3,7 @@ module github.com/umee-network/umee
 go 1.17
 
 require (
-	github.com/cosmos/cosmos-sdk v0.44.4
+	github.com/cosmos/cosmos-sdk v0.44.5
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v2 v2.0.0
 	github.com/ethereum/go-ethereum v1.10.13
@@ -23,7 +23,7 @@ require (
 	github.com/tendermint/starport v0.18.6
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tendermint/tm-db v0.6.6
-	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
+	google.golang.org/genproto v0.0.0-20211129164237-f09f9a12af12
 	google.golang.org/grpc v1.42.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
@@ -79,7 +79,8 @@ require (
 	github.com/containerd/console v1.0.2 // indirect
 	github.com/containerd/containerd v1.5.8 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
-	github.com/cosmos/iavl v0.17.2 // indirect
+	github.com/cosmos/btcutil v1.0.4 // indirect
+	github.com/cosmos/iavl v0.17.3 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/daixiang0/gci v0.2.9 // indirect
@@ -102,7 +103,6 @@ require (
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/emicklei/proto v1.9.0 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
-	github.com/enigmampc/btcutil v1.0.3-0.20200723161021-e2fb6adb2a25 // indirect
 	github.com/esimonov/ifshort v1.0.2 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.12.0 // indirect
