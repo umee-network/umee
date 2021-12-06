@@ -14,3 +14,11 @@ func Interpolate(x, xMin, yMin, xMax, yMax sdk.Dec) sdk.Dec {
 	// y = y1 + m(x-x1)
 	return yMin.Add(x.Sub(xMin).Mul(slope))
 }
+
+// MinInt returns the minimum of two sdk.Int
+func MinInt(x, y sdk.Int) sdk.Int {
+	if x.GTE(y) {
+		return y
+	}
+	return x
+}

@@ -326,22 +326,18 @@ func (k Keeper) LiquidateBorrow(
 
 	// Repayment cannot exceed liquidator's available balance
 	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
-	if repayment.Amount.GTE(liquidatorBalance.Amount) {
-		repayment.Amount = liquidatorBalance.Amount
-	}
+	repayment.Amount = MinInt(repayment.Amount, liquidatorBalance.Amount)
 
 	// Repayment cannot exceed borrower's borrowed amount of selected denom
-	if repayment.Amount.GTE(borrowed.AmountOf(repayment.Denom)) {
-		repayment.Amount = borrowed.AmountOf(repayment.Denom)
-	}
+	repayment.Amount = MinInt(repayment.Amount, borrowed.AmountOf(repayment.Denom))
 
 	// Repayment cannot exceed borrowed value * close factor
+	maxRepayValue := borrowValue.Mul(closeFactor)
 	repayValue, err := k.Price(ctx, repayment)
 	if err != nil {
 		return err
 	}
-	if repayValue.GTE(borrowValue.Mul(closeFactor)) {
-		maxRepayValue := borrowValue.Mul(closeFactor)
+	if repayValue.GTE(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
 		repayValue = maxRepayValue
@@ -364,9 +360,9 @@ func (k Keeper) LiquidateBorrow(
 
 	// Reward amount cannot exceed available collateral
 	if reward.Amount.GTE(collateral.AmountOf(rewardDenom)) {
-		// only pay what can be correctly compensated
+		// Reduce repayment.Amount to the maximum value permitted by the available collateral reward
 		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
-		// use all collateral of selected denom
+		// Use all collateral of reward denom
 		reward.Amount = collateral.AmountOf(rewardDenom)
 	}
 
