@@ -19,7 +19,8 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 				"error": [],
 				"result": {
 					"ATOMUSD": {
-						"c": ["35.0872000", "0.32546988"]
+						"c": ["35.0872000", "0.32546988"],
+						"v": ["1920.83610601", "7954.00219674"]
 					}
 				}
 			}
@@ -34,7 +35,8 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		prices, err := p.GetTickerPrices("ATOMUSD")
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
-		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"])
+		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"].Price)
+		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["ATOMUSD"].Volume)
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
@@ -44,10 +46,12 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 				"error": [],
 				"result": {
 					"ATOMUSD": {
-						"c": ["35.0872000", "0.32546988"]
+						"c": ["35.0872000", "0.32546988"],
+						"v": ["1920.83610601", "7954.00219674"]
 					},
 					"XXBTZUSD": {
-						"c": ["63339.40000", "0.00010000"]
+						"c": ["63339.40000", "0.00010000"],
+						"v": ["1920.83610601", "7954.00219674"]
 					}
 				}
 			}
@@ -62,8 +66,10 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		prices, err := p.GetTickerPrices("ATOMUSD", "XXBTZUSD")
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
-		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"])
-		require.Equal(t, sdk.MustNewDecFromStr("63339.40000"), prices["XXBTZUSD"])
+		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"].Price)
+		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["ATOMUSD"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("63339.40000"), prices["XXBTZUSD"].Price)
+		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["XXBTZUSD"].Volume)
 	})
 
 	t.Run("invalid_request_bad_response", func(t *testing.T) {
