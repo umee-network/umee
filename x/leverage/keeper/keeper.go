@@ -226,17 +226,10 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 
 	// Subtract repaid amount from borrowed amount
 	owed.Amount = owed.Amount.Sub(payment.Amount)
-	// Store the new total borrowed amount in keeper
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLoanKey(borrowerAddr, payment.Denom)
-	if owed.IsZero() {
-		store.Delete(key) // Completely repaid
-	} else {
-		bz, err := owed.Amount.Marshal()
-		if err != nil {
-			return err
-		}
-		store.Set(key, bz) // Partially repaid
+
+	// Store the remaining borrowed amount in keeper
+	if err := k.SetBorrow(ctx, borrowerAddr, owed.Denom, owed.Amount); err != nil {
+		return err
 	}
 	return nil
 }
@@ -326,10 +319,10 @@ func (k Keeper) LiquidateBorrow(
 
 	// Repayment cannot exceed liquidator's available balance
 	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
-	repayment.Amount = MinInt(repayment.Amount, liquidatorBalance.Amount)
+	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance.Amount)
 
 	// Repayment cannot exceed borrower's borrowed amount of selected denom
-	repayment.Amount = MinInt(repayment.Amount, borrowed.AmountOf(repayment.Denom))
+	repayment.Amount = sdk.MinInt(repayment.Amount, borrowed.AmountOf(repayment.Denom))
 
 	// Repayment cannot exceed borrowed value * close factor
 	maxRepayValue := borrowValue.Mul(closeFactor)
@@ -377,16 +370,8 @@ func (k Keeper) LiquidateBorrow(
 
 	// Store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLoanKey(borrowerAddr, repayment.Denom)
-	if owed.IsZero() {
-		store.Delete(key) // Completely repaid
-	} else {
-		bz, err := owed.Marshal()
-		if err != nil {
-			return err
-		}
-		store.Set(key, bz) // Partially repaid
+	if err := k.SetBorrow(ctx, borrowerAddr, repayment.Denom, owed); err != nil {
+		return err
 	}
 
 	// Transfer uToken collateral reward from borrower to liquidator
