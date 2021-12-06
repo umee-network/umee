@@ -18,7 +18,7 @@ message Params {
     (gogoproto.moretags)   = "yaml:\"complete_liquidation_threshold\""
   ];
   // The minimum_close_factor determines the portion of a borrower's position that can be
-  // liquidated in a single event, when the borrower is just barely over their borrow limit
+  // liquidated in a single event, when the borrower is just barely over their borrow limit.
   string minimum_close_factor = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
