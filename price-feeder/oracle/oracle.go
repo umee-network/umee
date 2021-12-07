@@ -313,7 +313,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, o.oracleClient.ValidatorAddr)
+	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 	msg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
 		Feeder:    o.oracleClient.OracleAddrString,
