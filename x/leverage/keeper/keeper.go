@@ -181,7 +181,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	totalBorrowed := currentlyBorrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	err = k.SetBorrow(ctx, borrowerAddr, borrow.Denom, totalBorrowed)
+	err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, totalBorrowed))
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	owed.Amount = owed.Amount.Sub(payment.Amount)
 
 	// Store the remaining borrowed amount in keeper
-	if err := k.SetBorrow(ctx, borrowerAddr, owed.Denom, owed.Amount); err != nil {
+	if err := k.SetBorrow(ctx, borrowerAddr, owed); err != nil {
 		return sdk.ZeroInt(), err
 	}
 	return payment.Amount, nil
@@ -379,7 +379,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// Store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
-	if err := k.SetBorrow(ctx, borrowerAddr, repayment.Denom, owed); err != nil {
+	if err := k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 

@@ -27,15 +27,15 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 
 // SetBorrow sets the amount borrowed by an address in a given denom.
 // If the amount is zero, any stored value is cleared.
-func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, amount sdk.Int) error {
-	bz, err := amount.Marshal()
+func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+	bz, err := borrow.Amount.Marshal()
 	if err != nil {
 		return err
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLoanKey(borrowerAddr, denom)
-	if amount.IsZero() {
+	key := types.CreateLoanKey(borrowerAddr, borrow.Denom)
+	if borrow.Amount.IsZero() {
 		store.Delete(key) // Completely repaid
 	} else {
 		store.Set(key, bz)
