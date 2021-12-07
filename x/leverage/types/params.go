@@ -105,7 +105,7 @@ func validateMinimumCloseFactor(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("minimum close factor cannot be negative: %d", v)
 	}
-	if v.GT(sdk.MustNewDecFromStr("1")) {
+	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("minimum close factor cannot exceed 1: %d", v)
 	}
 	return nil
