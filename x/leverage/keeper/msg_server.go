@@ -192,12 +192,12 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
-	actualRepayment := sdk.NewCoin(msg.Amount.Denom, repaid)
+	repaidCoin := sdk.NewCoin(msg.Amount.Denom, repaid)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
-		"amount", actualRepayment.String(),
+		"amount", repaidCoin.String(),
 		"attempted", msg.Amount.String(),
 	)
 
@@ -205,7 +205,7 @@ func (s msgServer) RepayAsset(
 		sdk.NewEvent(
 			types.EventTypeRepayBorrowedAsset,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, actualRepayment.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
 			sdk.NewAttribute(types.EventAttrAttempted, msg.Amount.String()),
 		),
 		sdk.NewEvent(
@@ -240,15 +240,15 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	actualRepayment := sdk.NewCoin(msg.Repayment.Denom, repaid)
-	actualReward := sdk.NewCoin(msg.RewardDenom, reward)
+	repaidCoin := sdk.NewCoin(msg.Repayment.Denom, repaid)
+	rewardCoin := sdk.NewCoin(msg.RewardDenom, reward)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid by liquidator",
 		"liquidator", liquidatorAddr.String(),
 		"borrower", borrowerAddr.String(),
-		"amount", actualRepayment.String(),
-		"reward", actualReward.String(),
+		"amount", repaidCoin.String(),
+		"reward", rewardCoin.String(),
 		"attempted", msg.Repayment.String(),
 	)
 
@@ -257,8 +257,8 @@ func (s msgServer) Liquidate(
 			types.EventTypeLiquidate,
 			sdk.NewAttribute(types.EventAttrLiquidator, liquidatorAddr.String()),
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, actualRepayment.String()),
-			sdk.NewAttribute(types.EventAttrReward, actualReward.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
+			sdk.NewAttribute(types.EventAttrReward, rewardCoin.String()),
 			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
 		),
 		sdk.NewEvent(
