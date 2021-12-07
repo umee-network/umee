@@ -52,7 +52,6 @@ func (q Querier) Params(
 	goCtx context.Context,
 	req *types.QueryParamsRequest,
 ) (*types.QueryParamsResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}

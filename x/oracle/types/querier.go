@@ -6,17 +6,17 @@ import (
 
 // Defines the prefix of each query path
 const (
-	QueryParameters        = "parameters"
-	QueryExchangeRate      = "exchangeRate"
-	QueryExchangeRates     = "exchangeRates"
-	QueryActives           = "actives"
-	QueryFeederDelegation  = "feederDelegation"
-	QueryMissCounter       = "missCounter"
-	QueryAggregatePrevote  = "aggregatePrevote"
-	QueryAggregatePrevotes = "aggregatePrevotes"
-	QueryAggregateVote     = "aggregateVote"
-	QueryAggregateVotes    = "aggregateVotes"
-	QueryVoteTargets       = "voteTargets"
+	QueryParameters          = "parameters"
+	QueryExchangeRate        = "exchangeRate"
+	QueryExchangeRates       = "exchangeRates"
+	QueryActiveExchangeRates = "activeRates"
+	QueryFeederDelegation    = "feederDelegation"
+	QueryMissCounter         = "missCounter"
+	QueryAggregatePrevote    = "aggregatePrevote"
+	QueryAggregatePrevotes   = "aggregatePrevotes"
+	QueryAggregateVote       = "aggregateVote"
+	QueryAggregateVotes      = "aggregateVotes"
+	QueryVoteTargets         = "voteTargets"
 )
 
 // QueryExchangeRateParams defines the params for the following queries:
