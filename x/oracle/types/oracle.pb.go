@@ -134,6 +134,7 @@ func (m *Denom) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Denom proto.InternalMessageInfo
 
+// AggregateExchangeRatePrevote -
 // struct for aggregate prevoting on the ExchangeRateVote.
 // The purpose of aggregate prevote is to hide vote exchange rates with hash
 // which is formatted as hex string in SHA256("{salt}:{exchange
@@ -176,7 +177,7 @@ func (m *AggregateExchangeRatePrevote) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AggregateExchangeRatePrevote proto.InternalMessageInfo
 
-// MsgAggregateExchangeRateVote - struct for voting on
+// AggregateExchangeRateVote - struct for voting on
 // the exchange rates of USD denominated in various assets.
 type AggregateExchangeRateVote struct {
 	ExchangeRateTuples ExchangeRateTuples `protobuf:"bytes,1,rep,name=exchange_rate_tuples,json=exchangeRateTuples,proto3,castrepeated=ExchangeRateTuples" json:"exchange_rate_tuples" yaml:"exchange_rate_tuples"`

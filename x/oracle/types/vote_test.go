@@ -7,11 +7,11 @@ import (
 )
 
 func TestParseExchangeRateTuples(t *testing.T) {
-	valid := "123.0uluna,123.123ukrw"
+	valid := "uumee:123.0,uatom:123.123"
 	_, err := ParseExchangeRateTuples(valid)
 	require.NoError(t, err)
 
-	duplicatedDenom := "100.0uluna,123.123ukrw,121233.123ukrw"
+	duplicatedDenom := "uumee:100.0,uatom:123.123,uatom:121233.123"
 	_, err = ParseExchangeRateTuples(duplicatedDenom)
 	require.Error(t, err)
 
@@ -19,11 +19,11 @@ func TestParseExchangeRateTuples(t *testing.T) {
 	_, err = ParseExchangeRateTuples(invalidCoins)
 	require.Error(t, err)
 
-	invalidCoinsWithValid := "123.0uluna,123.1"
+	invalidCoinsWithValid := "uumee:123.0,123.1"
 	_, err = ParseExchangeRateTuples(invalidCoinsWithValid)
 	require.Error(t, err)
 
-	abstainCoinsWithValid := "0.0uluna,123.1ukrw"
+	abstainCoinsWithValid := "uumee:0.0,uatom:123.1"
 	_, err = ParseExchangeRateTuples(abstainCoinsWithValid)
 	require.NoError(t, err)
 }
