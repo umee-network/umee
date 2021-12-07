@@ -322,10 +322,6 @@ func (k Keeper) LiquidateBorrow(
 
 	// Get liquidator's available balance of base asset to repay
 	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
-	// Return specific error on zero liquidator balance
-	if liquidatorBalance.Amount.IsZero() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidatorBalanceZero, liquidatorBalance.String())
-	}
 	// Repayment cannot exceed liquidator's available balance
 	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance.Amount)
 
