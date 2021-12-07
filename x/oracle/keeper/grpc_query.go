@@ -35,7 +35,8 @@ func (q querier) Params(
 	return &types.QueryParamsResponse{Params: params}, nil
 }
 
-// ExchangeRates queries exchange rates of all denoms
+// ExchangeRates queries exchange rates of all denoms,
+// or, if specified, returns a single denom
 func (q querier) ExchangeRates(
 	c context.Context,
 	req *types.QueryExchangeRatesRequest,

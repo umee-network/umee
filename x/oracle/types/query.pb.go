@@ -909,7 +909,8 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// ExchangeRates returns exchange rates of all denoms
+	// ExchangeRates returns exchange rates of all denoms,
+	// or, if specified, returns a single denom
 	ExchangeRates(ctx context.Context, in *QueryExchangeRatesRequest, opts ...grpc.CallOption) (*QueryExchangeRatesResponse, error)
 	// ActiveExchangeRates returns all active denoms
 	ActiveExchangeRates(ctx context.Context, in *QueryActiveExchangeRatesRequest, opts ...grpc.CallOption) (*QueryActiveExchangeRatesResponse, error)
@@ -1020,7 +1021,8 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// ExchangeRates returns exchange rates of all denoms
+	// ExchangeRates returns exchange rates of all denoms,
+	// or, if specified, returns a single denom
 	ExchangeRates(context.Context, *QueryExchangeRatesRequest) (*QueryExchangeRatesResponse, error)
 	// ActiveExchangeRates returns all active denoms
 	ActiveExchangeRates(context.Context, *QueryActiveExchangeRatesRequest) (*QueryActiveExchangeRatesResponse, error)

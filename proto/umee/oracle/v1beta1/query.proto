@@ -10,7 +10,8 @@ option go_package = "github.com/umee-network/umee/x/oracle/types";
 
 // Query defines the gRPC querier service.
 service Query {
-  // ExchangeRates returns exchange rates of all denoms
+  // ExchangeRates returns exchange rates of all denoms,
+  // or, if specified, returns a single denom
   rpc ExchangeRates(QueryExchangeRatesRequest) returns (QueryExchangeRatesResponse) {
     option (google.api.http).get = "/umee/oracle/v1beta1/denoms/exchange_rates/{denom}";
   }
