@@ -80,21 +80,26 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 
 	duplicateCheckMap := make(map[string]bool)
 	for i, tupleStr := range tupleStrs {
-		decCoin, err := sdk.ParseDecCoin(tupleStr)
+		denomAmountStr := strings.Split(tupleStr, ":")
+		if len(denomAmountStr) < 2 {
+			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
+		}
+		decCoin, err := sdk.NewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
 		}
+		denom := denomAmountStr[0]
 
 		tuples[i] = ExchangeRateTuple{
-			Denom:        decCoin.Denom,
-			ExchangeRate: decCoin.Amount,
+			Denom:        denom,
+			ExchangeRate: decCoin,
 		}
 
-		if _, ok := duplicateCheckMap[decCoin.Denom]; ok {
-			return nil, fmt.Errorf("duplicated denom %s", decCoin.Denom)
+		if _, ok := duplicateCheckMap[denom]; ok {
+			return nil, fmt.Errorf("duplicated denom %s", denom)
 		}
 
-		duplicateCheckMap[decCoin.Denom] = true
+		duplicateCheckMap[denom] = true
 	}
 
 	return tuples, nil
