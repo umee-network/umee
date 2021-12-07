@@ -3,12 +3,10 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/x/oracle/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Querier implements a QueryServer for the x/oracle module
@@ -29,6 +27,10 @@ func (q querier) Params(
 	c context.Context,
 	req *types.QueryParamsRequest,
 ) (*types.QueryParamsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 	params := q.GetParams(ctx)
 
@@ -54,7 +56,7 @@ func (q querier) ExchangeRates(
 		exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
 		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-			exchangeRates = append(exchangeRates, sdk.NewDecCoinFromDec(denom, rate))
+			exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
 			return false
 		})
 	}
@@ -70,7 +72,7 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(c)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
+	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
 		denoms = append(denoms, denom)
 		return false
 	})
