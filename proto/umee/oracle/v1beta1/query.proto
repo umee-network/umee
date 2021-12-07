@@ -10,24 +10,15 @@ option go_package = "github.com/umee-network/umee/x/oracle/types";
 
 // Query defines the gRPC querier service.
 service Query {
-  // ExchangeRate returns exchange rate of a denom
-  rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/{denom}/exchange_rate";
-  }
-
-  // ExchangeRates returns exchange rates of all denoms
+  // ExchangeRates returns exchange rates of all denoms,
+  // or, if specified, returns a single denom
   rpc ExchangeRates(QueryExchangeRatesRequest) returns (QueryExchangeRatesResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/exchange_rates";
+    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/exchange_rates/{denom}";
   }
 
-  // Actives returns all active denoms
-  rpc Actives(QueryActivesRequest) returns (QueryActivesResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/actives";
-  }
-
-  // VoteTargets returns all vote target denoms
-  rpc VoteTargets(QueryVoteTargetsRequest) returns (QueryVoteTargetsResponse) {
-    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/vote_targets";
+  // ActiveExchangeRates returns all active denoms
+  rpc ActiveExchangeRates(QueryActiveExchangeRatesRequest) returns (QueryActiveExchangeRatesResponse) {
+    option (google.api.http).get = "/umee/oracle/v1beta1/denoms/active_exchange_rates";
   }
 
   // FeederDelegation returns feeder delegation of a validator
@@ -66,9 +57,9 @@ service Query {
   }
 }
 
-// QueryExchangeRateRequest is the request type for the Query/ExchangeRate RPC
+// QueryExchangeRatesRequest is the request type for the Query/ExchangeRate RPC
 // method.
-message QueryExchangeRateRequest {
+message QueryExchangeRatesRequest {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
@@ -76,17 +67,6 @@ message QueryExchangeRateRequest {
   string denom = 1;
 }
 
-// QueryExchangeRateResponse is response type for the
-// Query/ExchangeRate RPC method.
-message QueryExchangeRateResponse {
-  // exchange_rate defines the exchange rate of USD denominated in various crypto
-  string exchange_rate = 1
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-}
-
-// QueryExchangeRatesRequest is the request type for the Query/ExchangeRates RPC
-// method.
-message QueryExchangeRatesRequest {}
 
 // QueryExchangeRatesResponse is response type for the
 // Query/ExchangeRates RPC method.
@@ -98,28 +78,17 @@ message QueryExchangeRatesResponse {
 }
 
 
-// QueryActivesRequest is the request type for the Query/Actives RPC method.
-message QueryActivesRequest {}
+// QueryActiveExchangeRatesRequest is the request type for the Query/ActiveExchangeRates RPC method.
+message QueryActiveExchangeRatesRequest {}
 
-// QueryActivesResponse is response type for the
-// Query/Actives RPC method.
-message QueryActivesResponse {
-  // actives defines a list of the denomination which oracle prices aggreed
+// QueryActiveExchangeRatesResponse is response type for the
+// Query/ActiveExchangeRates RPC method.
+message QueryActiveExchangeRatesResponse {
+  // activeRates defines a list of the denomination which oracle prices aggreed
   // upon.
-  repeated string actives = 1;
+  repeated string activeRates = 1;
 }
 
-// QueryVoteTargetsRequest is the request type for the Query/VoteTargets RPC
-// method.
-message QueryVoteTargetsRequest {}
-
-// QueryVoteTargetsResponse is response type for the
-// Query/VoteTargets RPC method.
-message QueryVoteTargetsResponse {
-  // vote_targets defines a list of the denomination in which everyone
-  // should vote in the current vote period.
-  repeated string vote_targets = 1;
-}
 
 // QueryFeederDelegationRequest is the request type for the
 // Query/FeederDelegation RPC method.
