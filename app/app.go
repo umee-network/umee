@@ -158,8 +158,8 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 	}
 )
 
