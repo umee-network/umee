@@ -481,9 +481,13 @@ func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	s.Require().NoError(err)
 
 	// lender repays 300 umee - should automatically reduce to 200 (the loan amount) and succeed
-	repaid, err := app.LeverageKeeper.RepayAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000))
+	coinToRepay := sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)
+	repaid, err := app.LeverageKeeper.RepayAsset(ctx, lenderAddr, coinToRepay)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(200000000), repaid)
+
+	// verify that coinToRepay has not been modified
+	s.Require().Equal(sdk.NewInt(300000000), coinToRepay.Amount)
 
 	// verify lender's new loan amount is 0 umee
 	loanBalance := app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
@@ -599,6 +603,9 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(190000000), repaid)
 	s.Require().Equal(sdk.NewInt(209000000), reward)
+
+	// verify that repayment has not been modified
+	s.Require().Equal(sdk.NewInt(300000000), repayment.Amount)
 
 	// verify liquidator's new u/umee balance = 220 = (200 + liquidation incentive)
 	uTokenBalance = app.BankKeeper.GetBalance(ctx, liquidatorAddr, rewardDenom)
@@ -896,6 +903,40 @@ func (s *IntegrationTestSuite) TestParams() {
 
 	got := app.LeverageKeeper.GetParams(ctx)
 	s.Require().Equal(params, got)
+}
+
+func (s *IntegrationTestSuite) TestOracle() {
+	app, ctx := s.app, s.ctx
+
+	// register uumee and u/uumee as an accepted asset+utoken pair
+	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
+
+	validCoin := sdk.NewInt64Coin(umeeapp.BondDenom, 1234000) // 1.234 umee
+
+	// Get the USD value of a single coin
+	value, err := app.LeverageKeeper.Price(ctx, validCoin)
+	s.Require().NoError(err)
+	//   TODO #97: Change to the correct expected USD value when oracle is integrated
+	s.Require().Equal(sdk.MustNewDecFromStr("1234000"), value)
+
+	//   TODO #97: Add a second valid coin, so the TotalPrice test below can properly add up their prices
+
+	// Get the total USD value of an sdk.Coins containing multiple valid denoms
+	value, err = app.LeverageKeeper.TotalPrice(ctx, sdk.NewCoins(validCoin))
+	s.Require().NoError(err)
+	//   TODO #97: Change to the correct expected USD value when oracle is integrated
+	s.Require().Equal(sdk.MustNewDecFromStr("1234000"), value)
+
+	//   TODO #97: Using two valid denoms, test keeper.EquivalentValue
+}
+
+func (s *IntegrationTestSuite) TestOracle_Invalid() {
+	app, ctx := s.app, s.ctx
+
+	invalidCoin := sdk.NewInt64Coin("uabcd", 1000000)
+
+	_, err := app.LeverageKeeper.Price(ctx, invalidCoin)
+	s.Require().Error(err)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
