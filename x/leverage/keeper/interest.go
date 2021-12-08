@@ -61,6 +61,9 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
 	currentTime := ctx.BlockTime().Unix()
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(types.SecondsPerYear)
+	if yearsElapsed.IsNegative() {
+		return types.ErrNegativeTimeElapsed
+	}
 
 	// Compute total borrows across all borrowers, which are used when calculating
 	// borrow utilization.
