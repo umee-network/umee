@@ -52,7 +52,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
 
-	// individual tests should set the oracle keeper to what they need
+	// Individual tests should set the leverage keeper to what they need, if for
+	// example, they need a custom oracle.
 	s.leverageKeeper = keeper.NewKeeper(
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
