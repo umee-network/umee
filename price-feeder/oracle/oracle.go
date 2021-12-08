@@ -109,7 +109,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 			// between loop executions.
 			//
 			// Ref: https://github.com/umee-network/umee/issues/256
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(2500 * time.Millisecond)
 		}
 	}
 }
@@ -321,7 +321,11 @@ func (o *Oracle) tick() error {
 	}
 
 	if isPrevoteOnlyTx {
-		if err := o.oracleClient.BroadcastPrevote(msg); err != nil {
+		if err := o.oracleClient.BroadcastTx(
+			nextBlockHeight,
+			oracleVotePeriod*2,
+			msg,
+		); err != nil {
 			return err
 		}
 
@@ -347,17 +351,16 @@ func (o *Oracle) tick() error {
 			Validator:     valAddr.String(),
 		}
 
-		err := o.oracleClient.BroadcastVote(nextBlockHeight, oracleVotePeriod-indexInVotePeriod, voteMsg)
-		if err != nil {
-			// This can happen if the voting is off-timed, or the voting denoms are
-			// not currently in the whitelist. We want to just reset and handle this
-			// silently.
-			o.previousPrevote = nil
-			o.previousVotePeriod = 0
-			return nil
+		if err := o.oracleClient.BroadcastTx(
+			nextBlockHeight,
+			oracleVotePeriod-indexInVotePeriod,
+			voteMsg,
+		); err != nil {
+			return err
 		}
 
 		o.previousPrevote = nil
+		o.previousVotePeriod = 0
 	}
 
 	return nil

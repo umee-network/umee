@@ -14,6 +14,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
@@ -24,6 +26,7 @@ import (
 type (
 	// OracleClient defines a structure that interfaces with the Umee node.
 	OracleClient struct {
+		Logger              zerolog.Logger
 		ChainID             string
 		KeyringBackend      string
 		KeyringDir          string
@@ -71,6 +74,7 @@ func NewOracleClient(
 	}
 
 	return &OracleClient{
+		Logger:              log.With().Str("module", "oracleClient").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,
 		KeyringDir:          keyringDir,
@@ -105,33 +109,10 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-// BroadcastPrevote attempts to broadcast a prevote transaction. Note, submiting
-// a prevote transaction does not require timeout functionality that vote
-// transactions require due to the fact that block timing validation exists on
-// the Umee node.
-//
+// BroadcastTx attempts to broadcast a transaction
+// a few times until it gets timed out
 // Ref: https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
-func (oc OracleClient) BroadcastPrevote(msgs ...sdk.Msg) error {
-	ctx, err := oc.CreateContext()
-	if err != nil {
-		return err
-	}
-
-	factory, err := oc.CreateTxFactory()
-	if err != nil {
-		return err
-	}
-
-	return tx.BroadcastTx(ctx, factory, msgs...)
-}
-
-// BroadcastVote attempts to broadcast a vote transaction within the next voting
-// period.
-//
-// Ref: https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
-func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
-	var height int64
-
+func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
 
@@ -146,7 +127,7 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 	}
 
 	// re-try voting until timeout
-	for height == 0 && lastCheckHeight < maxBlockHeight {
+	for lastCheckHeight < maxBlockHeight {
 		latestBlockHeight, err := rpcClient.GetChainHeight(ctx)
 		if err != nil {
 			return err
@@ -161,15 +142,13 @@ func (oc OracleClient) BroadcastVote(nextBlockHeight int64, timeoutHeight int64,
 
 		err = tx.BroadcastTx(ctx, factory, msgs...)
 		if err != nil {
-			return err
+			oc.Logger.Err(err).Msg("error broadcasting, retrying...")
+			continue
 		}
 
-		height, err = rpcClient.GetChainHeight(ctx)
-		if err != nil {
-			return err
-		}
+		oc.Logger.Info().Msg("successfully broadcasted")
+		return nil
 	}
-
 	return nil
 }
 
