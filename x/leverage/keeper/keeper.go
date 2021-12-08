@@ -320,7 +320,7 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// Actual repayment starts at attemptedRepayment but can be lower due to limiting factors
+	// Actual repayment starts at desiredRepayment but can be lower due to limiting factors
 	repayment := desiredRepayment
 
 	// Get liquidator's available balance of base asset to repay
