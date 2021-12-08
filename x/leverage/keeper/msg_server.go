@@ -187,21 +187,26 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
-	if err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount); err != nil {
+	repaid, err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount)
+	if err != nil {
 		return nil, err
 	}
+
+	repaidCoin := sdk.NewCoin(msg.Amount.Denom, repaid)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Amount.String(),
+		"amount", repaidCoin.String(),
+		"attempted", msg.Amount.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepayBorrowedAsset,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Amount.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -211,4 +216,57 @@ func (s msgServer) RepayAsset(
 	})
 
 	return &types.MsgRepayAssetResponse{}, nil
+}
+
+func (s msgServer) Liquidate(
+	goCtx context.Context,
+	msg *types.MsgLiquidate,
+) (*types.MsgLiquidateResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	liquidatorAddr, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
+		return nil, err
+	}
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	repaid, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
+	if err != nil {
+		return nil, err
+	}
+
+	repaidCoin := sdk.NewCoin(msg.Repayment.Denom, repaid)
+	rewardCoin := sdk.NewCoin(msg.RewardDenom, reward)
+
+	s.keeper.Logger(ctx).Debug(
+		"borrowed assets repaid by liquidator",
+		"liquidator", liquidatorAddr.String(),
+		"borrower", borrowerAddr.String(),
+		"amount", repaidCoin.String(),
+		"reward", rewardCoin.String(),
+		"attempted", msg.Repayment.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeLiquidate,
+			sdk.NewAttribute(types.EventAttrLiquidator, liquidatorAddr.String()),
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
+			sdk.NewAttribute(types.EventAttrReward, rewardCoin.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
+		),
+	})
+
+	return &types.MsgLiquidateResponse{}, nil
 }

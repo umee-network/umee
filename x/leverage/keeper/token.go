@@ -203,3 +203,13 @@ func (k Keeper) GetCollateralWeight(ctx sdk.Context, denom string) (sdk.Dec, err
 
 	return token.CollateralWeight, nil
 }
+
+// GetLiquidationIncentive gets liquidation incentive of a given token.
+func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	return token.LiquidationIncentive, nil
+}
