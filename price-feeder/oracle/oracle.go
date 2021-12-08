@@ -25,6 +25,14 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
+// We define tickerTimeout as the minimum timeout between each oracle loop. We
+// define this value empirically based on enough time to collect exchange rates,
+// and broadcast pre-vote and vote transactions such that they're committed in a
+// block during each voting period.
+const (
+	tickerTimeout = 2250 * time.Millisecond
+)
+
 // CurrencyPair defines a currency exchange pair consisting of a base and a quote.
 // We primarily utilize the base for broadcasting exchange rates and use the
 // pair for querying for the ticker prices.
@@ -105,11 +113,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 
 			o.lastPriceSyncTS = time.Now()
 
-			// XXX/TODO: We need to evaluate if this is the correct value to wait for
-			// between loop executions.
-			//
-			// Ref: https://github.com/umee-network/umee/issues/256
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(tickerTimeout)
 		}
 	}
 }
@@ -314,14 +318,21 @@ func (o *Oracle) tick() error {
 	}
 
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
-	msg := &oracletypes.MsgAggregateExchangeRatePrevote{
+	preVoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
 		Feeder:    o.oracleClient.OracleAddrString,
 		Validator: valAddr.String(),
 	}
 
 	if isPrevoteOnlyTx {
-		if err := o.oracleClient.BroadcastPrevote(msg); err != nil {
+		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
+		// but we give it some extra time just in case.
+		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
+		if err := o.oracleClient.BroadcastTx(
+			nextBlockHeight,
+			oracleVotePeriod*2,
+			preVoteMsg,
+		); err != nil {
 			return err
 		}
 
@@ -347,17 +358,16 @@ func (o *Oracle) tick() error {
 			Validator:     valAddr.String(),
 		}
 
-		err := o.oracleClient.BroadcastVote(nextBlockHeight, oracleVotePeriod-indexInVotePeriod, voteMsg)
-		if err != nil {
-			// This can happen if the voting is off-timed, or the voting denoms are
-			// not currently in the whitelist. We want to just reset and handle this
-			// silently.
-			o.previousPrevote = nil
-			o.previousVotePeriod = 0
-			return nil
+		if err := o.oracleClient.BroadcastTx(
+			nextBlockHeight,
+			oracleVotePeriod-indexInVotePeriod,
+			voteMsg,
+		); err != nil {
+			return err
 		}
 
 		o.previousPrevote = nil
+		o.previousVotePeriod = 0
 	}
 
 	return nil

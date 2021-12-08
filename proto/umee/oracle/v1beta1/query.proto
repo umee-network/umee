@@ -86,7 +86,7 @@ message QueryActiveExchangeRatesRequest {}
 message QueryActiveExchangeRatesResponse {
   // activeRates defines a list of the denomination which oracle prices aggreed
   // upon.
-  repeated string activeRates = 1;
+  repeated string active_rates = 1;
 }
 
 

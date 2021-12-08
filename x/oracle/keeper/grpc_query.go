@@ -3,12 +3,10 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/x/oracle/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/umee-network/umee/x/oracle/types"
 )
 
 // Querier implements a QueryServer for the x/oracle module
@@ -29,6 +27,10 @@ func (q querier) Params(
 	c context.Context,
 	req *types.QueryParamsRequest,
 ) (*types.QueryParamsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 	params := q.GetParams(ctx)
 
@@ -41,6 +43,10 @@ func (q querier) ExchangeRates(
 	c context.Context,
 	req *types.QueryExchangeRatesRequest,
 ) (*types.QueryExchangeRatesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var exchangeRates sdk.DecCoins
@@ -54,7 +60,7 @@ func (q querier) ExchangeRates(
 		exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
 		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-			exchangeRates = append(exchangeRates, sdk.NewDecCoinFromDec(denom, rate))
+			exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
 			return false
 		})
 	}
@@ -67,10 +73,14 @@ func (q querier) ActiveExchangeRates(
 	c context.Context,
 	req *types.QueryActiveExchangeRatesRequest,
 ) (*types.QueryActiveExchangeRatesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
+	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
 		denoms = append(denoms, denom)
 		return false
 	})
@@ -84,7 +94,7 @@ func (q querier) FeederDelegation(
 	req *types.QueryFeederDelegationRequest,
 ) (*types.QueryFeederDelegationResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(req.ValidatorAddr)
@@ -104,7 +114,7 @@ func (q querier) MissCounter(
 	req *types.QueryMissCounterRequest,
 ) (*types.QueryMissCounterResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(req.ValidatorAddr)
@@ -124,7 +134,7 @@ func (q querier) AggregatePrevote(
 	req *types.QueryAggregatePrevoteRequest,
 ) (*types.QueryAggregatePrevoteResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(req.ValidatorAddr)
@@ -148,6 +158,10 @@ func (q querier) AggregatePrevotes(
 	c context.Context,
 	req *types.QueryAggregatePrevotesRequest,
 ) (*types.QueryAggregatePrevotesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var prevotes []types.AggregateExchangeRatePrevote
@@ -167,7 +181,7 @@ func (q querier) AggregateVote(
 	req *types.QueryAggregateVoteRequest,
 ) (*types.QueryAggregateVoteResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid request")
+		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	valAddr, err := sdk.ValAddressFromBech32(req.ValidatorAddr)
@@ -191,6 +205,10 @@ func (q querier) AggregateVotes(
 	c context.Context,
 	req *types.QueryAggregateVotesRequest,
 ) (*types.QueryAggregateVotesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var votes []types.AggregateExchangeRateVote
