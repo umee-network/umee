@@ -100,13 +100,11 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
 	}
 
-	if !k.bankKeeper.HasBalance(ctx, lenderAddr, uToken) {
-		// Lender does not have the uTokens they intend to redeem
-		return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
-	}
-
-	// TODO #213: Calculate lender's borrow limit and current borrowed value, if any.
-	// Prevent withdrawing assets when it would bring user borrow limit below current borrowed value.
+	// TODO: Calculate lender's borrow limit and current borrowed value, if any.
+	// Prevent withdrawing assets when it would bring user borrow limit below
+	// current borrowed value.
+	//
+	// ref: https://github.com/umee-network/umee/issues/213
 
 	withdrawal, err := k.ExchangeUToken(ctx, uToken)
 	if err != nil {
