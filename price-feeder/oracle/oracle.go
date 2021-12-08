@@ -321,6 +321,9 @@ func (o *Oracle) tick() error {
 	}
 
 	if isPrevoteOnlyTx {
+		// this timeout could be as small as oracleVotePeriod-indexInVotePeriod,
+		// but we give it some extra time just in case
+		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
 		if err := o.oracleClient.BroadcastTx(
 			nextBlockHeight,
 			oracleVotePeriod*2,
