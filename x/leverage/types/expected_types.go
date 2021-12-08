@@ -26,3 +26,8 @@ type BankKeeper interface {
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
 }
+
+// OracleKeeper defines the expected x/oracle keeper interface.
+type OracleKeeper interface {
+	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
+}
