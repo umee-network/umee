@@ -25,15 +25,10 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// Came to this by looking at terra's timeout and
-// testing it locally - pretty consistently doesn't run
-// into the async broadcast issue, any lower and it does
-// have a few once in a while. Want to keep this on the
-// lower limit because we have retry logic in place, and making
-// it too long could skip voting periods. The goal is to have ticker
-// run twice per voting period (one vote for the current period,
-// and one pre-vote for the next), except for the first tick, which
-// will just have a pre-vote.
+// We define tickerTimeout as the minimum timeout between each oracle loop. We
+// define this value empirically based on enough time to collect exchange rates,
+// and broadcast pre-vote and vote transactions such that they're committed in a
+// block during each voting period.
 const (
 	tickerTimeout = 2250 * time.Millisecond
 )
