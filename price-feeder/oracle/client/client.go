@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"time"
@@ -149,7 +150,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		oc.Logger.Info().Msg("successfully broadcasted")
 		return nil
 	}
-	return nil
+
+	return errors.New("broadcasting msg timed out")
 }
 
 // CreateContext creates an SDK client Context instance used for transaction
