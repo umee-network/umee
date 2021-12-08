@@ -105,7 +105,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 
 			o.lastPriceSyncTS = time.Now()
 
-			time.Sleep(2500 * time.Millisecond)
+			time.Sleep(2250 * time.Millisecond)
 		}
 	}
 }
