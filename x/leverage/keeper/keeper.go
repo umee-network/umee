@@ -341,7 +341,7 @@ func (k Keeper) LiquidateBorrow(
 		repayValue = maxRepayValue
 	}
 
-	// given repay denom and amount, use oracle to find equivalent amount of
+	// Given repay denom and amount, use oracle to find equivalent amount of
 	// rewardDenom's base asset.
 	baseReward, err := k.EquivalentValue(ctx, repayment, baseRewardDenom)
 	if err != nil {
