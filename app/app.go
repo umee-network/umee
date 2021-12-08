@@ -91,12 +91,12 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	"github.com/umee-network/umee/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	"github.com/umee-network/umee/x/peggy"
 	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
+	// "github.com/umee-network/umee/x/leverage"
+	// leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 )
 
 const (
@@ -145,7 +145,7 @@ var (
 		evidence.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-		leverage.AppModuleBasic{},
+		// leverage.AppModuleBasic{},
 		peggy.AppModuleBasic{},
 	)
 
@@ -158,8 +158,8 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		peggytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -211,8 +211,8 @@ type UmeeApp struct {
 	TransferKeeper   uibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
-	LeverageKeeper   leveragekeeper.Keeper
-	PeggyKeeper      peggykeeper.Keeper
+	// LeverageKeeper   leveragekeeper.Keeper
+	PeggyKeeper peggykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -365,12 +365,12 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
-	app.LeverageKeeper = leveragekeeper.NewKeeper(
-		appCodec,
-		keys[leveragetypes.ModuleName],
-		app.GetSubspace(leveragetypes.ModuleName),
-		app.BankKeeper,
-	)
+	// app.LeverageKeeper = leveragekeeper.NewKeeper(
+	// 	appCodec,
+	// 	keys[leveragetypes.ModuleName],
+	// 	app.GetSubspace(leveragetypes.ModuleName),
+	// 	app.BankKeeper,
+	// )
 
 	// register the staking hooks
 	//
@@ -428,8 +428,8 @@ func New(
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
+		// AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -479,7 +479,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
-		leverage.NewAppModule(appCodec, app.LeverageKeeper),
+		// leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
 	)
 
@@ -497,14 +497,14 @@ func New(
 		evidencetypes.ModuleName,
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
-		leveragetypes.ModuleName,
+		// leveragetypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		leveragetypes.ModuleName,
+		// leveragetypes.ModuleName,
 		stakingtypes.ModuleName,
 		peggytypes.ModuleName,
 	)
@@ -531,7 +531,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
-		leveragetypes.ModuleName,
+		// leveragetypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 

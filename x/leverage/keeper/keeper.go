@@ -14,10 +14,11 @@ import (
 )
 
 type Keeper struct {
-	cdc        codec.Codec
-	storeKey   sdk.StoreKey
-	paramSpace paramtypes.Subspace
-	bankKeeper types.BankKeeper
+	cdc          codec.Codec
+	storeKey     sdk.StoreKey
+	paramSpace   paramtypes.Subspace
+	bankKeeper   types.BankKeeper
+	oracleKeeper types.OracleKeeper
 }
 
 func NewKeeper(
@@ -25,6 +26,7 @@ func NewKeeper(
 	storeKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
+	ok types.OracleKeeper,
 ) Keeper {
 
 	// set KeyTable if it has not already been set
@@ -33,10 +35,11 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		paramSpace: paramSpace,
-		bankKeeper: bk,
+		cdc:          cdc,
+		storeKey:     storeKey,
+		paramSpace:   paramSpace,
+		bankKeeper:   bk,
+		oracleKeeper: ok,
 	}
 }
 
