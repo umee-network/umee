@@ -110,8 +110,8 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 	return n, err
 }
 
-// BroadcastTx attempts to broadcast a transaction
-// a few times until it gets timed out
+// BroadcastTx attempts to broadcast a signed transaction. If it fails, a few re-attempts
+// will be made until the transaction succeeds or ultimately times out or fails.
 // Ref: https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L230
 func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, msgs ...sdk.Msg) error {
 	maxBlockHeight := nextBlockHeight + timeoutHeight

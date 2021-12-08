@@ -25,6 +25,19 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
+// Came to this by looking at terra's timeout and
+// testing it locally - pretty consistently doesn't run
+// into the async broadcast issue, any lower and it does
+// have a few once in a while. Want to keep this on the
+// lower limit because we have retry logic in place, and making
+// it too long could skip voting periods. The goal is to have ticker
+// run twice per voting period (one vote for the current period,
+// and one pre-vote for the next), except for the first tick, which
+// will just have a pre-vote.
+const (
+	tickerTimeout = 2250 * time.Millisecond
+)
+
 // CurrencyPair defines a currency exchange pair consisting of a base and a quote.
 // We primarily utilize the base for broadcasting exchange rates and use the
 // pair for querying for the ticker prices.
@@ -105,7 +118,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 
 			o.lastPriceSyncTS = time.Now()
 
-			time.Sleep(2250 * time.Millisecond)
+			time.Sleep(tickerTimeout)
 		}
 	}
 }
@@ -310,20 +323,20 @@ func (o *Oracle) tick() error {
 	}
 
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
-	msg := &oracletypes.MsgAggregateExchangeRatePrevote{
+	preVoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
 		Feeder:    o.oracleClient.OracleAddrString,
 		Validator: valAddr.String(),
 	}
 
 	if isPrevoteOnlyTx {
-		// this timeout could be as small as oracleVotePeriod-indexInVotePeriod,
-		// but we give it some extra time just in case
+		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
+		// but we give it some extra time just in case.
 		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
 		if err := o.oracleClient.BroadcastTx(
 			nextBlockHeight,
 			oracleVotePeriod*2,
-			msg,
+			preVoteMsg,
 		); err != nil {
 			return err
 		}
