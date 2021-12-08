@@ -111,5 +111,10 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid max borrow rate: %s", t.MaxBorrowRate)
 	}
 
+	// Liquidation incentives are non-negative
+	if t.LiquidationIncentive.IsNegative() {
+		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
+	}
+
 	return nil
 }

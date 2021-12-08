@@ -15,12 +15,9 @@ func NewMsgLendAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgLendAsset {
 }
 
 func (msg *MsgLendAsset) ValidateBasic() error {
-	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
+	_, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
 		return err
-	}
-	if lender.Empty() {
-		return errors.New("empty address")
 	}
 
 	if asset := msg.GetAmount(); !asset.IsValid() {
@@ -43,12 +40,9 @@ func NewMsgWithdrawAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAss
 }
 
 func (msg *MsgWithdrawAsset) ValidateBasic() error {
-	lender, err := sdk.AccAddressFromBech32(msg.GetLender())
+	_, err := sdk.AccAddressFromBech32(msg.GetLender())
 	if err != nil {
 		return err
-	}
-	if lender.Empty() {
-		return errors.New("empty address")
 	}
 
 	if asset := msg.GetAmount(); !asset.IsValid() {
@@ -72,12 +66,9 @@ func NewMsgSetCollateral(borrower sdk.AccAddress, denom string, enable bool) *Ms
 }
 
 func (msg *MsgSetCollateral) ValidateBasic() error {
-	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
-	}
-	if borrower.Empty() {
-		return errors.New("empty address")
 	}
 	return nil
 }
@@ -95,12 +86,9 @@ func NewMsgBorrowAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgBorrowAsset
 }
 
 func (msg *MsgBorrowAsset) ValidateBasic() error {
-	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
-	}
-	if borrower.Empty() {
-		return errors.New("empty address")
 	}
 
 	if asset := msg.GetAmount(); !asset.IsValid() {
@@ -123,12 +111,9 @@ func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
 }
 
 func (msg *MsgRepayAsset) ValidateBasic() error {
-	borrower, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
-	}
-	if borrower.Empty() {
-		return errors.New("empty address")
 	}
 
 	if asset := msg.GetAmount(); !asset.IsValid() {
@@ -141,4 +126,39 @@ func (msg *MsgRepayAsset) ValidateBasic() error {
 func (msg *MsgRepayAsset) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
+}
+
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
+	return &MsgLiquidate{
+		Liquidator:  borrower.String(),
+		Borrower:    borrower.String(),
+		Repayment:   repayment,
+		RewardDenom: rewardDenom,
+	}
+}
+
+func (msg *MsgLiquidate) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	if err != nil {
+		return err
+	}
+	_, err = sdk.AccAddressFromBech32(msg.GetBorrower())
+	if err != nil {
+		return err
+	}
+
+	if asset := msg.GetRepayment(); !asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	}
+
+	if msg.GetRewardDenom() == "" {
+		return errors.New("empty reward denom")
+	}
+
+	return nil
+}
+
+func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
+	liquidator, _ := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	return []sdk.AccAddress{liquidator}
 }
