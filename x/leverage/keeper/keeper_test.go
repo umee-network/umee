@@ -12,6 +12,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
+	"github.com/umee-network/umee/x/leverage"
 	"github.com/umee-network/umee/x/leverage/keeper"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -61,6 +62,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		app.BankKeeper,
 		nil,
 	)
+	leverage.InitGenesis(ctx, s.leverageKeeper, *types.DefaultGenesis())
 
 	// At the moment, SetRegisteredToken must be followed separately by
 	// SetTokenDenom to complete token registration. Therefore, this line does not
@@ -643,7 +645,7 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	// The "lender" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral
+	// already has 1k u/umee for collateral.
 	lenderAddr, _ := s.initBorrowScenario()
 
 	// lender borrows 50 umee
