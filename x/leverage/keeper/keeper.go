@@ -65,11 +65,6 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
 	}
 
-	if !k.bankKeeper.HasBalance(ctx, lenderAddr, loan) {
-		// lender does not have the assets they intend to lend
-		return sdkerrors.Wrap(types.ErrInsufficientBalance, loan.String())
-	}
-
 	// send token balance to leverage module account
 	loanTokens := sdk.NewCoins(loan)
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
