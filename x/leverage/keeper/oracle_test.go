@@ -47,32 +47,32 @@ func (m *mockOracleKeeper) Reset() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestOracle_TotalPrice() {
-	totalPrice, err := s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, atomIBCDenom})
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("0.00004359"), totalPrice)
+// func (s *IntegrationTestSuite) TestOracle_TotalPrice() {
+// 	totalPrice, err := s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, atomIBCDenom})
+// 	s.Require().NoError(err)
+// 	s.Require().Equal(sdk.MustNewDecFromStr("0.00004359"), totalPrice)
 
-	totalPrice, err = s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, "foo"})
-	s.Require().Error(err)
-	s.Require().Equal(sdk.ZeroDec(), totalPrice)
-}
+// 	totalPrice, err = s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, "foo"})
+// 	s.Require().Error(err)
+// 	s.Require().Equal(sdk.ZeroDec(), totalPrice)
+// }
 
-func (s *IntegrationTestSuite) TestOracle_EquivalentValue() {
-	c, err := s.leverageKeeper.EquivalentValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
+func (s *IntegrationTestSuite) TestOracle_EquivalentTokenValue() {
+	c, err := s.leverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt64Coin(atomIBCDenom, 256576), c)
 }
 
-func (s *IntegrationTestSuite) TestOracle_Price() {
-	p, err := s.leverageKeeper.Price(s.ctx, umeeapp.BondDenom)
+func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
+	p, err := s.leverageKeeper.TokenPrice(s.ctx, umeeapp.BondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00000421"), p)
 
-	p, err = s.leverageKeeper.Price(s.ctx, atomIBCDenom)
+	p, err = s.leverageKeeper.TokenPrice(s.ctx, atomIBCDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00003938"), p)
 
-	p, err = s.leverageKeeper.Price(s.ctx, "foo")
+	p, err = s.leverageKeeper.TokenPrice(s.ctx, "foo")
 	s.Require().Error(err)
 	s.Require().Equal(sdk.ZeroDec(), p)
 }

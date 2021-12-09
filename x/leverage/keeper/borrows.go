@@ -163,7 +163,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 		}
 
 		// get USD value of base assets
-		price, err := k.Price(ctx, baseAsset.Denom)
+		value, err := k.TokenValue(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -174,7 +174,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 		}
 
 		// add each collateral coin's weighted value to borrow limit
-		limit = limit.Add(price.Mul(weight))
+		limit = limit.Add(value.Mul(weight))
 	}
 
 	return limit, nil

@@ -293,7 +293,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// use oracle helper functions to find total borrowed value in USD
-	borrowValue, err := k.TotalPrice(ctx, types.DenomsFromCoins(borrowed))
+	borrowValue, err := k.TotalTokenValue(ctx, borrowed)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
@@ -330,7 +330,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// repayment cannot exceed borrowed value * close factor
 	maxRepayValue := borrowValue.Mul(closeFactor)
-	repayValue, err := k.Price(ctx, repayment.Denom)
+	repayValue, err := k.TokenValue(ctx, repayment)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
@@ -343,7 +343,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// Given repay denom and amount, use oracle to find equivalent amount of
 	// rewardDenom's base asset.
-	baseReward, err := k.EquivalentValue(ctx, repayment, baseRewardDenom)
+	baseReward, err := k.EquivalentTokenValue(ctx, repayment, baseRewardDenom)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}

@@ -20,9 +20,9 @@ func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	return k.oracleKeeper.GetExchangeRateBase(ctx, denom)
 }
 
-// GetTokenValue returns the total token value given a Coin. An error is
+// TokenValue returns the total token value given a Coin. An error is
 // returned if we cannot get the token's price or if it's not an accepted token.
-func (k Keeper) GetTokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
+func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	p, err := k.TokenPrice(ctx, coin.Denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
@@ -37,7 +37,7 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	total := sdk.ZeroDec()
 
 	for _, c := range coins {
-		v, err := k.GetTokenValue(ctx, c)
+		v, err := k.TokenValue(ctx, c)
 		if err != nil {
 			return sdk.ZeroDec(), nil
 		}
