@@ -51,9 +51,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
 
-	// At the moment, SetRegisteredToken must be followed separately by SetTokenDenom
-	// to complete token registration. Therefore, this line does not break the InvalidAsset tests
-	// which require 'uumee' to be unregistered.
 	app.LeverageKeeper.SetRegisteredToken(ctx, uumee)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
@@ -71,19 +68,21 @@ func (s *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
 	app.AccountKeeper.SetAccount(ctx, lenderAcc)
 
-	// mint and send coins
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
+	// create coins of an unregistered base asset type "uabcd"
+	invalidCoin := sdk.NewInt64Coin("uabcd", 1000000000) // 1k abcd
+	invalidCoins := sdk.NewCoins(invalidCoin)
 
-	// lending should fail as we have not set what tokens can be lent
-	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	// mint and send coins
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, invalidCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, invalidCoins))
+
+	// lending should fail as we have not registered token "uabcd"
+	err := app.LeverageKeeper.LendAsset(ctx, lenderAddr, invalidCoin)
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestLendAsset_Valid() {
 	app, ctx := s.app, s.ctx
-
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	lenderAddr := sdk.AccAddress([]byte("addr________________"))
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
@@ -113,8 +112,6 @@ func (s *IntegrationTestSuite) TestLendAsset_Valid() {
 
 func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	app, ctx := s.app, s.ctx
-
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	lenderAddr := sdk.AccAddress([]byte("addr________________"))
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
@@ -153,8 +150,6 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 
 func (s *IntegrationTestSuite) TestWithdrawAsset_WithExchangeRate() {
 	app, ctx := s.app, s.ctx
-
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	lenderAddr := sdk.AccAddress([]byte("addr________________"))
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
@@ -198,8 +193,6 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_WithExchangeRate() {
 func (s *IntegrationTestSuite) TestSetReserves() {
 	app, ctx := s.app, s.ctx
 
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
-
 	// get initial reserves
 	amount := app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
 	s.Require().Equal(amount, sdk.ZeroInt())
@@ -215,8 +208,6 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 
 func (s *IntegrationTestSuite) TestSetExchangeRate() {
 	app, ctx := s.app, s.ctx
-
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	// get initial exchange rate
 	rate, err := app.LeverageKeeper.GetExchangeRate(ctx, umeeapp.BondDenom)
@@ -246,8 +237,6 @@ func (s *IntegrationTestSuite) TestGetToken() {
 		KinkUtilizationRate: sdk.MustNewDecFromStr("0.6"),
 	}
 	app.LeverageKeeper.SetRegisteredToken(ctx, uabc)
-	app.LeverageKeeper.SetTokenDenom(ctx, uabc.BaseDenom)
-
 	reserveFactor, err := app.LeverageKeeper.GetReserveFactor(ctx, "uabc")
 	s.Require().NoError(err)
 	s.Require().Equal(reserveFactor, sdk.MustNewDecFromStr("0.1"))
@@ -279,9 +268,6 @@ func (s *IntegrationTestSuite) TestGetToken() {
 // account has been created with no assets.
 func (s *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddress) {
 	app, ctx := s.app, s.ctx
-
-	// register uumee and u/uumee as an accepted asset+utoken pair
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	// set default params
 	params := types.DefaultParams()
@@ -526,9 +512,6 @@ func (s *IntegrationTestSuite) TestGetCollateral() {
 
 func (s *IntegrationTestSuite) TestBorrowLimit() {
 	app, ctx := s.app, s.ctx
-
-	// register uumee and u/uumee as an accepted asset+utoken pair
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	// Create collateral utokens (1k u/umee)
 	collatDenom := app.LeverageKeeper.FromTokenToUTokenDenom(ctx, umeeapp.BondDenom)
@@ -782,7 +765,6 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 		KinkUtilizationRate: sdk.MustNewDecFromStr("0.8"),
 	}
 	app.LeverageKeeper.SetRegisteredToken(ctx, uabc)
-	app.LeverageKeeper.SetTokenDenom(ctx, "uabc")
 
 	// Base interest rate (0% utilization)
 	rate, err := app.LeverageKeeper.GetDynamicBorrowInterest(ctx, "uabc", sdk.ZeroDec())
@@ -907,9 +889,6 @@ func (s *IntegrationTestSuite) TestParams() {
 
 func (s *IntegrationTestSuite) TestOracle() {
 	app, ctx := s.app, s.ctx
-
-	// register uumee and u/uumee as an accepted asset+utoken pair
-	app.LeverageKeeper.SetTokenDenom(ctx, umeeapp.BondDenom)
 
 	validCoin := sdk.NewInt64Coin(umeeapp.BondDenom, 1234000) // 1.234 umee
 
