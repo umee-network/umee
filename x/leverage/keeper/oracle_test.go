@@ -100,4 +100,12 @@ func (s *IntegrationTestSuite) TestOracle_EquivalentTokenValue() {
 	c, err := s.leverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt64Coin(atomIBCDenom, 256576), c)
+
+	c, err = s.leverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin("foo", 2400000), atomIBCDenom)
+	s.Require().Error(err)
+	s.Require().Equal(sdk.Coin{}, c)
+
+	c, err = s.leverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), "foo")
+	s.Require().Error(err)
+	s.Require().Equal(sdk.Coin{}, c)
 }
