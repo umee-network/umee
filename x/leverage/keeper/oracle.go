@@ -39,7 +39,7 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	for _, c := range coins {
 		v, err := k.TokenValue(ctx, c)
 		if err != nil {
-			return sdk.ZeroDec(), nil
+			return sdk.ZeroDec(), err
 		}
 
 		total = total.Add(v)
@@ -62,7 +62,7 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
 	}
 
-	// first derive USD value of new denom if amount was unchanged
+	// first derive USD price of new denom if amount was unchanged
 	exchange, err := k.TokenPrice(ctx, toDenom)
 	if err != nil {
 		return sdk.Coin{}, err
