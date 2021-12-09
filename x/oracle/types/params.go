@@ -34,8 +34,9 @@ var (
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
 	DefaultWhitelist     = DenomList{
 		{
-			BaseDenom:    AtomDenom,
-			DisplayDenom: AtomSign,
+			BaseDenom:   AtomDenom,
+			SymbolDenom: AtomSign,
+			Exponent:    0,
 		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
@@ -149,7 +150,7 @@ func (p Params) Validate() error {
 		if len(denom.BaseDenom) == 0 {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
 		}
-		if len(denom.DisplayDenom) == 0 {
+		if len(denom.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
 		}
 	}
@@ -226,7 +227,7 @@ func validateWhitelist(i interface{}) error {
 		if len(d.BaseDenom) == 0 {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
 		}
-		if len(d.DisplayDenom) == 0 {
+		if len(d.SymbolDenom) == 0 {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
 		}
 	}

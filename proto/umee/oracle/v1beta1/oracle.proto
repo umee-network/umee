@@ -48,7 +48,8 @@ message Denom {
   option (gogoproto.goproto_stringer) = false;
 
   string baseDenom    = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
-  string displayDenom = 2 [(gogoproto.moretags) = "yaml:\"base_denom\""];
+  string symbolDenom  = 2 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
+  int64 exponent      = 3 [(gogoproto.moretags) = "yaml:\"exponent\""];
 }
 
 // AggregateExchangeRatePrevote -

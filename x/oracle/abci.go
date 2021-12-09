@@ -47,7 +47,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// (what's included in our whitelist)
 		var voteTargets []string
 		for _, v := range params.Whitelist {
-			voteTargets = append(voteTargets, v.DisplayDenom)
+			voteTargets = append(voteTargets, v.SymbolDenom)
 		}
 
 		// Clear all exchange rates
