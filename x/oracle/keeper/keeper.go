@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -103,8 +102,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 	for _, acceptedDenom := range params.Whitelist {
 		if denom == acceptedDenom.SymbolDenom {
-			exponent := sdk.NewDecFromBigInt(big.NewInt(int64(acceptedDenom.Exponent)))
-			return decProto.Dec.Quo(exponent), nil
+			return decProto.Dec.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
 		}
 	}
 

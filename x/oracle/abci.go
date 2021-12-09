@@ -44,7 +44,8 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		// These are the denoms we want votes on
-		// (what's included in our whitelist)
+		// TODO : Get these from the x/leverage module's accepted list of tokens
+		// Ref https://github.com/umee-network/umee/issues/281
 		var voteTargets []string
 		for _, v := range params.Whitelist {
 			voteTargets = append(voteTargets, v.SymbolDenom)
