@@ -36,7 +36,7 @@ var (
 		{
 			BaseDenom:   AtomDenom,
 			SymbolDenom: AtomSign,
-			Exponent:    0,
+			Exponent:    uint32(6),
 		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
