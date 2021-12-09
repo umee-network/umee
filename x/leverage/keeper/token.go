@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -9,64 +10,42 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// FromUTokenToTokenDenom returns the associated token denom for the given uToken
-// denom. If the uToken denom does not exist, we assume the association is
-// invalid and we return an empty string.
+// FromUTokenToTokenDenom strips the uToken prefix ("u/") from an input denom.
+// An empty string is returned if the prefix is not present or if the resulting
+// token denom is not an accepted asset type.
 func (k Keeper) FromUTokenToTokenDenom(ctx sdk.Context, uTokenDenom string) string {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateUTokenDenomKey(uTokenDenom)
-
-	bz := store.Get(key)
-	if len(bz) == 0 {
-		return ""
+	if strings.HasPrefix(uTokenDenom, types.UTokenPrefix) {
+		tokenDenom := strings.TrimPrefix(uTokenDenom, types.UTokenPrefix)
+		if k.IsAcceptedToken(ctx, tokenDenom) {
+			return tokenDenom
+		}
 	}
-
-	return string(bz)
+	return ""
 }
 
-// FromTokenToUTokenDenom returns the associated uToken denom for the given token
-// denom. If the token denom does not exist, we assume the association is invalid
-// and we return an empty string.
+// FromTokenToUTokenDenom adds the uToken prefix ("u/") to an input denom.
+// An empty string is returned if the input token denom is not an accepted asset type.
 func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) string {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateTokenDenomKey(tokenDenom)
-
-	bz := store.Get(key)
-	if len(bz) == 0 {
-		return ""
+	if k.IsAcceptedToken(ctx, tokenDenom) {
+		return types.UTokenPrefix + tokenDenom
 	}
-
-	return string(bz)
+	return ""
 }
 
 // IsAcceptedToken returns true if a given (non-UToken) token denom is an
 // accepted asset type.
 func (k Keeper) IsAcceptedToken(ctx sdk.Context, tokenDenom string) bool {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateTokenDenomKey(tokenDenom)
+	key := types.CreateRegisteredTokenKey(tokenDenom)
 
 	return store.Has(key)
 }
 
-// IsAcceptedUToken returns true if a given uToken denom is an accepted asset
-// type.
+// IsAcceptedUToken returns true if a given uToken denom is associated with
+// an accepted base asset type.
 func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateUTokenDenomKey(uTokenDenom)
-
-	return store.Has(key)
-}
-
-// SetTokenDenom stores the token denom along with the uToken denom association.
-func (k Keeper) SetTokenDenom(ctx sdk.Context, tokenDenom string) {
-	uTokenDenom := types.UTokenFromTokenDenom(tokenDenom)
-	store := ctx.KVStore(k.storeKey)
-
-	tokenKey := types.CreateTokenDenomKey(tokenDenom)
-	store.Set(tokenKey, []byte(uTokenDenom))
-
-	uTokenKey := types.CreateUTokenDenomKey(uTokenDenom)
-	store.Set(uTokenKey, []byte(tokenDenom))
+	tokenDenom := k.FromUTokenToTokenDenom(ctx, uTokenDenom)
+	return k.IsAcceptedToken(ctx, tokenDenom)
 }
 
 // SetRegisteredToken stores a token into the x/leverage module's KVStore.
