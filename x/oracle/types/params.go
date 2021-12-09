@@ -32,9 +32,11 @@ const (
 var (
 	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultTobinTax      = sdk.NewDecWithPrec(25, 4) // 0.25%
 	DefaultWhitelist     = DenomList{
-		{Name: UmeeDenom},
+		{
+			BaseDenom:    AtomDenom,
+			DisplayDenom: AtomSign,
+		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
@@ -144,8 +146,11 @@ func (p Params) Validate() error {
 	}
 
 	for _, denom := range p.Whitelist {
-		if len(denom.Name) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have name")
+		if len(denom.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
+		}
+		if len(denom.DisplayDenom) == 0 {
+			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
 		}
 	}
 	return nil
@@ -218,8 +223,11 @@ func validateWhitelist(i interface{}) error {
 	}
 
 	for _, d := range v {
-		if len(d.Name) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have name")
+		if len(d.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
+		}
+		if len(d.DisplayDenom) == 0 {
+			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
 		}
 	}
 

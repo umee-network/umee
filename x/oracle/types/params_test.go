@@ -56,7 +56,7 @@ func TestParamsEqual(t *testing.T) {
 
 	// empty name
 	p9 := DefaultParams()
-	p9.Whitelist[0].Name = ""
+	p9.Whitelist[0].BaseDenom = ""
 	err = p9.Validate()
 	require.Error(t, err)
 

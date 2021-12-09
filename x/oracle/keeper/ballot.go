@@ -92,8 +92,8 @@ func (k Keeper) ApplyWhitelist(
 	if updateRequired {
 		for _, item := range whitelist {
 			// register metadata to bank module
-			if _, ok := k.bankKeeper.GetDenomMetaData(ctx, item.Name); !ok {
-				base := item.Name
+			if _, ok := k.bankKeeper.GetDenomMetaData(ctx, item.BaseDenom); !ok {
+				base := item.BaseDenom
 				display := base[1:]
 
 				k.bankKeeper.SetDenomMetaData(

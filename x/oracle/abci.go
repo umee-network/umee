@@ -47,7 +47,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// (what's included in our whitelist)
 		var voteTargets []string
 		for _, v := range params.Whitelist {
-			voteTargets = append(voteTargets, v.Name)
+			voteTargets = append(voteTargets, v.DisplayDenom)
 		}
 
 		// Clear all exchange rates
@@ -87,12 +87,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
 		}
 
+		var voteTargetDenoms []string
+		for _, v := range params.Whitelist {
+			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
+		}
+
 		// Distribute rewards to ballot winners
 		k.RewardBallotWinners(
 			ctx,
 			(int64)(params.VotePeriod),
 			(int64)(params.RewardDistributionWindow),
-			voteTargets,
+			voteTargetDenoms,
 			validatorClaimMap,
 		)
 
