@@ -81,7 +81,7 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 func (k Keeper) ApplyWhitelist(
 	ctx sdk.Context,
 	whitelist types.DenomList,
-	voteTargets map[string]sdk.Dec,
+	voteTargets []string,
 ) {
 	// check is there any update in whitelist params
 	updateRequired := false

@@ -94,6 +94,18 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 	store.Set(types.GetExchangeRateKey(denom), bz)
 }
 
+// SetExchangeRateWithEvent sets an consensus
+// exchange rate to the store with ABCI event
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+	k.SetExchangeRate(ctx, denom, exchangeRate)
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(types.EventTypeExchangeRateUpdate,
+			sdk.NewAttribute(types.EventAttrKeyDenom, denom),
+			sdk.NewAttribute(types.EventAttrKeyExchangeRate, exchangeRate.String()),
+		),
+	)
+}
+
 // DeleteExchangeRate deletes the consensus exchange rate of USD denominated in
 // the denom asset from the store.
 func (k Keeper) DeleteExchangeRate(ctx sdk.Context, denom string) {

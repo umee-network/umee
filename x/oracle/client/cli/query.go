@@ -26,6 +26,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryAggregatePrevote(),
 		GetCmdQueryAggregateVote(),
 		GetCmdQueryParams(),
+		GetCmdQueryExchangeRates(),
+		GetCmdQueryExchangeRate(),
 	)
 
 	return cmd
@@ -142,6 +144,77 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 			res, err := queryClient.AggregatePrevote(
 				context.Background(),
 				&query,
+			)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryExchangeRates implements the query rate command.
+func GetCmdQueryExchangeRates() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "exchange-rates",
+		Args:  cobra.NoArgs,
+		Short: "Query the exchange rates",
+		Long: strings.TrimSpace(`
+Query the current exchange rates of assets based on USD.
+You can find the current list of active denoms by running
+
+$ umeed query oracle exchange-rates
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.ExchangeRates(
+				context.Background(),
+				&types.QueryExchangeRatesRequest{},
+			)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryExchangeRates implements the query rate command.
+func GetCmdQueryExchangeRate() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "exchange-rate [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query the exchange rates",
+		Long: strings.TrimSpace(`
+Query the current exchange rates of an asset based on USD.
+
+$ umeed query oracle exchange-rate ATOM
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.ExchangeRates(
+				context.Background(),
+				&types.QueryExchangeRatesRequest{
+					Denom: args[0],
+				},
 			)
 			if err != nil {
 				return err
