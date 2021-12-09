@@ -57,10 +57,18 @@ func TestParamsEqual(t *testing.T) {
 	// empty name
 	p9 := DefaultParams()
 	p9.Whitelist[0].BaseDenom = ""
+	p9.Whitelist[0].SymbolDenom = "ATOM"
 	err = p9.Validate()
 	require.Error(t, err)
 
+	// empty
 	p10 := DefaultParams()
-	require.NotNil(t, p10.ParamSetPairs())
-	require.NotNil(t, p10.String())
+	p10.Whitelist[0].BaseDenom = "uatom"
+	p10.Whitelist[0].SymbolDenom = ""
+	err = p10.Validate()
+	require.Error(t, err)
+
+	p11 := DefaultParams()
+	require.NotNil(t, p11.ParamSetPairs())
+	require.NotNil(t, p11.String())
 }
