@@ -27,7 +27,7 @@ type Keeper struct {
 	SlashingKeeper types.SlashingKeeper
 	StakingKeeper  types.StakingKeeper
 
-	AttestationHandler interface {
+	attestationHandler interface {
 		Handle(sdk.Context, types.EthereumClaim) error
 	}
 }
@@ -53,7 +53,7 @@ func NewKeeper(
 		SlashingKeeper: slashingKeeper,
 	}
 
-	k.AttestationHandler = NewAttestationHandler(bankKeeper, k)
+	k.attestationHandler = NewAttestationHandler(bankKeeper, k)
 
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
