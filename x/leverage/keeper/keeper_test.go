@@ -519,13 +519,15 @@ func (s *IntegrationTestSuite) TestGetCollateral() {
 }
 
 func (s *IntegrationTestSuite) TestBorrowLimit() {
-	// Create collateral utokens (1k u/umee)
+	// Create collateral uTokens (1k u/umee)
 	collatDenom := s.leverageKeeper.FromTokenToUTokenDenom(s.ctx, umeeapp.BondDenom)
 	collateral := sdk.NewCoins(sdk.NewInt64Coin(collatDenom, 1000000000))
 
 	// Manually compute borrow limit using collateral weight of 0.1
-	// and placeholder of 1 uumee = 1 USD value
-	expected := collateral[0].Amount.ToDec().Mul(sdk.MustNewDecFromStr("0.1"))
+	// and placeholder of 1 umee = $4.21.
+	expected := collateral[0].Amount.ToDec().
+		Mul(sdk.MustNewDecFromStr("0.00000421")).
+		Mul(sdk.MustNewDecFromStr("0.1"))
 
 	// Check borrow limit vs. manually computed value
 	borrowLimit, err := s.leverageKeeper.CalculateBorrowLimit(s.ctx, collateral)
