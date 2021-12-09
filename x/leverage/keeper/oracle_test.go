@@ -48,9 +48,6 @@ func (m *mockOracleKeeper) Reset() {
 }
 
 func (s *IntegrationTestSuite) TestOracle_TotalPrice() {
-	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
-	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
-
 	totalPrice, err := s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, atomIBCDenom})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00004359"), totalPrice)
@@ -61,18 +58,12 @@ func (s *IntegrationTestSuite) TestOracle_TotalPrice() {
 }
 
 func (s *IntegrationTestSuite) TestOracle_EquivalentValue() {
-	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
-	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
-
 	c, err := s.leverageKeeper.EquivalentValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt64Coin(atomIBCDenom, 256576), c)
 }
 
 func (s *IntegrationTestSuite) TestOracle_Price() {
-	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
-	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
-
 	p, err := s.leverageKeeper.Price(s.ctx, umeeapp.BondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00000421"), p)
