@@ -7,44 +7,50 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// Price returns the USD value of an sdk.Coin containing base assets
-func (k Keeper) Price(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
-	if !k.IsAcceptedToken(ctx, coin.Denom) {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, coin.Denom)
+// Price returns the USD value of a token. Note, the token's denomination must
+// be the base denomination, e.g. uumee. The x/oracle module must know of the
+// base and display denominations for each exchange pair. E.g. it must know about
+// the UMEE/USD exchange rate along with the uumee base denomination.
+func (k Keeper) Price(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	if !k.IsAcceptedToken(ctx, denom) {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
-	// TODO #97: Use oracle module (as well as denom metadata from x/bank)
-	return coin.Amount.ToDec(), nil
+
+	return k.oracleKeeper.GetExchangeRate(ctx, denom)
 }
 
-// TotalPrice returns the USD value of an sdk.Coins containing base assets
+// TotalPrice returns the total USD value of a set of Coins.
 func (k Keeper) TotalPrice(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
-	value := sdk.ZeroDec()
+	price := sdk.ZeroDec()
+
 	for _, coin := range coins {
-		v, err := k.Price(ctx, coin)
+		p, err := k.Price(ctx, coin.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
-		value = value.Add(v)
+
+		price = price.Add(p)
 	}
-	return value, nil
+
+	return price, nil
 }
 
 // EquivalentValue returns the amount of a selected denom which would have equal
 // USD value to a provided sdk.Coin
-func (k Keeper) EquivalentValue(ctx sdk.Context, coin sdk.Coin, toDenom string) (sdk.Coin, error) {
-	// get total USD price of input coin (denom, amount)
-	value, err := k.Price(ctx, coin)
+func (k Keeper) EquivalentValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom string) (sdk.Coin, error) {
+	// get total USD price of input (from) denomination
+	price, err := k.Price(ctx, fromCoin.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
 
-	// return immediately on zero value input
-	if value.IsZero() {
+	// return immediately on zero price
+	if price.IsZero() {
 		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
 	}
 
 	// first derive USD value of new denom if amount was unchanged
-	exchange, err := k.Price(ctx, sdk.NewCoin(toDenom, coin.Amount))
+	exchange, err := k.Price(ctx, toDenom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -55,6 +61,6 @@ func (k Keeper) EquivalentValue(ctx sdk.Context, coin sdk.Coin, toDenom string) 
 	// then return the amount corrected by the price ratio
 	return sdk.NewCoin(
 		toDenom,
-		coin.Amount.ToDec().Mul(value).Quo(exchange).TruncateInt(),
+		fromCoin.Amount.ToDec().Mul(price).Quo(exchange).TruncateInt(),
 	), nil
 }
