@@ -10,7 +10,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 
@@ -132,20 +131,14 @@ manually, the operator must use the current account nonce.`,
 
 			var ethSig []byte
 			if s, err := cmd.Flags().GetString(FlagOrchEthSig); len(s) > 0 && err == nil {
-				ethSig, err = hexutil.Decode(s)
-				if err != nil {
-					return err
-				}
+				ethSig = ethcmn.FromHex(s)
 			} else {
 				ethPrivKeyStr, err := cmd.Flags().GetString(FlagEthPrivKey)
 				if err != nil {
 					return err
 				}
 
-				privKeyBz, err := hexutil.Decode(ethPrivKeyStr)
-				if err != nil {
-					return fmt.Errorf("failed to parse Ethereum private key: %w", err)
-				}
+				privKeyBz := ethcmn.FromHex(ethPrivKeyStr)
 
 				ethPrivKey, err := ethcrypto.ToECDSA(privKeyBz)
 				if err != nil {
