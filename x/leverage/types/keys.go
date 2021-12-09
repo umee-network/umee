@@ -21,8 +21,6 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixTokenDenom        = []byte{0x01}
-	KeyPrefixUTokenDenom       = []byte{0x02}
 	KeyPrefixRegisteredToken   = []byte{0x03}
 	KeyPrefixLoanToken         = []byte{0x04}
 	KeyPrefixCollateralSetting = []byte{0x05}
@@ -30,26 +28,6 @@ var (
 	KeyPrefixLastInterestTime  = []byte{0x07}
 	KeyPrefixExchangeRate      = []byte{0x08}
 )
-
-// CreateTokenDenomKey returns a KVStore key for getting and storing a token's
-// associated uToken denomination.
-func CreateTokenDenomKey(tokenDenom string) []byte {
-	// tokenprefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixTokenDenom...)
-	key = append(key, []byte(tokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
-}
-
-// CreateUTokenDenomKey returns a KVStore key for getting and storing a uToken's
-// associated token denomination.
-func CreateUTokenDenomKey(uTokenDenom string) []byte {
-	// utokenprefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixUTokenDenom...)
-	key = append(key, []byte(uTokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
-}
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
 func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
