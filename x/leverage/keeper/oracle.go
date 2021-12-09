@@ -48,32 +48,32 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	return total, nil
 }
 
-// EquivalentTokenValue returns the amount of a selected denom which would have
-// equal USD value to a provided sdk.Coin.
+// EquivalentValue returns the amount of a selected denom which would have equal
+// USD value to a provided sdk.Coin
 func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom string) (sdk.Coin, error) {
-	// get total USD price of input (from) denomination
-	price, err := k.TokenPrice(ctx, fromCoin.Denom)
+	// get USD price of input (fromCoin) denomination
+	p1, err := k.TokenPrice(ctx, fromCoin.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
 
-	// return immediately on zero price
-	if price.IsZero() {
+	// return immediately on zero input value
+	if p1.IsZero() {
 		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
 	}
 
-	// first derive USD price of new denom if amount was unchanged
-	exchange, err := k.TokenPrice(ctx, toDenom)
+	// get USD price of output denomination
+	p2, err := k.TokenPrice(ctx, toDenom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
-	if !exchange.IsPositive() {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrBadValue, exchange.String())
+	if !p2.IsPositive() {
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrBadValue, p2.String())
 	}
 
 	// then return the amount corrected by the price ratio
 	return sdk.NewCoin(
 		toDenom,
-		fromCoin.Amount.ToDec().Mul(price).Quo(exchange).TruncateInt(),
+		fromCoin.Amount.ToDec().Mul(p1).Quo(p2).TruncateInt(),
 	), nil
 }
