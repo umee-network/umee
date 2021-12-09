@@ -151,7 +151,7 @@ func (p Params) Validate() error {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
 		}
 		if len(denom.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
+			return fmt.Errorf("oracle parameter Whitelist Denom must have SymbolDenom")
 		}
 	}
 	return nil
@@ -228,7 +228,7 @@ func validateWhitelist(i interface{}) error {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
 		}
 		if len(d.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have DisplayDenom")
+			return fmt.Errorf("oracle parameter Whitelist Denom must have SymbolDenom")
 		}
 	}
 
