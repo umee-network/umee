@@ -1,38 +1,87 @@
 package keeper_test
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	umeeapp "github.com/umee-network/umee/app"
 )
 
-func (s *IntegrationTestSuite) TestOracle() {
-	// register uumee and u/uumee as an accepted asset+utoken pair
-	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
-
-	validCoin := sdk.NewInt64Coin(umeeapp.BondDenom, 1234000) // 1.234 umee
-
-	// Get the USD value of a single coin
-	value, err := s.leverageKeeper.Price(s.ctx, validCoin)
-	s.Require().NoError(err)
-	//   TODO #97: Change to the correct expected USD value when oracle is integrated
-	s.Require().Equal(sdk.MustNewDecFromStr("1234000"), value)
-
-	// TODO #97: Add a second valid coin, so the TotalPrice test below can
-	// properly add up their prices.
-
-	// Get the total USD value of an sdk.Coins containing multiple valid denoms
-	value, err = s.leverageKeeper.TotalPrice(s.ctx, sdk.NewCoins(validCoin))
-	s.Require().NoError(err)
-	//   TODO #97: Change to the correct expected USD value when oracle is integrated
-	s.Require().Equal(sdk.MustNewDecFromStr("1234000"), value)
-
-	// TODO : Using two valid denoms, test keeper.EquivalentValue
+type mockOracleKeeper struct {
+	exchangeRates map[string]sdk.Dec
 }
 
-func (s *IntegrationTestSuite) TestOracle_Invalid() {
-	invalidCoin := sdk.NewInt64Coin("uabcd", 1000000)
+func newMockOracleKeeper() *mockOracleKeeper {
+	m := &mockOracleKeeper{
+		exchangeRates: make(map[string]sdk.Dec),
+	}
+	m.Reset()
 
-	_, err := s.leverageKeeper.Price(s.ctx, invalidCoin)
+	return m
+}
+
+func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
+	p, ok := m.exchangeRates[denom]
+	if !ok {
+		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
+	}
+
+	return p, nil
+}
+
+func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	p, err := m.GetExchangeRate(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	// assume 10^6 for the base denom
+	return p.Quo(sdk.MustNewDecFromStr("1000000.00")), nil
+}
+
+func (m *mockOracleKeeper) Reset() {
+	m.exchangeRates = map[string]sdk.Dec{
+		umeeapp.BondDenom: sdk.MustNewDecFromStr("4.21"),
+		atomIBCDenom:      sdk.MustNewDecFromStr("39.38"),
+	}
+}
+
+func (s *IntegrationTestSuite) TestOracle_TotalPrice() {
+	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
+	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
+
+	totalPrice, err := s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, atomIBCDenom})
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.00004359"), totalPrice)
+
+	totalPrice, err = s.leverageKeeper.TotalPrice(s.ctx, []string{umeeapp.BondDenom, "foo"})
 	s.Require().Error(err)
+	s.Require().Equal(sdk.ZeroDec(), totalPrice)
+}
+
+func (s *IntegrationTestSuite) TestOracle_EquivalentValue() {
+	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
+	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
+
+	c, err := s.leverageKeeper.EquivalentValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64Coin(atomIBCDenom, 256576), c)
+}
+
+func (s *IntegrationTestSuite) TestOracle_Price() {
+	s.leverageKeeper.SetTokenDenom(s.ctx, umeeapp.BondDenom)
+	s.leverageKeeper.SetTokenDenom(s.ctx, atomIBCDenom)
+
+	p, err := s.leverageKeeper.Price(s.ctx, umeeapp.BondDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.00000421"), p)
+
+	p, err = s.leverageKeeper.Price(s.ctx, atomIBCDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.00003938"), p)
+
+	p, err = s.leverageKeeper.Price(s.ctx, "foo")
+	s.Require().Error(err)
+	s.Require().Equal(sdk.ZeroDec(), p)
 }

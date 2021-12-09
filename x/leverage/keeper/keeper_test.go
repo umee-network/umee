@@ -19,6 +19,7 @@ import (
 
 const (
 	initialPower = int64(10000000000)
+	atomIBCDenom = "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D"
 )
 
 var (
@@ -42,7 +43,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
-	uumee := types.Token{
+	umeeToken := types.Token{
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
@@ -52,22 +53,28 @@ func (s *IntegrationTestSuite) SetupTest() {
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
+	atomIBCToken := types.Token{
+		BaseDenom:            atomIBCDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
 
-	// Individual tests should set the leverage keeper to what they need, if for
-	// example, they need a custom oracle.
 	s.leverageKeeper = keeper.NewKeeper(
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
-		nil,
+		newMockOracleKeeper(),
 	)
-	leverage.InitGenesis(ctx, s.leverageKeeper, *types.DefaultGenesis())
 
-	// At the moment, SetRegisteredToken must be followed separately by
-	// SetTokenDenom to complete token registration. Therefore, this line does not
-	// break the InvalidAsset tests which require 'uumee' to be unregistered.
-	s.leverageKeeper.SetRegisteredToken(ctx, uumee)
+	leverage.InitGenesis(ctx, s.leverageKeeper, *types.DefaultGenesis())
+	s.leverageKeeper.SetRegisteredToken(ctx, umeeToken)
+	s.leverageKeeper.SetRegisteredToken(ctx, atomIBCToken)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(s.leverageKeeper))

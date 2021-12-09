@@ -30,4 +30,5 @@ type BankKeeper interface {
 // OracleKeeper defines the expected x/oracle keeper interface.
 type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
+	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
 }

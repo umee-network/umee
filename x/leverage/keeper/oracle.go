@@ -7,24 +7,25 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// Price returns the USD value of a token. Note, the token's denomination must
-// be the base denomination, e.g. uumee. The x/oracle module must know of the
-// base and display denominations for each exchange pair. E.g. it must know about
-// the UMEE/USD exchange rate along with the uumee base denomination.
+// Price returns the USD value of a base token. Note, the token's denomination
+// must be the base denomination, e.g. uumee. The x/oracle module must know of
+// the base and display/symbol denominations for each exchange pair. E.g. it must
+// know about the UMEE/USD exchange rate along with the uumee base denomination
+// and the exponent.
 func (k Keeper) Price(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	return k.oracleKeeper.GetExchangeRate(ctx, denom)
+	return k.oracleKeeper.GetExchangeRateBase(ctx, denom)
 }
 
 // TotalPrice returns the total USD value of a set of Coins.
-func (k Keeper) TotalPrice(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
+func (k Keeper) TotalPrice(ctx sdk.Context, denoms []string) (sdk.Dec, error) {
 	price := sdk.ZeroDec()
 
-	for _, coin := range coins {
-		p, err := k.Price(ctx, coin.Denom)
+	for _, denom := range denoms {
+		p, err := k.Price(ctx, denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
