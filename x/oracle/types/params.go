@@ -35,8 +35,8 @@ var (
 	DefaultWhitelist     = DenomList{
 		{
 			BaseDenom:   AtomDenom,
-			SymbolDenom: AtomSign,
-			Exponent:    uint32(6),
+			SymbolDenom: AtomSymbol,
+			Exponent:    AtomExponent,
 		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
