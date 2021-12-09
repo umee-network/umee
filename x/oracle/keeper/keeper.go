@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -67,8 +68,8 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// GetExchangeRate gets the consensus exchange rate of USD denominated in the
-// denom asset from the store.
+// GetExchangeRate gets the consensus exchange rate of an asset
+// based on USD
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if denom == types.USDDenom {
 		return sdk.OneDec(), nil
@@ -80,10 +81,34 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 	}
 
-	dp := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &dp)
+	decProto := sdk.DecProto{}
+	k.cdc.MustUnmarshal(b, &decProto)
 
-	return dp.Dec, nil
+	return decProto.Dec, nil
+}
+
+// GetExchangeRateBase gets the consensus exchange rate of an asset
+// in the base denom (e.g. ATOM -> uatom)
+func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.GetExchangeRateKey(denom))
+	if b == nil {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	}
+
+	decProto := sdk.DecProto{}
+	k.cdc.MustUnmarshal(b, &decProto)
+
+	params := k.GetParams(ctx)
+
+	for _, acceptedDenom := range params.Whitelist {
+		if denom == acceptedDenom.SymbolDenom {
+			exponent := sdk.NewDecFromBigInt(big.NewInt(int64(acceptedDenom.Exponent)))
+			return decProto.Dec.Quo(exponent), nil
+		}
+	}
+
+	return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
