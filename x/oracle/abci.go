@@ -46,8 +46,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// TODO : Get these from the x/leverage module's accepted list of tokens
 		// Ref https://github.com/umee-network/umee/issues/281
 		var voteTargets []string
-		for _, v := range params.Whitelist {
+		var voteTargetDenoms []string
+		for _, v := range params.Acceptlist {
 			voteTargets = append(voteTargets, v.SymbolDenom)
+			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 		}
 
 		// Clear all exchange rates
@@ -88,11 +90,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
 		}
 
-		var voteTargetDenoms []string
-		for _, v := range params.Whitelist {
-			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
-		}
-
 		// Distribute rewards to ballot winners
 		k.RewardBallotWinners(
 			ctx,
@@ -106,7 +103,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.ClearBallots(ctx, params.VotePeriod)
 
 		// Update vote targets
-		k.ApplyWhitelist(ctx, params.Whitelist, voteTargets)
+		k.ApplyWhitelist(ctx, params.Acceptlist, voteTargets)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and

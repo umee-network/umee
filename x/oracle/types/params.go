@@ -32,7 +32,7 @@ const (
 var (
 	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultWhitelist     = DenomList{
+	DefaultAcceptList    = DenomList{
 		{
 			BaseDenom:   UmeeDenom,
 			SymbolDenom: UmeeSymbol,
@@ -52,7 +52,7 @@ func DefaultParams() Params {
 		VoteThreshold:            DefaultVoteThreshold,
 		RewardBand:               DefaultRewardBand,
 		RewardDistributionWindow: DefaultRewardDistributionWindow,
-		Whitelist:                DefaultWhitelist,
+		Acceptlist:               DefaultAcceptList,
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
@@ -90,7 +90,7 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 		),
 		paramstypes.NewParamSetPair(
 			KeyWhitelist,
-			&p.Whitelist,
+			&p.Acceptlist,
 			validateWhitelist,
 		),
 		paramstypes.NewParamSetPair(
@@ -146,7 +146,7 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
-	for _, denom := range p.Whitelist {
+	for _, denom := range p.Acceptlist {
 		if len(denom.BaseDenom) == 0 {
 			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
 		}

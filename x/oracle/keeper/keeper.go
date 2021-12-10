@@ -100,7 +100,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 	params := k.GetParams(ctx)
 
-	for _, acceptedDenom := range params.Whitelist {
+	for _, acceptedDenom := range params.Acceptlist {
 		if denom == acceptedDenom.SymbolDenom {
 			return decProto.Dec.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
 		}

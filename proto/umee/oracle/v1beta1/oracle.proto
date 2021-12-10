@@ -23,8 +23,8 @@ message Params {
     (gogoproto.nullable)   = false
   ];
   uint64         reward_distribution_window = 4 [(gogoproto.moretags) = "yaml:\"reward_distribution_window\""];
-  repeated Denom whitelist                  = 5 [
-    (gogoproto.moretags)     = "yaml:\"whitelist\"",
+  repeated Denom acceptlist                  = 5 [
+    (gogoproto.moretags)     = "yaml:\"acceptlist\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable)     = false
   ];
