@@ -7,10 +7,9 @@ import (
 // Denomination constants
 const (
 	UmeeDenom       string = "uumee"
+	UmeeSymbol      string = "umee"
+	UmeeExponent           = uint32(6)
 	USDDenom        string = "uusd"
-	AtomSymbol      string = "ATOM"
-	AtomDenom       string = "uatom"
-	AtomExponent           = uint32(6)
 	BlocksPerMinute        = uint64(10)
 	BlocksPerHour          = BlocksPerMinute * 60
 	BlocksPerDay           = BlocksPerHour * 24

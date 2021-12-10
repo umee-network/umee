@@ -67,8 +67,8 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// GetExchangeRate gets the consensus exchange rate of an asset
-// based on USD
+// GetExchangeRate gets the consensus exchange rate of USD denominated in the
+// denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if denom == types.USDDenom {
 		return sdk.OneDec(), nil

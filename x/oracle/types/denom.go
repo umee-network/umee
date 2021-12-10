@@ -15,7 +15,8 @@ func (d Denom) String() string {
 // Equal implements equal interface
 func (d Denom) Equal(d1 *Denom) bool {
 	return d.BaseDenom == d1.BaseDenom &&
-		d.SymbolDenom == d1.SymbolDenom
+		d.SymbolDenom == d1.SymbolDenom &&
+		d.Exponent == d1.Exponent
 }
 
 // DenomList is array of Denom

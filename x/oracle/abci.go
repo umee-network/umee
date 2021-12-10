@@ -21,7 +21,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(ctx)
 	if IsPeriodLastBlock(ctx, params.VotePeriod) {
-
 		// Build claim map over all validators in active set
 		validatorClaimMap := make(map[string]types.Claim)
 
@@ -64,7 +63,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for denom, ballot := range voteMap {
-
 			// Get weighted median of cross exchange rates
 			exchangeRate, err := Tally(ctx, ballot, params.RewardBand, validatorClaimMap)
 			if err != nil {
@@ -75,8 +73,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			k.SetExchangeRateWithEvent(ctx, denom, exchangeRate)
 		}
 
-		//---------------------------
-		// Do miss counting & slashing
+		// update miss counting & slashing
 		voteTargetsLen := len(voteTargets)
 		for _, claim := range validatorClaimMap {
 			// Skip abstain & valid voters
@@ -109,7 +106,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.ApplyWhitelist(ctx, params.Whitelist, voteTargets)
 	}
 
-	// Do slash who did miss voting over threshold and
+	// Slash oracle providers who missed voting over the threshold and
 	// reset miss counters of all validators at the last block of slash window
 	if IsPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)

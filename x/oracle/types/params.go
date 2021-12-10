@@ -34,9 +34,9 @@ var (
 	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
 	DefaultWhitelist     = DenomList{
 		{
-			BaseDenom:   AtomDenom,
-			SymbolDenom: AtomSymbol,
-			Exponent:    AtomExponent,
+			BaseDenom:   UmeeDenom,
+			SymbolDenom: UmeeSymbol,
+			Exponent:    UmeeExponent,
 		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
