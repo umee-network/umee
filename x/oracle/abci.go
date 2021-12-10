@@ -61,16 +61,18 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// NOTE: **Make abstain votes to have zero vote power**
 		voteMap := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
+		ballotDenomSlice := types.BallotMapToSlice(voteMap)
+
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
-		for denom, ballot := range voteMap {
+		for _, ballotDenom := range ballotDenomSlice {
 			// Get weighted median of cross exchange rates
-			exchangeRate, err := Tally(ctx, ballot, params.RewardBand, validatorClaimMap)
+			exchangeRate, err := Tally(ctx, ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
 			if err != nil {
 				return err
 			}
 
 			// Set the exchange rate, emit ABCI event
-			k.SetExchangeRateWithEvent(ctx, denom, exchangeRate)
+			k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate)
 		}
 
 		// update miss counting & slashing

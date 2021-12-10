@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -130,6 +131,26 @@ func (pb ExchangeRateBallot) Less(i, j int) bool {
 // Swap implements sort.Interface.
 func (pb ExchangeRateBallot) Swap(i, j int) {
 	pb[i], pb[j] = pb[j], pb[i]
+}
+
+// BallotDenom is a convenience wrapper for setting rates deterministically.
+type BallotDenom struct {
+	Ballot ExchangeRateBallot
+	Denom  string
+}
+
+// BallotMapToSlice returns an array of sorted exchange rate ballots.
+func BallotMapToSlice(votes map[string]ExchangeRateBallot) (b []BallotDenom) {
+	for denom, ballot := range votes {
+		b = append(b, BallotDenom{
+			Denom:  denom,
+			Ballot: ballot,
+		})
+	}
+	sort.Slice(b, func(i, j int) bool {
+		return b[i].Denom < b[j].Denom
+	})
+	return b
 }
 
 // Claim is an interface that directs its rewards to an attached bank account.
