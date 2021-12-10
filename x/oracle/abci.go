@@ -77,7 +77,8 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// update miss counting & slashing
 		voteTargetsLen := len(voteTargets)
-		for _, claim := range validatorClaimMap {
+		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
+		for _, claim := range claimSlice {
 			// Skip abstain & valid voters
 			if int(claim.WinCount) == voteTargetsLen {
 				continue

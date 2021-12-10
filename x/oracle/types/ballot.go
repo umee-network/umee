@@ -171,3 +171,20 @@ func NewClaim(power, weight, winCount int64, recipient sdk.ValAddress) Claim {
 		Recipient: recipient,
 	}
 }
+
+// ClaimMapToSlice returns an array of sorted exchange rate ballots.
+func ClaimMapToSlice(claims map[string]Claim) []Claim {
+	c := make([]Claim, len(claims))
+	for _, claim := range claims {
+		c = append(c, Claim{
+			Power:     claim.Power,
+			Weight:    claim.Weight,
+			WinCount:  claim.WinCount,
+			Recipient: claim.Recipient,
+		})
+	}
+	sort.Slice(c, func(i, j int) bool {
+		return c[i].Recipient.String() < c[j].Recipient.String()
+	})
+	return c
+}
