@@ -6,7 +6,8 @@ import (
 	"github.com/umee-network/umee/app/params"
 )
 
-// MakeEncodingConfig creates an EncodingConfig for testing
+// MakeEncodingConfig returns the application's encoding configuration with all
+// types and interfaces registered.
 func MakeEncodingConfig() params.EncodingConfig {
 	encodingConfig := params.MakeEncodingConfig()
 	std.RegisterLegacyAminoCodec(encodingConfig.Amino)

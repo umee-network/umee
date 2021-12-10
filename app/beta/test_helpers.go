@@ -39,7 +39,7 @@ func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
 	return betaApp
 }
 
-func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
+func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, app.GenesisState) {
 	db := dbm.NewMemDB()
 	encCdc := MakeEncodingConfig()
 	betaApp := New(
@@ -57,7 +57,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		return betaApp, NewDefaultGenesisState(encCdc.Marshaler)
 	}
 
-	return betaApp, GenesisState{}
+	return betaApp, app.GenesisState{}
 }
 
 // IntegrationTestNetworkConfig returns a networking configuration used for

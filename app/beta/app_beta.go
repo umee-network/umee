@@ -85,7 +85,7 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
@@ -114,7 +114,7 @@ const (
 )
 
 var (
-	_ app.CosmosApp           = (*UmeeApp)(nil)
+	_ umeeapp.CosmosApp       = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
 
 	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
@@ -123,15 +123,15 @@ var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		genutil.AppModuleBasic{},
-		app.BankModule{},
+		umeeapp.BankModule{},
 		capability.AppModuleBasic{},
-		app.StakingModule{},
-		app.MintModule{},
+		umeeapp.StakingModule{},
+		umeeapp.MintModule{},
 		distr.AppModuleBasic{},
-		app.GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
+		umeeapp.GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
 		params.AppModuleBasic{},
-		app.CrisisModule{},
-		app.SlashingModule{},
+		umeeapp.CrisisModule{},
+		umeeapp.SlashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
@@ -568,7 +568,7 @@ func (app *UmeeApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.R
 
 // InitChainer implements Umee's InitChain ABCI method.
 func (app *UmeeApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
-	var genesisState GenesisState
+	var genesisState umeeapp.GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(fmt.Sprintf("failed to unmarshal genesis state: %v", err))
 	}
