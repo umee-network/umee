@@ -15,7 +15,6 @@ func (k Keeper) OrganizeBallotByDenom(
 	ctx sdk.Context,
 	validatorClaimMap map[string]types.Claim,
 ) (votes map[string]types.ExchangeRateBallot) {
-
 	votes = map[string]types.ExchangeRateBallot{}
 
 	// collect aggregate votes

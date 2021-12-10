@@ -91,7 +91,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		denom := denomAmountStr[0]
 
 		tuples[i] = ExchangeRateTuple{
-			Denom:        denom,
+			Denom:        strings.ToUpper(denom),
 			ExchangeRate: decCoin,
 		}
 
