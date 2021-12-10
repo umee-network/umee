@@ -53,7 +53,7 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.CreateRegisteredTokenKey(token.BaseDenom)
 
-	bz, err := token.Marshal()
+	bz, err := k.cdc.Marshal(&token)
 	if err != nil {
 		panic(fmt.Sprintf("failed to encode token: %s", err))
 	}
@@ -117,7 +117,7 @@ func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, 
 		return token, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	err := token.Unmarshal(bz)
+	err := k.cdc.Unmarshal(bz, &token)
 	return token, err
 }
 
