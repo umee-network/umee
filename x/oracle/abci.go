@@ -45,9 +45,11 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// These are the denoms we want votes on
 		// TODO : Get these from the x/leverage module's accepted list of tokens
 		// Ref https://github.com/umee-network/umee/issues/281
-		var voteTargets []string
-		var voteTargetDenoms []string
-		for _, v := range params.Acceptlist {
+		var (
+			voteTargets      []string
+			voteTargetDenoms []string
+		)
+		for _, v := range params.AcceptList {
 			voteTargets = append(voteTargets, v.SymbolDenom)
 			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 		}
@@ -103,7 +105,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.ClearBallots(ctx, params.VotePeriod)
 
 		// Update vote targets
-		k.ApplyWhitelist(ctx, params.Acceptlist, voteTargets)
+		k.ApplyAcceptList(ctx, params.AcceptList, voteTargets)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and

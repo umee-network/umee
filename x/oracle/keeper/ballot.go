@@ -76,20 +76,20 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	)
 }
 
-// ApplyWhitelist updates vote targets denom list whitelist.
-func (k Keeper) ApplyWhitelist(
+// ApplyWhitelist updates vote targets denom list accept list.
+func (k Keeper) ApplyAcceptList(
 	ctx sdk.Context,
-	whitelist types.DenomList,
+	acceptList types.DenomList,
 	voteTargets []string,
 ) {
-	// check is there any update in whitelist params
+	// check is there any update in accept list params
 	updateRequired := false
-	if len(voteTargets) != len(whitelist) {
+	if len(voteTargets) != len(acceptList) {
 		updateRequired = true
 	}
 
 	if updateRequired {
-		for _, item := range whitelist {
+		for _, item := range acceptList {
 			// register metadata to bank module
 			if _, ok := k.bankKeeper.GetDenomMetaData(ctx, item.BaseDenom); !ok {
 				base := item.BaseDenom

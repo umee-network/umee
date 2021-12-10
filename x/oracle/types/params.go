@@ -15,7 +15,7 @@ var (
 	KeyVoteThreshold            = []byte("VoteThreshold")
 	KeyRewardBand               = []byte("RewardBand")
 	KeyRewardDistributionWindow = []byte("RewardDistributionWindow")
-	KeyWhitelist                = []byte("Whitelist")
+	KeyAcceptList               = []byte("AcceptList")
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
@@ -52,7 +52,7 @@ func DefaultParams() Params {
 		VoteThreshold:            DefaultVoteThreshold,
 		RewardBand:               DefaultRewardBand,
 		RewardDistributionWindow: DefaultRewardDistributionWindow,
-		Acceptlist:               DefaultAcceptList,
+		AcceptList:               DefaultAcceptList,
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
@@ -89,8 +89,8 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			validateRewardDistributionWindow,
 		),
 		paramstypes.NewParamSetPair(
-			KeyWhitelist,
-			&p.Acceptlist,
+			KeyAcceptList,
+			&p.AcceptList,
 			validateWhitelist,
 		),
 		paramstypes.NewParamSetPair(
@@ -146,12 +146,12 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
-	for _, denom := range p.Acceptlist {
+	for _, denom := range p.AcceptList {
 		if len(denom.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
+			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
 		}
 		if len(denom.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have SymbolDenom")
+			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
 	}
 	return nil

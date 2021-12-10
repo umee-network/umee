@@ -22,9 +22,9 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  uint64         reward_distribution_window = 4 [(gogoproto.moretags) = "yaml:\"reward_distribution_window\""];
-  repeated Denom acceptlist                  = 5 [
-    (gogoproto.moretags)     = "yaml:\"acceptlist\"",
+  uint64         reward_distribution_window   = 4 [(gogoproto.moretags) = "yaml:\"reward_distribution_window\""];
+  repeated Denom accept_list                  = 5 [
+    (gogoproto.moretags)     = "yaml:\"accept_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable)     = false
   ];

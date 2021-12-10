@@ -56,15 +56,15 @@ func TestParamsEqual(t *testing.T) {
 
 	// empty name
 	p9 := DefaultParams()
-	p9.Acceptlist[0].BaseDenom = ""
-	p9.Acceptlist[0].SymbolDenom = "ATOM"
+	p9.AcceptList[0].BaseDenom = ""
+	p9.AcceptList[0].SymbolDenom = "ATOM"
 	err = p9.Validate()
 	require.Error(t, err)
 
 	// empty
 	p10 := DefaultParams()
-	p10.Acceptlist[0].BaseDenom = "uatom"
-	p10.Acceptlist[0].SymbolDenom = ""
+	p10.AcceptList[0].BaseDenom = "uatom"
+	p10.AcceptList[0].SymbolDenom = ""
 	err = p10.Validate()
 	require.Error(t, err)
 
