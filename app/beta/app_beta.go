@@ -1,10 +1,8 @@
-package app
+package beta
 
 import (
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -16,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -88,15 +85,16 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/umee-network/umee/app"
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
+	"github.com/umee-network/umee/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	"github.com/umee-network/umee/x/peggy"
 	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
-	// leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	// "github.com/umee-network/umee/x/leverage"
-	// leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 )
 
 const (
@@ -116,12 +114,8 @@ const (
 )
 
 var (
-	_ CosmosApp               = (*UmeeApp)(nil)
+	_ app.CosmosApp           = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
-
-	// DefaultNodeHome defines the default home directory for the application
-	// daemon.
-	DefaultNodeHome string
 
 	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
@@ -129,15 +123,15 @@ var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		genutil.AppModuleBasic{},
-		BankModule{},
+		app.BankModule{},
 		capability.AppModuleBasic{},
-		StakingModule{},
-		MintModule{},
+		app.StakingModule{},
+		app.MintModule{},
 		distr.AppModuleBasic{},
-		GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
+		app.GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers()...)},
 		params.AppModuleBasic{},
-		CrisisModule{},
-		SlashingModule{},
+		app.CrisisModule{},
+		app.SlashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
@@ -145,7 +139,7 @@ var (
 		evidence.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-		// leverage.AppModuleBasic{},
+		leverage.AppModuleBasic{},
 		peggy.AppModuleBasic{},
 	)
 
@@ -158,25 +152,10 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 	}
 )
-
-func init() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(fmt.Sprintf("failed to get user home directory: %s", err))
-	}
-
-	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", Name))
-
-	// XXX: If other upstream or external application's depend on any of Umee's
-	// CLI or command functionality, then this would require us to move the
-	// SetAddressConfig call to somewhere external such as the root command
-	// constructor and anywhere else we contract the app.
-	SetAddressConfig()
-}
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
 // the Cosmos SDK's BaseApp.
@@ -211,8 +190,8 @@ type UmeeApp struct {
 	TransferKeeper   uibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
-	// LeverageKeeper   leveragekeeper.Keeper
-	PeggyKeeper peggykeeper.Keeper
+	LeverageKeeper   leveragekeeper.Keeper
+	PeggyKeeper      peggykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -252,8 +231,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, peggytypes.StoreKey,
-		// leveragetypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey, peggytypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -366,12 +344,13 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
-	// app.LeverageKeeper = leveragekeeper.NewKeeper(
-	// 	appCodec,
-	// 	keys[leveragetypes.ModuleName],
-	// 	app.GetSubspace(leveragetypes.ModuleName),
-	// 	app.BankKeeper,
-	// )
+	app.LeverageKeeper = leveragekeeper.NewKeeper(
+		appCodec,
+		keys[leveragetypes.ModuleName],
+		app.GetSubspace(leveragetypes.ModuleName),
+		app.BankKeeper,
+		nil,
+	)
 
 	// register the staking hooks
 	//
@@ -429,8 +408,8 @@ func New(
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
-		// AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
+		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -480,7 +459,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
-		// leverage.NewAppModule(appCodec, app.LeverageKeeper),
+		leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
 	)
 
@@ -498,14 +477,14 @@ func New(
 		evidencetypes.ModuleName,
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
-		// leveragetypes.ModuleName,
+		leveragetypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		// leveragetypes.ModuleName,
+		leveragetypes.ModuleName,
 		stakingtypes.ModuleName,
 		peggytypes.ModuleName,
 	)
@@ -532,7 +511,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
-		// leveragetypes.ModuleName,
+		leveragetypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 
@@ -750,7 +729,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
-	// paramsKeeper.Subspace(leveragetypes.ModuleName)
+	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(peggytypes.ModuleName)
 
 	return paramsKeeper
@@ -764,19 +743,4 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.CancelProposalHandler,
 		// TODO: Add handler for UpdateRegistryProposal
 	}
-}
-
-func VerifyAddressFormat(bz []byte) error {
-	if len(bz) == 0 {
-		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
-	}
-
-	if len(bz) != MaxAddrLen {
-		return sdkerrors.Wrapf(
-			sdkerrors.ErrUnknownAddress,
-			"invalid address length; got: %d, max: %d", len(bz), MaxAddrLen,
-		)
-	}
-
-	return nil
 }
