@@ -4,7 +4,9 @@ package types
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params: Params{
-			InterestEpoch: defaultInterestEpoch,
+			InterestEpoch:                defaultInterestEpoch,
+			CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
+			MinimumCloseFactor:           defaultMinimumCloseFactor,
 		},
 		Registry: []Token{},
 	}

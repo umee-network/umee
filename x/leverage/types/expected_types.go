@@ -25,8 +25,10 @@ type BankKeeper interface {
 	GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
-	// Question: When processing a deposit message, is it sufficient to use hasBalance,
-	//	or must we iterate through spendableCoins?
-	// 	That would be the case, for example, if HasBalance counted ibc-locked coins in its total
-	// SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
+}
+
+// OracleKeeper defines the expected x/oracle keeper interface.
+type OracleKeeper interface {
+	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
+	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
 }

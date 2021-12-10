@@ -16,7 +16,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 		{
 			name:         "valid request",
 			req:          &types.QueryRegisteredTokens{},
-			registrySize: 1,
+			registrySize: 2,
 			expectErr:    false,
 		},
 	}

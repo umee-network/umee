@@ -8,11 +8,11 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {
-	cfg := app.IntegrationTestNetworkConfig()
+	cfg := umeeappbeta.IntegrationTestNetworkConfig()
 	cfg.NumValidators = 2
 	suite.Run(t, NewIntegrationTestSuite(cfg))
 }

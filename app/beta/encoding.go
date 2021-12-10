@@ -1,4 +1,4 @@
-package app
+package beta
 
 import (
 	"github.com/cosmos/cosmos-sdk/std"
