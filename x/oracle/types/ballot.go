@@ -140,7 +140,8 @@ type BallotDenom struct {
 }
 
 // BallotMapToSlice returns an array of sorted exchange rate ballots.
-func BallotMapToSlice(votes map[string]ExchangeRateBallot) (b []BallotDenom) {
+func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
+	b := make([]BallotDenom, len(votes))
 	for denom, ballot := range votes {
 		b = append(b, BallotDenom{
 			Denom:  denom,

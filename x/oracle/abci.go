@@ -12,7 +12,7 @@ import (
 
 // IsPeriodLastBlock returns true if we are at the last block of the period
 func IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
-	return ((uint64)(ctx.BlockHeight())+1)%blocksPerPeriod == 0
+	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
 }
 
 // EndBlocker is called at the end of every block
@@ -95,8 +95,8 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// Distribute rewards to ballot winners
 		k.RewardBallotWinners(
 			ctx,
-			(int64)(params.VotePeriod),
-			(int64)(params.RewardDistributionWindow),
+			int64(params.VotePeriod),
+			int64(params.RewardDistributionWindow),
 			voteTargetDenoms,
 			validatorClaimMap,
 		)
