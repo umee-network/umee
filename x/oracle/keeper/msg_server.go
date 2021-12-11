@@ -149,7 +149,6 @@ func (ms msgServer) DelegateFeedConsent(
 		return nil, sdkerrors.Wrap(stakingtypes.ErrNoValidatorFound, msg.Operator)
 	}
 
-	// Set the delegation
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
