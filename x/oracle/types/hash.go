@@ -6,33 +6,33 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/yaml.v2"
-
-	"github.com/tendermint/tendermint/crypto/tmhash"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+	"gopkg.in/yaml.v2"
 )
 
 var _ yaml.Marshaler = AggregateVoteHash{}
 
-// AggregateVoteHash is hash value to hide vote exchange rates
-// which is formatted as hex string in SHA256("{salt}:{exchange rate}{denom},...,{exchange rate}{denom}:{voter}")
+// AggregateVoteHash is hash value to hide vote exchange rates which is
+// formatted as a HEX string:
+// SHA256("{salt}:{symbol}:{exchangeRate},...,{symbol}:{exchangeRate}:{voter}")
 type AggregateVoteHash []byte
 
-// GetAggregateVoteHash computes hash value of ExchangeRateVote
-// to avoid redundant DecCoins stringify operation, use string argument
+// GetAggregateVoteHash computes hash value of ExchangeRateVote to avoid
+// redundant DecCoins stringify operation.
 func GetAggregateVoteHash(salt string, exchangeRatesStr string, voter sdk.ValAddress) AggregateVoteHash {
 	hash := tmhash.NewTruncated()
 	sourceStr := fmt.Sprintf("%s:%s:%s", salt, exchangeRatesStr, voter.String())
-	_, err := hash.Write([]byte(sourceStr))
-	if err != nil {
+
+	if _, err := hash.Write([]byte(sourceStr)); err != nil {
 		panic(err)
 	}
+
 	bz := hash.Sum(nil)
 	return bz
 }
 
-// AggregateVoteHashFromHexString convert hex string to AggregateVoteHash
+// AggregateVoteHashFromHexString convert hex string to AggregateVoteHash.
 func AggregateVoteHashFromHexString(s string) (AggregateVoteHash, error) {
 	h, err := hex.DecodeString(s)
 	if err != nil {
@@ -72,8 +72,10 @@ func (h AggregateVoteHash) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 's':
 		_, _ = s.Write([]byte(h.String()))
+
 	case 'p':
 		_, _ = s.Write([]byte(fmt.Sprintf("%p", h)))
+
 	default:
 		_, _ = s.Write([]byte(fmt.Sprintf("%X", []byte(h))))
 	}

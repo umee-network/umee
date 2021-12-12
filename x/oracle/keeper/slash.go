@@ -5,9 +5,11 @@ import (
 )
 
 // SlashAndResetMissCounters iterates over all the current missed counters and
-// calculates the "valid vote rate" as
-// (votePeriodsPerWindow - missCounter)/votePeriodsPerWindow. If the valid vote
-// rate is below the minValidPerWindow, the validator will be slashed and jailed.
+// calculates the "valid vote rate" as:
+// (votePeriodsPerWindow - missCounter)/votePeriodsPerWindow.
+//
+// If the valid vote rate is below the minValidPerWindow, the validator will be
+// slashed and jailed.
 func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 	height := ctx.BlockHeight()
 	distributionHeight := height - sdk.ValidatorUpdateDelay - 1
@@ -44,6 +46,7 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 					distributionHeight,
 					validator.GetConsensusPower(powerReduction), slashFraction,
 				)
+
 				k.StakingKeeper.Jail(ctx, consAddr)
 			}
 		}

@@ -69,18 +69,24 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 // ExportGenesis returns the x/oracle module's exported genesis.
 func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	params := keeper.GetParams(ctx)
+
 	feederDelegations := []types.FeederDelegation{}
 	keeper.IterateFeederDelegations(ctx, func(valAddr sdk.ValAddress, feederAddr sdk.AccAddress) (stop bool) {
 		feederDelegations = append(feederDelegations, types.FeederDelegation{
-			FeederAddress:    feederAddr.String(),
 			ValidatorAddress: valAddr.String(),
+			FeederAddress:    feederAddr.String(),
 		})
+
 		return false
 	})
 
 	exchangeRates := []types.ExchangeRateTuple{}
 	keeper.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-		exchangeRates = append(exchangeRates, types.ExchangeRateTuple{Denom: denom, ExchangeRate: rate})
+		exchangeRates = append(exchangeRates, types.ExchangeRateTuple{
+			Denom:        denom,
+			ExchangeRate: rate,
+		})
+
 		return false
 	})
 
@@ -90,24 +96,30 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 			ValidatorAddress: operator.String(),
 			MissCounter:      missCounter,
 		})
+
 		return false
 	})
 
 	aggregateExchangeRatePrevotes := []types.AggregateExchangeRatePrevote{}
-	keeper.IterateAggregateExchangeRatePrevotes(ctx, func(_ sdk.ValAddress,
-		aggregatePrevote types.AggregateExchangeRatePrevote) (stop bool) {
-		aggregateExchangeRatePrevotes = append(aggregateExchangeRatePrevotes, aggregatePrevote)
-		return false
-	})
+	keeper.IterateAggregateExchangeRatePrevotes(
+		ctx,
+		func(_ sdk.ValAddress, aggregatePrevote types.AggregateExchangeRatePrevote) (stop bool) {
+			aggregateExchangeRatePrevotes = append(aggregateExchangeRatePrevotes, aggregatePrevote)
+			return false
+		},
+	)
 
 	aggregateExchangeRateVotes := []types.AggregateExchangeRateVote{}
-	keeper.IterateAggregateExchangeRateVotes(ctx, func(_ sdk.ValAddress,
-		aggregateVote types.AggregateExchangeRateVote) bool {
-		aggregateExchangeRateVotes = append(aggregateExchangeRateVotes, aggregateVote)
-		return false
-	})
+	keeper.IterateAggregateExchangeRateVotes(
+		ctx,
+		func(_ sdk.ValAddress, aggregateVote types.AggregateExchangeRateVote) bool {
+			aggregateExchangeRateVotes = append(aggregateExchangeRateVotes, aggregateVote)
+			return false
+		},
+	)
 
-	return types.NewGenesisState(params,
+	return types.NewGenesisState(
+		params,
 		exchangeRates,
 		feederDelegations,
 		missCounters,

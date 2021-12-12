@@ -55,51 +55,6 @@ func TestToMap(t *testing.T) {
 	}
 }
 
-func TestToCrossRate(t *testing.T) {
-	data := []struct {
-		base     sdk.Dec
-		quote    sdk.Dec
-		expected sdk.Dec
-	}{
-		{
-			base:     sdk.NewDec(1600),
-			quote:    sdk.NewDec(100),
-			expected: sdk.NewDec(16),
-		},
-		{
-			base:     sdk.NewDec(0),
-			quote:    sdk.NewDec(100),
-			expected: sdk.NewDec(16),
-		},
-		{
-			base:     sdk.NewDec(1600),
-			quote:    sdk.NewDec(0),
-			expected: sdk.NewDec(16),
-		},
-	}
-
-	pbBase := ExchangeRateBallot{}
-	pbQuote := ExchangeRateBallot{}
-	cb := ExchangeRateBallot{}
-	for _, data := range data {
-		valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
-		if !data.base.IsZero() {
-			pbBase = append(pbBase, NewVoteForTally(data.base, UmeeDenom, valAddr, 100))
-		}
-
-		pbQuote = append(pbQuote, NewVoteForTally(data.quote, UmeeDenom, valAddr, 100))
-
-		if !data.base.IsZero() && !data.quote.IsZero() {
-			cb = append(cb, NewVoteForTally(data.base.Quo(data.quote), UmeeDenom, valAddr, 100))
-		} else {
-			cb = append(cb, NewVoteForTally(sdk.ZeroDec(), UmeeDenom, valAddr, 0))
-		}
-	}
-
-	baseMapBallot := pbBase.ToMap()
-	require.Equal(t, cb, pbQuote.ToCrossRate(baseMapBallot))
-}
-
 func TestSqrt(t *testing.T) {
 	num := sdk.NewDecWithPrec(144, 4)
 	floatNum, err := strconv.ParseFloat(num.String(), 64)

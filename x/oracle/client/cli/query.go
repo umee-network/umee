@@ -9,10 +9,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
+
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-// GetQueryCmd returns the cli query commands for this module
+// GetQueryCmd returns the CLI query commands for the x/oracle module.
 func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
@@ -42,6 +43,7 @@ func GetCmdQueryParams() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(context.Background(), &types.QueryParamsRequest{})
@@ -57,18 +59,19 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAggregateVote implements the query aggregate prevote of the validator command
+// GetCmdQueryAggregateVote implements the query aggregate prevote of the
+// validator command.
 func GetCmdQueryAggregateVote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "aggregate-votes [validator]",
 		Args:  cobra.RangeArgs(0, 1),
-		Short: "Query outstanding oracle aggregate votes.",
+		Short: "Query outstanding oracle aggregate votes",
 		Long: strings.TrimSpace(`
 Query outstanding oracle aggregate vote.
 
 $ umeed query oracle aggregate-votes
 
-Or, can filter with voter address
+Or, you can filter with voter address
 
 $ umeed query oracle aggregate-votes umeevaloper...
 `),
@@ -77,11 +80,13 @@ $ umeed query oracle aggregate-votes umeevaloper...
 			if err != nil {
 				return err
 			}
+
 			queryClient := types.NewQueryClient(clientCtx)
 			query := types.QueryAggregateVoteRequest{}
 
 			if len(args) > 0 {
 				valString := args[0]
+
 				validator, err := sdk.ValAddressFromBech32(valString)
 				if err != nil {
 					return err
@@ -90,10 +95,7 @@ $ umeed query oracle aggregate-votes umeevaloper...
 				query.ValidatorAddr = validator.String()
 			}
 
-			res, err := queryClient.AggregateVote(
-				context.Background(),
-				&query,
-			)
+			res, err := queryClient.AggregateVote(context.Background(), &query)
 			if err != nil {
 				return err
 			}
@@ -106,12 +108,13 @@ $ umeed query oracle aggregate-votes umeevaloper...
 	return cmd
 }
 
-// GetCmdQueryAggregatePrevote implements the query aggregate prevote of the validator command
+// GetCmdQueryAggregatePrevote implements the query aggregate prevote of the
+// validator command.
 func GetCmdQueryAggregatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "aggregate-prevotes [validator]",
 		Args:  cobra.RangeArgs(0, 1),
-		Short: "Query outstanding oracle aggregate prevotes.",
+		Short: "Query outstanding oracle aggregate prevotes",
 		Long: strings.TrimSpace(`
 Query outstanding oracle aggregate prevotes.
 
@@ -126,11 +129,13 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 			if err != nil {
 				return err
 			}
+
 			queryClient := types.NewQueryClient(clientCtx)
 			query := types.QueryAggregatePrevoteRequest{}
 
 			if len(args) > 0 {
 				valString := args[0]
+
 				validator, err := sdk.ValAddressFromBech32(valString)
 				if err != nil {
 					return err
@@ -139,10 +144,7 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 				query.ValidatorAddr = validator.String()
 			}
 
-			res, err := queryClient.AggregatePrevote(
-				context.Background(),
-				&query,
-			)
+			res, err := queryClient.AggregatePrevote(context.Background(), &query)
 			if err != nil {
 				return err
 			}
