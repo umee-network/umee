@@ -70,6 +70,15 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	// Translate the base denom -> symbol
+	params := k.GetParams(ctx)
+	for i := range params.AcceptList {
+		if params.AcceptList[i].BaseDenom == denom {
+			denom = params.AcceptList[i].SymbolDenom
+			break
+		}
+	}
+
 	if denom == types.USDDenom {
 		return sdk.OneDec(), nil
 	}
