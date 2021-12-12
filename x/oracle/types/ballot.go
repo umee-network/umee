@@ -41,27 +41,6 @@ func (pb ExchangeRateBallot) ToMap() map[string]sdk.Dec {
 	return exchangeRateMap
 }
 
-// ToCrossRate return cross_rate(base/exchange_rate) ballot.
-func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeRateBallot) {
-	for i := range pb {
-		vote := pb[i]
-
-		exchangeRateRT, ok := bases[vote.Voter.String()]
-		if ok && vote.ExchangeRate.IsPositive() {
-			vote.ExchangeRate = exchangeRateRT.Quo(vote.ExchangeRate)
-		} else {
-			// If we can't get reference terra exchange rate, we just convert the vote
-			// as abstain vote.
-			vote.ExchangeRate = sdk.ZeroDec()
-			vote.Power = 0
-		}
-
-		cb = append(cb, vote)
-	}
-
-	return
-}
-
 // Power returns the total amount of voting power in the ballot.
 func (pb ExchangeRateBallot) Power() int64 {
 	var totalPower int64
