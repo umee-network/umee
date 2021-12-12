@@ -83,10 +83,12 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		if len(denomAmountStr) < 2 {
 			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
 		}
+
 		decCoin, err := sdk.NewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
 		}
+
 		denom := denomAmountStr[0]
 
 		tuples[i] = ExchangeRateTuple{
