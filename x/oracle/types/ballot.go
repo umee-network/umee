@@ -142,11 +142,13 @@ type BallotDenom struct {
 // BallotMapToSlice returns an array of sorted exchange rate ballots.
 func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 	b := make([]BallotDenom, len(votes))
+	i := 0
 	for denom, ballot := range votes {
-		b = append(b, BallotDenom{
+		b[i] = BallotDenom{
 			Denom:  denom,
 			Ballot: ballot,
-		})
+		}
+		i++
 	}
 	sort.Slice(b, func(i, j int) bool {
 		return b[i].Denom < b[j].Denom
@@ -175,13 +177,15 @@ func NewClaim(power, weight, winCount int64, recipient sdk.ValAddress) Claim {
 // ClaimMapToSlice returns an array of sorted exchange rate ballots.
 func ClaimMapToSlice(claims map[string]Claim) []Claim {
 	c := make([]Claim, len(claims))
+	i := 0
 	for _, claim := range claims {
-		c = append(c, Claim{
+		c[i] = Claim{
 			Power:     claim.Power,
 			Weight:    claim.Weight,
 			WinCount:  claim.WinCount,
 			Recipient: claim.Recipient,
-		})
+		}
+		i++
 	}
 	sort.Slice(c, func(i, j int) bool {
 		return c[i].Recipient.String() < c[j].Recipient.String()
