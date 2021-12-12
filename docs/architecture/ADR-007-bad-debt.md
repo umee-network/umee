@@ -13,6 +13,7 @@ Proposed
 Debt positions on Umee always start out overcollateralized, but if sufficient interest accrues or asset prices fluctuate too quickly, some borrowers may reach a state where the total value of their collateral is less than the value of their borrowed assets.
 
 Such debt (now undercollateralized) may become overcollateralized on its own if asset prices rebound in the right direction, but it is also eligible for liquidation in its current state.
+
 When fully liquidated, undercollateralized debt will result in an account with nonzero total borrows but zero collateral, thus no incentive for repayment. 
 
 It is in the interests of the overall system to repay such _bad debt_ using reserves, in order to prevent it accruing interest forever and damaging the health of the lending pool.
