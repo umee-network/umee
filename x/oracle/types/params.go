@@ -90,7 +90,7 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 		paramstypes.NewParamSetPair(
 			KeyAcceptList,
 			&p.AcceptList,
-			validateWhitelist,
+			validateAcceptList,
 		),
 		paramstypes.NewParamSetPair(
 			KeySlashFraction,
@@ -216,7 +216,7 @@ func validateRewardDistributionWindow(i interface{}) error {
 	return nil
 }
 
-func validateWhitelist(i interface{}) error {
+func validateAcceptList(i interface{}) error {
 	v, ok := i.(DenomList)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
@@ -224,10 +224,10 @@ func validateWhitelist(i interface{}) error {
 
 	for _, d := range v {
 		if len(d.BaseDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have BaseDenom")
+			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
 		}
 		if len(d.SymbolDenom) == 0 {
-			return fmt.Errorf("oracle parameter Whitelist Denom must have SymbolDenom")
+			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
 	}
 

@@ -76,7 +76,7 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 	)
 }
 
-// ApplyWhitelist updates vote targets denom list accept list.
+// ApplyAcceptList updates vote targets denom list accept list.
 func (k Keeper) ApplyAcceptList(
 	ctx sdk.Context,
 	acceptList types.DenomList,

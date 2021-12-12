@@ -33,8 +33,8 @@ func (k Keeper) RewardDistributionWindow(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// Whitelist returns the denom list that can be activated
-func (k Keeper) Whitelist(ctx sdk.Context) (res types.DenomList) {
+// AcceptList returns the denom list that can be activated
+func (k Keeper) AcceptList(ctx sdk.Context) (res types.DenomList) {
 	k.paramSpace.Get(ctx, types.KeyAcceptList, &res)
 	return
 }
