@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
@@ -26,13 +27,13 @@ func (k Keeper) RewardBallotWinners(
 		i++
 	}
 
-	// Sum weight of the claims
+	// sum weight of the claims
 	var ballotPowerSum int64
 	for _, winner := range ballotWinners {
 		ballotPowerSum += winner.Weight
 	}
 
-	// Exit if the ballot is empty
+	// return if the ballot is empty
 	if ballotPowerSum == 0 {
 		return
 	}
@@ -59,17 +60,17 @@ func (k Keeper) RewardBallotWinners(
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 
-		// Reflects contribution
+		// reflects contribution
 		rewardCoins, _ := periodRewards.MulDec(sdk.NewDec(winner.Weight).QuoInt64(ballotPowerSum)).TruncateDecimal()
 
-		// In case absence of the validator, we just skip distribution
+		// in case absence of the validator, we just skip distribution
 		if receiverVal != nil && !rewardCoins.IsZero() {
 			k.distrKeeper.AllocateTokensToValidator(ctx, receiverVal, sdk.NewDecCoinsFromCoins(rewardCoins...))
 			distributedReward = distributedReward.Add(rewardCoins...)
 		}
 	}
 
-	// Move distributed reward to distribution module
+	// move distributed reward to distribution module
 	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.distrName, distributedReward)
 	if err != nil {
 		panic(fmt.Sprintf("failed to send coins to distribution module %s", err.Error()))

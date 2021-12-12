@@ -47,10 +47,12 @@ func (pb ExchangeRateBallot) ToCrossRate(bases map[string]sdk.Dec) (cb ExchangeR
 	for i := range pb {
 		vote := pb[i]
 
-		if exchangeRateRT, ok := bases[vote.Voter.String()]; ok && vote.ExchangeRate.IsPositive() {
+		exchangeRateRT, ok := bases[vote.Voter.String()]
+		if ok && vote.ExchangeRate.IsPositive() {
 			vote.ExchangeRate = exchangeRateRT.Quo(vote.ExchangeRate)
 		} else {
-			// If we can't get reference terra exchange rate, we just convert the vote as abstain vote
+			// If we can't get reference terra exchange rate, we just convert the vote
+			// as abstain vote.
 			vote.ExchangeRate = sdk.ZeroDec()
 			vote.Power = 0
 		}
@@ -75,6 +77,7 @@ func (pb ExchangeRateBallot) Power() int64 {
 // CONTRACT: The ballot must be sorted.
 func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 	totalPower := pb.Power()
+
 	if pb.Len() > 0 {
 		var pivot int64
 		for _, v := range pb {
@@ -91,7 +94,7 @@ func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 }
 
 // StandardDeviation returns the standard deviation by the power of the ExchangeRateVote.
-func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec, err error) {
+func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 	if len(pb) == 0 {
 		return sdk.ZeroDec(), nil
 	}
@@ -108,13 +111,16 @@ func (pb ExchangeRateBallot) StandardDeviation() (standardDeviation sdk.Dec, err
 
 	floatNum, err := strconv.ParseFloat(variance.String(), 64)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdk.ZeroDec(), err
 	}
 
 	floatNum = math.Sqrt(floatNum)
-	standardDeviation, _ = sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
+	standardDeviation, err := sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
 
-	return
+	return standardDeviation, nil
 }
 
 // Len implements sort.Interface

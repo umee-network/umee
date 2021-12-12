@@ -12,20 +12,22 @@ func (k Keeper) VotePeriod(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// VoteThreshold returns the minimum percentage of votes that must be received for a ballot to pass.
+// VoteThreshold returns the minimum percentage of votes that must be received
+// for a ballot to pass.
 func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeyVoteThreshold, &res)
 	return
 }
 
-// RewardBand returns the ratio of allowable exchange rate error that a validator can be rewared
+// RewardBand returns the ratio of allowable exchange rate error that a validator
+// can be rewarded.
 func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeyRewardBand, &res)
 	return
 }
 
-// RewardDistributionWindow returns the
-// number of vote periods during which seigiornage reward comes in and then is distributed.
+// RewardDistributionWindow returns the number of vote periods during which
+// seigniorage reward comes in and then is distributed.
 func (k Keeper) RewardDistributionWindow(ctx sdk.Context) (res uint64) {
 	k.paramSpace.Get(ctx, types.KeyRewardDistributionWindow, &res)
 	return

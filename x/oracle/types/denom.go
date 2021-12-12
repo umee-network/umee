@@ -27,5 +27,6 @@ func (dl DenomList) String() (out string) {
 	for _, d := range dl {
 		out += d.String() + "\n"
 	}
+
 	return strings.TrimSpace(out)
 }

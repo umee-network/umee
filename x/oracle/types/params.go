@@ -3,10 +3,9 @@ package types
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v2"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"gopkg.in/yaml.v2"
 )
 
 // Parameter keys
