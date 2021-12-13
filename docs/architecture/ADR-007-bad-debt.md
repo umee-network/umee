@@ -68,7 +68,7 @@ There are two edge cases that would allow bad debt to slip past detection or aut
 
 This could be solved by any Liquidator - but if undercollateralized borrowers are being left for long periods without being completely liquidated, then a bot could be set up to finish them, even if that bot is controlled by Umee.
 
-- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will not be targeted again (as with zero collateral, no `LiquidateBorrow` will occur int he future).
+- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will not be targeted again (as with zero collateral, no `LiquidateBorrow` will occur in the future).
 
 An additional trick could be used in the case of reserve exhaustion: If transfer of uTokens is permitted, sending a miniscule amount of uTokens to an address with zero collateral would make it eligible for liquidation again, whereupon its bad debt would be detected and repaid.
 
