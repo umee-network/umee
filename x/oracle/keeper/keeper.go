@@ -70,21 +70,26 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	// Translate the base denom -> symbol
-	params := k.GetParams(ctx)
-	for i := range params.AcceptList {
-		if params.AcceptList[i].BaseDenom == denom {
-			denom = params.AcceptList[i].SymbolDenom
-			break
-		}
-	}
-
 	if denom == types.USDDenom {
 		return sdk.OneDec(), nil
 	}
 
+	var symbol string
+
+	// Translate the base denom -> symbol
+	params := k.GetParams(ctx)
+	for i := range params.AcceptList {
+		if params.AcceptList[i].BaseDenom == denom {
+			symbol = params.AcceptList[i].SymbolDenom
+			break
+		}
+	}
+	if len(symbol) == 0 {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	}
+
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.GetExchangeRateKey(denom))
+	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 	}
@@ -98,20 +103,16 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
 // in the base denom (e.g. ATOM -> uatom)
 func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.GetExchangeRateKey(denom))
-	if b == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	exchangeRate, err := k.GetExchangeRate(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
 	}
-
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
 
 	params := k.GetParams(ctx)
 
 	for _, acceptedDenom := range params.AcceptList {
-		if denom == acceptedDenom.SymbolDenom {
-			return decProto.Dec.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
+		if denom == acceptedDenom.BaseDenom {
+			return exchangeRate.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
 		}
 	}
 
