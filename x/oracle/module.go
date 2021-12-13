@@ -162,6 +162,10 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	if err := EndBlocker(ctx, am.keeper); err != nil {
+		panic(err)
+	}
+
 	return []abci.ValidatorUpdate{}
 }
