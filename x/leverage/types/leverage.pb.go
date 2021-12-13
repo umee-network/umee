@@ -32,7 +32,7 @@ type Params struct {
 	// must be in order for their positions to be liquidated fully in a single event.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
 	// The minimum_close_factor determines the portion of a borrower's position that can be
-	// liquidated in a single event, when the borrower is just barely over their borrow limit
+	// liquidated in a single event, when the borrower is just barely over their borrow limit.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`
 }
 
