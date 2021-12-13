@@ -32,7 +32,7 @@ This should not be a common case, as long as liquidation incentives exist, but m
 
 ### Checking for Repayment Eligibility
 
-A second consideration is when to check for borrowers' eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
+A second consideration is when to check for borrowers' eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval.
 
 The advantage of an immediate check during `LiquidateBorrow` is that only the borrow being liquidated needs to be checked for eligibility, instead of periodically iterating over all borrows. Additionally, `CollateralValue` has already been calculated in that function.
 
@@ -52,6 +52,22 @@ At the end of `LiquidateBorrow`, which is triggered by `MsgLiquidate`, the `borr
 
 The function `RepayBadDebt(borrowerAddress)` immediately repays any remaining borrows on the address in question, or repays the maximum available amount for any borrowed asset denomination where the borrowed amount exceeds available reserves.
 
+### Recovery from Exhausted Reserves
+
+When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, it stores information about the borrower and denomination in question so repayment can be completed later.
+
+```go
+// pseudocode
+// store a list of denominations with nonzero bad debt
+badDebtDenomPrefix | tokenDenom = true
+// store a list of borrow addresses with bad debt, sorted by denom
+badDebtAddressPrefix | lengthPrefixed(tokenDenom) | borrowerAddress = true
+```
+
+Then, every `InterestEpoch`, bad debt positions can be iterated through and repaid as reserves become available. Any `denom|address` that is fully repaid is cleared from the list, as well any `denom` which no longer has any associated bad debt addresses.
+
+Keeping a list of denominations in addition to addresses enables the iteration to efficiently skip denoms whose reserves are still zero, thus only reading addresses with bad debt that can actually be repaid at the time.
+
 ### Messages, Events, and Logs
 
 No new message types are required for bad debt repayment, as it is automatic.
@@ -70,10 +86,7 @@ This could be solved by any Liquidator - but if undercollateralized borrowers ar
 
 - Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will not be targeted again (as with zero collateral, no `LiquidateBorrow` will occur in the future).
 
-An additional trick could be used in the case of reserve exhaustion: If transfer of uTokens is permitted, sending a miniscule amount of uTokens to an address with zero collateral would make it eligible for liquidation again, whereupon its bad debt would be detected and repaid.
-
-If reserve exhaustion is deemed sufficiently rare, then it might be enough to have this trick available should the need for it arise.
-Otherwise, a very infrequent periodic check could be created to detect address the case automatically, or a message type that could be manually used to flag bad debt for repayment.
+This edge case is handled by storing bad un-handled bad debt addresses using `BadDebtAddressPrefix`.
 
 ## Consequences
 
@@ -81,10 +94,11 @@ Otherwise, a very infrequent periodic check could be created to detect address t
 
 - Bad debt is eligibe for reserve-funded repayment only when borrower collateral is zero, allowing liquidators to soften the blow to reserves
 - Computation-efficient checks for `Collateral Value == 0` during `LiquidateBorrow` do not require iterating over all borrowers.
+- System automatically recovers from reserve exhaustion
 
 ### Negative
 
-- Rare edge cases require bot or manual intervention
+- Bad debt with nonzero collateral goes undetected until the collateral is liquidated
 
 ### Neutral
 
