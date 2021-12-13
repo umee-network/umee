@@ -141,13 +141,31 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		// set last check height to latest block height
 		lastCheckHeight = latestBlockHeight
 
-		err = tx.BroadcastTx(clientCtx, factory, msgs...)
+		resp, err := BroadcastTx(clientCtx, factory, msgs...)
 		if err != nil {
-			oc.Logger.Err(err).Msg("failed to broadcast tx; retrying...")
+			var (
+				code uint32
+				hash string
+			)
+			if resp != nil {
+				code = resp.Code
+				hash = resp.TxHash
+			}
+
+			oc.Logger.Err(err).
+				Int64("max_height", maxBlockHeight).
+				Int64("last_check_height", lastCheckHeight).
+				Str("tx_hash", hash).
+				Uint32("tx_code", code).
+				Msg("failed to broadcast tx; retrying...")
 			continue
 		}
 
-		oc.Logger.Info().Msg("successfully broadcasted tx")
+		oc.Logger.Info().
+			Str("tx_hash", resp.TxHash).
+			Int64("tx_height", resp.Height).
+			Msg("successfully broadcasted tx")
+
 		return nil
 	}
 
