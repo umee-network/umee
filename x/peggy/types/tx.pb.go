@@ -1472,16 +1472,36 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
+	// ValsetConfirm defines a method for submitting validator set confirmation.
 	ValsetConfirm(ctx context.Context, in *MsgValsetConfirm, opts ...grpc.CallOption) (*MsgValsetConfirmResponse, error)
+	// SendToEth defines a method for sending funds from Cosmos to Ethereum.
 	SendToEth(ctx context.Context, in *MsgSendToEth, opts ...grpc.CallOption) (*MsgSendToEthResponse, error)
+	// RequestBatch defines a method for requesting a batch of transactions to be
+	// made and sent across the bridge.
 	RequestBatch(ctx context.Context, in *MsgRequestBatch, opts ...grpc.CallOption) (*MsgRequestBatchResponse, error)
+	// ConfirmBatch defines a method for a validator confirming a batch.
 	ConfirmBatch(ctx context.Context, in *MsgConfirmBatch, opts ...grpc.CallOption) (*MsgConfirmBatchResponse, error)
+	// DepositClaim defines a method for handling a deposit claim, where when
+	// enough validators claim a deposit, assets are minted on the Cosmos chain.
 	DepositClaim(ctx context.Context, in *MsgDepositClaim, opts ...grpc.CallOption) (*MsgDepositClaimResponse, error)
+	// WithdrawClaim defines a method for claiming that a batch of withdrawal
+	// transactions on the bridge contract were executed on Ethereum.
 	WithdrawClaim(ctx context.Context, in *MsgWithdrawClaim, opts ...grpc.CallOption) (*MsgWithdrawClaimResponse, error)
+	// ValsetUpdateClaim defines a method for claiming that a validator set update
+	// has occured.
 	ValsetUpdateClaim(ctx context.Context, in *MsgValsetUpdatedClaim, opts ...grpc.CallOption) (*MsgValsetUpdatedClaimResponse, error)
+	// ERC20DeployedClaim defines a method for handling an ERC20 deployment event
+	// on Ethereum such that the Cosmos chain can handle the token.
 	ERC20DeployedClaim(ctx context.Context, in *MsgERC20DeployedClaim, opts ...grpc.CallOption) (*MsgERC20DeployedClaimResponse, error)
+	// SetOrchestratorAddresses defines a method validators to set their
+	// orchestrator addresses.
 	SetOrchestratorAddresses(ctx context.Context, in *MsgSetOrchestratorAddresses, opts ...grpc.CallOption) (*MsgSetOrchestratorAddressesResponse, error)
+	// CancelSendToEth defines a method where a user may cancel their request to
+	// send tokens to Ethereum and receive a refund.
 	CancelSendToEth(ctx context.Context, in *MsgCancelSendToEth, opts ...grpc.CallOption) (*MsgCancelSendToEthResponse, error)
+	// SubmitBadSignatureEvidence defines a method that allows someone to submit
+	// evidence of a validator signing a valset, batch or claim that is invalid or
+	// never existed.
 	SubmitBadSignatureEvidence(ctx context.Context, in *MsgSubmitBadSignatureEvidence, opts ...grpc.CallOption) (*MsgSubmitBadSignatureEvidenceResponse, error)
 }
 
@@ -1594,16 +1614,36 @@ func (c *msgClient) SubmitBadSignatureEvidence(ctx context.Context, in *MsgSubmi
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
+	// ValsetConfirm defines a method for submitting validator set confirmation.
 	ValsetConfirm(context.Context, *MsgValsetConfirm) (*MsgValsetConfirmResponse, error)
+	// SendToEth defines a method for sending funds from Cosmos to Ethereum.
 	SendToEth(context.Context, *MsgSendToEth) (*MsgSendToEthResponse, error)
+	// RequestBatch defines a method for requesting a batch of transactions to be
+	// made and sent across the bridge.
 	RequestBatch(context.Context, *MsgRequestBatch) (*MsgRequestBatchResponse, error)
+	// ConfirmBatch defines a method for a validator confirming a batch.
 	ConfirmBatch(context.Context, *MsgConfirmBatch) (*MsgConfirmBatchResponse, error)
+	// DepositClaim defines a method for handling a deposit claim, where when
+	// enough validators claim a deposit, assets are minted on the Cosmos chain.
 	DepositClaim(context.Context, *MsgDepositClaim) (*MsgDepositClaimResponse, error)
+	// WithdrawClaim defines a method for claiming that a batch of withdrawal
+	// transactions on the bridge contract were executed on Ethereum.
 	WithdrawClaim(context.Context, *MsgWithdrawClaim) (*MsgWithdrawClaimResponse, error)
+	// ValsetUpdateClaim defines a method for claiming that a validator set update
+	// has occured.
 	ValsetUpdateClaim(context.Context, *MsgValsetUpdatedClaim) (*MsgValsetUpdatedClaimResponse, error)
+	// ERC20DeployedClaim defines a method for handling an ERC20 deployment event
+	// on Ethereum such that the Cosmos chain can handle the token.
 	ERC20DeployedClaim(context.Context, *MsgERC20DeployedClaim) (*MsgERC20DeployedClaimResponse, error)
+	// SetOrchestratorAddresses defines a method validators to set their
+	// orchestrator addresses.
 	SetOrchestratorAddresses(context.Context, *MsgSetOrchestratorAddresses) (*MsgSetOrchestratorAddressesResponse, error)
+	// CancelSendToEth defines a method where a user may cancel their request to
+	// send tokens to Ethereum and receive a refund.
 	CancelSendToEth(context.Context, *MsgCancelSendToEth) (*MsgCancelSendToEthResponse, error)
+	// SubmitBadSignatureEvidence defines a method that allows someone to submit
+	// evidence of a validator signing a valset, batch or claim that is invalid or
+	// never existed.
 	SubmitBadSignatureEvidence(context.Context, *MsgSubmitBadSignatureEvidence) (*MsgSubmitBadSignatureEvidenceResponse, error)
 }
 

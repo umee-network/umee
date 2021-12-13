@@ -11,26 +11,46 @@ option go_package = "github.com/umee-network/umee/x/peggy/types";
 
 // Msg defines the Msg service for the x/peggy module.
 service Msg {
+  // ValsetConfirm defines a method for submitting validator set confirmation.
   rpc ValsetConfirm(MsgValsetConfirm) returns (MsgValsetConfirmResponse);
 
+  // SendToEth defines a method for sending funds from Cosmos to Ethereum.
   rpc SendToEth(MsgSendToEth) returns (MsgSendToEthResponse);
 
+  // RequestBatch defines a method for requesting a batch of transactions to be
+  // made and sent across the bridge.
   rpc RequestBatch(MsgRequestBatch) returns (MsgRequestBatchResponse);
 
+  // ConfirmBatch defines a method for a validator confirming a batch.
   rpc ConfirmBatch(MsgConfirmBatch) returns (MsgConfirmBatchResponse);
 
+  // DepositClaim defines a method for handling a deposit claim, where when
+  // enough validators claim a deposit, assets are minted on the Cosmos chain.
   rpc DepositClaim(MsgDepositClaim) returns (MsgDepositClaimResponse);
 
+  // WithdrawClaim defines a method for claiming that a batch of withdrawal
+  // transactions on the bridge contract were executed on Ethereum.
   rpc WithdrawClaim(MsgWithdrawClaim) returns (MsgWithdrawClaimResponse);
 
+  // ValsetUpdateClaim defines a method for claiming that a validator set update
+  // has occured.
   rpc ValsetUpdateClaim(MsgValsetUpdatedClaim) returns (MsgValsetUpdatedClaimResponse);
 
+  // ERC20DeployedClaim defines a method for handling an ERC20 deployment event
+  // on Ethereum such that the Cosmos chain can handle the token.
   rpc ERC20DeployedClaim(MsgERC20DeployedClaim) returns (MsgERC20DeployedClaimResponse);
 
+  // SetOrchestratorAddresses defines a method validators to set their
+  // orchestrator addresses.
   rpc SetOrchestratorAddresses(MsgSetOrchestratorAddresses) returns (MsgSetOrchestratorAddressesResponse);
 
+  // CancelSendToEth defines a method where a user may cancel their request to
+  // send tokens to Ethereum and receive a refund.
   rpc CancelSendToEth(MsgCancelSendToEth) returns (MsgCancelSendToEthResponse);
 
+  // SubmitBadSignatureEvidence defines a method that allows someone to submit
+  // evidence of a validator signing a valset, batch or claim that is invalid or
+  // never existed.
   rpc SubmitBadSignatureEvidence(MsgSubmitBadSignatureEvidence) returns (MsgSubmitBadSignatureEvidenceResponse);
 }
 
