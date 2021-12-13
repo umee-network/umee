@@ -78,9 +78,9 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 
 	// Translate the base denom -> symbol
 	params := k.GetParams(ctx)
-	for i := range params.AcceptList {
-		if params.AcceptList[i].BaseDenom == denom {
-			symbol = params.AcceptList[i].SymbolDenom
+	for _, listDenom := range params.AcceptList {
+		if listDenom.BaseDenom == denom {
+			symbol = listDenom.SymbolDenom
 			break
 		}
 	}
