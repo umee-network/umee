@@ -69,13 +69,14 @@ func NewPreviousPrevote() *PreviousPrevote {
 type Oracle struct {
 	logger             zerolog.Logger
 	closer             *pfsync.Closer
-	mtx                sync.RWMutex
-	lastPriceSyncTS    time.Time
-	prices             map[string]sdk.Dec
 	oracleClient       *client.OracleClient
 	providerPairs      map[string][]CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
+
+	mtx             sync.RWMutex
+	lastPriceSyncTS time.Time
+	prices          map[string]sdk.Dec
 }
 
 func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {

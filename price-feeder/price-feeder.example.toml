@@ -24,15 +24,15 @@ quote = "USD"
 
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
-validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
 chain_id = "umee-local-testnet"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
 
 [key_ring]
 backend = "test"
-dir = "/Users/usrname/.umee"
+dir = "/Users/username/.umee"
 pass = "keyringPassword"
 
 [rpc]
-tmrpc_endpoint = "http://localhost:26657"
 grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
+tmrpc_endpoint = "http://localhost:26657"
