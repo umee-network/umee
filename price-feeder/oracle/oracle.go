@@ -14,7 +14,6 @@ import (
 	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
@@ -79,7 +78,7 @@ type Oracle struct {
 	prices          map[string]sdk.Dec
 }
 
-func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
+func New(logger zerolog.Logger, oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	providerPairs := make(map[string][]CurrencyPair)
 
 	for _, pair := range currencyPairs {
@@ -92,7 +91,7 @@ func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	}
 
 	return &Oracle{
-		logger:          log.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("module", "oracle").Logger(),
 		closer:          pfsync.NewCloser(),
 		oracleClient:    oc,
 		providerPairs:   providerPairs,
@@ -108,7 +107,9 @@ func (o *Oracle) Start(ctx context.Context) error {
 			o.closer.Close()
 
 		default:
+			o.logger.Debug().Msg("starting oracle tick")
 			if err := o.tick(); err != nil {
+				o.logger.Err(err).Msg("oracle tick failed")
 				return err
 			}
 
@@ -251,7 +252,7 @@ func (o *Oracle) generateSalt(length int) (string, error) {
 }
 
 func (o *Oracle) tick() error {
-	ctx, err := o.oracleClient.CreateContext()
+	clientCtx, err := o.oracleClient.CreateClientContext()
 	if err != nil {
 		return err
 	}
@@ -265,7 +266,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	blockHeight, err := rpcclient.GetChainHeight(ctx)
+	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
 	if err != nil {
 		return nil
 	}
@@ -328,16 +329,13 @@ func (o *Oracle) tick() error {
 	if isPrevoteOnlyTx {
 		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
 		// but we give it some extra time just in case.
+		//
 		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
-		if err := o.oracleClient.BroadcastTx(
-			nextBlockHeight,
-			oracleVotePeriod*2,
-			preVoteMsg,
-		); err != nil {
+		if err := o.oracleClient.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil {
 			return err
 		}
 
-		currentHeight, err := rpcclient.GetChainHeight(ctx)
+		currentHeight, err := rpcclient.GetChainHeight(clientCtx)
 		if err != nil {
 			return err
 		}

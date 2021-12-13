@@ -3,32 +3,31 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
-	"github.com/umee-network/umee/price-feeder/router"
+	v1 "github.com/umee-network/umee/price-feeder/router/v1"
 )
 
 const (
 	logLevelJSON = "json"
 	logLevelText = "text"
-)
 
-var (
-	logLevel  string
-	logFormat string
+	flagLogLevel  = "log-level"
+	flagLogFormat = "log-format"
 )
 
 var rootCmd = &cobra.Command{
@@ -45,8 +44,8 @@ vote and prevote messages following the oracle voting procedure.`,
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", zerolog.InfoLevel.String(), "logging level")
-	rootCmd.PersistentFlags().StringVar(&logFormat, "log-format", logLevelJSON, "logging format; must be either json or text")
+	rootCmd.PersistentFlags().String(flagLogLevel, zerolog.InfoLevel.String(), "logging level")
+	rootCmd.PersistentFlags().String(flagLogFormat, logLevelJSON, "logging format; must be either json or text")
 
 	rootCmd.AddCommand(getVersionCmd())
 }
@@ -61,23 +60,40 @@ func Execute() {
 }
 
 func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
-	logLvl, err := zerolog.ParseLevel(logLevel)
+	logLvlStr, err := cmd.Flags().GetString(flagLogLevel)
 	if err != nil {
 		return err
 	}
 
-	zerolog.SetGlobalLevel(logLvl)
+	logLvl, err := zerolog.ParseLevel(logLvlStr)
+	if err != nil {
+		return err
+	}
 
-	switch logFormat {
+	logFormatStr, err := cmd.Flags().GetString(flagLogFormat)
+	if err != nil {
+		return err
+	}
+
+	var logWriter io.Writer
+	if strings.ToLower(logFormatStr) == "text" {
+		logWriter = zerolog.ConsoleWriter{Out: os.Stderr}
+	} else {
+		logWriter = os.Stderr
+	}
+
+	switch strings.ToLower(logFormatStr) {
 	case logLevelJSON:
-		// JSON is the default logging format
+		logWriter = os.Stderr
 
 	case logLevelText:
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		logWriter = zerolog.ConsoleWriter{Out: os.Stderr}
 
 	default:
-		return fmt.Errorf("invalid logging format: %s", logFormat)
+		return fmt.Errorf("invalid logging format: %s", logFormatStr)
 	}
+
+	logger := zerolog.New(logWriter).Level(logLvl).With().Timestamp().Logger()
 
 	cfg, err := config.ParseConfig(args[0])
 	if err != nil {
@@ -88,7 +104,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	g, ctx := errgroup.WithContext(ctx)
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
-	trapSignal(cancel)
+	trapSignal(cancel, logger)
 
 	timeout, err := time.ParseDuration(cfg.RPC.RPCTimeout)
 	if err != nil {
@@ -96,6 +112,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	oracleClient, err := client.NewOracleClient(
+		logger,
 		cfg.Account.ChainID,
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
@@ -111,15 +128,15 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New(oracleClient, cfg.CurrencyPairs)
+	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs)
 
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
-		return startPriceFeeder(ctx, cfg, oracle)
+		return startPriceFeeder(ctx, logger, cfg, oracle)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices and votes
-		return startPriceOracle(ctx, oracle)
+		return startPriceOracle(ctx, logger, oracle)
 	})
 
 	// Block main process until all spawned goroutines have gracefully exited and
@@ -129,7 +146,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 
 // trapSignal will listen for any OS signal and invoke Done on the main
 // WaitGroup allowing the main process to gracefully exit.
-func trapSignal(cancel context.CancelFunc) {
+func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
 	var sigCh = make(chan os.Signal)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
@@ -137,15 +154,15 @@ func trapSignal(cancel context.CancelFunc) {
 
 	go func() {
 		sig := <-sigCh
-		log.Info().Str("signal", sig.String()).Msg("caught signal; shutting down...")
+		logger.Info().Str("signal", sig.String()).Msg("caught signal; shutting down...")
 		cancel()
 	}()
 }
 
-func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Oracle) error {
+func startPriceFeeder(ctx context.Context, logger zerolog.Logger, cfg config.Config, oracle *oracle.Oracle) error {
 	rtr := mux.NewRouter()
-	rtrWrapper := router.New(cfg, rtr, oracle)
-	rtrWrapper.RegisterRoutes()
+	v1Router := v1.New(logger, cfg, oracle)
+	v1Router.RegisterRoutes(rtr, v1.APIPathPrefix)
 
 	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)
 	if err != nil {
@@ -165,7 +182,7 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 	}
 
 	go func() {
-		log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder server...")
+		logger.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("starting price-feeder server...")
 		srvErrCh <- srv.ListenAndServe()
 	}()
 
@@ -175,37 +192,37 @@ func startPriceFeeder(ctx context.Context, cfg config.Config, oracle *oracle.Ora
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			log.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")
+			logger.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")
 			if err := srv.Shutdown(shutdownCtx); err != nil {
-				log.Error().Err(err).Msg("failed to gracefully shutdown price-feeder server")
+				logger.Error().Err(err).Msg("failed to gracefully shutdown price-feeder server")
 				return err
 			}
 
 			return nil
 
 		case err := <-srvErrCh:
-			log.Error().Err(err).Msg("failed to start price-feeder server")
+			logger.Error().Err(err).Msg("failed to start price-feeder server")
 			return err
 		}
 	}
 }
 
-func startPriceOracle(ctx context.Context, oracle *oracle.Oracle) error {
+func startPriceOracle(ctx context.Context, logger zerolog.Logger, oracle *oracle.Oracle) error {
 	srvErrCh := make(chan error, 1)
 
 	go func() {
-		log.Info().Msg("starting price-feeder oracle...")
+		logger.Info().Msg("starting price-feeder oracle...")
 		srvErrCh <- oracle.Start(ctx)
 	}()
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info().Msg("shutting down price-feeder oracle...")
+			logger.Info().Msg("shutting down price-feeder oracle...")
 			return nil
 
 		case err := <-srvErrCh:
-			log.Err(err).Msg("error starting the price-feeder oracle")
+			logger.Err(err).Msg("error starting the price-feeder oracle")
 			oracle.Stop()
 			return err
 		}

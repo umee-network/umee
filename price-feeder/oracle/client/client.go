@@ -16,7 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
@@ -52,11 +51,12 @@ type (
 )
 
 func NewOracleClient(
+	logger zerolog.Logger,
 	chainID string,
 	keyringBackend string,
 	keyringDir string,
 	keyringPass string,
-	tmrpc string,
+	tmRPC string,
 	rpcTimeout time.Duration,
 	oracleAddrString string,
 	validatorAddrString string,
@@ -75,12 +75,12 @@ func NewOracleClient(
 	}
 
 	return &OracleClient{
-		Logger:              log.With().Str("module", "oracleClient").Logger(),
+		Logger:              logger.With().Str("module", "oracleClient").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,
 		KeyringDir:          keyringDir,
 		KeyringPass:         keyringPass,
-		TMRPC:               tmrpc,
+		TMRPC:               tmRPC,
 		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,
 		OracleAddrString:    oracleAddrString,
@@ -117,7 +117,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 	maxBlockHeight := nextBlockHeight + timeoutHeight
 	lastCheckHeight := nextBlockHeight - 1
 
-	ctx, err := oc.CreateContext()
+	clientCtx, err := oc.CreateClientContext()
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 
 	// re-try voting until timeout
 	for lastCheckHeight < maxBlockHeight {
-		latestBlockHeight, err := rpcClient.GetChainHeight(ctx)
+		latestBlockHeight, err := rpcClient.GetChainHeight(clientCtx)
 		if err != nil {
 			return err
 		}
@@ -141,22 +141,22 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		// set last check height to latest block height
 		lastCheckHeight = latestBlockHeight
 
-		err = tx.BroadcastTx(ctx, factory, msgs...)
+		err = tx.BroadcastTx(clientCtx, factory, msgs...)
 		if err != nil {
-			oc.Logger.Err(err).Msg("error broadcasting, retrying...")
+			oc.Logger.Err(err).Msg("failed to broadcast tx; retrying...")
 			continue
 		}
 
-		oc.Logger.Info().Msg("successfully broadcasted")
+		oc.Logger.Info().Msg("successfully broadcasted tx")
 		return nil
 	}
 
-	return errors.New("broadcasting msg timed out")
+	return errors.New("broadcasting tx timed out")
 }
 
-// CreateContext creates an SDK client Context instance used for transaction
+// CreateClientContext creates an SDK client Context instance used for transaction
 // generation, signing and broadcasting.
-func (oc OracleClient) CreateContext() (client.Context, error) {
+func (oc OracleClient) CreateClientContext() (client.Context, error) {
 	var keyringInput io.Reader
 	if len(oc.KeyringPass) > 0 {
 		keyringInput = newPassReader(oc.KeyringPass)
@@ -217,7 +217,7 @@ func (oc OracleClient) CreateContext() (client.Context, error) {
 // CreateTxFactory creates an SDK Factory instance used for transaction
 // generation, signing and broadcasting.
 func (oc OracleClient) CreateTxFactory() (tx.Factory, error) {
-	clientCtx, err := oc.CreateContext()
+	clientCtx, err := oc.CreateClientContext()
 	if err != nil {
 		return tx.Factory{}, err
 	}
