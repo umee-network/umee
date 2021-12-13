@@ -34,7 +34,7 @@ This should not be a common case, as long as liquidation incentives exist, but m
 
 A second consideration is when to check for borrowers' eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
 
-The advantage of an immediate check during `LiquidateBorrow` is that only the borrow being liquidated needs to be checked for eligibility, instead of periodically iterating over all borrows. Additioanlly, `CollateralValue` has already been calculated in that function.
+The advantage of an immediate check during `LiquidateBorrow` is that only the borrow being liquidated needs to be checked for eligibility, instead of periodically iterating over all borrows. Additionally, `CollateralValue` has already been calculated in that function.
 
 However, there is an edge case (reserve exhaustion) where borrows eligible for reserve-driven-repayment during their final liquidation, cannot be fully repaid at that moment.
 If using an immediate check during `LiquidateBorrow`, there would be no future liquidation against that address to trigger bad debt repayment after reserves recovered - the debt would accrue interest indefinitely.
