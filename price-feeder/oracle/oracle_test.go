@@ -45,3 +45,13 @@ func (ots *OracleTestSuite) TestStop() {
 		time.Second,
 	)
 }
+
+func (ots *OracleTestSuite) TestGetLastPriceSyncTimestamp() {
+	// when no tick() has been invoked, assume zero value
+	ots.Require().Equal(time.Time{}, ots.oracle.GetLastPriceSyncTimestamp())
+}
+
+func (ots *OracleTestSuite) TestPrices() {
+	// initial prices should be empty (not set)
+	ots.Require().Empty(ots.oracle.GetPrices())
+}
