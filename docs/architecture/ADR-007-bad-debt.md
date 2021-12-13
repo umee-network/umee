@@ -32,7 +32,7 @@ This should not be a common case, as long as liquidation incentives exist, but m
 
 ### Checking for Repayment Eligibility
 
-A second consideration is when to check for borrowers eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
+A second consideration is when to check for borrowers' eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
 
 The advantage of an immediate check during `LiquidateBorrow` is that only the borrow being liquidated needs to be checked for eligibility, instead of periodically iterating over all borrows. Additioanlly, `CollateralValue` has already been calculated in that function.
 
