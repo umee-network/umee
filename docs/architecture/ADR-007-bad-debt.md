@@ -10,9 +10,9 @@ Proposed
 
 ## Context
 
-Debt positions on Umee always start out overcollateralized, but if sufficient interest accrues or asset prices fluctuate too quickly, some borrowers may reach a state where the total value of their collateral is less than the value of their borrowed assets.
+Debt positions on Umee always start out over-collateralized, but if sufficient interest accrues or asset prices fluctuate too quickly, some borrowers may reach a state where the total value of their collateral is less than the value of their borrowed assets.
 
-Such debt (now undercollateralized) may become overcollateralized on its own if asset prices rebound in the right direction, but it is also eligible for liquidation in its current state.
+Such debt (now under-collateralized) may become over-collateralized on its own if asset prices rebound in the right direction, but it is also eligible for liquidation in its current state.
 When fully liquidated, undercollateralized debt will result in an account with nonzero total borrows but zero collateral, thus no incentive for repayment.
 
 It is in the interests of the overall system to repay such _bad debt_ using reserves, in order to prevent it accruing interest forever and damaging the health of the lending pool.
@@ -27,21 +27,21 @@ In the former case, the system would also confiscate any remaining collateral, a
 
 In the latter case, liquidators would first have liquidate the portion of the debt that can be exchanged for collateral, reducing the total burden on reserves when the borrow is being repaid.
 
-Also in the latter case, if liquidators do not (for whatever reason) liquidate until the undercollateralized account's collateral is zero, its borrows would continue to accrue interest and remain ineligible for bad debt repayment.
+Also in the latter case, if liquidators do not (for whatever reason) liquidate until the under-collateralized account's collateral is zero, its borrows would continue to accrue interest and remain ineligible for bad debt repayment.
 This should not be a common case, as long as liquidation incentives exist, but might happen if liquidators are sparse, or if the remaining collateral is so small that it is not worth the gas fee to retrieve.
 
 ### Checking for Repayment Eligibility
 
-A second consideration is when to check for borrowers eligible for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
+A second consideration is when to check for borrowers eligibility for bad debt repayment. The two likely options are immediately during `LiquidateBorrow`, or during `EndBlock` every `InterestEpoch`. A third option might be to check periodically, but on a separately controlled interval `BadDebtRepayEpoch`.
 
 The advantage of an immediate check during `LiquidateBorrow` is that only the borrow being liquidated needs to be checked for eligibility, instead of periodically iterating over all borrows. Additioanlly, `CollateralValue` has already been calculated in that function.
 
 However, there is an edge case (reserve exhaustion) where borrows eligible for reserve-driven-repayment during their final liquidation, cannot be fully repaid at that moment.
 If using an immediate check during `LiquidateBorrow`, there would be no future liquidation against that address to trigger bad debt repayment after reserves recovered - the debt would accrue interest indefinitely.
 
-Also note that the fist decision on the condition for bad debt repayment eligibility changes the effectiveness of these options:
+Also note that the first decision on the condition for bad debt repayment eligibility changes the effectiveness of these options:
 
-- A condition of `Collateral Value == 0` favors checks during `LiquidateBorrow`. because liquidation is the only action on undercollateralized accounts that is allowed to reduce collateral to zero.
+- A condition of `Collateral Value == 0` favors checks during `LiquidateBorrow`, because liquidation is the only action on under-collateralized accounts that is allowed to reduce collateral to zero.
 - A condition of `Collateral Value < Borrow Value` mandates periodic checks, as such an inequality can result not only from liquidation, but also from interest accrual and/or asset price fluctuations.
 
 ## Decision
