@@ -11,7 +11,7 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/x/peggy/types";
 
-// Query defines the gRPC serivce for the x/peggy module.
+// Query defines the gRPC service for the x/peggy module.
 service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/peggy/v1/params";
