@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -117,6 +118,29 @@ func (pb ExchangeRateBallot) Swap(i, j int) {
 	pb[i], pb[j] = pb[j], pb[i]
 }
 
+// BallotDenom is a convenience wrapper for setting rates deterministically.
+type BallotDenom struct {
+	Ballot ExchangeRateBallot
+	Denom  string
+}
+
+// BallotMapToSlice returns an array of sorted exchange rate ballots.
+func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
+	b := make([]BallotDenom, len(votes))
+	i := 0
+	for denom, ballot := range votes {
+		b[i] = BallotDenom{
+			Denom:  denom,
+			Ballot: ballot,
+		}
+		i++
+	}
+	sort.Slice(b, func(i, j int) bool {
+		return b[i].Denom < b[j].Denom
+	})
+	return b
+}
+
 // Claim is an interface that directs its rewards to an attached bank account.
 type Claim struct {
 	Power     int64
@@ -133,4 +157,23 @@ func NewClaim(power, weight, winCount int64, recipient sdk.ValAddress) Claim {
 		WinCount:  winCount,
 		Recipient: recipient,
 	}
+}
+
+// ClaimMapToSlice returns an array of sorted exchange rate ballots.
+func ClaimMapToSlice(claims map[string]Claim) []Claim {
+	c := make([]Claim, len(claims))
+	i := 0
+	for _, claim := range claims {
+		c[i] = Claim{
+			Power:     claim.Power,
+			Weight:    claim.Weight,
+			WinCount:  claim.WinCount,
+			Recipient: claim.Recipient,
+		}
+		i++
+	}
+	sort.Slice(c, func(i, j int) bool {
+		return c[i].Recipient.String() < c[j].Recipient.String()
+	})
+	return c
 }
