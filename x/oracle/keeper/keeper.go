@@ -74,16 +74,49 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 		return sdk.OneDec(), nil
 	}
 
+	var symbol string
+
+	// Translate the base denom -> symbol
+	params := k.GetParams(ctx)
+	for _, listDenom := range params.AcceptList {
+		if listDenom.BaseDenom == denom {
+			symbol = listDenom.SymbolDenom
+			break
+		}
+	}
+	if len(symbol) == 0 {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	}
+
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.GetExchangeRateKey(denom))
+	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 	}
 
-	dp := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &dp)
+	decProto := sdk.DecProto{}
+	k.cdc.MustUnmarshal(b, &decProto)
 
-	return dp.Dec, nil
+	return decProto.Dec, nil
+}
+
+// GetExchangeRateBase gets the consensus exchange rate of an asset
+// in the base denom (e.g. ATOM -> uatom)
+func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	exchangeRate, err := k.GetExchangeRate(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	params := k.GetParams(ctx)
+
+	for _, acceptedDenom := range params.AcceptList {
+		if denom == acceptedDenom.BaseDenom {
+			return exchangeRate.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
+		}
+	}
+
+	return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
@@ -92,6 +125,18 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	store.Set(types.GetExchangeRateKey(denom), bz)
+}
+
+// SetExchangeRateWithEvent sets an consensus
+// exchange rate to the store with ABCI event
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+	k.SetExchangeRate(ctx, denom, exchangeRate)
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(types.EventTypeExchangeRateUpdate,
+			sdk.NewAttribute(types.EventAttrKeyDenom, denom),
+			sdk.NewAttribute(types.EventAttrKeyExchangeRate, exchangeRate.String()),
+		),
+	)
 }
 
 // DeleteExchangeRate deletes the consensus exchange rate of USD denominated in
