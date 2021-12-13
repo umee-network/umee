@@ -62,19 +62,19 @@ func NewOracleClient(
 	validatorAddrString string,
 	grpcEndpoint string,
 	gasAdjustment float64,
-) (*OracleClient, error) {
+) (OracleClient, error) {
 
 	oracleAddr, err := sdk.AccAddressFromBech32(oracleAddrString)
 	if err != nil {
-		return nil, err
+		return OracleClient{}, err
 	}
 
 	validatorAddr := sdk.ValAddress(validatorAddrString)
 	if err != nil {
-		return nil, err
+		return OracleClient{}, err
 	}
 
-	return &OracleClient{
+	return OracleClient{
 		Logger:              logger.With().Str("module", "oracleClient").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,

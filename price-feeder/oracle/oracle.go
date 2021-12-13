@@ -66,19 +66,21 @@ func NewPreviousPrevote() *PreviousPrevote {
 // for a given set of currency pairs and determining the correct exchange rates
 // to submit to the on-chain price oracle adhering the oracle specification.
 type Oracle struct {
-	logger             zerolog.Logger
-	closer             *pfsync.Closer
-	oracleClient       *client.OracleClient
+	logger zerolog.Logger
+	closer *pfsync.Closer
+
 	providerPairs      map[string][]CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
+	priceProviders     map[string]provider.Provider
+	oracleClient       client.OracleClient
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
 }
 
-func New(logger zerolog.Logger, oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
+func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	providerPairs := make(map[string][]CurrencyPair)
 
 	for _, pair := range currencyPairs {
@@ -95,6 +97,7 @@ func New(logger zerolog.Logger, oc *client.OracleClient, currencyPairs []config.
 		closer:          pfsync.NewCloser(),
 		oracleClient:    oc,
 		providerPairs:   providerPairs,
+		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
 	}
 }
@@ -163,14 +166,22 @@ func (o *Oracle) SetPrices() error {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
-		var priceProvider provider.Provider
+		var (
+			priceProvider provider.Provider
+			ok            bool
+		)
 
-		switch providerName {
-		case config.ProviderBinance:
-			priceProvider = provider.NewBinanceProvider()
+		priceProvider, ok = o.priceProviders[providerName]
+		if !ok {
+			switch providerName {
+			case config.ProviderBinance:
+				priceProvider = provider.NewBinanceProvider()
 
-		case config.ProviderKraken:
-			priceProvider = provider.NewKrakenProvider()
+			case config.ProviderKraken:
+				priceProvider = provider.NewKrakenProvider()
+			}
+
+			o.priceProviders[providerName] = priceProvider
 		}
 
 		g.Go(func() error {
