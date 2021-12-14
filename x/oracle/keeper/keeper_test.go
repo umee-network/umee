@@ -174,6 +174,59 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 	)
 
 	s.Require().NoError(err)
+
+	app.OracleKeeper.DeleteAggregateExchangeRatePrevote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	_, err = app.OracleKeeper.GetAggregateExchangeRatePrevote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
+	app, ctx := s.app, s.ctx
+
+	var tuples types.ExchangeRateTuples
+
+	tuples = append(tuples, types.ExchangeRateTuple{
+		Denom:        "UMEE",
+		ExchangeRate: sdk.ZeroDec(),
+	})
+
+	vote := types.AggregateExchangeRateVote{
+		ExchangeRateTuples: tuples,
+		Voter:              "test",
+	}
+
+	app.OracleKeeper.SetAggregateExchangeRateVote(
+		ctx,
+		ValAddrs[0],
+		vote,
+	)
+
+	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	s.Require().NoError(err)
+
+	app.OracleKeeper.DeleteAggregateExchangeRateVote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	s.Require().Error(err)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
