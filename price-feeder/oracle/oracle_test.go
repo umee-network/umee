@@ -134,12 +134,36 @@ func TestGenerateSalt(t *testing.T) {
 }
 
 func TestGenreateExchangeRatesString(t *testing.T) {
-	exRatesStr := GenreateExchangeRatesString(make(map[string]sdk.Dec))
-	require.Empty(t, exRatesStr)
+	testCases := map[string]struct {
+		input    map[string]sdk.Dec
+		expected string
+	}{
+		"empty input": {
+			input:    make(map[string]sdk.Dec),
+			expected: "",
+		},
+		"single denom": {
+			input: map[string]sdk.Dec{
+				"UMEE": sdk.MustNewDecFromStr("3.72"),
+			},
+			expected: "UMEE:3.720000000000000000",
+		},
+		"multi denom": {
+			input: map[string]sdk.Dec{
+				"UMEE": sdk.MustNewDecFromStr("3.72"),
+				"ATOM": sdk.MustNewDecFromStr("40.13"),
+				"OSMO": sdk.MustNewDecFromStr("8.69"),
+			},
+			expected: "ATOM:40.130000000000000000,OSMO:8.690000000000000000,UMEE:3.720000000000000000",
+		},
+	}
 
-	exRatesStr = GenreateExchangeRatesString(map[string]sdk.Dec{
-		"UMEE": sdk.MustNewDecFromStr("3.72"),
-		"ATOM": sdk.MustNewDecFromStr("40.13"),
-	})
-	require.Equal(t, "ATOM:40.130000000000000000,UMEE:3.720000000000000000", exRatesStr)
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			out := GenreateExchangeRatesString(tc.input)
+			require.Equal(t, tc.expected, out)
+		})
+	}
 }
