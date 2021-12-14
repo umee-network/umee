@@ -58,6 +58,21 @@ func (s *IntegrationTestSuite) SetupTest() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
+	sh := staking.NewHandler(app.StakingKeeper)
+
+	// Validator created
+	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
+
+	// mint and send coins to validators
+	for i := range Addrs {
+		s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+		s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, Addrs[i], initCoins))
+		_, err := sh(ctx, NewTestMsgCreateValidator(ValAddrs[i], ValPubKeys[i], amt))
+		s.Require().NoError(err)
+	}
+
+	staking.EndBlocker(ctx, app.StakingKeeper)
+
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = types.NewQueryClient(queryHelper)
@@ -113,21 +128,8 @@ func (s *IntegrationTestSuite) Test_FeederDelegation() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	sh := staking.NewHandler(app.StakingKeeper)
-
-	// mint and send coins
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, Addrs[0], initCoins))
-
-	// Validator created
-	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
-	_, err := sh(ctx, NewTestMsgCreateValidator(ValAddrs[0], ValPubKeys[0], amt))
-	s.Require().NoError(err)
-
-	staking.EndBlocker(ctx, app.StakingKeeper)
-
 	// Should not fail since we set up this feeder
-	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
+	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
 	s.Require().Error(err)
 
 	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
