@@ -200,7 +200,7 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRateTuples: tuples,
-		Voter:              "test",
+		Voter:              Addrs[0].String(),
 	}
 
 	app.OracleKeeper.SetAggregateExchangeRateVote(
@@ -227,6 +227,47 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 	)
 
 	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) Test_SetExchangeRateWithEvent() {
+	app, ctx := s.app, s.ctx
+	app.OracleKeeper.SetExchangeRateWithEvent(ctx, "umee", sdk.OneDec())
+}
+
+func (s *IntegrationTestSuite) Test_GetExchangeRate_USD() {
+	app, ctx := s.app, s.ctx
+
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uusd")
+
+	s.Require().NoError(err)
+
+	s.Require().Equal(rate, sdk.OneDec())
+}
+
+func (s *IntegrationTestSuite) Test_GetExchangeRate_InvalidDenom() {
+	app, ctx := s.app, s.ctx
+
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uxyz")
+
+	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) Test_GetExchangeRate_NotSet() {
+	app, ctx := s.app, s.ctx
+
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
+
+	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) Test_GetExchangeRate_Valid() {
+	app, ctx := s.app, s.ctx
+
+	app.OracleKeeper.SetExchangeRate(ctx, "umee", sdk.OneDec())
+
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
+
+	s.Require().NoError(err)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
