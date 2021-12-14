@@ -302,7 +302,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	exchangeRatesStr := GenreateExchangeRatesString(o.prices)
+	exchangeRatesStr := GenerateExchangeRatesString(o.prices)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 	preVoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
@@ -373,7 +373,7 @@ func GenerateSalt(length int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-// GenreateExchangeRatesString generates a canonical string representation of
+// GenerateExchangeRatesString generates a canonical string representation of
 // the aggregated exchange rates.
 func GenerateExchangeRatesString(prices map[string]sdk.Dec) string {
 	exchangeRates := make([]string, len(prices))
