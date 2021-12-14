@@ -8,15 +8,10 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
-	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -36,7 +31,9 @@ type IntegrationTestSuite struct {
 	queryClient types.QueryClient
 }
 
-const faucetAccountName = "faucet"
+const (
+	initialPower = int64(10000000000)
+)
 
 func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T(), false, 1)
@@ -45,33 +42,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
-	encodingConfig := umeeapp.MakeEncodingConfig()
-
-	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
-
 	keys := sdk.NewKVStoreKeys(
-		paramstypes.StoreKey,
 		types.StoreKey,
-		authtypes.StoreKey,
-		banktypes.StoreKey,
-	)
-
-	app.ParamsKeeper = paramskeeper.NewKeeper(
-		app.AppCodec(),
-		encodingConfig.Amino,
-		keys[paramstypes.StoreKey],
-		transientKeys[paramstypes.TStoreKey],
-	)
-
-	app.ParamsKeeper.Subspace(authtypes.ModuleName)
-	app.ParamsKeeper.Subspace(banktypes.ModuleName)
-	app.ParamsKeeper.Subspace(stakingtypes.ModuleName)
-	app.ParamsKeeper.Subspace(distrtypes.ModuleName)
-	app.ParamsKeeper.Subspace(types.ModuleName)
-
-	// set the BaseApp's parameter store
-	app.SetParamStore(
-		app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramskeeper.ConsensusParamsKeyTable()),
 	)
 
 	app.OracleKeeper = keeper.NewKeeper(
@@ -85,38 +57,10 @@ func (s *IntegrationTestSuite) SetupTest() {
 		distrtypes.ModuleName,
 	)
 
-	maccPerms := map[string][]string{
-		faucetAccountName:              {authtypes.Minter},
-		authtypes.FeeCollectorName:     nil,
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		distrtypes.ModuleName:          nil,
-		types.ModuleName:               nil,
-	}
-
-	app.AccountKeeper = authkeeper.NewAccountKeeper(
-		app.AppCodec(),
-		keys[authtypes.ModuleName],
-		app.GetSubspace(authtypes.ModuleName),
-		authtypes.ProtoBaseAccount,
-		maccPerms,
-	)
-
-	app.BankKeeper = bankkeeper.NewBaseKeeper(
-		app.AppCodec(),
-		keys[types.ModuleName],
-		app.AccountKeeper,
-		app.GetSubspace(banktypes.ModuleName),
-		app.ModuleAccountAddrs(),
-	)
-
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
-
-	totalSupply := sdk.NewCoins(sdk.NewCoin("uumee", InitTokens.MulRaw(int64(len(Addrs)*10))))
-	app.BankKeeper.MintCoins(ctx, faucetAccountName, totalSupply)
 
 	s.app = app
 	s.ctx = ctx
@@ -151,10 +95,8 @@ var (
 		sdk.ValAddress(pubKeys[4].Address()),
 	}
 
-	InitTokens = sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
-	InitCoins  = sdk.NewCoins(sdk.NewCoin(types.UmeeDenom, InitTokens))
-
-	OracleDecPrecision = 8
+	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
+	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
 )
 
 // NewTestMsgCreateValidator test msg creator
@@ -176,6 +118,7 @@ func (s *IntegrationTestSuite) Test_FeederDelegation() {
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
 	sh := staking.NewHandler(app.StakingKeeper)
+
 	// Validator created
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 	_, err := sh(ctx, NewTestMsgCreateValidator(ValAddrs[0], ValPubKeys[0], amt))
