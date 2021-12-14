@@ -71,6 +71,30 @@ func (ots *OracleTestSuite) TestPrices() {
 	// initial prices should be empty (not set)
 	ots.Require().Empty(ots.oracle.GetPrices())
 
+	// Use a mock provider with exchange rates that are not specified in
+	// configuration.
+	ots.oracle.priceProviders = map[string]provider.Provider{
+		config.ProviderBinance: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDX": {
+					Price:  sdk.MustNewDecFromStr("3.72"),
+					Volume: sdk.MustNewDecFromStr("2396974.02000000"),
+				},
+			},
+		},
+		config.ProviderKraken: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDX": {
+					Price:  sdk.MustNewDecFromStr("3.70"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+	}
+
+	ots.Require().NoError(ots.oracle.SetPrices())
+	ots.Require().Empty(ots.oracle.GetPrices())
+
 	// use a mock provider to provide prices for the configured exchange pairs
 	ots.oracle.priceProviders = map[string]provider.Provider{
 		config.ProviderBinance: mockProvider{
@@ -95,4 +119,5 @@ func (ots *OracleTestSuite) TestPrices() {
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
+	ots.Require().Equal(prices["UMEE"], sdk.MustNewDecFromStr("3.710916056220858266"))
 }
