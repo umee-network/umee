@@ -44,11 +44,17 @@ func (s *IntegrationTestSuite) SetupTest() {
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 	})
+
 	encodingConfig := umeeapp.MakeEncodingConfig()
 
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 
-	keys := sdk.NewKVStoreKeys(paramstypes.StoreKey)
+	keys := sdk.NewKVStoreKeys(
+		paramstypes.StoreKey,
+		types.StoreKey,
+		authtypes.StoreKey,
+		banktypes.StoreKey,
+	)
 
 	app.ParamsKeeper = paramskeeper.NewKeeper(
 		app.AppCodec(),
@@ -61,10 +67,16 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app.ParamsKeeper.Subspace(banktypes.ModuleName)
 	app.ParamsKeeper.Subspace(stakingtypes.ModuleName)
 	app.ParamsKeeper.Subspace(distrtypes.ModuleName)
+	app.ParamsKeeper.Subspace(types.ModuleName)
+
+	// set the BaseApp's parameter store
+	app.SetParamStore(
+		app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramskeeper.ConsensusParamsKeyTable()),
+	)
 
 	app.OracleKeeper = keeper.NewKeeper(
 		app.AppCodec(),
-		app.GetKey(types.ModuleName),
+		keys[types.ModuleName],
 		app.GetSubspace(types.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
@@ -82,28 +94,20 @@ func (s *IntegrationTestSuite) SetupTest() {
 		types.ModuleName:               nil,
 	}
 
-	blackListAddrs := map[string]bool{
-		authtypes.FeeCollectorName:     true,
-		stakingtypes.NotBondedPoolName: true,
-		stakingtypes.BondedPoolName:    true,
-		distrtypes.ModuleName:          true,
-		faucetAccountName:              true,
-	}
-
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		app.AppCodec(),
-		app.GetKey(authtypes.ModuleName),
-		app.ParamsKeeper.Subspace(authtypes.ModuleName),
+		keys[authtypes.ModuleName],
+		app.GetSubspace(authtypes.ModuleName),
 		authtypes.ProtoBaseAccount,
 		maccPerms,
 	)
 
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		app.AppCodec(),
-		app.GetKey(types.ModuleName),
+		keys[types.ModuleName],
 		app.AccountKeeper,
-		app.ParamsKeeper.Subspace(banktypes.ModuleName),
-		blackListAddrs,
+		app.GetSubspace(banktypes.ModuleName),
+		app.ModuleAccountAddrs(),
 	)
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
