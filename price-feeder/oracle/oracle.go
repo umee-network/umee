@@ -247,21 +247,6 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) generateSalt(length int) (string, error) {
-	if length == 0 {
-		return "", fmt.Errorf("failed to generate salt: zero length")
-	}
-
-	n := length / 2
-	bytes := make([]byte, n)
-
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(bytes), nil
-}
-
 func (o *Oracle) tick() error {
 	clientCtx, err := o.oracleClient.CreateClientContext()
 	if err != nil {
@@ -307,20 +292,7 @@ func (o *Oracle) tick() error {
 		return nil
 	}
 
-	isPrevoteOnlyTx := o.previousPrevote == nil
-	exchangeRates := make([]string, len(o.prices))
-	i := 0
-
-	// aggregate exchange rates as "<base>:<price>"
-	for base, avgPrice := range o.prices {
-		exchangeRates[i] = fmt.Sprintf("%s:%s", base, avgPrice.String())
-		i++
-	}
-
-	sort.Strings(exchangeRates)
-	exchangeRatesStr := strings.Join(exchangeRates, ",")
-
-	salt, err := o.generateSalt(2)
+	salt, err := GenerateSalt(2)
 	if err != nil {
 		return err
 	}
@@ -330,6 +302,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
+	exchangeRatesStr := GenreateExchangeRatesString(o.prices)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 	preVoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
@@ -337,6 +310,7 @@ func (o *Oracle) tick() error {
 		Validator: valAddr.String(),
 	}
 
+	isPrevoteOnlyTx := o.previousPrevote == nil
 	if isPrevoteOnlyTx {
 		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
 		// but we give it some extra time just in case.
@@ -381,4 +355,37 @@ func (o *Oracle) tick() error {
 	}
 
 	return nil
+}
+
+// GenerateSalt generates a random salt, size length/2,  as a HEX encoded string.
+func GenerateSalt(length int) (string, error) {
+	if length == 0 {
+		return "", fmt.Errorf("failed to generate salt: zero length")
+	}
+
+	n := length / 2
+	bytes := make([]byte, n)
+
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(bytes), nil
+}
+
+// GenreateExchangeRatesString generates a canonical string representation of
+// the aggregated exchange rates.
+func GenreateExchangeRatesString(prices map[string]sdk.Dec) string {
+	exchangeRates := make([]string, len(prices))
+	i := 0
+
+	// aggregate exchange rates as "<base>:<price>"
+	for base, avgPrice := range prices {
+		exchangeRates[i] = fmt.Sprintf("%s:%s", base, avgPrice.String())
+		i++
+	}
+
+	sort.Strings(exchangeRates)
+
+	return strings.Join(exchangeRates, ",")
 }

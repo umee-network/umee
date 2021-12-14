@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/umee-network/umee/price-feeder/config"
@@ -120,4 +121,25 @@ func (ots *OracleTestSuite) TestPrices() {
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(prices["UMEE"], sdk.MustNewDecFromStr("3.710916056220858266"))
+}
+
+func TestGenerateSalt(t *testing.T) {
+	salt, err := GenerateSalt(0)
+	require.Error(t, err)
+	require.Empty(t, salt)
+
+	salt, err = GenerateSalt(5)
+	require.NoError(t, err)
+	require.NotEmpty(t, salt)
+}
+
+func TestGenreateExchangeRatesString(t *testing.T) {
+	exRatesStr := GenreateExchangeRatesString(make(map[string]sdk.Dec))
+	require.Empty(t, exRatesStr)
+
+	exRatesStr = GenreateExchangeRatesString(map[string]sdk.Dec{
+		"UMEE": sdk.MustNewDecFromStr("3.72"),
+		"ATOM": sdk.MustNewDecFromStr("40.13"),
+	})
+	require.Equal(t, "ATOM:40.130000000000000000,UMEE:3.720000000000000000", exRatesStr)
 }
