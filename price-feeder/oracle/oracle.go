@@ -375,7 +375,7 @@ func GenerateSalt(length int) (string, error) {
 
 // GenreateExchangeRatesString generates a canonical string representation of
 // the aggregated exchange rates.
-func GenreateExchangeRatesString(prices map[string]sdk.Dec) string {
+func GenerateExchangeRatesString(prices map[string]sdk.Dec) string {
 	exchangeRates := make([]string, len(prices))
 	i := 0
 
