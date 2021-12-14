@@ -14,7 +14,6 @@ import (
 	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
@@ -67,18 +66,21 @@ func NewPreviousPrevote() *PreviousPrevote {
 // for a given set of currency pairs and determining the correct exchange rates
 // to submit to the on-chain price oracle adhering the oracle specification.
 type Oracle struct {
-	logger             zerolog.Logger
-	closer             *pfsync.Closer
-	mtx                sync.RWMutex
-	lastPriceSyncTS    time.Time
-	prices             map[string]sdk.Dec
-	oracleClient       *client.OracleClient
+	logger zerolog.Logger
+	closer *pfsync.Closer
+
 	providerPairs      map[string][]CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
+	priceProviders     map[string]provider.Provider
+	oracleClient       client.OracleClient
+
+	mtx             sync.RWMutex
+	lastPriceSyncTS time.Time
+	prices          map[string]sdk.Dec
 }
 
-func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
+func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	providerPairs := make(map[string][]CurrencyPair)
 
 	for _, pair := range currencyPairs {
@@ -91,10 +93,11 @@ func New(oc *client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
 	}
 
 	return &Oracle{
-		logger:          log.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("module", "oracle").Logger(),
 		closer:          pfsync.NewCloser(),
 		oracleClient:    oc,
 		providerPairs:   providerPairs,
+		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
 	}
 }
@@ -107,7 +110,9 @@ func (o *Oracle) Start(ctx context.Context) error {
 			o.closer.Close()
 
 		default:
+			o.logger.Debug().Msg("starting oracle tick")
 			if err := o.tick(); err != nil {
+				o.logger.Err(err).Msg("oracle tick failed")
 				return err
 			}
 
@@ -161,14 +166,22 @@ func (o *Oracle) SetPrices() error {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
-		var priceProvider provider.Provider
+		var (
+			priceProvider provider.Provider
+			ok            bool
+		)
 
-		switch providerName {
-		case config.ProviderBinance:
-			priceProvider = provider.NewBinanceProvider()
+		priceProvider, ok = o.priceProviders[providerName]
+		if !ok {
+			switch providerName {
+			case config.ProviderBinance:
+				priceProvider = provider.NewBinanceProvider()
 
-		case config.ProviderKraken:
-			priceProvider = provider.NewKrakenProvider()
+			case config.ProviderKraken:
+				priceProvider = provider.NewKrakenProvider()
+			}
+
+			o.priceProviders[providerName] = priceProvider
 		}
 
 		g.Go(func() error {
@@ -234,23 +247,8 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) generateSalt(length int) (string, error) {
-	if length == 0 {
-		return "", fmt.Errorf("failed to generate salt: zero length")
-	}
-
-	n := length / 2
-	bytes := make([]byte, n)
-
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(bytes), nil
-}
-
 func (o *Oracle) tick() error {
-	ctx, err := o.oracleClient.CreateContext()
+	clientCtx, err := o.oracleClient.CreateClientContext()
 	if err != nil {
 		return err
 	}
@@ -264,7 +262,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
-	blockHeight, err := rpcclient.GetChainHeight(ctx)
+	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
 	if err != nil {
 		return nil
 	}
@@ -294,20 +292,7 @@ func (o *Oracle) tick() error {
 		return nil
 	}
 
-	isPrevoteOnlyTx := o.previousPrevote == nil
-	exchangeRates := make([]string, len(o.prices))
-	i := 0
-
-	// aggregate exchange rates as "<base>:<price>"
-	for base, avgPrice := range o.prices {
-		exchangeRates[i] = fmt.Sprintf("%s:%s", base, avgPrice.String())
-		i++
-	}
-
-	sort.Strings(exchangeRates)
-	exchangeRatesStr := strings.Join(exchangeRates, ",")
-
-	salt, err := o.generateSalt(2)
+	salt, err := GenerateSalt(2)
 	if err != nil {
 		return err
 	}
@@ -317,6 +302,7 @@ func (o *Oracle) tick() error {
 		return err
 	}
 
+	exchangeRatesStr := GenerateExchangeRatesString(o.prices)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 	preVoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(), // hash of prices from the oracle
@@ -324,19 +310,17 @@ func (o *Oracle) tick() error {
 		Validator: valAddr.String(),
 	}
 
+	isPrevoteOnlyTx := o.previousPrevote == nil
 	if isPrevoteOnlyTx {
 		// This timeout could be as small as oracleVotePeriod-indexInVotePeriod,
 		// but we give it some extra time just in case.
+		//
 		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
-		if err := o.oracleClient.BroadcastTx(
-			nextBlockHeight,
-			oracleVotePeriod*2,
-			preVoteMsg,
-		); err != nil {
+		if err := o.oracleClient.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil {
 			return err
 		}
 
-		currentHeight, err := rpcclient.GetChainHeight(ctx)
+		currentHeight, err := rpcclient.GetChainHeight(clientCtx)
 		if err != nil {
 			return err
 		}
@@ -371,4 +355,37 @@ func (o *Oracle) tick() error {
 	}
 
 	return nil
+}
+
+// GenerateSalt generates a random salt, size length/2,  as a HEX encoded string.
+func GenerateSalt(length int) (string, error) {
+	if length == 0 {
+		return "", fmt.Errorf("failed to generate salt: zero length")
+	}
+
+	n := length / 2
+	bytes := make([]byte, n)
+
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(bytes), nil
+}
+
+// GenerateExchangeRatesString generates a canonical string representation of
+// the aggregated exchange rates.
+func GenerateExchangeRatesString(prices map[string]sdk.Dec) string {
+	exchangeRates := make([]string, len(prices))
+	i := 0
+
+	// aggregate exchange rates as "<base>:<price>"
+	for base, avgPrice := range prices {
+		exchangeRates[i] = fmt.Sprintf("%s:%s", base, avgPrice.String())
+		i++
+	}
+
+	sort.Strings(exchangeRates)
+
+	return strings.Join(exchangeRates, ",")
 }
