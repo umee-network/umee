@@ -162,7 +162,7 @@ func TestGenreateExchangeRatesString(t *testing.T) {
 		tc := tc
 
 		t.Run(name, func(t *testing.T) {
-			out := GenreateExchangeRatesString(tc.input)
+			out := GenerateExchangeRatesString(tc.input)
 			require.Equal(t, tc.expected, out)
 		})
 	}
