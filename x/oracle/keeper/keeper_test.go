@@ -19,6 +19,7 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	umeeapp "github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/oracle"
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
@@ -28,7 +29,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	app         *umeeapp.UmeeApp
+	app         *umeeappbeta.UmeeApp
 	queryClient types.QueryClient
 }
 
@@ -37,7 +38,7 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
-	app := umeeapp.Setup(s.T(), false, 1)
+	app := umeeappbeta.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
@@ -143,8 +144,36 @@ func (s *IntegrationTestSuite) Test_FeederDelegation() {
 func (s *IntegrationTestSuite) Test_MissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
+
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), uint64(0x0))
 	app.OracleKeeper.SetMissCounter(ctx, ValAddrs[0], missCounter)
 	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), missCounter)
+
+	app.OracleKeeper.DeleteMissCounter(ctx, ValAddrs[0])
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), uint64(0x0))
+}
+
+func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
+	app, ctx := s.app, s.ctx
+
+	prevote := types.AggregateExchangeRatePrevote{
+		Hash:        "hash",
+		Voter:       Addrs[0].String(),
+		SubmitBlock: 0,
+	}
+
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(
+		ctx,
+		ValAddrs[0],
+		prevote,
+	)
+
+	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(
+		ctx,
+		ValAddrs[0],
+	)
+
+	s.Require().NoError(err)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
