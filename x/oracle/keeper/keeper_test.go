@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -137,6 +138,13 @@ func (s *IntegrationTestSuite) Test_FeederDelegation() {
 	// Should not fail since we set up this feeder
 	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) Test_MissCounter() {
+	app, ctx := s.app, s.ctx
+	missCounter := uint64(rand.Intn(100))
+	app.OracleKeeper.SetMissCounter(ctx, ValAddrs[0], missCounter)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), missCounter)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
