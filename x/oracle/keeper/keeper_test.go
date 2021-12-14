@@ -9,9 +9,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -42,13 +42,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
-	keys := sdk.NewKVStoreKeys(
-		types.StoreKey,
-	)
-
 	app.OracleKeeper = keeper.NewKeeper(
 		app.AppCodec(),
-		keys[types.ModuleName],
+		app.GetKey(types.ModuleName),
 		app.GetSubspace(types.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
@@ -119,10 +115,20 @@ func (s *IntegrationTestSuite) Test_FeederDelegation() {
 
 	sh := staking.NewHandler(app.StakingKeeper)
 
+	// mint and send coins
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, Addrs[0], initCoins))
+
 	// Validator created
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 	_, err := sh(ctx, NewTestMsgCreateValidator(ValAddrs[0], ValPubKeys[0], amt))
 	s.Require().NoError(err)
+
+	staking.EndBlocker(ctx, app.StakingKeeper)
+
+	// Should not fail since we set up this feeder
+	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
+	s.Require().Error(err)
 
 	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
 
