@@ -25,8 +25,16 @@ func (t Token) Validate() error {
 		return err
 	}
 	if strings.HasPrefix(t.BaseDenom, UTokenPrefix) {
-		// Prevents base asset denoms that start with "u/"
+		// prevent base asset denoms that start with "u/"
 		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
+	}
+
+	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
+		return err
+	}
+	if strings.HasPrefix(t.SymbolDenom, UTokenPrefix) {
+		// prevent symbol (ticker) denoms that start with "u/"
+		return sdkerrors.Wrap(ErrInvalidAsset, t.SymbolDenom)
 	}
 
 	// Reserve factor and collateral weight range between 0 and 1, inclusive.
@@ -37,13 +45,14 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
 
-	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents multiple interest rates being
-	// defined at exactly 0% or 100% utilization (e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.)
+	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
+	// multiple interest rates being defined at exactly 0% or 100% utilization
+	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.
 	if !t.KinkUtilizationRate.IsPositive() || t.KinkUtilizationRate.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilizationRate)
 	}
 
-	// Interest rates are non-negative. They do not need to have a maximum value.
+	// interest rates are non-negative; they do not need to have a maximum value
 	if t.BaseBorrowRate.IsNegative() {
 		return fmt.Errorf("invalid base borrow rate: %s", t.BaseBorrowRate)
 	}
@@ -53,8 +62,6 @@ func (t Token) Validate() error {
 	if t.MaxBorrowRate.IsNegative() {
 		return fmt.Errorf("invalid max borrow rate: %s", t.MaxBorrowRate)
 	}
-
-	// Liquidation incentives are non-negative
 	if t.LiquidationIncentive.IsNegative() {
 		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
 	}
