@@ -185,6 +185,9 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 func (s *IntegrationTestSuite) Test_SetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
 	app.OracleKeeper.SetExchangeRateWithEvent(ctx, "umee", sdk.OneDec())
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
+	s.Require().NoError(err)
+	s.Require().Equal(rate, sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) Test_GetExchangeRate_USD() {
@@ -213,8 +216,9 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, "umee", sdk.OneDec())
-	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
 	s.Require().NoError(err)
+	s.Require().Equal(rate, sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) Test_DeleteExchangeRate() {
