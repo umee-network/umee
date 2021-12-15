@@ -218,7 +218,7 @@ The proposal details must be supplied via a JSON file. Please see the UpdateRegi
 type for a complete description of the expected input.
 
 Example:
-$ umeed tx gov submit-proposal update-registry /path/to/proposal.json [flags...]
+$ umeed tx gov submit-proposal update-registry </path/to/proposal.json> <deposit> [flags...]
 
 Where proposal.json contains:
 
