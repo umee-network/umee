@@ -82,30 +82,18 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	ValPubKeys = simapp.CreateTestPubKeys(5)
+	ValPubKeys = simapp.CreateTestPubKeys(1)
 
 	pubKeys = []crypto.PubKey{
-		secp256k1.GenPrivKey().PubKey(),
-		secp256k1.GenPrivKey().PubKey(),
-		secp256k1.GenPrivKey().PubKey(),
-		secp256k1.GenPrivKey().PubKey(),
 		secp256k1.GenPrivKey().PubKey(),
 	}
 
 	Addrs = []sdk.AccAddress{
 		sdk.AccAddress(pubKeys[0].Address()),
-		sdk.AccAddress(pubKeys[1].Address()),
-		sdk.AccAddress(pubKeys[2].Address()),
-		sdk.AccAddress(pubKeys[3].Address()),
-		sdk.AccAddress(pubKeys[4].Address()),
 	}
 
 	ValAddrs = []sdk.ValAddress{
 		sdk.ValAddress(pubKeys[0].Address()),
-		sdk.ValAddress(pubKeys[1].Address()),
-		sdk.ValAddress(pubKeys[2].Address()),
-		sdk.ValAddress(pubKeys[3].Address()),
-		sdk.ValAddress(pubKeys[4].Address()),
 	}
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
@@ -123,22 +111,31 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 	return msg
 }
 
-func (s *IntegrationTestSuite) Test_FeederDelegation() {
+func (s *IntegrationTestSuite) Test_SetFeederDelegation() {
 	app, ctx := s.app, s.ctx
 
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	// Should not fail since we set up this feeder
 	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
 	s.Require().Error(err)
 
 	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
 
-	// Should not fail since we set up this feeder
 	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) Test_GetFeederDelegation() {
+	app, ctx := s.app, s.ctx
+
+	feederAddr := sdk.AccAddress([]byte("addr________________"))
+	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
+	app.AccountKeeper.SetAccount(ctx, feederAcc)
+
+	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
+	s.Require().Equal(app.OracleKeeper.GetFeederDelegation(ctx, ValAddrs[0]), feederAddr)
 }
 
 func (s *IntegrationTestSuite) Test_MissCounter() {
@@ -161,7 +158,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 		Voter:       Addrs[0].String(),
 		SubmitBlock: 0,
 	}
-
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(
 		ctx,
 		ValAddrs[0],
@@ -172,7 +168,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 		ctx,
 		ValAddrs[0],
 	)
-
 	s.Require().NoError(err)
 
 	app.OracleKeeper.DeleteAggregateExchangeRatePrevote(
@@ -184,7 +179,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 		ctx,
 		ValAddrs[0],
 	)
-
 	s.Require().Error(err)
 }
 
@@ -192,7 +186,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 	app, ctx := s.app, s.ctx
 
 	var tuples types.ExchangeRateTuples
-
 	tuples = append(tuples, types.ExchangeRateTuple{
 		Denom:        "UMEE",
 		ExchangeRate: sdk.ZeroDec(),
@@ -202,7 +195,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 		ExchangeRateTuples: tuples,
 		Voter:              Addrs[0].String(),
 	}
-
 	app.OracleKeeper.SetAggregateExchangeRateVote(
 		ctx,
 		ValAddrs[0],
@@ -213,7 +205,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 		ctx,
 		ValAddrs[0],
 	)
-
 	s.Require().NoError(err)
 
 	app.OracleKeeper.DeleteAggregateExchangeRateVote(
@@ -225,7 +216,6 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 		ctx,
 		ValAddrs[0],
 	)
-
 	s.Require().Error(err)
 }
 
@@ -238,9 +228,7 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_USD() {
 	app, ctx := s.app, s.ctx
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uusd")
-
 	s.Require().NoError(err)
-
 	s.Require().Equal(rate, sdk.OneDec())
 }
 
@@ -248,7 +236,6 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_InvalidDenom() {
 	app, ctx := s.app, s.ctx
 
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uxyz")
-
 	s.Require().Error(err)
 }
 
@@ -256,7 +243,6 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_NotSet() {
 	app, ctx := s.app, s.ctx
 
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
-
 	s.Require().Error(err)
 }
 
@@ -264,10 +250,15 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, "umee", sdk.OneDec())
-
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
-
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) Test_DeleteExchangeRate() {
+	app, ctx := s.app, s.ctx
+
+	app.OracleKeeper.SetExchangeRate(ctx, "uumee", sdk.OneDec())
+	app.OracleKeeper.DeleteExchangeRate(ctx, "umee")
 }
 
 func TestKeeperTestSuite(t *testing.T) {
