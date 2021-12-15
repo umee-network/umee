@@ -532,6 +532,7 @@ func New(
 		authz.ModuleName,
 		feegrant.ModuleName,
 		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 
