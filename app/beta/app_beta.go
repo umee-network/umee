@@ -496,17 +496,17 @@ func New(
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
 		leveragetypes.ModuleName,
-		peggytypes.ModuleName,
 		oracletypes.ModuleName,
+		peggytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
 		stakingtypes.ModuleName,
 		peggytypes.ModuleName,
-		oracletypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
