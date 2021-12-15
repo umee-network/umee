@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -66,12 +65,10 @@ func (s *IntegrationTestSuite) SetupTest() {
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
-	for i := range Addrs {
-		s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-		s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, Addrs[i], initCoins))
-		_, err := sh(ctx, NewTestMsgCreateValidator(ValAddrs[i], ValPubKeys[i], amt))
-		s.Require().NoError(err)
-	}
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+	_, err := sh(ctx, NewTestMsgCreateValidator(valAddr, valPubKey, amt))
+	s.Require().NoError(err)
 
 	staking.EndBlocker(ctx, app.StakingKeeper)
 
@@ -82,19 +79,11 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	ValPubKeys = simapp.CreateTestPubKeys(1)
-
-	pubKeys = []crypto.PubKey{
-		secp256k1.GenPrivKey().PubKey(),
-	}
-
-	Addrs = []sdk.AccAddress{
-		sdk.AccAddress(pubKeys[0].Address()),
-	}
-
-	ValAddrs = []sdk.ValAddress{
-		sdk.ValAddress(pubKeys[0].Address()),
-	}
+	valPubKeys = simapp.CreateTestPubKeys(1)
+	valPubKey  = valPubKeys[0]
+	pubKey     = secp256k1.GenPrivKey().PubKey()
+	addr       = sdk.AccAddress(pubKey.Address())
+	valAddr    = sdk.ValAddress(pubKey.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
@@ -118,12 +107,12 @@ func (s *IntegrationTestSuite) Test_SetFeederDelegation() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
+	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
 	s.Require().Error(err)
 
-	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
+	s.app.OracleKeeper.SetFeederDelegation(ctx, valAddr, feederAddr)
 
-	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, ValAddrs[0])
+	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
 	s.Require().NoError(err)
 }
 
@@ -134,20 +123,20 @@ func (s *IntegrationTestSuite) Test_GetFeederDelegation() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	s.app.OracleKeeper.SetFeederDelegation(ctx, ValAddrs[0], feederAddr)
-	s.Require().Equal(app.OracleKeeper.GetFeederDelegation(ctx, ValAddrs[0]), feederAddr)
+	s.app.OracleKeeper.SetFeederDelegation(ctx, valAddr, feederAddr)
+	s.Require().Equal(app.OracleKeeper.GetFeederDelegation(ctx, valAddr), feederAddr)
 }
 
 func (s *IntegrationTestSuite) Test_MissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
 
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), uint64(0x0))
-	app.OracleKeeper.SetMissCounter(ctx, ValAddrs[0], missCounter)
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), missCounter)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0x0))
+	app.OracleKeeper.SetMissCounter(ctx, valAddr, missCounter)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), missCounter)
 
-	app.OracleKeeper.DeleteMissCounter(ctx, ValAddrs[0])
-	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, ValAddrs[0]), uint64(0x0))
+	app.OracleKeeper.DeleteMissCounter(ctx, valAddr)
+	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0x0))
 }
 
 func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
@@ -155,29 +144,29 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 
 	prevote := types.AggregateExchangeRatePrevote{
 		Hash:        "hash",
-		Voter:       Addrs[0].String(),
+		Voter:       addr.String(),
 		SubmitBlock: 0,
 	}
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 		prevote,
 	)
 
 	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 	s.Require().NoError(err)
 
 	app.OracleKeeper.DeleteAggregateExchangeRatePrevote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 
 	_, err = app.OracleKeeper.GetAggregateExchangeRatePrevote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 	s.Require().Error(err)
 }
@@ -193,28 +182,28 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRateTuples: tuples,
-		Voter:              Addrs[0].String(),
+		Voter:              addr.String(),
 	}
 	app.OracleKeeper.SetAggregateExchangeRateVote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 		vote,
 	)
 
 	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 	s.Require().NoError(err)
 
 	app.OracleKeeper.DeleteAggregateExchangeRateVote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 
 	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(
 		ctx,
-		ValAddrs[0],
+		valAddr,
 	)
 	s.Require().Error(err)
 }
