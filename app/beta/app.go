@@ -90,6 +90,7 @@ import (
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/x/leverage"
+	leverageclient "github.com/umee-network/umee/x/leverage/client"
 	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	"github.com/umee-network/umee/x/peggy"
@@ -741,6 +742,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
-		// TODO: Add handler for UpdateRegistryProposal
+		leverageclient.ProposalHandler,
 	}
 }

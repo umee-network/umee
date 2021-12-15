@@ -3,11 +3,13 @@ package cli
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/x/leverage/types"
@@ -195,6 +197,72 @@ func GetCmdRepayAsset() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// NewCmdSubmitUpdateRegistryProposal returns a CLI command handler to generate
+// or broadcast a transaction with a governance proposal message containing a
+// UpdateRegistryProposal.
+//
+// NOTE: The "registry" provided in the proposal replaces the entire existing
+// registry.
+func NewCmdSubmitUpdateRegistryProposal() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "update-registry [proposal-file] [deposit]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Submit a update leverage registry governance proposal",
+		Long: strings.TrimSpace(
+			`Submit a leverage registry governance proposal along with an initial deposit.
+The proposal details must be supplied via a JSON file. Please see the UpdateRegistryProposal
+type for a complete description of the expected input.
+
+Example:
+$ umeed tx gov submit-proposal update-registry /path/to/proposal.json [flags...]
+
+Where proposal.json contains:
+
+{
+  "title": "Update the Leverage Token Registry",
+  "description": "Replace the supported tokens in the leverage registry.",
+  "registry": [
+		{
+			"base_denom": "uumee",
+			"reserve_factor": "0.05",
+			"collateral_weight: "0.05",
+			// ...
+		},
+		// ...
+	]
+}
+`,
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			proposal, err := ParseUpdateRegistryProposal(clientCtx.Codec, args[0])
+			if err != nil {
+				return err
+			}
+
+			deposit, err := sdk.ParseCoinsNormalized(args[1])
+			if err != nil {
+				return err
+			}
+
+			content := types.NewUpdateRegistryProposal(proposal.Title, proposal.Description, proposal.Registry)
+
+			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, clientCtx.GetFromAddress())
+			if err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
 
 	return cmd
 }
