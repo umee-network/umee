@@ -222,6 +222,8 @@ func (s *IntegrationTestSuite) Test_DeleteExchangeRate() {
 
 	app.OracleKeeper.SetExchangeRate(ctx, "uumee", sdk.OneDec())
 	app.OracleKeeper.DeleteExchangeRate(ctx, "umee")
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
+	s.Require().Error(err)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
