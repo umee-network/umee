@@ -25,6 +25,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 	_, err := cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
 	require.Error(t, err)
 
+	// create a good proposal file and ensure parsing does not fail
 	filePath = path.Join(tmpDir, "good_proposal.json")
 	bz = []byte(`{
 	"title": "Update the Leverage Token Registry",
