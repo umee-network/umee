@@ -352,6 +352,11 @@ func New(
 		app.BankKeeper,
 		nil,
 	)
+	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
+		leveragetypes.NewMultiHooks(
+		// TODO: Use oracle hooks.
+		),
+	)
 
 	// register the staking hooks
 	//

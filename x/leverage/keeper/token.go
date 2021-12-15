@@ -58,12 +58,12 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 		panic(fmt.Sprintf("failed to encode token: %s", err))
 	}
 
-	// For tokens not previously registered, sets tokens:uToken to 1.0
-	err = k.InitializeExchangeRate(ctx, token.BaseDenom)
-	if err != nil {
+	// for tokens not previously registered, set tokens:uToken to 1.0
+	if err := k.InitializeExchangeRate(ctx, token.BaseDenom); err != nil {
 		panic(err)
 	}
 
+	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
 }
 
