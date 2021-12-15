@@ -147,27 +147,14 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 		Voter:       addr.String(),
 		SubmitBlock: 0,
 	}
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(
-		ctx,
-		valAddr,
-		prevote,
-	)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr, prevote)
 
-	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(
-		ctx,
-		valAddr,
-	)
+	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(ctx, valAddr)
 	s.Require().NoError(err)
 
-	app.OracleKeeper.DeleteAggregateExchangeRatePrevote(
-		ctx,
-		valAddr,
-	)
+	app.OracleKeeper.DeleteAggregateExchangeRatePrevote(ctx, valAddr)
 
-	_, err = app.OracleKeeper.GetAggregateExchangeRatePrevote(
-		ctx,
-		valAddr,
-	)
+	_, err = app.OracleKeeper.GetAggregateExchangeRatePrevote(ctx, valAddr)
 	s.Require().Error(err)
 }
 
@@ -184,27 +171,14 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 		ExchangeRateTuples: tuples,
 		Voter:              addr.String(),
 	}
-	app.OracleKeeper.SetAggregateExchangeRateVote(
-		ctx,
-		valAddr,
-		vote,
-	)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
 
-	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(
-		ctx,
-		valAddr,
-	)
+	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().NoError(err)
 
-	app.OracleKeeper.DeleteAggregateExchangeRateVote(
-		ctx,
-		valAddr,
-	)
+	app.OracleKeeper.DeleteAggregateExchangeRateVote(ctx, valAddr)
 
-	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(
-		ctx,
-		valAddr,
-	)
+	_, err = app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().Error(err)
 }
 
