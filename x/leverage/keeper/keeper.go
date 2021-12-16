@@ -88,7 +88,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 
 	if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
 		// For uToken denoms enabled as collateral by this lender, the
-		// minted uTokens stay in the module account and the keeper tracks the amount
+		// minted uTokens stay in the module account and the keeper tracks the amount.
 		currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
 		if err = k.SetCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
 			return err
