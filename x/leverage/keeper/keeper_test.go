@@ -64,6 +64,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
 
+	// we only override the Leverage keeper so we can supply a custom mock oracle
 	betaApp.LeverageKeeper = keeper.NewKeeper(
 		betaApp.AppCodec(),
 		betaApp.GetKey(types.ModuleName),
@@ -71,6 +72,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		betaApp.BankKeeper,
 		newMockOracleKeeper(),
 	)
+	betaApp.LeverageKeeper = *betaApp.LeverageKeeper.SetHooks(types.NewMultiHooks())
 
 	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
 	betaApp.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)

@@ -42,19 +42,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
-	// app.OracleKeeper = keeper.NewKeeper(
-	// 	app.AppCodec(),
-	// 	app.GetKey(types.ModuleName),
-	// 	app.GetSubspace(types.ModuleName),
-	// 	app.AccountKeeper,
-	// 	app.BankKeeper,
-	// 	app.DistrKeeper,
-	// 	app.StakingKeeper,
-	// 	distrtypes.ModuleName,
-	// )
-
-	// oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
-
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
