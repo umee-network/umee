@@ -351,6 +351,24 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
+	app.PeggyKeeper = peggykeeper.NewKeeper(
+		appCodec, keys[peggytypes.StoreKey],
+		app.GetSubspace(peggytypes.ModuleName),
+		app.AccountKeeper,
+		app.StakingKeeper,
+		app.BankKeeper,
+		app.SlashingKeeper,
+	)
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec,
+		keys[oracletypes.ModuleName],
+		app.GetSubspace(oracletypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.DistrKeeper,
+		app.StakingKeeper,
+		distrtypes.ModuleName,
+	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
@@ -360,7 +378,7 @@ func New(
 	)
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(
-		// TODO: Use oracle hooks.
+			app.OracleKeeper.Hooks(),
 		),
 	)
 
@@ -383,25 +401,6 @@ func New(
 		app.StakingKeeper,
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
-	)
-	app.PeggyKeeper = peggykeeper.NewKeeper(
-		appCodec, keys[peggytypes.StoreKey],
-		app.GetSubspace(peggytypes.ModuleName),
-		app.AccountKeeper,
-		app.StakingKeeper,
-		app.BankKeeper,
-		app.SlashingKeeper,
-	)
-
-	app.OracleKeeper = oraclekeeper.NewKeeper(
-		appCodec,
-		keys[oracletypes.ModuleName],
-		app.GetSubspace(oracletypes.ModuleName),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.DistrKeeper,
-		app.StakingKeeper,
-		distrtypes.ModuleName,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
