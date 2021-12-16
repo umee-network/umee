@@ -101,9 +101,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Clear the ballot
 		k.ClearBallots(ctx, params.VotePeriod)
-
-		// Update vote targets
-		k.ApplyAcceptList(ctx, params.AcceptList, voteTargets)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
