@@ -41,6 +41,7 @@ func (t Token) Validate() error {
 	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GT(sdk.OneDec()) {
 		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
 	}
+
 	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GT(sdk.OneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}

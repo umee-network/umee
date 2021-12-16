@@ -10,6 +10,10 @@ type Hooks interface {
 	// AfterTokenRegistered defines a hook another keeper can execute after the
 	// x/leverage registers a token.
 	AfterTokenRegistered(ctx sdk.Context, token Token)
+
+	// AfterRegisteredTokenRemoved defines a hook another keeper can execute after
+	// the x/leverage module removes a registered token.
+	AfterRegisteredTokenRemoved(ctx sdk.Context, token Token)
 }
 
 var _ Hooks = MultiHooks{}
@@ -25,5 +29,11 @@ func NewMultiHooks(hooks ...Hooks) MultiHooks {
 func (mh MultiHooks) AfterTokenRegistered(ctx sdk.Context, token Token) {
 	for _, h := range mh {
 		h.AfterTokenRegistered(ctx, token)
+	}
+}
+
+func (mh MultiHooks) AfterRegisteredTokenRemoved(ctx sdk.Context, token Token) {
+	for _, h := range mh {
+		h.AfterRegisteredTokenRemoved(ctx, token)
 	}
 }
