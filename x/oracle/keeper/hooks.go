@@ -45,7 +45,13 @@ func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) 
 	h.k.SetAcceptList(ctx, acceptList)
 }
 
-// AfterRegisteredTokenRemoved implements the x/leverage Hooks interface. Currently,
-// it performs a no-op, however, we may want to remove tokens from the accept
-// list in the future when they're removed from the x/leverage Token registry.
+// AfterRegisteredTokenRemoved implements the x/leverage Hooks interface.
+// Currently, it performs a no-op, however, we may want to remove tokens from
+// the accept list in the future when they're removed from the x/leverage Token
+// registry.
+//
+// We don't remove the token from the accept list because it might prove to be
+// useful to still have price data for assets outside of the scope of the
+// x/leverage registry. If assets need to be removed, they can always be purged
+// via param change proposals.
 func (h Hooks) AfterRegisteredTokenRemoved(ctx sdk.Context, token leveragetypes.Token) {}
