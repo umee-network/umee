@@ -11,6 +11,10 @@ import (
 // ExchangeToken converts an sdk.Coin containing a base asset to its value as a
 // uToken.
 func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
+	if !token.IsValid() {
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.String())
+	}
+
 	uTokenDenom := k.FromTokenToUTokenDenom(ctx, token.Denom)
 	if uTokenDenom == "" {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.Denom)
@@ -28,6 +32,10 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 // ExchangeUToken converts an sdk.Coin containing a uToken to its value in a base
 // token.
 func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+	if !uToken.IsValid() {
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
+	}
+
 	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
 	if tokenDenom == "" {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.Denom)

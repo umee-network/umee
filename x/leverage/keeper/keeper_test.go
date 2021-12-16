@@ -376,30 +376,33 @@ func (s *IntegrationTestSuite) TestRepayAsset_Invalid() {
 
 func (s *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	lenderAddr, _ := s.initBorrowScenario()
-	app, ctx := s.app, s.ctx
 
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
 	// lender borrows 200 umee
-	err := s.app.LeverageKeeper.BorrowAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 	s.Require().NoError(err)
 
 	// verify lender's new loan amount in the correct denom (200 umee)
-	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 
 	// verify lender's total loan balance (sdk.Coins) is also 200 umee (no other coins present)
-	totalLoanBalance, err := s.app.LeverageKeeper.GetBorrowerBorrows(ctx, lenderAddr)
+	totalLoanBalance, err := s.app.LeverageKeeper.GetBorrowerBorrows(s.ctx, lenderAddr)
 	s.Require().Equal(totalLoanBalance, sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 200000000)))
 
 	// verify lender's new umee balance (10 - 1k from initial + 200 from loan = 9200 umee)
-	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
+	tokenBalance := s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9200000000))
 
-	// verify lender's uToken balance remains at 1000 u/umee from initial conditions
-	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
-	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+	// verify lender's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
+	// verify lender's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 }
 
 func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
@@ -444,9 +447,13 @@ func (s *IntegrationTestSuite) TestRepayAsset_Valid() {
 	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9120000000))
 
-	// verify lender's uToken balance remains at 1000 u/umee from initial conditions
-	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
-	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+	// verify lender's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
+	// verify lender's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 
 	// lender repays 120 umee (loan repaid in full)
 	repaid, err = s.app.LeverageKeeper.RepayAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 120000000))
@@ -461,9 +468,14 @@ func (s *IntegrationTestSuite) TestRepayAsset_Valid() {
 	tokenBalance = app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9000000000))
 
-	// verify lender's uToken balance remains at 1000 u/umee from initial conditions
-	uTokenBalance = app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
-	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+	// verify lender's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
+	// verify lender's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+
 }
 
 func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {
@@ -493,9 +505,13 @@ func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	tokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9000000000))
 
-	// verify lender's uToken balance remains at 1k u/umee from initial conditions
-	uTokenBalance := app.BankKeeper.GetBalance(ctx, lenderAddr, "u/"+umeeapp.BondDenom)
-	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+	// verify lender's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
+	// verify lender's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 
 	// lender repays 50 umee - this time it fails because the loan no longer exists
 	_, err = s.app.LeverageKeeper.RepayAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
@@ -804,43 +820,41 @@ func (s *IntegrationTestSuite) TestDynamicInterest_InvalidAsset() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) TestSetCollateral_Valid() {
-	// Any user from the starting scenario can be used, since they are only toggling
-	// collateral settings.
+func (s *IntegrationTestSuite) TestSetCollateralSetting_Valid() {
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee enabled as collateral.
 	lenderAddr, _ := s.initBorrowScenario()
 
 	// lender disables u/umee as collateral
-	err := s.app.LeverageKeeper.SetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"u/uumee",
-		false,
-	)
+	err := s.app.LeverageKeeper.SetCollateralSetting(s.ctx, lenderAddr, "u/uumee", false)
 	s.Require().NoError(err)
-	enabled := s.app.LeverageKeeper.GetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"u/uumee",
-	)
+	enabled := s.app.LeverageKeeper.GetCollateralSetting(s.ctx, lenderAddr, "u/uumee")
 	s.Require().Equal(enabled, false)
 
+	// verify lender's uToken balance is 1000 u/umee
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
+
+	// verify lender's uToken collateral is 0 u/umee
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
 	// lender enables u/umee as collateral
-	err = s.app.LeverageKeeper.SetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"u/uumee",
-		true,
-	)
+	err = s.app.LeverageKeeper.SetCollateralSetting(s.ctx, lenderAddr, "u/uumee", true)
 	s.Require().NoError(err)
-	enabled = s.app.LeverageKeeper.GetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"u/uumee",
-	)
+	enabled = s.app.LeverageKeeper.GetCollateralSetting(s.ctx, lenderAddr, "u/uumee")
 	s.Require().Equal(enabled, true)
+
+	// verify lender's uToken balance is 0 u/umee
+	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
+
+	// verify lender's uToken collateral is 1000 u/umee
+	collateralBalance = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
+	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 }
 
-func (s *IntegrationTestSuite) TestSetCollateral_Invalid() {
+func (s *IntegrationTestSuite) TestSetCollateralSetting_Invalid() {
 	// Any user from the starting scenario can be used, since they are only toggling
 	// collateral settings.
 	lenderAddr, _ := s.initBorrowScenario()
@@ -854,25 +868,17 @@ func (s *IntegrationTestSuite) TestSetCollateral_Invalid() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) TestGetCollateral_Invalid() {
+func (s *IntegrationTestSuite) TestGetCollateralSetting_Invalid() {
 	// Any user from the starting scenario can be used, since we are only viewing
 	// collateral settings.
 	lenderAddr, _ := s.initBorrowScenario()
 
 	// Regular assets always return false, because only uTokens can be collateral
-	enabled := s.app.LeverageKeeper.GetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"uumee",
-	)
+	enabled := s.app.LeverageKeeper.GetCollateralSetting(s.ctx, lenderAddr, "uumee")
 	s.Require().Equal(enabled, false)
 
 	// Invalid or unrecognized assets always return false
-	enabled = s.app.LeverageKeeper.GetCollateralSetting(
-		s.ctx,
-		lenderAddr,
-		"abcd",
-	)
+	enabled = s.app.LeverageKeeper.GetCollateralSetting(s.ctx, lenderAddr, "abcd")
 	s.Require().Equal(enabled, false)
 }
 

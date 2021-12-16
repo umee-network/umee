@@ -133,22 +133,6 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	return utilization, nil
 }
 
-// GetBorrowerCollateral returns an sdk.Coins containing all uTokens in borrower's balance
-// which have been enabled as collateral.
-func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	collateral := sdk.NewCoins()
-
-	fullBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
-	for _, coin := range fullBalance {
-		// If a denom is a valid uToken and enabled as collateral by this borrower addr
-		if k.IsAcceptedUToken(ctx, coin.Denom) && k.GetCollateralSetting(ctx, borrowerAddr, coin.Denom) {
-			collateral = collateral.Add(coin)
-		}
-	}
-
-	return collateral
-}
-
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
