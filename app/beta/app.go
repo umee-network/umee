@@ -355,7 +355,7 @@ func New(
 		appCodec, keys[peggytypes.StoreKey],
 		app.GetSubspace(peggytypes.ModuleName),
 		app.AccountKeeper,
-		app.StakingKeeper,
+		&stakingKeeper,
 		app.BankKeeper,
 		app.SlashingKeeper,
 	)
@@ -366,7 +366,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.DistrKeeper,
-		app.StakingKeeper,
+		&stakingKeeper,
 		distrtypes.ModuleName,
 	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
