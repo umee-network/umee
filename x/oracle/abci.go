@@ -43,7 +43,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		var (
-			// voteTargets defines the symbol (ticker) denoms that we requirevotes on
+			// voteTargets defines the symbol (ticker) denoms that we require votes on
 			voteTargets      []string
 			voteTargetDenoms []string
 		)
