@@ -9,7 +9,6 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -17,9 +16,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
-	"github.com/umee-network/umee/x/oracle"
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
 )
@@ -43,30 +42,29 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Height:  1,
 	})
 
-	app.OracleKeeper = keeper.NewKeeper(
-		app.AppCodec(),
-		app.GetKey(types.ModuleName),
-		app.GetSubspace(types.ModuleName),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.DistrKeeper,
-		app.StakingKeeper,
-		distrtypes.ModuleName,
-	)
+	// app.OracleKeeper = keeper.NewKeeper(
+	// 	app.AppCodec(),
+	// 	app.GetKey(types.ModuleName),
+	// 	app.GetSubspace(types.ModuleName),
+	// 	app.AccountKeeper,
+	// 	app.BankKeeper,
+	// 	app.DistrKeeper,
+	// 	app.StakingKeeper,
+	// 	distrtypes.ModuleName,
+	// )
 
-	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
+	// oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
 	sh := staking.NewHandler(app.StakingKeeper)
-
-	// Validator created
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+
 	_, err := sh(ctx, NewTestMsgCreateValidator(valAddr, valPubKey, amt))
 	s.Require().NoError(err)
 
@@ -100,7 +98,7 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 	return msg
 }
 
-func (s *IntegrationTestSuite) Test_SetFeederDelegation() {
+func (s *IntegrationTestSuite) TestSetFeederDelegation() {
 	app, ctx := s.app, s.ctx
 
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
@@ -116,7 +114,7 @@ func (s *IntegrationTestSuite) Test_SetFeederDelegation() {
 	s.Require().NoError(err)
 }
 
-func (s *IntegrationTestSuite) Test_GetFeederDelegation() {
+func (s *IntegrationTestSuite) TestGetFeederDelegation() {
 	app, ctx := s.app, s.ctx
 
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
@@ -127,7 +125,7 @@ func (s *IntegrationTestSuite) Test_GetFeederDelegation() {
 	s.Require().Equal(app.OracleKeeper.GetFeederDelegation(ctx, valAddr), feederAddr)
 }
 
-func (s *IntegrationTestSuite) Test_MissCounter() {
+func (s *IntegrationTestSuite) TestMissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
 
@@ -139,7 +137,7 @@ func (s *IntegrationTestSuite) Test_MissCounter() {
 	s.Require().Equal(app.OracleKeeper.GetMissCounter(ctx, valAddr), uint64(0))
 }
 
-func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
+func (s *IntegrationTestSuite) TestAggregateExchangeRatePrevote() {
 	app, ctx := s.app, s.ctx
 
 	prevote := types.AggregateExchangeRatePrevote{
@@ -158,7 +156,7 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRatePrevote() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
+func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 	app, ctx := s.app, s.ctx
 
 	var tuples types.ExchangeRateTuples
@@ -182,7 +180,7 @@ func (s *IntegrationTestSuite) Test_AggregateExchangeRateVote() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) Test_SetExchangeRateWithEvent() {
+func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
 	app.OracleKeeper.SetExchangeRateWithEvent(ctx, "umee", sdk.OneDec())
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
@@ -190,7 +188,7 @@ func (s *IntegrationTestSuite) Test_SetExchangeRateWithEvent() {
 	s.Require().Equal(rate, sdk.OneDec())
 }
 
-func (s *IntegrationTestSuite) Test_GetExchangeRate_USD() {
+func (s *IntegrationTestSuite) TestGetExchangeRate_USD() {
 	app, ctx := s.app, s.ctx
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "uusd")
@@ -198,21 +196,21 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_USD() {
 	s.Require().Equal(rate, sdk.OneDec())
 }
 
-func (s *IntegrationTestSuite) Test_GetExchangeRate_InvalidDenom() {
+func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
 	app, ctx := s.app, s.ctx
 
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uxyz")
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) Test_GetExchangeRate_NotSet() {
+func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 	app, ctx := s.app, s.ctx
 
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, "uumee")
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) Test_GetExchangeRate_Valid() {
+func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, "umee", sdk.OneDec())
@@ -221,7 +219,7 @@ func (s *IntegrationTestSuite) Test_GetExchangeRate_Valid() {
 	s.Require().Equal(rate, sdk.OneDec())
 }
 
-func (s *IntegrationTestSuite) Test_DeleteExchangeRate() {
+func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, "uumee", sdk.OneDec())
