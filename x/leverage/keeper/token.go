@@ -48,7 +48,7 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 	return k.IsAcceptedToken(ctx, tokenDenom)
 }
 
-// SetRegisteredToken stores a token into the x/leverage module's KVStore.
+// SetRegisteredToken stores a Token into the x/leverage module's KVStore.
 func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.CreateRegisteredTokenKey(token.BaseDenom)
@@ -58,31 +58,36 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 		panic(fmt.Sprintf("failed to encode token: %s", err))
 	}
 
-	// For tokens not previously registered, sets tokens:uToken to 1.0
-	err = k.InitializeExchangeRate(ctx, token.BaseDenom)
-	if err != nil {
+	// for tokens not previously registered, set tokens:uToken to 1.0
+	if err := k.InitializeExchangeRate(ctx, token.BaseDenom); err != nil {
 		panic(err)
 	}
 
+	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
 }
 
 // DeleteRegisteredTokens deletes all registered tokens from the x/leverage
 // module's KVStore.
-func (k Keeper) DeleteRegisteredTokens(ctx sdk.Context) {
+func (k Keeper) DeleteRegisteredTokens(ctx sdk.Context) error {
+	tokens, err := k.GetAllRegisteredTokens(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, t := range tokens {
+		k.DeleteRegisteredToken(ctx, t.BaseDenom)
+		k.hooks.AfterRegisteredTokenRemoved(ctx, t)
+	}
+
+	return nil
+}
+
+// DeleteRegisteredToken deletes a registered Token by base denomination from
+// the x/leverage KVStore.
+func (k Keeper) DeleteRegisteredToken(ctx sdk.Context, denom string) {
 	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixRegisteredToken)
-	defer iter.Close()
-
-	var keys [][]byte
-	for ; iter.Valid(); iter.Next() {
-		keys = append(keys, iter.Key())
-	}
-
-	for _, k := range keys {
-		store.Delete(k)
-	}
+	store.Delete(types.CreateRegisteredTokenKey(denom))
 }
 
 // GetAllRegisteredTokens returns all the registered tokens from the x/leverage
