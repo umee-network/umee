@@ -94,6 +94,7 @@ import (
 	"github.com/umee-network/umee/x/peggy"
 	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
+	// leverageclient "github.com/umee-network/umee/x/leverage/client"
 	// leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	// "github.com/umee-network/umee/x/leverage"
 	// leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
@@ -762,7 +763,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
-		// TODO: Add handler for UpdateRegistryProposal
+		// leverageclient.ProposalHandler,
 	}
 }
 
