@@ -9,7 +9,7 @@ import (
 )
 
 // ActiveExchangeRates
-func (s *IntegrationTestSuite) TestQuerierActiveExchangeRates() {
+func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	const (
 		exchangeRate = "umee"
 	)
@@ -21,7 +21,7 @@ func (s *IntegrationTestSuite) TestQuerierActiveExchangeRates() {
 }
 
 // ExchangeRates
-func (s *IntegrationTestSuite) TestQuerierExchangeRates() {
+func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	const (
 		exchangeRate      = "umee"
 		exchangeRateDenom = "uumee"
@@ -36,7 +36,7 @@ func (s *IntegrationTestSuite) TestQuerierExchangeRates() {
 }
 
 // FeederDelegation
-func (s *IntegrationTestSuite) TestQuerierFeeederDelegation() {
+func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	app, ctx := s.app, s.ctx
 
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
@@ -58,7 +58,7 @@ func (s *IntegrationTestSuite) TestQuerierFeeederDelegation() {
 }
 
 // MissCounter
-func (s *IntegrationTestSuite) TestQuerierMissCounter() {
+func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
 
@@ -78,7 +78,7 @@ func (s *IntegrationTestSuite) TestQuerierMissCounter() {
 }
 
 // AggregatePrevote
-func (s *IntegrationTestSuite) TestQuerierAggregatePrevote() {
+func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	app, ctx := s.app, s.ctx
 
 	prevote := types.AggregateExchangeRatePrevote{
@@ -98,13 +98,13 @@ func (s *IntegrationTestSuite) TestQuerierAggregatePrevote() {
 }
 
 // AggregatePrevotes
-func (s *IntegrationTestSuite) TestQuerierAggregatePrevotes() {
+func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
 	_, err := s.queryClient.AggregatePrevotes(context.Background(), &types.QueryAggregatePrevotesRequest{})
 	s.Require().NoError(err)
 }
 
 // AggregateVote
-func (s *IntegrationTestSuite) TestQuerierAggregateVote() {
+func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	app, ctx := s.app, s.ctx
 
 	var tuples types.ExchangeRateTuples
@@ -126,13 +126,13 @@ func (s *IntegrationTestSuite) TestQuerierAggregateVote() {
 }
 
 // AggregateVotes
-func (s *IntegrationTestSuite) TestQuerierAggregateVotes() {
+func (s *IntegrationTestSuite) TestQuerier_AggregateVotes() {
 	_, err := s.queryClient.AggregateVotes(context.Background(), &types.QueryAggregateVotesRequest{})
 	s.Require().NoError(err)
 }
 
 // Params
-func (s *IntegrationTestSuite) TestQuerierParams() {
+func (s *IntegrationTestSuite) TestQuerier_Params() {
 	_, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
 }

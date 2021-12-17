@@ -30,6 +30,7 @@ type IntegrationTestSuite struct {
 	ctx         sdk.Context
 	app         *umeeappbeta.UmeeApp
 	queryClient types.QueryClient
+	msgServer   types.MsgServer
 }
 
 const (
@@ -75,6 +76,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = types.NewQueryClient(queryHelper)
+	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
 }
 
 // Test addresses
