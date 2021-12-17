@@ -3,7 +3,6 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -11,6 +10,10 @@ import (
 // ExchangeToken converts an sdk.Coin containing a base asset to its value as a
 // uToken.
 func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
+	if !token.IsValid() {
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.String())
+	}
+
 	uTokenDenom := k.FromTokenToUTokenDenom(ctx, token.Denom)
 	if uTokenDenom == "" {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.Denom)
@@ -28,6 +31,10 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 // ExchangeUToken converts an sdk.Coin containing a uToken to its value in a base
 // token.
 func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+	if !uToken.IsValid() {
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
+	}
+
 	tokenDenom := k.FromUTokenToTokenDenom(ctx, uToken.Denom)
 	if tokenDenom == "" {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.Denom)
@@ -109,7 +116,7 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 		//
 		// Mathematically:
 		// tokens:uToken = (module token balance + tokens borrowed - reserved tokens) / uToken supply
-		moduleBalance := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount.ToDec()
+		moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
 		tokenSupply := moduleBalance.Add(totalBorrows.AmountOf(denom).Sub(k.GetReserveAmount(ctx, denom)).ToDec())
 		uTokenSupply := k.TotalUTokenSupply(ctx, k.FromTokenToUTokenDenom(ctx, denom)).Amount
 		derivedExchangeRate := sdk.OneDec()

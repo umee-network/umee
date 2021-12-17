@@ -21,12 +21,13 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixRegisteredToken   = []byte{0x03}
-	KeyPrefixLoanToken         = []byte{0x04}
-	KeyPrefixCollateralSetting = []byte{0x05}
-	KeyPrefixReserveAmount     = []byte{0x06}
-	KeyPrefixLastInterestTime  = []byte{0x07}
-	KeyPrefixExchangeRate      = []byte{0x08}
+	KeyPrefixRegisteredToken   = []byte{0x01}
+	KeyPrefixLoanToken         = []byte{0x02}
+	KeyPrefixCollateralSetting = []byte{0x03}
+	KeyPrefixCollateralAmount  = []byte{0x04}
+	KeyPrefixReserveAmount     = []byte{0x05}
+	KeyPrefixLastInterestTime  = []byte{0x06}
+	KeyPrefixExchangeRate      = []byte{0x07}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
@@ -76,6 +77,27 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateCollateralAmountKey returns a KVStore key for getting and setting the amount of
+// collateral stored for a lender in a given denom.
+func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
+	// collateralprefix | lengthprefixed(lenderAddr) | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixCollateralAmount...)
+	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	key = append(key, []byte(uTokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateCollateralAmountKeyNoDenom returns the common prefix used by all collateral associated
+// with a given lender address.
+func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
+	// collateralprefix | lengthprefixed(lenderAddr)
+	var key []byte
+	key = append(key, KeyPrefixCollateralAmount...)
+	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	return key
 }
 
 // CreateReserveAmountKey returns a KVStore key for getting and setting the amount reserved of a a given token.
