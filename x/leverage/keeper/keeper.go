@@ -135,11 +135,11 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	}
 
 	// Withdraw will first attempt to use any uTokens in the lender's wallet
-	fromWallet := sdk.MinInt(k.bankKeeper.GetBalance(ctx, lenderAddr, uToken.Denom).Amount, uToken.Amount)
+	amountFromWallet := sdk.MinInt(k.bankKeeper.GetBalance(ctx, lenderAddr, uToken.Denom).Amount, uToken.Amount)
 	// Any additional uTokens must come from the lender's collateral
-	fromCollateral := uToken.Amount.Sub(fromWallet)
+	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 
-	if fromCollateral.IsPositive() {
+	if amountFromCollateral.IsPositive() {
 		if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
 			// TODO: Calculate lender's borrow limit and current borrowed value, if any.
 			// Prevent withdrawing collateral when it would bring user borrow limit below
@@ -147,13 +147,13 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 			//
 			// ref: https://github.com/umee-network/umee/issues/213
 
-			// reduce the lender's collateral by fromCollateral
+			// reduce the lender's collateral by amountFromCollateral
 			currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
-			if currentCollateral.Amount.LT(fromCollateral) {
+			if currentCollateral.Amount.LT(amountFromCollateral) {
 				return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 			}
 
-			newCollateral := sdk.NewCoin(uToken.Denom, currentCollateral.Amount.Sub(fromCollateral))
+			newCollateral := sdk.NewCoin(uToken.Denom, currentCollateral.Amount.Sub(amountFromCollateral))
 			if err = k.SetCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 				return err
 			}
@@ -163,8 +163,8 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 		}
 	}
 
-	// transfer fromWallet uTokens to the module account
-	uTokens := sdk.NewCoins(sdk.NewCoin(uToken.Denom, fromWallet))
+	// transfer amountFromWallet uTokens to the module account
+	uTokens := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromWallet))
 	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
