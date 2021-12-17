@@ -3,7 +3,6 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -117,7 +116,7 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	}
 
 	// Token Utilization = Total Borrows / (Module Account Balance + Total Borrows - Reserve Requirement)
-	moduleBalance := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
+	moduleBalance := k.ModuleBalance(ctx, denom)
 	reserveAmount := k.GetReserveAmount(ctx, denom)
 	denominator := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
 	if totalBorrowed.GTE(denominator) {
@@ -131,22 +130,6 @@ func (k Keeper) GetBorrowUtilization(ctx sdk.Context, denom string, totalBorrowe
 	utilization := sdk.NewDecFromInt(totalBorrowed).Quo(sdk.NewDecFromInt(denominator))
 
 	return utilization, nil
-}
-
-// GetBorrowerCollateral returns an sdk.Coins containing all uTokens in borrower's balance
-// which have been enabled as collateral.
-func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	collateral := sdk.NewCoins()
-
-	fullBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
-	for _, coin := range fullBalance {
-		// If a denom is a valid uToken and enabled as collateral by this borrower addr
-		if k.IsAcceptedUToken(ctx, coin.Denom) && k.GetCollateralSetting(ctx, borrowerAddr, coin.Denom) {
-			collateral = collateral.Add(coin)
-		}
-	}
-
-	return collateral
 }
 
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by

@@ -5,6 +5,7 @@
 - September 27, 2021: Initial Draft (@toteki)
 - September 29, 2021: Changed design after review suggestions (@toteki, @alexanderbez, @brentxu)
 - October 5, 2021: MsgSetCollateral and borrower-address-prefixed store keys (@toteki)
+- December 16th 2021: Collateral storage updated to use module account
 
 ## Status
 
@@ -16,8 +17,7 @@ One of the base functions of the Umee universal capital facility is to allow use
 
 ## Alternative Approaches
 
-- Borrower deposits uTokens into module account when using as collateral, instead of keeping in user wallet, flagging as collateral-enabled, and restricting transfer. We would not longer have to extend the `x/bank` module, but there would be additional message types.
-- Allow amounts of uToken to be specifically marked as collateral, rather than toggling collateral on/off for each asset type. This can be used with or without the other change above, and would allow more fine-grained control of collateral by borrowers.
+- Allow amounts of uToken to be specifically marked as collateral, rather than toggling collateral on/off for each asset type. This would allow more fine-grained control of collateral by borrowers.
 
 ## Decision
 
@@ -25,19 +25,18 @@ The Cosmos `x/bank` module and the existing `umee/x/leverage` deposit features a
 
 The flow of events is as follows:
 - Borrower already has uTokens in their account
-- Borrower marks those uTokens as eligible for use as collateral
+- Borrower marks those uTokens as eligible for use as collateral, which stores them in the `x/leverage` module account
 - Borrower requests to borrow assets from `leverage` module - module checks request, disburses tokens if acceptable, and remembers borrow position
-- While borrow position is open, modified `x/bank` module prevents transactions that would result in the ownging account's borrow position being higher than its calculated borrow limit (e.g. sending too many uTokens that are being used as collateral)
+- While borrow position is open, transactions that would result in the ownging account's borrow position being higher than its calculated borrow limit are prevented (i.e. borrowing too much, withdrawing too many uTokens that are being used as collateral, disabling essential collateral)
 - Eventually, borrower pays repayment amount (in full or in part) in the same asset denomination that was borrowed.
 
 Additionally, the following events occur at `EndBlock`:
 - Repayment amounts for open borrow positions increases by a borrowed-token-specific interest rate
-- Open borrow positions are checked to see if they fall below liquidation threshold
 
 The `umee/x/leverage` module will be responsible for remembering each open borrow position.
 If the same user account opens multiple borrow positions in the same token denomination, the second position simply increases the amount of the first.
 
-Additionally it has been discussed that, rather than an account's specific uToken denoms being tied to specific borrow positions, the sum of all borrow positions and collateral uTokens related to an account is used to check the account's overcollateralization levels and mark its positions for liquidation.
+Additionally, rather than an account's specific uToken denoms being tied to specific borrow positions, the sum of all borrow positions and collateral uTokens related to an account is to calculate the account's borrow limit.
 
 Note that the exchange rate of Assets:uAssets (e.g. `uatom:u/uatom`) is still a shifting exchange rate that grows with interest - see [ADR-001: Interest Stream](./ADR-001-interest-stream.md).
 
@@ -51,9 +50,10 @@ Note also that as a consequence of uToken interest, the asset value of uToken co
 
 For the purposes of borrowing and repaying assets, as well as marking uTokens as collateral, the `umee/x/leverage` module does not mint or burn tokens. It uses its keeper to remember open positions and user collateral settings, and the `x/bank` module to perform all necessary balance checks and token transfers.
 
-Additionally, the `x/bank` module must be extended to prevent users from transferring uTokens when doing so would lower their borrow limit below thir current total borrowed amount.
+To prevent users from transferring uTokens when doing so would lower their borrow limit below thir current total borrowed amount, uTokens that are enabled as collateral are stored in the `x/leverage` module account, and moved back to the user's wallet when they are disabled as collateral.
+As long as it would not reduce a user's borrow limit below their borrowed value, `MsgWithdrawAsset` can withdraw base assets in exchange uTokens used as collateral, even when they are stored in the module account.
 
-Because borrow limits weight the value of different token denominations together, the calculation will require the use of price oracles (and placeholder functions before those are available).
+Because borrow limits weight the value of different token denominations together, the calculation will require the use of `x/oracle`.
 
 ### Basic Message Types
 
@@ -79,7 +79,7 @@ type MsgRepayAsset struct {
 ```
 Messages must use denominations only in the allow-list. Collateral is always a uToken denomination, and assets are never uTokens.
 
-Asset borrowing respects the user's borrowing limit, which compares collateral uTokens associated with one base asset, to borrowed assets of a second base asset type. Price oracles must be used to compare the values of base assets (e.g. Atoms:Ether.)
+Asset borrowing respects the user's borrowing limit, which compares the total value of a borrower's collateral (scaled by each token's `CollateralWeight`) with the borrower's total borrowed value. Price `x/oracle` must be used to calculate borrow and collateral values.
 
 It is necessary that messages be signed by the borrower's account. Thus the method `GetSigners` should return the `Borrower` address for all message types above.
 
@@ -92,24 +92,19 @@ Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pair
 // for each borrower address store open borrows 
 borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 // additionally borrower collateral settings are stored for enabled denoms
-collateralPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true/false
+collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true/false
+// and the amount of collateral stored for each denom is kept
+collateralAmountPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 ```
 
 This will be accomplished by adding new prefixes and helper functions to `x/leverage/types/keys.go`.
 
-The use of borrowerAddress before tokenDenom in the store keys allows the KVstore's "iterate by prefix" functionality to perform operations on all keys of a type relating to a specific address, e.g. "all open borrow positions belonging to an individual user".
+The use of borrowerAddress before tokenDenom in the store keys allows the KVstore's "iterate by prefix" functionality to perform operations on all keys of a type relating to a specific address, e.g. "all open borrow positions belonging to an individual user". The same applies to collateral settings and amounts.
 
 In contrast, if we had put tokenDenom before borrower address, it would favor operations on the set of all keys associated with a given token.
 
 ### APIs and Handlers
 Both CLI and gRPC must be supported when sending the above message types, and all necessary handlers must be created in order to process and validate them as transactions.
-
-### Testing
-
-Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`uatom`), and uTokens existing (e.g. `u/uumee`,`u/uatom`), an integration test can be created in which one user account sends a `MsgBorrowAsset` and a `MsgRepayAsset` of the appropriate token types. It is also possible to use a single asset type for both the collateral and the borrowed asset.
-
-## Open Questions
-- See ADR-002 open questions on allow-listing asset types and uniquely identifying ibc/ assets regardless of ibc path.
 
 ## Consequences
 
@@ -117,16 +112,15 @@ Assuming a placeholder token allow-list of at least two elements (e.g. `uumee`,`
 
 - uTokens used as collateral increase in base asset value in the same way that lend positions do. This counteracts borrow position interest.
 - UX of enabling/disabling token types as collateral is simpler than depositing specific amounts
-- `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern facilitates getting open borrow positions by account address.
+- `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern facilitates getting open borrow and collateral positions by account address.
 
 ### Negative
 
-- `x/bank` module must be extended to prohibit peer-to-peer transfers of uTokens when they would violate `x/leverage` borrowing limit.
 - `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern makes it more difficult to get all open borrow positions by token denomination.
 
 ### Neutral
 - Borrow feature relies on allow-list of token types
 - Borrow feature relies on price oracles for base asset types
-- Borrow interest will rely on not-yet-implemented dynamic rate calculation
+- Borrow interest will rely on dynamic rate calculation
 
 ## References
