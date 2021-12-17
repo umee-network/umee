@@ -12,7 +12,6 @@ import (
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage"
-	"github.com/umee-network/umee/x/leverage/keeper"
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -23,13 +22,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		Height:  1,
 	})
 
-	k := keeper.NewKeeper(
-		app.AppCodec(),
-		app.GetKey(types.ModuleName),
-		app.GetSubspace(types.ModuleName),
-		app.BankKeeper,
-		nil,
-	)
+	k := app.LeverageKeeper
 	h := leverage.NewUpdateRegistryProposalHandler(k)
 
 	t.Run("invalid proposal type", func(t *testing.T) {
