@@ -17,6 +17,7 @@ type Keeper struct {
 	cdc          codec.Codec
 	storeKey     sdk.StoreKey
 	paramSpace   paramtypes.Subspace
+	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
 	oracleKeeper types.OracleKeeper
 }
@@ -45,6 +46,17 @@ func NewKeeper(
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+// SetHooks sets the module's hooks. Note, hooks can only be set once.
+func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
+	if k.hooks != nil {
+		panic("leverage hooks already set")
+	}
+
+	k.hooks = h
+
+	return k
 }
 
 // TotalUTokenSupply returns an sdk.Coin representing the total balance of a
