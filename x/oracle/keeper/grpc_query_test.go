@@ -8,7 +8,6 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-// ActiveExchangeRates
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	const (
 		exchangeRate = "umee"
@@ -20,7 +19,6 @@ func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	s.Require().NoError(err)
 }
 
-// ExchangeRates
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	const (
 		exchangeRate      = "umee"
@@ -38,7 +36,6 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	}, res.ExchangeRates)
 }
 
-// FeederDelegation
 func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	app, ctx := s.app, s.ctx
 
@@ -60,7 +57,6 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	s.Require().NoError(err)
 }
 
-// MissCounter
 func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
@@ -80,7 +76,6 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	s.Require().Equal(res.MissCounter, missCounter)
 }
 
-// AggregatePrevote
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	app, ctx := s.app, s.ctx
 
@@ -100,13 +95,11 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	s.Require().NoError(err)
 }
 
-// AggregatePrevotes
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
 	_, err := s.queryClient.AggregatePrevotes(context.Background(), &types.QueryAggregatePrevotesRequest{})
 	s.Require().NoError(err)
 }
 
-// AggregateVote
 func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	app, ctx := s.app, s.ctx
 
@@ -128,13 +121,11 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	s.Require().NoError(err)
 }
 
-// AggregateVotes
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotes() {
 	_, err := s.queryClient.AggregateVotes(context.Background(), &types.QueryAggregateVotesRequest{})
 	s.Require().NoError(err)
 }
 
-// Params
 func (s *IntegrationTestSuite) TestQuerier_Params() {
 	_, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
