@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -16,7 +18,9 @@ import (
 	"github.com/spf13/cast"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+
 	"github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/app/params"
 )
 
@@ -58,16 +62,7 @@ func (ac appCreator) newApp(
 		panic(fmt.Sprintf("failed to create snapshot store: %s", err))
 	}
 
-	return app.New(
-		logger,
-		db,
-		traceStore,
-		true,
-		skipUpgradeHeights,
-		cast.ToString(appOpts.Get(flags.FlagHome)),
-		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		ac.encCfg,
-		appOpts,
+	baseAppOpts := []func(*baseapp.BaseApp){
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
@@ -79,6 +74,40 @@ func (ac appCreator) newApp(
 		baseapp.SetSnapshotStore(snapshotStore),
 		baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
 		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
+	}
+
+	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+	}
+
+	// remove once beta functionality is complete
+	if enableBeta {
+		return umeeappbeta.New(
+			logger,
+			db,
+			traceStore,
+			true,
+			skipUpgradeHeights,
+			cast.ToString(appOpts.Get(flags.FlagHome)),
+			cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+			ac.encCfg,
+			appOpts,
+			baseAppOpts...,
+		)
+	}
+
+	return app.New(
+		logger,
+		db,
+		traceStore,
+		true,
+		skipUpgradeHeights,
+		cast.ToString(appOpts.Get(flags.FlagHome)),
+		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+		ac.encCfg,
+		appOpts,
+		baseAppOpts...,
 	)
 }
 
@@ -101,6 +130,34 @@ func (ac appCreator) appExport(
 	var loadLatest bool
 	if height == -1 {
 		loadLatest = true
+	}
+
+	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+	}
+
+	// remove once beta functionality is complete
+	if enableBeta {
+		umeeApp := umeeappbeta.New(
+			logger,
+			db,
+			traceStore,
+			loadLatest,
+			map[int64]bool{},
+			homePath,
+			uint(1),
+			ac.encCfg,
+			appOpts,
+		)
+
+		if height != -1 {
+			if err := umeeApp.LoadHeight(height); err != nil {
+				return servertypes.ExportedApp{}, err
+			}
+		}
+
+		return umeeApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
 	}
 
 	umeeApp := app.New(
