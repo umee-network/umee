@@ -72,6 +72,11 @@ func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin 
 	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
 }
 
+// ModuleBalance returns the amount of a given token held in the x/leverage module account
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
+	return k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
+}
+
 // LendAsset attempts to deposit assets into the leverage module account in
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
@@ -129,7 +134,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 	// Ensure module account has sufficient unreserved tokens to withdraw
 	reservedAmount := k.GetReserveAmount(ctx, token.Denom)
-	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), token.Denom).Amount
+	availableAmount := k.ModuleBalance(ctx, token.Denom)
 	if token.Amount.GT(availableAmount.Sub(reservedAmount)) {
 		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, token.String())
 	}

@@ -3,7 +3,6 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -117,7 +116,7 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 		//
 		// Mathematically:
 		// tokens:uToken = (module token balance + tokens borrowed - reserved tokens) / uToken supply
-		moduleBalance := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount.ToDec()
+		moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
 		tokenSupply := moduleBalance.Add(totalBorrows.AmountOf(denom).Sub(k.GetReserveAmount(ctx, denom)).ToDec())
 		uTokenSupply := k.TotalUTokenSupply(ctx, k.FromTokenToUTokenDenom(ctx, denom)).Amount
 		derivedExchangeRate := sdk.OneDec()
