@@ -29,10 +29,13 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
-	_, err := s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{
+	res, err := s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{
 		Denom: exchangeRateDenom,
 	})
 	s.Require().NoError(err)
+	s.Require().Equal(sdk.DecCoins{
+		sdk.NewDecCoinFromDec(exchangeRateDenom, sdk.OneDec()),
+	}, res.ExchangeRates)
 }
 
 // FeederDelegation
