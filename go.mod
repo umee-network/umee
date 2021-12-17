@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/cosmos/cosmos-sdk v0.44.5
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v2 v2.0.1
+	github.com/cosmos/ibc-go/v2 v2.0.2
 	github.com/ethereum/go-ethereum v1.10.13
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
@@ -18,13 +18,13 @@ require (
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.10.0
+	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/starport v0.18.6
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tendermint/tm-db v0.6.6
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
-	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
@@ -42,18 +42,15 @@ require (
 	github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
-	github.com/Microsoft/hcsshim v0.9.1 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/OpenPeeDeeP/depguard v1.0.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/Workiva/go-datastructures v1.0.52 // indirect
-	github.com/alecthomas/chroma v0.8.2 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/ashanbrown/forbidigo v1.2.0 // indirect
 	github.com/ashanbrown/makezero v0.0.0-20210520155254-b6261585ddde // indirect
 	github.com/atotto/clipboard v0.1.2 // indirect
-	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bkielbasa/cyclop v1.2.0 // indirect
@@ -71,11 +68,8 @@ require (
 	github.com/charmbracelet/charm v0.8.6 // indirect
 	github.com/charmbracelet/glamour v0.2.1-0.20210311152407-2b8307dcb400 // indirect
 	github.com/charmbracelet/glow v1.4.0 // indirect
-	github.com/chavacava/garif v0.0.0-20210405164556-e8a0a408d6af // indirect
-	github.com/chris-ramon/douceur v0.2.0 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.6.10 // indirect
 	github.com/confio/ics23/go v0.6.6 // indirect
-	github.com/containerd/cgroups v1.0.1 // indirect
 	github.com/containerd/console v1.0.2 // indirect
 	github.com/containerd/containerd v1.5.8 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
@@ -85,7 +79,6 @@ require (
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/daixiang0/gci v0.2.9 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
-	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v0.0.0-20180603214616-504e848d77ea // indirect
 	github.com/denis-tingajkin/go-header v0.4.2 // indirect
@@ -94,7 +87,6 @@ require (
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
-	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/docker/cli v20.10.11+incompatible // indirect
 	github.com/docker/docker v20.10.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -129,7 +121,6 @@ require (
 	github.com/go-toolsmith/typep v1.0.2 // indirect
 	github.com/go-xmlfmt/xmlfmt v0.0.0-20191208150333-d5b6f63a941b // indirect
 	github.com/gobuffalo/envy v1.9.0 // indirect
-	github.com/gobuffalo/flect v0.2.0 // indirect
 	github.com/gobuffalo/genny v0.6.0 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.0 // indirect
 	github.com/gobuffalo/helpers v0.5.0 // indirect
@@ -139,15 +130,11 @@ require (
 	github.com/gobuffalo/plush v3.8.3+incompatible // indirect
 	github.com/gobuffalo/plushgen v0.1.2 // indirect
 	github.com/gobuffalo/tags v2.1.7+incompatible // indirect
-	github.com/gobuffalo/uuid v2.0.5+incompatible // indirect
-	github.com/gobuffalo/validate v2.0.3+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goccy/go-yaml v1.9.2 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
-	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/gogo/gateway v1.1.0 // indirect
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
@@ -167,7 +154,6 @@ require (
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/gookit/color v1.4.2 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20210225214923-2e10b2664254 // indirect
-	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/rpc v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
@@ -198,7 +184,6 @@ require (
 	github.com/julz/importas v0.0.0-20210419104244-841f0c0fe66d // indirect
 	github.com/karrick/godirwalk v1.16.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/kisielk/errcheck v1.6.0 // indirect
 	github.com/kisielk/gotool v1.0.0 // indirect
@@ -231,7 +216,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/moby/sys/mount v0.3.0 // indirect
-	github.com/moby/sys/mountinfo v0.5.0 // indirect
 	github.com/moricho/tparallel v0.2.1 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/muesli/gitcha v0.2.0 // indirect
@@ -240,7 +224,6 @@ require (
 	github.com/muesli/sasquatch v0.0.0-20200811221207-66979d92330a // indirect
 	github.com/muesli/termenv v0.8.0 // indirect
 	github.com/nakabonne/nestif v0.3.0 // indirect
-	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
 	github.com/nishanths/exhaustive v0.2.3 // indirect
 	github.com/nishanths/predeclared v0.2.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -275,7 +258,6 @@ require (
 	github.com/sasha-s/go-deadlock v0.2.1-0.20190427202633-1595213edefa // indirect
 	github.com/securego/gosec/v2 v2.8.1 // indirect
 	github.com/segmentio/ksuid v1.0.3 // indirect
-	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shazow/go-diff v0.0.0-20160112020656-b6b7b6733b8c // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
@@ -308,7 +290,6 @@ require (
 	github.com/ultraware/whitespace v0.0.4 // indirect
 	github.com/uudashr/gocognit v1.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.2.1 // indirect
-	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
@@ -317,12 +298,11 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
+	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.5 // indirect
@@ -330,7 +310,6 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
-	gopkg.in/warnings.v0 v0.1.2 // indirect
 	honnef.co/go/tools v0.2.1 // indirect
 	mvdan.cc/gofumpt v0.1.1 // indirect
 	mvdan.cc/interfacer v0.0.0-20180901003855-c20040233aed // indirect
