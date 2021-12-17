@@ -7,18 +7,18 @@ genesis:
     staking:
       params:
         bond_denom: "uumee"
-    leverage:
-      registry:
-        - base_denom: "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D"
-          symbol_denom: "atom"
-          exponent: 6
-          reserve_factor: "40.000000000000000000"
-          collateral_weight: "43.000000000000000000"
-          base_borrow_rate: "32.000000000000000000"
-          kink_borrow_rate: "26.000000000000000000"
-          max_borrow_rate: "21.000000000000000000"
-          kink_utilization_rate: "0.250000000000000000"
-          liquidation_incentive: "88.000000000000000000"
+    # leverage:
+    #   registry:
+    #     - base_denom: "ibc/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    #       symbol_denom: "atom"
+    #       exponent: 6
+    #       reserve_factor: "40.000000000000000000"
+    #       collateral_weight: "43.000000000000000000"
+    #       base_borrow_rate: "32.000000000000000000"
+    #       kink_borrow_rate: "26.000000000000000000"
+    #       max_borrow_rate: "21.000000000000000000"
+    #       kink_utilization_rate: "0.250000000000000000"
+    #       liquidation_incentive: "88.000000000000000000"
     # peggy:
     #   params:
     #     bridge_ethereum_address: ""
@@ -35,7 +35,7 @@ validator:
   name: alice
   staked: "33500000000000uumee"
 servers:
-  dev-ui-address: "localhost:12346"
+  dev-ui-address: "localhost:12345"
 faucet:
   port: 4500
   name: "faucet"

@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
@@ -20,12 +22,24 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	encodingConfig := app.MakeEncodingConfig()
+	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+	}
+
+	var encodingConfig params.EncodingConfig
+	if enableBeta {
+		encodingConfig = umeeappbeta.MakeEncodingConfig()
+	} else {
+		encodingConfig = app.MakeEncodingConfig()
+	}
+
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -51,12 +65,12 @@ towards borrowing assets on another blockchain.`,
 		},
 	}
 
-	initRootCmd(rootCmd, encodingConfig)
+	initRootCmd(rootCmd, encodingConfig, enableBeta)
 
 	return rootCmd, encodingConfig
 }
 
-func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
+func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, beta bool) {
 	rootCmd.AddCommand(
 		addGenesisAccountCmd(app.DefaultNodeHome),
 		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
@@ -75,6 +89,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 
 	ac := appCreator{
 		encCfg: encodingConfig,
+		beta:   beta,
 	}
 	server.AddCommands(rootCmd, app.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
 

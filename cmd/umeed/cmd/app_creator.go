@@ -4,9 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -26,6 +24,7 @@ import (
 
 type appCreator struct {
 	encCfg params.EncodingConfig
+	beta   bool
 }
 
 func (ac appCreator) newApp(
@@ -76,13 +75,8 @@ func (ac appCreator) newApp(
 		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
 	}
 
-	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
-	if err != nil {
-		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
-	}
-
 	// remove once beta functionality is complete
-	if enableBeta {
+	if ac.beta {
 		return umeeappbeta.New(
 			logger,
 			db,
@@ -132,13 +126,8 @@ func (ac appCreator) appExport(
 		loadLatest = true
 	}
 
-	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
-	if err != nil {
-		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
-	}
-
 	// remove once beta functionality is complete
-	if enableBeta {
+	if ac.beta {
 		umeeApp := umeeappbeta.New(
 			logger,
 			db,
