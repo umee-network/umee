@@ -249,6 +249,8 @@ jobs:
       - name: Start Local Beta Network via Starport
         run: |
           starport chain serve --reset-once -v -c ./starport.ci.beta.yml > starport.beta.out 2>&1 &
+        env:
+          UMEE_ENABLE_BETA: true
         if: env.GIT_DIFF
       - name: Test Local Beta Network Liveness
         run: |
