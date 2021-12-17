@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/snapshots"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/spf13/cast"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -23,8 +24,9 @@ import (
 )
 
 type appCreator struct {
-	encCfg params.EncodingConfig
-	beta   bool
+	encCfg        params.EncodingConfig
+	moduleManager module.BasicManager
+	beta          bool
 }
 
 func (ac appCreator) newApp(
