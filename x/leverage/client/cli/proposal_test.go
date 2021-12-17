@@ -33,13 +33,13 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 	"registry": [
 		{
 			"base_denom": "uumee",
-			"reserve_factor": "40.000000000000000000",
-			"collateral_weight": "43.000000000000000000",
-			"base_borrow_rate": "32.000000000000000000",
-			"kink_borrow_rate": "26.000000000000000000",
-			"max_borrow_rate": "21.000000000000000000",
-			"kink_utilization_rate": "0.250000000000000000",
-			"liquidation_incentive": "88.000000000000000000"
+			"reserve_factor": "0.1",
+			"collateral_weight": "0.05",
+			"base_borrow_rate": "0.02",
+			"kink_borrow_rate": "0.2",
+			"max_borrow_rate": "1.5",
+			"kink_utilization_rate": "0.2",
+			"liquidation_incentive": "0.1"
 		}
 	]
 }`)
