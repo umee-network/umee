@@ -140,6 +140,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 			if currentCollateral.Amount.LT(fromCollateral) {
 				return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
 			}
+
 			newCollateral := sdk.NewCoin(uToken.Denom, currentCollateral.Amount.Sub(fromCollateral))
 			if err = k.SetCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 				return err
