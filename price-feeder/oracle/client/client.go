@@ -162,6 +162,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		}
 
 		oc.Logger.Info().
+			Uint32("tx_code", resp.Code).
 			Str("tx_hash", resp.TxHash).
 			Int64("tx_height", resp.Height).
 			Msg("successfully broadcasted tx")
