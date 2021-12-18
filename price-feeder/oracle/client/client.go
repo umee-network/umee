@@ -210,7 +210,7 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 		JSONCodec:         oc.Encoding.Marshaler,
 		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
 		Output:            os.Stderr,
-		BroadcastMode:     flags.BroadcastSync,
+		BroadcastMode:     flags.BroadcastBlock,
 		TxConfig:          oc.Encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		Codec:             oc.Encoding.Marshaler,
