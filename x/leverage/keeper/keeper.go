@@ -17,6 +17,7 @@ type Keeper struct {
 	cdc          codec.Codec
 	storeKey     sdk.StoreKey
 	paramSpace   paramtypes.Subspace
+	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
 	oracleKeeper types.OracleKeeper
 }
@@ -47,17 +48,33 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
+// SetHooks sets the module's hooks. Note, hooks can only be set once.
+func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
+	if k.hooks != nil {
+		panic("leverage hooks already set")
+	}
+
+	k.hooks = h
+
+	return k
+}
+
 // TotalUTokenSupply returns an sdk.Coin representing the total balance of a
 // given uToken type if valid. If the denom is not an accepted uToken type,
 // we return a zero amount.
 func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin {
 	if k.IsAcceptedUToken(ctx, uTokenDenom) {
 		return k.bankKeeper.GetSupply(ctx, uTokenDenom)
-		// Question: Does bank module still track balances sent (locked) via IBC? If it doesn't
+		// TODO - Question: Does bank module still track balances sent (locked) via IBC? If it doesn't
 		// then the balance returned here would decrease when the tokens are sent off, which is not
 		// what we want. In that case, the keeper should keep an sdk.Int total supply for each uToken type.
 	}
 	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
+}
+
+// ModuleBalance returns the amount of a given token held in the x/leverage module account
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
+	return k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
 }
 
 // LendAsset attempts to deposit assets into the leverage module account in
@@ -74,18 +91,27 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return err
 	}
 
-	// mint uToken
+	// determine uToken amount to mint
 	uToken, err := k.ExchangeToken(ctx, loan)
 	if err != nil {
 		return err
 	}
 
+	// mint uToken
 	uTokens := sdk.NewCoins(uToken)
 	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
+	if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
+		// For uToken denoms enabled as collateral by this lender, the
+		// minted uTokens stay in the module account and the keeper tracks the amount.
+		currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
+		if err = k.SetCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
+			return err
+		}
+	} else if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
+		// For uToken denoms not enabled as collateral by this lender, the uTokens are sent to lender address
 		return err
 	}
 
@@ -96,42 +122,66 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 // for the original tokens lent. If the uToken type is invalid or account balance
 // insufficient on either side, we return an error.
 func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken sdk.Coin) error {
-	if !uToken.IsValid() {
+	if !k.IsAcceptedUToken(ctx, uToken.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
 	}
 
-	// TODO: Calculate lender's borrow limit and current borrowed value, if any.
-	// Prevent withdrawing assets when it would bring user borrow limit below
-	// current borrowed value.
-	//
-	// ref: https://github.com/umee-network/umee/issues/213
-
-	withdrawal, err := k.ExchangeUToken(ctx, uToken)
+	// calculate base asset amount to withdraw
+	token, err := k.ExchangeUToken(ctx, uToken)
 	if err != nil {
 		return err
 	}
 
 	// Ensure module account has sufficient unreserved tokens to withdraw
-	reservedAmount := k.GetReserveAmount(ctx, withdrawal.Denom)
-	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), withdrawal.Denom).Amount
-	if withdrawal.Amount.GT(availableAmount.Sub(reservedAmount)) {
-		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, withdrawal.String())
+	reservedAmount := k.GetReserveAmount(ctx, token.Denom)
+	availableAmount := k.ModuleBalance(ctx, token.Denom)
+	if token.Amount.GT(availableAmount.Sub(reservedAmount)) {
+		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, token.String())
 	}
 
-	// send the uTokens from the lender to the module account
-	uTokens := sdk.NewCoins(uToken)
+	// Withdraw will first attempt to use any uTokens in the lender's wallet
+	amountFromWallet := sdk.MinInt(k.bankKeeper.GetBalance(ctx, lenderAddr, uToken.Denom).Amount, uToken.Amount)
+	// Any additional uTokens must come from the lender's collateral
+	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
+
+	if amountFromCollateral.IsPositive() {
+		if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
+			// TODO: Calculate lender's borrow limit and current borrowed value, if any.
+			// Prevent withdrawing collateral when it would bring user borrow limit below
+			// current borrowed value.
+			//
+			// ref: https://github.com/umee-network/umee/issues/213
+
+			// reduce the lender's collateral by amountFromCollateral
+			currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
+			if currentCollateral.Amount.LT(amountFromCollateral) {
+				return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
+			}
+
+			newCollateral := sdk.NewCoin(uToken.Denom, currentCollateral.Amount.Sub(amountFromCollateral))
+			if err = k.SetCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
+				return err
+			}
+		} else {
+			// If collateral was needed despite being disabled, wallet balance must have been insufficient
+			return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
+		}
+	}
+
+	// transfer amountFromWallet uTokens to the module account
+	uTokens := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromWallet))
 	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
-	// send the original lent tokens back to lender
-	tokens := sdk.NewCoins(withdrawal)
+	// send the base assets to lender
+	tokens := sdk.NewCoins(token)
 	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
 		return err
 	}
 
-	// burn the minted uTokens
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, uTokens); err != nil {
+	// burn the uTokens
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
 		return err
 	}
 
@@ -239,6 +289,38 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 	// TODO #213: If enable=false, use oracle to compute current borrowed value and borrow limit after disable.
 	// Prevent disabling collateral when it would bring user borrow limit below current borrowed value.
+
+	if enable {
+		// Enabling a denom of uTokens as collateral deposits any in the user's current
+		// balance into the module account and remembers the amount held.
+		uToken := k.bankKeeper.GetBalance(ctx, borrowerAddr, denom)
+		uTokens := sdk.NewCoins(uToken)
+
+		if uToken.Amount.IsPositive() {
+			currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
+			if err := k.SetCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
+				return err
+			}
+
+			if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, uTokens); err != nil {
+				return err
+			}
+		}
+	} else {
+		// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
+		// from the module account and returns it to the user
+		currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, denom)
+		uTokens := sdk.NewCoins(currentCollateral)
+
+		if currentCollateral.IsPositive() {
+			if err := k.SetCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
+				return err
+			}
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, uTokens); err != nil {
+				return err
+			}
+		}
+	}
 
 	// Enable sets to true; disable removes from KVstore rather than setting false
 	store := ctx.KVStore(k.storeKey)
@@ -371,7 +453,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// send repayment to leverage module account
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(
+	if err = k.bankKeeper.SendCoinsFromAccountToModule(
 		ctx, liquidatorAddr,
 		types.ModuleName,
 		sdk.NewCoins(repayment),
@@ -381,13 +463,30 @@ func (k Keeper) LiquidateBorrow(
 
 	// store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
-	if err := k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
+	if err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// Transfer uToken collateral reward from borrower to liquidator
-	if err := k.bankKeeper.SendCoins(ctx, borrowerAddr, liquidatorAddr, sdk.NewCoins(reward)); err != nil {
+	// Reduce borrower collateral by reward amount
+	newBorrowerCollateral := sdk.NewCoin(rewardDenom, collateral.AmountOf(rewardDenom).Sub(reward.Amount))
+	if err = k.SetCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
+	}
+
+	// Transfer uToken collateral reward from module account to liquidator
+	if k.GetCollateralSetting(ctx, liquidatorAddr, reward.Denom) {
+		// For uToken denoms enabled as collateral by liquidator, the uTokens remain in the
+		// module account and the keeper tracks the amount
+		liquidatorCollateral := k.GetCollateralAmount(ctx, liquidatorAddr, reward.Denom)
+		if err = k.SetCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
+			return sdk.ZeroInt(), sdk.ZeroInt(), err
+		}
+	} else {
+		// For uToken denoms not enabled as collateral by liquidator, the uTokens are sent to their address
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(reward))
+		if err != nil {
+			return sdk.ZeroInt(), sdk.ZeroInt(), err
+		}
 	}
 
 	return repayment.Amount, reward.Amount, nil

@@ -39,8 +39,8 @@ func (k Keeper) AcceptList(ctx sdk.Context) (res types.DenomList) {
 	return
 }
 
-// SetAcceptList store new accept list to param store
-// this function is only for test purpose
+// SetAcceptList updates the accepted list of assets supported by the x/oracle
+// module.
 func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }

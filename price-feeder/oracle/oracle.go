@@ -113,7 +113,6 @@ func (o *Oracle) Start(ctx context.Context) error {
 			o.logger.Debug().Msg("starting oracle tick")
 			if err := o.tick(); err != nil {
 				o.logger.Err(err).Msg("oracle tick failed")
-				return err
 			}
 
 			o.lastPriceSyncTS = time.Now()

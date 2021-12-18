@@ -6,7 +6,6 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // OrganizeBallotByDenom collects all oracle votes for the current vote period,
@@ -74,50 +73,4 @@ func (k Keeper) ClearBallots(ctx sdk.Context, votePeriod uint64) {
 			return false
 		},
 	)
-}
-
-// ApplyAcceptList updates vote targets denom list accept list.
-func (k Keeper) ApplyAcceptList(
-	ctx sdk.Context,
-	acceptList types.DenomList,
-	voteTargets []string,
-) {
-	// check is there any update in accept list params
-	updateRequired := false
-	if len(voteTargets) != len(acceptList) {
-		updateRequired = true
-	}
-
-	if updateRequired {
-		for _, item := range acceptList {
-			// register metadata to bank module
-			if _, ok := k.bankKeeper.GetDenomMetaData(ctx, item.BaseDenom); !ok {
-				base := item.BaseDenom
-				display := base[1:]
-
-				k.bankKeeper.SetDenomMetaData(
-					ctx,
-					banktypes.Metadata{
-						Description: "The national currency of the United States",
-						DenomUnits: []*banktypes.DenomUnit{
-							{Denom: base, Exponent: uint32(0), Aliases: []string{}},
-							{Denom: display, Exponent: uint32(6), Aliases: []string{}},
-						},
-						Base:    base,
-						Display: display,
-						Name:    display,
-						Symbol:  display,
-						// TODO: The Gravity bridge requires that name, symbol and display
-						// are all equal. However, it is not currently clear if these assets
-						// will be bridged across to Ethereum. If not, we can uncomment below.
-						//
-						// ref: https://github.com/umee-network/umee/issues/225
-						//
-						// Name:    fmt.Sprintf("%s United States Dollar", strings.ToUpper(display)),
-						// Symbol:  fmt.Sprintf("%sUSD", strings.ToUpper(display[:len(display)-1])),
-					},
-				)
-			}
-		}
-	}
 }

@@ -42,10 +42,8 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			}
 		}
 
-		// These are the denoms we want votes on
-		// TODO : Get these from the x/leverage module's accepted list of tokens
-		// Ref https://github.com/umee-network/umee/issues/281
 		var (
+			// voteTargets defines the symbol (ticker) denoms that we require votes on
 			voteTargets      []string
 			voteTargetDenoms []string
 		)
@@ -103,9 +101,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Clear the ballot
 		k.ClearBallots(ctx, params.VotePeriod)
-
-		// Update vote targets
-		k.ApplyAcceptList(ctx, params.AcceptList, voteTargets)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and

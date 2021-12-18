@@ -90,6 +90,7 @@ import (
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/x/leverage"
+	leverageclient "github.com/umee-network/umee/x/leverage/client"
 	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	"github.com/umee-network/umee/x/oracle"
@@ -350,12 +351,35 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
+	app.PeggyKeeper = peggykeeper.NewKeeper(
+		appCodec, keys[peggytypes.StoreKey],
+		app.GetSubspace(peggytypes.ModuleName),
+		app.AccountKeeper,
+		&stakingKeeper,
+		app.BankKeeper,
+		app.SlashingKeeper,
+	)
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec,
+		keys[oracletypes.ModuleName],
+		app.GetSubspace(oracletypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.DistrKeeper,
+		&stakingKeeper,
+		distrtypes.ModuleName,
+	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		nil,
+	)
+	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
+		leveragetypes.NewMultiHooks(
+			app.OracleKeeper.Hooks(),
+		),
 	)
 
 	// register the staking hooks
@@ -377,25 +401,6 @@ func New(
 		app.StakingKeeper,
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
-	)
-	app.PeggyKeeper = peggykeeper.NewKeeper(
-		appCodec, keys[peggytypes.StoreKey],
-		app.GetSubspace(peggytypes.ModuleName),
-		app.AccountKeeper,
-		app.StakingKeeper,
-		app.BankKeeper,
-		app.SlashingKeeper,
-	)
-
-	app.OracleKeeper = oraclekeeper.NewKeeper(
-		appCodec,
-		keys[oracletypes.ModuleName],
-		app.GetSubspace(oracletypes.ModuleName),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.DistrKeeper,
-		app.StakingKeeper,
-		distrtypes.ModuleName,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -763,6 +768,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
-		// TODO: Add handler for UpdateRegistryProposal
+		leverageclient.ProposalHandler,
 	}
 }

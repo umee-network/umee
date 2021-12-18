@@ -23,6 +23,8 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 		Registry: []types.Token{
 			{
 				BaseDenom:            "uumee",
+				SymbolDenom:          "umee",
+				Exponent:             6,
 				ReserveFactor:        sdk.NewDec(40),
 				CollateralWeight:     sdk.NewDec(43),
 				BaseBorrowRate:       sdk.NewDec(32),
@@ -44,6 +46,8 @@ registry:
       max_borrow_rate: "21.000000000000000000"
       kink_utilization_rate: "0.250000000000000000"
       liquidation_incentive: "88.000000000000000000"
+      symbol_denom: umee
+      exponent: 6
 `
 	require.Equal(t, expected, p.String())
 }
@@ -56,6 +60,8 @@ func TestToken_Validate(t *testing.T) {
 		"valid token": {
 			input: types.Token{
 				BaseDenom:            "uumee",
+				SymbolDenom:          "umee",
+				Exponent:             6,
 				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
 				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
