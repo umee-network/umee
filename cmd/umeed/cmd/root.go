@@ -27,18 +27,41 @@ import (
 	"github.com/umee-network/umee/app/params"
 )
 
+// EnableBeta defines an ldflag that enables the beta version of the application
+// to be built.
+var EnableBeta string
+
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	enableBeta, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
-	if err != nil {
-		panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+	var beta bool
+
+	switch {
+	case len(EnableBeta) > 0:
+		// Handle the case where a build flag is provided, which used when building
+		// the binary.
+		v, err := strconv.ParseBool(EnableBeta)
+		if err != nil {
+			panic(fmt.Sprintf("failed to parse EnableBeta build flag: %s", err))
+		}
+
+		beta = v
+
+	case len(os.Getenv("UMEE_ENABLE_BETA")) > 0:
+		// Handle the case where an env var is provided, which is used when running
+		// with Starport where we cannot control build flags/inputs.
+		v, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
+		if err != nil {
+			panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+		}
+
+		beta = v
 	}
 
 	var (
 		encodingConfig params.EncodingConfig
 		moduleManager  module.BasicManager
 	)
-	if enableBeta {
+	if beta {
 		encodingConfig = umeeappbeta.MakeEncodingConfig()
 		moduleManager = umeeappbeta.ModuleBasics
 	} else {
@@ -74,7 +97,7 @@ towards borrowing assets on another blockchain.`,
 	ac := appCreator{
 		encCfg:        encodingConfig,
 		moduleManager: moduleManager,
-		beta:          enableBeta,
+		beta:          beta,
 	}
 
 	initRootCmd(rootCmd, ac)
