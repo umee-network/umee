@@ -221,7 +221,7 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	s.Require().Equal(amount, sdk.ZeroInt())
 
 	// artifically reserve 200 umee
-	err := s.app.LeverageKeeper.IncreaseReserves(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	err := s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 	s.Require().NoError(err)
 
 	// get new reserves
@@ -413,7 +413,7 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 	lenderAddr, _ := s.initBorrowScenario()
 
 	// artifically reserve 200 umee
-	err := s.app.LeverageKeeper.IncreaseReserves(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	err := s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 	s.Require().NoError(err)
 
 	// Lender tries to borrow 1000 umee, insufficient balance because 200 of the
@@ -639,7 +639,7 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	s.Require().NoError(err)
 
 	// artificially set reserves
-	err = s.app.LeverageKeeper.IncreaseReserves(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
 	s.Require().NoError(err)
 
 	// expected token:uToken exchange rate
@@ -719,7 +719,7 @@ func (s *IntegrationTestSuite) TestBorrowUtilizationWithReserves() {
 	//   GetBorrowUtilization takes total borrows as input, and automatically retrieves module balance and reserves.
 
 	// Artificially set reserves to 300, leaving 700 lending pool available
-	err := s.app.LeverageKeeper.IncreaseReserves(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000))
+	err := s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000))
 	s.Require().NoError(err)
 
 	// Reserves = 300, module balance = 1000, total borrows = 0.
@@ -748,8 +748,8 @@ func (s *IntegrationTestSuite) TestBorrowUtilizationWithReserves() {
 	s.Require().NoError(err)
 	s.Require().Equal(util, sdk.OneDec())
 
-	// Artificially reserve additional 1k umee, to force edge cases and impossible scenarios below.
-	err = s.app.LeverageKeeper.IncreaseReserves(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
+	// Artificially set reserves to 1300 umee, to force edge cases and impossible scenarios below.
+	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 1300000000))
 	s.Require().NoError(err)
 
 	// Reserves = 1300, module balance = 300, total borrows = 2000.

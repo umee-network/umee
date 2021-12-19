@@ -8,6 +8,7 @@ const (
 	EventTypeBorrowAsset          = "borrow_asset"
 	EventTypeRepayBorrowedAsset   = "repay_borrowed_asset"
 	EventTypeLiquidate            = "liquidate_borrow_position"
+	EventTypeRepayBadDebt         = "repay_bad_debt"
 
 	EventAttrModule     = ModuleName
 	EventAttrLender     = "lender"

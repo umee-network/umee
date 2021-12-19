@@ -28,6 +28,8 @@ var (
 	KeyPrefixReserveAmount     = []byte{0x05}
 	KeyPrefixLastInterestTime  = []byte{0x06}
 	KeyPrefixExchangeRate      = []byte{0x07}
+	KeyPrefixBadDebtDenom      = []byte{0x08}
+	KeyPrefixBadDebtAddress    = []byte{0x09}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
@@ -132,4 +134,56 @@ func CreateExchangeRateKeyNoDenom() []byte {
 	var key []byte
 	key = append(key, KeyPrefixExchangeRate...)
 	return key
+}
+
+// CreateBadDebtDenomKey returns a KVStore key for tracking a denom with unpaid bad debt
+func CreateBadDebtDenomKey(denom string) []byte {
+	// badDebtDenomPrefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixBadDebtDenom...)
+	key = append(key, []byte(denom)...)
+	return key
+}
+
+// CreateBadDebtDenomKeyNoDenom returns a safe copy of badDebtDenomPrefix
+func CreateBadDebtDenomKeyNoDenom() []byte {
+	// badDebtDenomPrefix
+	var key []byte
+	key = append(key, KeyPrefixBadDebtDenom...)
+	return key
+}
+
+// CreateBadDebtAddressKey returns a KVStore key for tracking a denom with unpaid bad debt
+func CreateBadDebtAddressKey(denom string, borrowerAddr sdk.AccAddress) []byte {
+	// badDebtAddrPrefix | lengthprefixed(denom) | borrowerAddr
+	var key []byte
+	key = append(key, KeyPrefixBadDebtAddress...)
+	key = append(key, LengthPrefixDenom(denom)...)
+	key = append(key, borrowerAddr...)
+	return key
+}
+
+// CreateBadDebtAddressKeyNoAddress returns a KVStore key for iterating over a debom's bad debt
+func CreateBadDebtAddressKeyNoAddress(denom string) []byte {
+	// badDebtAddrPrefix | lengthprefixed(denom)
+	var key []byte
+	key = append(key, KeyPrefixBadDebtAddress...)
+	key = append(key, LengthPrefixDenom(denom)...)
+	return key
+}
+
+// LengthPrefixDenom matches the functionality of address.MustLengthPrefix,
+// but we are using it for denoms here.
+func LengthPrefixDenom(denom string) []byte {
+	bz := []byte(denom)
+	bzLen := len(bz)
+	// Note: Valid denoms in cosmos are 3-128 characters
+	if bzLen == 0 {
+		panic("length cannot be 0 bytes")
+	}
+	if bzLen > 255 {
+
+		panic("length cannot exceed 255 bytes")
+	}
+	return append([]byte{byte(bzLen)}, bz...)
 }
