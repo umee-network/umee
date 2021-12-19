@@ -163,15 +163,5 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/leverage module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	height := ctx.BlockHeight()
-	epoch := am.keeper.GetParams(ctx).InterestEpoch
-	if height%epoch == 0 {
-		if err := am.keeper.AccrueAllInterest(ctx); err != nil {
-			panic(err)
-		}
-		if err := am.keeper.UpdateExchangeRates(ctx); err != nil {
-			panic(err)
-		}
-	}
-	return []abci.ValidatorUpdate{}
+	return EndBlocker(ctx, am.keeper)
 }

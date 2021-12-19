@@ -19,7 +19,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	umeeparams "github.com/umee-network/umee/app/params"
 )
 
@@ -86,7 +86,7 @@ func NewOracleClient(
 		OracleAddrString:    oracleAddrString,
 		ValidatorAddr:       validatorAddr,
 		ValidatorAddrString: validatorAddrString,
-		Encoding:            umeeapp.MakeEncodingConfig(),
+		Encoding:            umeeappbeta.MakeEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
 		GRPCEndpoint:        grpcEndpoint,
 	}, nil
@@ -162,6 +162,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		}
 
 		oc.Logger.Info().
+			Uint32("tx_code", resp.Code).
 			Str("tx_hash", resp.TxHash).
 			Int64("tx_height", resp.Height).
 			Msg("successfully broadcasted tx")
