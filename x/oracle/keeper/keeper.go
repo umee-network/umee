@@ -152,7 +152,8 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		denom := string(iter.Key()[len(types.ExchangeRateKey):])
+		key := iter.Key()
+		denom := string(key[len(types.ExchangeRateKey) : len(key)-1])
 		dp := sdk.DecProto{}
 
 		k.cdc.MustUnmarshal(iter.Value(), &dp)
