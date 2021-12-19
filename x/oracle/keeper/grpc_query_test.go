@@ -8,11 +8,6 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-const (
-	exchangeRate      string = "umee"
-	exchangeRateDenom string = "uumee"
-)
-
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
 	res, err := s.queryClient.ActiveExchangeRates(context.Background(), &types.QueryActiveExchangeRatesRequest{})
@@ -22,12 +17,18 @@ func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
-	res, err := s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{
-		Denom: exchangeRateDenom,
+	res, err := s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{})
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.DecCoins{
+		sdk.NewDecCoinFromDec(exchangeRate, sdk.OneDec()),
+	}, res.ExchangeRates)
+
+	res, err = s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{
+		Denom: exchangeRate,
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(exchangeRateDenom, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(exchangeRate, sdk.OneDec()),
 	}, res.ExchangeRates)
 }
 
