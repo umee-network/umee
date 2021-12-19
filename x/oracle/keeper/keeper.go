@@ -69,7 +69,22 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.GetExchangeRateKey(symbol))
+	if b == nil {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, symbol)
+	}
+
+	decProto := sdk.DecProto{}
+	k.cdc.MustUnmarshal(b, &decProto)
+
+	return decProto.Dec, nil
+}
+
+// GetExchangeRateBase gets the consensus exchange rate of an asset
+// in the base denom (e.g. ATOM -> uatom)
+func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	if denom == types.USDDenom {
 		return sdk.OneDec(), nil
 	}
@@ -88,27 +103,10 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 	}
 
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.GetExchangeRateKey(symbol))
-	if b == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
-	}
-
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
-
-	return decProto.Dec, nil
-}
-
-// GetExchangeRateBase gets the consensus exchange rate of an asset
-// in the base denom (e.g. ATOM -> uatom)
-func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	exchangeRate, err := k.GetExchangeRate(ctx, denom)
+	exchangeRate, err := k.GetExchangeRate(ctx, symbol)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-
-	params := k.GetParams(ctx)
 
 	for _, acceptedDenom := range params.AcceptList {
 		if denom == acceptedDenom.BaseDenom {
