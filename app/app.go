@@ -91,12 +91,10 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	"github.com/umee-network/umee/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
 	"github.com/umee-network/umee/x/peggy"
 	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
+	// leverageclient "github.com/umee-network/umee/x/leverage/client"
 	// leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	// "github.com/umee-network/umee/x/leverage"
 	// leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
@@ -149,7 +147,6 @@ var (
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		// leverage.AppModuleBasic{},
-		oracle.AppModuleBasic{},
 		peggy.AppModuleBasic{},
 	)
 
@@ -162,9 +159,8 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
-		oracletypes.ModuleName:         nil,
-		// leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		peggytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -216,9 +212,8 @@ type UmeeApp struct {
 	TransferKeeper   uibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
-	PeggyKeeper      peggykeeper.Keeper
-	OracleKeeper     oraclekeeper.Keeper
 	// LeverageKeeper   leveragekeeper.Keeper
+	PeggyKeeper peggykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -260,7 +255,6 @@ func New(
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, peggytypes.StoreKey,
 		// leveragetypes.StoreKey,
-		oracletypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -408,16 +402,6 @@ func New(
 		app.BankKeeper,
 		app.SlashingKeeper,
 	)
-	app.OracleKeeper = oraclekeeper.NewKeeper(
-		appCodec,
-		keys[oracletypes.ModuleName],
-		app.GetSubspace(oracletypes.ModuleName),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.DistrKeeper,
-		app.StakingKeeper,
-		distrtypes.ModuleName,
-	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
@@ -499,7 +483,6 @@ func New(
 		transferModule,
 		// leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -518,7 +501,6 @@ func New(
 		ibchost.ModuleName,
 		// leveragetypes.ModuleName,
 		peggytypes.ModuleName,
-		oracletypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -527,7 +509,6 @@ func New(
 		// leveragetypes.ModuleName,
 		stakingtypes.ModuleName,
 		peggytypes.ModuleName,
-		oracletypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -554,7 +535,6 @@ func New(
 		feegrant.ModuleName,
 		// leveragetypes.ModuleName,
 		peggytypes.ModuleName,
-		oracletypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -773,7 +753,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(peggytypes.ModuleName)
-	paramsKeeper.Subspace(oracletypes.ModuleName)
 
 	return paramsKeeper
 }
@@ -784,7 +763,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
-		// TODO: Add handler for UpdateRegistryProposal
+		// leverageclient.ProposalHandler,
 	}
 }
 
