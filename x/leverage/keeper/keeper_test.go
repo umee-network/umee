@@ -430,8 +430,8 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
 	s.Require().Error(err)
 
-	// lender borrows 100 umee
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	// lender borrows 800 umee
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 800000000))
 	s.Require().NoError(err)
 }
 
