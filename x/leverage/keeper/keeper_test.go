@@ -629,6 +629,60 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9800000000))
 }
 
+func (s *IntegrationTestSuite) TestRepayBadDebt() {
+	_, bumAddr := s.initBorrowScenario()
+
+	// The "bum" user from the init scenario is being used because it
+	// has no assets or collateral.
+
+	// Create an uncollateralized debt position
+	badDebt := sdk.NewInt64Coin(umeeapp.BondDenom, 100000000) // 100 umee
+	err := s.app.LeverageKeeper.SetBorrow(s.ctx, bumAddr, badDebt)
+	s.Require().NoError(err)
+
+	// Manually mark the bad debt for repayment
+	s.app.LeverageKeeper.SetBadDebtDenom(s.ctx, umeeapp.BondDenom, true)
+	s.app.LeverageKeeper.SetBadDebtAddress(s.ctx, umeeapp.BondDenom, bumAddr, true)
+
+	// Manually set reserves to 60 umee
+	reserve := sdk.NewInt64Coin(umeeapp.BondDenom, 60000000)
+	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, reserve)
+	s.Require().NoError(err)
+
+	// Sweep all bad debts, which should repay 60 umee of the bad debt (partial repayment)
+	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
+	s.Require().NoError(err)
+
+	// Confirm that a debt of 40 umee remains
+	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, bumAddr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 40000000), remainingDebt)
+
+	// Confirm that reserves are exhausted
+	remainingReserve := s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
+	s.Require().Equal(sdk.ZeroInt(), remainingReserve)
+
+	// Manually set reserves to 70 umee
+	reserve = sdk.NewInt64Coin(umeeapp.BondDenom, 70000000)
+	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, reserve)
+	s.Require().NoError(err)
+
+	// Sweep all bad debts, which should fully repay the bad debt this time
+	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
+	s.Require().NoError(err)
+
+	// Confirm that the debt is eliminated
+	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, bumAddr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 0), remainingDebt)
+
+	// Confirm that reserves are now at 30 umee
+	remainingReserve = s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt(30000000), remainingReserve)
+
+	// Sweep all bad debts - but there are none
+	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
+	s.Require().NoError(err)
+}
+
 func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	// The init scenario is being used so module balance starts at 1000 umee
 	// and the uToken supply starts at 1000 due to lender account
