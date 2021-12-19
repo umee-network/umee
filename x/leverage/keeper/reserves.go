@@ -117,30 +117,47 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 	newBorrowed := borrowed.SubAmount(amountToRepay)
 	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))
 
-	if err := k.SetBorrow(ctx, borrowerAddr, newBorrowed); err != nil {
-		return false, err
+	if amountToRepay.IsPositive() {
+		if err := k.SetBorrow(ctx, borrowerAddr, newBorrowed); err != nil {
+			return false, err
+		}
+
+		if err := k.SetReserveAmount(ctx, newReserved); err != nil {
+			return false, err
+		}
+
+		// Because this action is not caused by a message, logging and
+		// events are here instead of msg_server.go
+		k.Logger(ctx).Debug(
+			"bad debt repaid",
+			"borrower", borrowerAddr.String(),
+			"denom", denom,
+			"amount", amountToRepay.String(),
+		)
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeRepayBadDebt,
+				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+				sdk.NewAttribute(types.EventAttrDenom, denom),
+				sdk.NewAttribute(sdk.AttributeKeyAmount, amountToRepay.String()),
+			),
+		)
 	}
 
-	if err := k.SetReserveAmount(ctx, newReserved); err != nil {
-		return false, err
+	if newBorrowed.IsPositive() {
+		k.Logger(ctx).Debug(
+			"reserves exhausted",
+			"denom", denom,
+		)
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeReservesExhausted,
+				sdk.NewAttribute(types.EventAttrDenom, denom),
+			),
+		)
 	}
-
-	// Because this action is not caused by a message, logging and events are here instead of msg_server.go
-	k.Logger(ctx).Debug(
-		"bad debt repaid",
-		"borrower", borrowerAddr.String(),
-		"denom", denom,
-		"amount", amountToRepay.String(),
-	)
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeRepayBadDebt,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(types.EventAttrDenom, denom),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, amountToRepay.String()),
-		),
-	)
 
 	// True is returned on full repayment
 	return newBorrowed.IsZero(), nil

@@ -75,6 +75,8 @@ No new message types are required for bad debt repayment, as it is automatic.
 
 The function `RepayBadDebt` must create event `EventRepayBadDebt` and logs for each borrowed asset it repays, recording address, denom, and amount.
 
+An additional event `ReservesExhausted` will be created to monitor for that specific edge case. It should record the `denom` for which repayment failed.
+
 ### Edge Cases
 
 There are two edge cases that would allow bad debt to slip past detection or automatic repayment:
