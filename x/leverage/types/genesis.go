@@ -3,11 +3,7 @@ package types
 // DefaultGenesis returns the default genesis state of the x/leverage module.
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		Params: Params{
-			InterestEpoch:                defaultInterestEpoch,
-			CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
-			MinimumCloseFactor:           defaultMinimumCloseFactor,
-		},
+		Params:   DefaultParams(),
 		Registry: []Token{},
 	}
 }
