@@ -146,11 +146,25 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 	if amountFromCollateral.IsPositive() {
 		if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
-			// TODO: Calculate lender's borrow limit and current borrowed value, if any.
-			// Prevent withdrawing collateral when it would bring user borrow limit below
-			// current borrowed value.
-			//
-			// ref: https://github.com/umee-network/umee/issues/213
+			// Calculate current borrowed value
+			borrowed := k.GetBorrowerBorrows(ctx, lenderAddr)
+			borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
+			if err != nil {
+				return err
+			}
+
+			// Calculate what borrow limit will be AFTER this withdrawal
+			collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
+			collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromCollateral))
+			newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
+			if err != nil {
+				return err
+			}
+
+			// Return error if borrow limit would drop below borrowed value
+			if borrowedValue.GT(newBorrowLimit) {
+				return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
+			}
 
 			// reduce the lender's collateral by amountFromCollateral
 			currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
@@ -208,26 +222,34 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 	}
 
 	// Determine amount of all tokens currently borrowed
-	currentlyBorrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+
+	// Calculate current borrow limit
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
 
-	// Retrieve borrower's account balance.
-	// accountBalance := k.bankKeeper.GetAllBalances(ctx, borrowerAddr)
+	// Calculate borrowed value will be AFTER this borrow
+	newBorrowedValue, err := k.TotalTokenValue(ctx, borrowed.Add(borrow))
+	if err != nil {
+		return err
+	}
 
-	// TODO #213: Use oracle to compute borrow limit and current borrowed value.
-	// Prevent borrows that exceed borrow limit.
+	// Return error if borrowed value would exceed borrow limit
+	if newBorrowedValue.GT(borrowLimit) {
+		return sdkerrors.Wrap(types.ErrBorrowLimitLow, borrowLimit.String())
+	}
 
-	// Note: Prior to oracle implementation, we cannot compare loan value to borrow limit
 	loanTokens := sdk.NewCoins(borrow)
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
 		return err
 	}
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
-	totalBorrowed := currentlyBorrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, totalBorrowed))
+	newBorrow := borrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
+	err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow))
 	if err != nil {
 		return err
 	}
@@ -287,9 +309,6 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	// TODO #213: If enable=false, use oracle to compute current borrowed value and borrow limit after disable.
-	// Prevent disabling collateral when it would bring user borrow limit below current borrowed value.
-
 	if enable {
 		// Enabling a denom of uTokens as collateral deposits any in the user's current
 		// balance into the module account and remembers the amount held.
@@ -307,6 +326,26 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 			}
 		}
 	} else {
+		// Determine currently borrowed value
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+		borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
+		if err != nil {
+			return err
+		}
+
+		// Determine what borrow limit would be AFTER disabling this denom as collateral
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+		collateralToDisable := sdk.NewCoins(sdk.NewCoin(denom, collateral.AmountOf(denom)))
+		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToDisable))
+		if err != nil {
+			return err
+		}
+
+		// Return error if borrow limit would drop below borrowed value
+		if newBorrowLimit.GT(borrowedValue) {
+			return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
+		}
+
 		// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
 		// from the module account and returns it to the user
 		currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, denom)
@@ -363,16 +402,10 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// get total borrowed by borrower (all denoms)
-	borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	if err != nil {
-		return sdk.ZeroInt(), sdk.ZeroInt(), err
-	}
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 
 	// get borrower uToken balances, for all uToken denoms enabled as collateral
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	if err != nil {
-		return sdk.ZeroInt(), sdk.ZeroInt(), err
-	}
 
 	// use oracle helper functions to find total borrowed value in USD
 	borrowValue, err := k.TotalTokenValue(ctx, borrowed)
