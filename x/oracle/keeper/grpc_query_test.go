@@ -8,25 +8,19 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
-func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	const (
-		exchangeRate = "umee"
-	)
-	app, ctx := s.app, s.ctx
+const (
+	exchangeRate      = "umee"
+	exchangeRateDenom = "uumee"
+)
 
-	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
+func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
 	_, err := s.queryClient.ActiveExchangeRates(context.Background(), &types.QueryActiveExchangeRatesRequest{})
 	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	const (
-		exchangeRate      = "umee"
-		exchangeRateDenom = "uumee"
-	)
-	app, ctx := s.app, s.ctx
-
-	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
 	res, err := s.queryClient.ExchangeRates(context.Background(), &types.QueryExchangeRatesRequest{
 		Denom: exchangeRateDenom,
 	})
@@ -37,18 +31,16 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
-	app, ctx := s.app, s.ctx
-
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
-	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
-	app.AccountKeeper.SetAccount(ctx, feederAcc)
+	feederAcc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, feederAddr)
+	s.app.AccountKeeper.SetAccount(s.ctx, feederAcc)
 
-	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
+	err := s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
 	s.Require().Error(err)
 
-	s.app.OracleKeeper.SetFeederDelegation(ctx, valAddr, feederAddr)
+	s.app.OracleKeeper.SetFeederDelegation(s.ctx, valAddr, feederAddr)
 
-	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
+	err = s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
 	s.Require().NoError(err)
 
 	_, err = s.queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
@@ -58,7 +50,6 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
-	app, ctx := s.app, s.ctx
 	missCounter := uint64(rand.Intn(100))
 
 	res, err := s.queryClient.MissCounter(context.Background(), &types.QueryMissCounterRequest{
@@ -67,7 +58,7 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	s.Require().NoError(err)
 	s.Require().Equal(res.MissCounter, uint64(0))
 
-	app.OracleKeeper.SetMissCounter(ctx, valAddr, missCounter)
+	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, missCounter)
 
 	res, err = s.queryClient.MissCounter(context.Background(), &types.QueryMissCounterRequest{
 		ValidatorAddr: valAddr.String(),
@@ -77,16 +68,14 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
-	app, ctx := s.app, s.ctx
-
 	prevote := types.AggregateExchangeRatePrevote{
 		Hash:        "hash",
 		Voter:       addr.String(),
 		SubmitBlock: 0,
 	}
-	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr, prevote)
+	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(s.ctx, valAddr, prevote)
 
-	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(ctx, valAddr)
+	_, err := s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().NoError(err)
 
 	_, err = s.queryClient.AggregatePrevote(context.Background(), &types.QueryAggregatePrevoteRequest{
@@ -101,8 +90,6 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
-	app, ctx := s.app, s.ctx
-
 	var tuples types.ExchangeRateTuples
 	tuples = append(tuples, types.ExchangeRateTuple{
 		Denom:        "UMEE",
@@ -113,7 +100,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 		ExchangeRateTuples: tuples,
 		Voter:              addr.String(),
 	}
-	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
 
 	_, err := s.queryClient.AggregateVote(context.Background(), &types.QueryAggregateVoteRequest{
 		ValidatorAddr: valAddr.String(),
