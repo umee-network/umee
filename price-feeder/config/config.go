@@ -75,7 +75,7 @@ type (
 	// Keyring defines the required Umee keyring configuration.
 	Keyring struct {
 		Backend string `toml:"backend" validate:"required"`
-		Pass    string `toml:"pass" validate:"required"`
+		Pass    string `toml:"pass"`
 		Dir     string `toml:"dir" validate:"required"`
 	}
 

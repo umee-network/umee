@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
@@ -9,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingcli "github.com/cosmos/cosmos-sdk/x/auth/vesting/client/cli"
@@ -20,12 +23,52 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/app/params"
 )
 
+// EnableBeta defines an ldflag that enables the beta version of the application
+// to be built.
+var EnableBeta string
+
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	encodingConfig := app.MakeEncodingConfig()
+	var beta bool
+
+	switch {
+	case len(EnableBeta) > 0:
+		// Handle the case where a build flag is provided, which used when building
+		// the binary.
+		v, err := strconv.ParseBool(EnableBeta)
+		if err != nil {
+			panic(fmt.Sprintf("failed to parse EnableBeta build flag: %s", err))
+		}
+
+		beta = v
+
+	case len(os.Getenv("UMEE_ENABLE_BETA")) > 0:
+		// Handle the case where an env var is provided, which is used when running
+		// with Starport where we cannot control build flags/inputs.
+		v, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
+		if err != nil {
+			panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
+		}
+
+		beta = v
+	}
+
+	var (
+		encodingConfig params.EncodingConfig
+		moduleManager  module.BasicManager
+	)
+	if beta {
+		encodingConfig = umeeappbeta.MakeEncodingConfig()
+		moduleManager = umeeappbeta.ModuleBasics
+	} else {
+		encodingConfig = app.MakeEncodingConfig()
+		moduleManager = app.ModuleBasics
+	}
+
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -51,21 +94,27 @@ towards borrowing assets on another blockchain.`,
 		},
 	}
 
-	initRootCmd(rootCmd, encodingConfig)
+	ac := appCreator{
+		encCfg:        encodingConfig,
+		moduleManager: moduleManager,
+		beta:          beta,
+	}
+
+	initRootCmd(rootCmd, ac)
 
 	return rootCmd, encodingConfig
 }
 
-func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
+func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 	rootCmd.AddCommand(
 		addGenesisAccountCmd(app.DefaultNodeHome),
-		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+		genutilcli.InitCmd(ac.moduleManager, app.DefaultNodeHome),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
-		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
+		genutilcli.ValidateGenesisCmd(ac.moduleManager),
 		genutilcli.GenTxCmd(
-			app.ModuleBasics,
-			encodingConfig.TxConfig,
+			ac.moduleManager,
+			ac.encCfg.TxConfig,
 			banktypes.GenesisBalancesIterator{},
 			app.DefaultNodeHome,
 		),
@@ -73,16 +122,13 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		debug.Cmd(),
 	)
 
-	ac := appCreator{
-		encCfg: encodingConfig,
-	}
 	server.AddCommands(rootCmd, app.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
-		queryCommand(),
-		txCommand(),
+		queryCommand(ac),
+		txCommand(ac),
 		keys.Commands(app.DefaultNodeHome),
 	)
 }
@@ -91,7 +137,7 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
 }
 
-func queryCommand() *cobra.Command {
+func queryCommand(ac appCreator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "query",
 		Aliases:                    []string{"q"},
@@ -109,13 +155,13 @@ func queryCommand() *cobra.Command {
 		authcmd.QueryTxCmd(),
 	)
 
-	app.ModuleBasics.AddQueryCommands(cmd)
+	ac.moduleManager.AddQueryCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
 
-func txCommand() *cobra.Command {
+func txCommand(ac appCreator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "tx",
 		Short:                      "Transactions sub-commands",
@@ -137,7 +183,7 @@ func txCommand() *cobra.Command {
 		vestingcli.GetTxCmd(),
 	)
 
-	app.ModuleBasics.AddTxCommands(cmd)
+	ac.moduleManager.AddTxCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd

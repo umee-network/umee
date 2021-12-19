@@ -536,8 +536,8 @@ func New(
 		ibctransfertypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
-		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
+		leveragetypes.ModuleName,
 		peggytypes.ModuleName,
 	)
 

@@ -21,6 +21,10 @@ ifeq (,$(VERSION))
   endif
 endif
 
+ifneq (,$(UMEE_ENABLE_BETA))
+	VERSION := $(VERSION)-beta
+endif
+
 ###############################################################################
 ##                                   Build                                   ##
 ###############################################################################
@@ -62,7 +66,8 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
+			-X github.com/umee-network/umee/cmd/umeed/cmd.EnableBeta=$(UMEE_ENABLE_BETA)
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
