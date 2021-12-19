@@ -9,14 +9,15 @@ import (
 )
 
 const (
-	exchangeRate      = "umee"
-	exchangeRateDenom = "uumee"
+	exchangeRate      string = "umee"
+	exchangeRateDenom string = "uumee"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
-	_, err := s.queryClient.ActiveExchangeRates(context.Background(), &types.QueryActiveExchangeRatesRequest{})
+	res, err := s.queryClient.ActiveExchangeRates(context.Background(), &types.QueryActiveExchangeRatesRequest{})
 	s.Require().NoError(err)
+	s.Require().Equal([]string{exchangeRate}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
@@ -43,10 +44,11 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	err = s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
 	s.Require().NoError(err)
 
-	_, err = s.queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
+	res, err := s.queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
+	s.Require().Equal(feederAddr.String(), res.FeederAddr)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
@@ -75,17 +77,24 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(s.ctx, valAddr, prevote)
 
-	_, err := s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
+	res, err := s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().NoError(err)
+	s.Require().Equal(prevote, res)
 
-	_, err = s.queryClient.AggregatePrevote(context.Background(), &types.QueryAggregatePrevoteRequest{
+	queryRes, err := s.queryClient.AggregatePrevote(context.Background(), &types.QueryAggregatePrevoteRequest{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
+	s.Require().Equal(types.AggregateExchangeRatePrevote{
+		Hash:        "hash",
+		Voter:       addr.String(),
+		SubmitBlock: 0,
+	}, queryRes.AggregatePrevote)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
-	_, err := s.queryClient.AggregatePrevotes(context.Background(), &types.QueryAggregatePrevotesRequest{})
+	res, err := s.queryClient.AggregatePrevotes(context.Background(), &types.QueryAggregatePrevotesRequest{})
+	s.Require().Equal([]types.AggregateExchangeRatePrevote(nil), res.AggregatePrevotes)
 	s.Require().NoError(err)
 }
 
@@ -102,18 +111,24 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
 
-	_, err := s.queryClient.AggregateVote(context.Background(), &types.QueryAggregateVoteRequest{
+	res, err := s.queryClient.AggregateVote(context.Background(), &types.QueryAggregateVoteRequest{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
+	s.Require().Equal(types.AggregateExchangeRateVote{
+		ExchangeRateTuples: tuples,
+		Voter:              addr.String(),
+	}, res.AggregateVote)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotes() {
-	_, err := s.queryClient.AggregateVotes(context.Background(), &types.QueryAggregateVotesRequest{})
+	res, err := s.queryClient.AggregateVotes(context.Background(), &types.QueryAggregateVotesRequest{})
 	s.Require().NoError(err)
+	s.Require().Equal([]types.AggregateExchangeRateVote(nil), res.AggregateVotes)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	_, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+	res, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
+	s.Require().Equal(types.DefaultGenesisState().Params, res.Params)
 }
