@@ -173,7 +173,7 @@ func CreateBadDebtAddressKeyNoAddress(denom string) []byte {
 }
 
 // LengthPrefixDenom matches the functionality of address.MustLengthPrefix,
-// but we are using it for denoms here.
+// but we are using it for denoms here, and also forbid len=0
 func LengthPrefixDenom(denom string) []byte {
 	bz := []byte(denom)
 	bzLen := len(bz)
