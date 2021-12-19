@@ -48,7 +48,7 @@ func (k Keeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 }
 
 // SweepBadDebts attempts to repay all bad debts in the system, efficiently
-// stopping for any denomination where reserves become inqdequate. It should be
+// stopping for any denomination where reserves become exhausted. It should be
 // called every Interest Epoch.
 func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
