@@ -77,7 +77,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
-func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.CreateLoanKeyNoDenom(borrowerAddr)
 
@@ -94,7 +94,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled loan amount should never happen
-			return sdk.NewCoins(), err
+			panic(err)
 		}
 
 		// for each loan found, add it to totalBorrowed
@@ -102,7 +102,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 	}
 
 	totalBorrowed.Sort()
-	return totalBorrowed, nil
+	return totalBorrowed
 }
 
 // GetBorrowUtilization derives the current borrow utilization of an asset type

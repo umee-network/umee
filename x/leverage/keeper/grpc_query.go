@@ -82,10 +82,7 @@ func (q Querier) Borrowed(
 	}
 
 	if len(req.Denom) == 0 {
-		tokens, err := q.Keeper.GetBorrowerBorrows(ctx, borrower)
-		if err != nil {
-			return nil, err
-		}
+		tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
 
 		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
 	}
