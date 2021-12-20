@@ -142,7 +142,7 @@ func CreateBadDebtDenomKey(denom string) []byte {
 	var key []byte
 	key = append(key, KeyPrefixBadDebtDenom...)
 	key = append(key, []byte(denom)...)
-	return key
+	return append(key, 0) // append 0 for null-termination
 }
 
 // CreateBadDebtDenomKeyNoDenom returns a safe copy of badDebtDenomPrefix
