@@ -384,8 +384,7 @@ func GenerateSalt(length int) (string, error) {
 		return "", fmt.Errorf("failed to generate salt: zero length")
 	}
 
-	n := length / 2
-	bytes := make([]byte, n)
+	bytes := make([]byte, length)
 
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
