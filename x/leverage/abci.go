@@ -13,6 +13,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
 	epoch := k.GetParams(ctx).InterestEpoch
 
 	if height%epoch == 0 {
+		if err := k.SweepBadDebts(ctx); err != nil {
+			panic(err)
+		}
+
 		if err := k.AccrueAllInterest(ctx); err != nil {
 			panic(err)
 		}

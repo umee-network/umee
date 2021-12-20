@@ -3,6 +3,7 @@
 ## Changelog
 
 - December 10, 2021: Initial Draft (@toteki)
+- December 19, 2021: Updated with simplified implemenation (@toteki)
 
 ## Status
 
@@ -48,25 +49,21 @@ Also note that the first decision on the condition for bad debt repayment eligib
 
 The simplest way to implement bad debt repayment is as follows:
 
-At the end of `LiquidateBorrow`, which is triggered by `MsgLiquidate`, the `borrowerAddress` in question is checked for `Collateral Value == 0`. If true, a separate function `RepayBadDebt(borrowerAddress)` is called.
+The function `RepayBadDebt(borrowerAddress, denom)` immediately repays any remaining borrows on the address in question, or repays the maximum available amount for any borrowed asset denomination where the borrowed amount exceeds available reserves.
 
-The function `RepayBadDebt(borrowerAddress)` immediately repays any remaining borrows on the address in question, or repays the maximum available amount for any borrowed asset denomination where the borrowed amount exceeds available reserves.
-
-### Recovery from Exhausted Reserves
-
-When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, it stores information about the borrower and denomination in question so repayment can be completed later.
+At the end of `LiquidateBorrow`, which is triggered by `MsgLiquidate`, the `borrowerAddress` in question is checked for `Collateral Value == 0`. If true, the denom and address of the bad debt are stored.
 
 ```go
 // pseudocode
-// store a list of denominations with nonzero bad debt
-badDebtDenomPrefix | tokenDenom = true
-// store a list of borrow addresses with bad debt, sorted by denom
-badDebtAddressPrefix | lengthPrefixed(tokenDenom) | borrowerAddress = true
+// store a list of borrow addresses with bad debt
+badDebtPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true
 ```
 
-Then, every `InterestEpoch`, bad debt positions can be iterated through and repaid as reserves become available. Any `denom|address` that is fully repaid is cleared from the list, as well any `denom` which no longer has any associated bad debt addresses.
+Then, every `InterestEpoch`, bad debt positions can be iterated through and repaid using available reserves. Any `address|denom` that is fully repaid is cleared from the list.
 
-Keeping a list of denominations in addition to addresses enables the iteration to efficiently skip denoms whose reserves are still zero, thus only reading addresses with bad debt that can actually be repaid at the time.
+### Recovery from Exhausted Reserves
+
+When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, the  address in question remains in the list, so it will be attempted again next `InterestEpoch`.
 
 ### Messages, Events, and Logs
 
@@ -74,7 +71,7 @@ No new message types are required for bad debt repayment, as it is automatic.
 
 The function `RepayBadDebt` must create event `EventRepayBadDebt` and logs for each borrowed asset it repays, recording address, denom, and amount.
 
-An additional event `ReservesExhausted` could be created to monitor for that specific edge case. It should record the `denom`, `borrowerAddress`, and remaining `BorrowedAmount` for any borrow that `RepayBadDebt` fails to repay.
+An additional event `ReservesExhausted` will be created to monitor for that specific edge case. It should record the `denom` for which repayment failed.
 
 ### Edge Cases
 
@@ -84,9 +81,7 @@ There are two edge cases that would allow bad debt to slip past detection or aut
 
 This could be solved by any Liquidator - but if undercollateralized borrowers are being left for long periods without being completely liquidated, then a bot could be set up to finish them, even if that bot is controlled by Umee.
 
-- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will not be targeted again (as with zero collateral, no `LiquidateBorrow` will occur in the future).
-
-This edge case is handled by storing bad un-handled bad debt addresses using `BadDebtAddressPrefix`.
+- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will be attempted every `InterestEpoch` until successful.
 
 ## Consequences
 
