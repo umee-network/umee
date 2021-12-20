@@ -29,7 +29,7 @@ import (
 // and broadcast pre-vote and vote transactions such that they're committed in a
 // block during each voting period.
 const (
-	tickerTimeout = 2250 * time.Millisecond
+	tickerTimeout = 1000 * time.Millisecond
 )
 
 // CurrencyPair defines a currency exchange pair consisting of a base and a quote.
