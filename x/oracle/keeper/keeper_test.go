@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -24,7 +25,7 @@ import (
 )
 
 const (
-	exchangeRate string = "umee"
+	exchangeRate string = "UMEE"
 )
 
 type IntegrationTestSuite struct {
@@ -208,6 +209,11 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 
 	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	s.Require().NoError(err)
+	s.Require().Equal(rate, sdk.OneDec())
+
+	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(exchangeRate), sdk.OneDec())
+	rate, err = app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
 }
