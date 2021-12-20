@@ -51,8 +51,18 @@ func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice
 		return nil, err
 	}
 
-	for _, r := range records[1:] { // skip header row
+	tickerMap := make(map[string]struct{})
+	for _, t := range tickers {
+		tickerMap[t] = struct{}{}
+	}
+
+	// Records are of the form [base, quote, price, volume] and we skip the first
+	// record as that contains the header.
+	for _, r := range records[1:] {
 		ticker := r[0] + r[1]
+		if _, ok := tickerMap[ticker]; !ok {
+			continue
+		}
 
 		price, err := sdk.NewDecFromStr(r[2])
 		if err != nil {
