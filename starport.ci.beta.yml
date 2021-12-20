@@ -9,8 +9,8 @@ genesis:
         bond_denom: "uumee"
     leverage:
       registry:
-        - base_denom: "ibc/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-          symbol_denom: "atom"
+        - base_denom: "uumee"
+          symbol_denom: "UMEE"
           exponent: 6
           reserve_factor: "0.100000000000000000"
           collateral_weight: "0.050000000000000000"
