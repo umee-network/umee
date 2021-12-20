@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -71,6 +72,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
+	symbol = strings.ToUpper(symbol)
 	b := store.Get(types.GetExchangeRateKey(symbol))
 	if b == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, symbol)
@@ -122,6 +124,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
+	denom = strings.ToUpper(denom)
 	store.Set(types.GetExchangeRateKey(denom), bz)
 }
 
