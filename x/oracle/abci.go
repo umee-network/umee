@@ -112,34 +112,38 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	return nil
 }
 
-// Tally calculates the median and returns it. Sets the set of voters to be rewarded, i.e. voted within
-// a reasonable spread from the weighted median to the store
-func Tally(ctx sdk.Context,
-	pb types.ExchangeRateBallot,
+// Tally calculates the median and returns it. It sets the set of voters to be
+// rewarded, i.e. voted within a reasonable spread from the weighted median to
+// the store. Note, the ballot is sorted by ExchangeRate.
+func Tally(
+	ctx sdk.Context,
+	ballot types.ExchangeRateBallot,
 	rewardBand sdk.Dec,
 	validatorClaimMap map[string]types.Claim,
 ) (sdk.Dec, error) {
-	weightedMedian := pb.WeightedMedian()
-	standardDeviation, err := pb.StandardDeviation()
+	weightedMedian := ballot.WeightedMedian()
+	standardDeviation, err := ballot.StandardDeviation()
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
 
+	// rewardSpread is the MAX((weightedMedian * (rewardBand/2)), standardDeviation)
 	rewardSpread := weightedMedian.Mul(rewardBand.QuoInt64(2))
+	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
-	if standardDeviation.GT(rewardSpread) {
-		rewardSpread = standardDeviation
-	}
+	for _, tallyVote := range ballot {
+		// Filter ballot winners and abstain voters. For non-abstain voters, we
+		// filter out the tally vote iff:
+		// (weightedMedian - rewardSpread) <= ExchangeRate <= (weightedMedian + rewardSpread)
+		// or if the exchange rate is negative or zero.
+		if (tallyVote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
+			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
+			!tallyVote.ExchangeRate.IsPositive() {
 
-	for _, vote := range pb {
-		// Filter ballot winners & abstain voters
-		if (vote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
-			vote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
-			!vote.ExchangeRate.IsPositive() {
-
-			key := vote.Voter.String()
+			key := tallyVote.Voter.String()
 			claim := validatorClaimMap[key]
-			claim.Weight += vote.Power
+
+			claim.Weight += tallyVote.Power
 			claim.WinCount++
 			validatorClaimMap[key] = claim
 		}
