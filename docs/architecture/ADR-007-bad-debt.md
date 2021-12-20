@@ -55,19 +55,15 @@ At the end of `LiquidateBorrow`, which is triggered by `MsgLiquidate`, the `borr
 
 ```go
 // pseudocode
-// store a list of denominations with nonzero bad debt
-badDebtDenomPrefix | tokenDenom = true
-// store a list of borrow addresses with bad debt, sorted by denom
-badDebtAddressPrefix | lengthPrefixed(tokenDenom) | borrowerAddress = true
+// store a list of borrow addresses with bad debt
+badDebtPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true
 ```
 
-Then, every `InterestEpoch`, bad debt positions can be iterated through and repaid using available reserves. Any `denom|address` that is fully repaid is cleared from the list, as well any `denom` which no longer has any associated bad debt addresses.
-
-Keeping a list of denominations in addition to addresses enables the iteration to efficiently skip denoms whose reserves are still zero, thus only reading addresses with bad debt that can actually be repaid at the time.
+Then, every `InterestEpoch`, bad debt positions can be iterated through and repaid using available reserves. Any `address|denom` that is fully repaid is cleared from the list.
 
 ### Recovery from Exhausted Reserves
 
-When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, the denom and address in question remain in their lists, so they will be attempted again next `InterestEpoch`.
+When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, the  address in question remains in the list, so it will be attempted again next `InterestEpoch`.
 
 ### Messages, Events, and Logs
 
@@ -85,9 +81,7 @@ There are two edge cases that would allow bad debt to slip past detection or aut
 
 This could be solved by any Liquidator - but if undercollateralized borrowers are being left for long periods without being completely liquidated, then a bot could be set up to finish them, even if that bot is controlled by Umee.
 
-- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will not be targeted again (as with zero collateral, no `LiquidateBorrow` will occur in the future).
-
-This edge case is handled by storing bad un-handled bad debt addresses using `BadDebtAddressPrefix`.
+- Reserve exhaustion: If reserves are insufficient to fully repay bad debt at the moment `RepayBadDebt` is called, the remaining debt will be attempted every `InterestEpoch` until successful.
 
 ## Consequences
 

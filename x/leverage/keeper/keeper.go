@@ -496,7 +496,6 @@ func (k Keeper) LiquidateBorrow(
 			// this liquidation. All other borrowed denoms were definitely not
 			// repaid in this liquidation so they are always marked as bad debt.
 			if coin.Denom != repayment.Denom || owed.IsPositive() {
-				k.SetBadDebtDenom(ctx, coin.Denom, true)
 				k.SetBadDebtAddress(ctx, coin.Denom, borrowerAddr, true)
 			}
 		}

@@ -163,22 +163,10 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 	return limit, nil
 }
 
-// SetBadDebtDenom sets or deletes a denom in the module's list of denoms with unpaid bad debt.
-func (k Keeper) SetBadDebtDenom(ctx sdk.Context, denom string, hasDebt bool) {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBadDebtDenomKey(denom)
-
-	if hasDebt {
-		store.Set(key, []byte{0x01})
-	} else {
-		store.Delete(key)
-	}
-}
-
 // SetBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
 func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sdk.AccAddress, hasDebt bool) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBadDebtAddressKey(denom, borrowerAddr)
+	key := types.CreateBadDebtKey(denom, borrowerAddr)
 
 	if hasDebt {
 		store.Set(key, []byte{0x01})

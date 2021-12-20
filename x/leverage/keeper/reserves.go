@@ -53,50 +53,30 @@ func (k Keeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
 
-	// Outer iterator will iterate over all token denoms with bad debt
-	denomPrefix := types.CreateBadDebtDenomKeyNoDenom()
-	denomIter := sdk.KVStorePrefixIterator(store, denomPrefix)
-	defer denomIter.Close()
+	// Iterator will iterate over all addresses with bad debt
+	prefix := types.CreateBadDebtKeyNoAddress()
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	defer iter.Close()
 
-	for ; denomIter.Valid(); denomIter.Next() {
-		// denomKey is prefix | denom
-		denomKey := denomIter.Key()
-		denom := string(denomKey[len(denomPrefix) : len(denomKey)-1]) // remove prefix
+	for ; iter.Valid(); iter.Next() {
+		// key is prefix | lengthPrefixed(addr) | denom | 0x00
+		key := iter.Key()
 
-		// Inner iterator will iterator over a single denom's bad debt addresses
-		addrPrefix := types.CreateBadDebtAddressKeyNoAddress(denom)
-		addrIter := sdk.KVStorePrefixIterator(store, addrPrefix)
-		defer addrIter.Close()
+		// remove prefix | lengthPrefix and denom | 0x00
+		addr := key[len(prefix)+1 : len(prefix)+int(key[len(prefix)]+1)]
 
-		// Track whether this denom's reserves have failed to repay a bad debt
-		reservesExhausted := false
+		// remove prefix | lengthPrefixed(addr) and null-terminator
+		denom := string(key[len(prefix)+int(key[len(prefix)]+1) : len(key)-1])
 
-		// Iterate over addresses with bad debt until denom's reserves exhausted
-		for ; !reservesExhausted && addrIter.Valid(); addrIter.Next() {
-			// addrKey is prefix | lengthPrefixed(denom) | addr
-			addrKey := addrIter.Key()
-			addr := sdk.AccAddress(addrKey[len(addrPrefix):]) // remove prefix and denom
-
-			// attempt to repay a single address's debt in this denom
-			fullyRepaid, err := k.RepayBadDebt(ctx, addr, denom)
-			if err != nil {
-				return err
-			}
-			if fullyRepaid {
-				// If the bad debt of this denom at the given address was fully repaid,
-				// clear the denom|address pair from this denom's bad debt address list
-				k.SetBadDebtAddress(ctx, denom, addr, false)
-			} else {
-				// If the debt was not fully repaid, reserves are exhausted and iteration
-				// over this denom should stop
-				reservesExhausted = true
-			}
+		// attempt to repay a single address's debt in this denom
+		fullyRepaid, err := k.RepayBadDebt(ctx, addr, denom)
+		if err != nil {
+			return err
 		}
-
-		if !reservesExhausted {
-			// If all bad debt for this denom was successfully repaid,
-			// clear the denom from the bad debt denoms list
-			k.SetBadDebtDenom(ctx, denom, false)
+		if fullyRepaid {
+			// If the bad debt of this denom at the given address was fully repaid,
+			// clear the address|denom pair from the bad debt address list
+			k.SetBadDebtAddress(ctx, denom, addr, false)
 		}
 	}
 	return nil
@@ -145,16 +125,21 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 		)
 	}
 
+	// Reserve exhaustion logs track any bad debts that were not repaid
 	if newBorrowed.IsPositive() {
 		k.Logger(ctx).Debug(
 			"reserves exhausted",
+			"borrower", borrowerAddr.String(),
 			"denom", denom,
+			"amount", newBorrowed.Amount.String(),
 		)
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeReservesExhausted,
+				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 				sdk.NewAttribute(types.EventAttrDenom, denom),
+				sdk.NewAttribute(sdk.AttributeKeyAmount, newBorrowed.Amount.String()),
 			),
 		)
 	}
