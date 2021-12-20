@@ -52,7 +52,8 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
 		cosmosante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
 		cosmosante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper),
-		cosmosante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
+		// SetPubKeyDecorator must be called before all signature verification decorators
+		cosmosante.NewSetPubKeyDecorator(options.AccountKeeper),
 		cosmosante.NewValidateSigCountDecorator(options.AccountKeeper),
 		cosmosante.NewSigGasConsumeDecorator(options.AccountKeeper, sigGasConsumer),
 		cosmosante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),

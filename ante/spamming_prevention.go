@@ -29,7 +29,12 @@ func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpammingPreventio
 }
 
 // AnteHandle handles msg tax fee checking
-func (spd SpammingPreventionDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
+func (spd SpammingPreventionDecorator) AnteHandle(
+	ctx sdk.Context,
+	tx sdk.Tx,
+	simulate bool,
+	next sdk.AnteHandler,
+) (newCtx sdk.Context, err error) {
 	if ctx.IsReCheckTx() {
 		return next(ctx, tx, simulate)
 	}
@@ -71,7 +76,10 @@ func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs
 			}
 
 			if lastSubmittedHeight, ok := spd.oraclePrevoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "the validator has already submitted a prevote at the current height")
+				return sdkerrors.Wrap(
+					sdkerrors.ErrInvalidRequest,
+					"the validator has already submitted a prevote at the current height",
+				)
 			}
 
 			spd.oraclePrevoteMap[msg.Validator] = curHeight
@@ -93,7 +101,10 @@ func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs
 			}
 
 			if lastSubmittedHeight, ok := spd.oracleVoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "the validator has already submitted a vote at the current height")
+				return sdkerrors.Wrap(
+					sdkerrors.ErrInvalidRequest,
+					"the validator has already submitted a vote at the current height",
+				)
 			}
 
 			spd.oracleVoteMap[msg.Validator] = curHeight
