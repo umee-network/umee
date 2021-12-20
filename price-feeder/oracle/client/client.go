@@ -75,7 +75,7 @@ func NewOracleClient(
 	}
 
 	return OracleClient{
-		Logger:              logger.With().Str("module", "oracleClient").Logger(),
+		Logger:              logger.With().Str("module", "oracle_client").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,
 		KeyringDir:          keyringDir,
