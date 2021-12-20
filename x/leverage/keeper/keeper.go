@@ -489,6 +489,18 @@ func (k Keeper) LiquidateBorrow(
 		}
 	}
 
+	// Detect bad debt (collateral == 0 after reward) for repayment by reserves next InterestEpoch
+	if collateral.Sub(sdk.NewCoins(reward)).IsZero() {
+		for _, coin := range borrowed {
+			// Mark repayment denom as bad debt only if some debt remains after
+			// this liquidation. All other borrowed denoms were definitely not
+			// repaid in this liquidation so they are always marked as bad debt.
+			if coin.Denom != repayment.Denom || owed.IsPositive() {
+				k.SetBadDebtAddress(ctx, coin.Denom, borrowerAddr, true)
+			}
+		}
+	}
+
 	return repayment.Amount, reward.Amount, nil
 }
 
