@@ -15,7 +15,6 @@ type HandlerOptions struct {
 	BankKeeper       types.BankKeeper
 	FeegrantKeeper   cosmosante.FeegrantKeeper
 	OracleKeeper     OracleKeeper
-	TreasuryKeeper   TreasuryKeeper
 	SignModeHandler  signing.SignModeHandler
 	SigGasConsumer   cosmosante.SignatureVerificationGasConsumer
 	IBCChannelKeeper channelkeeper.Keeper
@@ -37,10 +36,6 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "oracle keeper is required for ante builder")
 	}
 
-	if options.TreasuryKeeper == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "treasury keeper is required for ante builder")
-	}
-
 	if options.SignModeHandler == nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "sign mode handler is required for ante builder")
 	}
@@ -53,8 +48,8 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	return sdk.ChainAnteDecorators(
 		cosmosante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		cosmosante.NewRejectExtensionOptionsDecorator(),
+		NewMempoolFeeDecorator(),                             // mempool fee validation
 		NewSpammingPreventionDecorator(options.OracleKeeper), // spamming prevention
-		NewTaxFeeDecorator(options.TreasuryKeeper),           // mempool gas fee validation & record tax proceeds
 		cosmosante.NewValidateBasicDecorator(),
 		cosmosante.NewTxTimeoutHeightDecorator(),
 		cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
