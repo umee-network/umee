@@ -29,7 +29,7 @@ import (
 // and broadcast pre-vote and vote transactions such that they're committed in a
 // block during each voting period.
 const (
-	tickerTimeout = 2250 * time.Millisecond
+	tickerTimeout = 1000 * time.Millisecond
 )
 
 // CurrencyPair defines a currency exchange pair consisting of a base and a quote.
@@ -247,6 +247,8 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 }
 
 func (o *Oracle) tick() error {
+	o.logger.Debug().Msg("executing oracle tick")
+
 	clientCtx, err := o.oracleClient.CreateClientContext()
 	if err != nil {
 		return err
@@ -280,12 +282,24 @@ func (o *Oracle) tick() error {
 	// index [0, oracleVotePeriod - 1] > oracleVotePeriod - 2 OR index is 0
 	if (o.previousVotePeriod != 0 && currentVotePeriod == o.previousVotePeriod) ||
 		oracleVotePeriod-indexInVotePeriod < 2 {
+		o.logger.Info().
+			Int64("vote_period", oracleVotePeriod).
+			Float64("previous_vote_period", o.previousVotePeriod).
+			Float64("current_vote_period", currentVotePeriod).
+			Msg("skipping until next voting period")
+
 		return nil
 	}
 
 	// If we're past the voting period we needed to hit, reset and submit another
 	// prevote.
 	if o.previousVotePeriod != 0 && currentVotePeriod-o.previousVotePeriod != 1 {
+		o.logger.Info().
+			Int64("vote_period", oracleVotePeriod).
+			Float64("previous_vote_period", o.previousVotePeriod).
+			Float64("current_vote_period", currentVotePeriod).
+			Msg("missing vote during voting period")
+
 		o.previousVotePeriod = 0
 		o.previousPrevote = nil
 		return nil
@@ -315,6 +329,11 @@ func (o *Oracle) tick() error {
 		// but we give it some extra time just in case.
 		//
 		// Ref : https://github.com/terra-money/oracle-feeder/blob/baef2a4a02f57a2ffeaa207932b2e03d7fb0fb25/feeder/src/vote.ts#L222
+		o.logger.Info().
+			Str("hash", hash.String()).
+			Str("validator", preVoteMsg.Validator).
+			Str("feeder", preVoteMsg.Feeder).
+			Msg("broadcasting pre-vote")
 		if err := o.oracleClient.BroadcastTx(nextBlockHeight, oracleVotePeriod*2, preVoteMsg); err != nil {
 			return err
 		}
@@ -330,10 +349,8 @@ func (o *Oracle) tick() error {
 			ExchangeRates:     exchangeRatesStr,
 			SubmitBlockHeight: currentHeight,
 		}
-	}
-
-	// if we're in the next voting period, vote
-	if !isPrevoteOnlyTx {
+	} else {
+		// otherwise, we're in the next voting period and thus we vote
 		voteMsg := &oracletypes.MsgAggregateExchangeRateVote{
 			Salt:          o.previousPrevote.Salt,
 			ExchangeRates: o.previousPrevote.ExchangeRates,
@@ -341,6 +358,11 @@ func (o *Oracle) tick() error {
 			Validator:     valAddr.String(),
 		}
 
+		o.logger.Info().
+			Str("exchange_rates", voteMsg.ExchangeRates).
+			Str("validator", voteMsg.Validator).
+			Str("feeder", voteMsg.Feeder).
+			Msg("broadcasting vote")
 		if err := o.oracleClient.BroadcastTx(
 			nextBlockHeight,
 			oracleVotePeriod-indexInVotePeriod,
@@ -362,8 +384,7 @@ func GenerateSalt(length int) (string, error) {
 		return "", fmt.Errorf("failed to generate salt: zero length")
 	}
 
-	n := length / 2
-	bytes := make([]byte, n)
+	bytes := make([]byte, length)
 
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err

@@ -136,8 +136,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// apply all reserve increases accumulated when iterating over borrows
 	for _, coin := range newReserves {
-		err = k.IncreaseReserves(ctx, coin)
-		if err != nil {
+		if coin.IsNegative() {
+			return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+		}
+
+		if err = k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
 			return err
 		}
 	}

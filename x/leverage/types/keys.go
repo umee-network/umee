@@ -28,6 +28,7 @@ var (
 	KeyPrefixReserveAmount     = []byte{0x05}
 	KeyPrefixLastInterestTime  = []byte{0x06}
 	KeyPrefixExchangeRate      = []byte{0x07}
+	KeyPrefixBadDebt           = []byte{0x08}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
@@ -131,5 +132,23 @@ func CreateExchangeRateKeyNoDenom() []byte {
 	// exchangeRatePrefix
 	var key []byte
 	key = append(key, KeyPrefixExchangeRate...)
+	return key
+}
+
+// CreateBadDebtKey returns a KVStore key for tracking an address with unpaid bad debt
+func CreateBadDebtKey(denom string, borrowerAddr sdk.AccAddress) []byte {
+	// badDebtAddrPrefix | lengthprefixed(borrowerAddr) | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixBadDebt...)
+	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
+	key = append(key, []byte(denom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateBadDebtKeyNoAddress returns a safe copy of bad debt prefix
+func CreateBadDebtKeyNoAddress() []byte {
+	// badDebtPrefix
+	var key []byte
+	key = append(key, KeyPrefixBadDebt...)
 	return key
 }
