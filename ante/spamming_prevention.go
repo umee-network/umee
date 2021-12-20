@@ -71,7 +71,7 @@ func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs
 			}
 
 			if lastSubmittedHeight, ok := spd.oraclePrevoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "the validator has already been submitted prevote at the current height")
+				return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "the validator has already submitted a prevote at the current height")
 			}
 
 			spd.oraclePrevoteMap[msg.Validator] = curHeight
