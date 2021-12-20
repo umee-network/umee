@@ -85,6 +85,7 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	customante "github.com/umee-network/umee/ante"
 	umeeapp "github.com/umee-network/umee/app"
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
@@ -550,13 +551,14 @@ func New(
 	app.MountTransientStores(transientKeys)
 	app.MountMemoryStores(memKeys)
 
-	anteHandler, err := ante.NewAnteHandler(
-		ante.HandlerOptions{
+	anteHandler, err := customante.NewAnteHandler(
+		customante.HandlerOptions{
 			AccountKeeper:   app.AccountKeeper,
 			BankKeeper:      app.BankKeeper,
-			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 			FeegrantKeeper:  app.FeeGrantKeeper,
+			OracleKeeper:    app.OracleKeeper,
 			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 		},
 	)
 	if err != nil {

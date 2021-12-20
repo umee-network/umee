@@ -6,18 +6,15 @@ import (
 	cosmosante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	channelkeeper "github.com/cosmos/ibc-go/v2/modules/core/04-channel/keeper"
-	ibcante "github.com/cosmos/ibc-go/v2/modules/core/ante"
 )
 
 type HandlerOptions struct {
-	AccountKeeper    cosmosante.AccountKeeper
-	BankKeeper       types.BankKeeper
-	FeegrantKeeper   cosmosante.FeegrantKeeper
-	OracleKeeper     OracleKeeper
-	SignModeHandler  signing.SignModeHandler
-	SigGasConsumer   cosmosante.SignatureVerificationGasConsumer
-	IBCChannelKeeper channelkeeper.Keeper
+	AccountKeeper   cosmosante.AccountKeeper
+	BankKeeper      types.BankKeeper
+	FeegrantKeeper  cosmosante.FeegrantKeeper
+	OracleKeeper    OracleKeeper
+	SignModeHandler signing.SignModeHandler
+	SigGasConsumer  cosmosante.SignatureVerificationGasConsumer
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -60,6 +57,5 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		cosmosante.NewSigGasConsumeDecorator(options.AccountKeeper, sigGasConsumer),
 		cosmosante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
 		cosmosante.NewIncrementSequenceDecorator(options.AccountKeeper),
-		ibcante.NewAnteDecorator(options.IBCChannelKeeper),
 	), nil
 }
