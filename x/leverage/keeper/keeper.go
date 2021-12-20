@@ -249,8 +249,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	newBorrow := borrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow))
-	if err != nil {
+	if err := k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
 		return err
 	}
 	return nil
