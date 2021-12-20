@@ -61,7 +61,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	for ; denomIter.Valid(); denomIter.Next() {
 		// denomKey is prefix | denom
 		denomKey := denomIter.Key()
-		denom := string(denomKey[len(denomPrefix):]) // remove prefix
+		denom := string(denomKey[len(denomPrefix):len(denomKey)-1]]) // remove prefix
 
 		// Inner iterator will iterator over a single denom's bad debt addresses
 		addrPrefix := types.CreateBadDebtAddressKeyNoAddress(denom)
