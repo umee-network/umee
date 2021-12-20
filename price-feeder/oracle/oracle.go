@@ -282,7 +282,7 @@ func (o *Oracle) tick() error {
 	// index [0, oracleVotePeriod - 1] > oracleVotePeriod - 2 OR index is 0
 	if (o.previousVotePeriod != 0 && currentVotePeriod == o.previousVotePeriod) ||
 		oracleVotePeriod-indexInVotePeriod < 2 {
-		o.logger.Debug().
+		o.logger.Info().
 			Int64("vote_period", oracleVotePeriod).
 			Float64("previous_vote_period", o.previousVotePeriod).
 			Float64("current_vote_period", currentVotePeriod).
@@ -294,7 +294,7 @@ func (o *Oracle) tick() error {
 	// If we're past the voting period we needed to hit, reset and submit another
 	// prevote.
 	if o.previousVotePeriod != 0 && currentVotePeriod-o.previousVotePeriod != 1 {
-		o.logger.Debug().
+		o.logger.Info().
 			Int64("vote_period", oracleVotePeriod).
 			Float64("previous_vote_period", o.previousVotePeriod).
 			Float64("current_vote_period", currentVotePeriod).
