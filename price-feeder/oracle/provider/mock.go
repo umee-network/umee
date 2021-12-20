@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -53,13 +54,13 @@ func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice
 
 	tickerMap := make(map[string]struct{})
 	for _, t := range tickers {
-		tickerMap[t] = struct{}{}
+		tickerMap[strings.ToUpper(t)] = struct{}{}
 	}
 
 	// Records are of the form [base, quote, price, volume] and we skip the first
 	// record as that contains the header.
 	for _, r := range records[1:] {
-		ticker := r[0] + r[1]
+		ticker := strings.ToUpper(r[0] + r[1])
 		if _, ok := tickerMap[ticker]; !ok {
 			continue
 		}
@@ -81,7 +82,7 @@ func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice
 		tickerPrices[ticker] = TickerPrice{Price: price, Volume: volume}
 	}
 
-	for _, t := range tickers {
+	for t := range tickerMap {
 		if _, ok := tickerPrices[t]; !ok {
 			return nil, fmt.Errorf("missing exchange rate for %s", t)
 		}
