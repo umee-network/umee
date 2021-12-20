@@ -165,23 +165,7 @@ func (o *Oracle) SetPrices() error {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
-		var (
-			priceProvider provider.Provider
-			ok            bool
-		)
-
-		priceProvider, ok = o.priceProviders[providerName]
-		if !ok {
-			switch providerName {
-			case config.ProviderBinance:
-				priceProvider = provider.NewBinanceProvider()
-
-			case config.ProviderKraken:
-				priceProvider = provider.NewKrakenProvider()
-			}
-
-			o.priceProviders[providerName] = priceProvider
-		}
+		priceProvider := o.getOrSetProvider(providerName)
 
 		g.Go(func() error {
 			var ticker []string
@@ -244,6 +228,31 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	}
 
 	return queryResponse.Params, nil
+}
+
+func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
+	var (
+		priceProvider provider.Provider
+		ok            bool
+	)
+
+	priceProvider, ok = o.priceProviders[providerName]
+	if !ok {
+		switch providerName {
+		case config.ProviderBinance:
+			priceProvider = provider.NewBinanceProvider()
+
+		case config.ProviderKraken:
+			priceProvider = provider.NewKrakenProvider()
+
+		case config.ProviderMock:
+			priceProvider = provider.NewMockProvider()
+		}
+
+		o.priceProviders[providerName] = priceProvider
+	}
+
+	return priceProvider
 }
 
 func (o *Oracle) tick() error {
