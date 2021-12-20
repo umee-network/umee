@@ -182,7 +182,6 @@ func LengthPrefixDenom(denom string) []byte {
 		panic("length cannot be 0 bytes")
 	}
 	if bzLen > 255 {
-
 		panic("length cannot exceed 255 bytes")
 	}
 	return append([]byte{byte(bzLen)}, bz...)
