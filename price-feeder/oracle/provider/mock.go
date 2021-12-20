@@ -62,6 +62,7 @@ func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice
 	for _, r := range records[1:] {
 		ticker := strings.ToUpper(r[0] + r[1])
 		if _, ok := tickerMap[ticker]; !ok {
+			// skip records that are not requested
 			continue
 		}
 
