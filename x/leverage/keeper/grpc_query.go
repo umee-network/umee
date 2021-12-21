@@ -109,3 +109,81 @@ func (q Querier) ReserveAmount(
 
 	return &types.QueryReserveAmountResponse{Amount: amount}, nil
 }
+
+func (q Querier) CollateralSetting(
+	goCtx context.Context,
+	req *types.QueryCollateralSettingRequest,
+) (*types.QueryCollateralSettingResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
+
+	return &types.QueryCollateralSettingResponse{Enabled: setting}, nil
+}
+
+func (q Querier) Collateral(
+	goCtx context.Context,
+	req *types.QueryCollateralRequest,
+) (*types.QueryCollateralResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(req.Denom) == 0 {
+		tokens := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+
+		return &types.QueryCollateralResponse{Collateral: tokens}, nil
+	}
+
+	token := q.Keeper.GetCollateralAmount(ctx, borrower, req.Denom)
+
+	return &types.QueryCollateralResponse{Collateral: sdk.NewCoins(token)}, nil
+}
+
+func (q Querier) ExchangeRate(
+	goCtx context.Context,
+	req *types.QueryExchangeRateRequest,
+) (*types.QueryExchangeRateResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	rate, err := q.Keeper.GetExchangeRate(ctx, req.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryExchangeRateResponse{ExchangeRate: rate}, nil
+}
