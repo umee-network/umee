@@ -1,8 +1,6 @@
 package ante
 
 import (
-	"sync"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -15,7 +13,6 @@ type SpamPreventionDecorator struct {
 	oracleKeeper     OracleKeeper
 	oraclePrevoteMap map[string]int64
 	oracleVoteMap    map[string]int64
-	mu               *sync.Mutex
 }
 
 // NewSpammingPreventionDecorator returns new spamming prevention decorator instance
@@ -24,7 +21,6 @@ func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpamPreventionDec
 		oracleKeeper:     oracleKeeper,
 		oraclePrevoteMap: make(map[string]int64),
 		oracleVoteMap:    make(map[string]int64),
-		mu:               &sync.Mutex{},
 	}
 }
 
@@ -49,10 +45,7 @@ func (spd SpamPreventionDecorator) AnteHandle(
 }
 
 // CheckOracleSpamming check whether the msgs are spamming purpose or not
-func (spd SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
-	spd.mu.Lock()
-	defer spd.mu.Unlock()
-
+func (spd *SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
 	curHeight := ctx.BlockHeight()
 	for _, msg := range msgs {
 		switch msg := msg.(type) {
