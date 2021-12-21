@@ -166,9 +166,9 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateral returns a CLI command handler to query for the amount of
-// total collateral tokens for a given address.
-func GetCmdQueryCollateral() *cobra.Command {
+// GetCmdQueryCollateralSetting returns a CLI command handler to query for the collateral
+// setting of a specific token denom for an address.
+func GetCmdQueryCollateralSetting() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "collateral [addr]",
 		Args:  cobra.ExactArgs(2),
@@ -200,9 +200,9 @@ func GetCmdQueryCollateral() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateralSetting returns a CLI command handler to query for the amount of
+// GetCmdQueryCollateral returns a CLI command handler to query for the amount of
 // total collateral tokens for a given address.
-func GetCmdQueryCollateralSetting() *cobra.Command {
+func GetCmdQueryCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "collateral [addr]",
 		Args:  cobra.ExactArgs(1),
