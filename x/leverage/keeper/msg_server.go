@@ -215,7 +215,9 @@ func (s msgServer) RepayAsset(
 		),
 	})
 
-	return &types.MsgRepayAssetResponse{}, nil
+	return &types.MsgRepayAssetResponse{
+		Repaid: repaidCoin,
+	}, nil
 }
 
 func (s msgServer) Liquidate(
@@ -268,5 +270,8 @@ func (s msgServer) Liquidate(
 		),
 	})
 
-	return &types.MsgLiquidateResponse{}, nil
+	return &types.MsgLiquidateResponse{
+		Repaid: repaidCoin,
+		Reward: rewardCoin,
+	}, nil
 }
