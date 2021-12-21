@@ -1,8 +1,16 @@
 package tests
 
 import (
+	"fmt"
+
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/umee-network/umee/x/oracle/client/cli"
 )
 
 type IntegrationTestSuite struct {
@@ -23,4 +31,67 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	_, err := s.network.WaitForHeight(1)
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
+	val := s.network.Validators[0]
+
+	testCases := []struct {
+		name         string
+		args         []string
+		expectErr    bool
+		expectedCode uint32
+		respType     proto.Message
+	}{
+		{
+			name: "invalid operator address",
+			args: []string{
+				"foo",
+				s.network.Validators[1].Address.String(),
+			},
+			expectErr: true,
+			respType:  &sdk.TxResponse{},
+		},
+		{
+			name: "invalid feeder address",
+			args: []string{
+				val.Address.String(),
+				"foo",
+			},
+			expectErr: true,
+			respType:  &sdk.TxResponse{},
+		},
+		{
+			name: "valid transaction",
+			args: []string{
+				val.Address.String(),
+				s.network.Validators[1].Address.String(),
+				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+			},
+			expectErr:    false,
+			expectedCode: 0,
+			respType:     &sdk.TxResponse{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.Run(tc.name, func() {
+			clientCtx := val.ClientCtx
+
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdDelegateFeedConsent(), tc.args)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
+
+				txResp := tc.respType.(*sdk.TxResponse)
+				s.Require().Equal(tc.expectedCode, txResp.Code)
+			}
+		})
+	}
 }
