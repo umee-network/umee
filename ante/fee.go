@@ -7,7 +7,7 @@ import (
 )
 
 // MaxOracleMsgGasUsage is constant expected oracle msg gas cost
-const MaxOracleMsgGasUsage = uint64(100_000)
+const MaxOracleMsgGasUsage = uint64(100000)
 
 // MempoolFeeDecorator will check if the transaction's fee is at least as large
 // as the local validator's minimum gasFee (defined in validator config).
@@ -35,7 +35,6 @@ func (mfd MempoolFeeDecorator) AnteHandle(
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
-	// Ensure that the provided fees meet a minimum threshold for the validator,
 	// if this is a CheckTx. This is only for local mempool purposes, and thus
 	// is only ran on check tx.
 	if ctx.IsCheckTx() && !simulate &&

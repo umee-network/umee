@@ -10,8 +10,8 @@ import (
 )
 
 // SpammingPreventionDecorator will check if the transaction's gas is smaller than
-// configured hard cap
-type SpammingPreventionDecorator struct {
+// configured hard cap.
+type SpamPreventionDecorator struct {
 	oracleKeeper     OracleKeeper
 	oraclePrevoteMap map[string]int64
 	oracleVoteMap    map[string]int64
@@ -19,8 +19,8 @@ type SpammingPreventionDecorator struct {
 }
 
 // NewSpammingPreventionDecorator returns new spamming prevention decorator instance
-func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpammingPreventionDecorator {
-	return SpammingPreventionDecorator{
+func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpamPreventionDecorator {
+	return SpamPreventionDecorator{
 		oracleKeeper:     oracleKeeper,
 		oraclePrevoteMap: make(map[string]int64),
 		oracleVoteMap:    make(map[string]int64),
@@ -29,7 +29,7 @@ func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpammingPreventio
 }
 
 // AnteHandle handles msg tax fee checking
-func (spd SpammingPreventionDecorator) AnteHandle(
+func (spd SpamPreventionDecorator) AnteHandle(
 	ctx sdk.Context,
 	tx sdk.Tx,
 	simulate bool,
@@ -39,12 +39,9 @@ func (spd SpammingPreventionDecorator) AnteHandle(
 		return next(ctx, tx, simulate)
 	}
 
-	if !simulate {
-		if ctx.IsCheckTx() {
-			err := spd.CheckOracleSpamming(ctx, tx.GetMsgs())
-			if err != nil {
-				return ctx, err
-			}
+	if ctx.IsCheckTx() && !simulate {
+		if err := spd.CheckOracleSpamming(ctx, tx.GetMsgs()); err != nil {
+			return ctx, err
 		}
 	}
 
@@ -52,7 +49,7 @@ func (spd SpammingPreventionDecorator) AnteHandle(
 }
 
 // CheckOracleSpamming check whether the msgs are spamming purpose or not
-func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
+func (spd SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
 	spd.mu.Lock()
 	defer spd.mu.Unlock()
 
@@ -78,7 +75,7 @@ func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs
 			if lastSubmittedHeight, ok := spd.oraclePrevoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
 				return sdkerrors.Wrap(
 					sdkerrors.ErrInvalidRequest,
-					"the validator has already submitted a prevote at the current height",
+					"validator has already submitted a pre-vote message at the current height",
 				)
 			}
 
@@ -103,7 +100,7 @@ func (spd SpammingPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs
 			if lastSubmittedHeight, ok := spd.oracleVoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
 				return sdkerrors.Wrap(
 					sdkerrors.ErrInvalidRequest,
-					"the validator has already submitted a vote at the current height",
+					"validator has already submitted a vote message at the current height",
 				)
 			}
 
