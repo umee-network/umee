@@ -29,7 +29,7 @@ func NewSpamPreventionDecorator(oracleKeeper OracleKeeper) *SpamPreventionDecora
 }
 
 // AnteHandle handles msg tax fee checking
-func (spd SpamPreventionDecorator) AnteHandle(
+func (spd *SpamPreventionDecorator) AnteHandle(
 	ctx sdk.Context,
 	tx sdk.Tx,
 	simulate bool,
@@ -49,7 +49,7 @@ func (spd SpamPreventionDecorator) AnteHandle(
 }
 
 // CheckOracleSpam check whether the msgs are spamming on purpose or not
-func (spd SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.Msg) error {
+func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.Msg) error {
 	spd.mu.Lock()
 	defer spd.mu.Unlock()
 
