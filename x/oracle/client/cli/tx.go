@@ -35,7 +35,7 @@ func GetCmdDelegateFeedConsent() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delegate-feed-consent [operator] [feeder]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Delegate oracle consent from an operator to another feeder address",
+		Short: "Delegate oracle feed consent from an operator to another feeder address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
