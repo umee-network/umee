@@ -33,9 +33,10 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/reserve_amount";
   }
 
-  // CollateralSettings queries a borrower's enabled collateral denoms.
-  rpc CollateralSettings(QueryCollateralSettingsRequest) returns (QueryCollateralSettingsResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_settings";
+  // CollateralSetting queries a borrower's collateral setting of a specified
+  // uToken denomination.
+  rpc CollateralSetting(QueryCollateralSettingRequest) returns (QueryCollateralSettingResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_setting";
   }
 
   // Collateral queries the collateral amount of a user by token denomination.
@@ -98,15 +99,16 @@ message QueryReserveAmountResponse {
 }
 
 // QueryCollateralSettingsRequest defines the request structure for the
-// CollateralSettings gRPC service handler.
-message QueryCollateralSettingsRequest {
+// CollateralSetting gRPC service handler.
+message QueryCollateralSettingRequest {
   string address = 1;
+  string denom = 2;
 }
 
 // QueryCollateralSettingsResponse defines the response structure for the
-// CollateralSettings gRPC service handler.
-message QueryCollateralSettingsResponse {
-  repeated string denom = 1;
+// CollateralSetting gRPC service handler.
+message QueryCollateralSettingResponse {
+  bool enabled = 1;
 }
 
 // QueryCollateralRequest defines the request structure for the Collateral gRPC
