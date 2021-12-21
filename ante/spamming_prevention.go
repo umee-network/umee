@@ -9,7 +9,7 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// SpammingPreventionDecorator will check if the transaction's gas is smaller than
+// SpamPreventionDecorator will check if the transaction's gas is smaller than
 // configured hard cap.
 type SpamPreventionDecorator struct {
 	oracleKeeper     OracleKeeper
@@ -40,7 +40,7 @@ func (spd SpamPreventionDecorator) AnteHandle(
 	}
 
 	if ctx.IsCheckTx() && !simulate {
-		if err := spd.CheckOracleSpamming(ctx, tx.GetMsgs()); err != nil {
+		if err := spd.CheckOracleSpam(ctx, tx.GetMsgs()); err != nil {
 			return ctx, err
 		}
 	}
@@ -48,8 +48,8 @@ func (spd SpamPreventionDecorator) AnteHandle(
 	return next(ctx, tx, simulate)
 }
 
-// CheckOracleSpamming check whether the msgs are spamming on purpose or not
-func (spd SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
+// CheckOracleSpam check whether the msgs are spamming on purpose or not
+func (spd SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.Msg) error {
 	spd.mu.Lock()
 	defer spd.mu.Unlock()
 

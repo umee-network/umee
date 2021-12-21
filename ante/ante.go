@@ -45,8 +45,8 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	return sdk.ChainAnteDecorators(
 		cosmosante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
 		cosmosante.NewRejectExtensionOptionsDecorator(),
-		NewMempoolFeeDecorator(),                             // mempool fee validation
-		NewSpammingPreventionDecorator(options.OracleKeeper), // spamming prevention
+		NewMempoolFeeDecorator(),                         // mempool fee validation
+		NewSpamPreventionDecorator(options.OracleKeeper), // spam prevention
 		cosmosante.NewValidateBasicDecorator(),
 		cosmosante.NewTxTimeoutHeightDecorator(),
 		cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
