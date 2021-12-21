@@ -170,7 +170,7 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 // setting of a specific token denom for an address.
 func GetCmdQueryCollateralSetting() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "collateral [addr]",
+		Use:   "collateral-setting [addr] [denom]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Query for the collateral setting of a specific denom for an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
