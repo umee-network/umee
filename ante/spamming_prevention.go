@@ -44,7 +44,7 @@ func (spd SpamPreventionDecorator) AnteHandle(
 	return next(ctx, tx, simulate)
 }
 
-// CheckOracleSpamming check whether the msgs are spamming purpose or not
+// CheckOracleSpamming check whether the msgs are spamming on purpose or not
 func (spd SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
 	curHeight := ctx.BlockHeight()
 	for _, msg := range msgs {
