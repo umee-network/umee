@@ -16,8 +16,8 @@ type SpamPreventionDecorator struct {
 }
 
 // NewSpammingPreventionDecorator returns new spamming prevention decorator instance
-func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) SpamPreventionDecorator {
-	return SpamPreventionDecorator{
+func NewSpammingPreventionDecorator(oracleKeeper OracleKeeper) *SpamPreventionDecorator {
+	return &SpamPreventionDecorator{
 		oracleKeeper:     oracleKeeper,
 		oraclePrevoteMap: make(map[string]int64),
 		oracleVoteMap:    make(map[string]int64),
@@ -45,7 +45,7 @@ func (spd SpamPreventionDecorator) AnteHandle(
 }
 
 // CheckOracleSpamming check whether the msgs are spamming purpose or not
-func (spd *SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
+func (spd SpamPreventionDecorator) CheckOracleSpamming(ctx sdk.Context, msgs []sdk.Msg) error {
 	curHeight := ctx.BlockHeight()
 	for _, msg := range msgs {
 		switch msg := msg.(type) {
