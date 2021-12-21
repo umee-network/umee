@@ -31,6 +31,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdSetCollateral(),
 		GetCmdBorrowAsset(),
 		GetCmdRepayAsset(),
+		GetCmdLiquidate(),
 	)
 
 	return cmd
@@ -191,6 +192,50 @@ func GetCmdRepayAsset() *cobra.Command {
 			}
 
 			msg := types.NewMsgRepayAsset(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdLiquidate returns a CLI command handler to generate or broadcast a
+// transaction with a MsgLiquidate message.
+func GetCmdLiquidate() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "liquidate [liquidator] [borrower] [amount] [reward]",
+		Args:  cobra.ExactArgs(4),
+		Short: "Liquidate a specified amount of a borrower's debt for a chosen reward denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
+			}
+
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			borrowerAddr, err := sdk.AccAddressFromBech32(args[1])
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[2])
+			if err != nil {
+				return err
+			}
+
+			rewardDenom := args[3]
+			err = sdk.ValidateDenom(rewardDenom)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

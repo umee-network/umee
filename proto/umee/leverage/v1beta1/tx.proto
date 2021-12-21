@@ -90,7 +90,12 @@ message MsgSetCollateralResponse {}
 message MsgBorrowAssetResponse {}
 
 // MsgRepayAssetResponse defines the Msg/RepayAsset response type.
-message MsgRepayAssetResponse {}
+message MsgRepayAssetResponse {
+  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+}
 
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
-message MsgLiquidateResponse {}
+message MsgLiquidateResponse {
+  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin reward = 2 [(gogoproto.nullable) = false];
+}
