@@ -107,7 +107,7 @@ func (q querier) FeederDelegation(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	feederAddr, err := q.GetFeederDelegation(ctx, valAddr)
 	if err != nil {
-		return &types.QueryFeederDelegationResponse{}, err
+		return nil, err
 	}
 
 	return &types.QueryFeederDelegationResponse{
