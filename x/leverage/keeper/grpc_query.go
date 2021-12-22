@@ -203,6 +203,9 @@ func (q Querier) BorrowLimit(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
 
