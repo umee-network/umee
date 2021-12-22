@@ -30,13 +30,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	_, err := s.network.WaitForHeight(1)
 	s.Require().NoError(err)
-
-	//
-	//	Note: It appears that the list of registered tokens is
-	//	empty as of the end of this function. Need to either
-	// 	register `uumee` immediately or use custom genesis
-	//	state.
-	//
 }
 
 func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
@@ -52,9 +45,6 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 
 	var resp types.QueryRegisteredTokensResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-
-	// Note: Comment out once we're done figuring out how to register tokens in suite
-	fmt.Println("\n\n" + string(out.Bytes()))
 }
 
 func (s *IntegrationTestSuite) TestQueryParams() {
