@@ -8,11 +8,11 @@ RUN go mod download
 COPY . .
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
 RUN apk add --no-cache $PACKAGES
-RUN make install
+RUN UMEE_ENABLE_BETA=true make install
 
 # Fetch peggo (gravity bridge) binary
 FROM golang:1.17-alpine AS peggo-builder
-ARG PEGGO_VERSION=v0.1.0-rc1
+ARG PEGGO_VERSION=v0.1.0
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
