@@ -946,52 +946,37 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	time.Sleep(time.Second * 15)
-
-	// TODO: add health check...somehow
-	fmt.Println(s.priceFeederResource.GetHostPort("7171/tcp"))
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
-	resp, err := http.Get(endpoint)
-	s.Require().NoError(err)
+	s.Require().Eventually(
+		func() bool {
+			resp, err := http.Get(endpoint)
+			if err != nil {
+				return false
+			}
 
-	defer resp.Body.Close()
+			defer resp.Body.Close()
 
-	bz, err := io.ReadAll(resp.Body)
-	s.Require().NoError(err)
+			bz, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return false
+			}
 
-	fmt.Println("RESP BODY:", string(bz))
+			var respBody map[string]interface{}
+			if err := json.Unmarshal(bz, &respBody); err != nil {
+				return false
+			}
 
-	// s.Require().Eventually(
-	// 	func() bool {
-	// 		resp, err := http.Get(endpoint)
-	// 		if err != nil {
-	// 			return false
-	// 		}
+			prices, ok := respBody["prices"].(map[string]interface{})
+			if !ok {
+				return false
+			}
 
-	// 		defer resp.Body.Close()
-
-	// 		bz, err := io.ReadAll(resp.Body)
-	// 		if err != nil {
-	// 			return false
-	// 		}
-
-	// 		fmt.Println("RESP BODY:", string(bz))
-
-	// 		return false
-	// 		// var respBody map[string]interface{}
-	// 		// if err := json.Unmarshal(bz, &respBody); err != nil {
-	// 		// 	return false
-	// 		// }
-
-	// 		// status := respBody["status"].(string)
-	// 		// result := respBody["result"].(map[string]interface{})
-
-	// 		// return status == "success" && len(result["chains"].([]interface{})) == 2
-	// 	},
-	// 	5*time.Minute,
-	// 	time.Second,
-	// 	"hermes relayer not healthy",
-	// )
+			return len(prices) > 0
+		},
+		time.Minute,
+		time.Second,
+		"price-feeder not healthy",
+	)
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }

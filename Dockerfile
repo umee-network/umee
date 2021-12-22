@@ -26,6 +26,6 @@ ARG IMG_TAG
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
 COPY --from=umeed-builder /go/bin/price-feeder /usr/local/bin/
 COPY --from=peggo-builder /usr/local/bin/peggo /usr/local/bin/
-EXPOSE 26656 26657 1317 9090
+EXPOSE 26656 26657 1317 9090 7171
 
 ENTRYPOINT ["umeed", "start"]
