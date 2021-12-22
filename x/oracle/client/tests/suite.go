@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
-
 	"github.com/umee-network/umee/x/oracle/client/cli"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 type IntegrationTestSuite struct {
@@ -94,4 +94,18 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 			}
 		})
 	}
+}
+
+func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+	args := []string{
+		string(val.ValAddress),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdDelegateFeedConsent(), args)
+	s.Require().NoError(err)
+
+	var resp types.QueryFeederDelegationResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
