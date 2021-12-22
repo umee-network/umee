@@ -168,5 +168,5 @@ message QueryLiquidationTargetsRequest {}
 // QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
 // gRPC service handler.
 message QueryLiquidationTargetsResponse {
-  repeated string targets = 1;
+  repeated string targets = 1 [(gogoproto.nullable) = false];
 }
