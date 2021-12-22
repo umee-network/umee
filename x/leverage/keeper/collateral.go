@@ -77,3 +77,8 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	totalCollateral.Sort()
 	return totalCollateral
 }
+
+// GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation
+func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]string, error) {
+	return nil, nil
+}

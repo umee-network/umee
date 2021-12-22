@@ -33,6 +33,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralSetting(),
 		GetCmdQueryExchangeRate(),
+		GetCmdQueryBorrowLimit(),
+		GetCmdQueryLiquidationTargets(),
 	)
 
 	return cmd
@@ -257,6 +259,70 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 			}
 
 			resp, err := queryClient.ExchangeRate(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryBorrowLimit returns a CLI command handler to query for the
+// borrow limit of a specific borrower.
+func GetCmdQueryBorrowLimit() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "borrow-limit [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the borrow limit of a specified borrower",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryBorrowLimitRequest{
+				Address: args[0],
+			}
+
+			resp, err := queryClient.BorrowLimit(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryLiquidationTargets returns a CLI command handler to query for
+// all eligible liquidation targets
+func GetCmdQueryLiquidationTargets() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "liquidation-targets",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for all borrower addresses eligible for liquidation",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryLiquidationTargetsRequest{}
+
+			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

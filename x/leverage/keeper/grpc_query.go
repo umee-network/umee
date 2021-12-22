@@ -187,3 +187,48 @@ func (q Querier) ExchangeRate(
 
 	return &types.QueryExchangeRateResponse{ExchangeRate: rate}, nil
 }
+
+func (q Querier) BorrowLimit(
+	goCtx context.Context,
+	req *types.QueryBorrowLimitRequest,
+) (*types.QueryBorrowLimitResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+
+	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+
+	limit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
+}
+
+func (q Querier) LiquidationTargets(
+	goCtx context.Context,
+	req *types.QueryLiquidationTargetsRequest,
+) (*types.QueryLiquidationTargetsResponse, error) {
+
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	targets, err := q.Keeper.GetEligibleLiquidationTargets(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryLiquidationTargetsResponse{Targets: targets}, nil
+}

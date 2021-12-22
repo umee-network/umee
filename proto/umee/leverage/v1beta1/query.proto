@@ -50,6 +50,16 @@ service Query {
   rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/exchange_rate";
   }
+
+  // BorrowLimit queries the borrow limit in USD of a given borrower
+  rpc BorrowLimit(QueryBorrowLimitRequest) returns (QueryBorrowLimitResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/borrow_limit";
+  }
+
+  // LiquidationTargets queries a list of all borrowers eligible for liquidation
+  rpc LiquidationTargets(QueryLiquidationTargetsRequest) returns (QueryLiquidationTargetsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/liquidation_targets";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -136,4 +146,27 @@ message QueryExchangeRateRequest {
 message QueryExchangeRateResponse {
   string exchange_rate = 1
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryBorrowLimitRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+message QueryBorrowLimitRequest {
+  string address = 1;
+}
+
+// QueryBorrowLimitResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+message QueryBorrowLimitResponse {
+  string borrow_limit = 1
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryLiquidationTargetsRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+message QueryLiquidationTargetsRequest {}
+
+// QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+message QueryLiquidationTargetsResponse {
+  repeated string targets = 1;
 }
