@@ -388,11 +388,9 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 
 // ValidateFeeder returns the given feeder is allowed to feed the message or not.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
-	if !feederAddr.Equals(valAddr) {
-		delegate := k.GetFeederDelegation(ctx, valAddr)
-		if !delegate.Equals(feederAddr) {
-			return sdkerrors.Wrap(types.ErrNoVotingPermission, feederAddr.String())
-		}
+	delegate := k.GetFeederDelegation(ctx, valAddr)
+	if !delegate.Equals(feederAddr) {
+		return sdkerrors.Wrap(types.ErrNoVotingPermission, feederAddr.String())
 	}
 
 	// check that the given validator exists
