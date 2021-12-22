@@ -244,6 +244,11 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
+			_, err = sdk.ValAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
 			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
 				ValidatorAddr: args[0],
 			})
