@@ -231,7 +231,7 @@ $ umeed query oracle exchange-rate ATOM
 	return cmd
 }
 
-// GetCmdQueryDelegate implements the query feeder delegation command.
+// GetCmdQueryFeederDelegation implements the query feeder delegation command.
 func GetCmdQueryFeederDelegation() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "feeder-delegation [validator]",
