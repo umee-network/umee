@@ -152,7 +152,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 				hash = resp.TxHash
 			}
 
-			oc.Logger.Err(err).
+			oc.Logger.Debug().
+				Err(err).
 				Int64("max_height", maxBlockHeight).
 				Int64("last_check_height", lastCheckHeight).
 				Str("tx_hash", hash).
