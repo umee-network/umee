@@ -105,10 +105,7 @@ func (q querier) FeederDelegation(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	feederAddr := q.GetFeederDelegation(ctx, valAddr)
-
-	// Validate to ensure in active set
-	err = q.ValidateFeeder(ctx, feederAddr, valAddr)
+	feederAddr, err := q.GetFeederDelegation(ctx, valAddr)
 	if err != nil {
 		return &types.QueryFeederDelegationResponse{}, err
 	}
