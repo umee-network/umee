@@ -99,11 +99,15 @@ func (s *IntegrationTestSuite) TestSetFeederDelegation() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	err := s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
+	err := s.app.OracleKeeper.ValidateFeeder(ctx, addr, valAddr)
+	s.Require().NoError(err)
+	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
 	s.Require().Error(err)
 
 	s.app.OracleKeeper.SetFeederDelegation(ctx, valAddr, feederAddr)
 
+	err = s.app.OracleKeeper.ValidateFeeder(ctx, addr, valAddr)
+	s.Require().Error(err)
 	err = s.app.OracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
 	s.Require().NoError(err)
 }
