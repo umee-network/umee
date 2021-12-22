@@ -100,12 +100,12 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 	args := []string{
-		string(val.ValAddress),
+		val.ValAddress.String(),
 	}
 
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), args)
 	s.Require().NoError(err)
 
 	var resp types.QueryFeederDelegationResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp), out.String())
 }
