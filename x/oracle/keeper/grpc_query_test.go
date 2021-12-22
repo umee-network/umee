@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
@@ -35,9 +36,15 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	feederAddr := sdk.AccAddress([]byte("addr________________"))
 	feederAcc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, feederAddr)
+	inactiveValidator := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
 	s.app.AccountKeeper.SetAccount(s.ctx, feederAcc)
 
 	err := s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
+	s.Require().Error(err)
+
+	_, err = s.queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
+		ValidatorAddr: inactiveValidator,
+	})
 	s.Require().Error(err)
 
 	s.app.OracleKeeper.SetFeederDelegation(s.ctx, valAddr, feederAddr)

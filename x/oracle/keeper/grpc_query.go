@@ -105,9 +105,13 @@ func (q querier) FeederDelegation(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	feederAddr, err := q.GetFeederDelegation(ctx, valAddr)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.QueryFeederDelegationResponse{
-		FeederAddr: q.GetFeederDelegation(ctx, valAddr).String(),
+		FeederAddr: feederAddr.String(),
 	}, nil
 }
 

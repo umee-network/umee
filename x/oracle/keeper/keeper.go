@@ -168,16 +168,20 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 
 // GetFeederDelegation gets the account address to which the validator operator
 // delegated oracle vote rights.
-func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) sdk.AccAddress {
-	store := ctx.KVStore(k.storeKey)
+func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) (sdk.AccAddress, error) {
+	// check that the given validator exists
+	if val := k.StakingKeeper.Validator(ctx, operator); val == nil || !val.IsBonded() {
+		return nil, sdkerrors.Wrapf(stakingtypes.ErrNoValidatorFound, "validator %s is not active set", operator.String())
+	}
 
+	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetFeederDelegationKey(operator))
 	if bz == nil {
 		// by default the right is delegated to the validator itself
-		return sdk.AccAddress(operator)
+		return sdk.AccAddress(operator), nil
 	}
 
-	return sdk.AccAddress(bz)
+	return sdk.AccAddress(bz), nil
 }
 
 // SetFeederDelegation sets the account address to which the validator operator
@@ -388,14 +392,12 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 
 // ValidateFeeder returns the given feeder is allowed to feed the message or not.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
-	delegate := k.GetFeederDelegation(ctx, valAddr)
+	delegate, err := k.GetFeederDelegation(ctx, valAddr)
+	if err != nil {
+		return err
+	}
 	if !delegate.Equals(feederAddr) {
 		return sdkerrors.Wrap(types.ErrNoVotingPermission, feederAddr.String())
-	}
-
-	// check that the given validator exists
-	if val := k.StakingKeeper.Validator(ctx, valAddr); val == nil || !val.IsBonded() {
-		return sdkerrors.Wrapf(stakingtypes.ErrNoValidatorFound, "validator %s is not active set", valAddr.String())
 	}
 
 	return nil
