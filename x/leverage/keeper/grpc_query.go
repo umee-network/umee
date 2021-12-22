@@ -25,7 +25,6 @@ func (q Querier) RegisteredTokens(
 	goCtx context.Context,
 	req *types.QueryRegisteredTokens,
 ) (*types.QueryRegisteredTokensResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -66,7 +65,6 @@ func (q Querier) Borrowed(
 	goCtx context.Context,
 	req *types.QueryBorrowedRequest,
 ) (*types.QueryBorrowedResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -96,7 +94,6 @@ func (q Querier) ReserveAmount(
 	goCtx context.Context,
 	req *types.QueryReserveAmountRequest,
 ) (*types.QueryReserveAmountResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -114,7 +111,6 @@ func (q Querier) CollateralSetting(
 	goCtx context.Context,
 	req *types.QueryCollateralSettingRequest,
 ) (*types.QueryCollateralSettingResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -141,7 +137,6 @@ func (q Querier) Collateral(
 	goCtx context.Context,
 	req *types.QueryCollateralRequest,
 ) (*types.QueryCollateralResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -171,7 +166,6 @@ func (q Querier) ExchangeRate(
 	goCtx context.Context,
 	req *types.QueryExchangeRateRequest,
 ) (*types.QueryExchangeRateResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -192,7 +186,6 @@ func (q Querier) BorrowLimit(
 	goCtx context.Context,
 	req *types.QueryBorrowLimitRequest,
 ) (*types.QueryBorrowLimitResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -221,7 +214,6 @@ func (q Querier) LiquidationTargets(
 	goCtx context.Context,
 	req *types.QueryLiquidationTargetsRequest,
 ) (*types.QueryLiquidationTargetsResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
