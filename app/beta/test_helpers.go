@@ -15,6 +15,9 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/umee-network/umee/app"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 )
 
 func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
@@ -65,12 +68,43 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, app.GenesisState) {
 func IntegrationTestNetworkConfig() network.Config {
 	cfg := network.DefaultConfig()
 	encCfg := MakeEncodingConfig()
+	cdc := encCfg.Marshaler
+
+	// Start with the default genesis state
+	appGenState := ModuleBasics.DefaultGenesis(encCfg.Marshaler)
+
+	// Extract the x/leverage part of the genesis state to be modified
+	var leverageGenState leveragetypes.GenesisState
+	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
+		panic(err)
+	}
+
+	// Modify the x/leverage genesis state
+	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
+		BaseDenom:            app.BondDenom,
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
+	})
+
+	// Marshal the modified state and add it back into appGenState
+	bz, err := cdc.MarshalJSON(&leverageGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[leveragetypes.ModuleName] = bz
 
 	cfg.Codec = encCfg.Marshaler
 	cfg.TxConfig = encCfg.TxConfig
 	cfg.LegacyAmino = encCfg.Amino
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
-	cfg.GenesisState = ModuleBasics.DefaultGenesis(encCfg.Marshaler)
+	cfg.GenesisState = appGenState
 	cfg.BondDenom = BondDenom
 	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", BondDenom)
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
