@@ -103,7 +103,7 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 		string(val.ValAddress),
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdDelegateFeedConsent(), args)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), args)
 	s.Require().NoError(err)
 
 	var resp types.QueryFeederDelegationResponse

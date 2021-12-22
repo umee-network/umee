@@ -29,7 +29,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryExchangeRates(),
 		GetCmdQueryExchangeRate(),
-		GetCmdQueryDelegate(),
+		GetCmdQueryFeederDelegation(),
 	)
 
 	return cmd
@@ -232,9 +232,9 @@ $ umeed query oracle exchange-rate ATOM
 }
 
 // GetCmdQueryDelegate implements the query feeder delegation command.
-func GetCmdQueryDelegate() *cobra.Command {
+func GetCmdQueryFeederDelegation() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delegate [validator]",
+		Use:   "feeder-delegation [validator]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Query the current delegate for a given validator address",
 		RunE: func(cmd *cobra.Command, args []string) error {
