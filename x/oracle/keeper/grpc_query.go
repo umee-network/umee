@@ -227,3 +227,25 @@ func (q querier) AggregateVotes(
 		AggregateVotes: votes,
 	}, nil
 }
+
+func (q querier) DelegatedAddress(
+	goCtx context.Context,
+	req *types.QueryDelegatedAddressRequest,
+) (*types.QueryDelegatedAddressResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	valAddr, err := sdk.ValAddressFromBech32(req.ValidatorAddr)
+	if err != nil {
+		return &types.QueryDelegatedAddressResponse{}, err
+	}
+
+	addr := q.GetFeederDelegation(ctx, valAddr)
+
+	return &types.QueryDelegatedAddressResponse{
+		DelegateAddr: addr.String(),
+	}, nil
+}

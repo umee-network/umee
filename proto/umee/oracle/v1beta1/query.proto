@@ -193,3 +193,22 @@ message QueryParamsResponse {
   // params defines the parameters of the module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
+
+// QueryAggregateVoteRequest is the request type for the Query/DelegatedAddress
+// RPC method.
+message QueryDelegatedAddressRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // validator_addr defines the validator address for which we're trying
+  // to find a delegate.
+  string validator_addr = 1;
+}
+
+// QueryDelegatedAddressResponse is response type for the Query/DelegatedAddress
+// RPC method.
+message QueryDelegatedAddressResponse {
+  // delegate_addr defines the address to which voting rights
+  // have been delegated.
+  string delegate_addr = 1;
+}

@@ -29,6 +29,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryExchangeRates(),
 		GetCmdQueryExchangeRate(),
+		GetCmdQueryDelegate(),
 	)
 
 	return cmd
@@ -218,6 +219,34 @@ $ umeed query oracle exchange-rate ATOM
 					Denom: args[0],
 				},
 			)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryDelegate implements the query feeder delegation command.
+func GetCmdQueryDelegate() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "delegate [validator]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query the current delegate for a given validator address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
+				ValidatorAddr: args[0],
+			})
 			if err != nil {
 				return err
 			}
