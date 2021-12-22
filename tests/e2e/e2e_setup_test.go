@@ -101,18 +101,18 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 9. Create and run Gaia container(s).
 	// 10. Create and run IBC relayer (Hermes) containers.
 	s.initNodes()
-	// s.initEthereum()
-	// s.runEthContainer()
-	// s.runContractDeployment()
+	s.initEthereum()
+	s.runEthContainer()
+	s.runContractDeployment()
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
 	s.runPriceFeeder()
-	// s.runGaiaNetwork()
-	// s.runIBCRelayer()
-	// s.registerValidatorOrchAddresses()
-	// s.initPeggy()
-	// s.runOrchestrators()
+	s.runGaiaNetwork()
+	s.runIBCRelayer()
+	s.registerValidatorOrchAddresses()
+	s.initPeggy()
+	s.runOrchestrators()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
