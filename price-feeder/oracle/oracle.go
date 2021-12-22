@@ -211,9 +211,10 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 		o.oracleClient.GRPCEndpoint,
 		// the Cosmos SDK doesn't support any transport security mechanism
 		grpc.WithInsecure(),
+		grpc.WithContextDialer(dialerFunc),
 	)
 	if err != nil {
-		return oracletypes.Params{}, err
+		return oracletypes.Params{}, fmt.Errorf("failed to dial Cosmos gRPC service: %w", err)
 	}
 
 	defer grpcConn.Close()
@@ -224,7 +225,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 
 	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
 	if err != nil {
-		return oracletypes.Params{}, err
+		return oracletypes.Params{}, fmt.Errorf("failed to get x/oracle params: %w", err)
 	}
 
 	return queryResponse.Params, nil
