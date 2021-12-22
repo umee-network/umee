@@ -120,7 +120,9 @@ func (s *IntegrationTestSuite) TestGetFeederDelegation() {
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
 	s.app.OracleKeeper.SetFeederDelegation(ctx, valAddr, feederAddr)
-	s.Require().Equal(app.OracleKeeper.GetFeederDelegation(ctx, valAddr), feederAddr)
+	resp, err := app.OracleKeeper.GetFeederDelegation(ctx, valAddr)
+	s.Require().NoError(err)
+	s.Require().Equal(resp, feederAddr)
 }
 
 func (s *IntegrationTestSuite) TestMissCounter() {

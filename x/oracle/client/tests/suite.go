@@ -9,8 +9,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
-
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/umee-network/umee/x/oracle/client/cli"
+	"github.com/umee-network/umee/x/oracle/types"
 )
 
 type IntegrationTestSuite struct {
@@ -91,6 +93,59 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 
 				txResp := tc.respType.(*sdk.TxResponse)
 				s.Require().Equal(tc.expectedCode, txResp.Code)
+			}
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
+	val := s.network.Validators[0]
+	inactiveVal := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
+	clientCtx := val.ClientCtx
+
+	testCases := []struct {
+		name      string
+		args      []string
+		expectErr bool
+		respType  proto.Message
+	}{
+		{
+			name: "valid request",
+			args: []string{
+				val.ValAddress.String(),
+			},
+			expectErr: false,
+			respType:  &types.QueryFeederDelegationResponse{},
+		},
+		{
+			name: "invalid address",
+			args: []string{
+				"invalid_address",
+			},
+			expectErr: true,
+			respType:  &types.QueryFeederDelegationResponse{},
+		},
+		{
+			name: "non-existent validator",
+			args: []string{
+				inactiveVal.String(),
+			},
+			expectErr: true,
+			respType:  &types.QueryFeederDelegationResponse{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.Run(tc.name, func() {
+			tc.args = append(tc.args, fmt.Sprintf("--%s=json", tmcli.OutputFlag))
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), tc.args)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
 			}
 		})
 	}
