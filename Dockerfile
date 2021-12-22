@@ -9,6 +9,7 @@ COPY . .
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
 RUN apk add --no-cache $PACKAGES
 RUN UMEE_ENABLE_BETA=true make install
+RUN cd price-feeder && make install
 
 # Fetch peggo (gravity bridge) binary
 FROM golang:1.17-alpine AS peggo-builder
@@ -23,6 +24,7 @@ RUN cd peggo && git checkout ${PEGGO_VERSION} && make build && cp ./build/peggo 
 FROM gcr.io/distroless/cc:$IMG_TAG
 ARG IMG_TAG
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
+COPY --from=umeed-builder /go/bin/price-feeder /usr/local/bin/
 COPY --from=peggo-builder /usr/local/bin/peggo /usr/local/bin/
 EXPOSE 26656 26657 1317 9090
 
