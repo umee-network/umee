@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/umee-network/umee/x/oracle/client/cli"
 	"github.com/umee-network/umee/x/oracle/types"
 )
@@ -101,6 +102,7 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 	clientCtx := val.ClientCtx
 	args := []string{
 		val.ValAddress.String(),
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), args)
