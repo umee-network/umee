@@ -191,9 +191,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
-	// TODO: We need to setup borrowing first prior to testing this out.
-	//
-	// Ref: https://github.com/umee-network/umee/issues/94
 	flags := []string{
 		"uumee",
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -203,5 +200,36 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	s.Require().NoError(err)
 
 	var resp types.QueryExchangeRateResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+}
+
+func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	flags := []string{
+		val.Address.String(),
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowLimit(), flags)
+	s.Require().NoError(err)
+
+	var resp types.QueryBorrowLimitResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+}
+
+func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	flags := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryLiquidationTargets(), flags)
+	s.Require().NoError(err)
+
+	var resp types.QueryLiquidationTargetsResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }

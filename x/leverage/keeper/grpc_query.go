@@ -230,5 +230,10 @@ func (q Querier) LiquidationTargets(
 		return nil, err
 	}
 
-	return &types.QueryLiquidationTargetsResponse{Targets: targets}, nil
+	stringTargets := []string{}
+	for _, addr := range targets {
+		stringTargets = append(stringTargets, addr.String())
+	}
+
+	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
 }

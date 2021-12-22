@@ -310,7 +310,7 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 func GetCmdQueryLiquidationTargets() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidation-targets",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(0),
 		Short: "Query for all borrower addresses eligible for liquidation",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
