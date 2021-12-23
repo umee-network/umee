@@ -32,6 +32,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	"github.com/umee-network/umee/app"
+	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
@@ -53,18 +54,19 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	tmpDirs           []string
-	chain             *chain
-	ethClient         *ethclient.Client
-	gaiaRPC           *rpchttp.HTTP
-	dkrPool           *dockertest.Pool
-	dkrNet            *dockertest.Network
-	ethResource       *dockertest.Resource
-	gaiaResource      *dockertest.Resource
-	hermesResource    *dockertest.Resource
-	valResources      []*dockertest.Resource
-	orchResources     []*dockertest.Resource
-	peggyContractAddr string
+	tmpDirs             []string
+	chain               *chain
+	ethClient           *ethclient.Client
+	gaiaRPC             *rpchttp.HTTP
+	dkrPool             *dockertest.Pool
+	dkrNet              *dockertest.Network
+	ethResource         *dockertest.Resource
+	gaiaResource        *dockertest.Resource
+	hermesResource      *dockertest.Resource
+	priceFeederResource *dockertest.Resource
+	valResources        []*dockertest.Resource
+	orchResources       []*dockertest.Resource
+	peggyContractAddr   string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -105,6 +107,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
+	s.runPriceFeeder()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
 	s.registerValidatorOrchAddresses()
@@ -127,6 +130,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
 	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
+	s.Require().NoError(s.dkrPool.Purge(s.priceFeederResource))
 
 	for _, vc := range s.valResources {
 		s.Require().NoError(s.dkrPool.Purge(vc))
@@ -221,6 +225,26 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err := cdc.MarshalJSON(&peggyGenState)
 	s.Require().NoError(err)
 	appGenState[peggytypes.ModuleName] = bz
+
+	var leverageGenState leveragetypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
+
+	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
+		BaseDenom:            app.BondDenom,
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
+	})
+
+	bz, err = cdc.MarshalJSON(&leverageGenState)
+	s.Require().NoError(err)
+	appGenState[leveragetypes.ModuleName] = bz
 
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
@@ -813,8 +837,6 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					val.ethereumKey.privateKey[2:], // remove 0x prefix
 					"--eth-rpc",
 					fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
-					"--eth-chain-id",
-					fmt.Sprintf("%d", ethChainID),
 					"--cosmos-chain-id",
 					s.chain.id,
 					"--cosmos-grpc",
@@ -829,8 +851,9 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-keyring=test",
 					"--relay-batches=true",
 					"--relay-valsets=true",
-					"--relayer-loop-duration=1m",
-					"--orch-loop-duration=10s",
+					"--profit-multiplier=0.0",
+					"--requester-loop-multiplier=1.0",
+					"--relayer-loop-multiplier=1.0",
 				},
 			},
 			noRestart,
@@ -841,7 +864,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "oracle sent ValsetUpdate event successfully"
+	match := "sent Tx (Peggy updateValset)"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
@@ -873,6 +896,88 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			resource.Container.ID,
 		)
 	}
+}
+
+func (s *IntegrationTestSuite) runPriceFeeder() {
+	s.T().Log("starting price-feeder container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-price-feeder-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	priceFeederCfgPath := path.Join(tmpDir, "price-feeder")
+
+	s.Require().NoError(os.MkdirAll(priceFeederCfgPath, 0755))
+	_, err = copyFile(
+		filepath.Join("./scripts/", "price_feeder_bootstrap.sh"),
+		filepath.Join(priceFeederCfgPath, "price_feeder_bootstrap.sh"),
+	)
+	s.Require().NoError(err)
+
+	umeeVal := s.chain.validators[0]
+
+	s.priceFeederResource, err = s.dkrPool.RunWithOptions(
+		&dockertest.RunOptions{
+			Name:       "umee-price-feeder",
+			NetworkID:  s.dkrNet.Network.ID,
+			Repository: "umeenet/umeed",
+			Mounts: []string{
+				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
+				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
+			},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
+			},
+			Env: []string{
+				"UMEE_E2E_UMEE_VAL_KEY_DIR=/root/.umee",
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_KEY_PASS=%s", keyringPassphrase),
+				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeVal.keyInfo.GetAddress()),
+				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeVal.keyInfo.GetAddress())),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+			},
+			Entrypoint: []string{
+				"sh",
+				"-c",
+				"chmod +x /root/price-feeder/price_feeder_bootstrap.sh && sh /root/price-feeder/price_feeder_bootstrap.sh",
+			},
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
+	s.Require().Eventually(
+		func() bool {
+			resp, err := http.Get(endpoint)
+			if err != nil {
+				return false
+			}
+
+			defer resp.Body.Close()
+
+			bz, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return false
+			}
+
+			var respBody map[string]interface{}
+			if err := json.Unmarshal(bz, &respBody); err != nil {
+				return false
+			}
+
+			prices, ok := respBody["prices"].(map[string]interface{})
+			if !ok {
+				return false
+			}
+
+			return len(prices) > 0
+		},
+		time.Minute,
+		time.Second,
+		"price-feeder not healthy",
+	)
+
+	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }
 
 func noRestart(config *docker.HostConfig) {
