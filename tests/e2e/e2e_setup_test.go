@@ -851,6 +851,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-keyring=test",
 					"--relay-batches=true",
 					"--relay-valsets=true",
+					"--profit-multiplier=0.0",
 					"--requester-loop-multiplier=1.0",
 					"--relayer-loop-multiplier=1.0",
 				},
@@ -863,7 +864,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "oracle sent ValsetUpdate event successfully"
+	match := "sent Tx (Peggy updateValset)"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
