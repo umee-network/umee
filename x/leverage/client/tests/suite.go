@@ -7,9 +7,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
-	"github.com/umee-network/umee/x/leverage/types"
 
 	"github.com/umee-network/umee/x/leverage/client/cli"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 type IntegrationTestSuite struct {
