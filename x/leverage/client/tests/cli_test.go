@@ -16,3 +16,10 @@ func TestIntegrationTestSuite(t *testing.T) {
 	cfg.NumValidators = 2
 	suite.Run(t, NewIntegrationTestSuite(cfg))
 }
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.T().Log("tearing down integration test suite")
+
+	//ref: https://pkg.go.dev/github.com/cosmos/cosmos-sdk/testutil/network
+	s.network.Cleanup()
+}

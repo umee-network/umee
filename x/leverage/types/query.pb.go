@@ -384,6 +384,460 @@ func (m *QueryReserveAmountResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryReserveAmountResponse proto.InternalMessageInfo
 
+// QueryCollateralSettingsRequest defines the request structure for the
+// CollateralSetting gRPC service handler.
+type QueryCollateralSettingRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryCollateralSettingRequest) Reset()         { *m = QueryCollateralSettingRequest{} }
+func (m *QueryCollateralSettingRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralSettingRequest) ProtoMessage()    {}
+func (*QueryCollateralSettingRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{8}
+}
+func (m *QueryCollateralSettingRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralSettingRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralSettingRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralSettingRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralSettingRequest.Merge(m, src)
+}
+func (m *QueryCollateralSettingRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralSettingRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralSettingRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralSettingRequest proto.InternalMessageInfo
+
+func (m *QueryCollateralSettingRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *QueryCollateralSettingRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryCollateralSettingsResponse defines the response structure for the
+// CollateralSetting gRPC service handler.
+type QueryCollateralSettingResponse struct {
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+}
+
+func (m *QueryCollateralSettingResponse) Reset()         { *m = QueryCollateralSettingResponse{} }
+func (m *QueryCollateralSettingResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralSettingResponse) ProtoMessage()    {}
+func (*QueryCollateralSettingResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{9}
+}
+func (m *QueryCollateralSettingResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralSettingResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralSettingResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralSettingResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralSettingResponse.Merge(m, src)
+}
+func (m *QueryCollateralSettingResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralSettingResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralSettingResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralSettingResponse proto.InternalMessageInfo
+
+func (m *QueryCollateralSettingResponse) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+// QueryCollateralRequest defines the request structure for the Collateral gRPC
+// service handler.
+type QueryCollateralRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryCollateralRequest) Reset()         { *m = QueryCollateralRequest{} }
+func (m *QueryCollateralRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralRequest) ProtoMessage()    {}
+func (*QueryCollateralRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{10}
+}
+func (m *QueryCollateralRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralRequest.Merge(m, src)
+}
+func (m *QueryCollateralRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralRequest proto.InternalMessageInfo
+
+func (m *QueryCollateralRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *QueryCollateralRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryCollateralResponse defines the response structure for the Collateral gRPC
+// service handler.
+type QueryCollateralResponse struct {
+	Collateral github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=collateral,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"collateral"`
+}
+
+func (m *QueryCollateralResponse) Reset()         { *m = QueryCollateralResponse{} }
+func (m *QueryCollateralResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralResponse) ProtoMessage()    {}
+func (*QueryCollateralResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{11}
+}
+func (m *QueryCollateralResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralResponse.Merge(m, src)
+}
+func (m *QueryCollateralResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralResponse proto.InternalMessageInfo
+
+func (m *QueryCollateralResponse) GetCollateral() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.Collateral
+	}
+	return nil
+}
+
+// QueryExchangeRateRequest defines the request structure for the ExchangeRate
+// gRPC service handler.
+type QueryExchangeRateRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryExchangeRateRequest) Reset()         { *m = QueryExchangeRateRequest{} }
+func (m *QueryExchangeRateRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryExchangeRateRequest) ProtoMessage()    {}
+func (*QueryExchangeRateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{12}
+}
+func (m *QueryExchangeRateRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryExchangeRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryExchangeRateRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryExchangeRateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryExchangeRateRequest.Merge(m, src)
+}
+func (m *QueryExchangeRateRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryExchangeRateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryExchangeRateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryExchangeRateRequest proto.InternalMessageInfo
+
+func (m *QueryExchangeRateRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryExchangeRateResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+type QueryExchangeRateResponse struct {
+	ExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=exchange_rate,json=exchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"exchange_rate"`
+}
+
+func (m *QueryExchangeRateResponse) Reset()         { *m = QueryExchangeRateResponse{} }
+func (m *QueryExchangeRateResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryExchangeRateResponse) ProtoMessage()    {}
+func (*QueryExchangeRateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{13}
+}
+func (m *QueryExchangeRateResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryExchangeRateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryExchangeRateResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryExchangeRateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryExchangeRateResponse.Merge(m, src)
+}
+func (m *QueryExchangeRateResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryExchangeRateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryExchangeRateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryExchangeRateResponse proto.InternalMessageInfo
+
+// QueryBorrowLimitRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+type QueryBorrowLimitRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *QueryBorrowLimitRequest) Reset()         { *m = QueryBorrowLimitRequest{} }
+func (m *QueryBorrowLimitRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowLimitRequest) ProtoMessage()    {}
+func (*QueryBorrowLimitRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{14}
+}
+func (m *QueryBorrowLimitRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBorrowLimitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBorrowLimitRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBorrowLimitRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowLimitRequest.Merge(m, src)
+}
+func (m *QueryBorrowLimitRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBorrowLimitRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowLimitRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBorrowLimitRequest proto.InternalMessageInfo
+
+func (m *QueryBorrowLimitRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+// QueryBorrowLimitResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+type QueryBorrowLimitResponse struct {
+	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
+}
+
+func (m *QueryBorrowLimitResponse) Reset()         { *m = QueryBorrowLimitResponse{} }
+func (m *QueryBorrowLimitResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowLimitResponse) ProtoMessage()    {}
+func (*QueryBorrowLimitResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{15}
+}
+func (m *QueryBorrowLimitResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBorrowLimitResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBorrowLimitResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBorrowLimitResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowLimitResponse.Merge(m, src)
+}
+func (m *QueryBorrowLimitResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBorrowLimitResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowLimitResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBorrowLimitResponse proto.InternalMessageInfo
+
+// QueryLiquidationTargetsRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+type QueryLiquidationTargetsRequest struct {
+}
+
+func (m *QueryLiquidationTargetsRequest) Reset()         { *m = QueryLiquidationTargetsRequest{} }
+func (m *QueryLiquidationTargetsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationTargetsRequest) ProtoMessage()    {}
+func (*QueryLiquidationTargetsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{16}
+}
+func (m *QueryLiquidationTargetsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationTargetsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationTargetsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationTargetsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationTargetsRequest.Merge(m, src)
+}
+func (m *QueryLiquidationTargetsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationTargetsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationTargetsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationTargetsRequest proto.InternalMessageInfo
+
+// QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+type QueryLiquidationTargetsResponse struct {
+	Targets []string `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets,omitempty"`
+}
+
+func (m *QueryLiquidationTargetsResponse) Reset()         { *m = QueryLiquidationTargetsResponse{} }
+func (m *QueryLiquidationTargetsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationTargetsResponse) ProtoMessage()    {}
+func (*QueryLiquidationTargetsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{17}
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationTargetsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationTargetsResponse.Merge(m, src)
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationTargetsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationTargetsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationTargetsResponse proto.InternalMessageInfo
+
+func (m *QueryLiquidationTargetsResponse) GetTargets() []string {
+	if m != nil {
+		return m.Targets
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryRegisteredTokens)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokens")
 	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokensResponse")
@@ -393,51 +847,82 @@ func init() {
 	proto.RegisterType((*QueryBorrowedResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedResponse")
 	proto.RegisterType((*QueryReserveAmountRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryReserveAmountRequest")
 	proto.RegisterType((*QueryReserveAmountResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryReserveAmountResponse")
+	proto.RegisterType((*QueryCollateralSettingRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralSettingRequest")
+	proto.RegisterType((*QueryCollateralSettingResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralSettingResponse")
+	proto.RegisterType((*QueryCollateralRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralRequest")
+	proto.RegisterType((*QueryCollateralResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralResponse")
+	proto.RegisterType((*QueryExchangeRateRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryExchangeRateRequest")
+	proto.RegisterType((*QueryExchangeRateResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryExchangeRateResponse")
+	proto.RegisterType((*QueryBorrowLimitRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowLimitRequest")
+	proto.RegisterType((*QueryBorrowLimitResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowLimitResponse")
+	proto.RegisterType((*QueryLiquidationTargetsRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationTargetsRequest")
+	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationTargetsResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1beta1/query.proto", fileDescriptor_32bddfd5abbfa4dc) }
 
 var fileDescriptor_32bddfd5abbfa4dc = []byte{
-	// 614 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x31, 0x6f, 0xd3, 0x4e,
-	0x18, 0xc6, 0x73, 0xfd, 0xff, 0x1b, 0xca, 0x55, 0x48, 0xe8, 0x08, 0x22, 0xb5, 0xa8, 0xd3, 0x5a,
-	0x94, 0x06, 0xa4, 0xd8, 0x4d, 0x10, 0xd0, 0x01, 0x24, 0x08, 0x52, 0x2b, 0x98, 0xc0, 0x62, 0x62,
-	0xa0, 0x72, 0xe2, 0x57, 0xc6, 0x4a, 0xed, 0x4b, 0xef, 0x2e, 0x29, 0xd9, 0x10, 0x9f, 0x00, 0x89,
-	0x9d, 0x91, 0x81, 0xaf, 0xc0, 0xc2, 0xd8, 0xb1, 0x82, 0x05, 0x31, 0x14, 0x94, 0xf0, 0x41, 0x90,
-	0xef, 0xce, 0x4e, 0x53, 0x12, 0xe1, 0x76, 0x8a, 0xfd, 0xde, 0x3d, 0xef, 0xf3, 0x3b, 0xbf, 0xcf,
-	0x05, 0xaf, 0xf6, 0x22, 0x00, 0x67, 0x17, 0xfa, 0xc0, 0xbc, 0x00, 0x9c, 0x7e, 0xbd, 0x05, 0xc2,
-	0xab, 0x3b, 0x7b, 0x3d, 0x60, 0x03, 0xbb, 0xcb, 0xa8, 0xa0, 0x44, 0x6e, 0x89, 0x41, 0xec, 0x53,
-	0xd6, 0xb1, 0x93, 0x67, 0x3b, 0xdd, 0x6e, 0xeb, 0xed, 0xc6, 0xd5, 0x80, 0xd2, 0x60, 0x17, 0x1c,
-	0xaf, 0x1b, 0x3a, 0x5e, 0x1c, 0x53, 0xe1, 0x89, 0x90, 0xc6, 0x5c, 0x35, 0x30, 0xae, 0x4d, 0xf7,
-	0xc8, 0xba, 0xa8, 0x5d, 0xa5, 0x80, 0x06, 0x54, 0x3e, 0x3a, 0xc9, 0x93, 0xae, 0x9a, 0x6d, 0xca,
-	0x23, 0xca, 0x9d, 0x96, 0xc7, 0xc7, 0xca, 0x36, 0x0d, 0x63, 0xb5, 0x6e, 0x5d, 0xc1, 0x97, 0x9f,
-	0x25, 0xac, 0x2e, 0x04, 0x21, 0x17, 0xc0, 0xc0, 0x7f, 0x4e, 0x3b, 0x10, 0x73, 0xab, 0x83, 0x97,
-	0xa7, 0x2e, 0xb8, 0xc0, 0xbb, 0x34, 0xe6, 0x40, 0x9e, 0xe0, 0x05, 0x26, 0xd7, 0xd8, 0xa0, 0x8c,
-	0x56, 0xfe, 0xab, 0x2e, 0x36, 0xaa, 0xf6, 0x3f, 0x4f, 0x6a, 0xcb, 0x26, 0xcd, 0xff, 0x0f, 0x8e,
-	0x2a, 0x05, 0x37, 0xd3, 0x5b, 0x25, 0x4c, 0xa4, 0xd9, 0x53, 0x8f, 0x79, 0x11, 0x77, 0x61, 0xaf,
-	0x07, 0x5c, 0x58, 0x2f, 0xf1, 0xa5, 0x89, 0xaa, 0x36, 0xde, 0xc6, 0xc5, 0xae, 0xac, 0x94, 0xd1,
-	0x0a, 0xaa, 0x2e, 0x36, 0x6e, 0xe4, 0xb0, 0x55, 0x2d, 0xb4, 0xaf, 0x96, 0x5b, 0x5b, 0xb8, 0x24,
-	0xfb, 0x37, 0x29, 0x63, 0x74, 0x1f, 0x7c, 0xed, 0x4b, 0xca, 0xf8, 0x9c, 0xe7, 0xfb, 0x0c, 0xb8,
-	0x72, 0x38, 0xef, 0xa6, 0xaf, 0xa4, 0x84, 0xe7, 0x7d, 0x88, 0x69, 0x54, 0x9e, 0x93, 0x75, 0xf5,
-	0x62, 0xbd, 0x41, 0xfa, 0x23, 0x8e, 0x1b, 0x69, 0xd4, 0x00, 0x2f, 0xb4, 0x74, 0x4d, 0x7f, 0xa3,
-	0x25, 0x5b, 0x0d, 0xc4, 0x4e, 0x06, 0x92, 0xe1, 0x3d, 0xa2, 0x61, 0xdc, 0xdc, 0x48, 0xe0, 0x3e,
-	0xfd, 0xac, 0x54, 0x83, 0x50, 0xbc, 0xea, 0xb5, 0xec, 0x36, 0x8d, 0x1c, 0x3d, 0x3d, 0xf5, 0x53,
-	0xe3, 0x7e, 0xc7, 0x11, 0x83, 0x2e, 0x70, 0x29, 0xe0, 0x6e, 0xd6, 0xdc, 0xaa, 0xe3, 0x25, 0x3d,
-	0x2d, 0x0e, 0xac, 0x0f, 0x0f, 0x23, 0xda, 0x8b, 0x45, 0x7a, 0x9e, 0x8c, 0x1a, 0x1d, 0xa7, 0xf6,
-	0xb1, 0x31, 0x4d, 0xa2, 0xc9, 0xb7, 0x70, 0xd1, 0x93, 0x15, 0x25, 0x6a, 0xda, 0x09, 0xdc, 0x8f,
-	0xa3, 0xca, 0xf5, 0x1c, 0x70, 0x8f, 0x63, 0xe1, 0x6a, 0x75, 0xe3, 0xeb, 0x3c, 0x9e, 0x97, 0x36,
-	0xe4, 0x0b, 0xc2, 0x17, 0x4f, 0x86, 0x89, 0x6c, 0xe6, 0x98, 0xdd, 0xd4, 0x18, 0x1a, 0x0f, 0xce,
-	0xaa, 0x4c, 0x8f, 0x68, 0x6d, 0xbc, 0xfd, 0xf6, 0xfb, 0xfd, 0xdc, 0x4d, 0x52, 0x75, 0xa6, 0xdf,
-	0x2f, 0x96, 0x09, 0x77, 0x84, 0xa2, 0xfd, 0x80, 0x70, 0x51, 0x25, 0x89, 0xdc, 0xce, 0x6b, 0x3f,
-	0x11, 0x69, 0xe3, 0xce, 0x69, 0x65, 0x9a, 0x75, 0x4d, 0xb2, 0x56, 0xc8, 0xf2, 0x0c, 0x56, 0x95,
-	0x68, 0xf2, 0x11, 0xe1, 0x85, 0x34, 0x84, 0xe4, 0x6e, 0x5e, 0xaf, 0x13, 0xf9, 0x37, 0x36, 0x4f,
-	0x2f, 0xd4, 0x98, 0xeb, 0x12, 0x73, 0x95, 0x54, 0x66, 0x60, 0xa6, 0x79, 0x25, 0x9f, 0x11, 0xbe,
-	0x30, 0x11, 0x3c, 0x72, 0x2f, 0xff, 0x3c, 0xff, 0x8e, 0xb8, 0x71, 0xff, 0x8c, 0x6a, 0xcd, 0x5d,
-	0x93, 0xdc, 0xeb, 0x64, 0x6d, 0x66, 0x14, 0xa4, 0x6a, 0x47, 0x85, 0xba, 0xb9, 0x7d, 0x30, 0x34,
-	0xd1, 0xe1, 0xd0, 0x44, 0xbf, 0x86, 0x26, 0x7a, 0x37, 0x32, 0x0b, 0x87, 0x23, 0xb3, 0xf0, 0x7d,
-	0x64, 0x16, 0x5e, 0xd4, 0x8e, 0x5d, 0x8f, 0xa4, 0x55, 0x4d, 0x23, 0xa9, 0xbe, 0xaf, 0xc7, 0x9d,
-	0xe5, 0x4d, 0x69, 0x15, 0xe5, 0x9f, 0xf0, 0xad, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x80, 0xbf,
-	0x5c, 0x18, 0x46, 0x06, 0x00, 0x00,
+	// 960 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xbf, 0x6f, 0x1c, 0x45,
+	0x14, 0xc7, 0x3d, 0x81, 0xd8, 0xce, 0xb3, 0x2d, 0xc1, 0x60, 0xc8, 0x65, 0x45, 0xf6, 0xec, 0x4d,
+	0x9c, 0x9c, 0x93, 0x78, 0xd7, 0x76, 0x04, 0x04, 0x27, 0x48, 0xf8, 0x02, 0x09, 0xa0, 0x48, 0x90,
+	0x4d, 0x2a, 0x0a, 0x4e, 0x73, 0x77, 0x4f, 0x9b, 0x95, 0xef, 0x76, 0xce, 0xbb, 0x73, 0x4e, 0xdc,
+	0x21, 0x0a, 0x6a, 0xa4, 0xf4, 0x94, 0x14, 0x14, 0x34, 0x14, 0x14, 0x34, 0x94, 0x91, 0x28, 0x88,
+	0x44, 0x83, 0x28, 0x02, 0xb2, 0xf9, 0x43, 0xd0, 0xcd, 0xbc, 0xbd, 0x1f, 0xf6, 0x6d, 0xbc, 0xde,
+	0x28, 0x95, 0x6f, 0xdf, 0xce, 0xf7, 0xfb, 0x3e, 0x33, 0x6f, 0xf6, 0x3d, 0x19, 0x16, 0xbb, 0x6d,
+	0x44, 0xaf, 0x85, 0x3b, 0x18, 0x8b, 0x00, 0xbd, 0x9d, 0xb5, 0x3a, 0x2a, 0xb1, 0xe6, 0x6d, 0x77,
+	0x31, 0xde, 0x75, 0x3b, 0xb1, 0x54, 0x92, 0xeb, 0x25, 0x11, 0xaa, 0x87, 0x32, 0xde, 0x72, 0x7b,
+	0xbf, 0xdd, 0x74, 0xb9, 0x4b, 0xcb, 0xad, 0xb7, 0x03, 0x29, 0x83, 0x16, 0x7a, 0xa2, 0x13, 0x7a,
+	0x22, 0x8a, 0xa4, 0x12, 0x2a, 0x94, 0x51, 0x62, 0x0c, 0xac, 0xf3, 0xe3, 0x73, 0xf4, 0x5d, 0xcc,
+	0xaa, 0xf9, 0x40, 0x06, 0x52, 0xff, 0xf4, 0x7a, 0xbf, 0x28, 0x6a, 0x37, 0x64, 0xd2, 0x96, 0x89,
+	0x57, 0x17, 0xc9, 0x40, 0xd9, 0x90, 0x61, 0x64, 0xde, 0x3b, 0xa7, 0xe1, 0xcd, 0xbb, 0x3d, 0x56,
+	0x1f, 0x83, 0x30, 0x51, 0x18, 0x63, 0xf3, 0xbe, 0xdc, 0xc2, 0x28, 0x71, 0xb6, 0xe0, 0xec, 0xd8,
+	0x17, 0x3e, 0x26, 0x1d, 0x19, 0x25, 0xc8, 0x3f, 0x83, 0xe9, 0x58, 0xbf, 0x8b, 0x77, 0x4b, 0x6c,
+	0xe1, 0x95, 0xca, 0xcc, 0x7a, 0xc5, 0x3d, 0x72, 0xa7, 0xae, 0x36, 0xa9, 0xbe, 0xfa, 0xe4, 0x59,
+	0x79, 0xc2, 0xef, 0xeb, 0x9d, 0x79, 0xe0, 0x3a, 0xd9, 0x17, 0x22, 0x16, 0xed, 0xc4, 0xc7, 0xed,
+	0x2e, 0x26, 0xca, 0xf9, 0x0a, 0xde, 0x18, 0x89, 0x52, 0xe2, 0xdb, 0x30, 0xd9, 0xd1, 0x91, 0x12,
+	0x5b, 0x60, 0x95, 0x99, 0xf5, 0xe5, 0x1c, 0x69, 0x8d, 0x05, 0xe5, 0x25, 0xb9, 0x73, 0x0b, 0xe6,
+	0xb5, 0x7f, 0x55, 0xc6, 0xb1, 0x7c, 0x88, 0x4d, 0xca, 0xcb, 0x4b, 0x30, 0x25, 0x9a, 0xcd, 0x18,
+	0x13, 0x93, 0xe1, 0x94, 0x9f, 0x3e, 0xf2, 0x79, 0x38, 0xd9, 0xc4, 0x48, 0xb6, 0x4b, 0x27, 0x74,
+	0xdc, 0x3c, 0x38, 0x5f, 0x33, 0x3a, 0xc4, 0x81, 0x11, 0xa1, 0x06, 0x30, 0x5d, 0xa7, 0x18, 0x9d,
+	0xd1, 0x19, 0xd7, 0x14, 0xc4, 0xed, 0x15, 0xa4, 0x8f, 0x77, 0x53, 0x86, 0x51, 0x75, 0xb5, 0x07,
+	0xf7, 0xe3, 0x3f, 0xe5, 0x4a, 0x10, 0xaa, 0x07, 0xdd, 0xba, 0xdb, 0x90, 0x6d, 0x8f, 0xaa, 0x67,
+	0xfe, 0xac, 0x24, 0xcd, 0x2d, 0x4f, 0xed, 0x76, 0x30, 0xd1, 0x82, 0xc4, 0xef, 0x9b, 0x3b, 0x6b,
+	0x70, 0x86, 0xaa, 0x95, 0x60, 0xbc, 0x83, 0x9b, 0x6d, 0xd9, 0x8d, 0x54, 0xba, 0x9f, 0x3e, 0x35,
+	0x1b, 0xa6, 0x6e, 0x82, 0x35, 0x4e, 0x42, 0xe4, 0xb7, 0x60, 0x52, 0xe8, 0x88, 0x11, 0x55, 0xdd,
+	0x1e, 0xdc, 0xdf, 0xcf, 0xca, 0x17, 0x72, 0xc0, 0x7d, 0x1a, 0x29, 0x9f, 0xd4, 0xce, 0xe7, 0x74,
+	0x8d, 0x6e, 0xca, 0x56, 0x4b, 0x28, 0x8c, 0x45, 0xeb, 0x1e, 0x2a, 0x15, 0x46, 0x41, 0xd1, 0xc3,
+	0xde, 0x00, 0x3b, 0xcb, 0x90, 0xd0, 0x4b, 0x30, 0x85, 0x91, 0xa8, 0xb7, 0xf4, 0x99, 0xb3, 0xca,
+	0xb4, 0x9f, 0x3e, 0x3a, 0x9f, 0xc0, 0x5b, 0x07, 0xb4, 0x45, 0x29, 0xbe, 0x65, 0x70, 0xfa, 0x90,
+	0x15, 0xe5, 0xdf, 0x02, 0x68, 0xf4, 0xa3, 0x2f, 0xa3, 0xec, 0x43, 0xf6, 0xce, 0x2a, 0x94, 0x34,
+	0xc7, 0xc7, 0x8f, 0x1a, 0x0f, 0x44, 0x14, 0xa0, 0x2f, 0x14, 0x3e, 0xbf, 0xee, 0x1d, 0xba, 0x2a,
+	0xa3, 0x0a, 0x62, 0xbf, 0x07, 0x73, 0x48, 0xf1, 0x5a, 0x2c, 0x14, 0x16, 0xa8, 0xfe, 0x47, 0xd8,
+	0xf0, 0x67, 0x71, 0xc8, 0xdc, 0xb9, 0x4a, 0x67, 0x65, 0x3e, 0x8f, 0x3b, 0x61, 0x3b, 0x54, 0x47,
+	0x9e, 0xbb, 0xd3, 0xa6, 0x8d, 0x8d, 0x88, 0x88, 0xf2, 0x2e, 0xcc, 0x9a, 0x9b, 0x5f, 0x6b, 0xf5,
+	0xe2, 0x05, 0x21, 0x67, 0xea, 0x03, 0x6b, 0x67, 0x81, 0xae, 0xd5, 0x9d, 0x70, 0xbb, 0x1b, 0x36,
+	0x75, 0xfb, 0xbd, 0x2f, 0xe2, 0x00, 0x55, 0xbf, 0x1b, 0x6d, 0x42, 0x39, 0x73, 0x05, 0x71, 0xd9,
+	0x30, 0xa5, 0x4c, 0x48, 0x97, 0xfd, 0x14, 0xf5, 0x9b, 0x34, 0xb8, 0xfe, 0x78, 0x0e, 0x4e, 0x6a,
+	0x0f, 0xfe, 0x1b, 0x83, 0xd7, 0x0e, 0x76, 0x56, 0x7e, 0x2d, 0x47, 0x23, 0x1b, 0xdb, 0x93, 0xad,
+	0x0f, 0x8b, 0x2a, 0x53, 0x74, 0x67, 0xf5, 0x9b, 0x3f, 0xff, 0x7b, 0x7c, 0xe2, 0x12, 0xaf, 0x78,
+	0xe3, 0x87, 0x4d, 0xdc, 0x17, 0xd6, 0x94, 0xa1, 0xfd, 0x9e, 0xc1, 0xa4, 0x69, 0xab, 0xfc, 0x9d,
+	0xbc, 0xe9, 0x47, 0xfa, 0xbb, 0xf5, 0xee, 0x71, 0x65, 0xc4, 0xba, 0xa4, 0x59, 0xcb, 0xfc, 0x6c,
+	0x06, 0xab, 0x69, 0xef, 0xfc, 0x07, 0x06, 0xd3, 0x69, 0x47, 0xe6, 0xef, 0xe5, 0xcd, 0x75, 0x60,
+	0x18, 0x58, 0xd7, 0x8e, 0x2f, 0x24, 0xcc, 0x8b, 0x1a, 0x73, 0x91, 0x97, 0x33, 0x30, 0xd3, 0xe6,
+	0xcd, 0x7f, 0x65, 0x30, 0x37, 0xd2, 0x85, 0xf9, 0x8d, 0xfc, 0xf5, 0x3c, 0xdc, 0xef, 0xad, 0x0f,
+	0x0a, 0xaa, 0x89, 0x7b, 0x45, 0x73, 0x5f, 0xe4, 0x4b, 0x99, 0x57, 0x41, 0xab, 0x6a, 0xa6, 0xc3,
+	0xf3, 0xdf, 0x19, 0xbc, 0x7e, 0xa8, 0x19, 0xf3, 0xdc, 0x37, 0x32, 0x6b, 0x30, 0x58, 0x9b, 0x2f,
+	0xe0, 0x40, 0x3b, 0x59, 0xd3, 0x3b, 0xb9, 0xcc, 0x97, 0x33, 0x76, 0x32, 0xe8, 0xa3, 0xb5, 0x84,
+	0xb8, 0x7f, 0x62, 0x00, 0x03, 0x43, 0xfe, 0xfe, 0xf1, 0x21, 0x52, 0xfe, 0x8d, 0x22, 0x52, 0x02,
+	0x5f, 0xd6, 0xe0, 0xe7, 0xf8, 0xe2, 0x91, 0xe0, 0xfc, 0x17, 0x06, 0xb3, 0xc3, 0xad, 0x9c, 0x5f,
+	0xcf, 0x9b, 0x77, 0xcc, 0xc8, 0xb0, 0x6e, 0x14, 0x13, 0x13, 0xf6, 0x15, 0x8d, 0x7d, 0x81, 0x9f,
+	0xcf, 0xc0, 0x1e, 0x19, 0x2d, 0xfc, 0x67, 0x06, 0x33, 0x43, 0xdd, 0x9d, 0x6f, 0x1c, 0xef, 0x4b,
+	0x1b, 0x9e, 0x23, 0xd6, 0xf5, 0x42, 0x5a, 0xc2, 0xbe, 0xac, 0xb1, 0x97, 0xf8, 0xb9, 0xe7, 0x7e,
+	0xa8, 0x66, 0xd6, 0xf0, 0x3f, 0x18, 0xf0, 0xc3, 0x23, 0x80, 0xe7, 0xbe, 0xad, 0x99, 0x03, 0xc6,
+	0xaa, 0xbe, 0x88, 0x05, 0x6d, 0x65, 0x5d, 0x6f, 0xe5, 0x0a, 0xbf, 0x94, 0xb1, 0x95, 0xd6, 0x40,
+	0x5a, 0xa3, 0xa9, 0x54, 0xbd, 0xfd, 0x64, 0xcf, 0x66, 0x4f, 0xf7, 0x6c, 0xf6, 0xef, 0x9e, 0xcd,
+	0xbe, 0xdb, 0xb7, 0x27, 0x9e, 0xee, 0xdb, 0x13, 0x7f, 0xed, 0xdb, 0x13, 0x5f, 0xae, 0x0c, 0x4d,
+	0xd2, 0x9e, 0xdf, 0x0a, 0xc1, 0x19, 0xf3, 0x47, 0x03, 0x7b, 0x3d, 0x54, 0xeb, 0x93, 0xfa, 0x5f,
+	0x8a, 0xab, 0xff, 0x07, 0x00, 0x00, 0xff, 0xff, 0x75, 0x95, 0x0d, 0xf2, 0x14, 0x0d, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -463,6 +948,19 @@ type QueryClient interface {
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
 	ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error)
+	// CollateralSetting queries a borrower's collateral setting of a specified
+	// uToken denomination.
+	CollateralSetting(ctx context.Context, in *QueryCollateralSettingRequest, opts ...grpc.CallOption) (*QueryCollateralSettingResponse, error)
+	// Collateral queries the collateral amount of a user by token denomination.
+	// If the denomination is not supplied, the total for each collateral token is
+	// returned.
+	Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
+	// ExchangeRate queries the uToken exchange rate of a given uToken denomination.
+	ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error)
+	// BorrowLimit queries the borrow limit in USD of a given borrower
+	BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error)
+	// LiquidationTargets queries a list of all borrowers eligible for liquidation
+	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
 }
 
 type queryClient struct {
@@ -509,6 +1007,51 @@ func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountR
 	return out, nil
 }
 
+func (c *queryClient) CollateralSetting(ctx context.Context, in *QueryCollateralSettingRequest, opts ...grpc.CallOption) (*QueryCollateralSettingResponse, error) {
+	out := new(QueryCollateralSettingResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/CollateralSetting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error) {
+	out := new(QueryCollateralResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/Collateral", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
+	out := new(QueryExchangeRateResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/ExchangeRate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
+	out := new(QueryBorrowLimitResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/BorrowLimit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
+	out := new(QueryLiquidationTargetsResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/LiquidationTargets", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// RegisteredTokens queries for all the registered tokens.
@@ -522,6 +1065,19 @@ type QueryServer interface {
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
 	ReserveAmount(context.Context, *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error)
+	// CollateralSetting queries a borrower's collateral setting of a specified
+	// uToken denomination.
+	CollateralSetting(context.Context, *QueryCollateralSettingRequest) (*QueryCollateralSettingResponse, error)
+	// Collateral queries the collateral amount of a user by token denomination.
+	// If the denomination is not supplied, the total for each collateral token is
+	// returned.
+	Collateral(context.Context, *QueryCollateralRequest) (*QueryCollateralResponse, error)
+	// ExchangeRate queries the uToken exchange rate of a given uToken denomination.
+	ExchangeRate(context.Context, *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error)
+	// BorrowLimit queries the borrow limit in USD of a given borrower
+	BorrowLimit(context.Context, *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error)
+	// LiquidationTargets queries a list of all borrowers eligible for liquidation
+	LiquidationTargets(context.Context, *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -539,6 +1095,21 @@ func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowe
 }
 func (*UnimplementedQueryServer) ReserveAmount(ctx context.Context, req *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReserveAmount not implemented")
+}
+func (*UnimplementedQueryServer) CollateralSetting(ctx context.Context, req *QueryCollateralSettingRequest) (*QueryCollateralSettingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollateralSetting not implemented")
+}
+func (*UnimplementedQueryServer) Collateral(ctx context.Context, req *QueryCollateralRequest) (*QueryCollateralResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Collateral not implemented")
+}
+func (*UnimplementedQueryServer) ExchangeRate(ctx context.Context, req *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRate not implemented")
+}
+func (*UnimplementedQueryServer) BorrowLimit(ctx context.Context, req *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BorrowLimit not implemented")
+}
+func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LiquidationTargets not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -617,6 +1188,96 @@ func _Query_ReserveAmount_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_CollateralSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryCollateralSettingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CollateralSetting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/CollateralSetting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CollateralSetting(ctx, req.(*QueryCollateralSettingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryCollateralRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Collateral(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/Collateral",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Collateral(ctx, req.(*QueryCollateralRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryExchangeRateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ExchangeRate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/ExchangeRate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ExchangeRate(ctx, req.(*QueryExchangeRateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryBorrowLimitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).BorrowLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/BorrowLimit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryLiquidationTargetsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).LiquidationTargets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/LiquidationTargets",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargetsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umeenetwork.umee.leverage.v1beta1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -636,6 +1297,26 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReserveAmount",
 			Handler:    _Query_ReserveAmount_Handler,
+		},
+		{
+			MethodName: "CollateralSetting",
+			Handler:    _Query_CollateralSetting_Handler,
+		},
+		{
+			MethodName: "Collateral",
+			Handler:    _Query_Collateral_Handler,
+		},
+		{
+			MethodName: "ExchangeRate",
+			Handler:    _Query_ExchangeRate_Handler,
+		},
+		{
+			MethodName: "BorrowLimit",
+			Handler:    _Query_BorrowLimit_Handler,
+		},
+		{
+			MethodName: "LiquidationTargets",
+			Handler:    _Query_LiquidationTargets_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -895,6 +1576,331 @@ func (m *QueryReserveAmountResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryCollateralSettingRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralSettingRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralSettingRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCollateralSettingResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralSettingResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralSettingResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Enabled {
+		i--
+		if m.Enabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCollateralRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCollateralResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Collateral) > 0 {
+		for iNdEx := len(m.Collateral) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Collateral[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryExchangeRateRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryExchangeRateRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryExchangeRateRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryExchangeRateResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryExchangeRateResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryExchangeRateResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.ExchangeRate.Size()
+		i -= size
+		if _, err := m.ExchangeRate.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryBorrowLimitRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBorrowLimitRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBorrowLimitRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryBorrowLimitResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBorrowLimitResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBorrowLimitResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.BorrowLimit.Size()
+		i -= size
+		if _, err := m.BorrowLimit.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLiquidationTargetsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationTargetsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationTargetsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLiquidationTargetsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationTargetsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationTargetsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for iNdEx := len(m.Targets) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Targets[iNdEx])
+			copy(dAtA[i:], m.Targets[iNdEx])
+			i = encodeVarintQuery(dAtA, i, uint64(len(m.Targets[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -1003,6 +2009,139 @@ func (m *QueryReserveAmountResponse) Size() (n int) {
 	_ = l
 	l = m.Amount.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryCollateralSettingRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryCollateralSettingResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Enabled {
+		n += 2
+	}
+	return n
+}
+
+func (m *QueryCollateralRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryCollateralResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Collateral) > 0 {
+		for _, e := range m.Collateral {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QueryExchangeRateRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryExchangeRateResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.ExchangeRate.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryBorrowLimitRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryBorrowLimitResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.BorrowLimit.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryLiquidationTargetsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryLiquidationTargetsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for _, s := range m.Targets {
+			l = len(s)
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1621,6 +2760,852 @@ func (m *QueryReserveAmountResponse) Unmarshal(dAtA []byte) error {
 			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCollateralSettingRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralSettingRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralSettingRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCollateralSettingResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralSettingResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralSettingResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Enabled = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCollateralRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCollateralResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Collateral", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Collateral = append(m.Collateral, types.Coin{})
+			if err := m.Collateral[len(m.Collateral)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryExchangeRateRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryExchangeRateRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryExchangeRateRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryExchangeRateResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryExchangeRateResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryExchangeRateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExchangeRate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ExchangeRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBorrowLimitRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBorrowLimitRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBorrowLimitRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBorrowLimitResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBorrowLimitResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBorrowLimitResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BorrowLimit", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.BorrowLimit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationTargetsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationTargetsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Targets", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Targets = append(m.Targets, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

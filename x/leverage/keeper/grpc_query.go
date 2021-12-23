@@ -25,7 +25,6 @@ func (q Querier) RegisteredTokens(
 	goCtx context.Context,
 	req *types.QueryRegisteredTokens,
 ) (*types.QueryRegisteredTokensResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -66,7 +65,6 @@ func (q Querier) Borrowed(
 	goCtx context.Context,
 	req *types.QueryBorrowedRequest,
 ) (*types.QueryBorrowedResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -96,7 +94,6 @@ func (q Querier) ReserveAmount(
 	goCtx context.Context,
 	req *types.QueryReserveAmountRequest,
 ) (*types.QueryReserveAmountResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -108,4 +105,130 @@ func (q Querier) ReserveAmount(
 	amount := q.Keeper.GetReserveAmount(ctx, req.Denom)
 
 	return &types.QueryReserveAmountResponse{Amount: amount}, nil
+}
+
+func (q Querier) CollateralSetting(
+	goCtx context.Context,
+	req *types.QueryCollateralSettingRequest,
+) (*types.QueryCollateralSettingResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
+
+	return &types.QueryCollateralSettingResponse{Enabled: setting}, nil
+}
+
+func (q Querier) Collateral(
+	goCtx context.Context,
+	req *types.QueryCollateralRequest,
+) (*types.QueryCollateralResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(req.Denom) == 0 {
+		tokens := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+
+		return &types.QueryCollateralResponse{Collateral: tokens}, nil
+	}
+
+	token := q.Keeper.GetCollateralAmount(ctx, borrower, req.Denom)
+
+	return &types.QueryCollateralResponse{Collateral: sdk.NewCoins(token)}, nil
+}
+
+func (q Querier) ExchangeRate(
+	goCtx context.Context,
+	req *types.QueryExchangeRateRequest,
+) (*types.QueryExchangeRateResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	rate, err := q.Keeper.GetExchangeRate(ctx, req.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryExchangeRateResponse{ExchangeRate: rate}, nil
+}
+
+func (q Querier) BorrowLimit(
+	goCtx context.Context,
+	req *types.QueryBorrowLimitRequest,
+) (*types.QueryBorrowLimitResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+
+	limit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
+}
+
+func (q Querier) LiquidationTargets(
+	goCtx context.Context,
+	req *types.QueryLiquidationTargetsRequest,
+) (*types.QueryLiquidationTargetsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	targets, err := q.Keeper.GetEligibleLiquidationTargets(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	stringTargets := []string{}
+	for _, addr := range targets {
+		stringTargets = append(stringTargets, addr.String())
+	}
+
+	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
 }
