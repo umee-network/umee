@@ -32,6 +32,34 @@ service Query {
   rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/reserve_amount";
   }
+
+  // CollateralSetting queries a borrower's collateral setting of a specified
+  // uToken denomination.
+  rpc CollateralSetting(QueryCollateralSettingRequest) returns (QueryCollateralSettingResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_setting";
+  }
+
+  // Collateral queries the collateral amount of a user by token denomination.
+  // If the denomination is not supplied, the total for each collateral token is
+  // returned.
+  rpc Collateral(QueryCollateralRequest) returns (QueryCollateralResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/collateral";
+  }
+
+  // ExchangeRate queries the uToken exchange rate of a given uToken denomination.
+  rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/exchange_rate";
+  }
+
+  // BorrowLimit queries the borrow limit in USD of a given borrower
+  rpc BorrowLimit(QueryBorrowLimitRequest) returns (QueryBorrowLimitResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/borrow_limit";
+  }
+
+  // LiquidationTargets queries a list of all borrowers eligible for liquidation
+  rpc LiquidationTargets(QueryLiquidationTargetsRequest) returns (QueryLiquidationTargetsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/liquidation_targets";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -78,4 +106,67 @@ message QueryReserveAmountRequest {
 // gRPC service handler.
 message QueryReserveAmountResponse {
   string amount = 1 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+}
+
+// QueryCollateralSettingsRequest defines the request structure for the
+// CollateralSetting gRPC service handler.
+message QueryCollateralSettingRequest {
+  string address = 1;
+  string denom = 2;
+}
+
+// QueryCollateralSettingsResponse defines the response structure for the
+// CollateralSetting gRPC service handler.
+message QueryCollateralSettingResponse {
+  bool enabled = 1;
+}
+
+// QueryCollateralRequest defines the request structure for the Collateral gRPC
+// service handler.
+message QueryCollateralRequest {
+  string address = 1;
+  string denom   = 2;
+}
+
+// QueryCollateralResponse defines the response structure for the Collateral gRPC
+// service handler.
+message QueryCollateralResponse {
+  repeated cosmos.base.v1beta1.Coin collateral = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+}
+
+// QueryExchangeRateRequest defines the request structure for the ExchangeRate
+// gRPC service handler.
+message QueryExchangeRateRequest {
+  string denom = 1;
+}
+
+// QueryExchangeRateResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+message QueryExchangeRateResponse {
+  string exchange_rate = 1
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryBorrowLimitRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+message QueryBorrowLimitRequest {
+  string address = 1;
+}
+
+// QueryBorrowLimitResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+message QueryBorrowLimitResponse {
+  string borrow_limit = 1
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryLiquidationTargetsRequest defines the request structure for the BorrowLimit
+// gRPC service handler.
+message QueryLiquidationTargetsRequest {}
+
+// QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
+// gRPC service handler.
+message QueryLiquidationTargetsResponse {
+  repeated string targets = 1 [(gogoproto.nullable) = false];
 }
