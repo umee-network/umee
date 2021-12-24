@@ -12,12 +12,33 @@ import (
 // the base and display/symbol denominations for each exchange pair. E.g. it must
 // know about the UMEE/USD exchange rate along with the uumee base denomination
 // and the exponent.
-func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
+// This function will not panic or return non-positive exchange rates, preferring
+// to error instead.
+func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (price sdk.Dec, err error) {
+
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	return k.oracleKeeper.GetExchangeRateBase(ctx, denom)
+	defer func() {
+		// This will catch panics from the function body
+		// and instead return a general error.
+		if pan := recover(); pan != nil {
+			price = sdk.ZeroDec()
+			err = sdkerrors.Wrap(types.ErrOraclePanic, denom)
+		}
+	}()
+
+	price, err = k.oracleKeeper.GetExchangeRateBase(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	if price.IsNil() || !price.IsPositive() {
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidOraclePrice, denom)
+	}
+
+	return price, nil
 }
 
 // TokenValue returns the total token value given a Coin. An error is
