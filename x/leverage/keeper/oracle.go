@@ -15,7 +15,6 @@ import (
 // This function will not panic or return non-positive exchange rates, preferring
 // to error instead.
 func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (price sdk.Dec, err error) {
-
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
