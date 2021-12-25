@@ -111,7 +111,7 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		tickerPrices[cp.String()] = TickerPrice{Price: price, Volume: volume}
 	}
 
-	for _, cp := range baseDenomIdx {
+	for _, cp := range pairs {
 		if _, ok := tickerPrices[cp.String()]; !ok {
 			return nil, fmt.Errorf("missing exchange rate for %s", cp.String())
 		}
