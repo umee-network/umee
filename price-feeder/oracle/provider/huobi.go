@@ -111,6 +111,8 @@ func (p HuobiProvider) getTickerPrice(ticker string) (TickerPrice, error) {
 		return TickerPrice{}, fmt.Errorf("failed to parse Huobi price (%f) for %s", rawPrice, ticker)
 	}
 
+	// We have to fetch the volume separately since the last trade response does
+	// not include the last 24h volume.
 	volume, err := p.getTickerVolume(ticker)
 	if err != nil {
 		return TickerPrice{}, err
