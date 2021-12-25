@@ -53,7 +53,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
 		require.Equal(t, sdk.MustNewDecFromStr("28.0991"), prices["ATOMUSDT"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("16511168.890882"), prices["ATOMUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("16511168.890881622"), prices["ATOMUSDT"].Volume)
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
@@ -127,9 +127,9 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
 		require.Equal(t, sdk.MustNewDecFromStr("28.0991"), prices["ATOMUSDT"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("16511168.890882"), prices["ATOMUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("16511168.890881622"), prices["ATOMUSDT"].Volume)
 		require.Equal(t, sdk.MustNewDecFromStr("99.5148"), prices["LUNAUSDT"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("162129738.740874"), prices["LUNAUSDT"].Volume)
+		require.Equal(t, sdk.MustNewDecFromStr("162129738.74087432"), prices["LUNAUSDT"].Volume)
 	})
 
 	t.Run("invalid_request_bad_response", func(t *testing.T) {
