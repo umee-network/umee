@@ -20,6 +20,7 @@ const (
 
 	ProviderKraken  = "kraken"
 	ProviderBinance = "binance"
+	ProviderHuobi   = "huobi"
 	ProviderMock    = "mock"
 )
 
@@ -34,6 +35,7 @@ var (
 	SupportedProviders = map[string]struct{}{
 		ProviderKraken:  {},
 		ProviderBinance: {},
+		ProviderHuobi:   {},
 		ProviderMock:    {},
 	}
 )
