@@ -12,13 +12,14 @@ import (
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 type mockProvider struct {
 	prices map[string]provider.TickerPrice
 }
 
-func (m mockProvider) GetTickerPrices(ticker ...string) (map[string]provider.TickerPrice, error) {
+func (m mockProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]provider.TickerPrice, error) {
 	return m.prices, nil
 }
 

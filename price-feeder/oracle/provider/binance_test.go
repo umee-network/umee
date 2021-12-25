@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {
@@ -28,7 +29,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		p.client = server.Client()
 		p.baseURL = server.URL
 
-		prices, err := p.GetTickerPrices("ATOMUSDT")
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
 		require.Equal(t, sdk.MustNewDecFromStr("34.69000000"), prices["ATOMUSDT"].Price)
@@ -65,7 +66,10 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		p.client = server.Client()
 		p.baseURL = server.URL
 
-		prices, err := p.GetTickerPrices("ATOMUSDT", "LUNAUSDT")
+		prices, err := p.GetTickerPrices(
+			types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+			types.CurrencyPair{Base: "LUNA", Quote: "USDT"},
+		)
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
 		require.Equal(t, sdk.MustNewDecFromStr("34.69000000"), prices["ATOMUSDT"].Price)
@@ -84,7 +88,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		p.client = server.Client()
 		p.baseURL = server.URL
 
-		prices, err := p.GetTickerPrices("ATOMUSDT")
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})
@@ -104,7 +108,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		p.client = server.Client()
 		p.baseURL = server.URL
 
-		prices, err := p.GetTickerPrices("FOOBAR")
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})

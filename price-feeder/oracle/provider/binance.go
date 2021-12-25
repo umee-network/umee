@@ -9,6 +9,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -59,15 +60,15 @@ func NewBinanceProviderWithTimeout(timeout time.Duration) *BinanceProvider {
 	}
 }
 
-func (p BinanceProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(tickers))
-	for _, t := range tickers {
-		price, err := p.getTickerPrice(t)
+func (p BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+	tickerPrices := make(map[string]TickerPrice, len(pairs))
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp.String())
 		if err != nil {
 			return nil, err
 		}
 
-		tickerPrices[t] = price
+		tickerPrices[cp.String()] = price
 	}
 
 	return tickerPrices, nil
