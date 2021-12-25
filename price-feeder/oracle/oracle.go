@@ -231,6 +231,9 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 		case config.ProviderOsmosis:
 			priceProvider = provider.NewOsmosisProvider()
 
+		case config.ProviderHuobi:
+			priceProvider = provider.NewHuobiProvider()
+
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()
 		}
