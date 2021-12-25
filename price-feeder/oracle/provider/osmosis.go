@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -57,7 +58,7 @@ func NewOsmosisProviderWithTimeout(timeout time.Duration) *OsmosisProvider {
 }
 
 func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	path := fmt.Sprintf("%s%s/all", p.baseURL, osmosisBaseURL)
+	path := fmt.Sprintf("%s%s/all", p.baseURL, osmosisTokenEndpoint)
 
 	resp, err := p.client.Get(path)
 	if err != nil {
@@ -76,15 +77,17 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		return nil, fmt.Errorf("failed to unmarshal Osmosis response body: %w", err)
 	}
 
-	baseDenoms := make(map[string]struct{})
+	baseDenomIdx := make(map[string]types.CurrencyPair)
 	for _, cp := range pairs {
-		baseDenoms[strings.ToUpper(cp.Base)] = struct{}{}
+		baseDenomIdx[strings.ToUpper(cp.Base)] = cp
 	}
 
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 	for _, tr := range tokensResp {
 		symbol := strings.ToUpper(tr.Symbol) // symbol == base in a currency pair
-		if _, ok := baseDenoms[symbol]; !ok {
+
+		cp, ok := baseDenomIdx[symbol]
+		if !ok {
 			// skip tokens that are not requested
 			continue
 		}
@@ -93,19 +96,25 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 			return nil, fmt.Errorf("duplicate token found in Osmosis response: %s", symbol)
 		}
 
-		priceRaw := fmt.Sprintf("%f", tr.Price)
+		priceRaw := strconv.FormatFloat(tr.Price, 'f', -1, 64)
 		price, err := sdk.NewDecFromStr(priceRaw)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read Osmosis price (%s) for %s", priceRaw, symbol)
 		}
 
-		volumeRaw := fmt.Sprintf("%f", tr.Volume)
+		volumeRaw := strconv.FormatFloat(tr.Volume, 'f', -1, 64)
 		volume, err := sdk.NewDecFromStr(volumeRaw)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read Osmosis volume (%s) for %s", volumeRaw, symbol)
 		}
 
-		tickerPrices[symbol] = TickerPrice{Price: price, Volume: volume}
+		tickerPrices[cp.String()] = TickerPrice{Price: price, Volume: volume}
+	}
+
+	for _, cp := range baseDenomIdx {
+		if _, ok := tickerPrices[cp.String()]; !ok {
+			return nil, fmt.Errorf("missing exchange rate for %s", cp.String())
+		}
 	}
 
 	return tickerPrices, nil

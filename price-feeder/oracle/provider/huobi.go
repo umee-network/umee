@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -61,6 +63,15 @@ func NewHuobiProvider() *HuobiProvider {
 	}
 }
 
+func NewHuobiProviderWithTimeout(timeout time.Duration) *HuobiProvider {
+	return &HuobiProvider{
+		baseURL: huobiBaseURL,
+		client: &http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
 func (p HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 	for _, cp := range pairs {
@@ -107,7 +118,7 @@ func (p HuobiProvider) getTickerPrice(ticker string) (TickerPrice, error) {
 	}
 
 	rawPrice := tradeResp.Tick.Data[0].Price
-	price, err := sdk.NewDecFromStr(fmt.Sprintf("%f", rawPrice))
+	price, err := sdk.NewDecFromStr(strconv.FormatFloat(rawPrice, 'f', -1, 64))
 	if err != nil {
 		return TickerPrice{}, fmt.Errorf("failed to parse Huobi price (%f) for %s", rawPrice, ticker)
 	}
@@ -150,7 +161,7 @@ func (p HuobiProvider) getTickerVolume(ticker string) (sdk.Dec, error) {
 	}
 
 	rawVolume := marketResp.Tick.Vol
-	volume, err := sdk.NewDecFromStr(fmt.Sprintf("%f", rawVolume))
+	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(rawVolume, 'f', -1, 64))
 	if err != nil {
 		return sdk.ZeroDec(), fmt.Errorf("failed to parse Huobi volume (%f) for %s", rawVolume, ticker)
 	}
