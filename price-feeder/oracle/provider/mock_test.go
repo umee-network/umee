@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestMockProvider_GetTickerPrices(t *testing.T) {
@@ -26,7 +27,7 @@ ATOM,USDC,21.84,1827884.77
 		mp.client = server.Client()
 		mp.baseURL = server.URL
 
-		prices, err := mp.GetTickerPrices("UMEEUSDT")
+		prices, err := mp.GetTickerPrices(types.CurrencyPair{Base: "UMEE", Quote: "USDT"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
 		require.Equal(t, sdk.MustNewDecFromStr("3.04"), prices["UMEEUSDT"].Price)
@@ -47,7 +48,10 @@ ATOM,USDC,21.84,1827884.77
 		mp.client = server.Client()
 		mp.baseURL = server.URL
 
-		prices, err := mp.GetTickerPrices("UMEEUSDT", "ATOMUSDC")
+		prices, err := mp.GetTickerPrices(
+			types.CurrencyPair{Base: "UMEE", Quote: "USDT"},
+			types.CurrencyPair{Base: "ATOM", Quote: "USDC"},
+		)
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
 		require.Equal(t, sdk.MustNewDecFromStr("3.04"), prices["UMEEUSDT"].Price)
@@ -66,7 +70,7 @@ ATOM,USDC,21.84,1827884.77
 		mp.client = server.Client()
 		mp.baseURL = server.URL
 
-		prices, err := mp.GetTickerPrices("UMEEUSDT")
+		prices, err := mp.GetTickerPrices(types.CurrencyPair{Base: "UMEE", Quote: "USDT"})
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})

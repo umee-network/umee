@@ -9,6 +9,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -63,7 +64,12 @@ func NewKrakenProviderWithTimeout(timeout time.Duration) *KrakenProvider {
 	}
 }
 
-func (p KrakenProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice, error) {
+func (p KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+	tickers := make([]string, len(pairs))
+	for i, cp := range pairs {
+		tickers[i] = cp.String()
+	}
+
 	path := fmt.Sprintf("%s%s?pair=%s", p.baseURL, krakenTickerEndpoint, strings.Join(tickers, ","))
 
 	resp, err := p.client.Get(path)
