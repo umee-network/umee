@@ -20,6 +20,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
@@ -31,20 +32,6 @@ import (
 const (
 	tickerTimeout = 1000 * time.Millisecond
 )
-
-// CurrencyPair defines a currency exchange pair consisting of a base and a quote.
-// We primarily utilize the base for broadcasting exchange rates and use the
-// pair for querying for the ticker prices.
-type CurrencyPair struct {
-	Base  string
-	Quote string
-}
-
-// String implements the Stringer interface and defines a ticker symbol for
-// querying the exchange rate.
-func (cp CurrencyPair) String() string {
-	return cp.Base + cp.Quote
-}
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -69,7 +56,7 @@ type Oracle struct {
 	logger zerolog.Logger
 	closer *pfsync.Closer
 
-	providerPairs      map[string][]CurrencyPair
+	providerPairs      map[string][]types.CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
 	priceProviders     map[string]provider.Provider
@@ -81,11 +68,11 @@ type Oracle struct {
 }
 
 func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
-	providerPairs := make(map[string][]CurrencyPair)
+	providerPairs := make(map[string][]types.CurrencyPair)
 
 	for _, pair := range currencyPairs {
 		for _, provider := range pair.Providers {
-			providerPairs[provider] = append(providerPairs[provider], CurrencyPair{
+			providerPairs[provider] = append(providerPairs[provider], types.CurrencyPair{
 				Base:  pair.Base,
 				Quote: pair.Quote,
 			})
@@ -168,12 +155,7 @@ func (o *Oracle) SetPrices() error {
 		priceProvider := o.getOrSetProvider(providerName)
 
 		g.Go(func() error {
-			var ticker []string
-			for _, cp := range currencyPairs {
-				ticker = append(ticker, cp.String())
-			}
-
-			prices, err := priceProvider.GetTickerPrices(ticker...)
+			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
 			if err != nil {
 				return err
 			}
@@ -245,6 +227,12 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 
 		case config.ProviderKraken:
 			priceProvider = provider.NewKrakenProvider()
+
+		case config.ProviderOsmosis:
+			priceProvider = provider.NewOsmosisProvider()
+
+		case config.ProviderHuobi:
+			priceProvider = provider.NewHuobiProvider()
 
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()

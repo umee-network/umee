@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -36,8 +37,8 @@ func NewMockProvider() *MockProvider {
 	}
 }
 
-func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(tickers))
+func (p MockProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
 	resp, err := p.client.Get(p.baseURL)
 	if err != nil {
@@ -53,8 +54,8 @@ func (p MockProvider) GetTickerPrices(tickers ...string) (map[string]TickerPrice
 	}
 
 	tickerMap := make(map[string]struct{})
-	for _, t := range tickers {
-		tickerMap[strings.ToUpper(t)] = struct{}{}
+	for _, cp := range pairs {
+		tickerMap[strings.ToUpper(cp.String())] = struct{}{}
 	}
 
 	// Records are of the form [base, quote, price, volume] and we skip the first

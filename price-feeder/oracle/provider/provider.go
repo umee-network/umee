@@ -4,6 +4,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -12,7 +13,7 @@ const (
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
-	GetTickerPrices(ticker ...string) (map[string]TickerPrice, error)
+	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
 }
 
 // TickerPrice defines price and volume information for a symbol or ticker
