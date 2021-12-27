@@ -91,6 +91,6 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 	return suite.txBuilder.GetTx(), nil
 }
 
-func NewIntegrationTestSuite(t *testing.T) {
+func TestIntegrationTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
