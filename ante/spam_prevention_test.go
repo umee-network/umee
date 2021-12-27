@@ -84,5 +84,5 @@ func (ok dummyOracleKeeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAd
 		return nil
 	}
 
-	return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "cannot ensure feeder right")
+	return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "feeder is not authorized")
 }
