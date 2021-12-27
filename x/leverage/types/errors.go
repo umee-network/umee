@@ -20,5 +20,4 @@ var (
 	ErrLiquidatorBalanceZero   = sdkerrors.Register(ModuleName, 1110, "liquidator base asset balance is zero")
 	ErrNegativeTimeElapsed     = sdkerrors.Register(ModuleName, 1111, "negative time elapsed since last interest time")
 	ErrInvalidOraclePrice      = sdkerrors.Register(ModuleName, 1112, "invalid oracle price")
-	ErrOraclePanic             = sdkerrors.Register(ModuleName, 1113, "oracle module panicked")
 )
