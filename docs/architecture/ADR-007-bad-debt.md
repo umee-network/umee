@@ -1,4 +1,4 @@
-# ADR 005: Liquidation
+# ADR 007: Bad debt
 
 ## Changelog
 
@@ -16,7 +16,7 @@ Debt positions on Umee always start out over-collateralized, but if sufficient i
 Such debt (now under-collateralized) may become over-collateralized on its own if asset prices rebound in the right direction, but it is also eligible for liquidation in its current state.
 When fully liquidated, accounts whose `BorrowedValue` is greater than `CollateralValue` (adjusted for liquidation incentive) will result in an account with nonzero total borrows but zero collateral, thus no incentive for repayment.
 
-It is in the interests of the overall system to repay such _bad debt_ using reserves, in order to prevent it accruing interest forever and damaging the health of the lending pool.
+It is in the interests of the overall system to repay such _bad debt_ using reserves, in order to prevent it from accruing interest forever and damaging the health of the lending pool.
 
 ## Alternatives
 
@@ -26,7 +26,7 @@ One consideration to make is whether borrowers should be eligible for bad debt r
 
 In the former case, the system would also confiscate any remaining collateral, as though it were a liquidator, and would have to process the collateral in a way of our choosing (e.g. exchange for base assets, and add them to reserves).
 
-In the latter case, liquidators would first have liquidate the portion of the debt that can be exchanged for collateral, reducing the total burden on reserves when the borrow is being repaid.
+In the latter case, liquidators would first have to liquidate the portion of the debt that can be exchanged for collateral, reducing the total burden on reserves when the borrow is being repaid.
 
 Also in the latter case, if liquidators do not (for whatever reason) liquidate until the under-collateralized account's collateral is zero, its borrows would continue to accrue interest and remain ineligible for bad debt repayment.
 This should not be a common case, as long as liquidation incentives exist, but might happen if liquidators are sparse, or if the remaining collateral is so small that it is not worth the gas fee to retrieve.
@@ -63,7 +63,7 @@ Then, every `InterestEpoch`, bad debt positions can be iterated through and repa
 
 ### Recovery from Exhausted Reserves
 
-When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, the  address in question remains in the list, so it will be attempted again next `InterestEpoch`.
+When `RepayBadDebt(borrowerAddress)` fails to repay a borrow in full due to insufficient reserves, the address in question remains in the list, so it will be attempted again next `InterestEpoch`.
 
 ### Messages, Events, and Logs
 
@@ -87,7 +87,7 @@ This could be solved by any Liquidator - but if undercollateralized borrowers ar
 
 ### Positive
 
-- Bad debt is eligibe for reserve-funded repayment only when borrower collateral is zero, allowing liquidators to soften the blow to reserves
+- Bad debt is eligible for reserve-funded repayment only when borrower collateral is zero, allowing liquidators to soften the blow to reserves
 - Computation-efficient checks for `Collateral Value == 0` during `LiquidateBorrow` do not require iterating over all borrowers.
 - System automatically recovers from reserve exhaustion
 

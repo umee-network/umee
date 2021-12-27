@@ -45,17 +45,17 @@ The Asset Facility should harness the Cosmos `x/bank` module's `BaseKeeper` for 
 - Send coins (both base assets and uTokens) from module account to user account (and vice versa)
 - Mint uTokens
 - Burn uTokens
-- `SendKeeper`: Use BlockedAddr feature to guard against unexpected transfers to module account(s)
+- `SendKeeper`: Use the BlockedAddr feature to guard against unexpected transfers to module account(s)
 - `ViewKeeper`: Read individual account balances
 
 The [BaseKeeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md) of the Cosmos `x/bank` module comes with the following capabilities:
-> The base keeper provides full-permission access: the ability to arbitrary modify any account's balance and mint or burn coins.
+> The base keeper provides full-permission access: the ability to arbitrarily modify any account's balance and mint or burn coins.
 
 Note that `BaseKeeper` also has functions which read the total coins of each asset type in circulation on the chain, and can also read individual account balances using its embedded `ViewKeeper`.
 
 ### Basic Message Types
 
-For reference, here is the `Bank` module's built in coin transfer message as seen [here](https://docs.cosmos.network/v0.39/basics/app-anatomy.html), which is used when regular users send tokens to one another:
+For reference, here is the `Bank` module's built-in coin transfer message as seen [here](https://docs.cosmos.network/v0.39/basics/app-anatomy.html), which is used when regular users send tokens to one another:
 ```go
 // MsgSend - high level transaction of the coin module
 type MsgSend struct {
@@ -64,7 +64,7 @@ type MsgSend struct {
   Amount      sdk.Coins      `json:"amount" yaml:"amount"`
 }
 ```
-The `sdk.Coins` type is a slice (ordered list) of `sdk.Coin` which contain a token type and amount.
+The `sdk.Coins` type is a slice (ordered list) of `sdk.Coin` which contains a token type and amount.
 
 To implement the deposit functionality of the Asset Facility, the two common message types will be:
 ```go
@@ -107,7 +107,7 @@ Assuming a placeholder token allow-list of one element (e.g. `uumee`), and a uTo
 
 ### Positive
 - Banking module already provides underlying functionality
-Asset deposit does not require us to modify state beyond what is already done by the `x/bank` module (e.g. account balances): Deposit of assets into the module account is simultaneous with minting of uTokens to the sender's account, and uToken ownership is the sole requirement for asset withdrawal. We do not need to track individual user deposit history.
+Asset deposit does not require us to modify state beyond what is already done by the `x/bank` module (e.g. account balances): Deposit of assets into the module account is simultaneous with the minting of uTokens to the sender's account, and uToken ownership is the sole requirement for asset withdrawal. We do not need to track individual user deposit history.
 
 ### Negative
 

@@ -50,7 +50,7 @@ type MsgLiquidate struct {
 Repayment's denom is the borrowed asset denom to be repaid (because the borrower may have multiple open borrows). It is always a base asset type (not a uToken).
 Its amount is the maximum amount of asset the liquidator is willing to repay. This field enables partial liquidation.
 
-RewardDenom is the collateral type which the liquidator will recieve in exchange for repaying the borrower's loan. It is always a uToken denomination.
+RewardDenom is the collateral type which the liquidator will receive in exchange for repaying the borrower's loan. It is always a uToken denomination.
 
 It is necessary that messages be signed by the liquidator's account. Thus the method `GetSigners` should return the `Liquidator` address for the message type above.
 
@@ -103,7 +103,7 @@ After eligibility is confirmed, parameters governing liquidation can be fetched:
     liquidationIncentive, closeFactor := GetLiquidationParameters(rewardDenom, borrowValue, collateralValue)
 ```
 
-The liquidation incentive is the bonus collateral received when a liquidator repays a borrow position
+The liquidation incentive is the bonus collateral received when a liquidator repays a borrowed position
 (e.g. incentive=`0.2` means liquidator receives 120% the value of their repayment back in collateral).
 
 The close factor is the portion of a borrow position eligible for liquidation in this single liquidation event.
@@ -134,9 +134,9 @@ Once parameters are fetched, the final liquidation amounts (repayment and reward
    if rewardAmount > GetBalance(borrowerAddr,rewardDenom) {
      // only repay what can be correctly compensated
      partial := GetBalance(borrowerAddr,rewardDenom) / rewardAmount
-     repayAmount = repayAmount * partial 
+     repayAmount = repayAmount * partial
      // use all collateral of rewardDenom
-     rewardAmount = GetBalance(borrowerAddr,rewardDenom) 
+     rewardAmount = GetBalance(borrowerAddr,rewardDenom)
    }
 ```
 
@@ -148,10 +148,10 @@ Then the borrow can be repaid and the collateral rewarded using the liquidator's
 
 > the existing liquidation designs well incentivize liquidators but sell excessive amounts of discounted collateral at the borrowers’ expenses.
 
-Examining one exising liquidation scheme ([Compound](https://zengo.com/understanding-compounds-liquidation/)), two main parameters define maximum borrower losses due to liquidation:
+Examining one existing liquidation scheme ([Compound](https://zengo.com/understanding-compounds-liquidation/)), two main parameters define maximum borrower losses due to liquidation:
 - Liquidation Incentive (10%)
 - Close Factor (50%)
-When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% their borrowed value in a single liquidation event.
+When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% of their borrowed value in a single liquidation event.
 That is, the liquidator pays off 50% of their borrow and receives collateral worth 55% of its value.
 
 It should be possible to improve upon this aspect of the system by scaling one of the two parameters shown above, based on how far a borrower is over their borrow limit.
@@ -169,10 +169,10 @@ It should be possible to improve upon this aspect of the system by scaling one o
 > | 100 | 140 | 1.4 | 1.0 |
 
 The Dynamic Close Factor takes advantage of market forces to reduce excessive collateral selloffs, by reducing the portion of collateral initially eligible for liquidation.
-Liquidators would have the change to liquidate smaller portions of the borrow if profitable and bring the position back into health.
-Otherwise, close factor would continue to increase as the borrow accrues interest.
+Liquidators would have the chance to liquidate smaller portions of the borrow if profitable and bring the position back into health.
+Otherwise, the close factor would continue to increase as the borrow accrues interest.
 
-This also allows borrows to be liquidated completely in one transaction, once they are serverely over their borrow limit.
+This also allows borrows to be liquidated completely in one transaction, once they are severely over their borrow limit.
 
 The `LiquidationIncentive` parameter can be any value, varying from token to token, without affecting the close factor.
 
