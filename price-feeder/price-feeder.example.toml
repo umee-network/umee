@@ -9,16 +9,15 @@ write_timeout = "20s"
 [[currency_pairs]]
 base = "ATOM"
 providers = [
-  "kraken",
   "binance",
 ]
-quote = "USD"
+quote = "USDT"
 
 [[currency_pairs]]
-base = "UMEE"
+base = "ATOM"
 providers = [
   "kraken",
-  "binance",
+  "osmosis",
 ]
 quote = "USD"
 

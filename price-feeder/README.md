@@ -55,6 +55,30 @@ The `currency_pairs` sections contains one or more exchange rates along with the
 providers from which to get market data from. It is important to note that the
 providers supplied in each `currency_pairs` must support the given exchange rate.
 
+For example, to get multiple price points on ATOM, you could define `currency_pairs`
+as follows:
+
+```toml
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "binance",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "kraken",
+  "osmosis",
+]
+quote = "USD"
+```
+
+Providing multiple providers is beneficial in case any provider fails to return
+market data. Prices per exchange rate are submitted on-chain via pre-vote and
+vote messages using a volume-weighted average price (VWAP).
+
 ### `account`
 
 The `account` section contains the oracle's feeder and validator account information.
