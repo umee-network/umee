@@ -71,7 +71,7 @@ MaxAPY = sdk.NewDec("1.0")
 KinkUtilization = sdk.NewDec("0.8")
 ```
 
-Each token-spcific parameter will be stored in the `Token` registry.
+Each token-specific parameter will be stored in the `Token` registry.
 
 The initial interest rate model, based on [Compound's JumpRateModelV2](https://compound.finance/governance/proposals/20) defined in [this contract](https://etherscan.io/address/0xfb564da37b41b2f6b6edcc3e56fbf523bd9f2012#code), can be summarized as follows:
 
@@ -99,7 +99,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
     secondsElapsed := ctx.BlockTime.Unix() - k.GetLastInterestTime()
     // derived interest is annual, so we must convert time to years for the math to work
     yearsElapsed := sdk.OneDec().MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
-        
+
     // for each borrow, expressed as an sdk.Coin(Denom, Amount) associated with an sdk.Address
     {
         derivedInterest, err := k.DeriveInterestRate(denom)
@@ -131,7 +131,7 @@ The `x/leverage` module keeper must store, for each token denom, an `sdk.Int` re
 
 The portion of accrued interest set aside as reserves (an `sdk.Dec`) is determined per-token by a governance parameter called `ReserveFactor`, which will be managed by the `Token` registry.
 
-Reserves are part of the module account's balance, but may not leave module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions (outside the scope of this ADR) may release or transfer reserves.
+Reserves are part of the module account's balance, but may not leave the module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions (outside the scope of this ADR) may release or transfer reserves.
 
 To increase reserves whenever interest is accrued, the following must be added inside function `AccrueAllInterest`:
 
@@ -155,9 +155,9 @@ for _, coin := range newReserves {
 
 In financial terms, accrued interest is split between reserves and lender profits.
 
-The token:uToken exchange rate, which would have previously calculated by `(total tokens borrowed + module account balance) / uTokens in circulation` for a given token type and associated uToken denomination, must now be computed as `(total tokens borrowed + module account balance - reserved amount) / uTokens in circulation`.
+The token:uToken exchange rate, which would have previously been calculated by `(total tokens borrowed + module account balance) / uTokens in circulation` for a given token type and associated uToken denomination, must now be computed as `(total tokens borrowed + module account balance - reserved amount) / uTokens in circulation`.
 
-Also, because Lend, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, the exchange rate only needs to be calculated for each token every `InterestEpoch`, and stored so it can be used during transacions.
+Also, because Lend, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, the exchange rate only needs to be calculated for each token every `InterestEpoch`, and stored so it can be used during transactions.
 
 The exchange rate's keeper prefix is constructed as follows:
 
@@ -196,7 +196,7 @@ Example scenario:
 >
 > The same math is applied to all open borrows, which may be from different users and in different asset types, during EndBlock.
 
-Note that it is the "amount reserved" by the module that is increasing, not the actual balance of  the `x/leverage` account. The amount reserved is simply the amount below which the module account cannot be allowed to drop as the result of borrows or withdrawals.
+Note that it is the "amount reserved" by the module that is increasing, not the actual balance of the `x/leverage` account. The amount reserved is simply the amount below which the module account cannot be allowed to drop as the result of borrows or withdrawals.
 
 Here is an additional example scenario, to illustrate that the module account balance of a given token _can_ become less than the reserved amount, when a token type is at or near 100% borrow utilization:
 
@@ -214,7 +214,7 @@ The scenario above is not fatal to our model - lender Bob continues to gain valu
 
 The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% borrow utilization.
 
-This is not a threatening scenario, as it resolves as soon as either a sufficent `RepayAsset` or a `LendAsset` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
+This is not a threatening scenario, as it resolves as soon as either a sufficient `RepayAsset` or a `LendAsset` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
 
 ## Consequences
 
@@ -222,7 +222,7 @@ This is not a threatening scenario, as it resolves as soon as either a sufficent
 
 - Existing module account can be used for reserves
 - Borrow and withdraw restrictions are straightforward to calculate (module balance - reserve amount)
-- No tranactions or token transfers are required when accrued interest contributes to reserves
+- No transactions or token transfers are required when accrued interest contributes to reserves
 
 ### Negative
 
