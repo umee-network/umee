@@ -10,7 +10,7 @@ Proposed
 
 ## Context
 
-One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets, and earn interest on their deposits.
+One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets and earn interest on their deposits.
 
 From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
@@ -20,7 +20,7 @@ From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
 We need to find suitable ways to implement the interest stream on uTokens (which seems to require automatic minting or self-minting of tokens from existing balances). The method we choose should function in at least the following scenarios:
 
-- uToken balances held on Umee chain
+- uToken balances held on the Umee chain
 - uToken balances transferred or split between wallets on Umee chain
 - uToken balances sent to other Cosmos chains via IBC and held
 - uToken balances split or transferred while on other Cosmos chains
@@ -28,7 +28,7 @@ We need to find suitable ways to implement the interest stream on uTokens (which
 - uToken balances held on Ethereum as ERC20
 - uToken balances split or transferred on Ethereum as ERC20
 
-This collection of scenarios combined with the underlying implementation of Cosmos IBC, will create implementation challenges for the interest stream feature.
+This collection of scenarios combined with the underlying implementation of Cosmos IBC will create implementation challenges for the interest stream feature.
 
 From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/):
 
@@ -42,7 +42,7 @@ From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-de
 >
 > The only way to unlock the locked tokens on blockchain A is to send the voucher token back from blockchain B. The result is that the voucher token on blockchain B is burned. The burn process purposefully takes the tokens out of circulation.
 
-This means that if uTokens are to be sent to other Cosmos blockchains, then the interest stream must apply equally to 'voucher tokens' on other chains. These chains are not likely to be running our code, so it is unclear how we would cause uToken balances sent vie IBC to generate interest.
+This means that if uTokens are to be sent to other Cosmos blockchains, then the interest stream must apply equally to 'voucher tokens' on other chains. These chains are not likely to be running our code, so it is unclear how we would cause uToken balances sent via IBC to generate interest.
 
 As an alternative, transfer of uTokens via IBC could be forbidden or unsupported - in that case, only the scenarios where uToken balances are held on Umee and Ethereum need to be addressed. This is highly undesirable.
 
@@ -68,7 +68,7 @@ Example scenario:
 >
 > Also at week=2, Bob deposits 1000 Atoms. Because the exchange rate has shifted, he received approximately 998 uAtoms, which are worth 1000 Atoms if he were to redeem them immediately.
 >
-> At week=3, Atom:uAtom increases to 1.003. Bob's 998 uAtom are now worth 1001 Atom if redeemed. Alice's 2000 uAtom are worth 2006 Atom.
+> At week=3, Atom:uAtom increases to 1.003. Bob's 998 uAtom are now worth 1001 Atom if redeemed. Alice's 2000 uAtom is worth 2006 Atom.
 >
 > At week=4, Atom:uAtom increases to 1.004.
 >
