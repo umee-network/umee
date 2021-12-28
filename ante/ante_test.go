@@ -46,8 +46,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // CreateTestTx is a helper function to create a tx given multiple inputs.
 func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums []uint64, accSeqs []uint64, chainID string) (xauthsigning.Tx, error) {
-	// First round: we gather all the signer infos. We use the "set empty
-	// signature" hack to do that.
 	var sigsV2 []signing.SignatureV2
 	for i, priv := range privs {
 		sigV2 := signing.SignatureV2{
@@ -66,7 +64,6 @@ func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, acc
 		return nil, err
 	}
 
-	// Second round: all signer infos are set, so each signer can sign.
 	sigsV2 = []signing.SignatureV2{}
 	for i, priv := range privs {
 		signerData := xauthsigning.SignerData{
