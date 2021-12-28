@@ -22,4 +22,18 @@ The `price-feeder` tool is responsible for performing the following:
    on-chain to Umee's `x/oracle` module following Terra's [Oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html)
    specification.
 
+## Providers
+
+The list of current supported providers:
+
+- [Binance](https://www.binance.com/en)
+- [Huobi](https://www.huobi.com/en-us/)
+- [Kraken](https://www.kraken.com/en-us/)
+- [Osmosis](https://app.osmosis.zone/)
+
 ## Usage
+
+The `price-feeder` tool runs off of a single configuration file. This configuration
+file defines what exchange rates to fetch and what providers to get them from.
+In addition, it defines the oracle's keyring and feeder account information.
+Please see the [example configuration](price-feeder.example.toml) for more details.
