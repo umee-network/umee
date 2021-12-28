@@ -51,6 +51,10 @@ The `server` section contains configuration pertaining to the API served by the
 
 ### `currency_pairs`
 
+The `currency_pairs` sections contains one or more exchange rates along with the
+providers from which to get market data from. It is important to note that the
+providers supplied in each `currency_pairs` must support the given exchange rate.
+
 ### `account`
 
 The `account` section contains the oracle's feeder and validator account information.
