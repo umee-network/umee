@@ -3,13 +3,15 @@ package tests
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
-	"github.com/umee-network/umee/x/leverage/types"
 
 	"github.com/umee-network/umee/x/leverage/client/cli"
+	"github.com/umee-network/umee/x/leverage/types"
 )
 
 type IntegrationTestSuite struct {
@@ -30,6 +32,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	_, err := s.network.WaitForHeight(1)
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.T().Log("tearing down integration test suite")
+
+	s.network.Cleanup()
 }
 
 func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
@@ -221,5 +229,25 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	s.Require().NoError(err)
 
 	var resp types.QueryLiquidationTargetsResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+}
+
+func (s *IntegrationTestSuite) TestCmdLend() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+	// TODO: Modify clientCtx using WithKeyring or WithKeyringDir so transactions can be signed?
+
+	lendflags := []string{
+		val.Address.String(),
+		"100uumee",
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdLendAsset(), lendflags)
+	s.Require().NoError(err)
+
+	var resp types.MsgLendAssetResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
