@@ -43,7 +43,8 @@ func (suite *IntegrationTestSuite) TestMempoolFee() {
 		oracletypes.NewMsgAggregateExchangeRatePrevote(oracletypes.AggregateVoteHash{}, addr1, sdk.ValAddress(addr1)),
 		oracletypes.NewMsgAggregateExchangeRateVote("", "", addr1, sdk.ValAddress(addr1)),
 	))
-	_, err = suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
+	oracleTx, err := suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
+	_, err = antehandler(suite.ctx, oracleTx, false)
 	suite.Require().NoError(err, "Decorator should not require high price for oracle tx")
 
 	suite.ctx = suite.ctx.WithIsCheckTx(false)
