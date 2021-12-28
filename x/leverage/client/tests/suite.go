@@ -7,6 +7,7 @@ import (
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
@@ -232,22 +233,50 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
 
-func (s *IntegrationTestSuite) TestCmdLend() {
+func (s *IntegrationTestSuite) TestCmdBorrow() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
-	// TODO: Modify clientCtx using WithKeyring or WithKeyringDir so transactions can be signed?
 
-	lendflags := []string{
-		val.Address.String(),
-		"100uumee",
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+	setupCommands := []struct {
+		name    string
+		command *cobra.Command
+		args    []string
+	}{
+		{
+			"initial lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+			},
+		}, /*
+			{
+				"initial set collateral",
+				cli.GetCmdSetCollateral(),
+				[]string{
+					val.Address.String(),
+					"u/uumee",
+					"true",
+					fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+					fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+					fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+					fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+				},
+			},*/
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdLendAsset(), lendflags)
-	s.Require().NoError(err)
+	for _, tc := range setupCommands {
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, tc.command, tc.args)
+			s.Require().NoError(err)
 
-	var resp types.MsgLendAssetResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+			resp := &sdk.TxResponse{}
+			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
+			s.Require().Equal(uint32(0), resp.Code)
+		})
+	}
 }
