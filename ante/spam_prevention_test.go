@@ -11,7 +11,7 @@ import (
 )
 
 func (suite *IntegrationTestSuite) TestOracleSpam() {
-	suite.SetupTest() // setup
+	suite.SetupTest()
 	suite.txBuilder = suite.clientCtx.TxConfig.NewTxBuilder()
 
 	priv1, _, addr1 := testdata.KeyTestPubAddr()
@@ -25,7 +25,6 @@ func (suite *IntegrationTestSuite) TestOracleSpam() {
 	})
 	antehandler := sdk.ChainAnteDecorators(spd)
 
-	// Set IsCheckTx to true
 	suite.ctx = suite.ctx.WithIsCheckTx(true)
 
 	// normal so ok
@@ -41,11 +40,11 @@ func (suite *IntegrationTestSuite) TestOracleSpam() {
 	_, err = antehandler(suite.ctx, tx, false)
 	suite.Require().NoError(err)
 
-	// do it again is blocked
+	// do it again, gets blocked
 	_, err = antehandler(suite.ctx, tx, false)
 	suite.Require().Error(err)
 
-	// next block; can put oracletypes again
+	// next block
 	suite.ctx = suite.ctx.WithBlockHeight(101)
 	_, err = antehandler(suite.ctx, tx, false)
 	suite.Require().NoError(err)
@@ -59,18 +58,6 @@ func (suite *IntegrationTestSuite) TestOracleSpam() {
 	suite.Require().NoError(err)
 
 	suite.ctx = suite.ctx.WithBlockHeight(102)
-	_, err = antehandler(suite.ctx, tx, false)
-	suite.Require().Error(err)
-
-	// catch wrong feeder; again
-	suite.Require().NoError(suite.txBuilder.SetMsgs(
-		oracletypes.NewMsgAggregateExchangeRatePrevote(oracletypes.AggregateVoteHash{}, addr1, sdk.ValAddress(addr1)),
-		oracletypes.NewMsgAggregateExchangeRateVote("", "", addr2, sdk.ValAddress(addr1)),
-	))
-	tx, err = suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
-	suite.Require().NoError(err)
-
-	suite.ctx = suite.ctx.WithBlockHeight(103)
 	_, err = antehandler(suite.ctx, tx, false)
 	suite.Require().Error(err)
 }

@@ -5,9 +5,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/ante"
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-func (suite *IntegrationTestSuite) TestEnsureMempoolFeesGas() {
+func (suite *IntegrationTestSuite) TestMempoolFee() {
 	suite.SetupTest()
 	suite.txBuilder = suite.clientCtx.TxConfig.NewTxBuilder()
 
@@ -36,6 +37,14 @@ func (suite *IntegrationTestSuite) TestEnsureMempoolFeesGas() {
 	// antehandler errors with insufficient fees
 	_, err = antehandler(suite.ctx, tx, false)
 	suite.Require().Error(err, "Decorator should have errored on too low fee for local gasPrice")
+
+	// ensure no fees for oracle msgs
+	suite.Require().NoError(suite.txBuilder.SetMsgs(
+		oracletypes.NewMsgAggregateExchangeRatePrevote(oracletypes.AggregateVoteHash{}, addr1, sdk.ValAddress(addr1)),
+		oracletypes.NewMsgAggregateExchangeRateVote("", "", addr1, sdk.ValAddress(addr1)),
+	))
+	_, err = suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
+	suite.Require().NoError(err, "Decorator should not require high price for oracle tx")
 
 	suite.ctx = suite.ctx.WithIsCheckTx(false)
 
