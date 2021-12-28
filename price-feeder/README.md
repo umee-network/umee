@@ -37,3 +37,32 @@ The `price-feeder` tool runs off of a single configuration file. This configurat
 file defines what exchange rates to fetch and what providers to get them from.
 In addition, it defines the oracle's keyring and feeder account information.
 Please see the [example configuration](price-feeder.example.toml) for more details.
+
+```shell
+$ price-feeder /path/to/price_feeder_config.toml
+```
+
+## Configuration
+
+### `server`
+
+The `server` section contains configuration pertaining to the API served by the
+`price-feeder` process such the listening address and various HTTP timeouts.
+
+### `currency_pairs`
+
+### `account`
+
+The `account` section contains the oracle's feeder and validator account information.
+These are used to sign and populate data in pre-vote and vote oracle messages.
+
+### `keyring`
+
+The `keyring` section contains Keyring related material used to fetch the key pair
+associated with the oracle account that signs pre-vote and vote oracle messages.
+
+### `rpc`
+
+The `rpc` section contains the Tendermint and Cosmos application gRPC endpoints.
+These endpoints are used to query for on-chain data that pertain to oracle
+functionality and for broadcasting signed pre-vote and vote oracle messages.
