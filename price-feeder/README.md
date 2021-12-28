@@ -5,7 +5,7 @@ which are based on Terra's [x/oracle](https://github.com/terra-money/core/tree/m
 module and [oracle-feeder](https://github.com/terra-money/oracle-feeder). The
 core differences are as follows:
 
-- All exchange rates are quoted in USD or USD stablecoins.
+- All exchange rates must be quoted in USD or USD stablecoins.
 - No need or use of reference exchange rates (e.g. Luna).
 - No need or use of ToBin tax.
 - The `price-feeder` combines both `feeder` and `price-server` into a single
