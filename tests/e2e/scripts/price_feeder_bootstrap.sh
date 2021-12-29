@@ -35,7 +35,7 @@ address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
 chain_id = "umee-local-beta-testnet"
 validator = '$UMEE_E2E_PRICE_FEEDER_VALIDATOR'
 
-[key_ring]
+[keyring]
 backend = "test"
 dir = '$UMEE_E2E_UMEE_VAL_KEY_DIR'
 pass = '$UMEE_E2E_UMEE_VAL_KEY_PASS'

@@ -20,6 +20,8 @@ const (
 
 	ProviderKraken  = "kraken"
 	ProviderBinance = "binance"
+	ProviderOsmosis = "osmosis"
+	ProviderHuobi   = "huobi"
 	ProviderMock    = "mock"
 )
 
@@ -34,6 +36,8 @@ var (
 	SupportedProviders = map[string]struct{}{
 		ProviderKraken:  {},
 		ProviderBinance: {},
+		ProviderOsmosis: {},
+		ProviderHuobi:   {},
 		ProviderMock:    {},
 	}
 )
@@ -44,7 +48,7 @@ type (
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
 		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       Keyring        `toml:"key_ring" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
 		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
 		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
 	}
