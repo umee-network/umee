@@ -375,7 +375,7 @@ func New(
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
-		nil,
+		app.OracleKeeper,
 	)
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(

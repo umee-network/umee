@@ -253,20 +253,20 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
 				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
 			},
-		}, /*
-			{
-				"initial set collateral",
-				cli.GetCmdSetCollateral(),
-				[]string{
-					val.Address.String(),
-					"u/uumee",
-					"true",
-					fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-					fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-					fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-					fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
-				},
-			},*/
+		},
+		{
+			"initial set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+			},
+		},
 	}
 
 	for _, tc := range setupCommands {
