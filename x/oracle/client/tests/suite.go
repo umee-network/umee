@@ -169,3 +169,39 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().Equal(res.ExchangeRates[0].Denom, "UMEE")
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
 }
+
+func (s *IntegrationTestSuite) TestQueryExchangeRate() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	testCases := []struct {
+		name      string
+		args      []string
+		expectErr bool
+		respType  proto.Message
+	}{
+		{
+			name: "valid denom",
+			args: []string{
+				"UMEE",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			expectErr: false,
+			respType:  &types.QueryExchangeRatesResponse{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRate(), tc.args)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
+			}
+		})
+	}
+}
