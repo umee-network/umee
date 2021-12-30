@@ -7,6 +7,7 @@ import (
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -233,9 +234,66 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
 
+func (s *IntegrationTestSuite) TestCmdLend() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	testCases := []struct {
+		name        string
+		command     *cobra.Command
+		args        []string
+		expectedErr *sdkerrors.Error
+	}{
+		{
+			"invalid asset",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uabcd",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"valid lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+			},
+			nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, tc.command, tc.args)
+			s.Require().NoError(err)
+
+			resp := &sdk.TxResponse{}
+			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
+
+			if tc.expectedErr == nil {
+				s.Require().Equal(uint32(0), resp.Code)
+			} else {
+				s.Require().Equal(tc.expectedErr.ABCICode(), resp.Code)
+			}
+		})
+	}
+}
+
 func (s *IntegrationTestSuite) TestCmdBorrow() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
+
+	// TODO: Finish this once oracle is working
 
 	setupCommands := []struct {
 		name    string
@@ -254,19 +312,21 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
 			},
 		},
-		{
-			"initial set collateral",
-			cli.GetCmdSetCollateral(),
-			[]string{
-				val.Address.String(),
-				"u/uumee",
-				"true",
-				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+		/*
+			{
+				"initial set collateral",
+				cli.GetCmdSetCollateral(),
+				[]string{
+					val.Address.String(),
+					"u/uumee",
+					"true",
+					fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+					fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+					fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+					fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+				},
 			},
-		},
+		*/
 	}
 
 	for _, tc := range setupCommands {
