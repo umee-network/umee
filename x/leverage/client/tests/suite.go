@@ -734,3 +734,226 @@ func (s *IntegrationTestSuite) TestCmdWithdraw() {
 	runTestTransactions(s, setupCommands)
 	runTestTransactions(s, testCases)
 }
+
+func (s *IntegrationTestSuite) TestCmdBorrow() {
+
+	val := s.network.Validators[0]
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testTransaction{
+		{
+			"invalid asset",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"10xyz",
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"invalid asset (uToken)",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"10u/umee",
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"lending pool insufficient",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"7000uumee",
+			},
+			types.ErrLendingPoolInsufficient,
+		},
+		{
+			"borrow limit low",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"70uumee",
+			},
+			types.ErrBorrowLimitLow,
+		},
+		{
+			"borrow",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"repay",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestTransactions(s, setupCommands)
+	runTestTransactions(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestCmdRepay() {
+
+	val := s.network.Validators[0]
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+		{
+			"borrow",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testTransaction{
+		{
+			"invalid asset",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"10xyz",
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"invalid asset (uToken)",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"10u/umee",
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"repay",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestTransactions(s, setupCommands)
+	runTestTransactions(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestCmdLiquidate() {
+
+	val := s.network.Validators[0]
+
+	testCases := []testTransaction{
+		{
+			"liquidation ineligible",
+			cli.GetCmdLiquidate(),
+			[]string{
+				val.Address.String(),
+				val.Address.String(),
+				"5uumee",
+				"u/uumee",
+			},
+			types.ErrLiquidationIneligible,
+		},
+	}
+
+	runTestTransactions(s, testCases)
+}
