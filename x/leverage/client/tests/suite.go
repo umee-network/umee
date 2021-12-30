@@ -444,7 +444,7 @@ func (s *IntegrationTestSuite) TestQueryCollateralSetting() {
 			cli.GetCmdQueryCollateralSetting(),
 			[]string{
 				"xyz",
-				"u/umee",
+				"u/uumee",
 			},
 			true,
 			nil,
@@ -557,7 +557,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			cli.GetCmdLendAsset(),
 			[]string{
 				val.Address.String(),
-				"1000uumee",
+				"20000000uumee", // 20 umee
 			},
 			nil,
 		},
@@ -573,7 +573,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 		},
 	}
 
-	testCases := []testQuery{
+	nonzeroCase := []testQuery{
 		{
 			"query nonzero borrow limit",
 			cli.GetCmdQueryBorrowLimit(),
@@ -584,10 +584,19 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			&types.QueryBorrowLimitResponse{},
 			&types.QueryBorrowLimitResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
-				// This result is umee's collateral weight times its initial
-				// oracle exchange rate, times the collateral amount lent.
-				// For example, 0.05 * 34.21 * 1000 = 1710.5
-				BorrowLimit: sdk.MustNewDecFromStr("1710.5"),
+				// This result is umee's collateral weight times the collateral
+				// amount lent, times its initial oracle exchange rate.
+				//
+				// For example, 0.05 * 20 * 34.21 = 34.21
+				BorrowLimit: sdk.MustNewDecFromStr("34.21"),
+				// Bug note: Value of 2850833.333333333333 corresponds
+				// to an oracle.GetExchangeRateBase("uumee") of
+				// 2.8508333333 as traced with print statements.
+				//
+				// 34.21 / 2850833 = 12 / 1000000
+				//
+				// The million seems like it could result from Token.Exponent
+				// not being considered, but whence comes the factor of twelve?
 			},
 		},
 	}
@@ -608,7 +617,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			cli.GetCmdWithdrawAsset(),
 			[]string{
 				val.Address.String(),
-				"1000u/uumee",
+				"20000000u/uumee",
 			},
 			nil,
 		},
@@ -616,7 +625,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 
 	runTestQueries(s, simpleCases)
 	runTestTransactions(s, setupCommands)
-	runTestQueries(s, testCases)
+	runTestQueries(s, nonzeroCase)
 	runTestTransactions(s, cleanupCommands)
 }
 
