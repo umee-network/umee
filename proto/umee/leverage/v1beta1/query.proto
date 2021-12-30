@@ -27,8 +27,7 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
   }
 
-  // BorrowApy queries for the borrow apy of a specified denomination.
-  // If the token is not valid, the reserved amount is zero.
+  // BorrowApy queries for the borrow APY of a specified denomination.
   rpc BorrowApy(QueryBorrowApyRequest) returns (QueryBorrowApyResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
   }
@@ -72,13 +71,13 @@ service Query {
 // gRPC service handler.
 message QueryRegisteredTokens {}
 
-// QueryBorrowApyRequest defines the request structure for the query the borrow APY
+// QueryBorrowApyRequest defines the request structure for the BorrowApy
 // gRPC service handler.
 message QueryBorrowApyRequest {
   string denom = 1;
 }
 
-// QueryBorrowApyResponse defines the response structure for the query the borrow APY
+// QueryBorrowApyResponse defines the response structure for the BorrowApy
 // gRPC service handler.
 message QueryBorrowApyResponse {
   string apy = 1
