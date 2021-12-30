@@ -69,7 +69,7 @@ func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
 
-// QueryBorrowApyRequest defines the request structure for the query the borrow APY
+// QueryBorrowApyRequest defines the request structure for the BorrowApy
 // gRPC service handler.
 type QueryBorrowApyRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -115,7 +115,7 @@ func (m *QueryBorrowApyRequest) GetDenom() string {
 	return ""
 }
 
-// QueryBorrowApyResponse defines the response structure for the query the borrow APY
+// QueryBorrowApyResponse defines the response structure for the BorrowApy
 // gRPC service handler.
 type QueryBorrowApyResponse struct {
 	Apy github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=apy,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"apy"`
@@ -1036,8 +1036,7 @@ type QueryClient interface {
 	// If the denomination is not supplied, the total for each borrowed token is
 	// returned.
 	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
-	// BorrowApy queries for the borrow apy of a specified denomination.
-	// If the token is not valid, the reserved amount is zero.
+	// BorrowApy queries for the borrow APY of a specified denomination.
 	BorrowApy(ctx context.Context, in *QueryBorrowApyRequest, opts ...grpc.CallOption) (*QueryBorrowApyResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
@@ -1165,8 +1164,7 @@ type QueryServer interface {
 	// If the denomination is not supplied, the total for each borrowed token is
 	// returned.
 	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
-	// BorrowApy queries for the borrow apy of a specified denomination.
-	// If the token is not valid, the reserved amount is zero.
+	// BorrowApy queries for the borrow APY of a specified denomination.
 	BorrowApy(context.Context, *QueryBorrowApyRequest) (*QueryBorrowApyResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.

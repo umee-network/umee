@@ -105,17 +105,10 @@ func (q Querier) BorrowApy(
 		return nil, status.Error(codes.InvalidArgument, "invalid denom")
 	}
 
-	// ctx := sdk.UnwrapSDKContext(goCtx)
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	borrowApy := q.Keeper.GetBorrowApy(ctx, req.Denom)
 
-	// if len(req.Denom) == 0 {
-	// 	tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
-
-	// 	return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
-	// }
-
-	// token := q.Keeper.GetBorrow(ctx, borrower, req.Denom)
-
-	return &types.QueryBorrowApyResponse{Apy: sdk.ZeroDec()}, nil
+	return &types.QueryBorrowApyResponse{Apy: borrowApy}, nil
 }
 
 func (q Querier) ReserveAmount(

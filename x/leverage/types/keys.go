@@ -29,6 +29,7 @@ var (
 	KeyPrefixLastInterestTime  = []byte{0x06}
 	KeyPrefixExchangeRate      = []byte{0x07}
 	KeyPrefixBadDebt           = []byte{0x08}
+	KeyPrefixBorrowAPY         = []byte{0x09}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
@@ -151,4 +152,13 @@ func CreateBadDebtKeyNoAddress() []byte {
 	var key []byte
 	key = append(key, KeyPrefixBadDebt...)
 	return key
+}
+
+// CreateBorrowApyKey returns a KVStore key for getting and setting the borrow APY for a given token.
+func CreateBorrowApyKey(tokenDenom string) []byte {
+	// borrowApyPrefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixBorrowAPY...)
+	key = append(key, []byte(tokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
 }
