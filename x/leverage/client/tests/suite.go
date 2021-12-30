@@ -101,6 +101,7 @@ func runTestQueries(s *IntegrationTestSuite, tcs []testQuery) {
 	}
 
 	for _, tc := range tcs {
+		tc := tc // for the linter
 		tc.args = append(tc.args, queryFlags...)
 
 		s.Run(tc.name, func() {
