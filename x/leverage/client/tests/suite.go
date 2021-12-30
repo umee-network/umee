@@ -63,6 +63,7 @@ func runTestTransactions(s *IntegrationTestSuite, tcs []testTransaction) {
 	}
 
 	for _, tc := range tcs {
+		tc := tc // for the linter
 		tc.args = append(tc.args, txFlags...)
 
 		s.Run(tc.name, func() {
