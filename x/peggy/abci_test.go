@@ -78,27 +78,28 @@ func TestValsetSlashing_ValsetCreated_After_ValidatorBonded(t *testing.T) {
 	params := input.PeggyKeeper.GetParams(ctx)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(params.SignedValsetsWindow) + 2)
-	val := input.StakingKeeper.Validator(ctx, testpeggy.ValAddrs[0])
 	vs := pk.GetCurrentValset(ctx)
 	height := uint64(ctx.BlockHeight()) - (params.SignedValsetsWindow + 1)
 	vs.Height = height
-	vs.Nonce = height
+	vs.Nonce = pk.GetLatestValsetNonce(ctx) + 1
+
 	pk.StoreValsetUnsafe(ctx, vs)
 
-	for i, val := range testpeggy.AccAddrs {
+	for i, orch := range testpeggy.OrchAddrs {
 		if i == 0 {
 			// don't sign with first validator
 			continue
 		}
 
-		valsetConfirm := types.NewMsgValsetConfirm(vs.Nonce, testpeggy.EthAddrs[i].String(), val, "dummysig")
+		valsetConfirm := types.NewMsgValsetConfirm(vs.Nonce, testpeggy.EthAddrs[i].String(), orch, "dummysig")
 		pk.SetValsetConfirm(ctx, valsetConfirm)
 	}
 
+	assert.Equal(t, uint64(1), pk.GetLatestValsetNonce(ctx))
 	NewBlockHandler(pk).EndBlocker(ctx)
 
 	// ensure that the  validator who is bonded before valset is created is slashed
-	val = input.StakingKeeper.Validator(ctx, testpeggy.ValAddrs[0])
+	val := input.StakingKeeper.Validator(ctx, testpeggy.ValAddrs[0])
 	require.True(t, val.IsJailed())
 
 	// ensure that the  validator who attested the valset is not slashed.
@@ -131,10 +132,7 @@ func TestValsetSlashing_UnbondingValidator_UnbondWindow_NotExpired(t *testing.T)
 
 	// Create Valset request
 	ctx = ctx.WithBlockHeight(valsetRequestHeight)
-	vs := pk.GetCurrentValset(ctx)
-	vs.Height = uint64(valsetRequestHeight)
-	vs.Nonce = uint64(valsetRequestHeight)
-	pk.StoreValsetUnsafe(ctx, vs)
+	vs := pk.SetValsetRequest(ctx)
 
 	// Start Unbonding validators
 	// Validator-1  Unbond slash window is not expired. if not attested, slash
@@ -146,12 +144,12 @@ func TestValsetSlashing_UnbondingValidator_UnbondWindow_NotExpired(t *testing.T)
 	undelegateMsg2 := testpeggy.NewTestMsgUnDelegateValidator(testpeggy.ValAddrs[1], testpeggy.StakingAmount)
 	sh(input.Context, undelegateMsg2)
 
-	for i, val := range testpeggy.AccAddrs {
+	for i, orch := range testpeggy.OrchAddrs {
 		if i == 0 {
 			// don't sign with first validator
 			continue
 		}
-		valsetConfirm := types.NewMsgValsetConfirm(vs.Nonce, testpeggy.EthAddrs[i].String(), val, "dummysig")
+		valsetConfirm := types.NewMsgValsetConfirm(vs.Nonce, testpeggy.EthAddrs[i].String(), orch, "dummysig")
 		pk.SetValsetConfirm(ctx, valsetConfirm)
 	}
 	staking.EndBlocker(input.Context, input.StakingKeeper)
@@ -238,7 +236,7 @@ func TestValsetEmission(t *testing.T) {
 
 	// EndBlocker should set a new validator set
 	NewBlockHandler(pk).EndBlocker(ctx)
-	require.NotNil(t, pk.GetValset(ctx, uint64(ctx.BlockHeight())))
+	require.NotNil(t, pk.GetValset(ctx, uint64(pk.GetLatestValsetNonce(ctx))))
 	valsets := pk.GetValsets(ctx)
 	require.True(t, len(valsets) == 2)
 }

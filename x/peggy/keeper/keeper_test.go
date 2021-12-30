@@ -172,33 +172,36 @@ func TestLastSlashedValsetNonce(t *testing.T) {
 	}
 
 	latestValsetNonce := k.GetLatestValsetNonce(ctx)
-	assert.Equal(t, latestValsetNonce, uint64(i-1))
+	assert.Equal(t, uint64(i-1), latestValsetNonce)
 
 	//  lastSlashedValsetNonce should be zero initially.
 	lastSlashedValsetNonce := k.GetLastSlashedValsetNonce(ctx)
-	assert.Equal(t, lastSlashedValsetNonce, uint64(0))
+	assert.Equal(t, uint64(0), lastSlashedValsetNonce)
 	unslashedValsets := k.GetUnslashedValsets(ctx, uint64(12))
-	assert.Equal(t, len(unslashedValsets), 9)
+	assert.Equal(t, 9, len(unslashedValsets))
 
 	// check if last Slashed Valset nonce is set properly or not
 	k.SetLastSlashedValsetNonce(ctx, uint64(3))
 	lastSlashedValsetNonce = k.GetLastSlashedValsetNonce(ctx)
-	assert.Equal(t, lastSlashedValsetNonce, uint64(3))
+	assert.Equal(t, uint64(3), lastSlashedValsetNonce)
 
-	// when maxHeight < lastSlashedValsetNonce, len(unslashedValsets) should be zero
-	unslashedValsets = k.GetUnslashedValsets(ctx, uint64(2))
-	assert.Equal(t, len(unslashedValsets), 0)
+	lastSlashedValset := k.GetValset(ctx, lastSlashedValsetNonce)
 
-	// when maxHeight == lastSlashedValsetNonce, len(unslashedValsets) should be zero
-	unslashedValsets = k.GetUnslashedValsets(ctx, uint64(3))
-	assert.Equal(t, len(unslashedValsets), 0)
+	// when valset height + signedValsetsWindow > current block height, len(unslashedValsets) should be zero
+	unslashedValsets = k.GetUnslashedValsets(ctx, uint64(ctx.BlockHeight()))
+	assert.Equal(t, 0, len(unslashedValsets))
+
+	// when lastSlashedValset height + signedValsetsWindow == BlockHeight, len(unslashedValsets) should be zero
+	heightDiff := uint64(ctx.BlockHeight()) - lastSlashedValset.Height
+	unslashedValsets = k.GetUnslashedValsets(ctx, heightDiff)
+	assert.Equal(t, 0, len(unslashedValsets))
 
 	// when maxHeight > lastSlashedValsetNonce && maxHeight <= latestValsetNonce
-	unslashedValsets = k.GetUnslashedValsets(ctx, uint64(6))
-	assert.Equal(t, len(unslashedValsets), 2)
+	unslashedValsets = k.GetUnslashedValsets(ctx, heightDiff-2)
+	assert.Equal(t, 2, len(unslashedValsets))
 
 	// when maxHeight > latestValsetNonce
-	unslashedValsets = k.GetUnslashedValsets(ctx, uint64(15))
-	assert.Equal(t, len(unslashedValsets), 6)
+	unslashedValsets = k.GetUnslashedValsets(ctx, heightDiff-6)
+	assert.Equal(t, 6, len(unslashedValsets))
 	fmt.Println("unslashedValsetsRange", unslashedValsets)
 }

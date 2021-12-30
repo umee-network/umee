@@ -139,6 +139,33 @@ var (
 		sdk.ValAddress(AccPubKeys[4].Address()),
 	}
 
+	// OrchPubKeys holds the pub keys for the account keys
+	OrchPubKeys = []ccrypto.PubKey{
+		OrchPrivKeys[0].PubKey(),
+		OrchPrivKeys[1].PubKey(),
+		OrchPrivKeys[2].PubKey(),
+		OrchPrivKeys[3].PubKey(),
+		OrchPrivKeys[4].PubKey(),
+	}
+
+	// Orchestrator private keys
+	OrchPrivKeys = []ccrypto.PrivKey{
+		secp256k1.GenPrivKey(),
+		secp256k1.GenPrivKey(),
+		secp256k1.GenPrivKey(),
+		secp256k1.GenPrivKey(),
+		secp256k1.GenPrivKey(),
+	}
+
+	// OrchAddrs holds the sdk.AccAddresses
+	OrchAddrs = []sdk.AccAddress{
+		sdk.AccAddress(OrchPubKeys[0].Address()),
+		sdk.AccAddress(OrchPubKeys[1].Address()),
+		sdk.AccAddress(OrchPubKeys[2].Address()),
+		sdk.AccAddress(OrchPubKeys[3].Address()),
+		sdk.AccAddress(OrchPubKeys[4].Address()),
+	}
+
 	// EthAddrs holds etheruem addresses
 	EthAddrs = []common.Address{
 		common.BytesToAddress(bytes.Repeat([]byte{byte(1)}, 20)),
@@ -192,7 +219,6 @@ var (
 		AverageEthereumBlockTime:      15000,
 		SlashFractionValset:           sdk.NewDecWithPrec(1, 2),
 		SlashFractionBatch:            sdk.NewDecWithPrec(1, 2),
-		SlashFractionClaim:            sdk.NewDecWithPrec(1, 2),
 		SlashFractionConflictingClaim: sdk.NewDecWithPrec(1, 2),
 		SlashFractionBadEthSignature:  sdk.NewDecWithPrec(1, 2),
 	}
@@ -254,6 +280,7 @@ func SetupFiveValChain(t *testing.T) (TestInput, sdk.Context) {
 	// Register eth addresses for each validator
 	for i, addr := range ValAddrs {
 		input.PeggyKeeper.SetEthAddressForValidator(input.Context, addr, EthAddrs[i])
+		input.PeggyKeeper.SetOrchestratorValidator(input.Context, addr, OrchAddrs[i])
 	}
 
 	// Return the test input
@@ -607,7 +634,7 @@ func (s *StakingKeeperMock) GetParams(ctx sdk.Context) stakingtypes.Params {
 }
 
 func (s *StakingKeeperMock) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (validator stakingtypes.Validator, found bool) {
-	panic("unexpected call")
+	return stakingtypes.Validator{OperatorAddress: addr.String()}, true
 }
 
 func (s *StakingKeeperMock) ValidatorQueueIterator(ctx sdk.Context, endTime time.Time, endHeight int64) sdk.Iterator {

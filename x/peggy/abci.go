@@ -157,58 +157,78 @@ func (h *BlockHandler) cleanupTimedOutBatches(ctx sdk.Context) {
 	}
 }
 
+// prepValsetConfirms loads all confirmations into a hashmap indexed by validatorAddr
+// reducing the lookup time dramatically and separating out the task of looking up
+// the orchestrator for each validator
+func prepValsetConfirms(ctx sdk.Context, k keeper.Keeper, nonce uint64) map[string]*types.MsgValsetConfirm {
+	confirms := k.GetValsetConfirms(ctx, nonce)
+	// bytes are incomparable in go, so we convert the sdk.ValAddr bytes to a string
+	ret := make(map[string]*types.MsgValsetConfirm)
+	for _, confirm := range confirms {
+		// TODO this presents problems for delegate key rotation see issue #344
+		confVal, err := sdk.AccAddressFromBech32(confirm.Orchestrator)
+		if err != nil {
+			panic("Invalid confirm in store")
+		}
+		val, foundValidator := k.GetOrchestratorValidator(ctx, confVal)
+		if !foundValidator {
+			panic("Confirm from validator we can't identify?")
+		}
+		ret[val.String()] = confirm
+	}
+	return ret
+}
+
 func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
-	maxHeight := uint64(0)
 
 	// don't slash in the beginning before there aren't even SignedValsetsWindow blocks yet
-	if uint64(ctx.BlockHeight()) > params.SignedValsetsWindow {
-		maxHeight = uint64(ctx.BlockHeight()) - params.SignedValsetsWindow
-	} else {
-		// we can't slash anyone if SignedValsetWindow blocks have not passed
+	if uint64(ctx.BlockHeight()) <= params.SignedValsetsWindow {
 		return
 	}
 
-	unslashedValsets := h.k.GetUnslashedValsets(ctx, maxHeight)
+	unslashedValsets := h.k.GetUnslashedValsets(ctx, params.SignedValsetsWindow)
+
+	currentBondedSet := h.k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 
 	// unslashedValsets are sorted by nonce in ASC order
 	for _, vs := range unslashedValsets {
-		confirms := h.k.GetValsetConfirms(ctx, vs.Nonce)
+		confirms := prepValsetConfirms(ctx, h.k, vs.Nonce)
 
 		// SLASH BONDED VALIDATORS who didn't attest valset request
-		currentBondedSet := h.k.StakingKeeper.GetBondedValidatorsByPower(ctx)
-
 		for _, val := range currentBondedSet {
-			consAddr, _ := val.GetConsAddr()
+			consAddr, err := val.GetConsAddr()
+			if err != nil {
+				panic("Failed to get validator consensus addr")
+			}
 			valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, consAddr)
 
-			//  Slash validator ONLY if he joined after valset is created
-			if exist && valSigningInfo.StartHeight < int64(vs.Height) {
+			//  Slash validator ONLY if he joined before valset is created
+			startedBeforeValsetCreated := valSigningInfo.StartHeight < int64(vs.Height)
+
+			if exist && startedBeforeValsetCreated {
 				// Check if validator has confirmed valset or not
-				found := false
-				for _, conf := range confirms {
-					ethAddress, exists := h.k.GetEthAddressByValidator(ctx, val.GetOperator())
-					// This may have an issue if the validator changes their eth address
-					// TODO this presents problems for delegate key rotation see issue #344
-					if exists && common.HexToAddress(conf.EthAddress) == ethAddress {
-						found = true
-						break
-					}
-				}
+				_, found := confirms[val.GetOperator().String()]
+
 				// slash validators for not confirming valsets
 				if !found {
-					cons, _ := val.GetConsAddr()
 					consPower := val.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
 
-					h.k.StakingKeeper.Slash(
-						ctx,
-						cons,
-						ctx.BlockHeight(),
-						consPower,
-						params.SlashFractionValset,
-					)
+					// refresh validator before slashing/jailing
+					val, foundVal := h.k.StakingKeeper.GetValidator(ctx, val.GetOperator())
+					if !foundVal {
+						// this should be impossible, we haven't even progressed a single block since we got the list
+						panic("Validator exited set during endblocker?")
+					}
 
 					if !val.IsJailed() {
-						h.k.StakingKeeper.Jail(ctx, cons)
+						h.k.StakingKeeper.Slash(
+							ctx,
+							consAddr,
+							ctx.BlockHeight(),
+							consPower,
+							params.SlashFractionValset,
+						)
+						h.k.StakingKeeper.Jail(ctx, consAddr)
 					}
 				}
 			}

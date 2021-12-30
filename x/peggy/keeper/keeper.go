@@ -225,33 +225,31 @@ func (k *Keeper) GetLastUnbondingBlockHeight(ctx sdk.Context) uint64 {
 	return types.UInt64FromBytes(bytes)
 }
 
-// GetUnslashedValsets returns all the unslashed validator sets in state
-func (k *Keeper) GetUnslashedValsets(ctx sdk.Context, maxHeight uint64) (out []*types.Valset) {
+// GetUnslashedValsets returns all the "ready-to-slash" unslashed validator sets in state (valsets at least signedValsetsWindow blocks old)
+func (k Keeper) GetUnslashedValsets(ctx sdk.Context, signedValsetsWindow uint64) (out []*types.Valset) {
 	lastSlashedValsetNonce := k.GetLastSlashedValsetNonce(ctx)
-
-	k.IterateValsetBySlashedValsetNonce(ctx, lastSlashedValsetNonce, maxHeight, func(_ []byte, valset *types.Valset) bool {
-		if valset.Nonce > lastSlashedValsetNonce {
+	blockHeight := uint64(ctx.BlockHeight())
+	k.IterateValsetBySlashedValsetNonce(ctx, lastSlashedValsetNonce, func(_ []byte, valset *types.Valset) bool {
+		// Implicitly the unslashed valsets appear after the last slashed valset,
+		// however not all valsets are ready-to-slash since validators have a window
+		if valset.Nonce > lastSlashedValsetNonce && !(blockHeight < valset.Height+signedValsetsWindow) {
 			out = append(out, valset)
 		}
 		return false
 	})
-
 	return
 }
 
 // IterateValsetBySlashedValsetNonce iterates through all valset by last slashed valset nonce in ASC order
-func (k *Keeper) IterateValsetBySlashedValsetNonce(
-	ctx sdk.Context,
-	lastSlashedValsetNonce uint64,
-	maxHeight uint64,
-	cb func(k []byte, v *types.Valset) (stop bool),
-) {
+func (k Keeper) IterateValsetBySlashedValsetNonce(ctx sdk.Context, lastSlashedValsetNonce uint64, cb func([]byte, *types.Valset) bool) {
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetRequestKey)
-	iter := prefixStore.Iterator(types.UInt64Bytes(lastSlashedValsetNonce), types.UInt64Bytes(maxHeight))
+	// Consider all valsets, including the most recent one
+	cutoffNonce := k.GetLatestValsetNonce(ctx) + 1
+	iter := prefixStore.Iterator(types.UInt64Bytes(lastSlashedValsetNonce), types.UInt64Bytes(cutoffNonce))
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		valset := types.Valset{}
+		var valset types.Valset
 		k.cdc.MustUnmarshal(iter.Value(), &valset)
 
 		if cb(iter.Key(), &valset) {
@@ -279,15 +277,15 @@ func (k *Keeper) GetValsetConfirm(ctx sdk.Context, nonce uint64, validator sdk.A
 }
 
 // SetValsetConfirm sets a valset confirmation
-func (k *Keeper) SetValsetConfirm(ctx sdk.Context, valset *types.MsgValsetConfirm) []byte {
+func (k *Keeper) SetValsetConfirm(ctx sdk.Context, valsetConf *types.MsgValsetConfirm) []byte {
 	store := ctx.KVStore(k.storeKey)
-	addr, err := sdk.AccAddressFromBech32(valset.Orchestrator)
+	addr, err := sdk.AccAddressFromBech32(valsetConf.Orchestrator)
 	if err != nil {
 		panic(err)
 	}
 
-	key := types.GetValsetConfirmKey(valset.Nonce, addr)
-	store.Set(key, k.cdc.MustMarshal(valset))
+	key := types.GetValsetConfirmKey(valsetConf.Nonce, addr)
+	store.Set(key, k.cdc.MustMarshal(valsetConf))
 
 	return key
 }
@@ -410,6 +408,11 @@ func (k *Keeper) GetOrchestratorValidator(ctx sdk.Context, orch sdk.AccAddress) 
 
 	bz := store.Get(types.GetOrchestratorAddressKey(orch))
 	if bz == nil {
+		return nil, false
+	}
+
+	_, found := k.StakingKeeper.GetValidator(ctx, sdk.ValAddress(bz))
+	if !found {
 		return nil, false
 	}
 
