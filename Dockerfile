@@ -13,7 +13,7 @@ RUN cd price-feeder && make install
 
 # Fetch peggo (gravity bridge) binary
 FROM golang:1.17-alpine AS peggo-builder
-ARG PEGGO_VERSION=v0.1.0
+ARG PEGGO_VERSION=9c15a31d0ca9dcf97edeb066eb36df15759ee81b
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
