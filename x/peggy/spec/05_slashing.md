@@ -59,7 +59,7 @@ The current value of `UnbondSlashingValsetsWindow` is 25,000 blocks, or about 12
 
 It should be noted that both PEGGYSLASH-02 and PEGGYSLASH-03 could be eliminated with no loss of security if it where possible to perform the Ethereum signatures inside the consensus code. This is a pretty limited feature addition to Tendermint that would make Peggy far less prone to slashing.
 
-## PEGGYSLASH-04: Submitting incorrect Eth oracle claim (Disabled for now)
+## PEGGYSLASH-04: Submitting incorrect Eth oracle claim (Intentionally not implemented)
 
 The Ethereum oracle code (currently mostly contained in attestation.go), is a key part of Peggy. It allows the Peggy module to have knowledge of events that have occurred on Ethereum, such as deposits and executed batches. PEGGYSLASH-03 is intended to punish validators who submit a claim for an event that never happened on Ethereum.
 
@@ -77,7 +77,7 @@ If not enough of the cartel defects, then neither event will be observed, and th
 
 Also, PEGGYSLASH-04 will be triggered against the honest validators in the case of a successful cartel. This could act to make it easier for a forming cartel to threaten validators who do not want to join.
 
-## PEGGYSLASH-05: Failure to submit Eth oracle claims (Disabled for now)
+## PEGGYSLASH-05: Failure to submit Eth oracle claims (Intentionally not implemented)
 
 This is similar to PEGGYSLASH-04, but it is triggered against validators who do not submit an oracle claim that has been observed. In contrast to PEGGYSLASH-04, PEGGYSLASH-05 is intended to punish validators who stop participating in the oracle completely.
 

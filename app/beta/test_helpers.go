@@ -17,6 +17,7 @@ import (
 
 	"github.com/umee-network/umee/app"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
 func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
@@ -98,6 +99,25 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	appGenState[leveragetypes.ModuleName] = bz
+
+	var oracleGenState oracletypes.GenesisState
+	if err := cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState); err != nil {
+		panic(err)
+	}
+
+	// Set mock exchange rates and a large enough vote period such that we won't
+	// execute ballot voting and thus clear out previous exchange rates, since we
+	// are not running a price-feeder.
+	oracleGenState.Params.VotePeriod = 100
+	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
+		"UMEE", sdk.MustNewDecFromStr("34.21"),
+	))
+
+	bz, err = cdc.MarshalJSON(&oracleGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[oracletypes.ModuleName] = bz
 
 	cfg.Codec = encCfg.Marshaler
 	cfg.TxConfig = encCfg.TxConfig
