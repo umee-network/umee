@@ -15,7 +15,6 @@ type Params struct {
 	BridgeChainId                 uint64                                 
 	SignedValsetsWindow           uint64                                 
 	SignedBatchesWindow           uint64                                 
-	SignedClaimsWindow            uint64                                 
 	TargetBatchTimeout            uint64                                 
 	AverageBlockTime              uint64                                 
 	AverageEthereumBlockTime      uint64                                 
@@ -27,7 +26,6 @@ type Params struct {
 	SlashFractionBadEthSignature  sdk.Dec 
 	CosmosCoinDenom               string  
 	CosmosCoinErc20Contract       string  
-	ClaimSlashingEnabled          bool    
 	BridgeContractStartHeight     uint64  
 	ValsetReward                  types.Coin
 }
