@@ -113,6 +113,12 @@ func IntegrationTestNetworkConfig() network.Config {
 		"UMEE", sdk.MustNewDecFromStr("34.21"),
 	))
 
+	bz, err = cdc.MarshalJSON(&oracleGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[oracletypes.ModuleName] = bz
+
 	cfg.Codec = encCfg.Marshaler
 	cfg.TxConfig = encCfg.TxConfig
 	cfg.LegacyAmino = encCfg.Amino
