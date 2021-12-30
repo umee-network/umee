@@ -42,6 +42,44 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.network.Cleanup()
 }
 
+type testTransaction struct {
+	name        string
+	command     *cobra.Command
+	args        []string
+	expectedErr *sdkerrors.Error
+}
+
+// runTestTransactions implements repetitive test logic where transaction commands must be run
+// with flags to bypass gas and signature checks, then checked for success or an expected error
+func runTestTransactions(s *IntegrationTestSuite, tcs []testTransaction) {
+	clientCtx := s.network.Validators[0].ClientCtx
+
+	txFlags := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+	}
+
+	for _, tc := range tcs {
+		tc.args = append(tc.args, txFlags...)
+
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, tc.command, tc.args)
+			s.Require().NoError(err)
+
+			resp := &sdk.TxResponse{}
+			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
+
+			if tc.expectedErr == nil {
+				s.Require().Equal(0, int(resp.Code))
+			} else {
+				s.Require().Equal(int(tc.expectedErr.ABCICode()), int(resp.Code))
+			}
+		})
+	}
+}
+
 func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
@@ -287,4 +325,53 @@ func (s *IntegrationTestSuite) TestCmdLend() {
 			}
 		})
 	}
+}
+
+func (s *IntegrationTestSuite) TestCmdWithdraw() {
+	val := s.network.Validators[0]
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testTransaction{
+		{
+			"invalid asset",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uabcd",
+			},
+			types.ErrInvalidAsset,
+		},
+		{
+			"valid withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+		{
+			"lending pool insufficient",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"10000000u/uumee",
+			},
+			types.ErrLendingPoolInsufficient,
+		},
+	}
+
+	runTestTransactions(s, setupCommands)
+	runTestTransactions(s, testCases)
 }
