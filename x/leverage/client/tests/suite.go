@@ -526,7 +526,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	runTestQueries(s, testCases)
 }
 
-func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	val := s.network.Validators[0]
 
 	simpleCases := []testQuery{
