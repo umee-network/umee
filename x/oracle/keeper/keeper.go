@@ -112,7 +112,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 	for _, acceptedDenom := range params.AcceptList {
 		if denom == acceptedDenom.BaseDenom {
-			return exchangeRate.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
+			powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(acceptedDenom.Exponent))
+			return exchangeRate.Quo(powerReduction), nil
 		}
 	}
 

@@ -586,17 +586,8 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
 				// amount lent, times its initial oracle exchange rate.
-				//
-				// For example, 0.05 * 20 * 34.21 = 34.21
 				BorrowLimit: sdk.MustNewDecFromStr("34.21"),
-				// Bug note: Value of 2850833.333333333333 corresponds
-				// to an oracle.GetExchangeRateBase("uumee") of
-				// 2.8508333333 as traced with print statements.
-				//
-				// 34.21 / 2850833 = 12 / 1000000
-				//
-				// The million seems like it could result from Token.Exponent
-				// not being considered, but whence comes the factor of twelve?
+				// 0.05 * 20 * 34.21 = 34.21
 			},
 		},
 	}
