@@ -108,7 +108,6 @@ func DefaultParams() *Params {
 		PeggyId:                       "umee-peggyid",
 		SignedValsetsWindow:           10000,
 		SignedBatchesWindow:           10000,
-		SignedClaimsWindow:            10000,
 		TargetBatchTimeout:            43200000,
 		AverageBlockTime:              5000,
 		AverageEthereumBlockTime:      15000,
@@ -118,7 +117,6 @@ func DefaultParams() *Params {
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionBadEthSignature:  sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		UnbondSlashingValsetsWindow:   10000,
-		ClaimSlashingEnabled:          false,
 	}
 }
 
@@ -154,9 +152,6 @@ func (p Params) ValidateBasic() error {
 	if err := validateSignedBatchesWindow(p.SignedBatchesWindow); err != nil {
 		return sdkerrors.Wrap(err, "signed blocks window")
 	}
-	if err := validateSignedClaimsWindow(p.SignedClaimsWindow); err != nil {
-		return sdkerrors.Wrap(err, "signed blocks window")
-	}
 	if err := validateSlashFractionValset(p.SlashFractionValset); err != nil {
 		return sdkerrors.Wrap(err, "slash fraction valset")
 	}
@@ -174,9 +169,6 @@ func (p Params) ValidateBasic() error {
 	}
 	if err := validateUnbondSlashingValsetsWindow(p.UnbondSlashingValsetsWindow); err != nil {
 		return sdkerrors.Wrap(err, "unbond Slashing valset window")
-	}
-	if err := validateClaimSlashingEnabled(p.ClaimSlashingEnabled); err != nil {
-		return sdkerrors.Wrap(err, "claim slashing enabled")
 	}
 
 	return nil
@@ -197,7 +189,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractChainID, &p.BridgeChainId, validateBridgeChainID),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedValsetsWindow, &p.SignedValsetsWindow, validateSignedValsetsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedBatchesWindow, &p.SignedBatchesWindow, validateSignedBatchesWindow),
-		paramtypes.NewParamSetPair(ParamsStoreKeySignedClaimsWindow, &p.SignedClaimsWindow, validateSignedClaimsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreKeyAverageBlockTime, &p.AverageBlockTime, validateAverageBlockTime),
 		paramtypes.NewParamSetPair(ParamsStoreKeyTargetBatchTimeout, &p.TargetBatchTimeout, validateTargetBatchTimeout),
 		paramtypes.NewParamSetPair(ParamsStoreKeyAverageEthereumBlockTime, &p.AverageEthereumBlockTime, validateAverageEthereumBlockTime),
@@ -207,7 +198,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionConflictingClaim, &p.SlashFractionConflictingClaim, validateSlashFractionConflictingClaim),
 		paramtypes.NewParamSetPair(ParamStoreSlashFractionBadEthSignature, &p.SlashFractionBadEthSignature, validateSlashFractionBadEthSignature),
 		paramtypes.NewParamSetPair(ParamStoreUnbondSlashingValsetsWindow, &p.UnbondSlashingValsetsWindow, validateUnbondSlashingValsetsWindow),
-		paramtypes.NewParamSetPair(ParamStoreClaimSlashingEnabled, &p.ClaimSlashingEnabled, validateClaimSlashingEnabled),
 		paramtypes.NewParamSetPair(ParamsStoreKeyBridgeContractStartHeight, &p.BridgeContractStartHeight, validateBridgeContractStartHeight),
 		paramtypes.NewParamSetPair(ParamStoreValsetRewardAmount, &p.ValsetReward, validateValsetReward),
 	}
@@ -384,14 +374,6 @@ func validateCosmosCoinErc20Contract(i interface{}) error {
 	}
 
 	return ValidateEthAddress(v)
-}
-
-func validateClaimSlashingEnabled(i interface{}) error {
-	_, ok := i.(bool)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-	return nil
 }
 
 func validateSlashFractionBadEthSignature(i interface{}) error {

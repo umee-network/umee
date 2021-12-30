@@ -187,7 +187,6 @@ var (
 		SignedBatchesWindow:           10,
 		SignedValsetsWindow:           10,
 		UnbondSlashingValsetsWindow:   15,
-		SignedClaimsWindow:            10,
 		TargetBatchTimeout:            60001,
 		AverageBlockTime:              5000,
 		AverageEthereumBlockTime:      15000,
