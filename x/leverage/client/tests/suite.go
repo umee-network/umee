@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -80,165 +81,446 @@ func runTestTransactions(s *IntegrationTestSuite, tcs []testTransaction) {
 	}
 }
 
-func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
+type testQuery struct {
+	name             string
+	command          *cobra.Command
+	args             []string
+	expectErr        bool
+	responseType     proto.Message
+	expectedResponse proto.Message
+}
 
-	flags := []string{
+// runTestQueries implements repetitive test logic where query commands must be run
+// then checked for an exact response (including matching fields)
+func runTestQueries(s *IntegrationTestSuite, tcs []testQuery) {
+	clientCtx := s.network.Validators[0].ClientCtx
+
+	queryFlags := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), flags)
-	s.Require().NoError(err)
+	for _, tc := range tcs {
+		tc.args = append(tc.args, queryFlags...)
 
-	var resp types.QueryRegisteredTokensResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, tc.command, tc.args)
+
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.responseType), out.String())
+				s.Require().Equal(tc.expectedResponse, tc.responseType)
+			}
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
+	testCases := []testQuery{
+		{
+			"query registered tokens",
+			cli.GetCmdQueryAllRegisteredTokens(),
+			[]string{},
+			false,
+			&types.QueryRegisteredTokensResponse{},
+			&types.QueryRegisteredTokensResponse{
+				Registry: []types.Token{
+					{
+						// must match app/beta/test_helpers.go/IntegrationTestNetworkConfig
+						BaseDenom:            "uumee",
+						SymbolDenom:          "UMEE",
+						Exponent:             6,
+						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
+						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+						BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+						KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
+						KinkUtilizationRate:  sdk.MustNewDecFromStr("0.2"),
+						LiquidationIncentive: sdk.MustNewDecFromStr("0.18"),
+					},
+				},
+			},
+		},
+	}
+
+	runTestQueries(s, testCases)
 }
 
 func (s *IntegrationTestSuite) TestQueryParams() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	flags := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	testCases := []testQuery{
+		{
+			"query params",
+			cli.GetCmdQueryParams(),
+			[]string{},
+			false,
+			&types.QueryParamsResponse{},
+			&types.QueryParamsResponse{
+				Params: types.DefaultParams(),
+			},
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), flags)
-	s.Require().NoError(err)
-
-	var resp types.QueryParamsResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	runTestQueries(s, testCases)
 }
 
 func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
 
-	s.Run("get_all_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/94
-		flags := []string{
-			val.Address.String(),
-			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-		}
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+		{
+			"borrow",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+	}
 
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowed(), flags)
-		s.Require().NoError(err)
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryBorrowed(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query all borrowed",
+			cli.GetCmdQueryBorrowed(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryBorrowedResponse{},
+			&types.QueryBorrowedResponse{
+				Borrowed: sdk.NewCoins(
+					sdk.NewInt64Coin("uumee", 50),
+				),
+			},
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryBorrowed(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query denom borrowed",
+			cli.GetCmdQueryBorrowed(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+			},
+			false,
+			&types.QueryBorrowedResponse{},
+			&types.QueryBorrowedResponse{
+				Borrowed: sdk.NewCoins(
+					sdk.NewInt64Coin("uumee", 50),
+				),
+			},
+		},
+	}
 
-		var resp types.QueryBorrowedResponse
-		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-	})
+	cleanupCommands := []testTransaction{
+		{
+			"repay",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
 
-	s.Run("get_denom_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/94
-		flags := []string{
-			val.Address.String(),
-			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-			fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-		}
-
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowed(), flags)
-		s.Require().NoError(err)
-
-		var resp types.QueryBorrowedResponse
-		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-	})
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestQueryReserveAmount() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	// TODO: We need to setup borrowing first prior to testing this out.
-	//
-	// Ref: https://github.com/umee-network/umee/issues/94
-	flags := []string{
-		"uumee",
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	testCases := []testQuery{
+		{
+			"query reserve amount",
+			cli.GetCmdQueryReserveAmount(),
+			[]string{
+				"uumee",
+			},
+			false,
+			&types.QueryReserveAmountResponse{},
+			&types.QueryReserveAmountResponse{
+				Amount: sdk.ZeroInt(),
+			},
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryReserveAmount(),
+			[]string{
+				"abcd",
+			},
+			true,
+			nil,
+			nil,
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryReserveAmount(), flags)
-	s.Require().NoError(err)
-
-	var resp types.QueryReserveAmountResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	runTestQueries(s, testCases)
 }
 
 func (s *IntegrationTestSuite) TestQueryCollateral() {
 	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
 
-	s.Run("get_all_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/94
-		flags := []string{
-			val.Address.String(),
-			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-		}
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+	}
 
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryCollateral(), flags)
-		s.Require().NoError(err)
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryCollateral(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query all collateral",
+			cli.GetCmdQueryCollateral(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryCollateralResponse{},
+			&types.QueryCollateralResponse{
+				Collateral: sdk.NewCoins(
+					sdk.NewInt64Coin("u/uumee", 1000),
+				),
+			},
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryCollateral(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query denom collateral",
+			cli.GetCmdQueryCollateral(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
+			},
+			false,
+			&types.QueryCollateralResponse{},
+			&types.QueryCollateralResponse{
+				Collateral: sdk.NewCoins(
+					sdk.NewInt64Coin("u/uumee", 1000),
+				),
+			},
+		},
+	}
 
-		var resp types.QueryCollateralResponse
-		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-	})
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
 
-	s.Run("get_denom_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/94
-		flags := []string{
-			val.Address.String(),
-			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-			fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-		}
-
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryCollateral(), flags)
-		s.Require().NoError(err)
-
-		var resp types.QueryCollateralResponse
-		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-	})
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestQueryCollateralSetting() {
 	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
 
-	// TODO: We need to setup borrowing first prior to testing this out.
-	//
-	// Ref: https://github.com/umee-network/umee/issues/94
-	flags := []string{
-		val.Address.String(),
-		"u/uumee",
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	setupCommands := []testTransaction{
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryCollateralSetting(), flags)
-	s.Require().NoError(err)
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryCollateralSetting(),
+			[]string{
+				"xyz",
+				"u/umee",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryCollateralSetting(),
+			[]string{
+				val.Address.String(),
+				"abcd",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query collateral setting",
+			cli.GetCmdQueryCollateralSetting(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+			},
+			false,
+			&types.QueryCollateralSettingResponse{},
+			&types.QueryCollateralSettingResponse{
+				Enabled: true,
+			},
+		},
+	}
 
-	var resp types.QueryCollateralSettingResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+	}
+
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestQueryExchangeRate() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	flags := []string{
-		"uumee",
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	testCases := []testQuery{
+		{
+			"invalid denom",
+			cli.GetCmdQueryExchangeRate(),
+			[]string{
+				"abcd",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query exchange rate",
+			cli.GetCmdQueryExchangeRate(),
+			[]string{
+				"uumee",
+			},
+			false,
+			&types.QueryExchangeRateResponse{},
+			&types.QueryExchangeRateResponse{
+				ExchangeRate: sdk.OneDec(),
+			},
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRate(), flags)
-	s.Require().NoError(err)
-
-	var resp types.QueryExchangeRateResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	runTestQueries(s, testCases)
 }
 
 func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
@@ -258,42 +540,43 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 }
 
 func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	flags := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	testCases := []testQuery{
+		{
+			"query liquidation targets",
+			cli.GetCmdQueryLiquidationTargets(),
+			[]string{},
+			false,
+			&types.QueryLiquidationTargetsResponse{},
+			&types.QueryLiquidationTargetsResponse{
+				Targets: []string{},
+			},
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryLiquidationTargets(), flags)
-	s.Require().NoError(err)
-
-	var resp types.QueryLiquidationTargetsResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	runTestQueries(s, testCases)
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {
 	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
 
-	testCases := []struct {
-		name        string
-		command     *cobra.Command
-		args        []string
-		expectedErr *sdkerrors.Error
-	}{
+	testCases := []testTransaction{
 		{
 			"invalid asset",
 			cli.GetCmdLendAsset(),
 			[]string{
 				val.Address.String(),
 				"1000uabcd",
-				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
 			},
 			types.ErrInvalidAsset,
+		},
+		{
+			"insufficient funds",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"10000000000000000uumee",
+			},
+			sdkerrors.ErrInsufficientFunds,
 		},
 		{
 			"valid lend",
@@ -301,30 +584,25 @@ func (s *IntegrationTestSuite) TestCmdLend() {
 			[]string{
 				val.Address.String(),
 				"1000uumee",
-				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
 			},
 			nil,
 		},
 	}
 
-	for _, tc := range testCases {
-		s.Run(tc.name, func() {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, tc.command, tc.args)
-			s.Require().NoError(err)
-
-			resp := &sdk.TxResponse{}
-			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
-
-			if tc.expectedErr == nil {
-				s.Require().Equal(uint32(0), resp.Code)
-			} else {
-				s.Require().Equal(tc.expectedErr.ABCICode(), resp.Code)
-			}
-		})
+	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
 	}
+
+	runTestTransactions(s, testCases)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestCmdWithdraw() {

@@ -85,6 +85,10 @@ func (q Querier) Borrowed(
 		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
 	}
 
+	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+
 	token := q.Keeper.GetBorrow(ctx, borrower, req.Denom)
 
 	return &types.QueryBorrowedResponse{Borrowed: sdk.NewCoins(token)}, nil
@@ -102,6 +106,11 @@ func (q Querier) ReserveAmount(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+
 	amount := q.Keeper.GetReserveAmount(ctx, req.Denom)
 
 	return &types.QueryReserveAmountResponse{Amount: amount}, nil
@@ -126,6 +135,10 @@ func (q Querier) CollateralSetting(
 	borrower, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
+	}
+
+	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
 	}
 
 	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
@@ -157,6 +170,10 @@ func (q Querier) Collateral(
 		return &types.QueryCollateralResponse{Collateral: tokens}, nil
 	}
 
+	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
+	}
+
 	token := q.Keeper.GetCollateralAmount(ctx, borrower, req.Denom)
 
 	return &types.QueryCollateralResponse{Collateral: sdk.NewCoins(token)}, nil
@@ -174,6 +191,11 @@ func (q Querier) ExchangeRate(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+
 	rate, err := q.Keeper.GetExchangeRate(ctx, req.Denom)
 	if err != nil {
 		return nil, err
