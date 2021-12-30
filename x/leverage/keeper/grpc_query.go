@@ -94,6 +94,30 @@ func (q Querier) Borrowed(
 	return &types.QueryBorrowedResponse{Borrowed: sdk.NewCoins(token)}, nil
 }
 
+func (q Querier) BorrowApy(
+	goCtx context.Context,
+	req *types.QueryBorrowApyRequest,
+) (*types.QueryBorrowApyResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	// ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// if len(req.Denom) == 0 {
+	// 	tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
+
+	// 	return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
+	// }
+
+	// token := q.Keeper.GetBorrow(ctx, borrower, req.Denom)
+
+	return &types.QueryBorrowApyResponse{Apy: sdk.ZeroDec()}, nil
+}
+
 func (q Querier) ReserveAmount(
 	goCtx context.Context,
 	req *types.QueryReserveAmountRequest,

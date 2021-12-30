@@ -526,7 +526,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	runTestQueries(s, testCases)
 }
 
-func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	val := s.network.Validators[0]
 
 	simpleCases := []testQuery{
@@ -638,6 +637,22 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	}
 
 	runTestQueries(s, testCases)
+}
+
+func (s *IntegrationTestSuite) TestQueryBorrowApy() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	flags := []string{
+		"uumee",
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowApy(), flags)
+	s.Require().NoError(err)
+
+	var resp types.QueryBorrowApyResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {
