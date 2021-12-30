@@ -525,18 +525,99 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 
 func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
 
-	flags := []string{
-		val.Address.String(),
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	simpleCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryBorrowLimit(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query zero borrow limit",
+			cli.GetCmdQueryBorrowLimit(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryBorrowLimitResponse{},
+			&types.QueryBorrowLimitResponse{
+				BorrowLimit: sdk.ZeroDec(),
+			},
+		},
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowLimit(), flags)
-	s.Require().NoError(err)
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+	}
 
-	var resp types.QueryBorrowLimitResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	testCases := []testQuery{
+		{
+			"query nonzero borrow limit",
+			cli.GetCmdQueryBorrowLimit(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryBorrowLimitResponse{},
+			&types.QueryBorrowLimitResponse{
+				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// This result is umee's collateral weight times its initial
+				// oracle exchange rate, times the collateral amount lent.
+				// For example, 0.05 * 34.21 * 1000 = 1710.5
+				BorrowLimit: sdk.MustNewDecFromStr("1710.5"),
+			},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
