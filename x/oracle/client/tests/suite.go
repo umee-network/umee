@@ -170,6 +170,22 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
 }
 
+func (s *IntegrationTestSuite) TestQueryParams() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	args := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
+	s.Require().NoError(err)
+
+	var res types.QueryParamsResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+
+	s.Require().NotEmpty(res.Params.AcceptList)
+}
+
 func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
