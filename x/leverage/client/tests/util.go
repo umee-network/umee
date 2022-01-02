@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govcli "github.com/cosmos/cosmos-sdk/x/gov/client/cli"
@@ -18,6 +19,10 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
+// UpdateRegistry submits an UpdateRegistryProposal governance proposal with a
+// deposit and automatically votes yes on it. It will wait until the proposal
+// passes prior to returning. Note, the extraArgs are passed into the proposal
+// creation command along with the vote command.
 func (s *IntegrationTestSuite) UpdateRegistry(
 	clientCtx client.Context,
 	content *types.UpdateRegistryProposal,
@@ -32,10 +37,13 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	s.Require().NoError(err)
 	s.Require().NoError(ioutil.WriteFile(path, bz, 0644))
 
+	cmd := cli.NewCmdSubmitUpdateRegistryProposal()
+	flags.AddTxFlagsToCmd(cmd) // add flags manually since the gov workflow adds them automatically
+
 	// submit proposal
 	_, err = clitestutil.ExecTestCLICmd(
 		clientCtx,
-		cli.NewCmdSubmitUpdateRegistryProposal(),
+		cmd,
 		append(
 			[]string{
 				path,
@@ -51,7 +59,8 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	s.Require().Eventually(
 		func() bool {
 			out, err := clitestutil.ExecTestCLICmd(
-				clientCtx, govcli.GetCmdQueryProposals(),
+				clientCtx,
+				govcli.GetCmdQueryProposals(),
 				[]string{
 					fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 				},
@@ -66,7 +75,12 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 			}
 
 			for _, p := range resp.Proposals {
-				if p.GetTitle() == content.Title {
+				var c govtypes.Content
+				if err := clientCtx.Codec.UnpackAny(p.Content, &c); err != nil {
+					return false
+				}
+
+				if c.GetTitle() == content.Title {
 					proposalID = p.ProposalId
 					return true
 				}
@@ -99,7 +113,8 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	s.Require().Eventuallyf(
 		func() bool {
 			out, err := clitestutil.ExecTestCLICmd(
-				clientCtx, govcli.GetCmdQueryProposal(),
+				clientCtx,
+				govcli.GetCmdQueryProposal(),
 				[]string{
 					proposalIDStr,
 					fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -109,14 +124,14 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 				return false
 			}
 
-			var resp govtypes.QueryProposalResponse
-			if err := clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp); err != nil {
+			var prop govtypes.Proposal
+			if err := clientCtx.Codec.UnmarshalJSON(out.Bytes(), &prop); err != nil {
 				return false
 			}
 
-			return resp.Proposal.Status == govtypes.StatusPassed
+			return prop.Status == govtypes.StatusPassed
 		},
-		time.Minute,
+		2*time.Minute,
 		time.Second,
 		"proposal %d (%s) failed to pass", proposalID, content.Title,
 	)
