@@ -36,6 +36,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 }
 
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.T().Log("tearing down integration test suite")
+
+	s.network.Cleanup()
+}
+
 func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 	val := s.network.Validators[0]
 
