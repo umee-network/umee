@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -82,7 +84,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Modify the x/leverage genesis state
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
 		BaseDenom:            app.BondDenom,
-		SymbolDenom:          "UMEE",
+		SymbolDenom:          DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
@@ -110,7 +112,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 100
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
-		"UMEE", sdk.MustNewDecFromStr("34.21"),
+		DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
@@ -118,6 +120,19 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	appGenState[oracletypes.ModuleName] = bz
+
+	var govGenState govtypes.GenesisState
+	if err := cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState); err != nil {
+		panic(err)
+	}
+
+	govGenState.VotingParams.VotingPeriod = time.Second * 20
+
+	bz, err = cdc.MarshalJSON(&govGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[govtypes.ModuleName] = bz
 
 	cfg.Codec = encCfg.Marshaler
 	cfg.TxConfig = encCfg.TxConfig

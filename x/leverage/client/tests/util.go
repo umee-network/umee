@@ -20,7 +20,7 @@ import (
 
 func (s *IntegrationTestSuite) UpdateRegistry(
 	clientCtx client.Context,
-	content types.UpdateRegistryProposal,
+	content *types.UpdateRegistryProposal,
 	deposit sdk.Coins,
 	extraArgs ...string,
 ) {
@@ -28,7 +28,7 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	dir := s.T().TempDir()
 	path := path.Join(dir, "proposal.json")
 
-	bz, err := clientCtx.Codec.MarshalJSON(&content)
+	bz, err := clientCtx.Codec.MarshalJSON(content)
 	s.Require().NoError(err)
 	s.Require().NoError(ioutil.WriteFile(path, bz, 0644))
 
@@ -96,7 +96,7 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	s.Require().NoError(err)
 
 	// wait till proposal passes and is executed
-	s.Require().Eventually(
+	s.Require().Eventuallyf(
 		func() bool {
 			out, err := clitestutil.ExecTestCLICmd(
 				clientCtx, govcli.GetCmdQueryProposal(),
@@ -118,6 +118,6 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 		},
 		time.Minute,
 		time.Second,
-		"proposal failed to pass",
+		"proposal %d (%s) failed to pass", proposalID, content.Title,
 	)
 }

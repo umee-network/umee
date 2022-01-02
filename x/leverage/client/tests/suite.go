@@ -8,11 +8,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -131,8 +133,8 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 				Registry: []types.Token{
 					{
 						// must match app/beta/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:            "uumee",
-						SymbolDenom:          "UMEE",
+						BaseDenom:            app.BondDenom,
+						SymbolDenom:          app.DisplayDenom,
 						Exponent:             6,
 						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
@@ -165,6 +167,40 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 	}
 
 	runTestQueries(s, testCases)
+}
+
+func (s *IntegrationTestSuite) TestFoo() {
+	val := s.network.Validators[0]
+
+	s.UpdateRegistry(
+		val.ClientCtx,
+		types.NewUpdateRegistryProposal(
+			"test title",
+			"test description",
+			[]types.Token{
+				{
+					BaseDenom:            app.BondDenom,
+					SymbolDenom:          app.DisplayDenom,
+					Exponent:             6,
+					ReserveFactor:        sdk.MustNewDecFromStr("0.200000000000000000"),
+					CollateralWeight:     sdk.MustNewDecFromStr("0.070000000000000000"),
+					BaseBorrowRate:       sdk.MustNewDecFromStr("0.040000000000000000"),
+					KinkBorrowRate:       sdk.MustNewDecFromStr("0.400000000000000000"),
+					MaxBorrowRate:        sdk.MustNewDecFromStr("1.60000000000000000"),
+					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.300000000000000000"),
+					LiquidationIncentive: sdk.MustNewDecFromStr("0.280000000000000000"),
+				},
+			},
+		),
+		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
+		[]string{
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
+		}...,
+	)
 }
 
 func (s *IntegrationTestSuite) TestQueryBorrowed() {
@@ -738,7 +774,6 @@ func (s *IntegrationTestSuite) TestCmdWithdraw() {
 }
 
 func (s *IntegrationTestSuite) TestCmdBorrow() {
-
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
@@ -848,7 +883,6 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 }
 
 func (s *IntegrationTestSuite) TestCmdRepay() {
-
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
