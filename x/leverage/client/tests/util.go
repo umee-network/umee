@@ -35,7 +35,7 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 
 	bz, err := clientCtx.Codec.MarshalJSON(content)
 	s.Require().NoError(err)
-	s.Require().NoError(ioutil.WriteFile(path, bz, 0644))
+	s.Require().NoError(ioutil.WriteFile(path, bz, 0600))
 
 	cmd := cli.NewCmdSubmitUpdateRegistryProposal()
 	flags.AddTxFlagsToCmd(cmd) // add flags manually since the gov workflow adds them automatically
