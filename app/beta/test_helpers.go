@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -82,7 +84,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Modify the x/leverage genesis state
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
 		BaseDenom:            app.BondDenom,
-		SymbolDenom:          "UMEE",
+		SymbolDenom:          app.DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
@@ -110,7 +112,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 100
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
-		"UMEE", sdk.MustNewDecFromStr("34.21"),
+		app.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
@@ -119,13 +121,26 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 	appGenState[oracletypes.ModuleName] = bz
 
+	var govGenState govtypes.GenesisState
+	if err := cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState); err != nil {
+		panic(err)
+	}
+
+	govGenState.VotingParams.VotingPeriod = time.Minute
+
+	bz, err = cdc.MarshalJSON(&govGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[govtypes.ModuleName] = bz
+
 	cfg.Codec = encCfg.Marshaler
 	cfg.TxConfig = encCfg.TxConfig
 	cfg.LegacyAmino = encCfg.Amino
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.GenesisState = appGenState
-	cfg.BondDenom = BondDenom
-	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", BondDenom)
+	cfg.BondDenom = app.BondDenom
+	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", app.BondDenom)
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
 		return New(
 			val.Ctx.Logger,

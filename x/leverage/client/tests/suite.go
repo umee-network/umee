@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -131,8 +132,8 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 				Registry: []types.Token{
 					{
 						// must match app/beta/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:            "uumee",
-						SymbolDenom:          "UMEE",
+						BaseDenom:            app.BondDenom,
+						SymbolDenom:          app.DisplayDenom,
 						Exponent:             6,
 						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
@@ -738,7 +739,6 @@ func (s *IntegrationTestSuite) TestCmdWithdraw() {
 }
 
 func (s *IntegrationTestSuite) TestCmdBorrow() {
-
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
@@ -848,7 +848,6 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 }
 
 func (s *IntegrationTestSuite) TestCmdRepay() {
-
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
