@@ -179,6 +179,7 @@ func (o *Oracle) SetPrices() error {
 				if tp, ok := prices[cp.String()]; ok {
 					providerPrices[providerName][cp.Base] = tp
 				} else {
+					mtx.Unlock()
 					return fmt.Errorf("finding ticker price via provider failed")
 				}
 			}
