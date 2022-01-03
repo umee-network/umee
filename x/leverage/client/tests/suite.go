@@ -223,7 +223,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin("uumee", 50),
+					sdk.NewInt64Coin(app.BondDenom, 50),
 				),
 			},
 		},
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin("uumee", 50),
+					sdk.NewInt64Coin(app.BondDenom, 50),
 				),
 			},
 		},
@@ -297,7 +297,7 @@ func (s *IntegrationTestSuite) TestQueryReserveAmount() {
 			"query reserve amount",
 			cli.GetCmdQueryReserveAmount(),
 			[]string{
-				"uumee",
+				app.BondDenom,
 			},
 			false,
 			&types.QueryReserveAmountResponse{},
@@ -513,7 +513,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 			"query exchange rate",
 			cli.GetCmdQueryExchangeRate(),
 			[]string{
-				"uumee",
+				app.BondDenom,
 			},
 			false,
 			&types.QueryExchangeRateResponse{},
@@ -641,21 +641,39 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 }
 
 func (s *IntegrationTestSuite) TestQueryBorrowApy() {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	s.Run("get_borrow_apy_denom", func() {
-		flags := []string{
-			"uumee",
-			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-		}
-
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowApy(), flags)
-		s.Require().NoError(err)
-
-		var resp types.QueryBorrowApyResponse
-		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
-	})
+	testCasesBorrowApy := []testQuery{
+		{
+			"not accepted Token denom",
+			cli.GetCmdQueryBorrowApy(),
+			[]string{
+				"invalidToken",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryBorrowApy(),
+			[]string{
+				"",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"valid asset before lend",
+			cli.GetCmdQueryBorrowApy(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryBorrowApyResponse{},
+			&types.QueryBorrowApyResponse{Apy: sdk.ZeroDec()},
+		},
+	}
+	runTestQueries(s, testCasesBorrowApy)
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {
