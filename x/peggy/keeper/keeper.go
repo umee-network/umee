@@ -225,13 +225,14 @@ func (k *Keeper) GetLastUnbondingBlockHeight(ctx sdk.Context) uint64 {
 	return types.UInt64FromBytes(bytes)
 }
 
-// GetUnslashedValsets returns all the "ready-to-slash" unslashed validator sets in state (valsets at least signedValsetsWindow blocks old)
+// GetUnslashedValsets returns all the "ready-to-slash" unslashed validator sets in state
+// (valsets at least signedValsetsWindow blocks old).
 func (k Keeper) GetUnslashedValsets(ctx sdk.Context, signedValsetsWindow uint64) (out []*types.Valset) {
 	lastSlashedValsetNonce := k.GetLastSlashedValsetNonce(ctx)
 	blockHeight := uint64(ctx.BlockHeight())
 	k.IterateValsetBySlashedValsetNonce(ctx, lastSlashedValsetNonce, func(_ []byte, valset *types.Valset) bool {
-		// Implicitly the unslashed valsets appear after the last slashed valset,
-		// however not all valsets are ready-to-slash since validators have a window
+		// Implicitly, the unslashed valsets appear after the last slashed valset,
+		// however, not all valsets are ready-to-slash since validators have a window.
 		if valset.Nonce > lastSlashedValsetNonce && !(blockHeight < valset.Height+signedValsetsWindow) {
 			out = append(out, valset)
 		}

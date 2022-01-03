@@ -159,7 +159,7 @@ func (h *BlockHandler) cleanupTimedOutBatches(ctx sdk.Context) {
 
 // prepValsetConfirms loads all confirmations into a hashmap indexed by validatorAddr
 // reducing the lookup time dramatically and separating out the task of looking up
-// the orchestrator for each validator
+// the orchestrator for each validator.
 func prepValsetConfirms(ctx sdk.Context, k keeper.Keeper, nonce uint64) map[string]*types.MsgValsetConfirm {
 	confirms := k.GetValsetConfirms(ctx, nonce)
 	// bytes are incomparable in go, so we convert the sdk.ValAddr bytes to a string
@@ -168,11 +168,11 @@ func prepValsetConfirms(ctx sdk.Context, k keeper.Keeper, nonce uint64) map[stri
 		// TODO this presents problems for delegate key rotation see issue #344
 		confVal, err := sdk.AccAddressFromBech32(confirm.Orchestrator)
 		if err != nil {
-			panic("Invalid confirm in store")
+			panic(fmt.Sprintf("invalid claim confirmation address: %s", confirm.Orchestrator))
 		}
 		val, foundValidator := k.GetOrchestratorValidator(ctx, confVal)
 		if !foundValidator {
-			panic("Confirm from validator we can't identify?")
+			panic(fmt.Sprintf("failed to find validator by orchestrator address: %s", confVal))
 		}
 		ret[val.String()] = confirm
 	}
@@ -202,7 +202,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 			}
 			valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, consAddr)
 
-			//  Slash validator ONLY if he joined before valset is created
+			// slash validator ONLY if it joined before the valset was created
 			startedBeforeValsetCreated := valSigningInfo.StartHeight < int64(vs.Height)
 
 			if exist && startedBeforeValsetCreated {
@@ -304,10 +304,9 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 
 // prepBatchConfirms loads all confirmations into a hashmap indexed by validatorAddr
 // reducing the lookup time dramatically and separating out the task of looking up
-// the orchestrator for each validator
+// the orchestrator for each validator.
 func prepBatchConfirms(ctx sdk.Context, k keeper.Keeper, batch *types.OutgoingTxBatch) map[string]*types.MsgConfirmBatch {
 	confirms := k.GetBatchConfirmByNonceAndTokenContract(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
-	// bytes are incomparable in go, so we convert the sdk.ValAddr bytes to a string (note this is NOT bech32)
 	ret := make(map[string]*types.MsgConfirmBatch)
 	for _, confirm := range confirms {
 		// TODO this presents problems for delegate key rotation see issue #344
