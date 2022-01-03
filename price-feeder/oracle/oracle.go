@@ -157,7 +157,8 @@ func (o *Oracle) SetPrices() error {
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
 			if err != nil {
-				return err
+				o.logger.Debug().Msg("getting ticker price failed")
+				return nil
 			}
 
 			// flatten and collect prices based on the base currency per provider
@@ -170,6 +171,8 @@ func (o *Oracle) SetPrices() error {
 				}
 				if tp, ok := prices[cp.String()]; ok {
 					providerPrices[providerName][cp.Base] = tp
+				} else {
+					return fmt.Errorf("finding ticker price via provider failed")
 				}
 			}
 			mtx.Unlock()
@@ -179,10 +182,38 @@ func (o *Oracle) SetPrices() error {
 	}
 
 	if err := g.Wait(); err != nil {
+		o.logger.Debug().Err(err)
+		return nil
+	}
+
+	baseCoins := []string{}
+	for _, currencyPairs := range o.providerPairs {
+		for _, pair := range currencyPairs {
+			if !contains(baseCoins, pair.Base) {
+				baseCoins = append(baseCoins, pair.Base)
+			}
+		}
+	}
+
+	reportedCoins := []string{}
+	for _, providers := range providerPrices {
+		for base, _ := range providers {
+			if !contains(reportedCoins, base) {
+				reportedCoins = append(reportedCoins, base)
+			}
+		}
+	}
+
+	if len(reportedCoins) != len(baseCoins) {
+		return fmt.Errorf("unable to get prices for all exchange rates")
+	}
+
+	vwapPrices, err := ComputeVWAP(providerPrices)
+	if err != nil {
 		return err
 	}
 
-	o.prices = ComputeVWAP(providerPrices)
+	o.prices = vwapPrices
 
 	return nil
 }
