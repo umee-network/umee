@@ -60,7 +60,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Organize votes to ballot by denom
 		// NOTE: **Filter out inactive or jailed validators**
-		// NOTE: **Make abstain votes to have zero vote power**
 		voteMap := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
 		ballotDenomSlice := types.BallotMapToSlice(voteMap)
@@ -81,7 +80,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		voteTargetsLen := len(voteTargets)
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
-			// Skip abstain & valid voters
+			// Skip valid voters
 			if int(claim.WinCount) == voteTargetsLen {
 				continue
 			}
@@ -132,10 +131,9 @@ func Tally(
 	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
-		// Filter ballot winners and abstain voters. For non-abstain voters, we
+		// Filter ballot winners. For voters, we
 		// filter out the tally vote iff:
 		// (weightedMedian - rewardSpread) <= ExchangeRate <= (weightedMedian + rewardSpread)
-		// or if the exchange rate is negative or zero.
 		if (tallyVote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
 			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
 			!tallyVote.ExchangeRate.IsPositive() {
