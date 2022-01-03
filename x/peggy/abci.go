@@ -227,6 +227,13 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 							consPower,
 							params.SlashFractionValset,
 						)
+						ctx.EventManager().EmitEvent(
+							sdk.NewEvent(
+								sdk.EventTypeMessage,
+								sdk.NewAttribute("ValsetSignatureSlashing", consAddr.String()),
+							),
+						)
+
 						h.k.StakingKeeper.Jail(ctx, consAddr)
 					}
 				}
@@ -275,6 +282,12 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 
 						consPower := validator.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
 						h.k.StakingKeeper.Slash(ctx, valConsAddr, ctx.BlockHeight(), consPower, params.SlashFractionValset)
+						ctx.EventManager().EmitEvent(
+							sdk.NewEvent(
+								sdk.EventTypeMessage,
+								sdk.NewAttribute("ValsetSignatureSlashing", valConsAddr.String()),
+							),
+						)
 
 						if !validator.IsJailed() {
 							h.k.StakingKeeper.Jail(ctx, valConsAddr)
@@ -352,6 +365,12 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 
 				if !val.IsJailed() {
 					h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionBatch)
+					ctx.EventManager().EmitEvent(
+						sdk.NewEvent(
+							sdk.EventTypeMessage,
+							sdk.NewAttribute("BatchSignatureSlashing", consAddr.String()),
+						),
+					)
 					h.k.StakingKeeper.Jail(ctx, consAddr)
 				}
 			}
