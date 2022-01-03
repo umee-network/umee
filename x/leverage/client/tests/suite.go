@@ -643,16 +643,18 @@ func (s *IntegrationTestSuite) TestQueryBorrowApy() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
-	flags := []string{
-		"uumee",
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-	}
+	s.Run("get_borrow_apy_denom", func() {
+		flags := []string{
+			"uumee",
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+		}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowApy(), flags)
-	s.Require().NoError(err)
+		out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryBorrowApy(), flags)
+		s.Require().NoError(err)
 
-	var resp types.QueryBorrowApyResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+		var resp types.QueryBorrowApyResponse
+		s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+	})
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {
