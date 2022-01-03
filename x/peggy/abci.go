@@ -289,6 +289,25 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 	}
 }
 
+// prepBatchConfirms loads all confirmations into a hashmap indexed by validatorAddr
+// reducing the lookup time dramatically and separating out the task of looking up
+// the orchestrator for each validator
+func prepBatchConfirms(ctx sdk.Context, k keeper.Keeper, batch *types.OutgoingTxBatch) map[string]*types.MsgConfirmBatch {
+	confirms := k.GetBatchConfirmByNonceAndTokenContract(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
+	// bytes are incomparable in go, so we convert the sdk.ValAddr bytes to a string (note this is NOT bech32)
+	ret := make(map[string]*types.MsgConfirmBatch)
+	for _, confirm := range confirms {
+		// TODO this presents problems for delegate key rotation see issue #344
+		confVal, _ := sdk.AccAddressFromBech32(confirm.Orchestrator)
+		val, foundValidator := k.GetOrchestratorValidator(ctx, confVal)
+		if !foundValidator {
+			panic("Confirm from validator we can't identify?")
+		}
+		ret[val.String()] = confirm
+	}
+	return ret
+}
+
 func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 	// #2 condition
 	// We look through the full bonded set (not just the active set, include unbonding validators)
@@ -308,7 +327,8 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 	for _, batch := range unslashedBatches {
 		// SLASH BONDED VALIDTORS who didn't attest batch requests
 		currentBondedSet := h.k.StakingKeeper.GetBondedValidatorsByPower(ctx)
-		confirms := h.k.GetBatchConfirmByNonceAndTokenContract(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
+		confirms := prepBatchConfirms(ctx, h.k, batch)
+		// confirms := h.k.GetBatchConfirmByNonceAndTokenContract(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
 		for _, val := range currentBondedSet {
 			// Don't slash validators who joined after batch is created
 			consAddr, _ := val.GetConsAddr()
@@ -318,16 +338,7 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 				continue
 			}
 
-			found := false
-			for _, batchConfirmation := range confirms {
-				// TODO this presents problems for delegate key rotation see issue #344
-				orchestratorAcc, _ := sdk.AccAddressFromBech32(batchConfirmation.Orchestrator)
-				delegatedOperator, delegatedFound := h.k.GetOrchestratorValidator(ctx, orchestratorAcc)
-				if delegatedFound && delegatedOperator.Equals(val.GetOperator()) {
-					found = true
-					break
-				}
-			}
+			_, found := confirms[val.GetOperator().String()]
 
 			if !found {
 				// refresh validator before slashing/jailing

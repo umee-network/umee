@@ -277,7 +277,7 @@ func SetupFiveValChain(t *testing.T) (TestInput, sdk.Context) {
 	// Run the staking endblocker to ensure valset is correct in state
 	staking.EndBlocker(input.Context, input.StakingKeeper)
 
-	// Register eth addresses for each validator
+	// Register eth addresses and orchestrator address for each validator
 	for i, addr := range ValAddrs {
 		input.PeggyKeeper.SetEthAddressForValidator(input.Context, addr, EthAddrs[i])
 		input.PeggyKeeper.SetOrchestratorValidator(input.Context, addr, OrchAddrs[i])

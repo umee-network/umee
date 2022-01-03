@@ -185,7 +185,7 @@ func TestBatchSlashing(t *testing.T) {
 	}
 	pk.StoreBatchUnsafe(ctx, batch)
 
-	for i, val := range testpeggy.AccAddrs {
+	for i, orch := range testpeggy.OrchAddrs {
 		if i == 0 {
 			// don't sign with first validator
 			continue
@@ -202,7 +202,7 @@ func TestBatchSlashing(t *testing.T) {
 			Nonce:         batch.BatchNonce,
 			TokenContract: testpeggy.TokenContractAddrs[0],
 			EthSigner:     testpeggy.EthAddrs[i].String(),
-			Orchestrator:  val.String(),
+			Orchestrator:  orch.String(),
 		})
 	}
 
