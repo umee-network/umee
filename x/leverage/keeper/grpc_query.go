@@ -105,11 +105,11 @@ func (q Querier) BorrowApy(
 		return nil, status.Error(codes.InvalidArgument, "invalid denom")
 	}
 
+	ctx := sdk.UnwrapSDKContext(goCtx)
 	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
 	borrowApy := q.Keeper.GetBorrowApy(ctx, req.Denom)
 
 	return &types.QueryBorrowApyResponse{Apy: borrowApy}, nil
