@@ -197,7 +197,7 @@ func (o *Oracle) SetPrices() error {
 
 	reportedCoins := []string{}
 	for _, providers := range providerPrices {
-		for base, _ := range providers {
+		for base := range providers {
 			if !contains(reportedCoins, base) {
 				reportedCoins = append(reportedCoins, base)
 			}
