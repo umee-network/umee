@@ -211,8 +211,6 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 
 				// slash validators for not confirming valsets
 				if !found {
-					consPower := val.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
-
 					// refresh validator before slashing/jailing
 					val, foundVal := h.k.StakingKeeper.GetValidator(ctx, val.GetOperator())
 					if !foundVal {
@@ -221,6 +219,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 					}
 
 					if !val.IsJailed() {
+						consPower := val.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
 						h.k.StakingKeeper.Slash(
 							ctx,
 							consAddr,
@@ -267,8 +266,14 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 
 					// slash validators for not confirming valsets
 					if !found {
-						consPower := validator.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
+						// refresh validator before slashing/jailing
+						validator, foundVal := h.k.StakingKeeper.GetValidator(ctx, validator.GetOperator())
+						if !foundVal {
+							// this should be impossible, we haven't even progressed a single block since we got the list
+							panic("Validator exited set during endblocker?")
+						}
 
+						consPower := validator.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
 						h.k.StakingKeeper.Slash(ctx, valConsAddr, ctx.BlockHeight(), consPower, params.SlashFractionValset)
 
 						if !validator.IsJailed() {
@@ -325,13 +330,18 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 			}
 
 			if !found {
-				cons, _ := val.GetConsAddr()
+				// refresh validator before slashing/jailing
+				val, foundVal := h.k.StakingKeeper.GetValidator(ctx, val.GetOperator())
+				if !foundVal {
+					// this should be impossible, we haven't even progressed a single block since we got the list
+					panic("Validator exited set during endblocker?")
+				}
+
 				consPower := val.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
 
-				h.k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), consPower, params.SlashFractionBatch)
-
 				if !val.IsJailed() {
-					h.k.StakingKeeper.Jail(ctx, cons)
+					h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionBatch)
+					h.k.StakingKeeper.Jail(ctx, consAddr)
 				}
 			}
 		}
