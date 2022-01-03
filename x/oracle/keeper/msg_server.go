@@ -108,13 +108,6 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, sdkerrors.Wrapf(types.ErrVerificationFailed, "must be given %s not %s", aggregatePrevote.Hash, hash)
 	}
 
-	// Verify all exchange rates are positive
-	for _, v := range exchangeRateTuples {
-		if !v.ExchangeRate.IsPositive() {
-			return nil, types.ErrNegativeOrZeroRate
-		}
-	}
-
 	// Move aggregate prevote to aggregate vote with given exchange rates
 	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(exchangeRateTuples, valAddr))
 	ms.DeleteAggregateExchangeRatePrevote(ctx, valAddr)

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/x/leverage/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -87,6 +88,9 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		decCoin, err := sdk.NewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
+		}
+		if decCoin == sdk.ZeroDec() {
+			return nil, types.ErrInvalidOraclePrice
 		}
 
 		denom := strings.ToUpper(denomAmountStr[0])
