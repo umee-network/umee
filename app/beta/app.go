@@ -102,22 +102,6 @@ import (
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
-const (
-	// Name defines the application name of the Umee network.
-	Name = "umee"
-
-	// BondDenom defines the native staking token denomination.
-	BondDenom = "uumee"
-
-	// DisplayDenom defines the name, symbol, and display value of the umee token.
-	DisplayDenom = "umee"
-
-	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
-	//
-	// NOTE: In the SDK, the default value is 255.
-	MaxAddrLen = 20
-)
-
 var (
 	_ umeeapp.CosmosApp       = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
@@ -228,7 +212,7 @@ func New(
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 
-	base := baseapp.NewBaseApp(Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
+	base := baseapp.NewBaseApp(umeeapp.Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	base.SetCommitMultiStoreTracer(traceStore)
 	base.SetVersion(version.Version)
 	base.SetInterfaceRegistry(interfaceRegistry)

@@ -15,6 +15,8 @@ import (
 	"github.com/umee-network/umee/x/oracle/types"
 )
 
+var ten = sdk.MustNewDecFromStr("10")
+
 // Keeper of the oracle store
 type Keeper struct {
 	cdc        codec.BinaryCodec
@@ -112,7 +114,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 	for _, acceptedDenom := range params.AcceptList {
 		if denom == acceptedDenom.BaseDenom {
-			return exchangeRate.QuoInt64(int64(10 ^ acceptedDenom.Exponent)), nil
+			powerReduction := ten.Power(uint64(acceptedDenom.Exponent))
+			return exchangeRate.Quo(powerReduction), nil
 		}
 	}
 

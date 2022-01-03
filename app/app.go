@@ -108,7 +108,7 @@ const (
 	BondDenom = "uumee"
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
-	DisplayDenom = "umee"
+	DisplayDenom = "UMEE"
 
 	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
 	//

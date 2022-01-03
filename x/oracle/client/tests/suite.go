@@ -36,6 +36,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Require().NoError(err)
 }
 
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.T().Log("tearing down integration test suite")
+
+	s.network.Cleanup()
+}
+
 func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 	val := s.network.Validators[0]
 
@@ -168,6 +174,22 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().Len(res.ExchangeRates, 1)
 	s.Require().Equal(res.ExchangeRates[0].Denom, "UMEE")
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
+}
+
+func (s *IntegrationTestSuite) TestQueryParams() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	args := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
+	s.Require().NoError(err)
+
+	var res types.QueryParamsResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+
+	s.Require().NotEmpty(res.Params.AcceptList)
 }
 
 func (s *IntegrationTestSuite) TestQueryExchangeRate() {
