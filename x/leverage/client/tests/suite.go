@@ -663,7 +663,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowApy() {
 			nil,
 		},
 		{
-			"valid asset before lend",
+			"valid asset",
 			cli.GetCmdQueryBorrowApy(),
 			[]string{
 				app.BondDenom,
