@@ -131,8 +131,7 @@ func Tally(
 	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
-		// Filter ballot winners. For voters, we
-		// filter out the tally vote iff:
+		// Filter ballot winners. For voters, we filter out the tally vote iff:
 		// (weightedMedian - rewardSpread) <= ExchangeRate <= (weightedMedian + rewardSpread)
 		if (tallyVote.ExchangeRate.GTE(weightedMedian.Sub(rewardSpread)) &&
 			tallyVote.ExchangeRate.LTE(weightedMedian.Add(rewardSpread))) ||
