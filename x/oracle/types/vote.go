@@ -89,7 +89,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		if err != nil {
 			return nil, err
 		}
-		if decCoin == sdk.ZeroDec() {
+		if !decCoin.IsPositive() {
 			return nil, types.ErrInvalidOraclePrice
 		}
 
