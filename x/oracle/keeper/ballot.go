@@ -25,10 +25,6 @@ func (k Keeper) OrganizeBallotByDenom(
 
 			for _, tuple := range vote.ExchangeRateTuples {
 				tmpPower := power
-				if !tuple.ExchangeRate.IsPositive() {
-					// make the power of abstain vote zero
-					tmpPower = 0
-				}
 
 				votes[tuple.Denom] = append(
 					votes[tuple.Denom],
