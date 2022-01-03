@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"math/big"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -74,10 +75,25 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 			}
 		}
 
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				sdk.EventTypeMessage,
+				sdk.NewAttribute("MsgSendToCosmosAmount", claim.Amount.String()),
+				sdk.NewAttribute("MsgSendToCosmosNonce", strconv.Itoa(int(claim.GetEventNonce()))),
+				sdk.NewAttribute("MsgSendToCosmosToken", claim.TokenContract),
+			),
+		)
+
 		// withdraw in this context means a withdraw from the Ethereum side of the bridge
 	case *types.MsgWithdrawClaim:
 		tokenContract := common.HexToAddress(claim.TokenContract)
 		a.keeper.OutgoingTxBatchExecuted(ctx, tokenContract, claim.BatchNonce)
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				sdk.EventTypeMessage,
+				sdk.NewAttribute("MsgBatchSendToEthClaim", strconv.Itoa(int(claim.BatchNonce))),
+			),
+		)
 		return nil
 
 	case *types.MsgERC20DeployedClaim:
@@ -87,6 +103,15 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 
 		// add to ERC20 mapping
 		a.keeper.SetCosmosOriginatedDenomToERC20(ctx, claim.CosmosDenom, common.HexToAddress(claim.TokenContract))
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				sdk.EventTypeMessage,
+				sdk.NewAttribute("MsgERC20DeployedClaimToken", claim.TokenContract),
+				sdk.NewAttribute("MsgERC20DeployedClaim", strconv.Itoa(int(claim.GetEventNonce()))),
+			),
+		)
+
 		return nil
 
 	case *types.MsgValsetUpdatedClaim:
@@ -99,6 +124,13 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 			RewardAmount: claim.RewardAmount,
 			RewardToken:  claim.RewardToken,
 		})
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				sdk.EventTypeMessage,
+				sdk.NewAttribute("MsgValsetUpdatedClaim", strconv.Itoa(int(claim.GetEventNonce()))),
+			),
+		)
 
 	default:
 		panic(fmt.Sprintf("invalid event type for attestations %s", claim.GetType()))
