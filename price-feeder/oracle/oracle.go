@@ -147,8 +147,7 @@ func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
-	baseCoins := []string{}
-	reportedCoins := []string{}
+	requiredRates := []string{}
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
@@ -157,8 +156,8 @@ func (o *Oracle) SetPrices() error {
 		priceProvider := o.getOrSetProvider(providerName)
 
 		for _, pair := range currencyPairs {
-			if !Contains(baseCoins, pair.Base) {
-				baseCoins = append(baseCoins, pair.Base)
+			if !Contains(requiredRates, pair.Base) {
+				requiredRates = append(requiredRates, pair.Base)
 			}
 		}
 
@@ -194,15 +193,15 @@ func (o *Oracle) SetPrices() error {
 		return nil
 	}
 
+	reportedRates := []string{}
 	for _, providers := range providerPrices {
 		for base := range providers {
-			if !Contains(reportedCoins, base) {
-				reportedCoins = append(reportedCoins, base)
+			if !Contains(reportedRates, base) {
+				reportedRates = append(reportedRates, base)
 			}
 		}
 	}
-
-	if len(reportedCoins) != len(baseCoins) {
+	if len(reportedRates) != len(requiredRates) {
 		return fmt.Errorf("unable to get prices for all exchange rates")
 	}
 
