@@ -46,9 +46,9 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 	return vwap, nil
 }
 
-// contains is a utility function that tells us
+// Contains is a utility function that tells us
 // whether or not a string is in a slice of strings.
-func contains(s []string, str string) bool {
+func Contains(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
 			return true

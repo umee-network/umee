@@ -147,12 +147,20 @@ func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
+	baseCoins := []string{}
+	reportedCoins := []string{}
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
 		priceProvider := o.getOrSetProvider(providerName)
+
+		for _, pair := range currencyPairs {
+			if !Contains(baseCoins, pair.Base) {
+				baseCoins = append(baseCoins, pair.Base)
+			}
+		}
 
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
@@ -186,19 +194,9 @@ func (o *Oracle) SetPrices() error {
 		return nil
 	}
 
-	baseCoins := []string{}
-	for _, currencyPairs := range o.providerPairs {
-		for _, pair := range currencyPairs {
-			if !contains(baseCoins, pair.Base) {
-				baseCoins = append(baseCoins, pair.Base)
-			}
-		}
-	}
-
-	reportedCoins := []string{}
 	for _, providers := range providerPrices {
 		for base := range providers {
-			if !contains(reportedCoins, base) {
+			if !Contains(reportedCoins, base) {
 				reportedCoins = append(reportedCoins, base)
 			}
 		}

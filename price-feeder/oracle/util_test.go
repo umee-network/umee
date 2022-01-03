@@ -78,3 +78,31 @@ func TestComputeVWAP(t *testing.T) {
 		})
 	}
 }
+
+func TestContains(t *testing.T) {
+	testCases := map[string]struct {
+		arr        []string
+		searchterm string
+		expected   bool
+	}{
+		"success": {
+			arr:        []string{"foo", "bar"},
+			searchterm: "foo",
+			expected:   true,
+		},
+		"failure": {
+			arr:        []string{"foo", "bar"},
+			searchterm: "baz",
+			expected:   false,
+		},
+	}
+
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			contains := oracle.Contains(tc.arr, tc.searchterm)
+			require.Equal(t, contains, tc.expected)
+		})
+	}
+}
