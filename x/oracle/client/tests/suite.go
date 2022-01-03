@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
+
 	"github.com/umee-network/umee/x/oracle/client/cli"
 	"github.com/umee-network/umee/x/oracle/types"
 )
@@ -33,6 +34,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	_, err := s.network.WaitForHeight(1)
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	s.T().Log("tearing down integration test suite")
+
+	s.network.Cleanup()
 }
 
 func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
@@ -141,6 +148,76 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 		s.Run(tc.name, func() {
 			tc.args = append(tc.args, fmt.Sprintf("--%s=json", tmcli.OutputFlag))
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), tc.args)
+			if tc.expectErr {
+				s.Require().Error(err)
+			} else {
+				s.Require().NoError(err)
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), tc.respType), out.String())
+			}
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestQueryExchangeRates() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	args := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRates(), args)
+	s.Require().NoError(err)
+
+	var res types.QueryExchangeRatesResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+
+	s.Require().Len(res.ExchangeRates, 1)
+	s.Require().Equal(res.ExchangeRates[0].Denom, "UMEE")
+	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
+}
+
+func (s *IntegrationTestSuite) TestQueryParams() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	args := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
+	s.Require().NoError(err)
+
+	var res types.QueryParamsResponse
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+
+	s.Require().NotEmpty(res.Params.AcceptList)
+}
+
+func (s *IntegrationTestSuite) TestQueryExchangeRate() {
+	val := s.network.Validators[0]
+	clientCtx := val.ClientCtx
+
+	testCases := []struct {
+		name      string
+		args      []string
+		expectErr bool
+		respType  proto.Message
+	}{
+		{
+			name: "valid denom",
+			args: []string{
+				"UMEE",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			expectErr: false,
+			respType:  &types.QueryExchangeRatesResponse{},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+
+		s.Run(tc.name, func() {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRate(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
 			} else {

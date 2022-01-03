@@ -6,6 +6,7 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 )
 
 var (
@@ -29,6 +30,7 @@ func init() {
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLendAsset{}, "umee/leverage/MsgLendAsset", nil)
 	cdc.RegisterConcrete(&MsgWithdrawAsset{}, "umee/leverage/MsgWithdrawAsset", nil)
+	cdc.RegisterConcrete(&UpdateRegistryProposal{}, "umee/leverage/UpdateRegistryProposal", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -36,6 +38,11 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		(*sdk.Msg)(nil),
 		&MsgLendAsset{},
 		&MsgWithdrawAsset{},
+	)
+
+	registry.RegisterImplementations(
+		(*govtypes.Content)(nil),
+		&UpdateRegistryProposal{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
