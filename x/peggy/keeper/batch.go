@@ -282,13 +282,12 @@ func (k *Keeper) GetLastSlashedBatchBlock(ctx sdk.Context) uint64 {
 // GetUnslashedBatches returns all the unslashed batches in state
 func (k *Keeper) GetUnslashedBatches(ctx sdk.Context, maxHeight uint64) (out []*types.OutgoingTxBatch) {
 	lastSlashedBatchBlock := k.GetLastSlashedBatchBlock(ctx)
-	k.IterateBatchBySlashedBatchBlock(ctx, lastSlashedBatchBlock, maxHeight, func(_ []byte, batch *types.OutgoingTxBatch) bool {
-		if batch.Block > lastSlashedBatchBlock {
+	batches := k.GetOutgoingTxBatches(ctx)
+	for _, batch := range batches {
+		if batch.Block > lastSlashedBatchBlock && batch.Block < maxHeight {
 			out = append(out, batch)
 		}
-		return false
-	})
-
+	}
 	return
 }
 

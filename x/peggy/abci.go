@@ -1,6 +1,7 @@
 package peggy
 
 import (
+	"fmt"
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -340,7 +341,7 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 		// SLASH BONDED VALIDTORS who didn't attest batch requests
 		currentBondedSet := h.k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 		confirms := prepBatchConfirms(ctx, h.k, batch)
-		// confirms := h.k.GetBatchConfirmByNonceAndTokenContract(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
+
 		for _, val := range currentBondedSet {
 			// Don't slash validators who joined after batch is created
 			consAddr, _ := val.GetConsAddr()
