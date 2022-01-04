@@ -147,7 +147,7 @@ func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
-	requiredRates := make(map[string]bool)
+	requiredRates := make(map[string]struct{})
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
@@ -157,14 +157,13 @@ func (o *Oracle) SetPrices() error {
 
 		for _, pair := range currencyPairs {
 			if _, ok := requiredRates[pair.Base]; !ok {
-				requiredRates[pair.Base] = true
+				requiredRates[pair.Base] = struct{}{}
 			}
 		}
 
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
 			if err != nil {
-				o.logger.Debug().Msg("getting ticker price failed")
 				return err
 			}
 
@@ -193,11 +192,11 @@ func (o *Oracle) SetPrices() error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	reportedRates := make(map[string]bool)
+	reportedRates := make(map[string]struct{})
 	for _, providers := range providerPrices {
 		for base := range providers {
 			if _, ok := reportedRates[base]; !ok {
-				reportedRates[base] = true
+				reportedRates[base] = struct{}{}
 			}
 		}
 	}
