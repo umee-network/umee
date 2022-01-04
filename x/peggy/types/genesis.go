@@ -41,9 +41,6 @@ var (
 	// ParamsStoreKeySignedBatchesWindow stores the signed blocks window
 	ParamsStoreKeySignedBatchesWindow = []byte("SignedBatchesWindow")
 
-	// ParamsStoreKeySignedClaimsWindow stores the signed blocks window
-	ParamsStoreKeySignedClaimsWindow = []byte("SignedClaimsWindow")
-
 	// ParamsStoreKeyTargetBatchTimeout stores
 	ParamsStoreKeyTargetBatchTimeout = []byte("TargetBatchTimeout")
 
@@ -67,9 +64,6 @@ var (
 
 	// ParamStoreUnbondSlashingValsetsWindow stores unbond slashing valset window
 	ParamStoreUnbondSlashingValsetsWindow = []byte("UnbondSlashingValsetsWindow")
-
-	// ParamStoreClaimSlashingEnabled stores ClaimSlashing is enabled or not
-	ParamStoreClaimSlashingEnabled = []byte("ClaimSlashingEnabled")
 
 	// ParamStoreSlashFractionBadEthSignature stores the amount by which a validator making a fraudulent eth signature will be slashed
 	ParamStoreSlashFractionBadEthSignature = []byte("SlashFractionBadEthSignature")
@@ -307,13 +301,6 @@ func validateSlashFractionValset(i interface{}) error {
 }
 
 func validateSignedBatchesWindow(i interface{}) error {
-	if _, ok := i.(uint64); !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-	return nil
-}
-
-func validateSignedClaimsWindow(i interface{}) error {
 	if _, ok := i.(uint64); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
