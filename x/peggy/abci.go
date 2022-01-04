@@ -187,7 +187,6 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 	}
 
 	unslashedValsets := h.k.GetUnslashedValsets(ctx, params.SignedValsetsWindow)
-
 	currentBondedSet := h.k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 
 	// unslashedValsets are sorted by nonce in ASC order
