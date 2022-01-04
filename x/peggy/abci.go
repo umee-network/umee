@@ -163,7 +163,6 @@ func (h *BlockHandler) cleanupTimedOutBatches(ctx sdk.Context) {
 // the orchestrator for each validator.
 func prepValsetConfirms(ctx sdk.Context, k keeper.Keeper, nonce uint64) map[string]*types.MsgValsetConfirm {
 	confirms := k.GetValsetConfirms(ctx, nonce)
-	// bytes are incomparable in go, so we convert the sdk.ValAddr bytes to a string
 	ret := make(map[string]*types.MsgValsetConfirm)
 	for _, confirm := range confirms {
 		// TODO this presents problems for delegate key rotation see issue #344
