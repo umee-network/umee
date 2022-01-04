@@ -77,10 +77,10 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				sdk.EventTypeMessage,
-				sdk.NewAttribute("MsgSendToCosmosAmount", claim.Amount.String()),
-				sdk.NewAttribute("MsgSendToCosmosNonce", strconv.Itoa(int(claim.GetEventNonce()))),
-				sdk.NewAttribute("MsgSendToCosmosToken", claim.TokenContract),
+				types.EventTypeAttestation,
+				sdk.NewAttribute(types.AttributeKeySendToCosmosAmount, claim.Amount.String()),
+				sdk.NewAttribute(types.AttributeKeySendToCosmosNonce, strconv.Itoa(int(claim.GetEventNonce()))),
+				sdk.NewAttribute(types.AttributeKeySendToCosmosToken, claim.TokenContract),
 			),
 		)
 
@@ -90,8 +90,8 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 		a.keeper.OutgoingTxBatchExecuted(ctx, tokenContract, claim.BatchNonce)
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				sdk.EventTypeMessage,
-				sdk.NewAttribute("MsgBatchSendToEthClaim", strconv.Itoa(int(claim.BatchNonce))),
+				types.EventTypeAttestation,
+				sdk.NewAttribute(types.AttributeKeyBatchSendToEthNonce, strconv.Itoa(int(claim.BatchNonce))),
 			),
 		)
 		return nil
@@ -106,9 +106,9 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				sdk.EventTypeMessage,
-				sdk.NewAttribute("MsgERC20DeployedClaimToken", claim.TokenContract),
-				sdk.NewAttribute("MsgERC20DeployedClaim", strconv.Itoa(int(claim.GetEventNonce()))),
+				types.EventTypeAttestation,
+				sdk.NewAttribute(types.AttributeKeyERC20DeployedToken, claim.TokenContract),
+				sdk.NewAttribute(types.AttributeKeyERC20DeployedNonce, strconv.Itoa(int(claim.GetEventNonce()))),
 			),
 		)
 
@@ -127,8 +127,8 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				sdk.EventTypeMessage,
-				sdk.NewAttribute("MsgValsetUpdatedClaim", strconv.Itoa(int(claim.GetEventNonce()))),
+				types.EventTypeAttestation,
+				sdk.NewAttribute(types.AttributeKeyValsetUpdatedNonce, strconv.Itoa(int(claim.GetEventNonce()))),
 			),
 		)
 

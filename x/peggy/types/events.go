@@ -3,6 +3,7 @@ package types
 const (
 	EventTypeObservation   = "observation"
 	EventTypeOutgoingBatch = "outgoing_batch"
+	EventTypeAttestation   = "attestation"
 
 	EventTypeMultisigUpdateRequest    = "multisig_update_request"
 	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
@@ -28,4 +29,12 @@ const (
 	AttributeKeySetOrchestratorAddr    = "set_orchestrator_address"
 	AttributeKeySetEthereumAddr        = "set_ethereum_address"
 	AttributeKeyValidatorAddr          = "validator_address"
+
+	AttributeKeySendToCosmosAmount  = "send_to_cosmos_amount"
+	AttributeKeySendToCosmosNonce   = "send_to_cosmos_nonce"
+	AttributeKeySendToCosmosToken   = "send_to_cosmos_token"
+	AttributeKeyBatchSendToEthNonce = "batch_send_to_eth_nonce"
+	AttributeKeyERC20DeployedToken  = "erc20_deployed_token"
+	AttributeKeyERC20DeployedNonce  = "erc20_deployed_nonce"
+	AttributeKeyValsetUpdatedNonce  = "valset_updated_nonce"
 )
