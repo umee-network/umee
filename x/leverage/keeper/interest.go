@@ -72,11 +72,6 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		return err
 	}
 
-	borrowAPY, err := k.initializeBorrowAPYMap(ctx)
-	if err != nil {
-		return err
-	}
-
 	interestToApply := map[string]sdk.Dec{}
 	reserveFactors := map[string]sdk.Dec{}
 
@@ -100,7 +95,6 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			return err
 		}
 
-		borrowAPY[coin.Denom] = derivedRate
 		reserveFactors[coin.Denom] = reserveFactor
 		interestToApply[coin.Denom] = derivedRate.Mul(yearsElapsed)
 
@@ -155,10 +149,6 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 	}
 
-	if err := k.storeBorrowAPY(ctx, borrowAPY); err != nil {
-		return err
-	}
-
 	// set LastInterestTime
 	bz, err = sdk.NewInt(currentTime).Marshal()
 	if err != nil {
@@ -185,30 +175,4 @@ func (k *Keeper) InitializeLastInterestTime(ctx sdk.Context) {
 
 		store.Set(timeKey, bz)
 	}
-}
-
-// initializeBorrowAPYMap initiate the borrowApy map with zeroDec of all tokens registered
-func (k *Keeper) initializeBorrowAPYMap(ctx sdk.Context) (map[string]sdk.Dec, error) {
-	borrowAPY := map[string]sdk.Dec{}
-
-	allTokens, err := k.GetAllRegisteredTokens(ctx)
-	if err != nil {
-		return borrowAPY, err
-	}
-
-	for _, token := range allTokens {
-		borrowAPY[token.BaseDenom] = sdk.ZeroDec()
-	}
-
-	return borrowAPY, nil
-}
-
-// storeBorrowAPY stores all the borrow APY value into the store
-func (k *Keeper) storeBorrowAPY(ctx sdk.Context, borrowAPY map[string]sdk.Dec) error {
-	for denom, amountAPY := range borrowAPY {
-		if err := k.SetBorrowAPY(ctx, denom, amountAPY); err != nil {
-			return err
-		}
-	}
-	return nil
 }
