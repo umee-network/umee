@@ -175,36 +175,36 @@ func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sd
 	}
 }
 
-// GetBorrowApy returns an sdk.Dec of an borrow APY
+// GetBorrowAPY returns an sdk.Dec of an borrow APY
 // returns sdk.ZeroDec if not found
-func (k Keeper) GetBorrowApy(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBorrowApyKey(denom)
+	key := types.CreateBorrowAPYKey(denom)
 
-	apyBytes := store.Get(key)
-	if apyBytes == nil {
+	bytesAPY := store.Get(key)
+	if bytesAPY == nil {
 		return sdk.ZeroDec()
 	}
 
-	var apy sdk.Dec
-	err := apy.Unmarshal(apyBytes)
+	var borrowAPY sdk.Dec
+	err := borrowAPY.Unmarshal(bytesAPY)
 	if err != nil {
 		panic(err)
 	}
 
-	return apy
+	return borrowAPY
 }
 
-// SetBorrowApy sets the borrow APY of an specific denom
-func (k Keeper) SetBorrowApy(ctx sdk.Context, denom string, apy sdk.Dec) error {
+// SetBorrowAPY sets the borrow APY of an specific denom
+func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBorrowApyKey(denom)
+	key := types.CreateBorrowAPYKey(denom)
 
-	apyBytes, err := apy.Marshal()
+	bytesAPY, err := borrowAPY.Marshal()
 	if err != nil {
 		return err
 	}
 
-	store.Set(key, apyBytes)
+	store.Set(key, bytesAPY)
 	return nil
 }

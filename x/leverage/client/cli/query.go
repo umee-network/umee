@@ -33,7 +33,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralSetting(),
 		GetCmdQueryExchangeRate(),
-		GetCmdQueryBorrowApy(),
+		GetCmdQueryBorrowAPY(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationTargets(),
 	)
@@ -273,9 +273,9 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowApy returns a CLI command handler to query for the
+// GetCmdQueryBorrowAPY returns a CLI command handler to query for the
 // borrow APY of a specific uToken.
-func GetCmdQueryBorrowApy() *cobra.Command {
+func GetCmdQueryBorrowAPY() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "borrow-apy [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -288,11 +288,11 @@ func GetCmdQueryBorrowApy() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryBorrowApyRequest{
+			req := &types.QueryBorrowAPYRequest{
 				Denom: args[0],
 			}
 
-			resp, err := queryClient.BorrowApy(cmd.Context(), req)
+			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

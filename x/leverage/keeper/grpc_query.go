@@ -94,10 +94,10 @@ func (q Querier) Borrowed(
 	return &types.QueryBorrowedResponse{Borrowed: sdk.NewCoins(token)}, nil
 }
 
-func (q Querier) BorrowApy(
+func (q Querier) BorrowAPY(
 	goCtx context.Context,
-	req *types.QueryBorrowApyRequest,
-) (*types.QueryBorrowApyResponse, error) {
+	req *types.QueryBorrowAPYRequest,
+) (*types.QueryBorrowAPYResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -110,9 +110,9 @@ func (q Querier) BorrowApy(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	borrowApy := q.Keeper.GetBorrowApy(ctx, req.Denom)
+	borrowAPY := q.Keeper.GetBorrowAPY(ctx, req.Denom)
 
-	return &types.QueryBorrowApyResponse{Apy: borrowApy}, nil
+	return &types.QueryBorrowAPYResponse{APY: borrowAPY}, nil
 }
 
 func (q Querier) ReserveAmount(

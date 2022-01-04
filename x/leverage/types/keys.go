@@ -154,9 +154,9 @@ func CreateBadDebtKeyNoAddress() []byte {
 	return key
 }
 
-// CreateBorrowApyKey returns a KVStore key for getting and setting the borrow APY for a given token.
-func CreateBorrowApyKey(tokenDenom string) []byte {
-	// borrowApyPrefix | denom | 0x00
+// CreateBorrowAPYKey returns a KVStore key for getting and setting the borrow APY for a given token.
+func CreateBorrowAPYKey(tokenDenom string) []byte {
+	// borrowAPYPrefix | denom | 0x00
 	var key []byte
 	key = append(key, KeyPrefixBorrowAPY...)
 	key = append(key, []byte(tokenDenom)...)

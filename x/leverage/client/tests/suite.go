@@ -640,11 +640,11 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	runTestQueries(s, testCases)
 }
 
-func (s *IntegrationTestSuite) TestQueryBorrowApy() {
-	testCasesBorrowApy := []testQuery{
+func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
+	testCasesBorrowAPY := []testQuery{
 		{
 			"not accepted Token denom",
-			cli.GetCmdQueryBorrowApy(),
+			cli.GetCmdQueryBorrowAPY(),
 			[]string{
 				"invalidToken",
 			},
@@ -654,7 +654,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowApy() {
 		},
 		{
 			"invalid denom",
-			cli.GetCmdQueryBorrowApy(),
+			cli.GetCmdQueryBorrowAPY(),
 			[]string{
 				"",
 			},
@@ -664,16 +664,16 @@ func (s *IntegrationTestSuite) TestQueryBorrowApy() {
 		},
 		{
 			"valid asset",
-			cli.GetCmdQueryBorrowApy(),
+			cli.GetCmdQueryBorrowAPY(),
 			[]string{
 				app.BondDenom,
 			},
 			false,
-			&types.QueryBorrowApyResponse{},
-			&types.QueryBorrowApyResponse{Apy: sdk.ZeroDec()},
+			&types.QueryBorrowAPYResponse{},
+			&types.QueryBorrowAPYResponse{APY: sdk.ZeroDec()},
 		},
 	}
-	runTestQueries(s, testCasesBorrowApy)
+	runTestQueries(s, testCasesBorrowAPY)
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {

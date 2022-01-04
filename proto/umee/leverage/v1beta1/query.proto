@@ -27,8 +27,8 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
   }
 
-  // BorrowApy queries for the borrow APY of a specified denomination.
-  rpc BorrowApy(QueryBorrowApyRequest) returns (QueryBorrowApyResponse) {
+  // BorrowAPY queries for the borrow APY of a specified denomination.
+  rpc BorrowAPY(QueryBorrowAPYRequest) returns (QueryBorrowAPYResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
   }
 
@@ -71,16 +71,16 @@ service Query {
 // gRPC service handler.
 message QueryRegisteredTokens {}
 
-// QueryBorrowApyRequest defines the request structure for the BorrowApy
+// QueryBorrowAPYRequest defines the request structure for the BorrowAPY
 // gRPC service handler.
-message QueryBorrowApyRequest {
+message QueryBorrowAPYRequest {
   string denom = 1;
 }
 
-// QueryBorrowApyResponse defines the response structure for the BorrowApy
+// QueryBorrowAPYResponse defines the response structure for the BorrowAPY
 // gRPC service handler.
-message QueryBorrowApyResponse {
-  string apy = 1
+message QueryBorrowAPYResponse {
+  string APY = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
