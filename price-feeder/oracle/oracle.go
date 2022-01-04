@@ -147,7 +147,7 @@ func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
-	requiredRates := []string{}
+	requiredRates := make(map[string]bool)
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
@@ -156,8 +156,8 @@ func (o *Oracle) SetPrices() error {
 		priceProvider := o.getOrSetProvider(providerName)
 
 		for _, pair := range currencyPairs {
-			if !Contains(requiredRates, pair.Base) {
-				requiredRates = append(requiredRates, pair.Base)
+			if _, ok := requiredRates[pair.Base]; !ok {
+				requiredRates[pair.Base] = true
 			}
 		}
 
@@ -193,16 +193,22 @@ func (o *Oracle) SetPrices() error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	reportedRates := []string{}
+	reportedRates := make(map[string]bool)
 	for _, providers := range providerPrices {
 		for base := range providers {
-			if !Contains(reportedRates, base) {
-				reportedRates = append(reportedRates, base)
+			if _, ok := reportedRates[base]; !ok {
+				reportedRates[base] = true
 			}
 		}
 	}
+
 	if len(reportedRates) != len(requiredRates) {
 		return fmt.Errorf("unable to get prices for all exchange rates")
+	}
+	for base := range requiredRates {
+		if _, ok := reportedRates[base]; !ok {
+			return fmt.Errorf("reported rates were not equal to required rates")
+		}
 	}
 
 	vwapPrices, err := ComputeVWAP(providerPrices)

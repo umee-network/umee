@@ -94,7 +94,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices())
+	ots.Require().Error(ots.oracle.SetPrices())
 	ots.Require().Empty(ots.oracle.GetPrices())
 
 	// use a mock provider to provide prices for the configured exchange pairs
@@ -121,7 +121,32 @@ func (ots *OracleTestSuite) TestPrices() {
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
-	ots.Require().Equal(prices["UMEE"], sdk.MustNewDecFromStr("3.710916056220858266"))
+	ots.Require().Equal(sdk.MustNewDecFromStr("3.710916056220858266"), prices["UMEE"])
+
+	// use one working provider and one provider with an incorrect exchange rate
+	ots.oracle.priceProviders = map[string]provider.Provider{
+		config.ProviderBinance: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDX": {
+					Price:  sdk.MustNewDecFromStr("3.72"),
+					Volume: sdk.MustNewDecFromStr("2396974.02000000"),
+				},
+			},
+		},
+		config.ProviderKraken: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDC": {
+					Price:  sdk.MustNewDecFromStr("3.70"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+	}
+
+	ots.Require().NoError(ots.oracle.SetPrices())
+	prices = ots.oracle.GetPrices()
+	ots.Require().Len(prices, 1)
+	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
 }
 
 func TestGenerateSalt(t *testing.T) {
@@ -134,7 +159,7 @@ func TestGenerateSalt(t *testing.T) {
 	require.NotEmpty(t, salt)
 }
 
-func TestGenreateExchangeRatesString(t *testing.T) {
+func TestGenerateExchangeRatesString(t *testing.T) {
 	testCases := map[string]struct {
 		input    map[string]sdk.Dec
 		expected string
