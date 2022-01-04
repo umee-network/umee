@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -21,6 +22,14 @@ type mockProvider struct {
 
 func (m mockProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]provider.TickerPrice, error) {
 	return m.prices, nil
+}
+
+type failingProvider struct {
+	prices map[string]provider.TickerPrice
+}
+
+func (m failingProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]provider.TickerPrice, error) {
+	return nil, fmt.Errorf("unable to get ticker prices")
 }
 
 type OracleTestSuite struct {
@@ -147,6 +156,31 @@ func (ots *OracleTestSuite) TestPrices() {
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
+
+	// use one working provider and one provider that fails
+	ots.oracle.priceProviders = map[string]provider.Provider{
+		config.ProviderBinance: failingProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDC": {
+					Price:  sdk.MustNewDecFromStr("3.72"),
+					Volume: sdk.MustNewDecFromStr("2396974.02000000"),
+				},
+			},
+		},
+		config.ProviderKraken: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDC": {
+					Price:  sdk.MustNewDecFromStr("3.71"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+	}
+
+	ots.Require().NoError(ots.oracle.SetPrices())
+	prices = ots.oracle.GetPrices()
+	ots.Require().Len(prices, 1)
+	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
 }
 
 func TestGenerateSalt(t *testing.T) {
