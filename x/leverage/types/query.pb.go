@@ -154,6 +154,91 @@ func (m *QueryBorrowAPYResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowAPYResponse proto.InternalMessageInfo
 
+// QueryLendApyRequest defines the request structure for the LendApy
+// gRPC service handler.
+type QueryLendApyRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryLendApyRequest) Reset()         { *m = QueryLendApyRequest{} }
+func (m *QueryLendApyRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryLendApyRequest) ProtoMessage()    {}
+func (*QueryLendApyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{3}
+}
+func (m *QueryLendApyRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLendApyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLendApyRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLendApyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLendApyRequest.Merge(m, src)
+}
+func (m *QueryLendApyRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLendApyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLendApyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLendApyRequest proto.InternalMessageInfo
+
+func (m *QueryLendApyRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryLendApyResponse defines the response structure for the LendApy
+// gRPC service handler.
+type QueryLendApyResponse struct {
+	Apy github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=apy,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"apy"`
+}
+
+func (m *QueryLendApyResponse) Reset()         { *m = QueryLendApyResponse{} }
+func (m *QueryLendApyResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryLendApyResponse) ProtoMessage()    {}
+func (*QueryLendApyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{4}
+}
+func (m *QueryLendApyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLendApyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLendApyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLendApyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLendApyResponse.Merge(m, src)
+}
+func (m *QueryLendApyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLendApyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLendApyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLendApyResponse proto.InternalMessageInfo
+
 // QueryRegisteredTokensResponse defines the response structure for the
 // RegisteredTokens gRPC service handler.
 type QueryRegisteredTokensResponse struct {
@@ -164,7 +249,7 @@ func (m *QueryRegisteredTokensResponse) Reset()         { *m = QueryRegisteredTo
 func (m *QueryRegisteredTokensResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryRegisteredTokensResponse) ProtoMessage()    {}
 func (*QueryRegisteredTokensResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{3}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{5}
 }
 func (m *QueryRegisteredTokensResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -209,7 +294,7 @@ func (m *QueryParamsRequest) Reset()         { *m = QueryParamsRequest{} }
 func (m *QueryParamsRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryParamsRequest) ProtoMessage()    {}
 func (*QueryParamsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{4}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{6}
 }
 func (m *QueryParamsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -248,7 +333,7 @@ func (m *QueryParamsResponse) Reset()         { *m = QueryParamsResponse{} }
 func (m *QueryParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryParamsResponse) ProtoMessage()    {}
 func (*QueryParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{5}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{7}
 }
 func (m *QueryParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -295,7 +380,7 @@ func (m *QueryBorrowedRequest) Reset()         { *m = QueryBorrowedRequest{} }
 func (m *QueryBorrowedRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowedRequest) ProtoMessage()    {}
 func (*QueryBorrowedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{6}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{8}
 }
 func (m *QueryBorrowedRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -348,7 +433,7 @@ func (m *QueryBorrowedResponse) Reset()         { *m = QueryBorrowedResponse{} }
 func (m *QueryBorrowedResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowedResponse) ProtoMessage()    {}
 func (*QueryBorrowedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{7}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{9}
 }
 func (m *QueryBorrowedResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -394,7 +479,7 @@ func (m *QueryReserveAmountRequest) Reset()         { *m = QueryReserveAmountReq
 func (m *QueryReserveAmountRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryReserveAmountRequest) ProtoMessage()    {}
 func (*QueryReserveAmountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{8}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{10}
 }
 func (m *QueryReserveAmountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -440,7 +525,7 @@ func (m *QueryReserveAmountResponse) Reset()         { *m = QueryReserveAmountRe
 func (m *QueryReserveAmountResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryReserveAmountResponse) ProtoMessage()    {}
 func (*QueryReserveAmountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{9}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{11}
 }
 func (m *QueryReserveAmountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -480,7 +565,7 @@ func (m *QueryCollateralSettingRequest) Reset()         { *m = QueryCollateralSe
 func (m *QueryCollateralSettingRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralSettingRequest) ProtoMessage()    {}
 func (*QueryCollateralSettingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{10}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{12}
 }
 func (m *QueryCollateralSettingRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -533,7 +618,7 @@ func (m *QueryCollateralSettingResponse) Reset()         { *m = QueryCollateralS
 func (m *QueryCollateralSettingResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralSettingResponse) ProtoMessage()    {}
 func (*QueryCollateralSettingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{11}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{13}
 }
 func (m *QueryCollateralSettingResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -580,7 +665,7 @@ func (m *QueryCollateralRequest) Reset()         { *m = QueryCollateralRequest{}
 func (m *QueryCollateralRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralRequest) ProtoMessage()    {}
 func (*QueryCollateralRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{12}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{14}
 }
 func (m *QueryCollateralRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -633,7 +718,7 @@ func (m *QueryCollateralResponse) Reset()         { *m = QueryCollateralResponse
 func (m *QueryCollateralResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralResponse) ProtoMessage()    {}
 func (*QueryCollateralResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{13}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{15}
 }
 func (m *QueryCollateralResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -679,7 +764,7 @@ func (m *QueryExchangeRateRequest) Reset()         { *m = QueryExchangeRateReque
 func (m *QueryExchangeRateRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryExchangeRateRequest) ProtoMessage()    {}
 func (*QueryExchangeRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{14}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{16}
 }
 func (m *QueryExchangeRateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -725,7 +810,7 @@ func (m *QueryExchangeRateResponse) Reset()         { *m = QueryExchangeRateResp
 func (m *QueryExchangeRateResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryExchangeRateResponse) ProtoMessage()    {}
 func (*QueryExchangeRateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{15}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{17}
 }
 func (m *QueryExchangeRateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -764,7 +849,7 @@ func (m *QueryBorrowLimitRequest) Reset()         { *m = QueryBorrowLimitRequest
 func (m *QueryBorrowLimitRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowLimitRequest) ProtoMessage()    {}
 func (*QueryBorrowLimitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{16}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{18}
 }
 func (m *QueryBorrowLimitRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -810,7 +895,7 @@ func (m *QueryBorrowLimitResponse) Reset()         { *m = QueryBorrowLimitRespon
 func (m *QueryBorrowLimitResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowLimitResponse) ProtoMessage()    {}
 func (*QueryBorrowLimitResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{17}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{19}
 }
 func (m *QueryBorrowLimitResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -848,7 +933,7 @@ func (m *QueryLiquidationTargetsRequest) Reset()         { *m = QueryLiquidation
 func (m *QueryLiquidationTargetsRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryLiquidationTargetsRequest) ProtoMessage()    {}
 func (*QueryLiquidationTargetsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{18}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{20}
 }
 func (m *QueryLiquidationTargetsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -887,7 +972,7 @@ func (m *QueryLiquidationTargetsResponse) Reset()         { *m = QueryLiquidatio
 func (m *QueryLiquidationTargetsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryLiquidationTargetsResponse) ProtoMessage()    {}
 func (*QueryLiquidationTargetsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{19}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{21}
 }
 func (m *QueryLiquidationTargetsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1100,6 +1185,15 @@ func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, 
 	return out, nil
 }
 
+func (c *queryClient) LendApy(ctx context.Context, in *QueryLendApyRequest, opts ...grpc.CallOption) (*QueryLendApyResponse, error) {
+	out := new(QueryLendApyResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/LendApy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error) {
 	out := new(QueryReserveAmountResponse)
 	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/ReserveAmount", in, out, opts...)
@@ -1200,6 +1294,9 @@ func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowe
 func (*UnimplementedQueryServer) BorrowAPY(ctx context.Context, req *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowAPY not implemented")
 }
+func (*UnimplementedQueryServer) LendApy(ctx context.Context, req *QueryLendApyRequest) (*QueryLendApyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LendApy not implemented")
+}
 func (*UnimplementedQueryServer) ReserveAmount(ctx context.Context, req *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReserveAmount not implemented")
 }
@@ -1291,6 +1388,24 @@ func _Query_BorrowAPY_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).BorrowAPY(ctx, req.(*QueryBorrowAPYRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_LendApy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryLendApyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).LendApy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/LendApy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).LendApy(ctx, req.(*QueryLendApyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1424,6 +1539,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_BorrowAPY_Handler,
 		},
 		{
+			MethodName: "LendApy",
+			Handler:    _Query_LendApy_Handler,
+		},
+		{
 			MethodName: "ReserveAmount",
 			Handler:    _Query_ReserveAmount_Handler,
 		},
@@ -1529,6 +1648,69 @@ func (m *QueryBorrowAPYResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		size := m.APY.Size()
 		i -= size
 		if _, err := m.APY.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLendApyRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLendApyRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLendApyRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLendApyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLendApyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLendApyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.Apy.Size()
+		i -= size
+		if _, err := m.Apy.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
@@ -2137,6 +2319,30 @@ func (m *QueryBorrowAPYResponse) Size() (n int) {
 	return n
 }
 
+func (m *QueryLendApyRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryLendApyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Apy.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
 func (m *QueryRegisteredTokensResponse) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2559,6 +2765,172 @@ func (m *QueryBorrowAPYResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLendApyRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLendApyRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLendApyRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLendApyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLendApyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLendApyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Apy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Apy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
