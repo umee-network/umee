@@ -258,7 +258,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 
 				validator, exist := h.k.StakingKeeper.GetValidator(ctx, addr)
 				consAddr, _ := validator.GetConsAddr()
-				valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, valConsAddr)
+				valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, consAddr)
 
 				// Only slash validators who joined after valset is created and they are unbonding and UNBOND_SLASHING_WINDOW didn't passed
 				if exist && valSigningInfo.StartHeight < int64(vs.Height) && validator.IsUnbonding() && vs.Height < uint64(validator.UnbondingHeight)+params.UnbondSlashingValsetsWindow {
