@@ -164,8 +164,8 @@ func CreateBorrowAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateLendApyKey returns a KVStore key for getting and setting the lend APY for a given token.
-func CreateLendApyKey(tokenDenom string) []byte {
+// CreateLendAPYKey returns a KVStore key for getting and setting the lend APY for a given token.
+func CreateLendAPYKey(tokenDenom string) []byte {
 	// lendApyPrefix | denom | 0x00
 	var key []byte
 	key = append(key, KeyPrefixLendApy...)
