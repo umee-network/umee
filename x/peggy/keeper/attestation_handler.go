@@ -79,7 +79,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 			sdk.NewEvent(
 				types.EventTypeAttestation,
 				sdk.NewAttribute(types.AttributeKeySendToCosmosAmount, claim.Amount.String()),
-				sdk.NewAttribute(types.AttributeKeySendToCosmosNonce, strconv.Itoa(int(claim.GetEventNonce()))),
+				sdk.NewAttribute(types.AttributeKeySendToCosmosEventNonce, strconv.Itoa(int(claim.GetEventNonce()))),
 				sdk.NewAttribute(types.AttributeKeySendToCosmosToken, claim.TokenContract),
 			),
 		)
@@ -91,7 +91,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeAttestation,
-				sdk.NewAttribute(types.AttributeKeyBatchSendToEthNonce, strconv.Itoa(int(claim.BatchNonce))),
+				sdk.NewAttribute(types.AttributeKeyBatchNonce, strconv.Itoa(int(claim.BatchNonce))),
 			),
 		)
 		return nil
@@ -108,7 +108,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 			sdk.NewEvent(
 				types.EventTypeAttestation,
 				sdk.NewAttribute(types.AttributeKeyERC20DeployedToken, claim.TokenContract),
-				sdk.NewAttribute(types.AttributeKeyERC20DeployedNonce, strconv.Itoa(int(claim.GetEventNonce()))),
+				sdk.NewAttribute(types.AttributeKeyERC20DeployedEventNonce, strconv.Itoa(int(claim.GetEventNonce()))),
 			),
 		)
 
@@ -128,7 +128,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, claim types.EthereumClaim) e
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeAttestation,
-				sdk.NewAttribute(types.AttributeKeyValsetUpdatedNonce, strconv.Itoa(int(claim.GetEventNonce()))),
+				sdk.NewAttribute(types.AttributeKeyValsetUpdatedEventNonce, strconv.Itoa(int(claim.GetEventNonce()))),
 			),
 		)
 

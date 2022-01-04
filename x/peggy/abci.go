@@ -3,6 +3,7 @@ package peggy
 import (
 	"fmt"
 	"sort"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -229,8 +230,9 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 						)
 						ctx.EventManager().EmitEvent(
 							sdk.NewEvent(
-								sdk.EventTypeMessage,
-								sdk.NewAttribute("ValsetSignatureSlashing", consAddr.String()),
+								types.EventTypeSlashing,
+								sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
+								sdk.NewAttribute(types.AttributeKeyValsetNonce, strconv.FormatUint(vs.Nonce, 10)),
 							),
 						)
 
@@ -256,7 +258,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 				}
 
 				validator, exist := h.k.StakingKeeper.GetValidator(ctx, addr)
-				valConsAddr, _ := validator.GetConsAddr()
+				consAddr, _ := validator.GetConsAddr()
 				valSigningInfo, exist := h.k.SlashingKeeper.GetValidatorSigningInfo(ctx, valConsAddr)
 
 				// Only slash validators who joined after valset is created and they are unbonding and UNBOND_SLASHING_WINDOW didn't passed
@@ -281,16 +283,17 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 						}
 
 						consPower := validator.ConsensusPower(h.k.StakingKeeper.PowerReduction(ctx))
-						h.k.StakingKeeper.Slash(ctx, valConsAddr, ctx.BlockHeight(), consPower, params.SlashFractionValset)
+						h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionValset)
 						ctx.EventManager().EmitEvent(
 							sdk.NewEvent(
-								sdk.EventTypeMessage,
-								sdk.NewAttribute("ValsetSignatureSlashing", valConsAddr.String()),
+								types.EventTypeSlashing,
+								sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
+								sdk.NewAttribute(types.AttributeKeyValsetNonce, strconv.FormatUint(vs.Nonce, 10)),
 							),
 						)
 
 						if !validator.IsJailed() {
-							h.k.StakingKeeper.Jail(ctx, valConsAddr)
+							h.k.StakingKeeper.Jail(ctx, consAddr)
 						}
 					}
 				}
@@ -366,8 +369,9 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 					h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionBatch)
 					ctx.EventManager().EmitEvent(
 						sdk.NewEvent(
-							sdk.EventTypeMessage,
-							sdk.NewAttribute("BatchSignatureSlashing", consAddr.String()),
+							types.EventTypeSlashing,
+							sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
+							sdk.NewAttribute(types.AttributeKeyBatchNonce, strconv.FormatUint(batch.BatchNonce, 10)),
 						),
 					)
 					h.k.StakingKeeper.Jail(ctx, consAddr)
