@@ -165,7 +165,7 @@ func (o *Oracle) SetPrices() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
 			if err != nil {
 				o.logger.Debug().Msg("getting ticker price failed")
-				return nil
+				return err
 			}
 
 			// flatten and collect prices based on the base currency per provider
@@ -180,7 +180,7 @@ func (o *Oracle) SetPrices() error {
 					providerPrices[providerName][cp.Base] = tp
 				} else {
 					mtx.Unlock()
-					return fmt.Errorf("finding ticker price via provider failed")
+					return fmt.Errorf("failed to find exchange rate in provider response")
 				}
 			}
 			mtx.Unlock()
@@ -190,8 +190,7 @@ func (o *Oracle) SetPrices() error {
 	}
 
 	if err := g.Wait(); err != nil {
-		o.logger.Debug().Err(err)
-		return nil
+		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
 	reportedRates := []string{}
