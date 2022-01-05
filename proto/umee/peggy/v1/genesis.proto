@@ -107,6 +107,9 @@ message Params {
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
   uint64                   bridge_contract_start_height = 16;
   cosmos.base.v1beta1.Coin valset_reward                = 17 [(gogoproto.nullable) = false];
+  // ethereum_deny_list defines addresses that are forbidden from depositing or
+  // withdrawing from Ethereum to the bridge.
+  repeated string ethereum_deny_list = 18;
 }
 
 // GenesisState struct
