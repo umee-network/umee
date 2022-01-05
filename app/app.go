@@ -374,18 +374,6 @@ func New(
 	// 	app.BankKeeper,
 	// )
 
-	// register the staking hooks
-	//
-	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
-	// these hooks.
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
-		),
-	)
-
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibchost.StoreKey],
@@ -457,7 +445,19 @@ func New(
 		govRouter,
 	)
 
-	var skipGenesisInvariants = cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+	// register the staking hooks
+	//
+	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
+	// these hooks.
+	app.StakingKeeper = *stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
+		),
+	)
+
+	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
