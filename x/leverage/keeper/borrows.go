@@ -200,7 +200,7 @@ func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) e
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateBorrowAPYKey(denom)
 
-	bytesAPY, err := borrowAPY.Marshal()
+	bz, err := borrowAPY.Marshal()
 	if err != nil {
 		return err
 	}
