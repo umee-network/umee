@@ -10,7 +10,7 @@ import (
 // returns sdk.ZeroDec if not found
 func (k Keeper) GetLendApy(ctx sdk.Context, denom string) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLendApyKey(denom)
+	key := types.CreateLendAPYKey(denom)
 
 	apyBytes := store.Get(key)
 	if apyBytes == nil {
@@ -29,7 +29,7 @@ func (k Keeper) GetLendApy(ctx sdk.Context, denom string) sdk.Dec {
 // SetLendApy sets the lend APY of an specific denom
 func (k Keeper) SetLendApy(ctx sdk.Context, denom string, apy sdk.Dec) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLendApyKey(denom)
+	key := types.CreateLendAPYKey(denom)
 
 	apyBytes, err := apy.Marshal()
 	if err != nil {
