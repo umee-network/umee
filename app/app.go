@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
+	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -91,9 +94,6 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	"github.com/umee-network/umee/x/peggy"
-	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 	// leverageclient "github.com/umee-network/umee/x/leverage/client"
 	// leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	// "github.com/umee-network/umee/x/leverage"
@@ -147,7 +147,7 @@ var (
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		// leverage.AppModuleBasic{},
-		peggy.AppModuleBasic{},
+		gravity.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -160,7 +160,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -213,7 +213,7 @@ type UmeeApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	// LeverageKeeper   leveragekeeper.Keeper
-	PeggyKeeper peggykeeper.Keeper
+	GravityKeeper gravitykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -253,7 +253,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, peggytypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, gravitytypes.StoreKey,
 		// leveragetypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -382,7 +382,7 @@ func New(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
-			app.PeggyKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
 		),
 	)
 
@@ -394,13 +394,17 @@ func New(
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
 	)
-	app.PeggyKeeper = peggykeeper.NewKeeper(
-		appCodec, keys[peggytypes.StoreKey],
-		app.GetSubspace(peggytypes.ModuleName),
-		app.AccountKeeper,
-		app.StakingKeeper,
-		app.BankKeeper,
-		app.SlashingKeeper,
+
+	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
+	app.GravityKeeper = gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		&baseBankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -482,7 +486,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		// leverage.NewAppModule(appCodec, app.LeverageKeeper),
-		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
+		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -500,7 +504,6 @@ func New(
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
 		// leveragetypes.ModuleName,
-		peggytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -508,7 +511,7 @@ func New(
 		govtypes.ModuleName,
 		// leveragetypes.ModuleName,
 		stakingtypes.ModuleName,
-		peggytypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -534,7 +537,7 @@ func New(
 		authz.ModuleName,
 		feegrant.ModuleName,
 		// leveragetypes.ModuleName,
-		peggytypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -752,7 +755,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(leveragetypes.ModuleName)
-	paramsKeeper.Subspace(peggytypes.ModuleName)
+	paramsKeeper.Subspace(gravitytypes.ModuleName)
 
 	return paramsKeeper
 }
