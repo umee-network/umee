@@ -196,6 +196,10 @@ func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 
 // SetBorrowAPY sets the borrow APY of an specific denom
 func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) error {
+	if !k.IsAcceptedToken(ctx, denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	}
+
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateBorrowAPYKey(denom)
 
