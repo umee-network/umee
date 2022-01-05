@@ -31,11 +31,11 @@ func (k Keeper) SetLendAPY(ctx sdk.Context, denom string, lendAPY sdk.Dec) error
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateLendAPYKey(denom)
 
-	bytesAPY, err := lendAPY.Marshal()
+	bz, err := lendAPY.Marshal()
 	if err != nil {
 		return err
 	}
 
-	store.Set(key, bytesAPY)
+	store.Set(key, bz)
 	return nil
 }

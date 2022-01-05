@@ -30,7 +30,7 @@ var (
 	KeyPrefixExchangeRate      = []byte{0x07}
 	KeyPrefixBadDebt           = []byte{0x08}
 	KeyPrefixBorrowAPY         = []byte{0x09}
-	KeyPrefixLendAPY           = []byte{0x10}
+	KeyPrefixLendAPY           = []byte{0x0A}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
