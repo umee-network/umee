@@ -174,3 +174,39 @@ func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sd
 		store.Delete(key)
 	}
 }
+
+// GetBorrowAPY returns an sdk.Dec of an borrow APY
+// returns sdk.ZeroDec if not found
+func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateBorrowAPYKey(denom)
+
+	bz := store.Get(key)
+	if bz == nil {
+		return sdk.ZeroDec()
+	}
+
+	var borrowAPY sdk.Dec
+	if err := borrowAPY.Unmarshal(bz); err != nil {
+		panic(err)
+	}
+
+	return borrowAPY
+}
+
+// SetBorrowAPY sets the borrow APY of an specific denom
+func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) error {
+	if !k.IsAcceptedToken(ctx, denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	}
+
+	bz, err := borrowAPY.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateBorrowAPYKey(denom)
+	store.Set(key, bz)
+	return nil
+}
