@@ -200,14 +200,13 @@ func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) e
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBorrowAPYKey(denom)
-
 	bz, err := borrowAPY.Marshal()
 	if err != nil {
 		return err
 	}
 
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateBorrowAPYKey(denom)
 	store.Set(key, bz)
 	return nil
 }
