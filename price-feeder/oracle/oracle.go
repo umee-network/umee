@@ -281,7 +281,7 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 	for _, denom := range params.AcceptList {
 		symbol := strings.ToUpper(denom.SymbolDenom)
 		if _, ok := o.prices[symbol]; !ok {
-			o.logger.Warn().Msg("price missing for required denom " + symbol)
+			o.logger.Warn().Str("denom", symbol).Msg("price missing for required denom")
 		}
 	}
 }
