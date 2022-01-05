@@ -181,14 +181,13 @@ func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateBorrowAPYKey(denom)
 
-	bytesAPY := store.Get(key)
-	if bytesAPY == nil {
+	bz := store.Get(key)
+	if bz == nil {
 		return sdk.ZeroDec()
 	}
 
 	var borrowAPY sdk.Dec
-	err := borrowAPY.Unmarshal(bytesAPY)
-	if err != nil {
+	if err := borrowAPY.Unmarshal(bz); err != nil {
 		panic(err)
 	}
 
@@ -205,6 +204,6 @@ func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) e
 		return err
 	}
 
-	store.Set(key, bytesAPY)
+	store.Set(key, bz)
 	return nil
 }
