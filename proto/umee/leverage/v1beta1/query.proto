@@ -32,8 +32,8 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
   }
 
-  // LendApy queries for the lend APY of a specified denomination.
-  rpc LendApy(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
+  // LendAPY queries for the lend APY of a specified denomination.
+  rpc LendAPY(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
   }
 
