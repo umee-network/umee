@@ -100,7 +100,7 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 	defer iter.Close()
 
 	// Calculate exchange rates for all denoms which have an exchange rate stored
-	// in the keeper. If a token is registered but it's exchange rate is never
+	// in the keeper. If a token is registered but its exchange rate is never
 	// initialized (set to 1.0), this iterator will fail to detect it, and its
 	// exchange rate will remain undefined.
 	for ; iter.Valid(); iter.Next() {

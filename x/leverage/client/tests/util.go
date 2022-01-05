@@ -15,6 +15,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -135,4 +136,53 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 		time.Second,
 		"proposal %d (%s) failed to pass", proposalID, content.Title,
 	)
+}
+
+// updateCollateralWeight modifies the collateral weight of a registered token identified by baseDenom.
+// Also returns its previous collateral weight, which is useful when undoing changes.
+func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) sdk.Dec {
+	val := s.network.Validators[0]
+	clientCtx := s.network.Validators[0].ClientCtx
+
+	queryFlags := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
+	s.Require().NoError(err)
+
+	resp := &types.QueryRegisteredTokensResponse{}
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
+
+	newTokens := resp.GetRegistry()
+	foundToken := false
+	oldCollateralWeight := sdk.ZeroDec()
+	for _, token := range newTokens {
+		if token.BaseDenom == baseDenom {
+			oldCollateralWeight = token.CollateralWeight
+			token.CollateralWeight = collateralWeight
+			foundToken = true
+		}
+	}
+
+	s.Require().True(foundToken, "token to update was present")
+
+	s.UpdateRegistry(
+		clientCtx,
+		types.NewUpdateRegistryProposal(
+			"test title",
+			"test description",
+			newTokens,
+		),
+		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
+		[]string{
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
+		}...,
+	)
+
+	return oldCollateralWeight
 }
