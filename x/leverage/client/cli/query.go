@@ -274,7 +274,7 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 }
 
 // GetCmdQueryBorrowAPY returns a CLI command handler to query for the
-// borrow APY of a specific uToken.
+// borrow APY of a specific token.
 func GetCmdQueryBorrowAPY() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "borrow-apy [denom]",
