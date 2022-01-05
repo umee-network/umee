@@ -223,7 +223,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin("uumee", 50),
+					sdk.NewInt64Coin(app.BondDenom, 50),
 				),
 			},
 		},
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin("uumee", 50),
+					sdk.NewInt64Coin(app.BondDenom, 50),
 				),
 			},
 		},
@@ -297,7 +297,7 @@ func (s *IntegrationTestSuite) TestQueryReserveAmount() {
 			"query reserve amount",
 			cli.GetCmdQueryReserveAmount(),
 			[]string{
-				"uumee",
+				app.BondDenom,
 			},
 			false,
 			&types.QueryReserveAmountResponse{},
@@ -513,7 +513,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 			"query exchange rate",
 			cli.GetCmdQueryExchangeRate(),
 			[]string{
-				"uumee",
+				app.BondDenom,
 			},
 			false,
 			&types.QueryExchangeRateResponse{},
@@ -641,6 +641,42 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	}
 
 	runTestQueries(s, testCase)
+}
+
+func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
+	testCasesBorrowAPY := []testQuery{
+		{
+			"not accepted Token denom",
+			cli.GetCmdQueryBorrowAPY(),
+			[]string{
+				"invalidToken",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryBorrowAPY(),
+			[]string{
+				"",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"valid asset",
+			cli.GetCmdQueryBorrowAPY(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryBorrowAPYResponse{},
+			&types.QueryBorrowAPYResponse{APY: sdk.ZeroDec()},
+		},
+	}
+	runTestQueries(s, testCasesBorrowAPY)
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {

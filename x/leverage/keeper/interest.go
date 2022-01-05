@@ -97,6 +97,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 		reserveFactors[coin.Denom] = reserveFactor
 		interestToApply[coin.Denom] = derivedRate.Mul(yearsElapsed)
+
+		if err := k.SetBorrowAPY(ctx, coin.Denom, derivedRate); err != nil {
+			return err
+		}
 	}
 
 	newReserves := sdk.NewCoins()
