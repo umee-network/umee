@@ -1,6 +1,8 @@
 package oracle
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
@@ -10,7 +12,7 @@ import (
 // of provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref: https://en.wikipedia.org/wiki/Volume-weighted_average_price
-func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) map[string]sdk.Dec {
+func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]sdk.Dec, error) {
 	var (
 		vwap      = make(map[string]sdk.Dec)
 		volumeSum = make(map[string]sdk.Dec)
@@ -35,8 +37,11 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) map[string]s
 
 	// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
 	for base, p := range vwap {
+		if volumeSum[base] == sdk.ZeroDec() {
+			return nil, fmt.Errorf("unable to divide by zero")
+		}
 		vwap[base] = p.Quo(volumeSum[base])
 	}
 
-	return vwap
+	return vwap, nil
 }

@@ -147,12 +147,19 @@ func (o *Oracle) SetPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
+	requiredRates := make(map[string]struct{})
 
 	for providerName, currencyPairs := range o.providerPairs {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
 		priceProvider := o.getOrSetProvider(providerName)
+
+		for _, pair := range currencyPairs {
+			if _, ok := requiredRates[pair.Base]; !ok {
+				requiredRates[pair.Base] = struct{}{}
+			}
+		}
 
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
@@ -170,6 +177,9 @@ func (o *Oracle) SetPrices() error {
 				}
 				if tp, ok := prices[cp.String()]; ok {
 					providerPrices[providerName][cp.Base] = tp
+				} else {
+					mtx.Unlock()
+					return fmt.Errorf("failed to find exchange rate in provider response")
 				}
 			}
 			mtx.Unlock()
@@ -179,10 +189,33 @@ func (o *Oracle) SetPrices() error {
 	}
 
 	if err := g.Wait(); err != nil {
+		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
+	}
+
+	reportedRates := make(map[string]struct{})
+	for _, providers := range providerPrices {
+		for base := range providers {
+			if _, ok := reportedRates[base]; !ok {
+				reportedRates[base] = struct{}{}
+			}
+		}
+	}
+
+	if len(reportedRates) != len(requiredRates) {
+		return fmt.Errorf("unable to get prices for all exchange rates")
+	}
+	for base := range requiredRates {
+		if _, ok := reportedRates[base]; !ok {
+			return fmt.Errorf("reported rates were not equal to required rates")
+		}
+	}
+
+	vwapPrices, err := ComputeVWAP(providerPrices)
+	if err != nil {
 		return err
 	}
 
-	o.prices = ComputeVWAP(providerPrices)
+	o.prices = vwapPrices
 
 	return nil
 }

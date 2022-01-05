@@ -23,7 +23,11 @@ func TestParseExchangeRateTuples(t *testing.T) {
 	_, err = ParseExchangeRateTuples(invalidCoinsWithValid)
 	require.Error(t, err)
 
-	abstainCoinsWithValid := "uumee:0.0,uatom:123.1"
-	_, err = ParseExchangeRateTuples(abstainCoinsWithValid)
-	require.NoError(t, err)
+	zeroCoinsWithValid := "uumee:0.0,uatom:123.1"
+	_, err = ParseExchangeRateTuples(zeroCoinsWithValid)
+	require.Error(t, err)
+
+	negativeCoinsWithValid := "uumee:-1234.5,uatom:123.1"
+	_, err = ParseExchangeRateTuples(negativeCoinsWithValid)
+	require.Error(t, err)
 }
