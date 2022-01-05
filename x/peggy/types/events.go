@@ -1,10 +1,11 @@
 package types
 
 const (
-	EventTypeObservation   = "observation"
-	EventTypeOutgoingBatch = "outgoing_batch"
-	EventTypeAttestation   = "attestation"
-	EventTypeSlashing      = "slashing"
+	EventTypeObservation    = "observation"
+	EventTypeOutgoingBatch  = "outgoing_batch"
+	EventTypeAttestation    = "attestation"
+	EventTypeValsetSlashing = "valset_slashing"
+	EventTypeBatchSlashing  = "batch_slashing"
 
 	EventTypeMultisigUpdateRequest    = "multisig_update_request"
 	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"

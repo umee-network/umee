@@ -229,7 +229,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 						)
 						ctx.EventManager().EmitEvent(
 							sdk.NewEvent(
-								types.EventTypeSlashing,
+								types.EventTypeValsetSlashing,
 								sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
 								sdk.NewAttribute(types.AttributeKeyValsetNonce, strconv.FormatUint(vs.Nonce, 10)),
 							),
@@ -285,7 +285,7 @@ func (h *BlockHandler) valsetSlashing(ctx sdk.Context, params *types.Params) {
 						h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionValset)
 						ctx.EventManager().EmitEvent(
 							sdk.NewEvent(
-								types.EventTypeSlashing,
+								types.EventTypeValsetSlashing,
 								sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
 								sdk.NewAttribute(types.AttributeKeyValsetNonce, strconv.FormatUint(vs.Nonce, 10)),
 							),
@@ -368,7 +368,7 @@ func (h *BlockHandler) batchSlashing(ctx sdk.Context, params *types.Params) {
 					h.k.StakingKeeper.Slash(ctx, consAddr, ctx.BlockHeight(), consPower, params.SlashFractionBatch)
 					ctx.EventManager().EmitEvent(
 						sdk.NewEvent(
-							types.EventTypeSlashing,
+							types.EventTypeBatchSlashing,
 							sdk.NewAttribute(types.AttributeKeyConsensusAddress, consAddr.String()),
 							sdk.NewAttribute(types.AttributeKeyBatchNonce, strconv.FormatUint(batch.BatchNonce, 10)),
 						),
