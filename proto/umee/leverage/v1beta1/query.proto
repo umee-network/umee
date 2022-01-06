@@ -37,7 +37,7 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
   }
 
-  // MarketSize queries for the Market Size of a specified denomination.
+  // MarketSize queries for the Market Size in USD of a specified denomination.
   rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/market_size";
   }
@@ -107,13 +107,13 @@ message QueryLendAPYResponse {
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
-// QueryMarketSizeRequest defines the request structure for the Market Size
+// QueryMarketSizeRequest defines the request structure for the MarketSize
 // gRPC service handler.
 message QueryMarketSizeRequest {
   string denom = 1;
 }
 
-// QueryMarketSizeResponse defines the response structure for the Market Size in USD
+// QueryMarketSizeResponse defines the response structure for the MarketSize
 // gRPC service handler.
 message QueryMarketSizeResponse {
   string marketSizeUSD = 1
