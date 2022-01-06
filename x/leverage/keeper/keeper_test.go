@@ -719,14 +719,6 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	rate, err := s.app.LeverageKeeper.GetExchangeRate(s.ctx, umeeapp.BondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("2.7"), rate)
-
-	// expected market size
-	// uToken supply starts at 1000
-	// = (initialuTokenSupply + total borrows + reserves)
-	// = 1000 + 2000 + 300
-	// = 3300
-	marketSize := s.app.LeverageKeeper.GetMarketSize(s.ctx, umeeapp.BondDenom)
-	s.Require().Equal(sdk.NewDec(1000000000+borrowAmount+reserveAmount), marketSize)
 }
 
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {

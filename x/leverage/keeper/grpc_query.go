@@ -152,8 +152,17 @@ func (q Querier) MarketSize(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	marketSize := q.Keeper.GetMarketSize(ctx, req.Denom)
-	return &types.QueryMarketSizeResponse{MarketSize: marketSize}, nil
+	uDenom := q.Keeper.FromTokenToUTokenDenom(ctx, req.Denom)
+	marketSizeCoin, err := q.Keeper.ExchangeUToken(ctx, q.Keeper.TotalUTokenSupply(ctx, uDenom))
+	if err != nil {
+		return nil, err
+	}
+
+	marketSizeUSD, err := q.Keeper.TokenValue(ctx, marketSizeCoin)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryMarketSizeResponse{MarketSizeUSD: marketSizeUSD}, nil
 }
 
 func (q Querier) ReserveAmount(

@@ -742,7 +742,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSize: sdk.ZeroDec()},
+			&types.QueryMarketSizeResponse{MarketSizeUSD: sdk.ZeroDec()},
 		},
 	}
 	runTestQueries(s, testCasesMarketSize)

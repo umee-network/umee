@@ -147,38 +147,3 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 	// True is returned on full repayment
 	return newBorrowed.IsZero(), nil
 }
-
-// GetMarketSize returns an sdk.Dec of token market size returns sdk.ZeroDec if not found.
-func (k Keeper) GetMarketSize(ctx sdk.Context, denom string) sdk.Dec {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateMarketSizeKey(denom)
-
-	bz := store.Get(key)
-	if bz == nil {
-		return sdk.ZeroDec()
-	}
-
-	var marketSize sdk.Dec
-	if err := marketSize.Unmarshal(bz); err != nil {
-		panic(err)
-	}
-
-	return marketSize
-}
-
-// SetMarketSize sets the market size of an specific denom.
-func (k Keeper) SetMarketSize(ctx sdk.Context, denom string, marketSize sdk.Dec) error {
-	if !k.IsAcceptedToken(ctx, denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
-	}
-
-	bz, err := marketSize.Marshal()
-	if err != nil {
-		return err
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateMarketSizeKey(denom)
-	store.Set(key, bz)
-	return nil
-}
