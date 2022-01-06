@@ -32,6 +32,11 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
   }
 
+  // LendAPY queries for the lend APY of a specified denomination.
+  rpc LendAPY(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
+  }
+
   // ReserveAmount queries for the amount reserved of a specified denomination.
   // If the token is not valid, the reserved amount is zero.
   rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
@@ -80,6 +85,19 @@ message QueryBorrowAPYRequest {
 // QueryBorrowAPYResponse defines the response structure for the BorrowAPY
 // gRPC service handler.
 message QueryBorrowAPYResponse {
+  string APY = 1
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryLendAPYRequest defines the request structure for the LendAPY
+// gRPC service handler.
+message QueryLendAPYRequest {
+  string denom = 1;
+}
+
+// QueryLendAPYResponse defines the response structure for the LendAPY
+// gRPC service handler.
+message QueryLendAPYResponse {
   string APY = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
