@@ -15,8 +15,8 @@ The `Operator` field contains the operator address of the validator (prefixed `u
 ```go
 // MsgDelegateFeedConsent - struct for delegating oracle voting rights to another address.
 type MsgDelegateFeedConsent struct {
-	Operator	sdk.ValAddress
-	Delegate	sdk.AccAddress
+    Operator    sdk.ValAddress
+    Delegate    sdk.AccAddress
 }
 ```
 
@@ -30,9 +30,9 @@ You can use the `GetAggregateVoteHash()` function to help encode this hash. Note
 // The purpose of aggregate prevote is to hide vote exchange rates with a hash
 // which is formatted as hex string in SHA256("{salt}:{exchange rate}{denom},...,{exchange rate}{denom}:{voter}")
 type MsgAggregateExchangeRatePrevote struct {
-	Hash		AggregateVoteHash
-	Feeder		sdk.AccAddress
-	Validator	sdk.ValAddress
+    Hash        AggregateVoteHash
+    Feeder      sdk.AccAddress
+    Validator   sdk.ValAddress
 }
 ```
 
@@ -43,9 +43,9 @@ The `MsgAggregateExchangeRateVote` contains the actual exchange rates vote. The 
 ```go
 // MsgAggregateExchangeRateVote - struct for voting on the exchange rates of various assets.
 type MsgAggregateExchangeRateVote struct {
-	Salt			string
-	ExchangeRates	string
-	Feeder			sdk.AccAddress
-	Validator		sdk.ValAddress
+    Salt            string
+    ExchangeRates   string
+    Feeder          sdk.AccAddress
+    Validator       sdk.ValAddress
 }
 ```

@@ -14,8 +14,8 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
     Let `P_t` be the current time interval of duration defined by `VotePeriod` (currently set to 30 seconds, or 5 blocks) during which validators must submit two messages:
 
-    * A `MsgAggregateExchangeRatePrevote`, containing the SHA256 hash of the exchange rates of multiple denominations. A prevote must be submitted for all different denominations specified in `AcceptList`.
-    * A `MsgAggregateExchangeRateVote`, containing the salt used to create the hash for the aggregate prevote submitted in the previous interval `P_t-1`.
+  * A `MsgAggregateExchangeRatePrevote`, containing the SHA256 hash of the exchange rates of multiple denominations. A prevote must be submitted for all different denominations specified in `AcceptList`.
+  * A `MsgAggregateExchangeRateVote`, containing the salt used to create the hash for the aggregate prevote submitted in the previous interval `P_t-1`.
 
 * Vote Tally
 
