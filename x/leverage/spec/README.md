@@ -1,13 +1,3 @@
-### TODO:
-- Cover governance
-- Discuss interactions with `bank`, `ibctransfer` and `peggy`. Specifically the implications of transferring tokens/utokens/collateral at various points, and interactions with `Module Accounts`
-- a `Keeper` section?
-- invariants
-- "Lending and borrowing" section
-    - lend / withdraw for uTokens
-    - mark as collateral (moved to module to can no longer transfer it)
-    - borrow / repay
-
 # Leverage Module
 
 ## Abstract
@@ -34,6 +24,7 @@ TODO: Summary (or even business-level info) here.
         - [Borrow APY](01_overview.md#Borrow-APY)
         - [Lending APY](01_overview.md#Lending-APY)
         - [Close Factor](01_overview.md#Close-Factor)
+        - [Market Size](01_overview.md#Market-Size)
 2. **[State](02_state.md)**
     - [Token Registry](02_state.md#Token-Registry)
     - [Borrows](02_state.md#Borrows)
@@ -66,3 +57,13 @@ TODO: Summary (or even business-level info) here.
         - [x/Bank](07_interactions#Bank)
         - [x/IBCtransfer](07_interactions#IBC-Transfer)
         - [x/Peggy](07_interactions#Peggy)
+
+### TODO
+- Cover governance
+- Discuss interactions with `bank`, `ibctransfer` and `peggy`. Specifically the implications of transferring tokens/utokens/collateral at various points, and interactions with `Module Accounts`
+- a `Keeper` section
+- invariants
+- "Lending and borrowing" section
+  - lend / withdraw for uTokens
+  - mark as collateral (moved to module to can no longer transfer it)
+  - borrow / repay
