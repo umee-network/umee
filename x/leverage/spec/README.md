@@ -18,22 +18,22 @@ TODO: Summary (or even business-level info) here.
 
 ## Contents
 
-1. **[Theory](01_theory.md)**
-    - [Accepted Assets](01_theory.md#Accepted-Assets)
-        - [Token Parameters](01_theory.md#Token-Parameters)
-        - [uTokens](01_theory.md#uTokens)
-    - [Lending and Borrowing](01_theory.md#Lending-and-Borrowing)
-    - [Interest Rate Model](01_theory.md#Interest-Rate-Model)
-    - [Reserves](01_theory.md#Reserves)
-    - [Liquidation](01_theory.md#Liquidation)
-    - [Bad Debt](01_theory.md#Bad-Debt)
+1. **[Overview](01_overview.md)**
+    - [Accepted Assets](01_overview.md#Accepted-Assets)
+        - [Token Parameters](01_overview.md#Token-Parameters)
+        - [uTokens](01_overview.md#uTokens)
+    - [Lending and Borrowing](01_overview.md#Lending-and-Borrowing)
+    - [Interest Rate Model](01_overview.md#Interest-Rate-Model)
+    - [Reserves](01_overview.md#Reserves)
+    - [Liquidation](01_overview.md#Liquidation)
+    - [Bad Debt](01_overview.md#Bad-Debt)
     - Important Derived Values:
-        - [uToken Exchange Rate](01_theory.md#Exchange-Rate)
-        - [Borrow Utilization](01_theory.md#Borrow-Utilization)
-        - [Borrow Limit](01_theory.md#Borrow-Limit)
-        - [Borrow APY](01_theory.md#Borrow-APY)
-        - [Lending APY](01_theory.md#Lending-APY)
-        - [Close Factor](01_theory.md#Close-Factor)
+        - [uToken Exchange Rate](01_overview.md#Exchange-Rate)
+        - [Borrow Utilization](01_overview.md#Borrow-Utilization)
+        - [Borrow Limit](01_overview.md#Borrow-Limit)
+        - [Borrow APY](01_overview.md#Borrow-APY)
+        - [Lending APY](01_overview.md#Lending-APY)
+        - [Close Factor](01_overview.md#Close-Factor)
 2. **[State](02_state.md)**
     - [Token Registry](02_state.md#Token-Registry)
     - [Borrows](02_state.md#Borrows)
