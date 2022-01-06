@@ -103,7 +103,8 @@ message QueryLendAPYRequest {
 // QueryLendAPYResponse defines the response structure for the LendAPY
 // gRPC service handler.
 message QueryLendAPYResponse {
-  string APY = 1;
+  string APY = 1
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
 // QueryMarketSizeRequest defines the request structure for the Market Size
