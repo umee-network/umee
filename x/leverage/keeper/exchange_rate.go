@@ -117,7 +117,9 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 		// Mathematically:
 		// tokens:uToken = (module token balance + tokens borrowed - reserved tokens) / uToken supply
 		moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-		tokenSupply := moduleBalance.Add(totalBorrows.AmountOf(denom).Sub(k.GetReserveAmount(ctx, denom)).ToDec())
+		reservedAmount := k.GetReserveAmount(ctx, denom)
+		borrowedAmount := totalBorrows.AmountOf(denom)
+		tokenSupply := moduleBalance.Add(borrowedAmount.Sub(reservedAmount).ToDec())
 		uTokenSupply := k.TotalUTokenSupply(ctx, k.FromTokenToUTokenDenom(ctx, denom)).Amount
 		derivedExchangeRate := sdk.OneDec()
 
@@ -128,6 +130,9 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 		if err := k.SetExchangeRate(ctx, denom, derivedExchangeRate); err != nil {
 			return err
 		}
+
+		marketSizeToken := moduleBalance.Add(reservedAmount.ToDec()).Add(borrowedAmount.ToDec())
+		k.SetMarketSize(ctx, denom, marketSizeToken)
 	}
 
 	return nil

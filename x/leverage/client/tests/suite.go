@@ -712,6 +712,42 @@ func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
 	runTestQueries(s, testCasesBorrowAPY)
 }
 
+func (s *IntegrationTestSuite) TestQueryMarketSize() {
+	testCasesMarketSize := []testQuery{
+		{
+			"not accepted Token denom",
+			cli.GetCmdQueryMarketSize(),
+			[]string{
+				"invalidToken",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryMarketSize(),
+			[]string{
+				"",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"valid asset",
+			cli.GetCmdQueryMarketSize(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryMarketSizeResponse{},
+			&types.QueryMarketSizeResponse{MarketSize: sdk.ZeroDec()},
+		},
+	}
+	runTestQueries(s, testCasesMarketSize)
+}
+
 func (s *IntegrationTestSuite) TestCmdLend() {
 	val := s.network.Validators[0]
 

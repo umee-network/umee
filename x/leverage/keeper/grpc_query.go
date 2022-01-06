@@ -136,6 +136,26 @@ func (q Querier) LendAPY(
 	return &types.QueryLendAPYResponse{APY: lendAPY}, nil
 }
 
+func (q Querier) MarketSize(
+	goCtx context.Context,
+	req *types.QueryMarketSizeRequest,
+) (*types.QueryMarketSizeResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+
+	marketSize := q.Keeper.GetMarketSize(ctx, req.Denom)
+	return &types.QueryMarketSizeResponse{MarketSize: marketSize}, nil
+}
+
 func (q Querier) ReserveAmount(
 	goCtx context.Context,
 	req *types.QueryReserveAmountRequest,

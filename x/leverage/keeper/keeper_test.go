@@ -696,12 +696,14 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	// and the uToken supply starts at 1000 due to lender account
 	_, addr := s.initBorrowScenario()
 
+	borrowAmount := int64(2000000000)
 	// artificially increase total borrows (by affecting a single address)
-	err := s.app.LeverageKeeper.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 2000000000)) // 2000 umee
+	err := s.app.LeverageKeeper.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, borrowAmount)) // 2000 umee
 	s.Require().NoError(err)
 
+	reserveAmount := int64(300000000)
 	// artificially set reserves
-	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	err = s.app.LeverageKeeper.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, reserveAmount)) // 300 umee
 	s.Require().NoError(err)
 
 	// expected token:uToken exchange rate
@@ -717,6 +719,14 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	rate, err := s.app.LeverageKeeper.GetExchangeRate(s.ctx, umeeapp.BondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("2.7"), rate)
+
+	// expected market size
+	// uToken supply starts at 1000
+	// = (initialuTokenSupply + total borrows + reserves)
+	// = 1000 + 2000 + 300
+	// = 3300
+	marketSize := s.app.LeverageKeeper.GetMarketSize(s.ctx, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewDec(1000000000+borrowAmount+reserveAmount), marketSize)
 }
 
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {

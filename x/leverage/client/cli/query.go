@@ -35,6 +35,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryLendAPY(),
 		GetCmdQueryBorrowAPY(),
+		GetCmdQueryMarketSize(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationTargets(),
 	)
@@ -327,6 +328,39 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 			}
 
 			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMarketSize returns a CLI command handler to query for the
+// Market Size of a specific token.
+func GetCmdQueryMarketSize() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "market-size [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the market size of a specified denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryMarketSizeRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.MarketSize(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
