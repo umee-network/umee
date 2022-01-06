@@ -93,6 +93,7 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 	reserved := k.GetReserveAmount(ctx, denom)
 
 	amountToRepay := sdk.MinInt(borrowed.Amount, reserved)
+	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, denom))
 
 	newBorrowed := borrowed.SubAmount(amountToRepay)
 	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))
