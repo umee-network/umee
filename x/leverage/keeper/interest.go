@@ -90,19 +90,19 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			return err
 		}
 
-		derivedRate, err := k.GetDynamicBorrowInterest(ctx, coin.Denom, utilization)
+		borrowRate, err := k.GetDynamicBorrowInterest(ctx, coin.Denom, utilization)
 		if err != nil {
 			return err
 		}
 
 		reserveFactors[coin.Denom] = reserveFactor
-		interestToApply[coin.Denom] = derivedRate.Mul(yearsElapsed)
+		interestToApply[coin.Denom] = borrowRate.Mul(yearsElapsed)
 
-		if err := k.SetBorrowAPY(ctx, coin.Denom, derivedRate); err != nil {
+		if err := k.SetBorrowAPY(ctx, coin.Denom, borrowRate); err != nil {
 			return err
 		}
 
-		if err := k.SetLendAPY(ctx, coin.Denom, derivedRate.Mul(utilization)); err != nil {
+		if err := k.SetLendAPY(ctx, coin.Denom, borrowRate.Mul(utilization)); err != nil {
 			return err
 		}
 	}
