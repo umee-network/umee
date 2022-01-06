@@ -34,9 +34,9 @@ An `int64` representing the number of `VotePeriods` that validator `operator` mi
 type AggregateVoteHash []byte
 
 type AggregateExchangeRatePrevote struct {
-	Hash		AggregateVoteHash	// Vote hex hash to keep validators from free-riding
-	Voter		sdk.ValAddress		// Voter val address
-	SubmitBlock	int64
+    Hash        AggregateVoteHash	// Vote hex hash to keep validators from free-riding
+    Voter       sdk.ValAddress		// Voter val address
+    SubmitBlock int64
 }
 ```
 
