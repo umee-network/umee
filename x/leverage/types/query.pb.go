@@ -239,7 +239,7 @@ func (m *QueryLendAPYResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryLendAPYResponse proto.InternalMessageInfo
 
-// QueryMarketSizeRequest defines the request structure for the Market Size
+// QueryMarketSizeRequest defines the request structure for the Market Size in USD
 // gRPC service handler.
 type QueryMarketSizeRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -1221,7 +1221,7 @@ type QueryClient interface {
 	BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error)
 	// LendAPY queries for the lend APY of a specified denomination.
 	LendAPY(ctx context.Context, in *QueryLendAPYRequest, opts ...grpc.CallOption) (*QueryLendAPYResponse, error)
-	// MarketSize queries for the Market Size of a specified denomination.
+	// MarketSize queries for the Market Size in USD of a specified denomination.
 	MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
@@ -1371,7 +1371,7 @@ type QueryServer interface {
 	BorrowAPY(context.Context, *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error)
 	// LendAPY queries for the lend APY of a specified denomination.
 	LendAPY(context.Context, *QueryLendAPYRequest) (*QueryLendAPYResponse, error)
-	// MarketSize queries for the Market Size of a specified denomination.
+	// MarketSize queries for the Market Size in USD of a specified denomination.
 	MarketSize(context.Context, *QueryMarketSizeRequest) (*QueryMarketSizeResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.

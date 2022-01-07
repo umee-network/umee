@@ -107,13 +107,13 @@ message QueryLendAPYResponse {
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
-// QueryMarketSizeRequest defines the request structure for the MarketSize
+// QueryMarketSizeRequest defines the request structure for the Market Size in USD
 // gRPC service handler.
 message QueryMarketSizeRequest {
   string denom = 1;
 }
 
-// QueryMarketSizeResponse defines the response structure for the MarketSize
+// QueryMarketSizeResponse defines the response structure for the Market Size in USD
 // gRPC service handler.
 message QueryMarketSizeResponse {
   string marketSizeUSD = 1
