@@ -742,7 +742,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSizeUSD: sdk.ZeroDec()},
+			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.ZeroDec()},
 		},
 	}
 
@@ -768,7 +768,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSizeUSD: sdk.MustNewDecFromStr("34.21")},
+			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("34.21")},
 		},
 	}
 
