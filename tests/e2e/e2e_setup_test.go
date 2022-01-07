@@ -66,7 +66,7 @@ type IntegrationTestSuite struct {
 	priceFeederResource *dockertest.Resource
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
-	peggyContractAddr   string
+	gravityContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
