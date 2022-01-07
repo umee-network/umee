@@ -87,7 +87,7 @@ Bad debt repayments are tracked by borrower address and the amount successfully 
 | Type               | Attribute Key | Attribute Value     |
 | ------------------ | ------------- | ------------------- |
 | reserves_exhausted | borrower      | {borrowerAddress}   |
-| repay_bad_debt     | denom         | {denom}             |
-| repay_bad_debt     | amount        | {amount}            |
+| reserves_exhausted | denom         | {denom}             |
+| reserves_exhausted | amount        | {amount}            |
 
 Reserve exhaustion is tracked by the address of the last borrower partially repaid, and the remaining borrow amount in the relevant denom.
