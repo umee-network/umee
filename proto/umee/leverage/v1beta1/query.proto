@@ -116,7 +116,7 @@ message QueryMarketSizeRequest {
 // QueryMarketSizeResponse defines the response structure for the Market Size in USD
 // gRPC service handler.
 message QueryMarketSizeResponse {
-  string marketSizeUSD = 1
+  string market_size_usd = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
