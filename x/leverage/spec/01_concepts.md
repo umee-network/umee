@@ -22,11 +22,11 @@ Users have the following actions available to them:
 
   Lenders earn interest at an effective rate of the asset's [Lending APY](01_concepts.md#Lending-APY) as the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) increases over time.
 
-- [Enable or Disable](04_messages.md#MsgSetCollateral) a _uToken_ denomination as collateral for borrowing.
+- [Enable or Disable](04_messages.md#MsgSetCollateral) a uToken denomination as collateral for borrowing.
 
-  Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a _uToken_ denomination if it would reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
+  Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
-- [Withdraw](04_messages.md#MsgWithdrawAsset lent assets by turning in _uTokens_ of the associated denomination.
+- [Withdraw](04_messages.md#MsgWithdrawAsset lent assets by turning in uTokens of the associated denomination.
 
    Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
@@ -40,7 +40,7 @@ Users have the following actions available to them:
 
 - [Liquidate](04_messages.md#MsgLiquidate) undercollateralized borrows a different user whose total borrowed value is greater than their [Borrow Limit](01_concepts.md#Borrow-Limit).
 
-  The liquidator must select a reward denomination present in the borrower's _uToken_ collateral. Liquidation is limited by [Close Factor](01_concepts.md#Close-Factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
+  The liquidator must select a reward denomination present in the borrower's uToken collateral. Liquidation is limited by [Close Factor](01_concepts.md#Close-Factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
 
   If a borrower is serverly past their borrow limit, incentivized liquidation may exhaust all of their collateral and leave some debt behind. When liquidation exhausts the last of a borrower's collateral, its remaining debt is marked as _bad debt_ in the keeper, so it can be repaid using module reserves.
 
@@ -59,7 +59,7 @@ Some important quantities that govern the behavior of the `leverage` module are 
 As a reminder, the following values are always available as a basis for calculations:
 - User token balances, available through the `bank` module. This works for uTokens too.
 - The `leverage` module account balance, available through the `bank` module.
-- Collateral _uToken_ amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
+- Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Borrowed denominations and amounts for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Leverage module [Parameters](07_params.md)
 - Token parameters from the [Token Registry](02_state.md#Token-Registry)

@@ -27,11 +27,11 @@ message MsgWithdrawAsset {
 ```
 
 The message will fail under the following conditions:
-- `amount` is not a valid amount of an accepted asset's corresponding _uToken_
+- `amount` is not a valid amount of an accepted asset's corresponding uToken
 - The sum of `lender` uToken balance and uToken collateral (if enabled) is insufficient
 
 The following additional failures are only possible for collateral-enabled _uTokens_
-- Withdrawing the required _uToken_ collateral would reduce `lender`'s `BorrowLimit` below their total borrowed value
+- Withdrawing the required uToken collateral would reduce `lender`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
 ## MsgSetCollateral
@@ -47,7 +47,7 @@ message MsgSetCollateral {
 ```
 
 The message will fail under the following conditions:
-- `denom` is not a valid _uToken_
+- `denom` is not a valid uToken
 
 The following additional failures are only possible for collateral-enabled _uTokens_
 - Disabling the required _uTokens_ as collateral would reduce `borrower`'s `BorrowLimit` below their total borrowed value

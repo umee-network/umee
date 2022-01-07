@@ -15,7 +15,7 @@ The `x/leverage` module keeps the following objects in state:
 
 The following serialization methods are used unless otherwise stated:
 - `sdk.Dec.Marshal()` and `sdk.Int.Marshal()` for numeric types
-- `[]byte(denom) | 0x00 ` for asset and uToken denominations (strings)
+- `[]byte(denom) | 0x00` for asset and uToken denominations (strings)
 - `address.MustLengthPrefix(sdk.Address)` for account addresses
 
 Note that collateral settings and instances of bad debt are both tracked using a value of `0x01`. In both cases, the `0x01` means `true` ("enabled" or "present") and a missing or deleted entry means `false`. No value besides `0x01` is ever stored.
