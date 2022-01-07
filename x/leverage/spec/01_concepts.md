@@ -54,6 +54,46 @@ For example, if the module contains `1000 uumee` and `100 uumee` are reserved, t
 
 ## Derived Values
 
+Some important quantities that govern the behavior of the `leverage` module are derived from a combination of parameters, borrow values, and oracle prices. The math and reasoning behind these values will appear below.
+
+As a reminder, the following values are always available as a basis for calculations:
+- User token balances, available through the `bank` module. This works for uTokens too.
+- The `leverage` module account balance, available through the `bank` module.
+- Collateral _uToken_ amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
+- Borrowed denominations and amounts for individual borrowers, stored in `leverage` module [State](02_state.md).
+- Leverage module [Parameters](07_params.md)
+- Token parameters from the [Token Registry](02_state.md#Token-Registry)
+
+The more complex derived values must use the values above as a basis.
+
+### uToken Exchange Rate
+
 TODO
-TODO - math stuff here
+
+### Borrow Utilization
+
+TODO
+
+### Dynamic Interest Rate
+
+TODO
+
+### Borrow Limit
+
+TODO
+
+### Borrow APY
+
+TODO
+
+### Lending APY
+
+TODO
+
+### Close Factor
+
+TODO
+
+### Market Size
+
 TODO
