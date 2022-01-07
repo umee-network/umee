@@ -115,6 +115,27 @@ func (q Querier) BorrowAPY(
 	return &types.QueryBorrowAPYResponse{APY: borrowAPY}, nil
 }
 
+func (q Querier) LendAPY(
+	goCtx context.Context,
+	req *types.QueryLendAPYRequest,
+) (*types.QueryLendAPYResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+
+	lendAPY := q.Keeper.GetLendAPY(ctx, req.Denom)
+
+	return &types.QueryLendAPYResponse{APY: lendAPY}, nil
+}
+
 func (q Querier) ReserveAmount(
 	goCtx context.Context,
 	req *types.QueryReserveAmountRequest,

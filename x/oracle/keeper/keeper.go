@@ -154,12 +154,12 @@ func (k Keeper) DeleteExchangeRate(ctx sdk.Context, denom string) {
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.ExchangeRateKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
-		denom := string(key[len(types.ExchangeRateKey) : len(key)-1])
+		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1])
 		dp := sdk.DecProto{}
 
 		k.cdc.MustUnmarshal(iter.Value(), &dp)
@@ -201,7 +201,7 @@ type IterateFeederDelegationHandler = func(delegator sdk.ValAddress, delegate sd
 func (k Keeper) IterateFeederDelegations(ctx sdk.Context, handler IterateFeederDelegationHandler) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.FeederDelegationKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixFeederDelegation)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -250,7 +250,7 @@ func (k Keeper) DeleteMissCounter(ctx sdk.Context, operator sdk.ValAddress) {
 func (k Keeper) IterateMissCounters(ctx sdk.Context, handler func(sdk.ValAddress, uint64) bool) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.MissCounterKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMissCounter)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -312,7 +312,7 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRatePrevoteKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRatePrevote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -378,7 +378,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.AggregateExchangeRateVoteKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRateVote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
