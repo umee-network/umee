@@ -1,9 +1,5 @@
 # Leverage Module
 
-## TODO
-- Cover governance, especially UpdateRegistryProposal
-- a `Keeper` section?
-
 ## Abstract
 
 This document specifies the `x/leverage` module of the Umee chain.
