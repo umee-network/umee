@@ -8,25 +8,25 @@ order: 2
 
 An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Leverage](../../leverage/spec/README.md) module.
 
-- ExchangeRate: `0x01<denom_Bytes> -> amino(sdk.Dec)`
+- ExchangeRate: `0x01 | byte(denom) -> sdk.Dec`
 
 ## FeederDelegation
 
 An `sdk.AccAddress` (`umee-` account) address of `operator`'s delegated price feeder.
 
-- FeederDelegation: `0x02<valAddress_Bytes> -> amino(sdk.AccAddress)`
+- FeederDelegation: `0x02 | byte(valAddress length) | byte(valAddress) -> sdk.AccAddress`
 
 ## MissCounter
 
 An `int64` representing the number of `VotePeriods` that validator `operator` missed during the current `SlashWindow`.
 
-- MissCounter: `0x03<valAddress_Bytes> -> amino(int64)`
+- MissCounter: `0x03 | byte(valAddress length) | byte(valAddress) -> ProtocolBuffer(uint64)`
 
 ## AggregateExchangeRatePrevote
 
 `AggregateExchangeRatePrevote` containing a validator's aggregated prevote for all denoms for the current `VotePeriod`.
 
-- AggregateExchangeRatePrevote: `0x04<valAddress_Bytes> -> amino(AggregateExchangeRatePrevote)`
+- AggregateExchangeRatePrevote: `0x04 | byte(valAddress length) | byte(valAddress) -> ProtocolBuffer(AggregateExchangeRatePrevote)`
 
 ```go
 // AggregateVoteHash is a hash value to hide vote exchange rates
@@ -44,7 +44,7 @@ type AggregateExchangeRatePrevote struct {
 
 `AggregateExchangeRateVote` containing a validator's aggregate vote for all denoms for the current `VotePeriod`.
 
-- AggregateExchangeRateVote: `0x05<valAddress_Bytes> -> amino(AggregateExchangeRateVote)`
+- AggregateExchangeRateVote: `0x05 | byte(valAddress length) | byte(valAddress) -> ProtocolBuffer(AggregateExchangeRateVote)`
 
 ```go
 type ExchangeRateTuple struct {
