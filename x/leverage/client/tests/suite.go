@@ -772,9 +772,22 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 		},
 	}
 
+	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000u/uumee",
+			},
+			nil,
+		},
+	}
+
 	runTestQueries(s, testCasesMarketSizeBeforeLend)
 	runTestTransactions(s, lendCommands)
 	runTestQueries(s, testCasesMarketSizeAfterLend)
+	runTestTransactions(s, cleanupCommands)
 }
 
 func (s *IntegrationTestSuite) TestCmdLend() {
