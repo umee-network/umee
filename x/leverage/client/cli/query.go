@@ -347,7 +347,7 @@ func GetCmdQueryMarketSize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "market-size [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the market size of a specified denomination in USD",
+		Short: "Query for the USD market size of a specified denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
