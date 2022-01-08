@@ -94,10 +94,6 @@ import (
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	// leverageclient "github.com/umee-network/umee/x/leverage/client"
-	// leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	// "github.com/umee-network/umee/x/leverage"
-	// leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
 )
 
 const (
@@ -146,7 +142,6 @@ var (
 		evidence.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-		// leverage.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 	)
 
@@ -159,8 +154,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		// leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		gravitytypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -212,8 +206,7 @@ type UmeeApp struct {
 	TransferKeeper   uibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
-	// LeverageKeeper   leveragekeeper.Keeper
-	GravityKeeper gravitykeeper.Keeper
+	GravityKeeper    gravitykeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -254,7 +247,6 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, gravitytypes.StoreKey,
-		// leveragetypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -367,12 +359,6 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
-	// app.LeverageKeeper = leveragekeeper.NewKeeper(
-	// 	appCodec,
-	// 	keys[leveragetypes.ModuleName],
-	// 	app.GetSubspace(leveragetypes.ModuleName),
-	// 	app.BankKeeper,
-	// )
 
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
@@ -435,7 +421,6 @@ func New(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
-		// AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -485,7 +470,6 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
-		// leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 	)
 
@@ -503,14 +487,12 @@ func New(
 		evidencetypes.ModuleName,
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
-		// leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
-		// leveragetypes.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
@@ -537,7 +519,6 @@ func New(
 		ibctransfertypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
-		// leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
 
@@ -755,7 +736,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
-	// paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 
 	return paramsKeeper
@@ -767,7 +747,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
-		// leverageclient.ProposalHandler,
 	}
 }
 
