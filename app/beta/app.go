@@ -360,15 +360,6 @@ func New(
 		),
 	)
 
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
-	)
-
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -379,6 +370,27 @@ func New(
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
 		&app.AccountKeeper,
+	)
+
+	app.IBCKeeper = ibckeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey],
+		app.GetSubspace(ibchost.ModuleName),
+		app.StakingKeeper,
+		app.UpgradeKeeper,
+		app.ScopedIBCKeeper,
+	)
+
+	// register the staking hooks
+	//
+	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
+	// these hooks.
+	app.StakingKeeper = *stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
+		),
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -429,18 +441,6 @@ func New(
 		app.BankKeeper,
 		&stakingKeeper,
 		govRouter,
-	)
-
-	// register the staking hooks
-	//
-	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
-	// these hooks.
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
-		),
 	)
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
