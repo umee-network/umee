@@ -224,7 +224,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey,
-		gravitytypes.StoreKey, oracletypes.StoreKey,
+		oracletypes.StoreKey, gravitytypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -372,15 +372,6 @@ func New(
 		&app.AccountKeeper,
 	)
 
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
-	)
-
 	// register the staking hooks
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
@@ -391,6 +382,15 @@ func New(
 			app.SlashingKeeper.Hooks(),
 			app.GravityKeeper.Hooks(),
 		),
+	)
+
+	app.IBCKeeper = ibckeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey],
+		app.GetSubspace(ibchost.ModuleName),
+		app.StakingKeeper,
+		app.UpgradeKeeper,
+		app.ScopedIBCKeeper,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -492,6 +492,7 @@ func New(
 		ibchost.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(

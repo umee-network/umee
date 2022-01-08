@@ -442,7 +442,7 @@ func New(
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
 		keys[evidencetypes.StoreKey],
-		&app.StakingKeeper,
+		&stakingKeeper,
 		app.SlashingKeeper,
 	)
 
@@ -464,7 +464,7 @@ func New(
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper,
-			app.StakingKeeper,
+			&stakingKeeper,
 			app.BaseApp.DeliverTx,
 			encodingConfig.TxConfig,
 		),
@@ -504,6 +504,7 @@ func New(
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
 		// leveragetypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(

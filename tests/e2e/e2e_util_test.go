@@ -351,7 +351,12 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 		"failed connect chains; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
 	)
 
-	s.T().Logf("IBC connection stderr: %s", errBuf.String())
+	s.Require().Containsf(
+		errBuf.String(),
+		"successfully opened init channel",
+		"failed to connect chains via IBC: %s", errBuf.String(),
+	)
+
 	s.T().Logf("connected %s and %s chains via IBC", s.chain.id, gaiaChainID)
 }
 
