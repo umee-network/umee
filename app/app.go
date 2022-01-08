@@ -374,15 +374,6 @@ func New(
 	// 	app.BankKeeper,
 	// )
 
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
-	)
-
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -405,6 +396,15 @@ func New(
 			app.SlashingKeeper.Hooks(),
 			app.GravityKeeper.Hooks(),
 		),
+	)
+
+	app.IBCKeeper = ibckeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey],
+		app.GetSubspace(ibchost.ModuleName),
+		app.StakingKeeper,
+		app.UpgradeKeeper,
+		app.ScopedIBCKeeper,
 	)
 
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
