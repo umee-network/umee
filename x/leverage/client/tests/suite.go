@@ -619,10 +619,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 
 	runTestQueries(s, simpleCases)
 	runTestTransactions(s, setupCommands)
-	//todo: discover why collat weight isn't updating. the following line should break this test but doesn't
-	originalCollateralWeight := updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.10"))
 	runTestQueries(s, nonzeroCase)
-	_ = updateCollateralWeight(s, "uumee", originalCollateralWeight)
 	runTestTransactions(s, cleanupCommands)
 }
 
@@ -977,7 +974,6 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-/*
 func (s *IntegrationTestSuite) TestCmdLiquidate() {
 	val := s.network.Validators[0]
 
@@ -987,7 +983,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			cli.GetCmdLendAsset(),
 			[]string{
 				val.Address.String(),
-				"100000uumee",
+				"1000uumee",
 			},
 			nil,
 		},
@@ -1006,7 +1002,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			cli.GetCmdBorrowAsset(),
 			[]string{
 				val.Address.String(),
-				"5000uumee",
+				"00uumee",
 			},
 			nil,
 		},
@@ -1020,7 +1016,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 				val.Address.String(),
 				val.Address.String(),
 				// note: liquidation amount will be automatically reduced to maximum eligible amount
-				"5000uumee",
+				"50uumee",
 				"u/uumee",
 			},
 			nil,
@@ -1031,7 +1027,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			[]string{
 				val.Address.String(),
 				val.Address.String(),
-				"500uumee",
+				"50uumee",
 				"u/uumee",
 			},
 			types.ErrLiquidationIneligible,
@@ -1045,7 +1041,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			[]string{
 				val.Address.String(),
 				// note: repay amount will be automatically reduced post-liquidation
-				"5000uumee",
+				"50uumee",
 			},
 			nil,
 		},
@@ -1064,17 +1060,15 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			cli.GetCmdWithdrawAsset(),
 			[]string{
 				val.Address.String(),
-				"100000u/uumee",
+				"1000u/uumee",
 			},
 			nil,
 		},
 	}
 
 	runTestTransactions(s, setupCommands)
-	originalCollateralWeight := updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.00"))
+	originalCollateralWeight := updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01"))
 	runTestTransactions(s, testCases)
 	_ = updateCollateralWeight(s, "uumee", originalCollateralWeight)
 	runTestTransactions(s, cleanupCommands)
-
 }
-*/

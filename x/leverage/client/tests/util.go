@@ -133,7 +133,7 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 			return prop.Status == govtypes.StatusPassed
 		},
 		2*time.Minute,
-		time.Second,
+		10*time.Second,
 		"proposal %d (%s) failed to pass", proposalID, content.Title,
 	)
 }
@@ -182,6 +182,30 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
 		}...,
+	)
+
+	// Verify that the RegisteredTokens query is returning an updated registry
+	s.Require().Eventuallyf(
+		func() bool {
+			out, err = clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
+			if err != nil {
+				return false
+			}
+
+			registry := &types.QueryRegisteredTokensResponse{}
+			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), registry), out.String())
+
+			newTokens := registry.GetRegistry()
+			for _, token := range newTokens {
+				if token.BaseDenom == baseDenom {
+					return s.Equal(collateralWeight, token.CollateralWeight)
+				}
+			}
+			return false
+		},
+		2*time.Minute,
+		10*time.Second,
+		"collateral weight never updated",
 	)
 
 	return oldCollateralWeight
