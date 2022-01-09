@@ -640,6 +640,42 @@ func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
 	runTestQueries(s, testCase)
 }
 
+func (s *IntegrationTestSuite) TestQueryLendAPY() {
+	testCasesLendAPY := []testQuery{
+		{
+			"not accepted Token denom",
+			cli.GetCmdQueryLendAPY(),
+			[]string{
+				"invalidToken",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryLendAPY(),
+			[]string{
+				"",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"valid asset",
+			cli.GetCmdQueryLendAPY(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryLendAPYResponse{},
+			&types.QueryLendAPYResponse{APY: sdk.ZeroDec()},
+		},
+	}
+	runTestQueries(s, testCasesLendAPY)
+}
+
 func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
 	testCasesBorrowAPY := []testQuery{
 		{
