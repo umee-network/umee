@@ -1010,7 +1010,7 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestCmdLiquidate() {
+func (s *IntegrationTestSuite) TestXCmdLiquidate() {
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
