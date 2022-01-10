@@ -301,7 +301,7 @@ func New(t *testing.T, cfg Config) *Network {
 			mnemonic = cfg.Mnemonics[i]
 		}
 
-		addr, secret, err := generateSaveCoinKey(kb, nodeDirName, mnemonic, true, algo) // server.GenerateSaveCoinKey(kb, nodeDirName, true, algo)
+		addr, secret, err := generateSaveCoinKey(kb, nodeDirName, mnemonic, true, algo)
 		require.NoError(t, err)
 
 		info := map[string]string{"secret": secret}
