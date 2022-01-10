@@ -493,6 +493,8 @@ func New(
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
+		feegrant.ModuleName,
+		authz.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
