@@ -33,13 +33,13 @@ type KeeperTestSuite struct {
 
 func (s *KeeperTestSuite) SetupTest() {
 	s.coordinator = ibctesting.NewCoordinator(s.T(), 0)
-	ibctesting.DefaultTestingAppInit = SetupTestingApp
 
 	chains := make(map[string]*ibctesting.TestChain)
 	for i := 0; i < 2; i++ {
 		// create a chain with the temporary coordinator that we'll later override
 		chainID := ibctesting.GetChainID(i)
 		chain := ibctesting.NewTestChain(s.T(), ibctesting.NewCoordinator(s.T(), 0), chainID)
+		ibctesting.DefaultTestingAppInit = SetupTestingApp(chain.Vals)
 
 		balance := banktypes.Balance{
 			Address: chain.SenderAccount.GetAddress().String(),

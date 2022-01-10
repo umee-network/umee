@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -33,7 +34,6 @@ import (
 
 	"github.com/umee-network/umee/app"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 const (
@@ -66,7 +66,7 @@ type IntegrationTestSuite struct {
 	priceFeederResource *dockertest.Resource
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
-	peggyContractAddr   string
+	gravityContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -92,26 +92,23 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	//
 	// 1. Initialize Umee validator nodes.
 	// 2. Launch an Ethereum container that mines.
-	// 3. Deploy the Peggy (Gravity Bridge) contract
-	// 4. Create and initialize Umee validator genesis files.
-	// 5. Start Umee network.
-	// 6. Register each validator's Ethereum key.
-	// 7. Invoke the initialize method on the Peggy contract.
-	// 8. Create and start peggo (orchestrator) containers.
-	// 9. Create and run Gaia container(s).
-	// 10. Create and run IBC relayer (Hermes) containers.
+	// 3. Create and initialize Umee validator genesis files (setting delegate keys for validators).
+	// 4. Start Umee network.
+	// 5. Run an Oracle price feeder.
+	// 6. Create and run Gaia container(s).
+	// 7. Create and run IBC relayer (Hermes) containers.
+	// 8. Deploy the Gravity Bridge contract.
+	// 9. Create and start Peggo (orchestrator) containers.
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
-	s.runContractDeployment()
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
 	s.runPriceFeeder()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
-	s.registerValidatorOrchAddresses()
-	s.initPeggy()
+	s.runContractDeployment()
 	s.runOrchestrators()
 }
 
@@ -215,16 +212,23 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	var peggyGenState peggytypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[peggytypes.ModuleName], &peggyGenState))
+	var gravityGenState gravitytypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
-	peggyGenState.Params.BridgeEthereumAddress = s.peggyContractAddr
-	peggyGenState.Params.BridgeContractStartHeight = 0
-	peggyGenState.Params.BridgeChainId = uint64(ethChainID)
+	gravityGenState.Params.BridgeChainId = uint64(ethChainID)
+	gravityGenState.DelegateKeys = make([]gravitytypes.MsgSetOrchestratorAddress, len(s.chain.validators))
 
-	bz, err := cdc.MarshalJSON(&peggyGenState)
+	for i, val := range s.chain.validators {
+		gravityGenState.DelegateKeys[i] = gravitytypes.MsgSetOrchestratorAddress{
+			Validator:    sdk.ValAddress(val.keyInfo.GetAddress()).String(),
+			Orchestrator: val.keyInfo.GetAddress().String(),
+			EthAddress:   val.ethereumKey.address,
+		}
+	}
+
+	bz, err := cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
-	appGenState[peggytypes.ModuleName] = bz
+	appGenState[gravitytypes.ModuleName] = bz
 
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
@@ -635,22 +639,26 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 }
 
 func (s *IntegrationTestSuite) runContractDeployment() {
-	s.T().Log("starting contract deployer container...")
+	s.T().Log("starting Gravity Bridge contract deployer container...")
 
 	resource, err := s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       "peggy-contract-deployer",
+			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
 			Repository: "umeenet/umeed",
 			// NOTE: container names are prefixed with '/'
 			Entrypoint: []string{
 				"peggo",
 				"bridge",
-				"deploy-peggy",
+				"deploy-gravity",
 				"--eth-pk",
 				ethMinerPK[2:], // remove 0x prefix
 				"--eth-rpc",
 				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+				"--cosmos-grpc",
+				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
+				"--tendermint-rpc",
+				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
 			},
 		},
 		noRestart,
@@ -690,8 +698,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	tokens := re.FindStringSubmatch(errBuf.String())
 	s.Require().Len(tokens, 2)
 
-	peggyContractAddr := tokens[1]
-	s.Require().NotEmpty(peggyContractAddr)
+	gravityContractAddr := tokens[1]
+	s.Require().NotEmpty(gravityContractAddr)
 
 	re = regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens = re.FindStringSubmatch(errBuf.String())
@@ -718,8 +726,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
 
-	s.T().Logf("deployed Peggy (Gravity Bridge) contract: %s", peggyContractAddr)
-	s.peggyContractAddr = peggyContractAddr
+	s.T().Logf("deployed Gravity Bridge contract: %s", gravityContractAddr)
+	s.gravityContractAddr = gravityContractAddr
 }
 
 func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
@@ -728,92 +736,6 @@ func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
 	for i := range s.chain.validators {
 		s.registerOrchAddresses(i, "10photon")
 	}
-}
-
-func (s *IntegrationTestSuite) initPeggy() {
-	s.T().Log("initializing Peggy contract...")
-
-	resource, err := s.dkrPool.RunWithOptions(
-		&dockertest.RunOptions{
-			Name:       "peggy-contract-init",
-			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/umeed",
-			// NOTE: container names are prefixed with '/'
-			Entrypoint: []string{
-				"peggo",
-				"bridge",
-				"init-peggy",
-				"--eth-pk",
-				ethMinerPK[2:], // remove 0x prefix
-				"--eth-rpc",
-				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
-				"--cosmos-chain-id",
-				s.chain.id,
-				"--cosmos-grpc",
-				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
-				"--tendermint-rpc",
-				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
-			},
-		},
-		noRestart,
-	)
-	s.Require().NoError(err)
-
-	s.T().Logf("started Peggy contract initializer: %s", resource.Container.ID)
-
-	// wait for the container to finish executing
-	container := resource.Container
-	for container.State.Running {
-		time.Sleep(10 * time.Second)
-
-		container, err = s.dkrPool.Client.InspectContainer(resource.Container.ID)
-		s.Require().NoError(err)
-	}
-
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
-	s.Require().NoErrorf(s.dkrPool.Client.Logs(
-		docker.LogsOptions{
-			Container:    resource.Container.ID,
-			OutputStream: &outBuf,
-			ErrorStream:  &errBuf,
-			Stdout:       true,
-			Stderr:       true,
-		},
-	),
-		"failed to get Peggy initializer logs; stdout: %s, stderr: %s",
-		outBuf.String(), errBuf.String(),
-	)
-
-	re := regexp.MustCompile(`Transaction: (0x.+)`)
-	tokens := re.FindStringSubmatch(errBuf.String())
-	s.Require().Len(tokens, 2)
-
-	txHash := tokens[1]
-	s.Require().NotEmpty(txHash)
-
-	s.Require().Eventually(
-		func() bool {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-
-			if err := queryEthTx(ctx, s.ethClient, txHash); err != nil {
-				return false
-			}
-
-			return true
-		},
-		time.Minute,
-		time.Second,
-		"failed to confirm Peggy initialization transaction",
-	)
-
-	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
-
-	s.T().Log("initialized Peggy (Gravity Bridge) contract")
 }
 
 func (s *IntegrationTestSuite) runOrchestrators() {
@@ -833,6 +755,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				Entrypoint: []string{
 					"peggo",
 					"orchestrator",
+					s.gravityContractAddr,
 					"--eth-pk",
 					val.ethereumKey.privateKey[2:], // remove 0x prefix
 					"--eth-rpc",
@@ -864,17 +787,17 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "sent Tx (Peggy updateValset)"
+	match := "oracle sent set of claims successfully"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
+		var (
+			outBuf bytes.Buffer
+			errBuf bytes.Buffer
+		)
+
 		s.Require().Eventuallyf(
 			func() bool {
-				var (
-					outBuf bytes.Buffer
-					errBuf bytes.Buffer
-				)
-
 				err := s.dkrPool.Client.Logs(
 					docker.LogsOptions{
 						Container:    resource.Container.ID,
