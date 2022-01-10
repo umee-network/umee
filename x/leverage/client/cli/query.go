@@ -276,7 +276,7 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 }
 
 // GetCmdQueryAvailableBorrow returns a CLI command handler to query for the
-// avaiable amount to borrow of a specific denom.
+// available amount to borrow of a specific denom.
 func GetCmdQueryAvailableBorrow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "available-borrow [denom]",
