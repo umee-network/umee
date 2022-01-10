@@ -148,25 +148,24 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 
+	// Query all registered tokens
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
 	s.Require().NoError(err)
 
 	resp := &types.QueryRegisteredTokensResponse{}
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
 
+	// Replace the collateral weight of the selected token with the new value
 	newTokens := resp.GetRegistry()
-	foundToken := false
 	oldCollateralWeight := sdk.ZeroDec()
 	for _, token := range newTokens {
 		if token.BaseDenom == baseDenom {
 			oldCollateralWeight = token.CollateralWeight
 			token.CollateralWeight = collateralWeight
-			foundToken = true
 		}
 	}
 
-	s.Require().True(foundToken, "token to update was present")
-
+	// Update token registry using the modified token registry - waits for proposal accepted
 	s.UpdateRegistry(
 		clientCtx,
 		types.NewUpdateRegistryProposal(
@@ -184,29 +183,18 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 		}...,
 	)
 
-	// Verify that the RegisteredTokens query is returning an updated registry
-	s.Require().Eventuallyf(
-		func() bool {
-			out, err = clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
-			if err != nil {
-				return false
-			}
+	// Query registered tokens again
+	out, err = clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
+	s.Require().NoError(err)
 
-			registry := &types.QueryRegisteredTokensResponse{}
-			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), registry), out.String())
-
-			newTokens := registry.GetRegistry()
-			for _, token := range newTokens {
-				if token.BaseDenom == baseDenom {
-					return s.Equal(collateralWeight, token.CollateralWeight)
-				}
-			}
-			return false
-		},
-		2*time.Minute,
-		10*time.Second,
-		"collateral weight never updated",
-	)
+	// Verify that the RegisteredTokens query is returning an updated collateral weight
+	registry := &types.QueryRegisteredTokensResponse{}
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), registry), out.String())
+	for _, token := range registry.GetRegistry() {
+		if token.BaseDenom == baseDenom {
+			s.Require().Equal(collateralWeight, token.CollateralWeight, "Collateral weight not updated")
+		}
+	}
 
 	return oldCollateralWeight
 }

@@ -1038,7 +1038,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			cli.GetCmdBorrowAsset(),
 			[]string{
 				val.Address.String(),
-				"00uumee",
+				"50uumee",
 			},
 			nil,
 		},
