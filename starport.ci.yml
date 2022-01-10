@@ -7,14 +7,10 @@ genesis:
     staking:
       params:
         bond_denom: "uumee"
-    # peggy:
-    #   params:
-    #     bridge_ethereum_address: ""
-    #     bridge_contract_start_height: ""
-    #     bridge_chain_id: ""
 accounts:
   - name: alice
     coins: ["39000000000000uumee"]
+    mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
   - name: bob
     coins: ["5500000000000uumee"]
   - name: faucet
