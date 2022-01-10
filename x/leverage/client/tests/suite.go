@@ -1051,22 +1051,11 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			[]string{
 				val.Address.String(),
 				val.Address.String(),
-				// note: liquidation amount will be automatically reduced to maximum eligible amount
-				"50uumee",
+				// note: partial liquidation, so cleanup still requires a CmdRepay
+				"5uumee",
 				"u/uumee",
 			},
 			nil,
-		},
-		{
-			"liquidation ineligible",
-			cli.GetCmdLiquidate(),
-			[]string{
-				val.Address.String(),
-				val.Address.String(),
-				"50uumee",
-				"u/uumee",
-			},
-			types.ErrLiquidationIneligible,
 		},
 	}
 
@@ -1076,7 +1065,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				// note: repay amount will be automatically reduced post-liquidation
+				// note: amount will be reduced from 50 to remaining amount owed
 				"50uumee",
 			},
 			nil,
@@ -1103,8 +1092,8 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 	}
 
 	runTestTransactions(s, setupCommands)
-	originalCollateralWeight := updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01"))
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01")) // lower to allow liquidation
 	runTestTransactions(s, testCases)
-	_ = updateCollateralWeight(s, "uumee", originalCollateralWeight)
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.05")) // reset to original
 	runTestTransactions(s, cleanupCommands)
 }

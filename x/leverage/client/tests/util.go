@@ -140,7 +140,7 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 
 // updateCollateralWeight modifies the collateral weight of a registered token identified by baseDenom.
 // Also returns its previous collateral weight, which is useful when undoing changes.
-func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) sdk.Dec {
+func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) {
 	val := s.network.Validators[0]
 	clientCtx := s.network.Validators[0].ClientCtx
 
@@ -157,11 +157,9 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 
 	// Replace the collateral weight of the selected token with the new value
 	newTokens := resp.GetRegistry()
-	oldCollateralWeight := sdk.ZeroDec()
-	for _, token := range newTokens {
-		if token.BaseDenom == baseDenom {
-			oldCollateralWeight = token.CollateralWeight
-			token.CollateralWeight = collateralWeight
+	for i := range newTokens {
+		if newTokens[i].BaseDenom == baseDenom {
+			newTokens[i].CollateralWeight = collateralWeight
 		}
 	}
 
@@ -182,19 +180,4 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
 		}...,
 	)
-
-	// Query registered tokens again
-	out, err = clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
-	s.Require().NoError(err)
-
-	// Verify that the RegisteredTokens query is returning an updated collateral weight
-	registry := &types.QueryRegisteredTokensResponse{}
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), registry), out.String())
-	for _, token := range registry.GetRegistry() {
-		if token.BaseDenom == baseDenom {
-			s.Require().Equal(collateralWeight, token.CollateralWeight, "Collateral weight not updated")
-		}
-	}
-
-	return oldCollateralWeight
 }
