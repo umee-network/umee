@@ -114,7 +114,7 @@ func (q Querier) AvailableBorrow(
 	moduleBalance := q.Keeper.ModuleBalance(ctx, req.Denom)
 	reserveAmount := q.Keeper.GetReserveAmount(ctx, req.Denom)
 
-	return &types.QueryAvailableBorrowResponse{Amount: moduleBalance.Sub(reserveAmount).ToDec()}, nil
+	return &types.QueryAvailableBorrowResponse{Amount: moduleBalance.Sub(reserveAmount)}, nil
 }
 
 func (q Querier) BorrowAPY(

@@ -118,7 +118,7 @@ func (m *QueryAvailableBorrowRequest) GetDenom() string {
 // QueryAvailableBorrowResponse defines the response structure for the
 // available amount for borrow gRPC service handler.
 type QueryAvailableBorrowResponse struct {
-	Amount github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"amount"`
+	Amount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
 }
 
 func (m *QueryAvailableBorrowResponse) Reset()         { *m = QueryAvailableBorrowResponse{} }

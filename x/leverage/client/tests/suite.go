@@ -998,7 +998,7 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 }
 
 func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
-	testCasesMarketSizeBeforeLend := []testQuery{
+	testCasesAvailableBorrowBeforeLend := []testQuery{
 		{
 			"not accepted Token denom",
 			cli.GetCmdQueryAvailableBorrow(),
@@ -1027,7 +1027,7 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 			},
 			false,
 			&types.QueryAvailableBorrowResponse{},
-			&types.QueryAvailableBorrowResponse{Amount: sdk.ZeroDec()},
+			&types.QueryAvailableBorrowResponse{Amount: sdk.ZeroInt()},
 		},
 	}
 
@@ -1045,7 +1045,7 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 		},
 	}
 
-	testCasesMarketSizeAfterLend := []testQuery{
+	testCasesAvailableBorrowAfterLend := []testQuery{
 		{
 			"valid asset",
 			cli.GetCmdQueryAvailableBorrow(),
@@ -1054,7 +1054,7 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 			},
 			false,
 			&types.QueryAvailableBorrowResponse{},
-			&types.QueryAvailableBorrowResponse{Amount: sdk.NewDec(amountLend)},
+			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(amountLend)},
 		},
 	}
 
@@ -1070,9 +1070,9 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 		},
 	}
 
-	runTestQueries(s, testCasesMarketSizeBeforeLend)
+	runTestQueries(s, testCasesAvailableBorrowBeforeLend)
 	runTestTransactions(s, lendCommands)
-	runTestQueries(s, testCasesMarketSizeAfterLend)
+	runTestQueries(s, testCasesAvailableBorrowAfterLend)
 	runTestTransactions(s, cleanupCommands)
 }
 
