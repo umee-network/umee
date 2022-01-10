@@ -623,23 +623,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
-	testCase := []testQuery{
-		{
-			"no targets",
-			cli.GetCmdQueryLiquidationTargets(),
-			[]string{},
-			false,
-			&types.QueryLiquidationTargetsResponse{},
-			&types.QueryLiquidationTargetsResponse{
-				Targets: []string{},
-			},
-		},
-	}
-
-	runTestQueries(s, testCase)
-}
-
 func (s *IntegrationTestSuite) TestQueryLendAPY() {
 	testCasesLendAPY := []testQuery{
 		{
@@ -1013,6 +996,19 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 func (s *IntegrationTestSuite) TestXCmdLiquidate() {
 	val := s.network.Validators[0]
 
+	noTargetsQuery := []testQuery{
+		{
+			"no targets",
+			cli.GetCmdQueryLiquidationTargets(),
+			[]string{},
+			false,
+			&types.QueryLiquidationTargetsResponse{},
+			&types.QueryLiquidationTargetsResponse{
+				Targets: []string{},
+			},
+		},
+	}
+
 	setupCommands := []testTransaction{
 		{
 			"lend",
@@ -1041,6 +1037,22 @@ func (s *IntegrationTestSuite) TestXCmdLiquidate() {
 				"50uumee",
 			},
 			nil,
+		},
+	}
+
+	oneTargetQuery := []testQuery{
+		{
+			"one liquidation target",
+			cli.GetCmdQueryLiquidationTargets(),
+			[]string{},
+			false,
+			&types.QueryLiquidationTargetsResponse{},
+			&types.QueryLiquidationTargetsResponse{
+				Targets: []string{
+					// TODO: comment in when this query is implemented
+					// val.Address.String()
+				},
+			},
 		},
 	}
 
@@ -1091,8 +1103,10 @@ func (s *IntegrationTestSuite) TestXCmdLiquidate() {
 		},
 	}
 
+	runTestQueries(s, noTargetsQuery)
 	runTestTransactions(s, setupCommands)
 	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01")) // lower to allow liquidation
+	runTestQueries(s, oneTargetQuery)
 	runTestTransactions(s, testCases)
 	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.05")) // reset to original
 	runTestTransactions(s, cleanupCommands)
