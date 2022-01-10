@@ -7,6 +7,11 @@ genesis:
     staking:
       params:
         bond_denom: "uumee"
+    gravity:
+      delegate_keys:
+        - validator: "umeevaloper1zypqa76je7pxsdwkfah6mu9a583sju6xjettez"
+          orchestrator: "umee1zypqa76je7pxsdwkfah6mu9a583sju6xjavygg"
+          eth_address: "0x9fc56f2e851e1ab2b4c0fc4f6344800f29652ffe"
 accounts:
   - name: alice
     coins: ["39000000000000uumee"]
