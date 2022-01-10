@@ -210,3 +210,12 @@ func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) e
 	store.Set(key, bz)
 	return nil
 }
+
+// GetAvailableToBorrow gets the amount available to borrow of a given token.
+func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
+	// Available for borrow = Module Balance - Reserve Amount
+	moduleBalance := k.ModuleBalance(ctx, denom)
+	reserveAmount := k.GetReserveAmount(ctx, denom)
+
+	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
+}
