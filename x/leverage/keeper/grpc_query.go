@@ -110,11 +110,9 @@ func (q Querier) AvailableBorrow(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	// Available for borrow = Module Balance - Reserve Amount
-	moduleBalance := q.Keeper.ModuleBalance(ctx, req.Denom)
-	reserveAmount := q.Keeper.GetReserveAmount(ctx, req.Denom)
+	amountAvailable := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
 
-	return &types.QueryAvailableBorrowResponse{Amount: moduleBalance.Sub(reserveAmount)}, nil
+	return &types.QueryAvailableBorrowResponse{Amount: amountAvailable}, nil
 }
 
 func (q Querier) BorrowAPY(
