@@ -197,12 +197,3 @@ func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec,
 
 	return token.LiquidationIncentive, nil
 }
-
-// GetAvailableToBorrow gets the amount available to borrow of a given token.
-func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
-	// Available for borrow = Module Balance - Reserve Amount
-	moduleBalance := k.ModuleBalance(ctx, denom)
-	reserveAmount := k.GetReserveAmount(ctx, denom)
-
-	return moduleBalance.Sub(reserveAmount)
-}
