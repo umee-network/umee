@@ -69,6 +69,91 @@ func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
 
+// QueryAvailableBorrowRequest defines the request structure for the
+// available amount for borrow gRPC service handler.
+type QueryAvailableBorrowRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryAvailableBorrowRequest) Reset()         { *m = QueryAvailableBorrowRequest{} }
+func (m *QueryAvailableBorrowRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAvailableBorrowRequest) ProtoMessage()    {}
+func (*QueryAvailableBorrowRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{1}
+}
+func (m *QueryAvailableBorrowRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAvailableBorrowRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAvailableBorrowRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAvailableBorrowRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAvailableBorrowRequest.Merge(m, src)
+}
+func (m *QueryAvailableBorrowRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAvailableBorrowRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAvailableBorrowRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAvailableBorrowRequest proto.InternalMessageInfo
+
+func (m *QueryAvailableBorrowRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryAvailableBorrowResponse defines the response structure for the
+// available amount for borrow gRPC service handler.
+type QueryAvailableBorrowResponse struct {
+	Amount github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"amount"`
+}
+
+func (m *QueryAvailableBorrowResponse) Reset()         { *m = QueryAvailableBorrowResponse{} }
+func (m *QueryAvailableBorrowResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAvailableBorrowResponse) ProtoMessage()    {}
+func (*QueryAvailableBorrowResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{2}
+}
+func (m *QueryAvailableBorrowResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAvailableBorrowResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAvailableBorrowResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAvailableBorrowResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAvailableBorrowResponse.Merge(m, src)
+}
+func (m *QueryAvailableBorrowResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAvailableBorrowResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAvailableBorrowResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAvailableBorrowResponse proto.InternalMessageInfo
+
 // QueryBorrowAPYRequest defines the request structure for the BorrowAPY
 // gRPC service handler.
 type QueryBorrowAPYRequest struct {
@@ -79,7 +164,7 @@ func (m *QueryBorrowAPYRequest) Reset()         { *m = QueryBorrowAPYRequest{} }
 func (m *QueryBorrowAPYRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowAPYRequest) ProtoMessage()    {}
 func (*QueryBorrowAPYRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{1}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{3}
 }
 func (m *QueryBorrowAPYRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -125,7 +210,7 @@ func (m *QueryBorrowAPYResponse) Reset()         { *m = QueryBorrowAPYResponse{}
 func (m *QueryBorrowAPYResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowAPYResponse) ProtoMessage()    {}
 func (*QueryBorrowAPYResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{2}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{4}
 }
 func (m *QueryBorrowAPYResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -164,7 +249,7 @@ func (m *QueryLendAPYRequest) Reset()         { *m = QueryLendAPYRequest{} }
 func (m *QueryLendAPYRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryLendAPYRequest) ProtoMessage()    {}
 func (*QueryLendAPYRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{3}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{5}
 }
 func (m *QueryLendAPYRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -210,7 +295,7 @@ func (m *QueryLendAPYResponse) Reset()         { *m = QueryLendAPYResponse{} }
 func (m *QueryLendAPYResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryLendAPYResponse) ProtoMessage()    {}
 func (*QueryLendAPYResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{4}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{6}
 }
 func (m *QueryLendAPYResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1095,6 +1180,8 @@ func (m *QueryLiquidationTargetsResponse) GetTargets() []string {
 
 func init() {
 	proto.RegisterType((*QueryRegisteredTokens)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokens")
+	proto.RegisterType((*QueryAvailableBorrowRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryAvailableBorrowRequest")
+	proto.RegisterType((*QueryAvailableBorrowResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryAvailableBorrowResponse")
 	proto.RegisterType((*QueryBorrowAPYRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowAPYRequest")
 	proto.RegisterType((*QueryBorrowAPYResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowAPYResponse")
 	proto.RegisterType((*QueryLendAPYRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLendAPYRequest")
@@ -1217,6 +1304,8 @@ type QueryClient interface {
 	// If the denomination is not supplied, the total for each borrowed token is
 	// returned.
 	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
+	// AvailableBorrow queries for the available amount to borrow of a specified denomination.
+	AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error)
 	// BorrowAPY queries for the borrow APY of a specified denomination.
 	BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error)
 	// LendAPY queries for the lend APY of a specified denomination.
@@ -1270,6 +1359,15 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
 	out := new(QueryBorrowedResponse)
 	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/Borrowed", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error) {
+	out := new(QueryAvailableBorrowResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/AvailableBorrow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1367,6 +1465,8 @@ type QueryServer interface {
 	// If the denomination is not supplied, the total for each borrowed token is
 	// returned.
 	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
+	// AvailableBorrow queries for the available amount to borrow of a specified denomination.
+	AvailableBorrow(context.Context, *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error)
 	// BorrowAPY queries for the borrow APY of a specified denomination.
 	BorrowAPY(context.Context, *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error)
 	// LendAPY queries for the lend APY of a specified denomination.
@@ -1403,6 +1503,9 @@ func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsReq
 }
 func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowedRequest) (*QueryBorrowedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Borrowed not implemented")
+}
+func (*UnimplementedQueryServer) AvailableBorrow(ctx context.Context, req *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AvailableBorrow not implemented")
 }
 func (*UnimplementedQueryServer) BorrowAPY(ctx context.Context, req *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowAPY not implemented")
@@ -1486,6 +1589,24 @@ func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AvailableBorrow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAvailableBorrowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AvailableBorrow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/AvailableBorrow",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AvailableBorrow(ctx, req.(*QueryAvailableBorrowRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1669,6 +1790,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Borrowed_Handler,
 		},
 		{
+			MethodName: "AvailableBorrow",
+			Handler:    _Query_AvailableBorrow_Handler,
+		},
+		{
 			MethodName: "BorrowAPY",
 			Handler:    _Query_BorrowAPY_Handler,
 		},
@@ -1729,6 +1854,69 @@ func (m *QueryRegisteredTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAvailableBorrowRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAvailableBorrowRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAvailableBorrowRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAvailableBorrowResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAvailableBorrowResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAvailableBorrowResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.Amount.Size()
+		i -= size
+		if _, err := m.Amount.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -2496,6 +2684,30 @@ func (m *QueryRegisteredTokens) Size() (n int) {
 	return n
 }
 
+func (m *QueryAvailableBorrowRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAvailableBorrowResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Amount.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
 func (m *QueryBorrowAPYRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2827,6 +3039,172 @@ func (m *QueryRegisteredTokens) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: QueryRegisteredTokens: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAvailableBorrowRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAvailableBorrowRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAvailableBorrowRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAvailableBorrowResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAvailableBorrowResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAvailableBorrowResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
