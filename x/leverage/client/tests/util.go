@@ -139,7 +139,6 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 }
 
 // updateCollateralWeight modifies the collateral weight of a registered token identified by baseDenom.
-// Also returns its previous collateral weight, which is useful when undoing changes.
 func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) {
 	val := s.network.Validators[0]
 	clientCtx := s.network.Validators[0].ClientCtx
