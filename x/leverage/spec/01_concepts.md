@@ -57,10 +57,12 @@ For example, if the module contains `1000 uumee` and `100 uumee` are reserved, t
 Some important quantities that govern the behavior of the `leverage` module are derived from a combination of parameters, borrow values, and oracle prices. The math and reasoning behind these values will appear below.
 
 As a reminder, the following values are always available as a basis for calculations:
-- User token balances, available through the `bank` module. This works for uTokens too.
+- Account token and uToken balances, available through the `bank` module.
+- Total supply of any token or uToken denomination, available through the `bank` module.
 - The `leverage` module account balance, available through the `bank` module.
 - Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Borrowed denominations and amounts for individual borrowers, stored in `leverage` module [State](02_state.md).
+- Total borrows summed over all borrower accounts, derived from the above.
 - Leverage module [Parameters](07_params.md)
 - Token parameters from the [Token Registry](02_state.md#Token-Registry)
 
@@ -68,15 +70,27 @@ The more complex derived values must use the values above as a basis.
 
 ### uToken Exchange Rate
 
-TODO
+uTokens are intended to work in the following way:
+
+> The total supply of uTokens of a given denomination, if exchanged, are worth the total amount of the associated token denomination in the lending pool, including that which has been borrowed out and any interest accrued on it.
+
+Thus, the uToken exchange rate for a given `denom` and associated `uDenom` is calculated as:
+
+`exchangeRate(denom) = [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ] / TotalSupply(uDenom)`
+
+For efficiency, and because the exchange rate can only be affected by interest accruing (and not by `Lend`, `Withdraw`, `Borrow`, `Repay`, and `Liquidate` transactions), uToken exchange rates are calculated every `InterestEpoch` and stored in state.
+
+Exchange rates satisfy the invariant
+
+`exchangeRate(denom) >= 1.0`
 
 ### Borrow Utilization
 
-TODO
+Borrow utilization of a token denomination is calculated as:
 
-### Dynamic Interest Rate
+`borrowUtilization(denom) = TotalBorrowed(denom) / [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`
 
-TODO
+Borrow utilization ranges between zero and one in general. In edge cases where `ReservedAmount(denom) > ModuleBalance(denom)`, utilization is taken to be `1.0`.
 
 ### Borrow Limit
 

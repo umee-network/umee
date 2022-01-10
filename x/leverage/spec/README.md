@@ -19,7 +19,6 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
     - Important Derived Values:
         - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
         - [Borrow Utilization](01_concepts.md#Borrow-Utilization)
-        - [Dynamic Interest Rate](01_concepts.md#Dynamic-Interest-Rate)
         - [Borrow Limit](01_concepts.md#Borrow-Limit)
         - [Borrow APY](01_concepts.md#Borrow-APY)
         - [Lending APY](01_concepts.md#Lending-APY)
