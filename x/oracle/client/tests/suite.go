@@ -11,6 +11,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/tests/network"
 	"github.com/umee-network/umee/x/oracle/client/cli"
 	"github.com/umee-network/umee/x/oracle/types"
@@ -172,7 +173,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
 
 	s.Require().Len(res.ExchangeRates, 1)
-	s.Require().Equal(res.ExchangeRates[0].Denom, "UMEE")
+	s.Require().Equal(res.ExchangeRates[0].Denom, app.DisplayDenom)
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
 }
 
