@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	exchangeRate string = "UMEE"
+	exchangeRate string = umeeapp.DisplayDenom
 )
 
 type IntegrationTestSuite struct {
