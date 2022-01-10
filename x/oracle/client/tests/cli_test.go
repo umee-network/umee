@@ -6,6 +6,8 @@ package tests
 import (
 	"testing"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
