@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
@@ -18,6 +17,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/umee-network/umee/app"
+	"github.com/umee-network/umee/tests/network"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
