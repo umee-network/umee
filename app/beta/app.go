@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 
+	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
+	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -97,9 +100,6 @@ import (
 	"github.com/umee-network/umee/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
-	"github.com/umee-network/umee/x/peggy"
-	peggykeeper "github.com/umee-network/umee/x/peggy/keeper"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 var (
@@ -130,7 +130,7 @@ var (
 		vesting.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
-		peggy.AppModuleBasic{},
+		gravity.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -143,7 +143,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		peggytypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         nil,
 	}
 )
@@ -182,8 +182,9 @@ type UmeeApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
-	PeggyKeeper      peggykeeper.Keeper
+	GravityKeeper    gravitykeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
+
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
@@ -222,8 +223,8 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey, peggytypes.StoreKey,
-		oracletypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, leveragetypes.StoreKey,
+		oracletypes.StoreKey, gravitytypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -336,14 +337,6 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
-	app.PeggyKeeper = peggykeeper.NewKeeper(
-		appCodec, keys[peggytypes.StoreKey],
-		app.GetSubspace(peggytypes.ModuleName),
-		app.AccountKeeper,
-		&stakingKeeper,
-		app.BankKeeper,
-		app.SlashingKeeper,
-	)
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		keys[oracletypes.ModuleName],
@@ -367,6 +360,18 @@ func New(
 		),
 	)
 
+	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
+	app.GravityKeeper = gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		&baseBankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+	)
+
 	// register the staking hooks
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
@@ -375,7 +380,7 @@ func New(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
-			app.PeggyKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
 		),
 	)
 
@@ -467,7 +472,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		leverage.NewAppModule(appCodec, app.LeverageKeeper),
-		peggy.NewAppModule(app.PeggyKeeper, app.BankKeeper),
+		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper),
 	)
 
@@ -487,7 +492,7 @@ func New(
 		ibchost.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
-		peggytypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -496,7 +501,7 @@ func New(
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
 		stakingtypes.ModuleName,
-		peggytypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -523,7 +528,7 @@ func New(
 		feegrant.ModuleName,
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		peggytypes.ModuleName,
+		gravitytypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -742,7 +747,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
-	paramsKeeper.Subspace(peggytypes.ModuleName)
+	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 
 	return paramsKeeper

@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -28,6 +27,7 @@ import (
 	"github.com/tendermint/tendermint/privval"
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
+	"github.com/umee-network/umee/tests/util"
 )
 
 type validator struct {
@@ -178,24 +178,18 @@ func (v *validator) createKey(name string) error {
 }
 
 func (v *validator) generateEthereumKey() error {
-	privateKey, err := crypto.GenerateKey()
+	privKey, pubKey, _, err := util.GenerateRandomEthKey()
 	if err != nil {
 		return err
 	}
 
-	privateKeyBytes := crypto.FromECDSA(privateKey)
+	privKeyBz := crypto.FromECDSA(privKey)
+	pubKeyBz := crypto.FromECDSAPub(pubKey)
 
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		return fmt.Errorf("unexpected public key type; expected: %T, got: %T", &ecdsa.PublicKey{}, publicKey)
-	}
-
-	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
 	v.ethereumKey = ethereumKey{
-		privateKey: hexutil.Encode(privateKeyBytes),
-		publicKey:  hexutil.Encode(publicKeyBytes),
-		address:    crypto.PubkeyToAddress(*publicKeyECDSA).Hex(),
+		privateKey: hexutil.Encode(privKeyBz),
+		publicKey:  hexutil.Encode(pubKeyBz),
+		address:    crypto.PubkeyToAddress(*pubKey).Hex(),
 	}
 
 	return nil

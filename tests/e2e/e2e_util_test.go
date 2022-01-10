@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,9 +19,6 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
-
-	peggycli "github.com/umee-network/umee/x/peggy/client/cli"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
@@ -39,6 +37,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 			"peggo",
 			"bridge",
 			"deploy-erc20",
+			s.gravityContractAddr,
 			baseDenom,
 			"--eth-pk",
 			ethMinerPK[2:], // remove 0x prefix
@@ -88,7 +87,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 
 			return true
 		},
-		2*time.Minute,
+		6*time.Minute,
 		time.Second,
 		"failed to confirm ERC20 deployment transaction",
 	)
@@ -137,12 +136,11 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 		Cmd: []string{
 			"umeed",
 			"tx",
-			"peggy",
+			"gravity",
 			"set-orchestrator-address",
 			valAddr.String(),
 			valAddr.String(),
 			s.chain.validators[valIdx].ethereumKey.address,
-			fmt.Sprintf("--%s=%s", peggycli.FlagEthPrivKey, s.chain.validators[valIdx].ethereumKey.privateKey),
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
@@ -200,7 +198,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		Cmd: []string{
 			"umeed",
 			"tx",
-			"peggy",
+			"gravity",
 			"send-to-eth",
 			ethDest,
 			amount,
@@ -238,7 +236,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		func() bool {
 			return queryUmeeTx(endpoint, txHash) == nil
 		},
-		time.Minute,
+		2*time.Minute,
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
@@ -264,6 +262,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			"peggo",
 			"bridge",
 			"send-to-cosmos",
+			s.gravityContractAddr,
 			tokenAddr,
 			toUmeeAddr,
 			amount,
@@ -305,7 +304,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		func() bool {
 			return queryEthTx(ctx, s.ethClient, txHash) == nil
 		},
-		2*time.Minute,
+		5*time.Minute,
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
@@ -350,6 +349,12 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 	s.Require().NoErrorf(
 		err,
 		"failed connect chains; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
+	)
+
+	s.Require().Containsf(
+		errBuf.String(),
+		"successfully opened init channel",
+		"failed to connect chains via IBC: %s", errBuf.String(),
 	)
 
 	s.T().Logf("connected %s and %s chains via IBC", s.chain.id, gaiaChainID)
@@ -477,7 +482,7 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 }
 
 func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/peggy/v1/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
+	resp, err := http.Get(fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
 	if err != nil {
 		return "", false, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}
@@ -489,7 +494,7 @@ func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
 		return "", false, err
 	}
 
-	var denomToERC20Resp peggytypes.QueryDenomToERC20Response
+	var denomToERC20Resp gravitytypes.QueryDenomToERC20Response
 	if err := cdc.UnmarshalJSON(bz, &denomToERC20Resp); err != nil {
 		return "", false, err
 	}

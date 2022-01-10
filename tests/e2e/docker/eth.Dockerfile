@@ -1,4 +1,4 @@
-FROM ethereum/client-go:v1.10.3
+FROM ethereum/client-go:v1.10.13
 
 RUN apk add --no-cache curl
 COPY eth_genesis.json eth_genesis.json
