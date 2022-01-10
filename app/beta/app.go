@@ -500,6 +500,8 @@ func New(
 		govtypes.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
+		feegrant.ModuleName,
+		authz.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
 	)

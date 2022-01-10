@@ -37,6 +37,11 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
   }
 
+  // MarketSize queries for the Market Size in USD of a specified denomination.
+  rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/market_size";
+  }
+
   // ReserveAmount queries for the amount reserved of a specified denomination.
   // If the token is not valid, the reserved amount is zero.
   rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
@@ -99,6 +104,19 @@ message QueryLendAPYRequest {
 // gRPC service handler.
 message QueryLendAPYResponse {
   string APY = 1
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryMarketSizeRequest defines the request structure for the Market Size in USD
+// gRPC service handler.
+message QueryMarketSizeRequest {
+  string denom = 1;
+}
+
+// QueryMarketSizeResponse defines the response structure for the Market Size in USD
+// gRPC service handler.
+message QueryMarketSizeResponse {
+  string market_size_usd = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 

@@ -153,8 +153,12 @@ func collectGenFiles(cfg Config, vals []*Validator, outputDir string) error {
 	return nil
 }
 
-func initGenFiles(cfg Config, genAccounts []authtypes.GenesisAccount, genBalances []banktypes.Balance, genFiles []string) error {
-
+func initGenFiles(
+	cfg Config,
+	genAccounts []authtypes.GenesisAccount,
+	genBalances []banktypes.Balance,
+	genFiles []string,
+) error {
 	// set the accounts in the genesis state
 	var authGenState authtypes.GenesisState
 	cfg.Codec.MustUnmarshalJSON(cfg.GenesisState[authtypes.ModuleName], &authGenState)
@@ -245,10 +249,22 @@ func generateSaveCoinKey(
 
 	if mnemonic != "" {
 		secret = mnemonic
-		info, err = keybase.NewAccount(keyName, mnemonic, keyring.DefaultBIP39Passphrase, sdk.GetConfig().GetFullBIP44Path(), algo)
+		info, err = keybase.NewAccount(
+			keyName,
+			mnemonic,
+			keyring.DefaultBIP39Passphrase,
+			sdk.GetConfig().GetFullBIP44Path(),
+			algo,
+		)
 	} else {
 		// generate a private key, with recovery phrase
-		info, secret, err = keybase.NewMnemonic(keyName, keyring.English, sdk.GetConfig().GetFullBIP44Path(), keyring.DefaultBIP39Passphrase, algo)
+		info, secret, err = keybase.NewMnemonic(
+			keyName,
+			keyring.English,
+			sdk.GetConfig().GetFullBIP44Path(),
+			keyring.DefaultBIP39Passphrase,
+			algo,
+		)
 	}
 	if err != nil {
 		return sdk.AccAddress{}, "", err
