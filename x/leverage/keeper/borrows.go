@@ -217,5 +217,5 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 	moduleBalance := k.ModuleBalance(ctx, denom)
 	reserveAmount := k.GetReserveAmount(ctx, denom)
 
-	return moduleBalance.Sub(reserveAmount)
+	return sdk.MaxInt(moduleBalance.Sub(reserveAmount),sdk.ZeroInt())
 }
