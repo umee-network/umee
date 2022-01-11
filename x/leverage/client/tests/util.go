@@ -171,7 +171,7 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 	s.UpdateRegistry(
 		clientCtx,
 		types.NewUpdateRegistryProposal(
-			fmt.Sprintf("collateral weight update - %d", proposalCounter)
+			fmt.Sprintf("collateral weight update - %d", proposalCounter),
 			"update collateral weight to "+collateralWeight.String(),
 			newTokens,
 		),
