@@ -94,20 +94,63 @@ Borrow utilization ranges between zero and one in general. In edge cases where `
 
 ### Borrow Limit
 
-TODO
+Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
+
+A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited.
+
+```go
+  collateral := GetBorrowerCollateral(borrower) // sdk.Coins
+  for _, coin := range collateral {
+    borrowLimit += TokenValue(coin) // Oracle price of denomination * Amount
+  }
+```
 
 ### Borrow APY
 
-TODO
+Umee uses a dynamic interest rate model. The borrow APY for each borrowed token denomination changes based on that denomination's Borrow Utilization.
+
+The `Token` struct stored in state for a given denomination defines three points on the `Utilization vs Borrow APY` graph:
+
+- At utilization = `0.0`, borrow APY = `Token.BaseBorrowRate`
+- At utilization = `Token.KinkUtilizationRate`, borrow APY = `Token.KinkBorrowRate`
+- At utilization = `1.0`, borrow APY = `Token.MaxBorrowRate`
+
+When utilization is between two of the above values, borrow APY is determined by linear interpolation between the two points. The resulting graph looks like a straight line with a "kink" in it.
 
 ### Lending APY
 
-TODO
+The interest accrued on borrows, after some of it is set aside for reserved is distributed to all lenders (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
+
+While Lending APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
+
+`LendAPY(token) = BorrowAPY(token) * BorrowUtilization(token) * [1.0 - ReserveFactor(token)]`
 
 ### Close Factor
 
-TODO
+When a borrower is above their borrow limit, their open borrows are eligible for liquidation. In order to reduce the severity of liquidation events that can occur to borrowers that only slightly exceed their borrow limits, a dynamic `CloseFactor` applies.
+
+A `CloseFactor` can be between 0 and 1. For example, a `CloseFactor = 0.25` means that a liquidator can at most pay back 25% of a borrower's current total borrowed value in a single transaction.
+
+Two module parameters are required to compute a borrower's `CloseFactor` based on how far their `TotalBorrowedValue` exceeds their `BorrowLimit` (both of which are USD values determined using price oracles)
+
+```go
+portionOverLimit := (TotalBorrowedValue / BorrowLimit) - 1
+// e.g. (1100/1000) - 1 = 0.1, or 10% over borrow limit
+
+if portionOverLimit > params.CompleteLiquidationThreshold {
+  CloseFactor = 1.0
+} else {
+  CloseFactor = Interpolate(             // linear interpolation
+    0.0,                                 // minimum x
+    params.CompleteLiquidationThreshold, // maximum x
+    params.MinimumCloseFactor,           // minimum y
+    1.0,                                 // maximum y
+  )
+}
+```
 
 ### Market Size
 
-TODO
+The `MarketSize` of a token denom is the USD value of all tokens lent to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
+
+`MarketSize(denom) = oracle.Price(denom) * [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`
