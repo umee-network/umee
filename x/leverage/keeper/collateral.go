@@ -78,8 +78,8 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
-// addressExistInList returns true if address exist in the list of addresses.
-func addressExistInList(list []sdk.AccAddress, addrToCheck sdk.AccAddress) bool {
+// addressExist returns true if address exist in the list of addresses.
+func addressExist(list []sdk.AccAddress, addrToCheck sdk.AccAddress) bool {
 	for _, addr := range list {
 		if addrToCheck.Equals(addr) {
 			return true
@@ -110,7 +110,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		borrowerAddr := types.GetAddressFromKeyWithPrefix(key, borrowPrefix)
 
 		// if the address is already on the list it can move to the next
-		if addressExistInList(addressEligibleToLiquidation, borrowerAddr) {
+		if addressExist(addressEligibleToLiquidation, borrowerAddr) {
 			continue
 		}
 
