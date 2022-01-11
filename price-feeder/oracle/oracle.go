@@ -103,6 +103,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 			startTime := time.Now()
 
 			if err := o.tick(); err != nil {
+				telemetry.IncrCounter(1, "failure", "tick")
 				o.logger.Err(err).Msg("oracle tick failed")
 			}
 
