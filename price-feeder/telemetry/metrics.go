@@ -122,20 +122,20 @@ func New(cfg Config) (*Metrics, error) {
 func (m *Metrics) Gather(format string) (GatherResponse, error) {
 	switch format {
 	case FormatPrometheus:
-		return m.GatherPrometheus()
+		return m.gatherPrometheus()
 
 	case FormatText:
-		return m.GatherGeneric()
+		return m.gatherGeneric()
 
 	case FormatDefault:
-		return m.GatherGeneric()
+		return m.gatherGeneric()
 
 	default:
 		return GatherResponse{}, fmt.Errorf("unsupported metrics format: %s", format)
 	}
 }
 
-func (m *Metrics) GatherPrometheus() (GatherResponse, error) {
+func (m *Metrics) gatherPrometheus() (GatherResponse, error) {
 	if !m.prometheusEnabled {
 		return GatherResponse{}, fmt.Errorf("prometheus metrics are not enabled")
 	}
@@ -158,7 +158,7 @@ func (m *Metrics) GatherPrometheus() (GatherResponse, error) {
 	return GatherResponse{ContentType: string(expfmt.FmtText), Metrics: buf.Bytes()}, nil
 }
 
-func (m *Metrics) GatherGeneric() (GatherResponse, error) {
+func (m *Metrics) gatherGeneric() (GatherResponse, error) {
 	summary, err := m.memSink.DisplayMetrics(nil, nil)
 	if err != nil {
 		return GatherResponse{}, fmt.Errorf("failed to gather in-memory metrics: %w", err)
