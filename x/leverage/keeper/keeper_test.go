@@ -48,7 +48,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
@@ -724,22 +724,34 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	// already has 1k u/umee for collateral.
 	lenderAddr, _ := s.initBorrowScenario()
 
-	// lender borrows 50 umee
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
+	// lender borrows 40 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
 	s.Require().NoError(err)
 
-	// verify lender's loan amount (50 umee)
+	// verify lender's loan amount (40 umee)
 	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, lenderAddr, umeeapp.BondDenom)
-	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
+	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
 
 	// Because no time has passed since genesis (due to test setup) this will not
 	// increase borrowed amount.
 	err = s.app.LeverageKeeper.AccrueAllInterest(s.ctx)
 	s.Require().NoError(err)
 
-	// verify lender's loan amount (50 umee)
+	// verify lender's loan amount (40 umee)
 	loanBalance = s.app.LeverageKeeper.GetBorrow(s.ctx, lenderAddr, umeeapp.BondDenom)
-	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
+	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
+
+	// borrow APY at utilization = 4%
+	// when kink utilization = 80%, and base/kink APY are 0.02 and 0.22
+	borrowAPY := s.app.LeverageKeeper.GetBorrowAPY(s.ctx, umeeapp.BondDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.03"), borrowAPY)
+
+	// lend APY when borrow APY is 3%
+	// and utilization is 4%, and reservefactor is 25%
+	lendAPY := s.app.LeverageKeeper.GetLendAPY(s.ctx, umeeapp.BondDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.0009"), lendAPY)
 }
 
 func (s *IntegrationTestSuite) TestBorrowUtilizationNoReserves() {
