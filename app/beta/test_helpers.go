@@ -110,7 +110,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Set mock exchange rates and a large enough vote period such that we won't
 	// execute ballot voting and thus clear out previous exchange rates, since we
 	// are not running a price-feeder.
-	oracleGenState.Params.VotePeriod = 100
+	oracleGenState.Params.VotePeriod = 1000
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
 		app.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
