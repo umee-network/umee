@@ -12,7 +12,6 @@ import (
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/pkg/httputil"
 	"github.com/umee-network/umee/price-feeder/router/middleware"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -24,10 +23,10 @@ type Router struct {
 	logger  zerolog.Logger
 	cfg     config.Config
 	oracle  Oracle
-	metrics *telemetry.Metrics
+	metrics Metrics
 }
 
-func New(logger zerolog.Logger, cfg config.Config, oracle Oracle, metrics *telemetry.Metrics) *Router {
+func New(logger zerolog.Logger, cfg config.Config, oracle Oracle, metrics Metrics) *Router {
 	return &Router{
 		logger:  logger.With().Str("module", "router").Logger(),
 		cfg:     cfg,

@@ -14,6 +14,7 @@ import (
 
 	"github.com/umee-network/umee/price-feeder/config"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 var (
@@ -25,8 +26,7 @@ var (
 	}
 )
 
-type mockOracle struct {
-}
+type mockOracle struct{}
 
 func (m mockOracle) GetLastPriceSyncTimestamp() time.Time {
 	return time.Now()
@@ -34,6 +34,20 @@ func (m mockOracle) GetLastPriceSyncTimestamp() time.Time {
 
 func (m mockOracle) GetPrices() map[string]sdk.Dec {
 	return mockPrices
+}
+
+type mockMetrics struct{}
+
+func (mockMetrics) Gather(format string) (telemetry.GatherResponse, error) {
+	return telemetry.GatherResponse{}, nil
+}
+
+func (mockMetrics) GatherPrometheus() (telemetry.GatherResponse, error) {
+	return telemetry.GatherResponse{}, nil
+}
+
+func (mockMetrics) GatherGeneric() (telemetry.GatherResponse, error) {
+	return telemetry.GatherResponse{}, nil
 }
 
 type RouterTestSuite struct {
@@ -53,7 +67,7 @@ func (rts *RouterTestSuite) SetupSuite() {
 		},
 	}
 
-	r := v1.New(zerolog.Nop(), cfg, mockOracle{})
+	r := v1.New(zerolog.Nop(), cfg, mockOracle{}, mockMetrics{})
 	r.RegisterRoutes(mux, v1.APIPathPrefix)
 
 	rts.mux = mux
