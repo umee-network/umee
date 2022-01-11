@@ -42,14 +42,6 @@ func (mockMetrics) Gather(format string) (telemetry.GatherResponse, error) {
 	return telemetry.GatherResponse{}, nil
 }
 
-func (mockMetrics) GatherPrometheus() (telemetry.GatherResponse, error) {
-	return telemetry.GatherResponse{}, nil
-}
-
-func (mockMetrics) GatherGeneric() (telemetry.GatherResponse, error) {
-	return telemetry.GatherResponse{}, nil
-}
-
 type RouterTestSuite struct {
 	suite.Suite
 
