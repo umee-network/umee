@@ -26,7 +26,7 @@ Users have the following actions available to them:
 
   Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
-- [Withdraw](04_messages.md#MsgWithdrawAsset lent assets by turning in uTokens of the associated denomination.
+- [Withdraw](04_messages.md#MsgWithdrawAsset) lent assets by turning in uTokens of the associated denomination.
 
    Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
