@@ -4,7 +4,7 @@ This document covers basic concepts and math that determine the `leverage` modul
 
 ## Accepted Assets
 
-At the foundation of the `leverage` module is the [Token Registry](02_state.md#Token-Registry), which contains a list of accepts base asset types.
+At the foundation of the `leverage` module is the [Token Registry](02_state.md#Token-Registry), which contains a list of accepted types.
 
 This list is controlled by governance, and serves to limit the asset types available for transactions like borrowing and lending, and also any query services based on denomination.
 
