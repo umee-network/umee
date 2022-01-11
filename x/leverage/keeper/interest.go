@@ -102,7 +102,8 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			return err
 		}
 
-		if err := k.SetLendAPY(ctx, coin.Denom, borrowRate.Mul(utilization)); err != nil {
+		lendRate := borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reserveFactor))
+		if err := k.SetLendAPY(ctx, coin.Denom, lendRate); err != nil {
 			return err
 		}
 	}
