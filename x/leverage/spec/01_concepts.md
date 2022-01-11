@@ -80,9 +80,7 @@ Thus, the uToken exchange rate for a given `denom` and associated `uDenom` is ca
 
 For efficiency, and because the exchange rate can only be affected by interest accruing (and not by `Lend`, `Withdraw`, `Borrow`, `Repay`, and `Liquidate` transactions), uToken exchange rates are calculated every `InterestEpoch` and stored in state.
 
-Exchange rates satisfy the invariant
-
-`exchangeRate(denom) >= 1.0`
+Exchange rates satisfy the invariant `exchangeRate(denom) >= 1.0`
 
 ### Borrow Utilization
 
