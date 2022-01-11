@@ -30,7 +30,7 @@ Users have the following actions available to them:
 
    Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
-- [Borrow](04_messages.md#MsgBorrowAsset) assets of an accepted type, up to their [Borrow Limit](01_concepts.md#Borrow-Limit). 
+- [Borrow](04_messages.md#MsgBorrowAsset) assets of an accepted type, up to their [Borrow Limit](01_concepts.md#Borrow-Limit).
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](01_concepts.md#Borrow-APY).
 
