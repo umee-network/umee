@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -142,6 +143,9 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		lastCheckHeight = latestBlockHeight
 
 		resp, err := BroadcastTx(clientCtx, factory, msgs...)
+		if resp != nil && resp.Code != 0 {
+			err = fmt.Errorf("invalid response code from tx")
+		}
 		if err != nil {
 			var (
 				code uint32

@@ -15,9 +15,12 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
+
+var proposalCounter int
 
 // UpdateRegistry submits an UpdateRegistryProposal governance proposal with a
 // deposit and automatically votes yes on it. It will wait until the proposal
@@ -132,7 +135,53 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 			return prop.Status == govtypes.StatusPassed
 		},
 		2*time.Minute,
-		time.Second,
+		10*time.Second,
 		"proposal %d (%s) failed to pass", proposalID, content.Title,
+	)
+}
+
+// updateCollateralWeight modifies the collateral weight of a registered token identified by baseDenom.
+func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) {
+	val := s.network.Validators[0]
+	clientCtx := s.network.Validators[0].ClientCtx
+
+	queryFlags := []string{
+		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	}
+
+	// Query all registered tokens
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryAllRegisteredTokens(), queryFlags)
+	s.Require().NoError(err)
+
+	resp := &types.QueryRegisteredTokensResponse{}
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
+
+	// Replace the collateral weight of the selected token with the new value
+	newTokens := resp.GetRegistry()
+	for i := range newTokens {
+		if newTokens[i].BaseDenom == baseDenom {
+			newTokens[i].CollateralWeight = collateralWeight
+		}
+	}
+
+	// Increment proposalCounter so we don't re-use proposal title
+	proposalCounter++
+
+	// Update token registry using the modified token registry - waits for proposal accepted
+	s.UpdateRegistry(
+		clientCtx,
+		types.NewUpdateRegistryProposal(
+			fmt.Sprintf("collateral weight update - %d", proposalCounter),
+			"update collateral weight to "+collateralWeight.String(),
+			newTokens,
+		),
+		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
+		[]string{
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
+			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
+			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
+		}...,
 	)
 }

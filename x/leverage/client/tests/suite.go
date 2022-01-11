@@ -623,23 +623,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestQueryLiquidationTargets() {
-	testCases := []testQuery{
-		{
-			"query liquidation targets",
-			cli.GetCmdQueryLiquidationTargets(),
-			[]string{},
-			false,
-			&types.QueryLiquidationTargetsResponse{},
-			&types.QueryLiquidationTargetsResponse{
-				Targets: []string{},
-			},
-		},
-	}
-
-	runTestQueries(s, testCases)
-}
-
 func (s *IntegrationTestSuite) TestQueryLendAPY() {
 	testCasesLendAPY := []testQuery{
 		{
@@ -1168,22 +1151,120 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 }
 
 func (s *IntegrationTestSuite) TestCmdLiquidate() {
-
 	val := s.network.Validators[0]
+
+	noTargetsQuery := []testQuery{
+		{
+			"no targets",
+			cli.GetCmdQueryLiquidationTargets(),
+			[]string{},
+			false,
+			&types.QueryLiquidationTargetsResponse{},
+			&types.QueryLiquidationTargetsResponse{
+				Targets: []string{},
+			},
+		},
+	}
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+		{
+			"borrow",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"50uumee",
+			},
+			nil,
+		},
+	}
+
+	oneTargetQuery := []testQuery{
+		{
+			"one liquidation target",
+			cli.GetCmdQueryLiquidationTargets(),
+			[]string{},
+			false,
+			&types.QueryLiquidationTargetsResponse{},
+			&types.QueryLiquidationTargetsResponse{
+				Targets: []string{
+					// TODO: comment in when this query is implemented
+					// val.Address.String()
+				},
+			},
+		},
+	}
 
 	testCases := []testTransaction{
 		{
-			"liquidation ineligible",
+			"valid liquidate",
 			cli.GetCmdLiquidate(),
 			[]string{
 				val.Address.String(),
 				val.Address.String(),
+				// note: partial liquidation, so cleanup still requires a CmdRepay
 				"5uumee",
 				"u/uumee",
 			},
-			types.ErrLiquidationIneligible,
+			nil,
 		},
 	}
 
+	cleanupCommands := []testTransaction{
+		{
+			"repay",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				// note: amount will be reduced from 50 to remaining amount owed
+				"50uumee",
+			},
+			nil,
+		},
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, noTargetsQuery)
+	runTestTransactions(s, setupCommands)
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01")) // lower to allow liquidation
+	runTestQueries(s, oneTargetQuery)
 	runTestTransactions(s, testCases)
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.05")) // reset to original
+	runTestTransactions(s, cleanupCommands)
 }
