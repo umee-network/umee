@@ -235,7 +235,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
 		BaseDenom:            app.BondDenom,
-		SymbolDenom:          "UMEE",
+		SymbolDenom:          app.DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),

@@ -35,6 +35,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryLendAPY(),
 		GetCmdQueryBorrowAPY(),
+		GetCmdQueryMarketSize(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationTargets(),
 	)
@@ -274,6 +275,39 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 	return cmd
 }
 
+// GetCmdQueryAvailableBorrow returns a CLI command handler to query for the
+// available amount to borrow of a specific denom.
+func GetCmdQueryAvailableBorrow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "available-borrow [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the available amount to borrow of a specified denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryAvailableBorrowRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.AvailableBorrow(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // GetCmdQueryLendAPY returns a CLI command handler to query for the
 // lend APY of a specific uToken.
 func GetCmdQueryLendAPY() *cobra.Command {
@@ -327,6 +361,39 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 			}
 
 			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMarketSize returns a CLI command handler to query for the
+// Market Size of a specific token.
+func GetCmdQueryMarketSize() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "market-size [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the USD market size of a specified denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryMarketSizeRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.MarketSize(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

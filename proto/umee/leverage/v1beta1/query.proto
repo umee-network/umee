@@ -27,6 +27,11 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
   }
 
+  // AvailableBorrow queries for the available amount to borrow of a specified denomination.
+  rpc AvailableBorrow(QueryAvailableBorrowRequest) returns (QueryAvailableBorrowResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/available_borrow";
+  }
+
   // BorrowAPY queries for the borrow APY of a specified denomination.
   rpc BorrowAPY(QueryBorrowAPYRequest) returns (QueryBorrowAPYResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
@@ -35,6 +40,11 @@ service Query {
   // LendAPY queries for the lend APY of a specified denomination.
   rpc LendAPY(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
+  }
+
+  // MarketSize queries for the Market Size in USD of a specified denomination.
+  rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/market_size";
   }
 
   // ReserveAmount queries for the amount reserved of a specified denomination.
@@ -76,6 +86,19 @@ service Query {
 // gRPC service handler.
 message QueryRegisteredTokens {}
 
+// QueryAvailableBorrowRequest defines the request structure for the
+// available amount for borrow gRPC service handler.
+message QueryAvailableBorrowRequest {
+  string denom = 1;
+}
+
+// QueryAvailableBorrowResponse defines the response structure for the
+// available amount for borrow gRPC service handler.
+message QueryAvailableBorrowResponse {
+  string amount = 1
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+}
+
 // QueryBorrowAPYRequest defines the request structure for the BorrowAPY
 // gRPC service handler.
 message QueryBorrowAPYRequest {
@@ -99,6 +122,19 @@ message QueryLendAPYRequest {
 // gRPC service handler.
 message QueryLendAPYResponse {
   string APY = 1
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryMarketSizeRequest defines the request structure for the Market Size in USD
+// gRPC service handler.
+message QueryMarketSizeRequest {
+  string denom = 1;
+}
+
+// QueryMarketSizeResponse defines the response structure for the Market Size in USD
+// gRPC service handler.
+message QueryMarketSizeResponse {
+  string market_size_usd = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
