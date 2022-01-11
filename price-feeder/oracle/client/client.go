@@ -22,6 +22,7 @@ import (
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	umeeparams "github.com/umee-network/umee/app/params"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 type (
@@ -144,6 +145,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 
 		resp, err := BroadcastTx(clientCtx, factory, msgs...)
 		if resp != nil && resp.Code != 0 {
+			telemetry.IncrCounter(1, "failure", "tx")
 			err = fmt.Errorf("invalid response code from tx")
 		}
 		if err != nil {
