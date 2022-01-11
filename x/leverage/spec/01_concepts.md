@@ -117,7 +117,7 @@ When utilization is between two of the above values, borrow APY is determined by
 
 ### Lending APY
 
-The interest accrued on borrows, after some of it is set aside for reserved is distributed to all lenders (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
+The interest accrued on borrows, after some of it is set aside for reserves, is distributed to all lenders (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
 
 While Lending APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
 
