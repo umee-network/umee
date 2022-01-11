@@ -20,7 +20,7 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-var proposalCounter = sdk.ZeroInt()
+var proposalCounter int
 
 // UpdateRegistry submits an UpdateRegistryProposal governance proposal with a
 // deposit and automatically votes yes on it. It will wait until the proposal
@@ -165,13 +165,13 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 	}
 
 	// Increment proposalCounter so we don't re-use proposal title
-	proposalCounter = proposalCounter.Add(sdk.OneInt())
+	proposalCounter++
 
 	// Update token registry using the modified token registry - waits for proposal accepted
 	s.UpdateRegistry(
 		clientCtx,
 		types.NewUpdateRegistryProposal(
-			"collateral weight update "+proposalCounter.String(),
+			fmt.Sprintf("collateral weight update - %d", proposalCounter)
 			"update collateral weight to "+collateralWeight.String(),
 			newTokens,
 		),
