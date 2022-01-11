@@ -23,7 +23,7 @@ quote = "USD"
 
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
-chain_id = "umee-local-testnet"
+chain_id = "umee-local-beta-testnet"
 validator = "umeevaloper12tysz6mzrawenca2t3t7ltym4hfjj8a5upsn2k"
 
 [keyring]
