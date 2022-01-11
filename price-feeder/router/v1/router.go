@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -10,6 +12,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/pkg/httputil"
 	"github.com/umee-network/umee/price-feeder/router/middleware"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -18,16 +21,18 @@ const (
 
 // Router defines a router wrapper used for registering v1 API routes.
 type Router struct {
-	logger zerolog.Logger
-	cfg    config.Config
-	oracle Oracle
+	logger  zerolog.Logger
+	cfg     config.Config
+	oracle  Oracle
+	metrics *telemetry.Metrics
 }
 
-func New(logger zerolog.Logger, cfg config.Config, oracle Oracle) *Router {
+func New(logger zerolog.Logger, cfg config.Config, oracle Oracle, metrics *telemetry.Metrics) *Router {
 	return &Router{
-		logger: logger.With().Str("module", "router").Logger(),
-		cfg:    cfg,
-		oracle: oracle,
+		logger:  logger.With().Str("module", "router").Logger(),
+		cfg:     cfg,
+		oracle:  oracle,
+		metrics: metrics,
 	}
 }
 
@@ -56,6 +61,11 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		"/prices",
 		mChain.ThenFunc(r.pricesHandler()),
 	).Methods(httputil.MethodGET)
+
+	v1Router.Handle(
+		"/metrics",
+		mChain.ThenFunc(r.metricsHandler()),
+	).Methods(httputil.MethodGET)
 }
 
 func (r *Router) healthzHandler() http.HandlerFunc {
@@ -77,5 +87,20 @@ func (r *Router) pricesHandler() http.HandlerFunc {
 		}
 
 		httputil.RespondWithJSON(w, http.StatusOK, resp)
+	}
+}
+
+func (r *Router) metricsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		format := strings.TrimSpace(req.FormValue("format"))
+
+		gr, err := r.metrics.Gather(format)
+		if err != nil {
+			writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("failed to gather metrics: %s", err))
+			return
+		}
+
+		w.Header().Set("Content-Type", gr.ContentType)
+		_, _ = w.Write(gr.Metrics)
 	}
 }

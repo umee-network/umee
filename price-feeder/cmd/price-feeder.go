@@ -20,6 +20,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -130,9 +131,14 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 
 	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs)
 
+	metrics, err := telemetry.New(cfg.Telemetry)
+	if err != nil {
+		return err
+	}
+
 	g.Go(func() error {
 		// start the process that observes and publishes exchange prices
-		return startPriceFeeder(ctx, logger, cfg, oracle)
+		return startPriceFeeder(ctx, logger, cfg, oracle, metrics)
 	})
 	g.Go(func() error {
 		// start the process that calculates oracle prices and votes
@@ -147,7 +153,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 // trapSignal will listen for any OS signal and invoke Done on the main
 // WaitGroup allowing the main process to gracefully exit.
 func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
-	var sigCh = make(chan os.Signal)
+	sigCh := make(chan os.Signal)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
 	signal.Notify(sigCh, syscall.SIGINT)
@@ -159,9 +165,15 @@ func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
 	}()
 }
 
-func startPriceFeeder(ctx context.Context, logger zerolog.Logger, cfg config.Config, oracle *oracle.Oracle) error {
+func startPriceFeeder(
+	ctx context.Context,
+	logger zerolog.Logger,
+	cfg config.Config,
+	oracle *oracle.Oracle,
+	metrics *telemetry.Metrics,
+) error {
 	rtr := mux.NewRouter()
-	v1Router := v1.New(logger, cfg, oracle)
+	v1Router := v1.New(logger, cfg, oracle, metrics)
 	v1Router.RegisterRoutes(rtr, v1.APIPathPrefix)
 
 	writeTimeout, err := time.ParseDuration(cfg.Server.WriteTimeout)

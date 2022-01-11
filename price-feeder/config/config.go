@@ -9,6 +9,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -45,12 +46,13 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server        Server         `toml:"server"`
-		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
-		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
+		Server        Server           `toml:"server"`
+		CurrencyPairs []CurrencyPair   `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Account       Account          `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring          `toml:"keyring" validate:"required,gt=0,dive,required"`
+		RPC           RPC              `toml:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry     telemetry.Config `toml:"telemetry"`
+		GasAdjustment float64          `toml:"gas_adjustment" validate:"required"`
 	}
 
 	// Server defines the API server configuration.
