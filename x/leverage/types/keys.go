@@ -172,3 +172,17 @@ func CreateLendAPYKey(tokenDenom string) []byte {
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
+
+// AddressFromKey extracts address from a key with the form
+// prefix | lengthPrefixed(addr) | ...
+func AddressFromKey(key []byte, prefix []byte) sdk.AccAddress {
+	addrLength := int(key[len(prefix)])
+	return key[len(prefix)+1 : len(prefix)+1+addrLength]
+}
+
+// DenomFromKeyWithAddress extracts denom from a key with the form
+// prefix | lengthPrefixed(addr) | denom | 0x00
+func DenomFromKeyWithAddress(key []byte, prefix []byte) string {
+	addrLength := int(key[len(prefix)])
+	return string(key[len(prefix)+addrLength+1 : len(key)-1])
+}

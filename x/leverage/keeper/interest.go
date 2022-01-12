@@ -121,7 +121,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		key, val := iter.Key(), iter.Value()
 
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(key[len(borrowPrefix)+int(key[len(borrowPrefix)]+1) : len(key)-1])
+		denom := types.DenomFromKeyWithAddress(key, borrowPrefix)
 
 		var currentBorrow sdk.Int
 		if err := currentBorrow.Unmarshal(val); err != nil {

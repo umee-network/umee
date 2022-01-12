@@ -78,9 +78,58 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
-// GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation
+// GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
-	// TODO: Complete this to support liquidation tool
-	// ref: https://github.com/umee-network/umee/issues/229
-	return nil, nil
+	store := ctx.KVStore(k.storeKey)
+	borrowPrefix := types.CreateLoanKeyNoAddress()
+
+	iter := sdk.KVStorePrefixIterator(store, borrowPrefix)
+	defer iter.Close()
+
+	liquidationTargets := []sdk.AccAddress{}
+	checkedAddrs := map[string]struct{}{}
+
+	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
+	for ; iter.Valid(); iter.Next() {
+		// key is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
+		key, _ := iter.Key(), iter.Value()
+
+		// remove prefix | denom and null-terminator
+		borrowerAddr := types.AddressFromKey(key, borrowPrefix)
+
+		// if the address is already checked it can move on
+		if _, ok := checkedAddrs[borrowerAddr.String()]; ok {
+			continue
+		}
+		checkedAddrs[borrowerAddr.String()] = struct{}{}
+
+		// get total borrowed by borrower (all denoms)
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+
+		// get borrower uToken balances, for all uToken denoms enabled as collateral
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+
+		// use oracle helper functions to find total borrowed value in USD
+		borrowValue, err := k.TotalTokenValue(ctx, borrowed)
+		if err != nil {
+			return nil, err
+		}
+
+		// use collateral weights to compute borrow limit from enabled collateral
+		borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
+		if err != nil {
+			return nil, err
+		}
+
+		// check if the borrower's limit is bigger than the value
+		if borrowLimit.GTE(borrowValue) {
+			continue
+		}
+
+		// if the borrowLimit is smaller then the borrowValue
+		// the address is eligible to liquidation
+		liquidationTargets = append(liquidationTargets, borrowerAddr)
+	}
+
+	return liquidationTargets, nil
 }
