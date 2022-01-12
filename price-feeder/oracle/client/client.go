@@ -146,7 +146,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight int64, timeoutHeight int64, m
 		resp, err := BroadcastTx(clientCtx, factory, msgs...)
 		if resp != nil && resp.Code != 0 {
 			telemetry.IncrCounter(1, "failure", "tx", "code")
-			err = fmt.Errorf("invalid response code from tx")
+			err = fmt.Errorf("invalid response code from tx: %d", resp.Code)
 		}
 		if err != nil {
 			var (
