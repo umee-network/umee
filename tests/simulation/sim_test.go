@@ -184,3 +184,63 @@ func TestAppStateDeterminism(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkFullAppSimulation(b *testing.B) {
+	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-bench-sim", "Simulation")
+	if skip {
+		b.Skip("skipping application simulation")
+	}
+
+	require.NoError(b, err, "simulation setup failed")
+
+	defer func() {
+		db.Close()
+		require.NoError(b, os.RemoveAll(dir))
+	}()
+
+	var logger log.Logger
+	if simapp.FlagVerboseValue {
+		logger = server.ZeroLogWrapper{
+			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
+		}
+	} else {
+		logger = server.ZeroLogWrapper{
+			Logger: zerolog.Nop(),
+		}
+	}
+
+	app := umeeapp.New(
+		logger,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		umeeapp.DefaultNodeHome,
+		simapp.FlagPeriodValue,
+		umeeapp.MakeEncodingConfig(),
+		umeeapp.EmptyAppOptions{},
+		interBlockCacheOpt(),
+	)
+
+	// Run randomized simulation:w
+	_, simParams, simErr := simulation.SimulateFromSeed(
+		b,
+		os.Stdout,
+		app.BaseApp,
+		appStateFn(app.AppCodec(), app.SimulationManager()),
+		simtypes.RandomAccounts,
+		simapp.SimulationOperations(app, app.AppCodec(), config),
+		app.ModuleAccountAddrs(),
+		config,
+		app.AppCodec(),
+	)
+
+	// export state and simParams before the simulation error is checked
+	err = simapp.CheckExportSimulation(app, config, simParams)
+	require.NoError(b, err)
+	require.NoError(b, simErr)
+
+	if config.Commit {
+		simapp.PrintStats(db)
+	}
+}
