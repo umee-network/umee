@@ -1,9 +1,9 @@
 package v1
 
 import (
+	"encoding/json"
 	"net/http"
 
-	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -44,5 +44,6 @@ func newErrorResponse(code int, err string) errorResponse {
 func writeErrorResponse(w http.ResponseWriter, status int, err string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_, _ = w.Write(legacy.Cdc.MustMarshalJSON(newErrorResponse(0, err)))
+	bz, _ := json.Marshal(newErrorResponse(0, err))
+	_, _ = w.Write(bz)
 }

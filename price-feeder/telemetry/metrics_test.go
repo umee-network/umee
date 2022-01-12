@@ -9,16 +9,17 @@ import (
 	"github.com/armon/go-metrics"
 	"github.com/prometheus/common/expfmt"
 	"github.com/stretchr/testify/require"
+	"github.com/umee-network/umee/price-feeder/config"
 )
 
 func TestMetrics_Disabled(t *testing.T) {
-	m, err := New(Config{Enabled: false})
+	m, err := New(config.Telemetry{Enabled: false})
 	require.Nil(t, m)
 	require.Nil(t, err)
 }
 
 func TestMetrics_InMem(t *testing.T) {
-	m, err := New(Config{
+	m, err := New(config.Telemetry{
 		Enabled:        true,
 		EnableHostname: false,
 		ServiceName:    "test",
@@ -41,12 +42,12 @@ func TestMetrics_InMem(t *testing.T) {
 }
 
 func TestMetrics_Prom(t *testing.T) {
-	m, err := New(Config{
-		Enabled:                 true,
-		EnableHostname:          false,
-		ServiceName:             "test",
-		PrometheusRetentionTime: 60,
-		EnableHostnameLabel:     false,
+	m, err := New(config.Telemetry{
+		Enabled:             true,
+		EnableHostname:      false,
+		ServiceName:         "test",
+		Type:                "prometheus",
+		EnableHostnameLabel: false,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, m)

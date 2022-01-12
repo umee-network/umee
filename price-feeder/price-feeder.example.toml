@@ -42,5 +42,5 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-prometheus_retention_time = 1800
+type = "prometheus"
 global_labels = [["chain-id", "umee-local-beta-testnet"]]

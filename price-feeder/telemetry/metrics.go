@@ -10,6 +10,7 @@ import (
 	metricsprom "github.com/armon/go-metrics/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
+	"github.com/umee-network/umee/price-feeder/config"
 )
 
 // globalLabels defines the set of global labels that will be applied to all
@@ -22,37 +23,6 @@ const (
 	FormatPrometheus = "prometheus"
 	FormatText       = "text"
 )
-
-// Config defines the configuration options for application telemetry.
-type Config struct {
-	// Prefixed with keys to separate services
-	ServiceName string `toml:"service_name"`
-
-	// Enabled enables the application telemetry functionality. When enabled,
-	// an in-memory sink is also enabled by default. Operators may also enabled
-	// other sinks such as Prometheus.
-	Enabled bool `toml:"enabled"`
-
-	// Enable prefixing gauge values with hostname
-	EnableHostname bool `toml:"enable_hostname"`
-
-	// Enable adding hostname to labels
-	EnableHostnameLabel bool `toml:"enable_hostname_label"`
-
-	// Enable adding service to labels
-	EnableServiceLabel bool `toml:"enable_service_label"`
-
-	// PrometheusRetentionTime, when positive, enables a Prometheus metrics sink.
-	// It defines the retention duration in seconds.
-	PrometheusRetentionTime int64 `toml:"prometheus_retention_time"`
-
-	// GlobalLabels defines a global set of name/value label tuples applied to all
-	// metrics emitted using the wrapper functions defined in telemetry package.
-	//
-	// Example:
-	// [["chain_id", "cosmoshub-1"]]
-	GlobalLabels [][]string `toml:"global_labels"`
-}
 
 // Metrics defines a wrapper around application telemetry functionality. It allows
 // metrics to be gathered at any point in time. When creating a Metrics object,
@@ -71,7 +41,7 @@ type GatherResponse struct {
 }
 
 // New creates a new instance of Metrics
-func New(cfg Config) (*Metrics, error) {
+func New(cfg config.Telemetry) (*Metrics, error) {
 	if !cfg.Enabled {
 		return nil, nil
 	}
@@ -95,10 +65,10 @@ func New(cfg Config) (*Metrics, error) {
 	m := &Metrics{memSink: memSink}
 	fanout := metrics.FanoutSink{memSink}
 
-	if cfg.PrometheusRetentionTime > 0 {
+	if cfg.Type == "prometheus" {
 		m.prometheusEnabled = true
 		prometheusOpts := metricsprom.PrometheusOpts{
-			Expiration: time.Duration(cfg.PrometheusRetentionTime) * time.Second,
+			Expiration: time.Duration(120) * time.Second,
 		}
 
 		promSink, err := metricsprom.NewPrometheusSinkFrom(prometheusOpts)

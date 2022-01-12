@@ -9,7 +9,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -46,13 +45,13 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server        Server           `toml:"server"`
-		CurrencyPairs []CurrencyPair   `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Account       Account          `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       Keyring          `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC           RPC              `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry     telemetry.Config `toml:"telemetry"`
-		GasAdjustment float64          `toml:"gas_adjustment" validate:"required"`
+		Server        Server         `toml:"server"`
+		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
+		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry     Telemetry      `toml:"telemetry"`
+		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
 	}
 
 	// Server defines the API server configuration.
@@ -92,6 +91,37 @@ type (
 		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
 		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
 		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
+	}
+
+	// Telemetry defines the configuration options for application telemetry.
+	Telemetry struct {
+		// Prefixed with keys to separate services
+		ServiceName string `toml:"service_name"`
+
+		// Enabled enables the application telemetry functionality. When enabled,
+		// an in-memory sink is also enabled by default. Operators may also enabled
+		// other sinks such as Prometheus.
+		Enabled bool `toml:"enabled"`
+
+		// Enable prefixing gauge values with hostname
+		EnableHostname bool `toml:"enable_hostname"`
+
+		// Enable adding hostname to labels
+		EnableHostnameLabel bool `toml:"enable_hostname_label"`
+
+		// Enable adding service to labels
+		EnableServiceLabel bool `toml:"enable_service_label"`
+
+		// GlobalLabels defines a global set of name/value label tuples applied to all
+		// metrics emitted using the wrapper functions defined in telemetry package.
+		//
+		// Example:
+		// [["chain_id", "cosmoshub-1"]]
+		GlobalLabels [][]string `toml:"global_labels"`
+
+		// Type determines which type of telemetry to use
+		// Valid values are "prometheus" or "generic"
+		Type string `toml:"type"`
 	}
 )
 
