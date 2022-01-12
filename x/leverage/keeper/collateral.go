@@ -80,7 +80,6 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
-	// ref: https://github.com/umee-network/umee/issues/229
 	store := ctx.KVStore(k.storeKey)
 	borrowPrefix := types.CreateLoanKeyNoAddress()
 
@@ -88,7 +87,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	defer iter.Close()
 
 	liquidationTargets := []sdk.AccAddress{}
-	checkedAddrs := map[string]bool{}
+	checkedAddrs := map[string]struct{}
 
 	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
 	for ; iter.Valid(); iter.Next() {
@@ -99,10 +98,10 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		borrowerAddr := types.AddressFromKey(key, borrowPrefix)
 
 		// if the address is already checked it can move on
-		if checkedAddrs[borrowerAddr.String()] {
+		if _, ok := checkedAddrs[borrowerAddr.String()]; ok {
 			continue
 		}
-		checkedAddrs[borrowerAddr.String()] = true
+		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
 		// get total borrowed by borrower (all denoms)
 		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
