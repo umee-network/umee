@@ -173,29 +173,16 @@ func CreateLendAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// GetAddressFromKeyWithPrefix the key should be exactly:
-// prefix | lengthPrefixed(addr)
-func GetAddressFromKeyWithPrefix(key []byte, prefix []byte) sdk.AccAddress {
-	// key is prefix | lengthPrefixed(addr) | ....
-	prefixLength := len(prefix)
-	lengthAddr := int(key[prefixLength])
-	// plus 1 because of the byte that represent the size of lengthPrefixedAddress
-	initAddr := prefixLength + 1
-	endAddr := initAddr + lengthAddr
-
-	return key[initAddr:endAddr]
+// AddressFromKey extracts address from a key with the form
+// prefix | lengthPrefixed(addr) | ...
+func AddressFromKey(key []byte, prefix []byte) sdk.AccAddress {
+	addrLength := int(key[prefixLength])
+	return key[len(prefix)+1:len(prefix)+1+addrLength]
 }
 
-// GetDenomFromKeyWithPrefixAndAddress returns the denom from the key formatted as:
+// DenomFromKeyWithAddress extracts denom from a key with the form
 // prefix | lengthPrefixed(addr) | denom | 0x00
-func GetDenomFromKeyWithPrefixAndAddress(key []byte, prefix []byte) string {
-	// key is prefix | lengthPrefixed(addr) | denom | 0x00
-	prefixLength := len(prefix)
-	lengthAddr := int(key[prefixLength])
-	// plus 1 because of the byte that represent the size of lengthPrefixedAddress
-	initDenom := prefixLength + lengthAddr + 1
-	// minus 1 because of removing the appended 0 of null-termination
-	endDenom := len(key) - 1
-
-	return string(key[initDenom:endDenom])
+func DenomFromKeyWithAddress(key []byte, prefix []byte) string {
+	addrLength := int(key[prefixLength])
+	return string(key[len(prefix)+addrLength+1 : len(key)-1])
 }
