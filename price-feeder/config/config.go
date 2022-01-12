@@ -96,32 +96,32 @@ type (
 	// Telemetry defines the configuration options for application telemetry.
 	Telemetry struct {
 		// Prefixed with keys to separate services
-		ServiceName string `toml:"service_name"`
+		ServiceName string `toml:"service_name" validate:"required"`
 
 		// Enabled enables the application telemetry functionality. When enabled,
 		// an in-memory sink is also enabled by default. Operators may also enabled
 		// other sinks such as Prometheus.
-		Enabled bool `toml:"enabled"`
+		Enabled bool `toml:"enabled" validate:"required"`
 
 		// Enable prefixing gauge values with hostname
-		EnableHostname bool `toml:"enable_hostname"`
+		EnableHostname bool `toml:"enable_hostname" validate:"required"`
 
 		// Enable adding hostname to labels
-		EnableHostnameLabel bool `toml:"enable_hostname_label"`
+		EnableHostnameLabel bool `toml:"enable_hostname_label" validate:"required"`
 
 		// Enable adding service to labels
-		EnableServiceLabel bool `toml:"enable_service_label"`
+		EnableServiceLabel bool `toml:"enable_service_label" validate:"required"`
 
 		// GlobalLabels defines a global set of name/value label tuples applied to all
 		// metrics emitted using the wrapper functions defined in telemetry package.
 		//
 		// Example:
 		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels"`
+		GlobalLabels [][]string `toml:"global_labels" validate:"required"`
 
 		// Type determines which type of telemetry to use
 		// Valid values are "prometheus" or "generic"
-		Type string `toml:"type"`
+		Type string `toml:"type" validate:"required"`
 	}
 )
 
@@ -168,6 +168,11 @@ func ParseConfig(configPath string) (Config, error) {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
 		}
+	}
+
+	if len(cfg.Telemetry.Type) == 0 ||
+		(cfg.Telemetry.Type != "prometheus" && cfg.Telemetry.Type != "generic") {
+		return cfg, fmt.Errorf("unsupported telemetry type: %s", cfg.Telemetry.Type)
 	}
 
 	return cfg, cfg.Validate()
