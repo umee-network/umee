@@ -32,6 +32,74 @@ func interBlockCacheOpt() func(*baseapp.BaseApp) {
 	return baseapp.SetInterBlockCache(store.NewCommitKVStoreCacheManager())
 }
 
+// fauxMerkleModeOpt returns a BaseApp option to use a dbStoreAdapter instead of
+// an IAVLStore for faster simulation speed.
+func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
+	bapp.SetFauxMerkleMode()
+}
+
+// TestFullAppSimulation tests application fuzzing given a random seed as input.
+func TestFullAppSimulation(t *testing.T) {
+	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	if skip {
+		t.Skip("skipping application simulation")
+	}
+
+	require.NoError(t, err, "simulation setup failed")
+
+	defer func() {
+		db.Close()
+		require.NoError(t, os.RemoveAll(dir))
+	}()
+
+	var logger log.Logger
+	if simapp.FlagVerboseValue {
+		logger = server.ZeroLogWrapper{
+			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
+		}
+	} else {
+		logger = server.ZeroLogWrapper{
+			Logger: zerolog.Nop(),
+		}
+	}
+
+	app := umeeapp.New(
+		logger,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		umeeapp.DefaultNodeHome,
+		simapp.FlagPeriodValue,
+		umeeapp.MakeEncodingConfig(),
+		umeeapp.EmptyAppOptions{},
+		fauxMerkleModeOpt,
+	)
+	require.Equal(t, umeeapp.Name, app.Name())
+
+	// run randomized simulation
+	_, simParams, simErr := simulation.SimulateFromSeed(
+		t,
+		os.Stdout,
+		app.BaseApp,
+		appStateFn(app.AppCodec(), app.SimulationManager()),
+		simtypes.RandomAccounts,
+		simapp.SimulationOperations(app, app.AppCodec(), config),
+		app.ModuleAccountAddrs(),
+		config,
+		app.AppCodec(),
+	)
+
+	// export state and simParams before the simulation error is checked
+	err = CheckExportSimulation(app, config, simParams)
+	require.NoError(t, err)
+	require.NoError(t, simErr)
+
+	if config.Commit {
+		PrintStats(db)
+	}
+}
+
 // TestAppStateDeterminism tests for application non-determinism using a PRNG
 // as an input for the simulator's seed.
 func TestAppStateDeterminism(t *testing.T) {
