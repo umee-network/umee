@@ -163,7 +163,7 @@ test-sim-non-determinism:
 
 test-sim-multi-seed-short:
 	@echo "Running short multi-seed application simulations. This may take awhile!"
-	@$(GOBIN)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
+	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
 
 .PHONY: \
 test-sim-non-determinism \

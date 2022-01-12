@@ -67,5 +67,5 @@ jobs:
         if: env.GIT_DIFF
       - name: test-sim-multi-seed-short
         run: |
-          export GOBIN=~/go/bin && make test-sim-multi-seed-short
+          make test-sim-multi-seed-short
         if: env.GIT_DIFF
