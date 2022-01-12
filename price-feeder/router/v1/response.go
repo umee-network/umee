@@ -1,6 +1,9 @@
 package v1
 
 import (
+	"encoding/json"
+	"net/http"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -24,3 +27,23 @@ type (
 		Prices map[string]sdk.Dec `json:"prices"`
 	}
 )
+
+// errorResponse defines the attributes of a JSON error response.
+type errorResponse struct {
+	Code  int    `json:"code,omitempty"`
+	Error string `json:"error"`
+}
+
+// newErrorResponse creates a new errorResponse instance.
+func newErrorResponse(code int, err string) errorResponse {
+	return errorResponse{Code: code, Error: err}
+}
+
+// writeErrorResponse prepares and writes a HTTP error
+// given a status code and an error message.
+func writeErrorResponse(w http.ResponseWriter, status int, err string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	bz, _ := json.Marshal(newErrorResponse(0, err))
+	_, _ = w.Write(bz)
+}

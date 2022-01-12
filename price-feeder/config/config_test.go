@@ -41,6 +41,15 @@ func TestValidate(t *testing.T) {
 					GRPCEndpoint:  "localhost:9090",
 					RPCTimeout:    "100ms",
 				},
+				Telemetry: config.Telemetry{
+					ServiceName:         "price-feeder",
+					Enabled:             true,
+					EnableHostname:      true,
+					EnableHostnameLabel: true,
+					EnableServiceLabel:  true,
+					GlobalLabels:        make([][]string, 1),
+					Type:                "genesis",
+				},
 				GasAdjustment: 1.5,
 			},
 			false,
@@ -152,6 +161,15 @@ pass = "keyringPassword"
 tmrpc_endpoint = "http://localhost:26657"
 grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
+
+[telemetry]
+service_name = "price-feeder"
+enabled = true
+enable_hostname = true
+enable_hostname_label = true
+enable_service_label = true
+type = "prometheus"
+global_labels = [["chain-id", "umee-local-beta-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
