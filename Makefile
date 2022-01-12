@@ -162,7 +162,7 @@ test-sim-non-determinism:
 		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
 
 test-sim-multi-seed-short:
-	@echo "Running short multi-seed application simulations. This may take awhile!"
+	@echo "Running short multi-seed application simulations. This may take a while!"
 	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
 
 test-sim-benchmark-invariants:
