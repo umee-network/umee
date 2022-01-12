@@ -324,6 +324,29 @@ func (s *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddress)
 	return lenderAddr, bumAddr
 }
 
+// mintAndLendAtom mints a amount of atoms to an address
+// account has been created with no assets.
+func (s *IntegrationTestSuite) mintAndLendAtom(mintTo sdk.AccAddress, amountToMint, amountToLend int64) {
+	app, ctx := s.app, s.ctx
+
+	// mint and send atom to mint addr
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName,
+		sdk.NewCoins(sdk.NewInt64Coin(atomIBCDenom, amountToMint)), // amountToMint Atom
+	))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, mintTo,
+		sdk.NewCoins(sdk.NewInt64Coin(atomIBCDenom, amountToMint)), // amountToMint Atom,
+	))
+
+	// lender lends amountToLend atom and receives amountToLend u/atom
+	err := s.app.LeverageKeeper.LendAsset(ctx, mintTo, sdk.NewInt64Coin(atomIBCDenom, amountToLend))
+	s.Require().NoError(err)
+
+	// lender enables u/atom as collateral
+	collatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(ctx, atomIBCDenom)
+	err = s.app.LeverageKeeper.SetCollateralSetting(ctx, mintTo, collatDenom, true)
+	s.Require().NoError(err)
+}
+
 func (s *IntegrationTestSuite) TestBorrowAsset_Invalid() {
 	lenderAddr, _ := s.initBorrowScenario()
 
@@ -984,12 +1007,159 @@ func (s *IntegrationTestSuite) TestGetCollateralSetting_Invalid() {
 	s.Require().Equal(enabled, false)
 }
 
-func (s *IntegrationTestSuite) TestParams() {
-	params := types.DefaultParams()
-	s.app.LeverageKeeper.SetParams(s.ctx, params)
+func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset() {
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee enabled as collateral.
+	lenderAddr, _ := s.initBorrowScenario()
 
-	got := s.app.LeverageKeeper.GetParams(s.ctx)
-	s.Require().Equal(params, got)
+	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// = 1000 * 0.1
+	// = 100
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	s.Require().NoError(err)
+
+	zeroAddresses, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{}, zeroAddresses)
+
+	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
+	umeeToken := types.Token{
+		BaseDenom:            umeeapp.BondDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+
+	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{lenderAddr}, lenderAddress)
+
+	// if it tries to borrow any other asset it should return an error
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(atomIBCDenom, 1))
+	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset() {
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee enabled as collateral.
+	lenderAddr, _ := s.initBorrowScenario()
+
+	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// = 1000 * 0.1
+	// = 100
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	s.Require().NoError(err)
+
+	zeroAddresses, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{}, zeroAddresses)
+
+	mintAmountAtom := int64(100000000) // 100 atom
+	lendAmountAtom := int64(50000000)  // 50 atom
+
+	// mints and send to lender 100 atom and already
+	// enable 50 u/atom as collateral.
+	s.mintAndLendAtom(lenderAddr, mintAmountAtom, lendAmountAtom)
+
+	// lender borrows 4 atom (max current allowed - 1) lender amount enabled as colateral * CollateralWeight
+	// = (50 * 0.1) - 1
+	// = 4
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
+	s.Require().NoError(err)
+
+	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
+	umeeToken := types.Token{
+		BaseDenom:            umeeapp.BondDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+
+	// Note: Setting atom collateral weight to 0.01 to the lender be eligible to liquidation in a second token
+	atomIBCToken := types.Token{
+		BaseDenom:            atomIBCDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
+
+	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{lenderAddr}, lenderAddress)
+}
+
+func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee enabled as collateral.
+	lenderAddr, anotherLender := s.initBorrowScenario()
+
+	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// = 1000 * 0.1
+	// = 100
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	s.Require().NoError(err)
+
+	zeroAddresses, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{}, zeroAddresses)
+
+	mintAmountAtom := int64(100000000) // 100 atom
+	lendAmountAtom := int64(50000000)  // 50 atom
+
+	// mints and send to anotherLender 100 atom and already
+	// enable 50 u/atom as collateral.
+	s.mintAndLendAtom(anotherLender, mintAmountAtom, lendAmountAtom)
+
+	// anotherLender borrows 4 atom (max current allowed - 1) anotherLender amount enabled as colateral * CollateralWeight
+	// = (50 * 0.1) - 1
+	// = 4
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, anotherLender, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
+	s.Require().NoError(err)
+
+	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
+	umeeToken := types.Token{
+		BaseDenom:            umeeapp.BondDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+
+	// Note: Setting atom collateral weight to 0.01 to the anotherLender also be eligible to liquidation
+	atomIBCToken := types.Token{
+		BaseDenom:            atomIBCDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
+
+	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	s.Require().NoError(err)
+	s.Require().Equal([]sdk.AccAddress{lenderAddr, anotherLender}, lenderAddress)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
