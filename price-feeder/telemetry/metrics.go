@@ -124,10 +124,7 @@ func (m *Metrics) Gather(format string) (GatherResponse, error) {
 	case FormatPrometheus:
 		return m.gatherPrometheus()
 
-	case FormatText:
-		return m.gatherGeneric()
-
-	case FormatDefault:
+	case FormatText, FormatDefault:
 		return m.gatherGeneric()
 
 	default:
