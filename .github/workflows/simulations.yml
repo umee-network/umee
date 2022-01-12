@@ -30,24 +30,19 @@ jobs:
 
   test-sim-nondeterminism:
     runs-on: ubuntu-latest
-    needs: Build
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2.1.5
         with:
-          go-version: 1.16
-      - uses: technote-space/get-diff-action@v5.0.2
+          go-version: 1.17
+      - uses: actions/checkout@v2
+      - uses: technote-space/get-diff-action@v6.0.1
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
-      - uses: actions/cache@v2.1.7
-        with:
-          path: ~/go/bin
-          key: ${{ runner.os }}-go-runsim-binary
-        if: "env.GIT_DIFF != ''"
-      - name: test nondeterminism
+      - name: Test application non-determinism
         run: |
           make test-sim-non-determinism
-        if: "env.GIT_DIFF != ''"
+        if: env.GIT_DIFF
