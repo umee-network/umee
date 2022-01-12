@@ -100,8 +100,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 
 	addressEligibleToLiquidation := []sdk.AccAddress{}
 
-	// Iterate over all open borrows, accruing interest on each and collecting new
-	// reserves.
+	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
 	for ; iter.Valid(); iter.Next() {
 		// key is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
 		key, _ := iter.Key(), iter.Value()
