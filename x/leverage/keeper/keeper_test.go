@@ -1144,7 +1144,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
-	// Note: Setting atom collateral weight to 0.01 to the lender be eligible to liquidation in a second token
+	// Note: Setting atom collateral weight to 0.01 to the anotherLender also be eligible to liquidation
 	atomIBCToken := types.Token{
 		BaseDenom:            atomIBCDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),

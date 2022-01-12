@@ -87,7 +87,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	defer iter.Close()
 
 	liquidationTargets := []sdk.AccAddress{}
-	checkedAddrs := map[string]struct{}
+	checkedAddrs := map[string]struct{}{}
 
 	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
 	for ; iter.Valid(); iter.Next() {
