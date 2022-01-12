@@ -98,7 +98,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	iter := sdk.KVStorePrefixIterator(store, borrowPrefix)
 	defer iter.Close()
 
-	addressEligibleToLiquidation := []sdk.AccAddress{}
+	liquidationTargets := []sdk.AccAddress{}
 
 	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
 	for ; iter.Valid(); iter.Next() {
@@ -106,10 +106,10 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		key, _ := iter.Key(), iter.Value()
 
 		// remove prefix | denom and null-terminator
-		borrowerAddr := types.GetAddressFromKeyWithPrefix(key, borrowPrefix)
+		borrowerAddr := types.AddressFromKey(key, borrowPrefix)
 
 		// if the address is already on the list it can move to the next
-		if addressExist(addressEligibleToLiquidation, borrowerAddr) {
+		if addressExist(liquidationTargets, borrowerAddr) {
 			continue
 		}
 
@@ -138,8 +138,8 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 
 		// if the borrowLimit is smaller then the borrowValue
 		// the address is eligible to liquidation
-		addressEligibleToLiquidation = append(addressEligibleToLiquidation, borrowerAddr)
+		liquidationTargets = append(liquidationTargets, borrowerAddr)
 	}
 
-	return addressEligibleToLiquidation, nil
+	return liquidationTargets, nil
 }
