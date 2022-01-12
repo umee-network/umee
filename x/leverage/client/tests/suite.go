@@ -1206,8 +1206,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 			&types.QueryLiquidationTargetsResponse{},
 			&types.QueryLiquidationTargetsResponse{
 				Targets: []string{
-					// TODO: comment in when this query is implemented
-					// val.Address.String()
+					val.Address.String(),
 				},
 			},
 		},
