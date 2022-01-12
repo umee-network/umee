@@ -151,6 +151,25 @@ lint:
 .PHONY: lint
 
 ###############################################################################
+##                                Simulations                                ##
+###############################################################################
+
+test-sim-nondeterminism:
+	@echo "Running non-determinism simulations..."
+	@go test -mod=readonly ./tests/simulation -run TestAppStateDeterminism -Enabled=true \
+		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
+
+.PHONY: \
+test-sim-nondeterminism
+# test-sim-custom-genesis-fast \
+# test-sim-import-export \
+# test-sim-after-import \
+# test-sim-custom-genesis-multi-seed \
+# test-sim-multi-seed-short \
+# test-sim-multi-seed-long \
+# test-sim-benchmark-invariants
+
+###############################################################################
 ##                                 Protobuf                                  ##
 ###############################################################################
 
