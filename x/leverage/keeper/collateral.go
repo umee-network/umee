@@ -132,11 +132,13 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 			return nil, err
 		}
 
-		// confirm borrower's eligibility for liquidation
-		if borrowLimit.LT(borrowValue) {
+		// check if the borrower's limit is bigger than the value
+		if borrowLimit.GTE(borrowValue) {
 			continue
 		}
 
+		// if the borrowLimit is smaller then the borrowValue
+		// the address is eligible to liquidation
 		addressEligibleToLiquidation = append(addressEligibleToLiquidation, borrowerAddr)
 	}
 
