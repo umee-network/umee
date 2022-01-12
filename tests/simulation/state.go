@@ -23,6 +23,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/tests/util"
 )
 
@@ -190,7 +191,7 @@ func appStateRandomizedFn(
 	appParams simtypes.AppParams,
 ) (json.RawMessage, []simtypes.Account) {
 	numAccs := int64(len(accs))
-	genesisState := umeeapp.NewDefaultGenesisState(cdc)
+	genesisState := umeeappbeta.NewDefaultGenesisState(cdc)
 
 	// Generate a random amount of initial stake coins and a random initial
 	// number of bonded accounts.

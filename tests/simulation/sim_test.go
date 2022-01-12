@@ -20,6 +20,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	umeeapp "github.com/umee-network/umee/app"
+	umeeappbeta "github.com/umee-network/umee/app/beta"
 )
 
 func init() {
@@ -63,7 +64,7 @@ func TestFullAppSimulation(t *testing.T) {
 		}
 	}
 
-	app := umeeapp.New(
+	app := umeeappbeta.New(
 		logger,
 		db,
 		nil,
@@ -71,7 +72,7 @@ func TestFullAppSimulation(t *testing.T) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
+		umeeappbeta.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
 	)
@@ -134,7 +135,7 @@ func TestAppStateDeterminism(t *testing.T) {
 			}
 
 			db := dbm.NewMemDB()
-			app := umeeapp.New(
+			app := umeeappbeta.New(
 				logger,
 				db,
 				nil,
@@ -142,7 +143,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				map[int64]bool{},
 				umeeapp.DefaultNodeHome,
 				simapp.FlagPeriodValue,
-				umeeapp.MakeEncodingConfig(),
+				umeeappbeta.MakeEncodingConfig(),
 				umeeapp.EmptyAppOptions{},
 				interBlockCacheOpt(),
 			)
@@ -209,7 +210,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		}
 	}
 
-	app := umeeapp.New(
+	app := umeeappbeta.New(
 		logger,
 		db,
 		nil,
@@ -217,7 +218,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
+		umeeappbeta.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		interBlockCacheOpt(),
 	)
