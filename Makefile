@@ -154,13 +154,13 @@ lint:
 ##                                Simulations                                ##
 ###############################################################################
 
-test-sim-nondeterminism:
+test-sim-non-determinism:
 	@echo "Running non-determinism simulations..."
 	@go test -mod=readonly ./tests/simulation -run TestAppStateDeterminism -Enabled=true \
 		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
 
 .PHONY: \
-test-sim-nondeterminism
+test-sim-non-determinism
 # test-sim-custom-genesis-fast \
 # test-sim-import-export \
 # test-sim-after-import \
