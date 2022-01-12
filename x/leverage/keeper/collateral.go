@@ -78,17 +78,6 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
-// addressExist returns true if address exist in the list of addresses.
-func addressExist(list []sdk.AccAddress, addrToCheck sdk.AccAddress) bool {
-	for _, addr := range list {
-		if addrToCheck.Equals(addr) {
-			return true
-		}
-	}
-
-	return false
-}
-
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
 	// ref: https://github.com/umee-network/umee/issues/229
@@ -99,6 +88,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	defer iter.Close()
 
 	liquidationTargets := []sdk.AccAddress{}
+	checkedAddrs := map[string]bool{}
 
 	// Iterate over all open borrows, adding addresses that are eligible for liquidation to a slice.
 	for ; iter.Valid(); iter.Next() {
@@ -108,10 +98,11 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		// remove prefix | denom and null-terminator
 		borrowerAddr := types.AddressFromKey(key, borrowPrefix)
 
-		// if the address is already on the list it can move to the next
-		if addressExist(liquidationTargets, borrowerAddr) {
+		// if the address is already checked it can move on
+		if checkedAddrs[borrowerAddr.String()] {
 			continue
 		}
+		checkedAddrs[borrowerAddr.String()] = true
 
 		// get total borrowed by borrower (all denoms)
 		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
