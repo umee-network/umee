@@ -57,8 +57,12 @@ func (s *IntegrationTestSuite) SetupTest() {
 	// mint and send coins to validators
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
 	_, err := sh(ctx, NewTestMsgCreateValidator(valAddr, valPubKey, amt))
+	s.Require().NoError(err)
+	_, err = sh(ctx, NewTestMsgCreateValidator(valAddr2, valPubKey2, amt))
 	s.Require().NoError(err)
 
 	staking.EndBlocker(ctx, app.StakingKeeper)
@@ -71,11 +75,17 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(1)
-	valPubKey  = valPubKeys[0]
-	pubKey     = secp256k1.GenPrivKey().PubKey()
-	addr       = sdk.AccAddress(pubKey.Address())
-	valAddr    = sdk.ValAddress(pubKey.Address())
+	valPubKeys = simapp.CreateTestPubKeys(2)
+
+	valPubKey = valPubKeys[0]
+	pubKey    = secp256k1.GenPrivKey().PubKey()
+	addr      = sdk.AccAddress(pubKey.Address())
+	valAddr   = sdk.ValAddress(pubKey.Address())
+
+	valPubKey2 = valPubKeys[1]
+	pubKey2    = secp256k1.GenPrivKey().PubKey()
+	addr2      = sdk.AccAddress(pubKey2.Address())
+	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
