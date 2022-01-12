@@ -146,7 +146,7 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		delegateKeys := make([]gravitytypes.MsgSetOrchestratorAddress, 0, len(stakingState.Validators))
 		for _, val := range stakingState.Validators {
 			if val.Status != stakingtypes.Bonded {
-				_, _, ethAddr, err := util.GenerateRandomEthKey()
+				_, _, ethAddr, err := util.GenerateRandomEthKeyFromRand(r)
 				if err != nil {
 					panic(err)
 				}
