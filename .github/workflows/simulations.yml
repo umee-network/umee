@@ -30,7 +30,6 @@ jobs:
 
   test-sim-non-determinism:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     steps:
       - uses: actions/setup-go@v2.1.5
         with:

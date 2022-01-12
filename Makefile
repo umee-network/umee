@@ -154,18 +154,20 @@ lint:
 ##                                Simulations                                ##
 ###############################################################################
 
+SIMAPP = ./tests/simulation
+
 test-sim-non-determinism:
-	@echo "Running non-determinism simulations..."
-	@go test -mod=readonly ./tests/simulation -run TestAppStateDeterminism -Enabled=true \
+	@echo "Running non-determinism application simulations..."
+	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
 		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
 
+test-sim-multi-seed-short:
+	@echo "Running short multi-seed application simulations. This may take awhile!"
+	@$(GOBIN)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
+
 .PHONY: \
-test-sim-non-determinism
-# test-sim-custom-genesis-fast \
-# test-sim-import-export \
-# test-sim-after-import \
-# test-sim-custom-genesis-multi-seed \
-# test-sim-multi-seed-short \
+test-sim-non-determinism \
+test-sim-multi-seed-short
 # test-sim-multi-seed-long \
 # test-sim-benchmark-invariants
 
