@@ -108,7 +108,6 @@ towards borrowing assets on another blockchain.`,
 }
 
 func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
-
 	// We allow two variants of the gentx command:
 	//
 	// 1. The standard one provided by the SDK, mainly motivated for testing
