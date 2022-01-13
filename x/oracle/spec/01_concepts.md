@@ -44,6 +44,7 @@ The Oracle module's reward pool is composed of any tokens present in its module 
 From the Oracle module's perspective, tokens of varied denominations from the `AcceptList` simply appear in the module account at a regular interval.
 The interval is the `x/Leverage` module's `InterestEpoch` parameter, e.g. every 100 blocks, which is generally not equal to the Oracle's `VotePeriod` or other parameters.
 
+The reward pool is not distributed all at once, but instead over a period of time, determined by the param `RewardDistributionWindow`, currently set to `5256000`.
 ## Slashing
 
 > Be sure to read this section carefully as it concerns potential loss of funds.
