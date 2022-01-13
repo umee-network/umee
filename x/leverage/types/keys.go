@@ -85,7 +85,7 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 // CreateCollateralAmountKey returns a KVStore key for getting and setting the amount of
 // collateral stored for a lender in a given denom.
 func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
-	// collateralprefix | lengthprefixed(lenderAddr) | denom | 0x00
+	// collateralPrefix | lengthprefixed(lenderAddr) | denom | 0x00
 	var key []byte
 	key = append(key, KeyPrefixCollateralAmount...)
 	key = append(key, address.MustLengthPrefix(lenderAddr)...)
@@ -96,10 +96,18 @@ func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []
 // CreateCollateralAmountKeyNoDenom returns the common prefix used by all collateral associated
 // with a given lender address.
 func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
-	// collateralprefix | lengthprefixed(lenderAddr)
+	// collateralPrefix | lengthprefixed(lenderAddr)
 	var key []byte
 	key = append(key, KeyPrefixCollateralAmount...)
 	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	return key
+}
+
+// CreateCollateralAmountKeyNoAddress returns a safe copy of collateralPrefix
+func CreateCollateralAmountKeyNoAddress() []byte {
+	// collateralPrefix
+	var key []byte
+	key = append(key, KeyPrefixCollateralAmount...)
 	return key
 }
 
