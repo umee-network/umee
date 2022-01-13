@@ -180,6 +180,14 @@ func CreateBorrowAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
+// CreateBorrowAPYKey returns a safe copy of borrow APY prefix
+func CreateBorrowAPYKeyNoDenom() []byte {
+	// borrowAPYPrefix
+	var key []byte
+	key = append(key, KeyPrefixBorrowAPY...)
+	return key
+}
+
 // CreateLendAPYKey returns a KVStore key for getting and setting the lend APY for a given token.
 func CreateLendAPYKey(tokenDenom string) []byte {
 	// lendAPYPrefix | denom | 0x00

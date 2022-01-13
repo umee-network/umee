@@ -8,18 +8,20 @@ import (
 )
 
 const (
-	routeExchangeRates   = "exchange-rates"
-	routeReserveAmount   = "reserve-amount"
-	routeBorrowAmount    = "borrow-amount"
-	routeColateralAmount = "colateral-amount"
+	routeExchangeRates    = "exchange-rates"
+	routeReserveAmount    = "reserve-amount"
+	routeCollateralAmount = "collateral-amount"
+	routeBorrowAmount     = "borrow-amount"
+	routeBorrowAPY        = "borrow-apy"
 )
 
 // RegisterInvariants registers the leverage module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeReserveAmount, ReserveAmountInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeColateralAmount, CollateralAmountInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/leverage module.
@@ -35,12 +37,17 @@ func AllInvariants(k Keeper) sdk.Invariant {
 			return res, stop
 		}
 
+		res, stop = CollateralAmountInvariant(k)(ctx)
+		if stop {
+			return res, stop
+		}
+
 		res, stop = BorrowAmountInvariant(k)(ctx)
 		if stop {
 			return res, stop
 		}
 
-		return CollateralAmountInvariant(k)(ctx)
+		return BorrowAPYInvariant(k)(ctx)
 	}
 }
 
@@ -58,7 +65,7 @@ func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
 		iter := sdk.KVStorePrefixIterator(store, exchangeRatePrefix)
 		defer iter.Close()
 
-		// Iterate thought all denoms which have an exchange rate stored
+		// Iterate through all denoms which have an exchange rate stored
 		// in the keeper. If a token is registered but its exchange rate is
 		// lower than 1.0 or it has some error doing the unmarshal it
 		// adds the denom invariant count and message description
@@ -105,7 +112,7 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 		iter := sdk.KVStorePrefixIterator(store, reserveAmountPrefix)
 		defer iter.Close()
 
-		// Iterate thought all denoms which have an reserve amount stored
+		// Iterate through all denoms which have an reserve amount stored
 		// in the keeper. If a token is registered but its reserve amount is
 		// negative or it has some error doing the unmarshal it
 		// adds the denom invariant count and message description
@@ -152,7 +159,7 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 		iter := sdk.KVStorePrefixIterator(store, loanKeyPrefix)
 		defer iter.Close()
 
-		// Iterate thought all denoms which have an borrow amount stored
+		// Iterate through all denoms which have an borrow amount stored
 		// in the keeper. If a token is registered but its borrow amount is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
@@ -201,7 +208,7 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 		iter := sdk.KVStorePrefixIterator(store, collateralPrefix)
 		defer iter.Close()
 
-		// Iterate thought all denoms which have an collateral amount stored
+		// Iterate through all denoms which have an collateral amount stored
 		// in the keeper. If a token is registered but its borrow amount is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
@@ -223,15 +230,52 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 
 			if !amount.IsPositive() {
 				count++
-				msg += fmt.Sprintf("\t%s - %s colateral amount %s is not positive\n", denom, address.String(), amount.String())
+				msg += fmt.Sprintf("\t%s - %s collateral amount %s is not positive\n", denom, address.String(), amount.String())
 			}
 		}
 
 		broken := count != 0
 
 		return sdk.FormatInvariant(
-			types.ModuleName, routeColateralAmount,
+			types.ModuleName, routeCollateralAmount,
 			fmt.Sprintf("number of not positive collateral amount found %d\n%s", count, msg),
+		), broken
+	}
+}
+
+// BorrowAPYInvariant checks that Borrow APY have all positive values
+func BorrowAPYInvariant(k Keeper) sdk.Invariant {
+	return func(ctx sdk.Context) (string, bool) {
+		var (
+			msg   string
+			count int
+		)
+
+		prefix := types.CreateBorrowAPYKeyNoDenom()
+		err := k.Iterate(ctx, prefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, prefix)
+
+			var borrowAPY sdk.Dec
+			if err := borrowAPY.Unmarshal(val); err != nil {
+				return err
+			}
+
+			if !borrowAPY.IsPositive() {
+				count++
+				msg += fmt.Sprintf("\t%s borrow APY %s is not positive\n", denom, borrowAPY.String())
+			}
+			return nil
+		})
+
+		if err != nil {
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the borrow APY %+v\n", err)
+		}
+
+		broken := count != 0
+
+		return sdk.FormatInvariant(
+			types.ModuleName, routeBorrowAPY,
+			fmt.Sprintf("number of not positive borrow APY found %d\n%s", count, msg),
 		), broken
 	}
 }
