@@ -112,6 +112,14 @@ func CreateReserveAmountKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
+// CreateReserveAmountKeyNoDenom returns a safe copy of reserveAmountPrefix
+func CreateReserveAmountKeyNoDenom() []byte {
+	// reserveAmountPrefix
+	var key []byte
+	key = append(key, KeyPrefixReserveAmount...)
+	return key
+}
+
 // CreateLastInterestTimeKey returns a KVStore key for getting and setting the amount reserved of a a given token.
 func CreateLastInterestTimeKey() []byte {
 	// lastinterestprefix
