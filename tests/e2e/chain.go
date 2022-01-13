@@ -142,14 +142,15 @@ func (c *chain) createAndInitOrchestrators(count int) error {
 		// create orchestrator
 		orchestrator := c.createOrchestrator(i)
 
-		// create keys
-		mnemonic, info, err := createMemoryKey()
+		err := orchestrator.createKey("orch")
 		if err != nil {
 			return err
 		}
 
-		orchestrator.keyInfo = *info
-		orchestrator.mnemonic = mnemonic
+		err = orchestrator.generateEthereumKey()
+		if err != nil {
+			return err
+		}
 
 		c.orchestrators = append(c.orchestrators, orchestrator)
 	}
