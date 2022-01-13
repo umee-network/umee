@@ -13,6 +13,7 @@ const (
 	routeCollateralAmount = "collateral-amount"
 	routeBorrowAmount     = "borrow-amount"
 	routeBorrowAPY        = "borrow-apy"
+	routeLendAPY          = "lend-apy"
 )
 
 // RegisterInvariants registers the leverage module invariants
@@ -22,6 +23,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeLendAPY, LendAPYInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/leverage module.
@@ -47,7 +49,12 @@ func AllInvariants(k Keeper) sdk.Invariant {
 			return res, stop
 		}
 
-		return BorrowAPYInvariant(k)(ctx)
+		res, stop = BorrowAPYInvariant(k)(ctx)
+		if stop {
+			return res, stop
+		}
+
+		return LendAPYInvariant(k)(ctx)
 	}
 }
 
@@ -275,6 +282,50 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 		return sdk.FormatInvariant(
 			types.ModuleName, routeBorrowAPY,
 			fmt.Sprintf("number of not positive borrow APY found %d\n%s", count, msg),
+		), broken
+	}
+}
+
+// LendAPYInvariant checks that Lend APY have all positive values
+func LendAPYInvariant(k Keeper) sdk.Invariant {
+	return func(ctx sdk.Context) (string, bool) {
+		var (
+			msg   string
+			count int
+		)
+
+		lendAPYprefix := types.CreateLendAPYKeyNoDenom()
+
+		// Iterate through all denoms which have an lend APY stored
+		// in the keeper. If a token is registered but its lend APY is
+		// not positive or it has some error doing the unmarshal it
+		// adds the denom and address invariant count and message description
+		err := k.Iterate(ctx, lendAPYprefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, lendAPYprefix)
+
+			var lendAPY sdk.Dec
+			if err := lendAPY.Unmarshal(val); err != nil {
+				count++
+				msg += fmt.Sprintf("\t%s received an error while Unmarshal the byte %+v\n", denom, val)
+				return nil
+			}
+
+			if !lendAPY.IsPositive() {
+				count++
+				msg += fmt.Sprintf("\t%s lend APY %s is not positive\n", denom, lendAPY.String())
+			}
+			return nil
+		})
+
+		if err != nil {
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the lend APY %+v\n", err)
+		}
+
+		broken := count != 0
+
+		return sdk.FormatInvariant(
+			types.ModuleName, routeLendAPY,
+			fmt.Sprintf("number of not positive lend APY found %d\n%s", count, msg),
 		), broken
 	}
 }

@@ -172,7 +172,7 @@ func CreateBorrowAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateBorrowAPYKey returns a safe copy of borrow APY prefix
+// CreateBorrowAPYKeyNoDenom returns a safe copy of borrow APY prefix
 func CreateBorrowAPYKeyNoDenom() []byte {
 	// borrowAPYPrefix
 	var key []byte
