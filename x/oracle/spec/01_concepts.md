@@ -37,6 +37,13 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
 Let `M` be the weighted median, `𝜎` be the standard deviation of the votes in the ballot, and `R` be the RewardBand parameter. The band around the median is set to be `𝜀 = max(𝜎, R/2)`. All valid (i.e. bonded and non-jailed) validators that submitted an exchange rate vote in the interval `[M - 𝜀, M + 𝜀]` should be included in the set of winners, weighted by their relative vote power.
 
+## Reward Pool
+
+The Oracle module's reward pool is composed of any tokens present in its module account. This pool is funded by the `x/leverage` module as portion of interest accrued on borrowed tokens.
+
+From the Oracle module's perspective, tokens of varied denominations from the `AcceptList` simply appear in the module account at a regular interval.
+The interval is the `x/Leverage` module's `InterestEpoch` parameter, e.g. every 100 blocks, which is generally not equal to the Oracle's `VotePeriod` or other parameters.
+
 ## Slashing
 
 > Be sure to read this section carefully as it concerns potential loss of funds.
