@@ -195,7 +195,6 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 }
 
 func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string) (sdk.Msg, error) {
-
 	eth, err := gravitytypes.NewEthAddress(ethAddr)
 	if err != nil {
 		return nil, err
