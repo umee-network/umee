@@ -22,6 +22,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
@@ -98,11 +99,18 @@ func (o *Oracle) Start(ctx context.Context) error {
 
 		default:
 			o.logger.Debug().Msg("starting oracle tick")
+
+			startTime := time.Now()
+
 			if err := o.tick(); err != nil {
+				telemetry.IncrCounter(1, "failure", "tick")
 				o.logger.Err(err).Msg("oracle tick failed")
 			}
 
 			o.lastPriceSyncTS = time.Now()
+
+			telemetry.MeasureSince(startTime, "runtime", "tick")
+			telemetry.IncrCounter(1, "new", "tick")
 
 			time.Sleep(tickerTimeout)
 		}
@@ -164,6 +172,7 @@ func (o *Oracle) SetPrices() error {
 		g.Go(func() error {
 			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
 			if err != nil {
+				telemetry.IncrCounter(1, "failure", "provider")
 				return err
 			}
 

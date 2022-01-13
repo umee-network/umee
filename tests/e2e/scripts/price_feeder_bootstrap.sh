@@ -44,6 +44,15 @@ pass = '$UMEE_E2E_UMEE_VAL_KEY_PASS'
 grpc_endpoint = 'tcp://$UMEE_E2E_UMEE_VAL_HOST:9090'
 rpc_timeout = "100ms"
 tmrpc_endpoint = 'http://$UMEE_E2E_UMEE_VAL_HOST:26657'
+
+[telemetry]
+service_name = "price-feeder"
+enabled = true
+enable_hostname = true
+enable_hostname_label = true
+enable_service_label = true
+type = "prometheus"
+global_labels = [["chain-id", "umee-local-beta-testnet"]]
 EOF
 
 # start price-feeder

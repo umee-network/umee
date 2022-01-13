@@ -118,7 +118,7 @@ docker-push-gaia:
 ##                              Tests & Linting                              ##
 ###############################################################################
 
-PACKAGES_UNIT=$(shell go list ./... | grep -v '/e2e')
+PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
 PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
@@ -149,6 +149,31 @@ lint:
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
 
 .PHONY: lint
+
+###############################################################################
+##                                Simulations                                ##
+###############################################################################
+
+SIMAPP = ./tests/simulation
+
+test-sim-non-determinism:
+	@echo "Running non-determinism application simulations..."
+	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
+		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
+
+test-sim-multi-seed-short:
+	@echo "Running short multi-seed application simulations. This may take a while!"
+	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
+
+test-sim-benchmark-invariants:
+	@echo "Running simulation invariant benchmarks..."
+	@go test -mod=readonly $(SIMAPP) -benchmem -bench=BenchmarkFullAppSimulation -run=NOOP \
+	-Enabled=true -NumBlocks=1000 -BlockSize=200 -Period=1 -Commit=true -Seed=57 -v -timeout 24h
+
+.PHONY: \
+test-sim-non-determinism \
+test-sim-multi-seed-short \
+test-sim-benchmark-invariants
 
 ###############################################################################
 ##                                 Protobuf                                  ##
