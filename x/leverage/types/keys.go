@@ -83,7 +83,9 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 // collateral stored for a lender in a given denom.
 func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
 	// collateralPrefix | lengthprefixed(lenderAddr) | denom | 0x00
-	key := CreateCollateralAmountKeyNoDenom(lenderAddr)
+	var key []byte
+	key = append(key, KeyPrefixCollateralAmount...)
+	key = append(key, address.MustLengthPrefix(lenderAddr)...)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -92,8 +94,8 @@ func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []
 // with a given lender address.
 func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
 	// collateralPrefix | lengthprefixed(lenderAddr)
-	key := CreateCollateralAmountKeyNoAddress()
-	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	var key []byte
+	key = append(key, KeyPrefixCollateralAmount...)
 	return key
 }
 
