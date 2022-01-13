@@ -203,26 +203,21 @@ func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sd
 	}
 }
 
-// GetAllBadDebts gets bad debt instances across all borrowers.
-func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
-	prefix := types.KeyPrefixBadDebt
-	badDebts := []types.BadDebt{}
+// IterateBorrowAPY iterate through all the keys from the Borrow APY prefix
+// and then calls the iterate function with the denom and borrowAPY if this function
+// returns an error, it stops the for loop
+func (k Keeper) IterateBorrowAPY(ctx sdk.Context, iterate func(denom string, borrowAPY sdk.Dec) error) error {
+	prefix := types.CreateBorrowAPYKeyNoDenom()
+	return k.Iterate(ctx, prefix, func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
 
-	iterator := func(key, val []byte) error {
-		addr := types.AddressFromKey(key, prefix)
-		denom := types.DenomFromKeyWithAddress(key, prefix)
+		var borrowAPY sdk.Dec
+		if err := borrowAPY.Unmarshal(val); err != nil {
+			return err
+		}
 
-		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
-
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return badDebts
+		return iterate(denom, borrowAPY)
+	})
 }
 
 // GetBorrowAPY returns an sdk.Dec of an borrow APY
