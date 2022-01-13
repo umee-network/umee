@@ -14,12 +14,14 @@ var (
 	KeyInterestEpoch                = []byte("InterestEpoch")
 	KeyCompleteLiquidationThreshold = []byte("CompleteLiquidationThreshold")
 	KeyMinimumCloseFactor           = []byte("MinimumCloseFactor")
+	KeyOracleRewardFactor           = []byte("OracleRewardFactor")
 )
 
 var (
 	defaultInterestEpoch                = int64(100)
 	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
 	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
+	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
 )
 
 func NewParams(epoch int64) Params {
@@ -34,6 +36,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyCompleteLiquidationThreshold, &p.CompleteLiquidationThreshold,
 			validateLiquidationThreshold),
 		paramtypes.NewParamSetPair(KeyMinimumCloseFactor, &p.MinimumCloseFactor, validateMinimumCloseFactor),
+		paramtypes.NewParamSetPair(KeyOracleRewardFactor, &p.OracleRewardFactor, validateOracleRewardFactor),
 	}
 }
 
@@ -55,6 +58,7 @@ func DefaultParams() Params {
 		InterestEpoch:                defaultInterestEpoch,
 		CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
 		MinimumCloseFactor:           defaultMinimumCloseFactor,
+		OracleRewardFactor:           defaultOracleRewardFactor,
 	}
 }
 
@@ -67,6 +71,9 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateMinimumCloseFactor(p.MinimumCloseFactor); err != nil {
+		return err
+	}
+	if err := validateOracleRewardFactor(p.OracleRewardFactor); err != nil {
 		return err
 	}
 	return nil
@@ -107,6 +114,21 @@ func validateMinimumCloseFactor(i interface{}) error {
 	}
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("minimum close factor cannot exceed 1: %d", v)
+	}
+	return nil
+}
+
+func validateOracleRewardFactor(i interface{}) error {
+	v, ok := i.(sdk.Dec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNegative() {
+		return fmt.Errorf("oracle reward factor cannot be negative: %d", v)
+	}
+	if v.GT(sdk.OneDec()) {
+		return fmt.Errorf("oracle reward factor cannot exceed 1: %d", v)
 	}
 	return nil
 }

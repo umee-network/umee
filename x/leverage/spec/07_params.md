@@ -7,6 +7,7 @@ The leverage module contains the following parameters:
 | InterestEpoch                | int64   | 100     |
 | CompleteLiquidationThreshold | sdk.Dec | 0.1     |
 | MinimumCloseFactor           | sdk.Dec | 0.01    |
+| OracleRewardFactor           | sdk.Dec | 0.01    |
 
 ## InterestEpoch
 
@@ -23,3 +24,8 @@ to be eligible for full liquidation in a single liquidation event.
 
 MinimumCloseFactor is the [Close Factor](01_concepts.md#Close-Factor) for
 borrows that are just above their borrow limit.
+
+## OracleRewardFactor
+
+OracleRewardFactor is the portion of borrow interest accrued that goes to fund
+the `x/oracle` reward pool.

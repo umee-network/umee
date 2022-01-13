@@ -108,6 +108,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 	}
 
+	oracleRewards := sdk.NewCoins()
 	newReserves := sdk.NewCoins()
 	borrowPrefix := types.CreateLoanKeyNoAddress()
 
@@ -141,6 +142,12 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		// A portion of amountToAccrue defined by the denom's reserve factor will be
 		// set aside as reserves.
 		newReserves = newReserves.Add(sdk.NewCoin(denom, reserveFactors[denom].MulInt(amountToAccrue).TruncateInt()))
+
+		// A portion of amountToAccrue defined by the param OracleRewardFactor will be
+		// sent to the oracle module account to fund the reward pool.
+		oracleRewards = oracleRewards.Add(
+			sdk.NewCoin(denom, k.GetParams(ctx).OracleRewardFactor.MulInt(amountToAccrue).TruncateInt()),
+		)
 	}
 
 	// apply all reserve increases accumulated when iterating over borrows
@@ -152,6 +159,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		if err = k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
 			return err
 		}
+	}
+
+	// fund oracle reward pool
+	if err := k.FundOracle(ctx, oracleRewards); err != nil {
+		return err
 	}
 
 	// set LastInterestTime
