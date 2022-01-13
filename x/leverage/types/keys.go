@@ -186,3 +186,9 @@ func DenomFromKeyWithAddress(key []byte, prefix []byte) string {
 	addrLength := int(key[len(prefix)])
 	return string(key[len(prefix)+addrLength+1 : len(key)-1])
 }
+
+// DenomFromKey extracts denom from a key with the form
+// prefix | denom | 0x00
+func DenomFromKey(key []byte, prefix []byte) string {
+	return string(key[len(prefix) : len(key)-1])
+}
