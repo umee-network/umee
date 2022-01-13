@@ -139,8 +139,8 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 			"gravity",
 			"set-orchestrator-address",
 			valAddr.String(),
-			valAddr.String(),
-			s.chain.validators[valIdx].ethereumKey.address,
+			s.chain.orchestrators[valIdx].keyInfo.GetAddress().String(),
+			s.chain.orchestrators[valIdx].ethereumKey.address,
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 
 	s.T().Logf(
 		"sending tokens from Ethereum to Umee; from: %s, to: %s, amount: %s, contract: %s",
-		s.chain.validators[valIdx].ethereumKey.address, toUmeeAddr, amount, tokenAddr,
+		s.chain.orchestrators[valIdx].ethereumKey.address, toUmeeAddr, amount, tokenAddr,
 	)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
@@ -267,7 +267,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			toUmeeAddr,
 			amount,
 			"--eth-pk",
-			s.chain.validators[valIdx].ethereumKey.privateKey[2:], // remove 0x prefix
+			s.chain.orchestrators[valIdx].ethereumKey.privateKey[2:], // remove 0x prefix
 			"--eth-rpc",
 			fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 			"--cosmos-chain-id",
