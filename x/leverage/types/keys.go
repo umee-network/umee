@@ -180,7 +180,7 @@ func CreateBorrowAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateBorrowAPYKey returns a safe copy of borrow APY prefix
+// CreateBorrowAPYKeyNoDenom returns a safe copy of borrow APY prefix
 func CreateBorrowAPYKeyNoDenom() []byte {
 	// borrowAPYPrefix
 	var key []byte
@@ -195,6 +195,14 @@ func CreateLendAPYKey(tokenDenom string) []byte {
 	key = append(key, KeyPrefixLendAPY...)
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateLendAPYKey returns a safe copy of lend APY prefix
+func CreateLendAPYKeyNoDenom() []byte {
+	// lendAPYPrefix
+	var key []byte
+	key = append(key, KeyPrefixLendAPY...)
+	return key
 }
 
 // AddressFromKey extracts address from a key with the form
