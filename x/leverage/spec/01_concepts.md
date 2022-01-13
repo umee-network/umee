@@ -52,6 +52,10 @@ Rather than being stored in a separate account, the `ReserveAmount` of any given
 
 For example, if the module contains `1000 uumee` and `100 uumee` are reserved, then only `900 uumee` are available for Borrow and Withdraw transactions. If `40 uumee` of reserves are then used to pay off a bad debt, the module acount will have `960 uumee` with `60 uumee` reserved, keeping the available balance at `900 uumee`.
 
+## Oracle Rewards
+
+At the same time reserves are accrued, an additional portion of borrow interest accrued is transferred from the `leverage` module account to the `oracle` module account to fund its reward pool. Because the transfer happens instantaneously and the accounts are separate, there is no need to module state to track the amounts.
+
 ## Derived Values
 
 Some important quantities that govern the behavior of the `leverage` module are derived from a combination of parameters, borrow values, and oracle prices. The math and reasoning behind these values will appear below.
