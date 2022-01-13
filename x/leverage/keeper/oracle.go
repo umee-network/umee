@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
+
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -87,4 +89,24 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 		toDenom,
 		fromCoin.Amount.ToDec().Mul(p1).Quo(p2).TruncateInt(),
 	), nil
+}
+
+// FundOracle transfers coins to the oracle module account, as long as the
+// leverage module account has sufficient unreserved assets.
+func (k Keeper) FundOracle(ctx sdk.Context, rewards sdk.Coins) error {
+	for i, coin := range rewards {
+		reserved := k.GetReserveAmount(ctx, coin.Denom)
+		balance := k.ModuleBalance(ctx, coin.Denom)
+
+		amountToTransfer := sdk.MinInt(coin.Amount, balance.Sub(reserved))
+		amountToTransfer = sdk.MaxInt(amountToTransfer, sdk.ZeroInt())
+
+		rewards[i].Amount = amountToTransfer
+	}
+
+	if !rewards.IsZero() {
+		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, rewards)
+	}
+
+	return nil
 }
