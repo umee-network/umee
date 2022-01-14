@@ -72,7 +72,7 @@ func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its exchange rate is
 		// lower than 1.0 or it has some error doing the unmarshal it
 		// adds the denom invariant count and message description
-		err := k.Iterate(ctx, exchangeRatePrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, exchangeRatePrefix, func(key, val []byte) error {
 			// remove exchangeRatePrefix and null-terminator
 			denom := types.DenomFromKey(key, exchangeRatePrefix)
 
@@ -117,7 +117,7 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its reserve amount is
 		// negative or it has some error doing the unmarshal it
 		// adds the denom invariant count and message description
-		err := k.Iterate(ctx, reserveAmountPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, reserveAmountPrefix, func(key, val []byte) error {
 			// remove reserveAmountPrefix and null-terminator
 			denom := types.DenomFromKey(key, reserveAmountPrefix)
 
@@ -162,7 +162,7 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its borrow amount is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
-		err := k.Iterate(ctx, collateralPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, collateralPrefix, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
 			denom := types.DenomFromKeyWithAddress(key, collateralPrefix)
 			// remove prefix | denom and null-terminator
@@ -209,7 +209,7 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its borrow amount is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
-		err := k.Iterate(ctx, loanKeyPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, loanKeyPrefix, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
 			denom := types.DenomFromKeyWithAddress(key, loanKeyPrefix)
 			// remove prefix | denom and null-terminator
@@ -256,7 +256,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its borrow APY is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
-		err := k.Iterate(ctx, borrowAPYprefix, func(key, val []byte) error {
+		err := k.iterate(ctx, borrowAPYprefix, func(key, val []byte) error {
 			denom := types.DenomFromKey(key, borrowAPYprefix)
 
 			var borrowAPY sdk.Dec
@@ -300,7 +300,7 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 		// in the keeper. If a token is registered but its lend APY is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
-		err := k.Iterate(ctx, lendAPYprefix, func(key, val []byte) error {
+		err := k.iterate(ctx, lendAPYprefix, func(key, val []byte) error {
 			denom := types.DenomFromKey(key, lendAPYprefix)
 
 			var lendAPY sdk.Dec
