@@ -254,7 +254,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms which have an Borrow APY stored
 		// in the keeper. If a borrow APY is registered but it is
-		// not positive or it has some error doing the unmarshal it
+		// negative or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
 		err := k.iterate(ctx, borrowAPYprefix, func(key, val []byte) error {
 			denom := types.DenomFromKey(key, borrowAPYprefix)
@@ -266,9 +266,9 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 				return nil
 			}
 
-			if !borrowAPY.IsPositive() {
+			if borrowAPY.IsNegative() {
 				count++
-				msg += fmt.Sprintf("\t%s borrow APY %s is not positive\n", denom, borrowAPY.String())
+				msg += fmt.Sprintf("\t%s borrow APY %s is negative\n", denom, borrowAPY.String())
 			}
 			return nil
 		})
@@ -281,7 +281,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 
 		return sdk.FormatInvariant(
 			types.ModuleName, routeBorrowAPY,
-			fmt.Sprintf("number of not positive borrow APY found %d\n%s", count, msg),
+			fmt.Sprintf("number of negative borrow APY found %d\n%s", count, msg),
 		), broken
 	}
 }
@@ -298,7 +298,7 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms which have an lend APY stored
 		// in the keeper. If a lend APY is registered but it is
-		// not positive or it has some error doing the unmarshal it
+		// negative or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
 		err := k.iterate(ctx, lendAPYprefix, func(key, val []byte) error {
 			denom := types.DenomFromKey(key, lendAPYprefix)
@@ -310,9 +310,9 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 				return nil
 			}
 
-			if !lendAPY.IsPositive() {
+			if lendAPY.IsNegative() {
 				count++
-				msg += fmt.Sprintf("\t%s lend APY %s is not positive\n", denom, lendAPY.String())
+				msg += fmt.Sprintf("\t%s lend APY %s is negative\n", denom, lendAPY.String())
 			}
 			return nil
 		})
@@ -325,7 +325,7 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 
 		return sdk.FormatInvariant(
 			types.ModuleName, routeLendAPY,
-			fmt.Sprintf("number of not positive lend APY found %d\n%s", count, msg),
+			fmt.Sprintf("number of negative lend APY found %d\n%s", count, msg),
 		), broken
 	}
 }
