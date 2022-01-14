@@ -606,18 +606,15 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 	return liquidationIncentive, closeFactor, nil
 }
 
-// iterate through all the keys from that prefix and then calls
-// the iterate function with the key and value if this function
-// returns an error, it stops the for loop
+// iterate through all keys with a given prefix using a provided function.
+// If the provided function returns an error, iteration stops and the error
+// is returned.
 func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte) error) error {
 	store := ctx.KVStore(k.storeKey)
 
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 
-	// Iterate through all keys and values
-	// if any iterate function returns an error
-	// it stops the loop
 	for ; iter.Valid(); iter.Next() {
 		key, val := iter.Key(), iter.Value()
 

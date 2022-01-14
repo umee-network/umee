@@ -253,7 +253,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 		borrowAPYprefix := types.CreateBorrowAPYKeyNoDenom()
 
 		// Iterate through all denoms which have an Borrow APY stored
-		// in the keeper. If a token is registered but its borrow APY is
+		// in the keeper. If a borrow APY is registered but it is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
 		err := k.iterate(ctx, borrowAPYprefix, func(key, val []byte) error {
@@ -297,7 +297,7 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 		lendAPYprefix := types.CreateLendAPYKeyNoDenom()
 
 		// Iterate through all denoms which have an lend APY stored
-		// in the keeper. If a token is registered but its lend APY is
+		// in the keeper. If a lend APY is registered but it is
 		// not positive or it has some error doing the unmarshal it
 		// adds the denom and address invariant count and message description
 		err := k.iterate(ctx, lendAPYprefix, func(key, val []byte) error {
