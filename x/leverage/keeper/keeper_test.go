@@ -1162,6 +1162,29 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	s.Require().Equal([]sdk.AccAddress{lenderAddr, anotherLender}, lenderAddress)
 }
 
+func (s *IntegrationTestSuite) TestExchangeRatesInvariant() {
+	app, ctx := s.app, s.ctx
+
+	// artificially set uToken exchange rate to 2.0
+	err := app.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("2.0"))
+	s.Require().NoError(err)
+
+	// it should not report any invariant
+	_, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	s.Require().False(broken)
+
+	// setting the uToken exchange rate to 0.9 to be wrong and report an invariant
+	err = app.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("0.9"))
+	s.Require().NoError(err)
+
+	// it should report one variant
+	invariant, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: exchange-rates invariant\namount of exchange rate lower than one 1\n\tuumee exchange rate 0.900000000000000000 is lower than one\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
