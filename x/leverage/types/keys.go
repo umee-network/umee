@@ -197,7 +197,7 @@ func CreateLendAPYKey(tokenDenom string) []byte {
 	return append(key, 0) // append 0 for null-termination
 }
 
-// CreateLendAPYKey returns a safe copy of lend APY prefix
+// CreateLendAPYKeyNoDenom returns a safe copy of lend APY prefix
 func CreateLendAPYKeyNoDenom() []byte {
 	// lendAPYPrefix
 	var key []byte
