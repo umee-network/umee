@@ -12,6 +12,7 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
+	"github.com/umee-network/umee/app"
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage"
@@ -1242,6 +1243,42 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 	// it should not report any invariant
 	_, broken = keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
+}
+
+func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, app.BondDenom, sdk.NewDec(2))
+
+	// it should not report any invariant
+	_, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the borrow APY to 0
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, app.BondDenom, sdk.NewDec(0))
+
+	// it should report an invariant because the borrow apy is set to 0
+	invariant, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: borrow-apy invariant\nnumber of not positive borrow APY found 1\n\tuumee borrow APY 0.000000000000000000 is not positive\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
+}
+
+func (s *IntegrationTestSuite) TestLendAPYInvariant() {
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, app.BondDenom, sdk.NewDec(2))
+
+	// it should not report any invariant
+	_, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the lend APY to 0
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, app.BondDenom, sdk.NewDec(0))
+
+	// it should report an invariant because the lend apy is set to 0
+	invariant, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: lend-apy invariant\nnumber of not positive lend APY found 1\n\tuumee lend APY 0.000000000000000000 is not positive\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
