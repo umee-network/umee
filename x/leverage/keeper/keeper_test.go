@@ -1195,7 +1195,31 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	s.Require().NoError(err)
 
 	// it should not report any invariant
-	_, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	_, broken := keeper.ReserveAmountInvariant(app.LeverageKeeper)(ctx)
+	s.Require().False(broken)
+}
+
+func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
+	lenderAddr, _ := s.initBorrowScenario()
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// lender borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	s.Require().NoError(err)
+
+	// it should not report any invariant
+	_, broken := keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// lender repays 30 umee, actually only 20 because is the min between
+	// the amount borrowed and the amount repaid
+	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
+	s.Require().NoError(err)
+
+	// it should not report any invariant
+	_, broken = keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
 }
 
