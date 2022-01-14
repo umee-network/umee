@@ -1255,10 +1255,17 @@ func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
 	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
 
 	// check invariant
+	_, broken = keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the borrow APY to an negative value
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(-1))
+
+	// check invariant
 	invariant, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().True(broken)
 
-	expectedInvariant := "leverage: borrow-apy invariant\nnumber of not positive borrow APY found 1\n\tuumee borrow APY 0.000000000000000000 is not positive\n\n"
+	expectedInvariant := "leverage: borrow-apy invariant\nnumber of not positive borrow APY found 1\n\tuumee borrow APY -1.000000000000000000 is negative\n\n"
 	s.Require().Equal(expectedInvariant, invariant)
 }
 
@@ -1273,10 +1280,17 @@ func (s *IntegrationTestSuite) TestLendAPYInvariant() {
 	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
 
 	// check invariant
+	_, broken = keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the lend APY to an negative value
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(-1))
+
+	// check invariant
 	invariant, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().True(broken)
 
-	expectedInvariant := "leverage: lend-apy invariant\nnumber of not positive lend APY found 1\n\tuumee lend APY 0.000000000000000000 is not positive\n\n"
+	expectedInvariant := "leverage: lend-apy invariant\nnumber of not positive lend APY found 1\n\tuumee lend APY -1.000000000000000000 is negative\n\n"
 	s.Require().Equal(expectedInvariant, invariant)
 }
 
