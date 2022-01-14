@@ -1187,6 +1187,18 @@ func (s *IntegrationTestSuite) TestExchangeRatesInvariant() {
 	s.Require().Equal(expectedInvariant, invariant)
 }
 
+func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
+	app, ctx := s.app, s.ctx
+
+	// artificially set reserves
+	err := app.LeverageKeeper.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	s.Require().NoError(err)
+
+	// it should not report any invariant
+	_, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	s.Require().False(broken)
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
