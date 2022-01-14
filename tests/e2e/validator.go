@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -19,15 +20,12 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
-	"github.com/umee-network/umee/tests/util"
 )
 
 type validator struct {
@@ -40,13 +38,6 @@ type validator struct {
 	consensusKey     privval.FilePVKey
 	consensusPrivKey cryptotypes.PrivKey
 	nodeKey          p2p.NodeKey
-	ethereumKey      ethereumKey
-}
-
-type ethereumKey struct {
-	publicKey  string
-	privateKey string
-	address    string
 }
 
 func (v *validator) instanceName() string {
@@ -177,24 +168,6 @@ func (v *validator) createKey(name string) error {
 	return v.createKeyFromMnemonic(name, mnemonic)
 }
 
-func (v *validator) generateEthereumKey() error {
-	privKey, pubKey, _, err := util.GenerateRandomEthKey()
-	if err != nil {
-		return err
-	}
-
-	privKeyBz := crypto.FromECDSA(privKey)
-	pubKeyBz := crypto.FromECDSAPub(pubKey)
-
-	v.ethereumKey = ethereumKey{
-		privateKey: hexutil.Encode(privKeyBz),
-		publicKey:  hexutil.Encode(pubKeyBz),
-		address:    crypto.PubkeyToAddress(*pubKey).Hex(),
-	}
-
-	return nil
-}
-
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	description := stakingtypes.NewDescription(v.moniker, "", "", "", "")
 	commissionRates := stakingtypes.CommissionRates{
@@ -219,6 +192,19 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 		commissionRates,
 		minSelfDelegation,
 	)
+}
+
+func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string) (sdk.Msg, error) {
+	eth, err := gravitytypes.NewEthAddress(ethAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return gravitytypes.NewMsgSetOrchestratorAddress(
+		sdk.ValAddress(v.keyInfo.GetAddress()),
+		orchAddr,
+		*eth,
+	), nil
 }
 
 func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {

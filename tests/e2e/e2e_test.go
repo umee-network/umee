@@ -53,7 +53,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	// send 300 stake tokens from Umee to Ethereum
 	s.Run("send_stake_tokens_to_eth", func() {
-		ethRecipient := s.chain.validators[1].ethereumKey.address
+		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
 		s.sendFromUmeeToEth(0, ethRecipient, fmt.Sprintf("300%s", ibcStakeDenom), "10photon", fmt.Sprintf("7%s", ibcStakeDenom))
 
 		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
@@ -124,7 +124,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Umee to Ethereum
 	s.Run("send_photon_tokens_to_eth", func() {
-		ethRecipient := s.chain.validators[1].ethereumKey.address
+		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
 		s.sendFromUmeeToEth(0, ethRecipient, "100photon", "10photon", "3photon")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
@@ -196,7 +196,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
-		ethRecipient := s.chain.validators[1].ethereumKey.address
+		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
 		s.sendFromUmeeToEth(0, ethRecipient, "300uumee", "10photon", "7uumee")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))

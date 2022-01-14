@@ -23,6 +23,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -189,11 +190,10 @@ func (s *IntegrationTestSuite) initEthereum() {
 	}
 
 	ethGenesis.Alloc["0xBf660843528035a5A4921534E156a27e64B231fE"] = alloc
-	for _, val := range s.chain.validators {
-		s.Require().NoError(val.generateEthereumKey())
-		ethGenesis.Alloc[val.ethereumKey.address] = alloc
+	for _, orch := range s.chain.orchestrators {
+		s.Require().NoError(orch.generateEthereumKey())
+		ethGenesis.Alloc[orch.ethereumKey.address] = alloc
 	}
-
 	ethGenBz, err := json.MarshalIndent(ethGenesis, "", "  ")
 	s.Require().NoError(err)
 
@@ -216,15 +216,6 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
 	gravityGenState.Params.BridgeChainId = uint64(ethChainID)
-	gravityGenState.DelegateKeys = make([]gravitytypes.MsgSetOrchestratorAddress, len(s.chain.validators))
-
-	for i, val := range s.chain.validators {
-		gravityGenState.DelegateKeys[i] = gravitytypes.MsgSetOrchestratorAddress{
-			Validator:    sdk.ValAddress(val.keyInfo.GetAddress()).String(),
-			Orchestrator: val.keyInfo.GetAddress().String(),
-			EthAddress:   val.ethereumKey.address,
-		}
-	}
 
 	bz, err := cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
@@ -280,7 +271,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
-		signedTx, err := val.signMsg(createValmsg)
+		delKeysMsg, err := val.buildDelegateKeysMsg(s.chain.orchestrators[i].keyInfo.GetAddress(), s.chain.orchestrators[i].ethereumKey.address)
+		s.Require().NoError(err)
+
+		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
 		s.Require().NoError(err)
 
 		txRaw, err := cdc.MarshalJSON(signedTx)
@@ -742,22 +736,19 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
 	s.orchResources = make([]*dockertest.Resource, len(s.chain.validators))
-	for i, val := range s.chain.validators {
+	for i, orch := range s.chain.orchestrators {
 		resource, err := s.dkrPool.RunWithOptions(
 			&dockertest.RunOptions{
 				Name:       s.chain.orchestrators[i].instanceName(),
 				NetworkID:  s.dkrNet.Network.ID,
 				Repository: "umeenet/umeed",
-				Mounts: []string{
-					fmt.Sprintf("%s/:/root/.umee", val.configDir()),
-				},
 				// NOTE: container names are prefixed with '/'
 				Entrypoint: []string{
 					"peggo",
 					"orchestrator",
 					s.gravityContractAddr,
 					"--eth-pk",
-					val.ethereumKey.privateKey[2:], // remove 0x prefix
+					orch.ethereumKey.privateKey[2:], // remove 0x prefix
 					"--eth-rpc",
 					fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 					"--cosmos-chain-id",
@@ -769,14 +760,14 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-gas-prices",
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
 					"--cosmos-from",
-					val.keyInfo.GetName(),
-					"--cosmos-keyring-dir=/root/.umee",
-					"--cosmos-keyring=test",
+					orch.keyInfo.GetName(),
 					"--relay-batches=true",
 					"--relay-valsets=true",
 					"--profit-multiplier=0.0",
 					"--requester-loop-multiplier=1.0",
 					"--relayer-loop-multiplier=1.0",
+					"--cosmos-pk",
+					hexutil.Encode(s.chain.orchestrators[i].privateKey.Bytes()),
 				},
 			},
 			noRestart,
