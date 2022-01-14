@@ -1263,7 +1263,7 @@ func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
 	invariant, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().True(broken)
 
-	expectedInvariant := "leverage: borrow-apy invariant\nnumber of not positive borrow APY found 1\n\tuumee borrow APY -1.000000000000000000 is negative\n\n"
+	expectedInvariant := "leverage: borrow-apy invariant\nnumber of negative borrow APY found 1\n\tuumee borrow APY -1.000000000000000000 is negative\n\n"
 	s.Require().Equal(expectedInvariant, invariant)
 }
 
@@ -1288,7 +1288,7 @@ func (s *IntegrationTestSuite) TestLendAPYInvariant() {
 	invariant, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().True(broken)
 
-	expectedInvariant := "leverage: lend-apy invariant\nnumber of not positive lend APY found 1\n\tuumee lend APY -1.000000000000000000 is negative\n\n"
+	expectedInvariant := "leverage: lend-apy invariant\nnumber of negative lend APY found 1\n\tuumee lend APY -1.000000000000000000 is negative\n\n"
 	s.Require().Equal(expectedInvariant, invariant)
 }
 
