@@ -1199,6 +1199,27 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	s.Require().False(broken)
 }
 
+func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
+	lenderAddr, _ := s.initBorrowScenario()
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// it should not report any invariant
+	_, broken := keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+
+	// withdraw the lended umee in the initBorrowScenario
+	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
+	s.Require().NoError(err)
+
+	// it should not report any invariant
+	_, broken = keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+}
+
 func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 	lenderAddr, _ := s.initBorrowScenario()
 
