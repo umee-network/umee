@@ -12,7 +12,6 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	"github.com/umee-network/umee/app"
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage"
@@ -1246,14 +1245,14 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
-	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, app.BondDenom, sdk.NewDec(2))
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(2))
 
 	// check invariant
 	_, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
 
 	// sets the borrow APY to 0
-	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, app.BondDenom, sdk.NewDec(0))
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
 
 	// check invariant
 	invariant, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
@@ -1264,14 +1263,14 @@ func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestLendAPYInvariant() {
-	s.app.LeverageKeeper.SetLendAPY(s.ctx, app.BondDenom, sdk.NewDec(2))
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(2))
 
 	// check invariant
 	_, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
 
 	// sets the lend APY to 0
-	s.app.LeverageKeeper.SetLendAPY(s.ctx, app.BondDenom, sdk.NewDec(0))
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
 
 	// check invariant
 	invariant, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
