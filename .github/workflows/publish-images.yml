@@ -7,7 +7,7 @@ on:
       - '**'
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'enable.publishimage')
+    if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Enable:ImagePublish')
     name: Publish Docker, GCP
     runs-on: ubuntu-latest
 
