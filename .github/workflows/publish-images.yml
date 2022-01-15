@@ -4,10 +4,10 @@ on:
     types: [ labeled ]
   push:
     branches:
-      - main
+      - '**'
 jobs:
   publish:
-    if: ${{ github.event.label.name == 'enable.publishimage' }}
+    if: github.ref == 'refs/heads/main' || github.event.label.name == 'enable.publishimage'
     name: Publish Docker, GCP
     runs-on: ubuntu-latest
 
