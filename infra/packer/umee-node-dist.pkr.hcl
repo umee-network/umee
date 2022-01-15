@@ -18,6 +18,9 @@ packer {
 source "docker" "final" {
   image  = "ubuntu:20.04"
   commit = true
+  changes = [
+    "ENTRYPOINT /usr/local/bin/umeed"
+  ]
 }
 
 source "googlecompute" "final" {

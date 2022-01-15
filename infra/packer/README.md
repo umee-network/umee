@@ -12,3 +12,8 @@ brew tap hashicorp/tap
 brew install hashicorp/tap/packer
 ```
 
+## Testing Packer hcl changes outside of CI
+```bash
+export GITHUB_SHA=foobar
+bin/pack-and-distribute-only-docker
+```
