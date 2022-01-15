@@ -1,0 +1,9 @@
+#!/bin/bash -xeu
+
+# build binary distribution
+bin/build-dist
+
+# pack it into the images
+packer init umee-node-dist.pkr.hcl
+export PKR_VAR_git_sha="$GITHUB_SHA"
+packer build umee-node-dist.pkr.hcl

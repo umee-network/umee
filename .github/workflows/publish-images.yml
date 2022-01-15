@@ -1,0 +1,18 @@
+name: Images
+on:
+  pull_request:
+    types: [ labeled ]
+  push:
+    branches:
+      - main
+jobs:
+  publish:
+    if: ${{ github.event.label.name == 'enable.publishimage' }}
+    name: Publish Docker, GCP
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/pack-and-distribute 
+        with:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}

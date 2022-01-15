@@ -1,0 +1,41 @@
+FROM ubuntu:focal-20211006
+
+# Install system dependencies
+RUN apt update \
+  && apt install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gcc \
+    git \
+    libc6-dev \
+    make \
+  && apt clean autoclean \
+  && apt autoremove --yes \
+  && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+# Install go 
+RUN curl -sL https://go.dev/dl/go1.17.5.linux-amd64.tar.gz | tar --strip-components=1 -C /usr/local -xz
+
+# Copy Umee source in
+WORKDIR /tmp/build/umee
+COPY Makefile go.mod go.sum ./
+COPY ante/ ante/
+COPY app/ app/
+COPY cmd/ cmd/
+COPY price-feeder/ price-feeder/
+COPY tests/ tests/
+COPY x/ x/
+
+# Build umeed
+RUN make build
+
+# Build price-feeder
+WORKDIR /tmp/build/umee/price-feeder
+RUN make build
+
+# Clone/Build Peggo
+WORKDIR /tmp/build/peggo
+RUN git clone https://github.com/umee-network/peggo.git --branch main --single-branch --depth 1 .
+RUN make build
+
+WORKDIR /root
