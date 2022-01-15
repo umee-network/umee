@@ -9,11 +9,9 @@ For example:
 docker run -it us-docker.pkg.dev/umeedefi/stack/node:<full-git-sha>
 ```
 
-```
-->
-```
+➡️
 
-```
+```text
 A daemon and client for interacting with the Umee network. Umee is a
 Universal Capital Facility that can collateralize assets on one blockchain
 towards borrowing assets on another blockchain.
