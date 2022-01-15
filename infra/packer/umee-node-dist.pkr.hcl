@@ -16,7 +16,7 @@ packer {
 }
 
 source "docker" "final" {
-  image  = "ubuntu:focal-20211006"
+  image  = "ubuntu:20.04"
   commit = true
 }
 
