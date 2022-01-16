@@ -88,6 +88,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
+	customgravity "github.com/umee-network/umee/x/gravity"
 
 	customante "github.com/umee-network/umee/ante"
 	umeeapp "github.com/umee-network/umee/app"
@@ -554,6 +555,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
+		customgravity.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
 		transferModule,
 	)
 
