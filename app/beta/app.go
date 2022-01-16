@@ -543,6 +543,7 @@ func New(
 	// deterministic simulations.
 	app.sm = module.NewSimulationManager(
 		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
+		customgravity.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
@@ -555,7 +556,6 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
-		customgravity.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
 		transferModule,
 	)
 
