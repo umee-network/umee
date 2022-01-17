@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"crypto/ecdsa"
 	"math/rand"
 
 	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
@@ -8,6 +9,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
@@ -55,6 +58,14 @@ func WeightedOperations(
 	}
 }
 
+func generateEthAddress() string {
+	privateKey, _ := crypto.GenerateKey()
+	publicKey := privateKey.Public()
+	publicKeyECDSA := publicKey.(*ecdsa.PublicKey)
+	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+	return address
+}
+
 // SimulateValidatorReplace loops through the validator set and updates gravity info
 func SimulateValidatorReplace(
 	k gravitykeeper.Keeper,
@@ -73,7 +84,7 @@ func SimulateValidatorReplace(
 			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, validator.GetOperator())
 			_, foundExistingOrchAddress := k.GetOrchestratorValidator(ctx, account)
 			if !foundExistingEthAddress || !foundExistingOrchAddress {
-				ethAddr, _ := types.NewEthAddress("0x3146D2d6Eed46Afa423969f5dDC3152DfC359b09")
+				ethAddr, _ := types.NewEthAddress(generateEthAddress())
 				simAccount, _ := simtypes.FindAccount(accs, account)
 				spendable := bk.SpendableCoins(ctx, account)
 				msg := types.NewMsgSetOrchestratorAddress(validator.GetOperator(), account, *ethAddr)
@@ -93,12 +104,11 @@ func SimulateValidatorReplace(
 				}
 				_, _, err := simulation.GenAndDeliverTxWithRandFees(txCtx)
 				if err != nil {
-					panic("unable to update set")
+					panic("unable to update gravity validator set")
 				}
 			}
-			return true
+			return false
 		})
-
 		return simtypes.NewOperationMsgBasic("gravity", "MsgSetOrchestratorAddress", "validators updated", true, nil), nil, nil
 	}
 }
