@@ -7,7 +7,7 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// GetLendAPY returns an sdk.Dec of an lend APY returns sdk.ZeroDec if not found.
+// GetLendAPY returns an sdk.Dec of an lend APY. Returns sdk.ZeroDec if not found.
 func (k Keeper) GetLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateLendAPYKey(denom)
