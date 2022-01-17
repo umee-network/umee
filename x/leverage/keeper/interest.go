@@ -69,10 +69,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// Compute total borrows across all borrowers, which are used when calculating
 	// borrow utilization.
-	totalBorrowed, err := k.GetTotalBorrows(ctx)
-	if err != nil {
-		return err
-	}
+	totalBorrowed := k.GetTotalBorrows(ctx)
 
 	interestToApply := map[string]sdk.Dec{}
 	reserveFactors := map[string]sdk.Dec{}
@@ -162,7 +159,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
 		}
 
-		if err = k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
+		if err := k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
 			return err
 		}
 	}
@@ -173,7 +170,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	bz, err = sdk.NewInt(currentTime).Marshal()
+	bz, err := sdk.NewInt(currentTime).Marshal()
 	if err != nil {
 		return err
 	}
