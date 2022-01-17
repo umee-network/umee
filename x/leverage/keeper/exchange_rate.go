@@ -89,10 +89,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) err
 // token denoms.
 func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
-	totalBorrows, err := k.GetTotalBorrows(ctx)
-	if err != nil {
-		return err
-	}
+	totalBorrows := k.GetTotalBorrows(ctx)
 
 	exchangeRatePrefix := types.CreateExchangeRateKeyNoDenom()
 
@@ -133,7 +130,7 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 	return nil
 }
 
-// InitializeExchangeRate checks the token:uTokenexchange rate for a given base
+// InitializeExchangeRate checks the token:uToken exchange rate for a given base
 // token denom and sets it to 1.0 if no rate has been registered. No-op if a
 // rate already exists.
 func (k Keeper) InitializeExchangeRate(ctx sdk.Context, denom string) error {
