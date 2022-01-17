@@ -46,7 +46,7 @@ func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow s
 // an sdk.Coins. It is done for all asset types at once, rather than one denom
 // at a time, because either case would require iterating through all open
 // borrows the way borrows are currently stored ( prefix | address | denom ).
-func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
+func (k Keeper) GetTotalBorrows(ctx sdk.Context) sdk.Coins {
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.KeyPrefixLoanToken
 	iter := sdk.KVStorePrefixIterator(store, prefix)
@@ -64,7 +64,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
-			return sdk.NewCoins(), err
+			panic(err)
 		}
 
 		// For each loan found, add it to totalBorrowed
@@ -72,7 +72,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) (sdk.Coins, error) {
 	}
 
 	totalBorrowed.Sort()
-	return totalBorrowed, nil
+	return totalBorrowed
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
