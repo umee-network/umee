@@ -18,7 +18,6 @@ import (
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 // Simulation operation weights constants
@@ -77,17 +76,18 @@ func SimulateValidatorReplace(
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		vals := sk.GetValidatorSet()
-		vals.IterateValidators(ctx, func(index int64, validator stakingtypes.ValidatorI) (stop bool) {
-			account := sdk.AccAddress(validator.GetOperator())
+		vals := sk.GetAllValidators(ctx)
+		for _, validator := range vals {
+			operator := validator.GetOperator()
+			account := sdk.AccAddress(operator)
 			// check if the validator does not have an existing key
-			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, validator.GetOperator())
+			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, operator)
 			_, foundExistingOrchAddress := k.GetOrchestratorValidator(ctx, account)
 			if !foundExistingEthAddress || !foundExistingOrchAddress {
 				ethAddr, _ := types.NewEthAddress(generateEthAddress())
 				simAccount, _ := simtypes.FindAccount(accs, account)
 				spendable := bk.SpendableCoins(ctx, account)
-				msg := types.NewMsgSetOrchestratorAddress(validator.GetOperator(), account, *ethAddr)
+				msg := types.NewMsgSetOrchestratorAddress(operator, account, *ethAddr)
 				txCtx := simulation.OperationInput{
 					R:               r,
 					App:             app,
@@ -107,8 +107,7 @@ func SimulateValidatorReplace(
 					panic("unable to update gravity validator set")
 				}
 			}
-			return false
-		})
+		}
 		return simtypes.NewOperationMsgBasic("gravity", "MsgSetOrchestratorAddress", "validators updated", true, nil), nil, nil
 	}
 }
