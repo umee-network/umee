@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -110,6 +112,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	oracleRewards := sdk.NewCoins()
 	newReserves := sdk.NewCoins()
+	totalInterest := sdk.NewCoins()
 	borrowPrefix := types.CreateLoanKeyNoAddress()
 
 	iter := sdk.KVStorePrefixIterator(store, borrowPrefix)
@@ -138,6 +141,9 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 
 		store.Set(key, bz)
+
+		// Track total interest across all borrowers for logging
+		totalInterest = totalBorrowed.Add(sdk.NewCoin(denom, amountToAccrue))
 
 		// A portion of amountToAccrue defined by the denom's reserve factor will be
 		// set aside as reserves.
@@ -171,8 +177,28 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	if err != nil {
 		return err
 	}
-
 	store.Set(timeKey, bz)
+
+	// Because this action is not caused by a message, logging and
+	// events are here instead of msg_server.go
+	k.Logger(ctx).Debug(
+		"interest epoch",
+		"block height", fmt.Sprintf("%d", ctx.BlockHeight()),
+		"unix time", fmt.Sprintf("%d", currentTime),
+		"interest", totalInterest.String(),
+		"reserved", newReserves.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeInterestEpoch,
+			sdk.NewAttribute(types.EventAttrBlockHeight, fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute(types.EventAttrUnixTime, fmt.Sprintf("%d", currentTime)),
+			sdk.NewAttribute(types.EventAttrInterest, totalInterest.String()),
+			sdk.NewAttribute(types.EventAttrReserved, newReserves.String()),
+		),
+	})
+
 	return nil
 }
 
