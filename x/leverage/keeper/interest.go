@@ -177,6 +177,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	if err != nil {
 		return err
 	}
+
 	store.Set(timeKey, bz)
 
 	// Because this action is not caused by a message, logging and
