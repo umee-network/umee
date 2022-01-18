@@ -22,7 +22,7 @@ import (
 
 // Simulation operation weights constants
 const (
-	OpWeightExec = "op_weight_simulate_replace"
+	OpWeightReplace = "op_weight_simulate_replace"
 )
 
 // operations weight
@@ -43,7 +43,7 @@ func WeightedOperations(
 
 	var weightReplace int
 
-	appParams.GetOrGenerate(cdc, OpWeightExec, &weightReplace, nil,
+	appParams.GetOrGenerate(cdc, OpWeightReplace, &weightReplace, nil,
 		func(_ *rand.Rand) {
 			weightReplace = DefaultWeightReplace
 		},
@@ -57,6 +57,7 @@ func WeightedOperations(
 	}
 }
 
+// generateEthAddress generates a random valid eth address
 func generateEthAddress() string {
 	privateKey, _ := crypto.GenerateKey()
 	publicKey := privateKey.Public()
@@ -80,7 +81,6 @@ func SimulateValidatorReplace(
 		for _, validator := range vals {
 			operator := validator.GetOperator()
 			account := sdk.AccAddress(operator)
-			// check if the validator does not have an existing key
 			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, operator)
 			_, foundExistingOrchAddress := k.GetOrchestratorValidator(ctx, account)
 			if !foundExistingEthAddress || !foundExistingOrchAddress {
@@ -108,6 +108,10 @@ func SimulateValidatorReplace(
 				}
 			}
 		}
-		return simtypes.NewOperationMsgBasic("gravity", "MsgSetOrchestratorAddress", "validators updated", true, nil), nil, nil
+		return simtypes.NewOperationMsgBasic(
+			types.ModuleName,
+			"MsgSetOrchestratorAddress",
+			"validators updated", true,
+			nil), nil, nil
 	}
 }
