@@ -1162,6 +1162,136 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	s.Require().Equal([]sdk.AccAddress{lenderAddr, anotherLender}, lenderAddress)
 }
 
+func (s *IntegrationTestSuite) TestExchangeRatesInvariant() {
+	app, ctx := s.app, s.ctx
+
+	// artificially set uToken exchange rate to 2.0
+	err := app.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("2.0"))
+	s.Require().NoError(err)
+
+	// check invariant
+	_, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	s.Require().False(broken)
+
+	// setting the uToken exchange rate to 0.9 to be wrong and report an invariant
+	err = app.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("0.9"))
+	s.Require().NoError(err)
+
+	// check invariant
+	invariant, broken := keeper.ExchangeRatesInvariant(app.LeverageKeeper)(ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: exchange-rates invariant\namount of exchange rate lower than one 1\n\tuumee exchange rate 0.900000000000000000 is lower than one\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
+}
+
+func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
+	app, ctx := s.app, s.ctx
+
+	// artificially set reserves
+	err := app.LeverageKeeper.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	s.Require().NoError(err)
+
+	// check invariant
+	_, broken := keeper.ReserveAmountInvariant(app.LeverageKeeper)(ctx)
+	s.Require().False(broken)
+}
+
+func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
+	lenderAddr, _ := s.initBorrowScenario()
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// check invariant
+	_, broken := keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+
+	// withdraw the lended umee in the initBorrowScenario
+	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
+	s.Require().NoError(err)
+
+	// check invariant
+	_, broken = keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+}
+
+func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
+	lenderAddr, _ := s.initBorrowScenario()
+
+	// The "lender" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral
+
+	// lender borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	s.Require().NoError(err)
+
+	// check invariant
+	_, broken := keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// lender repays 30 umee, actually only 20 because is the min between
+	// the amount borrowed and the amount repaid
+	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
+	s.Require().NoError(err)
+
+	// check invariant
+	_, broken = keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+}
+
+func (s *IntegrationTestSuite) TestBorrowAPYInvariant() {
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(2))
+
+	// check invariant
+	_, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the borrow APY to 0
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
+
+	// check invariant
+	_, broken = keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the borrow APY to an negative value
+	s.app.LeverageKeeper.SetBorrowAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(-1))
+
+	// check invariant
+	invariant, broken := keeper.BorrowAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: borrow-apy invariant\nnumber of negative borrow APY found 1\n\tuumee borrow APY -1.000000000000000000 is negative\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
+}
+
+func (s *IntegrationTestSuite) TestLendAPYInvariant() {
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(2))
+
+	// check invariant
+	_, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the lend APY to 0
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(0))
+
+	// check invariant
+	_, broken = keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken)
+
+	// sets the lend APY to an negative value
+	s.app.LeverageKeeper.SetLendAPY(s.ctx, umeeapp.BondDenom, sdk.NewDec(-1))
+
+	// check invariant
+	invariant, broken := keeper.LendAPYInvariant(s.app.LeverageKeeper)(s.ctx)
+	s.Require().True(broken)
+
+	expectedInvariant := "leverage: lend-apy invariant\nnumber of negative lend APY found 1\n\tuumee lend APY -1.000000000000000000 is negative\n\n"
+	s.Require().Equal(expectedInvariant, invariant)
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
