@@ -135,7 +135,6 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 			app.DefaultNodeHome,
 		),
 		bridgeGenTxCmd,
-		bridgecmd.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 	)
