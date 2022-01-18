@@ -124,7 +124,7 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 			amount := sdk.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s received an error while Unmarshal the byte %+v\n", denom, val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
 				return nil
 			}
 
@@ -171,7 +171,7 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 			amount := sdk.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s - %s received an error while Unmarshal the byte %+v\n", denom, address.String(), val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s - %s: %+v\n", denom, address.String(), val)
 				return nil
 			}
 
@@ -218,7 +218,7 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 			amount := sdk.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s - %s received an error while Unmarshal the byte %+v\n", denom, address.String(), val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s - %s: %+v\n", denom, address.String(), val)
 				return nil
 			}
 
@@ -262,7 +262,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 			var borrowAPY sdk.Dec
 			if err := borrowAPY.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s received an error while Unmarshal the byte %+v\n", denom, val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
 				return nil
 			}
 
@@ -306,7 +306,7 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 			var lendAPY sdk.Dec
 			if err := lendAPY.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s received an error while Unmarshal the byte %+v\n", denom, val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
 				return nil
 			}
 
