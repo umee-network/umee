@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage/simulation"
@@ -26,14 +25,43 @@ type SimTestSuite struct {
 	ctx sdk.Context
 }
 
-// SetupTest creates a new umee base app
+// SetupTest creates a new ume base app
 func (s *SimTestSuite) SetupTest() {
-	checkTx := false
-	s.app = umeeappbeta.Setup(s.T(), checkTx, 1)
-	s.ctx = s.app.BaseApp.NewContext(checkTx, tmproto.Header{
+	s.app = umeeappbeta.Setup(s.T(), false, 1)
+	s.ctx = s.app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 	})
+}
+
+// TestWeightedOperations tests the weights of the operations.
+func (s *SimTestSuite) TestWeightedOperations() {
+	cdc := s.app.AppCodec()
+	appParams := make(simtypes.AppParams)
+
+	weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper)
+
+	// setup 3 accounts
+	r := rand.New(rand.NewSource(1))
+	accs := s.getTestingAccounts(r, 3)
+
+	expected := []struct {
+		weight     int
+		opMsgRoute string
+		opMsgName  string
+	}{
+		{simulation.DefaultWeightMsgLendAsset, types.ModuleName, types.EventTypeLoanAsset},
+	}
+
+	for i, w := range weightesOps {
+		operationMsg, _, _ := w.Op()(r, s.app.BaseApp, s.ctx, accs, "")
+		// 	// the following checks are very much dependent from the ordering of the output given
+		// 	// by WeightedOperations. if the ordering in WeightedOperations changes some tests
+		// 	// will fail
+		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
+		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
+		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
+	}
 }
 
 // getTestingAccounts generates
@@ -54,41 +82,6 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int) []simtypes.Accoun
 	}
 
 	return accounts
-}
-
-// TestWeightedOperations tests the weights of the operations.
-func (s *SimTestSuite) TestWeightedOperations() {
-	cdc := s.app.AppCodec()
-	appParams := make(simtypes.AppParams)
-
-	weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
-
-	// setup 3 accounts
-	r := rand.New(rand.NewSource(1))
-	accs := s.getTestingAccounts(r, 3)
-
-	expected := []struct {
-		weight     int
-		opMsgRoute string
-		opMsgName  string
-	}{
-		{simulation.DefaultWeightMsgLendAsset, types.ModuleName, types.EventTypeLoanAsset},
-		{simulation.DefaultWeightMsgWithdrawAsset, types.ModuleName, types.EventTypeWithdrawLoanedAsset},
-		{simulation.DefaultWeightMsgBorrowAsset, types.ModuleName, types.EventTypeBorrowAsset},
-		{simulation.DefaultWeightMsgSetCollateral, types.ModuleName, types.EventTypeSetCollateralSetting},
-		{simulation.DefaultWeightMsgRepayAsset, types.ModuleName, types.EventTypeRepayBorrowedAsset},
-		{simulation.DefaultWeightMsgLiquidate, types.ModuleName, types.EventTypeLiquidate},
-	}
-
-	for i, w := range weightesOps {
-		operationMsg, _, _ := w.Op()(r, s.app.BaseApp, s.ctx, accs, "")
-		// 	// the following checks are very much dependent from the ordering of the output given
-		// 	// by WeightedOperations. if the ordering in WeightedOperations changes some tests
-		// 	// will fail
-		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
-		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
-		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
-	}
 }
 
 func TestSimTestSuite(t *testing.T) {
