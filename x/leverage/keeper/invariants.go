@@ -79,7 +79,7 @@ func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
 			amount := sdk.ZeroDec()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
-				msg += fmt.Sprintf("\t%s received an error while Unmarshal the byte %+v\n", denom, val)
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
 				return nil
 			}
 
