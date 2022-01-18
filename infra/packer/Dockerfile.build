@@ -26,8 +26,11 @@ COPY price-feeder/ price-feeder/
 COPY tests/ tests/
 COPY x/ x/
 
-# Build umeed
+# Build umeed beta
 RUN UMEE_ENABLE_BETA=true make build
+RUN mv build/umeed build/umeed-beta
+# Build umeed
+RUN make build
 
 # Build price-feeder
 WORKDIR /tmp/build/umee/price-feeder
