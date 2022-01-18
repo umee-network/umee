@@ -46,9 +46,7 @@ func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 // and borrower address.
 func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 	// loanprefix | lengthprefixed(borrowerAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixLoanToken...)
-	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
+	key := CreateLoanKeyNoDenom(borrowerAddr)
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -57,8 +55,7 @@ func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 // borrower address.
 func CreateLoanKeyNoDenom(borrowerAddr sdk.AccAddress) []byte {
 	// loanprefix | lengthprefixed(borrowerAddr)
-	var key []byte
-	key = append(key, KeyPrefixLoanToken...)
+	key := CreateLoanKeyNoAddress()
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	return key
 }
@@ -85,10 +82,8 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 // CreateCollateralAmountKey returns a KVStore key for getting and setting the amount of
 // collateral stored for a lender in a given denom.
 func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
-	// collateralprefix | lengthprefixed(lenderAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixCollateralAmount...)
-	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	// collateralPrefix | lengthprefixed(lenderAddr) | denom | 0x00
+	key := CreateCollateralAmountKeyNoDenom(lenderAddr)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -96,20 +91,34 @@ func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []
 // CreateCollateralAmountKeyNoDenom returns the common prefix used by all collateral associated
 // with a given lender address.
 func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
-	// collateralprefix | lengthprefixed(lenderAddr)
+	// collateralPrefix | lengthprefixed(lenderAddr)
+	key := CreateCollateralAmountKeyNoAddress()
+	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	return key
+}
+
+// CreateCollateralAmountKeyNoAddress returns a safe copy of collateralPrefix
+func CreateCollateralAmountKeyNoAddress() []byte {
+	// collateralPrefix
 	var key []byte
 	key = append(key, KeyPrefixCollateralAmount...)
-	key = append(key, address.MustLengthPrefix(lenderAddr)...)
 	return key
 }
 
 // CreateReserveAmountKey returns a KVStore key for getting and setting the amount reserved of a a given token.
 func CreateReserveAmountKey(tokenDenom string) []byte {
 	// reserveamountprefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixReserveAmount...)
+	key := CreateReserveAmountKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateReserveAmountKeyNoDenom returns a safe copy of reserveAmountPrefix
+func CreateReserveAmountKeyNoDenom() []byte {
+	// reserveAmountPrefix
+	var key []byte
+	key = append(key, KeyPrefixReserveAmount...)
+	return key
 }
 
 // CreateLastInterestTimeKey returns a KVStore key for getting and setting the amount reserved of a a given token.
@@ -123,8 +132,7 @@ func CreateLastInterestTimeKey() []byte {
 // CreateExchangeRateKey returns a KVStore key for getting and setting the token:uToken rate for a a given token.
 func CreateExchangeRateKey(tokenDenom string) []byte {
 	// exchangeRatePrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixExchangeRate...)
+	key := CreateExchangeRateKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -140,8 +148,7 @@ func CreateExchangeRateKeyNoDenom() []byte {
 // CreateBadDebtKey returns a KVStore key for tracking an address with unpaid bad debt
 func CreateBadDebtKey(denom string, borrowerAddr sdk.AccAddress) []byte {
 	// badDebtAddrPrefix | lengthprefixed(borrowerAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixBadDebt...)
+	key := CreateBadDebtKeyNoAddress()
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	key = append(key, []byte(denom)...)
 	return append(key, 0) // append 0 for null-termination
@@ -158,19 +165,33 @@ func CreateBadDebtKeyNoAddress() []byte {
 // CreateBorrowAPYKey returns a KVStore key for getting and setting the borrow APY for a given token.
 func CreateBorrowAPYKey(tokenDenom string) []byte {
 	// borrowAPYPrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixBorrowAPY...)
+	key := CreateBorrowAPYKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateBorrowAPYKeyNoDenom returns a safe copy of borrow APY prefix
+func CreateBorrowAPYKeyNoDenom() []byte {
+	// borrowAPYPrefix
+	var key []byte
+	key = append(key, KeyPrefixBorrowAPY...)
+	return key
 }
 
 // CreateLendAPYKey returns a KVStore key for getting and setting the lend APY for a given token.
 func CreateLendAPYKey(tokenDenom string) []byte {
 	// lendAPYPrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixLendAPY...)
+	key := CreateLendAPYKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateLendAPYKeyNoDenom returns a safe copy of lend APY prefix
+func CreateLendAPYKeyNoDenom() []byte {
+	// lendAPYPrefix
+	var key []byte
+	key = append(key, KeyPrefixLendAPY...)
+	return key
 }
 
 // AddressFromKey extracts address from a key with the form
@@ -185,4 +206,10 @@ func AddressFromKey(key []byte, prefix []byte) sdk.AccAddress {
 func DenomFromKeyWithAddress(key []byte, prefix []byte) string {
 	addrLength := int(key[len(prefix)])
 	return string(key[len(prefix)+addrLength+1 : len(key)-1])
+}
+
+// DenomFromKey extracts denom from a key with the form
+// prefix | denom | 0x00
+func DenomFromKey(key []byte, prefix []byte) string {
+	return string(key[len(prefix) : len(key)-1])
 }

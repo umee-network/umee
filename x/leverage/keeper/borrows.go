@@ -59,7 +59,7 @@ func (k Keeper) GetTotalBorrows(ctx sdk.Context) sdk.Coins {
 		key, val := iter.Key(), iter.Value()
 
 		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := string(key[len(prefix)+int(key[len(prefix)]+1) : len(key)-1])
+		denom := types.DenomFromKeyWithAddress(key, prefix)
 
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {

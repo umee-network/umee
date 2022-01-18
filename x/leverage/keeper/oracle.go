@@ -94,6 +94,7 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 // FundOracle transfers coins to the oracle module account, as long as the
 // leverage module account has sufficient unreserved assets.
 func (k Keeper) FundOracle(ctx sdk.Context, rewards sdk.Coins) error {
+	// Reduce rewards if they exceed unresered module balance
 	for i, coin := range rewards {
 		reserved := k.GetReserveAmount(ctx, coin.Denom)
 		balance := k.ModuleBalance(ctx, coin.Denom)
@@ -104,6 +105,21 @@ func (k Keeper) FundOracle(ctx sdk.Context, rewards sdk.Coins) error {
 		rewards[i].Amount = amountToTransfer
 	}
 
+	// Because this action is not caused by a message, logging and
+	// events are here instead of msg_server.go
+	k.Logger(ctx).Debug(
+		"funded oracle",
+		"amount", rewards.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeFundOracle,
+			sdk.NewAttribute(sdk.AttributeKeyAmount, rewards.String()),
+		),
+	})
+
+	// Send rewards
 	if !rewards.IsZero() {
 		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, rewards)
 	}
