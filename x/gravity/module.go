@@ -43,7 +43,7 @@ func NewAppModule(
 	}
 }
 
-// WeightedOperations returns the all the gov module operations with their respective weights.
+// WeightedOperations returns the all the gravity module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	return simulation.WeightedOperations(
 		simState.AppParams, simState.Cdc, am.stakingKeeper, am.accountKeeper, am.bankKeeper, am.keeper, am.cdc,
