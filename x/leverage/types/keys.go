@@ -46,9 +46,7 @@ func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 // and borrower address.
 func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 	// loanprefix | lengthprefixed(borrowerAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixLoanToken...)
-	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
+	key := CreateLoanKeyNoDenom(borrowerAddr)
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -57,8 +55,7 @@ func CreateLoanKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 // borrower address.
 func CreateLoanKeyNoDenom(borrowerAddr sdk.AccAddress) []byte {
 	// loanprefix | lengthprefixed(borrowerAddr)
-	var key []byte
-	key = append(key, KeyPrefixLoanToken...)
+	key := CreateLoanKeyNoAddress()
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	return key
 }
@@ -86,9 +83,7 @@ func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string)
 // collateral stored for a lender in a given denom.
 func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
 	// collateralPrefix | lengthprefixed(lenderAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixCollateralAmount...)
-	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	key := CreateCollateralAmountKeyNoDenom(lenderAddr)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -97,8 +92,7 @@ func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []
 // with a given lender address.
 func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
 	// collateralPrefix | lengthprefixed(lenderAddr)
-	var key []byte
-	key = append(key, KeyPrefixCollateralAmount...)
+	key := CreateCollateralAmountKeyNoAddress()
 	key = append(key, address.MustLengthPrefix(lenderAddr)...)
 	return key
 }
@@ -114,8 +108,7 @@ func CreateCollateralAmountKeyNoAddress() []byte {
 // CreateReserveAmountKey returns a KVStore key for getting and setting the amount reserved of a a given token.
 func CreateReserveAmountKey(tokenDenom string) []byte {
 	// reserveamountprefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixReserveAmount...)
+	key := CreateReserveAmountKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -139,8 +132,7 @@ func CreateLastInterestTimeKey() []byte {
 // CreateExchangeRateKey returns a KVStore key for getting and setting the token:uToken rate for a a given token.
 func CreateExchangeRateKey(tokenDenom string) []byte {
 	// exchangeRatePrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixExchangeRate...)
+	key := CreateExchangeRateKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -156,8 +148,7 @@ func CreateExchangeRateKeyNoDenom() []byte {
 // CreateBadDebtKey returns a KVStore key for tracking an address with unpaid bad debt
 func CreateBadDebtKey(denom string, borrowerAddr sdk.AccAddress) []byte {
 	// badDebtAddrPrefix | lengthprefixed(borrowerAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixBadDebt...)
+	key := CreateBadDebtKeyNoAddress()
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	key = append(key, []byte(denom)...)
 	return append(key, 0) // append 0 for null-termination
@@ -174,8 +165,7 @@ func CreateBadDebtKeyNoAddress() []byte {
 // CreateBorrowAPYKey returns a KVStore key for getting and setting the borrow APY for a given token.
 func CreateBorrowAPYKey(tokenDenom string) []byte {
 	// borrowAPYPrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixBorrowAPY...)
+	key := CreateBorrowAPYKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
@@ -191,8 +181,7 @@ func CreateBorrowAPYKeyNoDenom() []byte {
 // CreateLendAPYKey returns a KVStore key for getting and setting the lend APY for a given token.
 func CreateLendAPYKey(tokenDenom string) []byte {
 	// lendAPYPrefix | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixLendAPY...)
+	key := CreateLendAPYKeyNoDenom()
 	key = append(key, []byte(tokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
