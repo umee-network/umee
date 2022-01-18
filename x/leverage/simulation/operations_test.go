@@ -26,7 +26,7 @@ type SimTestSuite struct {
 	ctx sdk.Context
 }
 
-// SetupTest creates a new ume base app
+// SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	s.app = umeeappbeta.Setup(s.T(), false, 1)
 	s.ctx = s.app.BaseApp.NewContext(false, tmproto.Header{
