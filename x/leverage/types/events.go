@@ -10,13 +10,19 @@ const (
 	EventTypeLiquidate            = "liquidate_borrow_position"
 	EventTypeRepayBadDebt         = "repay_bad_debt"
 	EventTypeReservesExhausted    = "reserves_exhausted"
+	EventTypeInterestEpoch        = "interest_epoch"
+	EventTypeFundOracle           = "fund_oracle"
 
-	EventAttrModule     = ModuleName
-	EventAttrLender     = "lender"
-	EventAttrBorrower   = "borrower"
-	EventAttrLiquidator = "liquidator"
-	EventAttrDenom      = "denom"
-	EventAttrEnable     = "enabled"
-	EventAttrAttempted  = "attempted"
-	EventAttrReward     = "reward"
+	EventAttrModule      = ModuleName
+	EventAttrLender      = "lender"
+	EventAttrBorrower    = "borrower"
+	EventAttrLiquidator  = "liquidator"
+	EventAttrDenom       = "denom"
+	EventAttrEnable      = "enabled"
+	EventAttrAttempted   = "attempted"
+	EventAttrReward      = "reward"
+	EventAttrInterest    = "total_interest"
+	EventAttrBlockHeight = "block_height"
+	EventAttrUnixTime    = "unix_time"
+	EventAttrReserved    = "reserved"
 )
