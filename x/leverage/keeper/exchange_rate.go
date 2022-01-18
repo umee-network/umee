@@ -105,7 +105,7 @@ func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
 		key, _ := iter.Key(), iter.Value()
 
 		// remove exchangeRatePrefix and null-terminator
-		denom := string(key[len(exchangeRatePrefix) : len(key)-1])
+		denom := types.DenomFromKey(key, exchangeRatePrefix)
 
 		// uToken exchange rate is equal to the token supply (including borrowed
 		// tokens yet to be repaid and excluding tokens reserved) divided by total

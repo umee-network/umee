@@ -38,3 +38,17 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 
 	require.Equal(t, uDenom, expectedDenom)
 }
+
+func TestDenomFromKey(t *testing.T) {
+	denom := app.BondDenom
+	key := types.CreateExchangeRateKey(denom)
+	expectedDenom := types.DenomFromKey(key, types.KeyPrefixExchangeRate)
+
+	require.Equal(t, denom, expectedDenom)
+
+	uDenom := fmt.Sprintf("u%s", denom)
+	key = types.CreateExchangeRateKey(uDenom)
+	expectedDenom = types.DenomFromKey(key, types.KeyPrefixExchangeRate)
+
+	require.Equal(t, uDenom, expectedDenom)
+}
