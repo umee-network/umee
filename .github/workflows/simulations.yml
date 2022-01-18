@@ -68,8 +68,4 @@ jobs:
       - name: test-sim-multi-seed-short
         run: |
           make test-sim-multi-seed-short
-        # TODO: We disable multi-seed simulations due to the gravity bridge.
-        #
-        # Ref: https://github.com/umee-network/umee/issues/389
-        if: ${{ false }}
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
