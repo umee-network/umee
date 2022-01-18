@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -18,7 +19,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
+	"github.com/umee-network/umee/tests/util"
 )
 
 type KeeperTestSuite struct {
@@ -36,10 +38,11 @@ func (s *KeeperTestSuite) SetupTest() {
 
 	chains := make(map[string]*ibctesting.TestChain)
 	for i := 0; i < 2; i++ {
+		ibctesting.DefaultTestingAppInit = SetupTestingApp
+
 		// create a chain with the temporary coordinator that we'll later override
 		chainID := ibctesting.GetChainID(i)
 		chain := ibctesting.NewTestChain(s.T(), ibctesting.NewCoordinator(s.T(), 0), chainID)
-		ibctesting.DefaultTestingAppInit = SetupTestingApp(chain.Vals)
 
 		balance := banktypes.Balance{
 			Address: chain.SenderAccount.GetAddress().String(),
@@ -66,6 +69,27 @@ func (s *KeeperTestSuite) SetupTest() {
 			Time:    s.coordinator.CurrentTime.UTC(),
 		}
 
+		// set gravity bridge delegate keys
+		umeApp := app.(*umeeapp.UmeeApp)
+		for _, val := range chain.Vals.Validators {
+			_, _, ethAddr, err := util.GenerateRandomEthKey()
+			s.Require().NoError(err)
+
+			gravityEthAddr, err := gravitytypes.NewEthAddress(ethAddr.Hex())
+			s.Require().NoError(err)
+
+			umeApp.GravityKeeper.SetOrchestratorValidator(
+				chain.GetContext(),
+				sdk.ValAddress(val.Address),
+				sdk.AccAddress(val.Address),
+			)
+			umeApp.GravityKeeper.SetEthAddressForValidator(
+				chain.GetContext(),
+				sdk.ValAddress(val.Address),
+				*gravityEthAddr,
+			)
+		}
+
 		chain.Coordinator = s.coordinator
 		s.coordinator.CommitBlock(chain)
 
@@ -83,8 +107,8 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
-func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *app.UmeeApp {
-	umeeApp, ok := c.App.(*app.UmeeApp)
+func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
+	umeeApp, ok := c.App.(*umeeapp.UmeeApp)
 	s.Require().True(ok)
 
 	return umeeApp
