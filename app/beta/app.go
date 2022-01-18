@@ -88,7 +88,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
-	customgravity "github.com/umee-network/umee/x/gravity"
+	gravitysim "github.com/umee-network/umee/x/gravity"
 
 	customante "github.com/umee-network/umee/ante"
 	umeeapp "github.com/umee-network/umee/app"
@@ -543,7 +543,6 @@ func New(
 	// deterministic simulations.
 	app.sm = module.NewSimulationManager(
 		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
-		customgravity.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
@@ -557,6 +556,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
+		gravitysim.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()
