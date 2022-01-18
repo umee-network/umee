@@ -72,7 +72,26 @@ The leverage module emits the following events:
 
 ## Keeper events
 
-In addition to handlers events, the leverage keeper will produce events from the following functions.
+In addition to handlers events, the leverage keeper will produce events from the following functions which may occur during `EndBlock`.
+
+### AccrueAllInterest
+
+| Type           | Attribute Key  | Attribute Value        |
+| -------------- | -------------- | ---------------------- |
+| interest_epoch | block_height   | {ctx.BlockHeight}      |
+| interest_epoch | unix_time      | {ctx.BlockTime.Unix()} |
+| interest_epoch | total_interest | {totalInterest}        |
+| interest_epoch | reserved       | {newReserves}          |
+
+Interest epochs emit an event with their current block height and time, as well as total interest accrued across all borrows and the amount of each token added to reserves. Occurs every `InterestEpoch`.
+
+### FundOracle
+
+| Type        | Attribute Key | Attribute Value |
+| ----------- | ------------- | --------------- |
+| fund_oracle | amount        | {reward}        |
+
+Oracle rewards sent from the leverage module are tracked at the moment of transfer. Occurs every `InterestEpoch`.
 
 ### RepayBadDebt
 
