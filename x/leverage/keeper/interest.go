@@ -181,8 +181,8 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	// events are here instead of msg_server.go
 	k.Logger(ctx).Debug(
 		"interest epoch",
-		"block height", fmt.Sprintf("%d", ctx.BlockHeight()),
-		"unix time", fmt.Sprintf("%d", currentTime),
+		"block_height", fmt.Sprintf("%d", ctx.BlockHeight()),
+		"unix_time", fmt.Sprintf("%d", currentTime),
 		"interest", totalInterest.String(),
 		"reserved", newReserves.String(),
 	)
