@@ -19,7 +19,7 @@ source "docker" "final" {
   image  = "ubuntu:20.04"
   commit = true
   changes = [
-    "ENTRYPOINT /usr/local/bin/umeed"
+    "ENTRYPOINT [\"/usr/local/bin/umeed\"]"
   ]
 }
 
