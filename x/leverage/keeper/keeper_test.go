@@ -71,7 +71,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 		betaApp.AppCodec(),
 		betaApp.GetKey(types.ModuleName),
 		betaApp.GetSubspace(types.ModuleName),
-		betaApp.AccountKeeper,
 		betaApp.BankKeeper,
 		newMockOracleKeeper(),
 	)
