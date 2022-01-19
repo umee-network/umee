@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"crypto/ecdsa"
 	"math/rand"
 
 	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
@@ -9,8 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/ethereum/go-ethereum/crypto"
-
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
@@ -28,6 +25,7 @@ const (
 // operations weight
 const (
 	DefaultWeightReplace = 100
+	EthAddrGeneratorSeed = 10
 )
 
 // WeightedOperations returns all the operations from the module with their respective weights
@@ -57,15 +55,6 @@ func WeightedOperations(
 	}
 }
 
-// generateEthAddress generates a random valid eth address
-func generateEthAddress() string {
-	privateKey, _ := crypto.GenerateKey()
-	publicKey := privateKey.Public()
-	publicKeyECDSA := publicKey.(*ecdsa.PublicKey)
-	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-	return address
-}
-
 // SimulateValidatorReplace loops through the validator set and updates gravity info
 func SimulateValidatorReplace(
 	k gravitykeeper.Keeper,
@@ -77,6 +66,7 @@ func SimulateValidatorReplace(
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		ethAddressGenerator := NewEthAddressGenerator(EthAddrGeneratorSeed)
 		vals := sk.GetAllValidators(ctx)
 		for _, validator := range vals {
 			operator := validator.GetOperator()
@@ -84,7 +74,7 @@ func SimulateValidatorReplace(
 			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, operator)
 			_, foundExistingOrchAddress := k.GetOrchestratorValidator(ctx, account)
 			if !foundExistingEthAddress || !foundExistingOrchAddress {
-				ethAddr, _ := types.NewEthAddress(generateEthAddress())
+				ethAddr, _ := types.NewEthAddress(ethAddressGenerator.GenerateEthAddress())
 				simAccount, _ := simtypes.FindAccount(accs, account)
 				spendable := bk.SpendableCoins(ctx, account)
 				msg := types.NewMsgSetOrchestratorAddress(operator, account, *ethAddr)
