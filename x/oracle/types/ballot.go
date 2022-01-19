@@ -1,8 +1,9 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"sort"
+	
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
