@@ -11,8 +11,6 @@ type BankKeeper interface {
 	SetDenomMetaData(ctx sdk.Context, denomMetaData banktypes.Metadata)
 	IterateAllDenomMetaData(ctx sdk.Context, cb func(banktypes.Metadata) bool)
 	GetSupply(ctx sdk.Context, denom string) sdk.Coin
-	// Note: The following will panic until we have a module account
-	// See auth/types/ModuleAccount
 	MintCoins(ctx sdk.Context, moduleName string, amounts sdk.Coins) error
 	BurnCoins(ctx sdk.Context, moduleName string, amounts sdk.Coins) error
 	SendCoinsFromModuleToAccount(
