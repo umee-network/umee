@@ -165,7 +165,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.sendFromEthToUmee(1, photonERC20Addr, toAddr.String(), "100")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		expBalance := int64(99999998334)
+		expBalance := int64(99999998127)
 
 		// require the original sender's (validator) balance increased
 		var latestBalance int64
