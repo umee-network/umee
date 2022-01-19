@@ -555,6 +555,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
+		oracle.NewAppModuleSim(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()
