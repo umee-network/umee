@@ -177,21 +177,21 @@ func TestPBStandardDeviation(t *testing.T) {
 			[]float64{1.0, 2.0, 10.0, 100000.0},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDecWithPrec(4999500036300, OracleDecPrecision),
+			sdk.MustNewDecFromStr("49995.000362536252310906"),
 		},
 		{
 			// Adding fake validator doesn't change outcome
 			[]float64{1.0, 2.0, 10.0, 100000.0, 10000000000},
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
-			sdk.NewDecWithPrec(447213595075100600, OracleDecPrecision),
+			sdk.MustNewDecFromStr("4472135950.751005519905537611"),
 		},
 		{
 			// Tie votes
 			[]float64{1.0, 2.0, 3.0, 4.0},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.NewDecWithPrec(122474500, OracleDecPrecision),
+			sdk.MustNewDecFromStr("1.224744871391589049"),
 		},
 		{
 			// No votes
