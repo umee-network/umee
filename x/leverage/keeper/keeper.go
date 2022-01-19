@@ -6,12 +6,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
-	"github.com/umee-network/umee/x/leverage/simulation"
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -626,14 +623,4 @@ func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte)
 	}
 
 	return nil
-}
-
-// WeightedOperations returns the all the leverage module operations with their respective weights.
-func (k Keeper) WeightedOperations(
-	simState module.SimulationState,
-	ak types.AccountKeeper,
-) []simtypes.WeightedOperation {
-	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, ak, k.bankKeeper,
-	)
 }
