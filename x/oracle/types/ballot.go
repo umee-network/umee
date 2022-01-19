@@ -1,12 +1,8 @@
 package types
 
 import (
-	"fmt"
-	"math"
-	"sort"
-	"strconv"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"sort"
 )
 
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
@@ -88,13 +84,8 @@ func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 
 	variance := sum.QuoInt64(int64(len(pb)))
 
-	floatNum, err := strconv.ParseFloat(variance.String(), 64)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
+	standardDeviation, err := variance.ApproxSqrt()
 
-	floatNum = math.Sqrt(floatNum)
-	standardDeviation, err := sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
