@@ -2,6 +2,7 @@ package types
 
 import (
 	"sort"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
