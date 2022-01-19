@@ -351,6 +351,7 @@ func New(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
+		app.AccountKeeper,
 		app.BankKeeper,
 		app.OracleKeeper,
 	)

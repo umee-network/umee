@@ -6,26 +6,31 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	simcos "github.com/cosmos/cosmos-sdk/x/simulation"
 	"github.com/tendermint/tendermint/libs/log"
-
+	"github.com/umee-network/umee/x/leverage/simulation"
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
 type Keeper struct {
-	cdc          codec.Codec
-	storeKey     sdk.StoreKey
-	paramSpace   paramtypes.Subspace
-	hooks        types.Hooks
-	bankKeeper   types.BankKeeper
-	oracleKeeper types.OracleKeeper
+	cdc           codec.Codec
+	storeKey      sdk.StoreKey
+	paramSpace    paramtypes.Subspace
+	hooks         types.Hooks
+	accountKeeper simcos.AccountKeeper
+	bankKeeper    types.BankKeeper
+	oracleKeeper  types.OracleKeeper
 }
 
 func NewKeeper(
 	cdc codec.Codec,
 	storeKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
+	ak simcos.AccountKeeper,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 ) Keeper {
@@ -36,11 +41,12 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		paramSpace:   paramSpace,
-		bankKeeper:   bk,
-		oracleKeeper: ok,
+		cdc:           cdc,
+		storeKey:      storeKey,
+		paramSpace:    paramSpace,
+		accountKeeper: ak,
+		bankKeeper:    bk,
+		oracleKeeper:  ok,
 	}
 }
 
@@ -624,4 +630,11 @@ func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte)
 	}
 
 	return nil
+}
+
+// WeightedOperations returns the all the leverage module operations with their respective weights.
+func (k Keeper) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
+	return simulation.WeightedOperations(
+		simState.AppParams, simState.Cdc, k.accountKeeper, k.bankKeeper,
+	)
 }
