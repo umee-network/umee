@@ -475,7 +475,7 @@ func New(
 		transferModule,
 		leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -582,7 +582,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
-		oracle.NewAppModuleSim(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()
