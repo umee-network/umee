@@ -15,6 +15,7 @@ import (
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	"github.com/umee-network/umee/tests/util"
 )
 
 // Simulation operation weights constants
@@ -25,7 +26,6 @@ const (
 // operations weight
 const (
 	DefaultWeightReplace = 100
-	EthAddrGeneratorSeed = 10
 )
 
 // WeightedOperations returns all the operations from the module with their respective weights
@@ -66,7 +66,6 @@ func SimulateValidatorReplace(
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		ethAddressGenerator := NewEthAddressGenerator(EthAddrGeneratorSeed)
 		vals := sk.GetAllValidators(ctx)
 		for _, validator := range vals {
 			operator := validator.GetOperator()
@@ -74,7 +73,8 @@ func SimulateValidatorReplace(
 			_, foundExistingEthAddress := k.GetEthAddressByValidator(ctx, operator)
 			_, foundExistingOrchAddress := k.GetOrchestratorValidator(ctx, account)
 			if !foundExistingEthAddress || !foundExistingOrchAddress {
-				ethAddr, _ := types.NewEthAddress(ethAddressGenerator.GenerateEthAddress())
+				_, _, addr, _ := util.GenerateRandomEthKeyFromRand(r)
+				ethAddr, _ := types.NewEthAddress(addr.String())
 				simAccount, _ := simtypes.FindAccount(accs, account)
 				spendable := bk.SpendableCoins(ctx, account)
 				msg := types.NewMsgSetOrchestratorAddress(operator, account, *ethAddr)
