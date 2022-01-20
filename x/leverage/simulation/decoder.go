@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
-	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -47,9 +46,13 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			return fmt.Sprintf("%v\n%v", collateralAmountA, collateralAmountB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixLastInterestTime):
-			var lastInterestTimeA, lastInterestTimeB gogotypes.Int64Value
-			cdc.MustUnmarshal(kvA.Value, &lastInterestTimeA)
-			cdc.MustUnmarshal(kvA.Value, &lastInterestTimeB)
+			lastInterestTimeA, lastInterestTimeB := sdk.ZeroInt(), sdk.ZeroInt()
+			if err := lastInterestTimeA.Unmarshal(kvA.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			if err := lastInterestTimeB.Unmarshal(kvB.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
 			return fmt.Sprintf("%v\n%v", lastInterestTimeA, lastInterestTimeB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixExchangeRate):
