@@ -67,6 +67,14 @@ func SimulateValidatorReplace(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		vals := sk.GetAllValidators(ctx)
+		vs := k.GetLatestValset(ctx)
+		if vs != nil && len(vs.Members) != len(vals) {
+			return simtypes.NewOperationMsgBasic(
+				types.ModuleName,
+				"MsgSetOrchestratorAddress",
+				"validator set already updated", true,
+				nil), nil, nil
+		}
 		for _, validator := range vals {
 			operator := validator.GetOperator()
 			account := sdk.AccAddress(operator)
