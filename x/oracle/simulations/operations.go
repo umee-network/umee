@@ -30,6 +30,7 @@ const (
 var (
 	whitelist                     = []string{types.UmeeSymbol, types.USDDenom}
 	voteHashMap map[string]string = make(map[string]string)
+	umeePrice                     = sdk.NewDec(25)
 )
 
 // GenerateExchangeRatesString generates a canonical string representation of
@@ -104,10 +105,8 @@ func SimulateMsgAggregateExchangeRatePrevote(
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
-
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
@@ -120,8 +119,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 
 		prices := make(map[string]sdk.Dec, len(whitelist))
 		for _, denom := range whitelist {
-			price := sdk.NewDecWithPrec(int64(simtypes.RandIntBetween(r, 1, 10000)), int64(1))
-			prices[denom] = price
+			prices[denom] = simtypes.RandomDecAmount(r, sdk.NewDec(1)).Add(umeePrice)
 		}
 
 		exchangeRatesStr := GenerateExchangeRatesString(prices)
