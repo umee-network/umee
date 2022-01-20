@@ -68,7 +68,7 @@ func SimulateValidatorReplace(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		vals := sk.GetAllValidators(ctx)
 		vs := k.GetLatestValset(ctx)
-		if vs != nil && len(vs.Members) != len(vals) {
+		if vs == nil || len(vs.Members) == len(vals) {
 			return simtypes.NewOperationMsgBasic(
 				types.ModuleName,
 				"MsgSetOrchestratorAddress",
