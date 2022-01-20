@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	whitelist                     = []string{types.UmeeSymbol, types.USDDenom}
+	acceptList                    = []string{types.UmeeSymbol, types.USDDenom}
 	voteHashMap map[string]string = make(map[string]string)
 	umeePrice                     = sdk.NewDec(25)
 )
@@ -117,8 +117,8 @@ func SimulateMsgAggregateExchangeRatePrevote(
 			), nil, nil
 		}
 
-		prices := make(map[string]sdk.Dec, len(whitelist))
-		for _, denom := range whitelist {
+		prices := make(map[string]sdk.Dec, len(acceptList))
+		for _, denom := range acceptList {
 			prices[denom] = simtypes.RandomDecAmount(r, sdk.NewDec(1)).Add(umeePrice)
 		}
 
