@@ -13,6 +13,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage/simulation"
