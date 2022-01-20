@@ -5,6 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
+	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
@@ -13,7 +14,6 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/tests/network"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
