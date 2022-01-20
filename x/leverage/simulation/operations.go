@@ -53,9 +53,10 @@ func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simt
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "skip all transfers"), nil, nil
 		}
 
+		fromAccount := ak.GetAccount(ctx, from.Address)
 		coin := coins[r.Int31n(int32(coins.Len()))]
 
-		msg := types.NewMsgLendAsset(from.Address, coin)
+		msg := types.NewMsgLendAsset(fromAccount.GetAddress(), coin)
 
 		txCtx := simulation.OperationInput{
 			R:               r,

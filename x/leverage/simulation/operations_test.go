@@ -5,11 +5,12 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
+	abci "github.com/tendermint/tendermint/abci/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	umeeapp "github.com/umee-network/umee/app"
@@ -22,17 +23,40 @@ import (
 type SimTestSuite struct {
 	suite.Suite
 
-	app *umeeappbeta.UmeeApp
-	ctx sdk.Context
+	app    *umeeappbeta.UmeeApp
+	simApp *simapp.SimApp
+	ctx    sdk.Context
 }
 
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
+	checkTx := false
+	s.simApp = simapp.Setup(checkTx)
 	s.app = umeeappbeta.Setup(s.T(), false, 1)
 	s.ctx = s.app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 	})
+}
+
+// getTestingAccounts generates
+func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int) []simtypes.Account {
+	accounts := simtypes.RandomAccounts(r, n)
+
+	initAmt := sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
+	initCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, initAmt), sdk.NewCoin(umeeapp.BondDenom, initAmt))
+
+	// add coins to the accounts
+	for _, account := range accounts {
+		acc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, account.Address)
+		s.app.AccountKeeper.SetAccount(s.ctx, acc)
+		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, initCoins))
+		s.Require().NoError(
+			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), initCoins),
+		)
+	}
+
+	return accounts
 }
 
 // TestWeightedOperations tests the weights of the operations.
@@ -65,24 +89,33 @@ func (s *SimTestSuite) TestWeightedOperations() {
 	}
 }
 
-// getTestingAccounts generates
-func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int) []simtypes.Account {
-	accounts := simtypes.RandomAccounts(r, n)
+// TestWeightedOperations tests the weights of the operations.
+func (s *SimTestSuite) TestSimulateMsgLendAsset() {
+	// cdc := s.app.AppCodec()
+	// appParams := make(simtypes.AppParams)
 
-	initAmt := sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
-	initCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, initAmt), sdk.NewCoin(umeeapp.BondDenom, initAmt))
+	// weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper)
 
-	// add coins to the accounts
-	for _, account := range accounts {
-		acc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, account.Address)
-		s.app.AccountKeeper.SetAccount(s.ctx, acc)
-		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, initCoins))
-		s.Require().NoError(
-			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), initCoins),
-		)
-	}
+	// setup 3 accounts
+	r := rand.New(rand.NewSource(1))
+	accs := s.getTestingAccounts(r, 3)
 
-	return accounts
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgLendAsset(s.app.AccountKeeper, s.app.BankKeeper)
+
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "") // s.ctx.ChainID()
+	s.Require().NoError(err)
+
+	fmt.Print(operationMsg, futureOperations)
+
+	// var msg types.MsgLendAsset
+	// types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	// s.Require().True(operationMsg.OK)
+	// s.Require().Equal("cosmos1ghekyjucln7y67ntx7cf27m9dpuxxemn4c8g4r", msg.Lender)
+	// s.Require().Equal("cosmos1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7u4x9a0", msg.Amount.String())
+	// s.Require().Len(futureOperations, 0)
 }
 
 func TestSimTestSuite(t *testing.T) {
