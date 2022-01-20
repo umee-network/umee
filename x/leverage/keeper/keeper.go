@@ -140,7 +140,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 	}
 
 	// Withdraw will first attempt to use any uTokens in the lender's wallet
-	amountFromWallet := sdk.MinInt(k.bankKeeper.GetBalance(ctx, lenderAddr, uToken.Denom).Amount, uToken.Amount)
+	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, lenderAddr).AmountOf(uToken.Denom), uToken.Amount)
 	// Any additional uTokens must come from the lender's collateral
 	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 
@@ -311,7 +311,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if enable {
 		// Enabling a denom of uTokens as collateral deposits any in the user's current
 		// balance into the module account and remembers the amount held.
-		uToken := k.bankKeeper.GetBalance(ctx, borrowerAddr, denom)
+		uToken := sdk.NewCoin(denom, k.bankKeeper.SpendableCoins(ctx, borrowerAddr).AmountOf(denom))
 		uTokens := sdk.NewCoins(uToken)
 
 		if uToken.Amount.IsPositive() {
@@ -434,10 +434,10 @@ func (k Keeper) LiquidateBorrow(
 	repayment := desiredRepayment
 
 	// get liquidator's available balance of base asset to repay
-	liquidatorBalance := k.bankKeeper.GetBalance(ctx, liquidatorAddr, repayment.Denom)
+	liquidatorBalance := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayment.Denom)
 
 	// repayment cannot exceed liquidator's available balance
-	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance.Amount)
+	repayment.Amount = sdk.MinInt(repayment.Amount, liquidatorBalance)
 
 	// repayment cannot exceed borrower's borrowed amount of selected denom
 	repayment.Amount = sdk.MinInt(repayment.Amount, borrowed.AmountOf(repayment.Denom))
