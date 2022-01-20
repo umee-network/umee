@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/keeper"
 	"github.com/umee-network/umee/x/leverage/simulation"

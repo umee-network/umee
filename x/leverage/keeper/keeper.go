@@ -9,6 +9,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
