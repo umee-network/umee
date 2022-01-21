@@ -200,7 +200,7 @@ func SimulateMsgAggregateExchangeRateVote(
 			return simtypes.NoOpMsg(
 				types.ModuleName,
 				types.TypeMsgAggregateExchangeRateVote,
-				"vote hash not exists",
+				"vote hash does not exist",
 			), nil, nil
 		}
 
@@ -215,7 +215,7 @@ func SimulateMsgAggregateExchangeRateVote(
 			return simtypes.NoOpMsg(
 				types.ModuleName,
 				types.TypeMsgAggregateExchangeRateVote,
-				"reveal period of submitted vote do not match with registered prevote",
+				"reveal period of submitted vote does not match with registered prevote",
 			), nil, nil
 		}
 
