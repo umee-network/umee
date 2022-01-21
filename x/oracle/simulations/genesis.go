@@ -21,37 +21,37 @@ const (
 	minValidPerWindowKey        = "min_valid_per_window"
 )
 
-// GenVotePeriod randomized VotePeriod
+// GenVotePeriod produces a randomized VotePeriod in the range of [1, 100]
 func GenVotePeriod(r *rand.Rand) uint64 {
 	return uint64(1 + r.Intn(100))
 }
 
-// GenVoteThreshold randomized VoteThreshold
+// GenVoteThreshold produces a randomized VoteThreshold in the range of [0.333, 0.666]
 func GenVoteThreshold(r *rand.Rand) sdk.Dec {
 	return sdk.NewDecWithPrec(333, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(333)), 3))
 }
 
-// GenRewardBand randomized RewardBand
+// GenRewardBand produces a randomized RewardBand in the range of [0.000, 0.100]
 func GenRewardBand(r *rand.Rand) sdk.Dec {
 	return sdk.ZeroDec().Add(sdk.NewDecWithPrec(int64(r.Intn(100)), 3))
 }
 
-// GenRewardDistributionWindow randomized RewardDistributionWindow
+// GenRewardDistributionWindow produces a randomized RewardDistributionWindow in the range of [100, 100000]
 func GenRewardDistributionWindow(r *rand.Rand) uint64 {
 	return uint64(100 + r.Intn(100000))
 }
 
-// GenSlashFraction randomized SlashFraction
+// GenSlashFraction produces a randomized SlashFraction in the range of [0.000, 0.100]
 func GenSlashFraction(r *rand.Rand) sdk.Dec {
 	return sdk.ZeroDec().Add(sdk.NewDecWithPrec(int64(r.Intn(100)), 3))
 }
 
-// GenSlashWindow randomized SlashWindow
+// GenSlashWindow produces a randomized SlashWindow in the range of [100, 100000]
 func GenSlashWindow(r *rand.Rand) uint64 {
 	return uint64(100 + r.Intn(100000))
 }
 
-// GenMinValidPerWindow randomized MinValidPerWindow
+// GenMinValidPerWindow produces a randomized MinValidPerWindow in the range of [0, 0.500]
 func GenMinValidPerWindow(r *rand.Rand) sdk.Dec {
 	return sdk.ZeroDec().Add(sdk.NewDecWithPrec(int64(r.Intn(500)), 3))
 }
