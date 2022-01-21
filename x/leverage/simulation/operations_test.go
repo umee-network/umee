@@ -65,7 +65,7 @@ func (s *SimTestSuite) TestWeightedOperations() {
 	cdc := s.app.AppCodec()
 	appParams := make(simtypes.AppParams)
 
-	weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper)
+	weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 
 	// setup 3 accounts
 	r := rand.New(rand.NewSource(1))
