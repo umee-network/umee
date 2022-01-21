@@ -28,9 +28,8 @@ const (
 )
 
 var (
-	acceptList                    = []string{types.UmeeSymbol, types.USDDenom}
-	voteHashMap map[string]string = make(map[string]string)
-	umeePrice                     = sdk.MustNewDecFromStr("25.71")
+	acceptList = []string{types.UmeeSymbol, types.USDDenom}
+	umeePrice  = sdk.MustNewDecFromStr("25.71")
 )
 
 // GenerateExchangeRatesString generates a canonical string representation of
@@ -62,6 +61,7 @@ func WeightedOperations(
 		weightMsgAggregateExchangeRatePrevote int
 		weightMsgAggregateExchangeRateVote    int
 		weightMsgDelegateFeedConsent          int
+		voteHashMap                           = make(map[string]string)
 	)
 
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
@@ -85,11 +85,11 @@ func WeightedOperations(
 	return simulation.WeightedOperations{
 		simulation.NewWeightedOperation(
 			weightMsgAggregateExchangeRatePrevote,
-			SimulateMsgAggregateExchangeRatePrevote(ak, bk, k),
+			SimulateMsgAggregateExchangeRatePrevote(ak, bk, k, voteHashMap),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgAggregateExchangeRateVote,
-			SimulateMsgAggregateExchangeRateVote(ak, bk, k),
+			SimulateMsgAggregateExchangeRateVote(ak, bk, k, voteHashMap),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgDelegateFeedConsent,
@@ -103,6 +103,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 	ak types.AccountKeeper,
 	bk types.BankKeeper,
 	k keeper.Keeper,
+	voteHashMap map[string]string,
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
@@ -176,6 +177,7 @@ func SimulateMsgAggregateExchangeRateVote(
 	ak types.AccountKeeper,
 	bk types.BankKeeper,
 	k keeper.Keeper,
+	voteHashMap map[string]string,
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
