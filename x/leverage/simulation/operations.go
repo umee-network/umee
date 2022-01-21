@@ -18,8 +18,10 @@ import (
 const (
 	DefaultWeightMsgLendAsset     int = 100
 	DefaultWeightMsgWithdrawAsset int = 85
+	DefaultWeightMsgBorrowAsset   int = 80
 	OpWeightMsgLendAsset              = "op_weight_msg_lend_asset"
 	OpWeightMsgWithdrawAsset          = "op_weight_msg_withdraw_asset"
+	OpWeightMsgBorrowAsset            = "op_weight_msg_borrow_asset"
 )
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
@@ -31,6 +33,7 @@ func WeightedOperations(
 	var (
 		weightMsgLend     int
 		weightMsgWithdraw int
+		weightMsgBorrow   int
 	)
 	appParams.GetOrGenerate(cdc, OpWeightMsgLendAsset, &weightMsgLend, nil,
 		func(_ *rand.Rand) {
@@ -40,6 +43,11 @@ func WeightedOperations(
 	appParams.GetOrGenerate(cdc, OpWeightMsgWithdrawAsset, &weightMsgWithdraw, nil,
 		func(_ *rand.Rand) {
 			weightMsgWithdraw = DefaultWeightMsgWithdrawAsset
+		},
+	)
+	appParams.GetOrGenerate(cdc, OpWeightMsgBorrowAsset, &weightMsgBorrow, nil,
+		func(_ *rand.Rand) {
+			weightMsgBorrow = DefaultWeightMsgBorrowAsset
 		},
 	)
 
@@ -52,6 +60,10 @@ func WeightedOperations(
 			weightMsgWithdraw,
 			SimulateMsgWithdrawAsset(ak, bk, lk),
 		),
+		simulation.NewWeightedOperation(
+			weightMsgBorrow,
+			SimulateMsgBorrowAsset(ak, bk, lk),
+		),
 	}
 }
 
@@ -62,15 +74,11 @@ func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simt
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coins, skip := randomSendFields(r, ctx, accs, bk)
-		if coins == nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "Coins is nil"), nil, nil
-		}
+		from, coin, skip := randomSendFields(r, ctx, accs, bk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "skip all transfers"), nil, nil
 		}
 
-		coin := coins[r.Int31n(int32(coins.Len()))]
 		msg := types.NewMsgLendAsset(from.Address, coin)
 
 		txCtx := simulation.OperationInput{
@@ -99,15 +107,11 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coins, skip := randomWithdrawFields(r, ctx, accs, lk)
-		if coins == nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawLoanedAsset, "Coins is nil"), nil, nil
-		}
+		from, coin, skip := randomCollateralFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawLoanedAsset, "skip all transfers"), nil, nil
 		}
 
-		coin := coins[r.Int31n(int32(coins.Len()))]
 		msg := types.NewMsgWithdrawAsset(from.Address, coin)
 
 		txCtx := simulation.OperationInput{
@@ -128,34 +132,74 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 	}
 }
 
+// SimulateMsgBorrowAsset tests and runs a single msg send where
+// an account borrow some asset.
+func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+	return func(
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+		accs []simtypes.Account, chainID string,
+	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		from, coin, skip := randomCollateralFields(r, ctx, accs, lk)
+		if skip {
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "skip all transfers"), nil, nil
+		}
+
+		msg := types.NewMsgBorrowAsset(from.Address, coin)
+
+		txCtx := simulation.OperationInput{
+			R:             r,
+			App:           app,
+			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
+			Cdc:           nil,
+			Msg:           msg,
+			MsgType:       types.EventTypeBorrowAsset,
+			Context:       ctx,
+			SimAccount:    from,
+			AccountKeeper: ak,
+			Bankkeeper:    bk,
+			ModuleName:    types.ModuleName,
+		}
+
+		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+	}
+}
+
+// randomCoin get random coin from coins
+func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
+	if coins.Empty() {
+		return sdk.Coin{}
+	}
+	return coins[r.Int31n(int32(coins.Len()))]
+}
+
 // randomSendFields returns an random account and coins to spend in the simulation.
 func randomSendFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
-) (acc simtypes.Account, spendableCoins sdk.Coins, skip bool) {
+) (acc simtypes.Account, spendableCoin sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	spendableBalances := bk.SpendableCoins(ctx, acc.Address)
 
-	spendableCoins = simtypes.RandSubsetCoins(r, spendableBalances)
+	spendableCoins := simtypes.RandSubsetCoins(r, spendableBalances)
 	if spendableCoins.Empty() {
-		return acc, nil, true
+		return acc, sdk.Coin{}, true
 	}
 
-	return acc, spendableCoins, false
+	return acc, randomCoin(r, spendableCoins), false
 }
 
-// randomWithdrawFields returns an random account and coins to withdraw in the simulation.
-func randomWithdrawFields(
+// randomCollateralFields returns an random account and coins to withdraw in the simulation.
+func randomCollateralFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
-) (acc simtypes.Account, withdrawCoins sdk.Coins, skip bool) {
+) (acc simtypes.Account, withdrawCoin sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	collateralBalances := lk.GetBorrowerCollateral(ctx, acc.Address)
 
-	withdrawCoins = simtypes.RandSubsetCoins(r, collateralBalances)
+	withdrawCoins := simtypes.RandSubsetCoins(r, collateralBalances)
 	if withdrawCoins.Empty() {
-		return acc, nil, true
+		return acc, sdk.Coin{}, true
 	}
 
-	return acc, withdrawCoins, false
+	return acc, randomCoin(r, withdrawCoins), false
 }
