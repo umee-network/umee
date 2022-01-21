@@ -315,10 +315,10 @@ func (o *Oracle) tick() error {
 
 	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
 	if err != nil {
-		return nil
+		return err
 	}
-	if blockHeight == 0 {
-		return fmt.Errorf("expected non-zero block height")
+	if blockHeight < 1 {
+		return fmt.Errorf("expected positive block height")
 	}
 
 	// Get oracle vote period, next block height, current vote period, and index
