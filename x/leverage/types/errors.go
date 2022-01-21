@@ -22,5 +22,4 @@ var (
 	ErrInvalidOraclePrice      = sdkerrors.Register(ModuleName, 1112, "invalid oracle price")
 	ErrNegativeAPY             = sdkerrors.Register(ModuleName, 1113, "negative APY")
 	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 1114, "exchange rate less than one")
-	ErrNilInput                = sdkerrors.Register(ModuleName, 1115, "a required input was nil")
 )

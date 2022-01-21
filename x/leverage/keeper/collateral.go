@@ -90,7 +90,7 @@ func (k Keeper) GetAllCollateral(ctx sdk.Context) []types.Collateral {
 
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
-			// improperly marshaled borrow amount should never happen
+			// improperly marshaled collateral amount should never happen
 			return err
 		}
 

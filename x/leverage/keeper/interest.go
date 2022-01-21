@@ -197,10 +197,6 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime sdk.Int) erro
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
 
-	if interestTime.IsNil() {
-		return sdkerrors.Wrap(types.ErrNilInput, "interestTime")
-	}
-
 	bz, err := interestTime.Marshal()
 	if err != nil {
 		return err
