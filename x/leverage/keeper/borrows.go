@@ -42,6 +42,37 @@ func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow s
 	return nil
 }
 
+// GetAllBorrows returns all borrows across all borrowers and asset types. Uses the
+// Borrow struct found in GenesisState, which stores borrower address as a string.
+func (k Keeper) GetAllBorrows(ctx sdk.Context) []types.Borrow {
+	prefix := types.KeyPrefixLoanToken
+	borrows := []types.Borrow{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled borrow amount should never happen
+			return err
+		}
+
+		borrows = append(
+			borrows,
+			types.Borrow{Address: addr.String(), Amount: sdk.NewCoin(denom, amount)},
+		)
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return borrows
+}
+
 // GetTotalBorrows returns total borrows across all borrowers and asset types as
 // an sdk.Coins. It is done for all asset types at once, rather than one denom
 // at a time, because either case would require iterating through all open
@@ -175,6 +206,31 @@ func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sd
 	}
 }
 
+// GetAllBadDebts gets bad debt instances across all borrowers.
+func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
+	prefix := types.KeyPrefixBadDebt
+	badDebts := []types.BadDebt{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		badDebts = append(
+			badDebts,
+			types.BadDebt{Address: addr.String(), Denom: denom},
+		)
+
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return badDebts
+}
+
 // GetBorrowAPY returns an sdk.Dec of an borrow APY
 // returns sdk.ZeroDec if not found
 func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
@@ -194,10 +250,40 @@ func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return borrowAPY
 }
 
+// GetAllBorrowAPY returns all borrow APYs, arranged as a sorted sdk.DecCoins.
+func (k Keeper) GetAllBorrowAPY(ctx sdk.Context) sdk.DecCoins {
+	prefix := types.KeyPrefixBorrowAPY
+	rates := sdk.NewDecCoins()
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var rate sdk.Dec
+		if err := rate.Unmarshal(val); err != nil {
+			// improperly marshaled APY should never happen
+			return err
+		}
+
+		rates = rates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return rates
+}
+
 // SetBorrowAPY sets the borrow APY of an specific denom
 func (k Keeper) SetBorrowAPY(ctx sdk.Context, denom string, borrowAPY sdk.Dec) error {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	}
+
+	if borrowAPY.IsNegative() {
+		return sdkerrors.Wrap(types.ErrNegativeAPY, denom+borrowAPY.String())
 	}
 
 	bz, err := borrowAPY.Marshal()

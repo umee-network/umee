@@ -25,10 +25,40 @@ func (k Keeper) GetLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return lendAPY
 }
 
+// GetAllLendAPY returns all lend APYs, arranged as a sorted sdk.DecCoins.
+func (k Keeper) GetAllLendAPY(ctx sdk.Context) sdk.DecCoins {
+	prefix := types.KeyPrefixLendAPY
+	rates := sdk.NewDecCoins()
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var rate sdk.Dec
+		if err := rate.Unmarshal(val); err != nil {
+			// improperly marshaled APY should never happen
+			return err
+		}
+
+		rates = rates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return rates
+}
+
 // SetLendAPY sets the lend APY of an specific denom.
 func (k Keeper) SetLendAPY(ctx sdk.Context, denom string, lendAPY sdk.Dec) error {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	}
+
+	if lendAPY.IsNegative() {
+		return sdkerrors.Wrap(types.ErrNegativeAPY, denom+lendAPY.String())
 	}
 
 	bz, err := lendAPY.Marshal()

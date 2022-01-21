@@ -2,12 +2,51 @@ syntax = "proto3";
 package umeenetwork.umee.leverage.v1beta1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "umee/leverage/v1beta1/leverage.proto";
 
 option go_package = "github.com/umee-network/umee/x/leverage/types";
 
 // GenesisState defines the x/leverage module's genesis state.
 message GenesisState {
-  Params         params   = 1 [(gogoproto.nullable) = false];
-  repeated Token registry = 2 [(gogoproto.nullable) = false];
+  Params                            params              = 1 [(gogoproto.nullable) = false];
+  repeated Token                    registry            = 2 [(gogoproto.nullable) = false];
+  repeated Borrow                   borrows             = 3 [(gogoproto.nullable) = false];
+  repeated CollateralSetting        collateral_settings = 4 [(gogoproto.nullable) = false];
+  repeated Collateral               collateral          = 5 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin reserves            = 6
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+  string LastInterestTime = 7
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 8
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
+  repeated BadDebt bad_debts = 9 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin borrow_APYs = 10
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
+  repeated cosmos.base.v1beta1.DecCoin lend_APYs = 11
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
+}
+
+// Borrow is a loan struct used in the leverage module's genesis state.
+message Borrow {
+  string                   address = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+}
+
+// CollateralSetting is a borrow collateral setting used in the leverage module's genesis state.
+message CollateralSetting {
+  string address = 1;
+  string denom   = 2;
+}
+
+// Collateral is a collateral position used in the leverage module's genesis state.
+message Collateral {
+  string                   address = 1;
+  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+}
+
+// BadDebt is a bad debt instance used in the leverage module's genesis state.
+message BadDebt {
+  string address = 1;
+  string denom   = 2;
 }

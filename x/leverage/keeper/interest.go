@@ -52,19 +52,13 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
 
 	// get last time at which interest was accrued
-	timeKey := types.CreateLastInterestTimeKey()
-	prevInterestTime := sdk.ZeroInt()
-
-	bz := store.Get(timeKey)
-	if err := prevInterestTime.Unmarshal(bz); err != nil {
-		return err
-	}
+	prevInterestTime := k.GetLastInterestTime(ctx)
 
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
 	currentTime := ctx.BlockTime().Unix()
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(types.SecondsPerYear)
 	if yearsElapsed.IsNegative() {
-		return types.ErrNegativeTimeElapsed
+		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
 	}
 
 	// Compute total borrows across all borrowers, which are used when calculating
@@ -170,12 +164,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	bz, err := sdk.NewInt(currentTime).Marshal()
+	err := k.SetLastInterestTime(ctx, sdk.NewInt(currentTime))
 	if err != nil {
 		return err
 	}
-
-	store.Set(timeKey, bz)
 
 	// Because this action is not caused by a message, logging and
 	// events are here instead of msg_server.go
@@ -200,20 +192,35 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	return nil
 }
 
-// InitializeLastInterestTime sets LastInterestTime to present if it does not
-// exist (used for genesis).
-func (k *Keeper) InitializeLastInterestTime(ctx sdk.Context) {
+// SetLastInterestTime sets LastInterestTime to a given value
+func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime sdk.Int) error {
 	store := ctx.KVStore(k.storeKey)
-
 	timeKey := types.CreateLastInterestTimeKey()
-	currentTime := ctx.BlockTime().Unix()
 
-	if store.Get(timeKey) == nil {
-		bz, err := sdk.NewInt(currentTime).Marshal()
-		if err != nil {
-			panic(err)
-		}
-
-		store.Set(timeKey, bz)
+	if interestTime.IsNil() {
+		return sdkerrors.Wrap(types.ErrNilInput, "interestTime")
 	}
+
+	bz, err := interestTime.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(timeKey, bz)
+	return nil
+}
+
+// GetLastInterestTime gets last time at which interest was accrued
+func (k Keeper) GetLastInterestTime(ctx sdk.Context) sdk.Int {
+	store := ctx.KVStore(k.storeKey)
+	timeKey := types.CreateLastInterestTimeKey()
+
+	interestTime := sdk.ZeroInt()
+
+	bz := store.Get(timeKey)
+	if err := interestTime.Unmarshal(bz); err != nil {
+		panic(err)
+	}
+
+	return interestTime
 }
