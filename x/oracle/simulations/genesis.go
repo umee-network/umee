@@ -21,9 +21,9 @@ const (
 	minValidPerWindowKey        = "min_valid_per_window"
 )
 
-// GenVotePeriod produces a randomized VotePeriod in the range of [1, 100]
+// GenVotePeriod produces a randomized VotePeriod in the range of [5, 100]
 func GenVotePeriod(r *rand.Rand) uint64 {
-	return uint64(1 + r.Intn(100))
+	return uint64(5 + r.Intn(100))
 }
 
 // GenVoteThreshold produces a randomized VoteThreshold in the range of [0.333, 0.666]

@@ -30,7 +30,7 @@ const (
 var (
 	acceptList                    = []string{types.UmeeSymbol, types.USDDenom}
 	voteHashMap map[string]string = make(map[string]string)
-	umeePrice                     = sdk.NewDec(25)
+	umeePrice                     = sdk.MustNewDecFromStr("25.71")
 )
 
 // GenerateExchangeRatesString generates a canonical string representation of
@@ -56,12 +56,14 @@ func WeightedOperations(
 	cdc codec.JSONCodec,
 	ak types.AccountKeeper,
 	bk types.BankKeeper,
-	k keeper.Keeper) simulation.WeightedOperations {
+	k keeper.Keeper,
+) simulation.WeightedOperations {
 	var (
 		weightMsgAggregateExchangeRatePrevote int
 		weightMsgAggregateExchangeRateVote    int
 		weightMsgDelegateFeedConsent          int
 	)
+
 	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
 		func(_ *rand.Rand) {
 			weightMsgAggregateExchangeRatePrevote = simappparams.DefaultWeightMsgSend * 2
@@ -107,6 +109,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
+
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
@@ -119,7 +122,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 
 		prices := make(map[string]sdk.Dec, len(acceptList))
 		for _, denom := range acceptList {
-			prices[denom] = simtypes.RandomDecAmount(r, sdk.NewDec(1)).Add(umeePrice)
+			prices[denom] = umeePrice.Add(simtypes.RandomDecAmount(r, sdk.NewDec(1)))
 		}
 
 		exchangeRatesStr := GenerateExchangeRatesString(prices)
