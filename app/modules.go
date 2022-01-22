@@ -180,7 +180,7 @@ func (GenutilModule) ValidateGenesis(
 		if _, ok := msgs[1].(*gravitytypes.MsgSetOrchestratorAddress); !ok {
 			return fmt.Errorf(
 				"gentx %d contains invalid message at index 1; expected: %T; got: %T",
-				i, &gravitytypes.MsgSetOrchestratorAddress{}, msgs[0],
+				i, &gravitytypes.MsgSetOrchestratorAddress{}, msgs[1],
 			)
 		}
 	}
