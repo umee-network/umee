@@ -2,14 +2,18 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/x/mint"
@@ -127,4 +131,47 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genState.Params.DowntimeJailDuration = 24 * time.Hour
 
 	return cdc.MustMarshalJSON(genState)
+}
+
+// GenutilModule defines a custom wrapper around the x/genutil module's
+// AppModuleBasic implementation to provide custom genesis state validation.
+type GenutilModule struct {
+	genutil.AppModuleBasic
+}
+
+// ValidateGenesis validates the x/genutil genesis state.
+func (GenutilModule) ValidateGenesis(
+	cdc codec.JSONCodec,
+	encCfg client.TxEncodingConfig,
+	bz json.RawMessage,
+) error {
+
+	var genState genutiltypes.GenesisState
+	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", genutiltypes.ModuleName, err)
+	}
+
+	txJSONDecoder := encCfg.TxJSONDecoder()
+
+	for i, genTx := range genState.GenTxs {
+		var tx sdk.Tx
+
+		tx, err := txJSONDecoder(genTx)
+		if err != nil {
+			return err
+		}
+
+		msgs := tx.GetMsgs()
+		// if len(msgs) != 1 {
+		// 	return errors.New(
+		// 		"must provide genesis Tx with exactly 1 CreateValidator message")
+		// }
+
+		// if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
+		// 	return fmt.Errorf(
+		// 		"genesis transaction %v does not contain a MsgCreateValidator", i)
+		// }
+	}
+
+	return nil
 }
