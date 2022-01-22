@@ -16,7 +16,7 @@ func NewGenesisState(
 	collateralSettings []CollateralSetting,
 	collateral []Collateral,
 	reserves sdk.Coins,
-	lastInterestTime sdk.Int,
+	lastInterestTime int64,
 	exchangeRates sdk.DecCoins,
 	badDebts []BadDebt,
 	borrowAPYs sdk.DecCoins,
@@ -43,7 +43,7 @@ func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params:           DefaultParams(),
 		Registry:         []Token{},
-		LastInterestTime: sdk.ZeroInt(),
+		LastInterestTime: 0,
 	}
 }
 
@@ -92,14 +92,6 @@ func (gs GenesisState) Validate() error {
 
 	if err := gs.Reserves.Validate(); err != nil {
 		return err
-	}
-
-	if gs.LastInterestTime.IsNil() {
-		return sdkerrors.Wrap(ErrNilInput, "GenesisState.LastInterestTime")
-	}
-
-	if gs.LastInterestTime.IsNegative() {
-		return sdkerrors.Wrap(ErrNegativeTimeElapsed, gs.LastInterestTime.String())
 	}
 
 	if err := gs.ExchangeRates.Validate(); err != nil {

@@ -16,8 +16,7 @@ message GenesisState {
   repeated Collateral               collateral          = 5 [(gogoproto.nullable) = false];
   repeated cosmos.base.v1beta1.Coin reserves            = 6
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
-  string LastInterestTime = 7
-      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  int64                                last_interest_time = 7;
   repeated cosmos.base.v1beta1.DecCoin exchange_rates = 8
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
   repeated BadDebt bad_debts = 9 [(gogoproto.nullable) = false];

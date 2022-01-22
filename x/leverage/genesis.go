@@ -55,7 +55,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 
-	if err := k.SetLastInterestTime(ctx, genState.LastInterestTime); err != nil {
+	if err := k.SetLastInterestTime(ctx, sdk.NewInt(genState.LastInterestTime)); err != nil {
 		panic(err)
 	}
 
@@ -102,7 +102,7 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		k.GetAllCollateralSettings(ctx),
 		k.GetAllCollateral(ctx),
 		k.GetAllReserves(ctx),
-		k.GetLastInterestTime(ctx),
+		k.GetLastInterestTime(ctx).Int64(),
 		k.GetAllExchangeRates(ctx),
 		k.GetAllBadDebts(ctx),
 		k.GetAllBorrowAPY(ctx),
