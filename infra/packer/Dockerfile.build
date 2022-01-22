@@ -1,4 +1,4 @@
-FROM ubuntu:focal-20211006
+FROM ubuntu:20.04
 
 # Install system dependencies
 RUN apt update \
