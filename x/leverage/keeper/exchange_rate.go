@@ -68,10 +68,10 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 	return amount, nil
 }
 
-// GetAllExchangeRates returns all exchange rates, arranged as a sorted sdk.DecCoins.
-func (k Keeper) GetAllExchangeRates(ctx sdk.Context) sdk.DecCoins {
+// GetAllExchangeRates returns all exchange rates.
+func (k Keeper) GetAllExchangeRates(ctx sdk.Context) []types.ExchangeRate {
 	prefix := types.KeyPrefixExchangeRate
-	exchangeRates := sdk.NewDecCoins()
+	exchangeRates := []types.ExchangeRate{}
 
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
@@ -82,7 +82,7 @@ func (k Keeper) GetAllExchangeRates(ctx sdk.Context) sdk.DecCoins {
 			return err
 		}
 
-		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		exchangeRates = append(exchangeRates, types.NewExchangeRate(denom, rate))
 		return nil
 	}
 

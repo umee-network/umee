@@ -244,10 +244,10 @@ func (k Keeper) GetBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return borrowAPY
 }
 
-// GetAllBorrowAPY returns all borrow APYs, arranged as a sorted sdk.DecCoins.
-func (k Keeper) GetAllBorrowAPY(ctx sdk.Context) sdk.DecCoins {
+// GetAllBorrowAPY returns all borrow APYs.
+func (k Keeper) GetAllBorrowAPY(ctx sdk.Context) []types.APY {
 	prefix := types.KeyPrefixBorrowAPY
-	rates := sdk.NewDecCoins()
+	rates := []types.APY{}
 
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
@@ -258,7 +258,7 @@ func (k Keeper) GetAllBorrowAPY(ctx sdk.Context) sdk.DecCoins {
 			return err
 		}
 
-		rates = rates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		rates = append(rates, types.NewAPY(denom, rate))
 		return nil
 	}
 

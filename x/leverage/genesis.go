@@ -60,7 +60,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	}
 
 	for _, rate := range genState.ExchangeRates {
-		if err := k.SetExchangeRate(ctx, rate.Denom, rate.Amount); err != nil {
+		if err := k.SetExchangeRate(ctx, rate.Denom, rate.ExchangeRate); err != nil {
 			panic(err)
 		}
 	}
@@ -75,13 +75,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	}
 
 	for _, rate := range genState.Borrow_APYs {
-		if err := k.SetBorrowAPY(ctx, rate.Denom, rate.Amount); err != nil {
+		if err := k.SetBorrowAPY(ctx, rate.Denom, rate.APY); err != nil {
 			panic(err)
 		}
 	}
 
 	for _, rate := range genState.Lend_APYs {
-		if err := k.SetLendAPY(ctx, rate.Denom, rate.Amount); err != nil {
+		if err := k.SetLendAPY(ctx, rate.Denom, rate.APY); err != nil {
 			panic(err)
 		}
 	}

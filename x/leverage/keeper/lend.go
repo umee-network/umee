@@ -26,9 +26,9 @@ func (k Keeper) GetLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 }
 
 // GetAllLendAPY returns all lend APYs, arranged as a sorted sdk.DecCoins.
-func (k Keeper) GetAllLendAPY(ctx sdk.Context) sdk.DecCoins {
+func (k Keeper) GetAllLendAPY(ctx sdk.Context) []types.APY {
 	prefix := types.KeyPrefixLendAPY
-	rates := sdk.NewDecCoins()
+	rates := []types.APY{}
 
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
@@ -39,7 +39,7 @@ func (k Keeper) GetAllLendAPY(ctx sdk.Context) sdk.DecCoins {
 			return err
 		}
 
-		rates = rates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		rates = append(rates, types.NewAPY(denom, rate))
 		return nil
 	}
 

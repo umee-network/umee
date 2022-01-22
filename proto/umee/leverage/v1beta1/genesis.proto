@@ -16,14 +16,11 @@ message GenesisState {
   repeated Collateral               collateral          = 5 [(gogoproto.nullable) = false];
   repeated cosmos.base.v1beta1.Coin reserves            = 6
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
-  int64                                last_interest_time = 7;
-  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 8
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
-  repeated BadDebt bad_debts = 9 [(gogoproto.nullable) = false];
-  repeated cosmos.base.v1beta1.DecCoin borrow_APYs = 10
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
-  repeated cosmos.base.v1beta1.DecCoin lend_APYs = 11
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"];
+  int64                 last_interest_time = 7;
+  repeated ExchangeRate exchange_rates     = 8  [(gogoproto.nullable) = false];
+  repeated BadDebt      bad_debts          = 9  [(gogoproto.nullable) = false];
+  repeated APY          borrow_APYs        = 10 [(gogoproto.nullable) = false];
+  repeated APY          lend_APYs          = 11 [(gogoproto.nullable) = false];
 }
 
 // Borrow is a loan struct used in the leverage module's genesis state.
@@ -49,3 +46,22 @@ message BadDebt {
   string address = 1;
   string denom   = 2;
 }
+
+// ExchangeRate is a denom's uToken exchange rate used in the leverage module's genesis state.
+message ExchangeRate {
+  string denom         = 1;
+  string exchange_rate = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// APY is a denom's borrow or lend APY used in the leverage module's genesis state.
+message APY {
+  string denom = 1;
+  string APY = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
