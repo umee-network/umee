@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -162,15 +163,26 @@ func (GenutilModule) ValidateGenesis(
 		}
 
 		msgs := tx.GetMsgs()
-		// if len(msgs) != 1 {
-		// 	return errors.New(
-		// 		"must provide genesis Tx with exactly 1 CreateValidator message")
-		// }
+		if n := len(msgs); n != 2 {
+			return fmt.Errorf(
+				"gentx %d contains invalid number of messages; expected: 2; got: %d",
+				i, n,
+			)
+		}
 
-		// if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
-		// 	return fmt.Errorf(
-		// 		"genesis transaction %v does not contain a MsgCreateValidator", i)
-		// }
+		if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
+			return fmt.Errorf(
+				"gentx %d contains invalid message at index 0; expected: %T; got: %T",
+				i, &stakingtypes.MsgCreateValidator{}, msgs[0],
+			)
+		}
+
+		if _, ok := msgs[1].(*gravitytypes.MsgSetOrchestratorAddress); !ok {
+			return fmt.Errorf(
+				"gentx %d contains invalid message at index 1; expected: %T; got: %T",
+				i, &gravitytypes.MsgSetOrchestratorAddress{}, msgs[0],
+			)
+		}
 	}
 
 	return nil
