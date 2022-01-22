@@ -94,10 +94,7 @@ func (k Keeper) GetAllCollateral(ctx sdk.Context) []types.Collateral {
 			return err
 		}
 
-		collateral = append(
-			collateral,
-			types.Collateral{Address: addr.String(), Amount: sdk.NewCoin(denom, amount)},
-		)
+		collateral = append(collateral, types.NewCollateral(addr.String(), sdk.NewCoin(denom, amount)))
 		return nil
 	}
 

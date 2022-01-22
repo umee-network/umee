@@ -58,10 +58,7 @@ func (k Keeper) GetAllBorrows(ctx sdk.Context) []types.Borrow {
 			return err
 		}
 
-		borrows = append(
-			borrows,
-			types.Borrow{Address: addr.String(), Amount: sdk.NewCoin(denom, amount)},
-		)
+		borrows = append(borrows, types.NewBorrow(addr.String(), sdk.NewCoin(denom, amount)))
 		return nil
 	}
 
@@ -215,10 +212,7 @@ func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		badDebts = append(
-			badDebts,
-			types.BadDebt{Address: addr.String(), Denom: denom},
-		)
+		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
 
 		return nil
 	}

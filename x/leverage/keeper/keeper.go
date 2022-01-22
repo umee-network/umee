@@ -391,10 +391,7 @@ func (k Keeper) GetAllCollateralSettings(ctx sdk.Context) []types.CollateralSett
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		collateralSettings = append(
-			collateralSettings,
-			types.CollateralSetting{Address: addr.String(), Denom: denom},
-		)
+		collateralSettings = append(collateralSettings, types.NewCollateralSetting(addr.String(), denom))
 
 		return nil
 	}

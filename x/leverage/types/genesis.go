@@ -136,3 +136,35 @@ func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.R
 
 	return &genesisState
 }
+
+// NewBorrow creates the Borrow struct used in GenesisState
+func NewBorrow(addr string, amount sdk.Coin) Borrow {
+	return Borrow{
+		Address: addr,
+		Amount:  amount,
+	}
+}
+
+// NewCollateral creates the Collateral struct used in GenesisState
+func NewCollateral(addr string, amount sdk.Coin) Collateral {
+	return Collateral{
+		Address: addr,
+		Amount:  amount,
+	}
+}
+
+// NewCollateralSetting creates the CollateralSetting struct used in GenesisState
+func NewCollateralSetting(addr, denom string) CollateralSetting {
+	return CollateralSetting{
+		Address: addr,
+		Denom:   denom,
+	}
+}
+
+// NewBadDebt creates the BadDebt struct used in GenesisState
+func NewBadDebt(addr, denom string) BadDebt {
+	return BadDebt{
+		Address: addr,
+		Denom:   denom,
+	}
+}
