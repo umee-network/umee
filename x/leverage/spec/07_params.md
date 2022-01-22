@@ -4,7 +4,7 @@ The leverage module contains the following parameters:
 
 | Key                          | Type    | Example |
 | -----------------------------| ------- | ------- |
-| InterestEpoch                | int64   | 100     |
+| InterestEpoch                | int64   | 1000    |
 | CompleteLiquidationThreshold | sdk.Dec | 0.1     |
 | MinimumCloseFactor           | sdk.Dec | 0.01    |
 | OracleRewardFactor           | sdk.Dec | 0.01    |
