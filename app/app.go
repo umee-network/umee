@@ -126,7 +126,7 @@ var (
 	// and genesis verification.
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		genutil.AppModuleBasic{},
+		GenutilModule{},
 		BankModule{},
 		capability.AppModuleBasic{},
 		StakingModule{},
