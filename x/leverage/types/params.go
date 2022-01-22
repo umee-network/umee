@@ -18,7 +18,7 @@ var (
 )
 
 var (
-	defaultInterestEpoch                = int64(100)
+	defaultInterestEpoch                = int64(1000)
 	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
 	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
 	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
