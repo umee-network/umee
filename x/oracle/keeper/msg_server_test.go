@@ -99,6 +99,13 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		ExchangeRates: ratesStrInvalidRate,
 	}
 
+	// Flattened acceptList symbols to make checks easier
+	acceptList := s.app.OracleKeeper.GetParams(ctx).AcceptList
+	var acceptListFlat []string
+	for _, v := range acceptList {
+		acceptListFlat = append(acceptListFlat, v.SymbolDenom)
+	}
+
 	// No existing prevote
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
 	s.Require().EqualError(err, sdkerrors.Wrap(types.ErrNoAggregatePrevote, valAddr.String()).Error())
@@ -117,6 +124,10 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
 	s.Require().NoError(err)
+	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	for _, v := range vote.ExchangeRateTuples {
+		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
+	}
 
 	// Valid, but with an exchange rate not on the accept list
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(
@@ -127,12 +138,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsgInvalidRate)
 	s.Require().NoError(err)
-	acceptList := s.app.OracleKeeper.GetParams(ctx).AcceptList
-	var acceptListFlat []string
-	for _, v := range acceptList {
-		acceptListFlat = append(acceptListFlat, v.SymbolDenom)
-	}
-	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	vote, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
 	s.Require().NoError(err)
 	for _, v := range vote.ExchangeRateTuples {
 		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
