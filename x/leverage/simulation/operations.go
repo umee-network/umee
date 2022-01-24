@@ -21,11 +21,13 @@ const (
 	DefaultWeightMsgBorrowAsset   int = 80
 	DefaultWeightMsgSetCollateral int = 60
 	DefaultWeightMsgRepayAsset    int = 70
+	DefaultWeightMsgLiquidate     int = 75
 	OpWeightMsgLendAsset              = "op_weight_msg_lend_asset"
 	OpWeightMsgWithdrawAsset          = "op_weight_msg_withdraw_asset"
 	OpWeightMsgBorrowAsset            = "op_weight_msg_borrow_asset"
 	OpWeightMsgSetCollateral          = "op_weight_msg_set_collateral"
 	OpWeightMsgRepayAsset             = "op_weight_msg_repay_asset"
+	OpWeightMsgLiquidate              = "op_weight_msg_liquidate"
 )
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
@@ -40,6 +42,7 @@ func WeightedOperations(
 		weightMsgBorrow        int
 		weightMsgSetCollateral int
 		weightMsgRepayAsset    int
+		weightMsgLiquidate     int
 	)
 	appParams.GetOrGenerate(cdc, OpWeightMsgLendAsset, &weightMsgLend, nil,
 		func(_ *rand.Rand) {
@@ -66,6 +69,11 @@ func WeightedOperations(
 			weightMsgRepayAsset = DefaultWeightMsgRepayAsset
 		},
 	)
+	appParams.GetOrGenerate(cdc, OpWeightMsgLiquidate, &weightMsgLiquidate, nil,
+		func(_ *rand.Rand) {
+			weightMsgLiquidate = DefaultWeightMsgLiquidate
+		},
+	)
 
 	return simulation.WeightedOperations{
 		simulation.NewWeightedOperation(
@@ -87,6 +95,10 @@ func WeightedOperations(
 		simulation.NewWeightedOperation(
 			weightMsgRepayAsset,
 			SimulateMsgRepayAsset(ak, bk, lk),
+		),
+		simulation.NewWeightedOperation(
+			weightMsgLiquidate,
+			SimulateMsgLiquidate(ak, bk, lk),
 		),
 	}
 }
@@ -253,6 +265,38 @@ func SimulateMsgRepayAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk 
 	}
 }
 
+// SimulateMsgLiquidate tests and runs a single msg send where
+// some asset borrowed is liquidated.
+func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+	return func(
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+		accs []simtypes.Account, chainID string,
+	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		liquidator, borrower, repaymentCoin, skip := randomLiquidateFields(r, ctx, accs, lk)
+		if skip {
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
+		}
+
+		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentCoin, repaymentCoin.Denom)
+
+		txCtx := simulation.OperationInput{
+			R:             r,
+			App:           app,
+			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
+			Cdc:           nil,
+			Msg:           msg,
+			MsgType:       types.EventTypeLiquidate,
+			Context:       ctx,
+			SimAccount:    borrower,
+			AccountKeeper: ak,
+			Bankkeeper:    bk,
+			ModuleName:    types.ModuleName,
+		}
+
+		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+	}
+}
+
 // randomCoin get random coin from coins
 func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 	if coins.Empty() {
@@ -291,4 +335,23 @@ func randomCollateralFields(
 	}
 
 	return acc, randomCoin(r, withdrawCoins), false
+}
+
+// randomLiquidateFields returns two random account and coins to liquidate in the simulation.
+func randomLiquidateFields(
+	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
+) (liquidator simtypes.Account, borrower simtypes.Account, repaymentCoin sdk.Coin, skip bool) {
+	idxLiquidator := r.Intn(len(accs) - 1)
+
+	liquidator = accs[idxLiquidator]
+	borrower = accs[idxLiquidator+1]
+
+	collateralBalances := lk.GetBorrowerCollateral(ctx, borrower.Address)
+
+	repaymentCoins := simtypes.RandSubsetCoins(r, collateralBalances)
+	if repaymentCoins.Empty() {
+		return liquidator, borrower, sdk.Coin{}, true
+	}
+
+	return liquidator, borrower, randomCoin(r, repaymentCoins), false
 }
