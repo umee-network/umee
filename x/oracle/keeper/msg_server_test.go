@@ -73,11 +73,11 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	ctx := s.ctx
 
 	ratesStr := "umee:123.2"
-	ratesStrInvalidRate := "umee:123.2,badcoin:234.5"
+	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
 	salt, err := GenerateSalt(2)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
-	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidRate, valAddr)
+	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
 
 	prevoteMsg := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
@@ -94,7 +94,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		Feeder:        addr.String(),
 		Validator:     valAddr.String(),
 		Salt:          salt,
-		ExchangeRates: ratesStrInvalidRate,
+		ExchangeRates: ratesStrInvalidCoin,
 	}
 
 	// Flattened acceptList symbols to make checks easier
