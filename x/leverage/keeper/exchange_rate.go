@@ -68,6 +68,32 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) 
 	return amount, nil
 }
 
+// GetAllExchangeRates returns all exchange rates.
+func (k Keeper) GetAllExchangeRates(ctx sdk.Context) []types.ExchangeRate {
+	prefix := types.KeyPrefixExchangeRate
+	exchangeRates := []types.ExchangeRate{}
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var rate sdk.Dec
+		if err := rate.Unmarshal(val); err != nil {
+			// improperly marshaled exchange rate should never happen
+			return err
+		}
+
+		exchangeRates = append(exchangeRates, types.NewExchangeRate(denom, rate))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return exchangeRates
+}
+
 // SetExchangeRate sets the token:uTokenexchange rate for a given base token
 // denom.
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) error {

@@ -78,6 +78,34 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
+// GetAllCollateral returns all collateral across all borrowers and asset types. Uses the
+// CollateralAmount struct found in GenesisState, which stores borrower address as a string.
+func (k Keeper) GetAllCollateral(ctx sdk.Context) []types.Collateral {
+	prefix := types.KeyPrefixCollateralAmount
+	collateral := []types.Collateral{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled collateral amount should never happen
+			return err
+		}
+
+		collateral = append(collateral, types.NewCollateral(addr.String(), sdk.NewCoin(denom, amount)))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return collateral
+}
+
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
 	store := ctx.KVStore(k.storeKey)

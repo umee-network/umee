@@ -28,6 +28,32 @@ func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
 	return amount
 }
 
+// GetAllReserves returns all reserves.
+func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
+	prefix := types.KeyPrefixReserveAmount
+	reserves := sdk.NewCoins()
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled reserve amount should never happen
+			return err
+		}
+
+		reserves = reserves.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return reserves
+}
+
 // SetReserveAmount sets the amount reserved of a specified token.
 func (k Keeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	if !k.IsAcceptedToken(ctx, coin.Denom) || !coin.IsValid() {
