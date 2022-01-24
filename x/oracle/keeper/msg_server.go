@@ -92,9 +92,8 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, sdkerrors.Wrap(types.ErrNoAggregatePrevote, msg.Validator)
 	}
 
-	height := uint64(ctx.BlockHeight())
 	// Check a msg is submitted proper period
-	if (height/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
+	if (uint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
