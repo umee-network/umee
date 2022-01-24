@@ -112,7 +112,7 @@ var (
 	// and genesis verification.
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		genutil.AppModuleBasic{},
+		umeeapp.GenutilModule{},
 		umeeapp.BankModule{},
 		capability.AppModuleBasic{},
 		umeeapp.StakingModule{},
