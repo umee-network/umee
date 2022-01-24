@@ -127,7 +127,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
 	}
 
-	// Valid, but with an exchange rate not on the accept list
+	// Valid, but with an exchange rate which isn't in AcceptList
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(
 		ctx,
 		valAddr,
