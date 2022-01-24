@@ -34,7 +34,7 @@ func (dl DenomList) String() (out string) {
 // Contains checks whether or not a SymbolDenom (e.g. UMEE) is in the DenomList
 func (dl DenomList) Contains(symbolDenom string) bool {
 	for _, d := range dl {
-		if strings.ToUpper(d.SymbolDenom) == strings.ToUpper(symbolDenom) {
+		if strings.EqualFold(d.SymbolDenom, symbolDenom) {
 			return true
 		}
 	}
