@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -45,7 +44,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeappbeta.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  1,
+		Height:  9,
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
@@ -241,8 +240,4 @@ func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
 	app.OracleKeeper.DeleteExchangeRate(ctx, exchangeRate)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
 	s.Require().Error(err)
-}
-
-func TestKeeperTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
 }

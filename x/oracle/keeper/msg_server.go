@@ -92,8 +92,9 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, sdkerrors.Wrap(types.ErrNoAggregatePrevote, msg.Validator)
 	}
 
+	height := uint64(ctx.BlockHeight())
 	// Check a msg is submitted proper period
-	if (uint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
+	if (height/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
@@ -108,8 +109,16 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, sdkerrors.Wrapf(types.ErrVerificationFailed, "must be given %s not %s", aggregatePrevote.Hash, hash)
 	}
 
+	// Filter out rates which aren't included in the AcceptList
+	filteredTuples := types.ExchangeRateTuples{}
+	for _, tuple := range exchangeRateTuples {
+		if params.AcceptList.Contains(tuple.Denom) {
+			filteredTuples = append(filteredTuples, tuple)
+		}
+	}
+
 	// Move aggregate prevote to aggregate vote with given exchange rates
-	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(exchangeRateTuples, valAddr))
+	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(filteredTuples, valAddr))
 	ms.DeleteAggregateExchangeRatePrevote(ctx, valAddr)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
