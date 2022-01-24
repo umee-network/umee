@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -56,7 +57,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
 	currentTime := ctx.BlockTime().Unix()
-	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(types.SecondsPerYear)
+	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 	if yearsElapsed.IsNegative() {
 		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
 	}
@@ -164,7 +165,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	err := k.SetLastInterestTime(ctx, sdk.NewInt(currentTime))
+	err := k.SetLastInterestTime(ctx, currentTime)
 	if err != nil {
 		return err
 	}
@@ -193,11 +194,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 }
 
 // SetLastInterestTime sets LastInterestTime to a given value
-func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime sdk.Int) error {
+func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
 
-	bz, err := interestTime.Marshal()
+	bz, err := k.cdc.Marshal(&gogotypes.Int64Value{Value: interestTime})
 	if err != nil {
 		return err
 	}
@@ -207,16 +208,16 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime sdk.Int) erro
 }
 
 // GetLastInterestTime gets last time at which interest was accrued
-func (k Keeper) GetLastInterestTime(ctx sdk.Context) sdk.Int {
+func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
-
-	interestTime := sdk.ZeroInt()
-
 	bz := store.Get(timeKey)
-	if err := interestTime.Unmarshal(bz); err != nil {
+
+	val := gogotypes.Int64Value{}
+
+	if err := k.cdc.Unmarshal(bz, &val); err != nil {
 		panic(err)
 	}
 
-	return interestTime
+	return val.Value
 }
