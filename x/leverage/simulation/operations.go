@@ -19,9 +19,11 @@ const (
 	DefaultWeightMsgLendAsset     int = 100
 	DefaultWeightMsgWithdrawAsset int = 85
 	DefaultWeightMsgBorrowAsset   int = 80
+	DefaultWeightMsgSetCollateral int = 60
 	OpWeightMsgLendAsset              = "op_weight_msg_lend_asset"
 	OpWeightMsgWithdrawAsset          = "op_weight_msg_withdraw_asset"
 	OpWeightMsgBorrowAsset            = "op_weight_msg_borrow_asset"
+	OpWeightMsgSetCollateral          = "op_weight_msg_set_collateral"
 )
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
@@ -31,9 +33,10 @@ func WeightedOperations(
 ) simulation.WeightedOperations {
 
 	var (
-		weightMsgLend     int
-		weightMsgWithdraw int
-		weightMsgBorrow   int
+		weightMsgLend          int
+		weightMsgWithdraw      int
+		weightMsgBorrow        int
+		weightMsgSetCollateral int
 	)
 	appParams.GetOrGenerate(cdc, OpWeightMsgLendAsset, &weightMsgLend, nil,
 		func(_ *rand.Rand) {
@@ -50,6 +53,11 @@ func WeightedOperations(
 			weightMsgBorrow = DefaultWeightMsgBorrowAsset
 		},
 	)
+	appParams.GetOrGenerate(cdc, OpWeightMsgSetCollateral, &weightMsgSetCollateral, nil,
+		func(_ *rand.Rand) {
+			weightMsgSetCollateral = DefaultWeightMsgSetCollateral
+		},
+	)
 
 	return simulation.WeightedOperations{
 		simulation.NewWeightedOperation(
@@ -63,6 +71,10 @@ func WeightedOperations(
 		simulation.NewWeightedOperation(
 			weightMsgBorrow,
 			SimulateMsgBorrowAsset(ak, bk, lk),
+		),
+		simulation.NewWeightedOperation(
+			weightMsgSetCollateral,
+			SimulateMsgSetCollateralSetting(ak, bk, lk),
 		),
 	}
 }
@@ -153,6 +165,39 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 			Cdc:           nil,
 			Msg:           msg,
 			MsgType:       types.EventTypeBorrowAsset,
+			Context:       ctx,
+			SimAccount:    from,
+			AccountKeeper: ak,
+			Bankkeeper:    bk,
+			ModuleName:    types.ModuleName,
+		}
+
+		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+	}
+}
+
+// SimulateMsgSetCollateralSetting tests and runs a single msg send where
+// an account set some denom as collateral.
+func SimulateMsgSetCollateralSetting(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+	return func(
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+		accs []simtypes.Account, chainID string,
+	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		from, coin, skip := randomCollateralFields(r, ctx, accs, lk)
+		if skip {
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSetCollateralSetting, "skip all transfers"), nil, nil
+		}
+
+		enable := lk.GetCollateralSetting(ctx, from.Address.Bytes(), coin.Denom)
+		msg := types.NewMsgSetCollateral(from.Address, coin.Denom, !enable)
+
+		txCtx := simulation.OperationInput{
+			R:             r,
+			App:           app,
+			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
+			Cdc:           nil,
+			Msg:           msg,
+			MsgType:       types.EventTypeSetCollateralSetting,
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,
