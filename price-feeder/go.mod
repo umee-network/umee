@@ -4,17 +4,20 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/cosmos/cosmos-sdk v0.44.5
+	github.com/armon/go-metrics v0.3.10
+	github.com/cosmos/cosmos-sdk v0.45.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
+	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/common v0.29.0
 	github.com/rs/cors v1.8.0
-	github.com/rs/zerolog v1.23.0
+	github.com/rs/zerolog v1.26.1
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
-	github.com/umee-network/umee v0.0.0-20211220053224-a63399da0d04
+	github.com/umee-network/umee v0.0.0-20220124203543-959fdcf7c663
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -25,14 +28,14 @@ require (
 	github.com/99designs/keyring v1.1.6 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119145013-642d08945c63 // indirect
 	github.com/Workiva/go-datastructures v1.0.52 // indirect
-	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/coinbase/rosetta-sdk-go v0.6.10 // indirect
+	github.com/coinbase/rosetta-sdk-go v0.7.0 // indirect
 	github.com/confio/ics23/go v0.6.6 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
@@ -48,7 +51,7 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/dustin/go-humanize v1.0.1-0.20200219035652-afde56e7acac // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
-	github.com/ethereum/go-ethereum v1.10.13 // indirect
+	github.com/ethereum/go-ethereum v1.10.15 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-kit/kit v0.10.0 // indirect
@@ -93,14 +96,12 @@ require (
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.29.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
-	github.com/rs/xid v1.2.1 // indirect
+	github.com/rs/xid v1.3.0 // indirect
 	github.com/sasha-s/go-deadlock v0.2.1-0.20190427202633-1595213edefa // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
@@ -116,7 +117,7 @@ require (
 	github.com/tendermint/tm-db v0.6.6 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect

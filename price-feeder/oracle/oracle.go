@@ -293,6 +293,12 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 			o.logger.Warn().Str("denom", symbol).Msg("price missing for required denom")
 		}
 	}
+	for symbol := range o.prices {
+		if !params.AcceptList.Contains(symbol) {
+			o.logger.Warn().Str("denom", symbol).Msg("attempting to vote on unaccepted denom")
+			delete(o.prices, symbol)
+		}
+	}
 }
 
 func (o *Oracle) tick() error {
