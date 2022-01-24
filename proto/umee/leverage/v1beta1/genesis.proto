@@ -19,8 +19,8 @@ message GenesisState {
   int64                 last_interest_time = 7;
   repeated ExchangeRate exchange_rates     = 8  [(gogoproto.nullable) = false];
   repeated BadDebt      bad_debts          = 9  [(gogoproto.nullable) = false];
-  repeated APY          borrow_APYs        = 10 [(gogoproto.nullable) = false];
-  repeated APY          lend_APYs          = 11 [(gogoproto.nullable) = false];
+  repeated APY          borrow_rates       = 10 [(gogoproto.nullable) = false];
+  repeated APY          lend_rates         = 11 [(gogoproto.nullable) = false];
 }
 
 // Borrow is a loan struct used in the leverage module's genesis state.

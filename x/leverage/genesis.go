@@ -74,13 +74,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		k.SetBadDebtAddress(ctx, badDebt.Denom, borrower, true)
 	}
 
-	for _, rate := range genState.Borrow_APYs {
+	for _, rate := range genState.BorrowRates {
 		if err := k.SetBorrowAPY(ctx, rate.Denom, rate.APY); err != nil {
 			panic(err)
 		}
 	}
 
-	for _, rate := range genState.Lend_APYs {
+	for _, rate := range genState.LendRates {
 		if err := k.SetLendAPY(ctx, rate.Denom, rate.APY); err != nil {
 			panic(err)
 		}

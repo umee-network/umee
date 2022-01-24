@@ -32,8 +32,8 @@ func NewGenesisState(
 		LastInterestTime:   lastInterestTime,
 		ExchangeRates:      exchangeRates,
 		BadDebts:           badDebts,
-		Borrow_APYs:        borrowAPYs,
-		Lend_APYs:          lendAPYs,
+		BorrowRates:        borrowAPYs,
+		LendRates:          lendAPYs,
 	}
 }
 
@@ -114,7 +114,7 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	for _, rate := range gs.Borrow_APYs {
+	for _, rate := range gs.BorrowRates {
 		if err := sdk.ValidateDenom(rate.Denom); err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	for _, rate := range gs.Lend_APYs {
+	for _, rate := range gs.LendRates {
 		if err := sdk.ValidateDenom(rate.Denom); err != nil {
 			return err
 		}
