@@ -45,7 +45,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeappbeta.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  1,
+		Height:  9,
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
