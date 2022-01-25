@@ -18,7 +18,6 @@ import (
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
@@ -114,7 +113,7 @@ var (
 	// and genesis verification.
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		genutil.AppModuleBasic{},
+		umeeapp.GenutilModule{},
 		umeeapp.BankModule{},
 		capability.AppModuleBasic{},
 		umeeapp.StakingModule{},
@@ -218,7 +217,6 @@ func New(
 
 	base := baseapp.NewBaseApp(umeeapp.Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	base.SetCommitMultiStoreTracer(traceStore)
-	base.SetVersion(version.Version)
 	base.SetInterfaceRegistry(interfaceRegistry)
 
 	keys := sdk.NewKVStoreKeys(
@@ -476,7 +474,7 @@ func New(
 		transferModule,
 		leverage.NewAppModule(appCodec, app.LeverageKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -584,6 +582,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		gravitysim.NewAppModule(app.GravityKeeper, app.BankKeeper, app.StakingKeeper, app.AccountKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()

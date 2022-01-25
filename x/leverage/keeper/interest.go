@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -52,19 +53,13 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
 
 	// get last time at which interest was accrued
-	timeKey := types.CreateLastInterestTimeKey()
-	prevInterestTime := sdk.ZeroInt()
-
-	bz := store.Get(timeKey)
-	if err := prevInterestTime.Unmarshal(bz); err != nil {
-		return err
-	}
+	prevInterestTime := k.GetLastInterestTime(ctx)
 
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
 	currentTime := ctx.BlockTime().Unix()
-	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime.Int64()).QuoInt64(types.SecondsPerYear)
+	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 	if yearsElapsed.IsNegative() {
-		return types.ErrNegativeTimeElapsed
+		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
 	}
 
 	// Compute total borrows across all borrowers, which are used when calculating
@@ -170,12 +165,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	bz, err := sdk.NewInt(currentTime).Marshal()
+	err := k.SetLastInterestTime(ctx, currentTime)
 	if err != nil {
 		return err
 	}
-
-	store.Set(timeKey, bz)
 
 	// Because this action is not caused by a message, logging and
 	// events are here instead of msg_server.go
@@ -200,20 +193,31 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	return nil
 }
 
-// InitializeLastInterestTime sets LastInterestTime to present if it does not
-// exist (used for genesis).
-func (k *Keeper) InitializeLastInterestTime(ctx sdk.Context) {
+// SetLastInterestTime sets LastInterestTime to a given value
+func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error {
 	store := ctx.KVStore(k.storeKey)
-
 	timeKey := types.CreateLastInterestTimeKey()
-	currentTime := ctx.BlockTime().Unix()
 
-	if store.Get(timeKey) == nil {
-		bz, err := sdk.NewInt(currentTime).Marshal()
-		if err != nil {
-			panic(err)
-		}
-
-		store.Set(timeKey, bz)
+	bz, err := k.cdc.Marshal(&gogotypes.Int64Value{Value: interestTime})
+	if err != nil {
+		return err
 	}
+
+	store.Set(timeKey, bz)
+	return nil
+}
+
+// GetLastInterestTime gets last time at which interest was accrued
+func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
+	store := ctx.KVStore(k.storeKey)
+	timeKey := types.CreateLastInterestTimeKey()
+	bz := store.Get(timeKey)
+
+	val := gogotypes.Int64Value{}
+
+	if err := k.cdc.Unmarshal(bz, &val); err != nil {
+		panic(err)
+	}
+
+	return val.Value
 }

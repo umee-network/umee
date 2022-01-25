@@ -382,6 +382,28 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	return store.Has(key)
 }
 
+// GetAllCollateralSettings gets collateral settings for all borrowers.
+func (k Keeper) GetAllCollateralSettings(ctx sdk.Context) []types.CollateralSetting {
+	prefix := types.KeyPrefixCollateralSetting
+	collateralSettings := []types.CollateralSetting{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		collateralSettings = append(collateralSettings, types.NewCollateralSetting(addr.String(), denom))
+
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return collateralSettings
+}
+
 // LiquidateBorrow attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
 // for a selected denomination of uToken collateral. If the borrower is not over their borrow limit, or
 // the repayment or reward denominations are invalid, an error is returned. If the attempted repayment
@@ -452,7 +474,6 @@ func (k Keeper) LiquidateBorrow(
 	if repayValue.GTE(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
-		repayValue = maxRepayValue
 	}
 
 	// Given repay denom and amount, use oracle to find equivalent amount of

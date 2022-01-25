@@ -65,13 +65,7 @@ func NewOracleClient(
 	grpcEndpoint string,
 	gasAdjustment float64,
 ) (OracleClient, error) {
-
 	oracleAddr, err := sdk.AccAddressFromBech32(oracleAddrString)
-	if err != nil {
-		return OracleClient{}, err
-	}
-
-	validatorAddr := sdk.ValAddress(validatorAddrString)
 	if err != nil {
 		return OracleClient{}, err
 	}
@@ -86,7 +80,7 @@ func NewOracleClient(
 		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,
 		OracleAddrString:    oracleAddrString,
-		ValidatorAddr:       validatorAddr,
+		ValidatorAddr:       sdk.ValAddress(validatorAddrString),
 		ValidatorAddrString: validatorAddrString,
 		Encoding:            umeeappbeta.MakeEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
