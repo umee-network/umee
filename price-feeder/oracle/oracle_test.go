@@ -208,7 +208,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 		config.ProviderOsmosis: mockProvider{
 			prices: map[string]provider.TickerPrice{
-				"XBT": {
+				"XBTUSDT": {
 					Price:  sdk.MustNewDecFromStr("3.71"),
 					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
 				},
