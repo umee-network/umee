@@ -56,6 +56,11 @@ func (ots *OracleTestSuite) SetupSuite() {
 				Quote:     "USDC",
 				Providers: []string{config.ProviderKraken},
 			},
+			{
+				Base:      "XBT",
+				Quote:     "USDT",
+				Providers: []string{config.ProviderOsmosis},
+			},
 		},
 	)
 }
@@ -190,6 +195,33 @@ func (ots *OracleTestSuite) TestPrices() {
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
+
+	// use one working provider and one for a coin not in accept list
+	ots.oracle.priceProviders = map[string]provider.Provider{
+		config.ProviderKraken: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDC": {
+					Price:  sdk.MustNewDecFromStr("3.71"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+		config.ProviderOsmosis: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"XBT": {
+					Price:  sdk.MustNewDecFromStr("3.71"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+	}
+
+	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	prices = ots.oracle.GetPrices()
+	ots.Require().Len(prices, 1)
+	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
+	_, invalidPriceSet := prices["XBT"]
+	ots.Require().False(invalidPriceSet)
 }
 
 func TestGenerateSalt(t *testing.T) {
