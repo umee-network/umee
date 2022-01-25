@@ -151,7 +151,7 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 // SetPrices retrieve all the prices from our set of providers as determined
 // in the config, average them out, and update the oracle's current exchange
 // rates.
-func (o *Oracle) SetPrices() error {
+func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
@@ -163,14 +163,20 @@ func (o *Oracle) SetPrices() error {
 
 		priceProvider := o.getOrSetProvider(providerName)
 
+		var acceptedPairs []types.CurrencyPair
 		for _, pair := range currencyPairs {
-			if _, ok := requiredRates[pair.Base]; !ok {
-				requiredRates[pair.Base] = struct{}{}
+			if acceptList.Contains(pair.Base) {
+				acceptedPairs = append(acceptedPairs, pair)
+				if _, ok := requiredRates[pair.Base]; !ok {
+					requiredRates[pair.Base] = struct{}{}
+				}
+			} else {
+				o.logger.Warn().Str("denom", pair.Base).Msg("attempting to vote on unaccepted denom")
 			}
 		}
 
 		g.Go(func() error {
-			prices, err := priceProvider.GetTickerPrices(currencyPairs...)
+			prices, err := priceProvider.GetTickerPrices(acceptedPairs...)
 			if err != nil {
 				telemetry.IncrCounter(1, "failure", "provider")
 				return err
@@ -180,7 +186,7 @@ func (o *Oracle) SetPrices() error {
 			//
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, cp := range currencyPairs {
+			for _, cp := range acceptedPairs {
 				if _, ok := providerPrices[providerName]; !ok {
 					providerPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
@@ -293,12 +299,6 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 			o.logger.Warn().Str("denom", symbol).Msg("price missing for required denom")
 		}
 	}
-	for symbol := range o.prices {
-		if !params.AcceptList.Contains(symbol) {
-			o.logger.Warn().Str("denom", symbol).Msg("attempting to vote on unaccepted denom")
-			delete(o.prices, symbol)
-		}
-	}
 }
 
 func (o *Oracle) tick() error {
@@ -308,15 +308,14 @@ func (o *Oracle) tick() error {
 	if err != nil {
 		return err
 	}
-
-	if err := o.SetPrices(); err != nil {
-		return err
-	}
-
 	oracleParams, err := o.GetParams()
 	if err != nil {
 		return err
 	}
+	if err := o.SetPrices(oracleParams.AcceptList); err != nil {
+		return err
+	}
+
 	o.checkAcceptList(oracleParams)
 
 	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
