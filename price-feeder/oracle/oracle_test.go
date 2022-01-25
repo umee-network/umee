@@ -14,6 +14,8 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
 type mockProvider struct {
@@ -53,6 +55,11 @@ func (ots *OracleTestSuite) SetupSuite() {
 				Base:      "UMEE",
 				Quote:     "USDC",
 				Providers: []string{config.ProviderKraken},
+			},
+			{
+				Base:      "XBT",
+				Quote:     "USDT",
+				Providers: []string{config.ProviderOsmosis},
 			},
 		},
 	)
@@ -102,8 +109,15 @@ func (ots *OracleTestSuite) TestPrices() {
 			},
 		},
 	}
+	acceptList := oracletypes.DenomList{
+		oracletypes.Denom{
+			BaseDenom:   "UUMEE",
+			SymbolDenom: "UMEE",
+			Exponent:    6,
+		},
+	}
 
-	ots.Require().Error(ots.oracle.SetPrices())
+	ots.Require().Error(ots.oracle.SetPrices(acceptList))
 	ots.Require().Empty(ots.oracle.GetPrices())
 
 	// use a mock provider to provide prices for the configured exchange pairs
@@ -126,7 +140,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices())
+	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
@@ -152,7 +166,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices())
+	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
@@ -177,10 +191,37 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices())
+	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
+
+	// use one working provider and one for a coin not in accept list
+	ots.oracle.priceProviders = map[string]provider.Provider{
+		config.ProviderKraken: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"UMEEUSDC": {
+					Price:  sdk.MustNewDecFromStr("3.71"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+		config.ProviderOsmosis: mockProvider{
+			prices: map[string]provider.TickerPrice{
+				"XBTUSDT": {
+					Price:  sdk.MustNewDecFromStr("3.71"),
+					Volume: sdk.MustNewDecFromStr("1994674.34000000"),
+				},
+			},
+		},
+	}
+
+	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	prices = ots.oracle.GetPrices()
+	ots.Require().Len(prices, 1)
+	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
+	_, reportedUnacceptedDenom := prices["XBT"]
+	ots.Require().False(reportedUnacceptedDenom)
 }
 
 func TestGenerateSalt(t *testing.T) {
