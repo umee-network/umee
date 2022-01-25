@@ -20,7 +20,7 @@ const (
 
 // GenInterestEpoch produces a randomized InterestEpoch in the range of [10, 100]
 func GenInterestEpoch(r *rand.Rand) int64 {
-	return int64(10 + r.Intn(100))
+	return int64(10 + r.Intn(90))
 }
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
