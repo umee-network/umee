@@ -474,7 +474,6 @@ func (k Keeper) LiquidateBorrow(
 	if repayValue.GTE(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
-		repayValue = maxRepayValue
 	}
 
 	// Given repay denom and amount, use oracle to find equivalent amount of
