@@ -220,8 +220,8 @@ func (ots *OracleTestSuite) TestPrices() {
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
-	_, invalidPriceSet := prices["XBT"]
-	ots.Require().False(invalidPriceSet)
+	_, reportedUnacceptedDenom := prices["XBT"]
+	ots.Require().False(reportedUnacceptedDenom)
 }
 
 func TestGenerateSalt(t *testing.T) {
