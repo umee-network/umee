@@ -3,8 +3,13 @@ module github.com/umee-network/umee
 go 1.17
 
 require (
+<<<<<<< HEAD
 	github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220105165903-e165ecda7fb2
 	github.com/cosmos/cosmos-sdk v0.44.5
+=======
+	github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119001715-90cc0c9bb07f
+	github.com/cosmos/cosmos-sdk v0.45.0
+>>>>>>> 0cbc763 (chore: Update Gravity Bridge to v1.3.3 (#420))
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v2 v2.0.2
 	github.com/ethereum/go-ethereum v1.10.15
