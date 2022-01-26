@@ -39,8 +39,7 @@ build {
   ]
 
   provisioner "shell" {
-    inline = ["apt update"
-      , "sed -i 's/http:\/\/.\+\/ubuntu/http:\/\/mirrors.edge.kernel.org\/ubuntu/g' /etc/apt/sources.list"
+    inline = [ "sed -i 's/http:\\/\\/.\\+\\/ubuntu/http:\\/\\/mirrors.edge.kernel.org\\/ubuntu/g' /etc/apt/sources.list"
       , "apt update"
       , "apt install -y --no-install-recommends ack apt-transport-https bsdmainutils ca-certificates curl debian-keyring debian-archive-keyring iputils-ping jq less lsof nano ncat net-tools nmap supervisor sysstat telnet traceroute vim"
       , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | tee /etc/apt/trusted.gpg.d/caddy-stable.asc"
