@@ -2,6 +2,7 @@ FROM ubuntu:20.04
 
 # Install system dependencies
 RUN apt update \
+  && sleep 5 \
   && apt install -y --no-install-recommends \
     ca-certificates \
     curl \
