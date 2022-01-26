@@ -73,8 +73,6 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
 	salt, err := GenerateSalt(40)
 	s.Require().NoError(err)
-	shortSalt, err := GenerateSalt(19)
-	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
 
@@ -87,12 +85,6 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		Feeder:        addr.String(),
 		Validator:     valAddr.String(),
 		Salt:          salt,
-		ExchangeRates: ratesStr,
-	}
-	voteMsgShortSalt := &types.MsgAggregateExchangeRateVote{
-		Feeder:        addr.String(),
-		Validator:     valAddr.String(),
-		Salt:          shortSalt,
 		ExchangeRates: ratesStr,
 	}
 	voteMsgInvalidRate := &types.MsgAggregateExchangeRateVote{
