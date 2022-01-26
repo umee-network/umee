@@ -1,11 +1,9 @@
 package simulation_test
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -23,17 +21,28 @@ import (
 type SimTestSuite struct {
 	suite.Suite
 
-	app    *umeeappbeta.UmeeApp
-	simApp *simapp.SimApp
-	ctx    sdk.Context
+	app *umeeappbeta.UmeeApp
+	ctx sdk.Context
 }
 
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	s.simApp = simapp.Setup(checkTx)
 	s.app = umeeappbeta.Setup(s.T(), checkTx, 1)
 	s.ctx = s.app.BaseApp.NewContext(checkTx, tmproto.Header{})
+
+	// Note: Setting umee collateral weight to 1.0 to allow lender to borrow heavily
+	umeeToken := types.Token{
+		BaseDenom:            umeeapp.BondDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("1.0"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 }
 
 // getTestingAccounts generates
@@ -109,15 +118,15 @@ func (s *SimTestSuite) TestSimulateMsgLendAsset() {
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "") // s.ctx.ChainID()
 	s.Require().NoError(err)
 
-	fmt.Print(operationMsg, futureOperations)
+	// fmt.Print(operationMsg, futureOperations)
 
-	// var msg types.MsgLendAsset
-	// types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+	var msg types.MsgLendAsset
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
-	// s.Require().True(operationMsg.OK)
+	s.Require().True(operationMsg.OK)
 	// s.Require().Equal("cosmos1ghekyjucln7y67ntx7cf27m9dpuxxemn4c8g4r", msg.Lender)
 	// s.Require().Equal("cosmos1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7u4x9a0", msg.Amount.String())
-	// s.Require().Len(futureOperations, 0)
+	s.Require().Len(futureOperations, 0)
 }
 
 func TestSimTestSuite(t *testing.T) {
