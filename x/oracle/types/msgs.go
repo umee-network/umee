@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strings"
+
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -148,8 +150,13 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	if len(msg.Salt) > 80 || len(msg.Salt) < 60 {
 		return sdkerrors.Wrap(ErrInvalidSaltLength, "salt length must be [60, 80]")
 	}
-	// Will panic if salt is invalid
-	GetAggregateVoteHash(msg.Salt, msg.ExchangeRates, sdk.ValAddress(msg.Validator))
+	_, err = AggregateVoteHashFromHexString(msg.Salt)
+	if err != nil {
+		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must be a valid hex string")
+	}
+	if strings.Contains(msg.Salt, ":") {
+		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must not contain colon character")
+	}
 
 	return nil
 }

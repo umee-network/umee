@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
@@ -23,14 +22,6 @@ type AggregateVoteHash []byte
 // redundant DecCoins stringify operation.
 func GetAggregateVoteHash(salt string, exchangeRatesStr string, voter sdk.ValAddress) AggregateVoteHash {
 	hash := tmhash.NewTruncated()
-
-	_, err := AggregateVoteHashFromHexString(salt)
-	if err != nil {
-		panic(err)
-	}
-	if strings.Contains(salt, ":") {
-		panic("salt cannot contain colon character")
-	}
 
 	sourceStr := fmt.Sprintf("%s:%s:%s", salt, exchangeRatesStr, voter.String())
 

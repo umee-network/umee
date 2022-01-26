@@ -19,7 +19,7 @@ var (
 	ErrVerificationFailed    = sdkerrors.Register(ModuleName, 7, "hash verification failed")
 	ErrRevealPeriodMissMatch = sdkerrors.Register(ModuleName, 8, "reveal period of submitted vote does not match with registered prevote")
 	ErrInvalidSaltLength     = sdkerrors.Register(ModuleName, 9, "invalid salt length; should be 60~80")
-	ErrInvalidSaltFormat     = sdkerrors.Register(ModuleName, 10, "invalid salt format; should be hex")
+	ErrInvalidSaltFormat     = sdkerrors.Register(ModuleName, 10, "invalid salt format")
 	ErrNoAggregatePrevote    = sdkerrors.Register(ModuleName, 11, "no aggregate prevote")
 	ErrNoAggregateVote       = sdkerrors.Register(ModuleName, 12, "no aggregate vote")
 	ErrUnknownDenom          = sdkerrors.Register(ModuleName, 13, "unknown denom")
