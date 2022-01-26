@@ -52,11 +52,17 @@ func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilizat
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	store := ctx.KVStore(k.storeKey)
 
+	// Get current unix time in seconds
+	currentTime := ctx.BlockTime().Unix()
+
 	// get last time at which interest was accrued
 	prevInterestTime := k.GetLastInterestTime(ctx)
+	if prevInterestTime == 0 {
+		// on first ever interest epoch, ignore stored value
+		prevInterestTime = currentTime
+	}
 
 	// Calculate time elapsed since last interest accrual (measured in years for APR math)
-	currentTime := ctx.BlockTime().Unix()
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 	if yearsElapsed.IsNegative() {
 		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
