@@ -111,7 +111,10 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	// Run ValidateBasics
 	s.Require().NoError(prevoteMsg.ValidateBasic())
 	s.Require().NoError(voteMsg.ValidateBasic())
-	s.Require().EqualError(voteMsgShortSalt.ValidateBasic(), sdkerrors.Wrap(types.ErrInvalidSaltLength, "salt length must be [60, 80]").Error())
+	s.Require().EqualError(
+		voteMsgShortSalt.ValidateBasic(),
+		sdkerrors.Wrap(types.ErrInvalidSaltLength, "salt length must be [60, 80]").Error(),
+	)
 	s.Require().NoError(voteMsgInvalidRate.ValidateBasic())
 
 	// Flattened acceptList symbols to make checks easier
