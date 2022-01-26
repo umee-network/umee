@@ -74,7 +74,8 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	zeroExchangeRates := "foo:0.0,bar:1232.132"
 	negativeExchangeRates := "foo:-1234.5,bar:1232.132"
 	overFlowExchangeRates := "foo:1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0,bar:1232.132"
-	validSalt := "111111222222333333444444555555666666777777888888999999000000"
+	validSalt := "815b67e86196b9f4ef4d6cd0ffe50b7ab934d700a84420ba92ac312234aac83ed6ec231707469689"
+	saltWithColon := "cb5888a54d16862ced872f423606b1ba8815aeb0b96bdbe4defd76222dfd:"
 	tests := []struct {
 		voter         sdk.AccAddress
 		salt          string
@@ -88,6 +89,7 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 		{addrs[0], validSalt, overFlowExchangeRates, false},
 		{sdk.AccAddress{}, validSalt, exchangeRates, false},
 		{addrs[0], "", exchangeRates, false},
+		{addrs[0], saltWithColon, exchangeRates, false},
 	}
 
 	for i, tc := range tests {
