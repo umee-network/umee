@@ -6,4 +6,4 @@ bin/build-dist
 # pack it into the images
 packer init umee-node-dist.pkr.hcl
 export PKR_VAR_git_sha="$GITHUB_SHA"
-packer build -parallel-builds=1 umee-node-dist.pkr.hcl
+packer build -parallel-builds=2 umee-node-dist.pkr.hcl
