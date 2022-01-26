@@ -5,10 +5,12 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
+	abci "github.com/tendermint/tendermint/abci/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
@@ -22,15 +24,17 @@ import (
 type SimTestSuite struct {
 	suite.Suite
 
-	app *umeeappbeta.UmeeApp
-	ctx sdk.Context
+	app    *umeeappbeta.UmeeApp
+	simApp *simapp.SimApp
+	ctx    sdk.Context
 }
 
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	s.app = umeeappbeta.Setup(s.T(), checkTx, 1)
-	s.ctx = s.app.BaseApp.NewContext(checkTx, tmproto.Header{
+	s.simApp = simapp.Setup(checkTx)
+	s.app = umeeappbeta.Setup(s.T(), false, 1)
+	s.ctx = s.app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 	})
@@ -89,6 +93,35 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
 	}
+}
+
+// TestWeightedOperations tests the weights of the operations.
+func (s *SimTestSuite) TestSimulateMsgLendAsset() {
+	// cdc := s.app.AppCodec()
+	// appParams := make(simtypes.AppParams)
+
+	// weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper)
+
+	// setup 3 accounts
+	r := rand.New(rand.NewSource(1))
+	accs := s.getTestingAccounts(r, 3)
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgLendAsset(s.app.AccountKeeper, s.app.BankKeeper)
+	// test failing for check signature ??
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "") // s.ctx.ChainID()
+	s.Require().NoError(err)
+
+	fmt.Print(operationMsg, futureOperations)
+
+	// var msg types.MsgLendAsset
+	// types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	// s.Require().True(operationMsg.OK)
+	// s.Require().Equal("cosmos1ghekyjucln7y67ntx7cf27m9dpuxxemn4c8g4r", msg.Lender)
+	// s.Require().Equal("cosmos1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7u4x9a0", msg.Amount.String())
+	// s.Require().Len(futureOperations, 0)
 }
 
 func TestSimTestSuite(t *testing.T) {
