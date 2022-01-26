@@ -79,6 +79,8 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
 	salt, err := GenerateSalt(40)
 	s.Require().NoError(err)
+	shortSalt, err := GenerateSalt(19)
+	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
 
@@ -93,6 +95,12 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		Salt:          salt,
 		ExchangeRates: ratesStr,
 	}
+	voteMsgShortSalt := &types.MsgAggregateExchangeRateVote{
+		Feeder:        addr.String(),
+		Validator:     valAddr.String(),
+		Salt:          shortSalt,
+		ExchangeRates: ratesStr,
+	}
 	voteMsgInvalidRate := &types.MsgAggregateExchangeRateVote{
 		Feeder:        addr.String(),
 		Validator:     valAddr.String(),
@@ -103,6 +111,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	// Run ValidateBasics
 	s.Require().NoError(prevoteMsg.ValidateBasic())
 	s.Require().NoError(voteMsg.ValidateBasic())
+	s.Require().EqualError(voteMsgShortSalt.ValidateBasic(), sdkerrors.Wrap(types.ErrInvalidSaltLength, "salt length must be [60, 80]").Error())
 	s.Require().NoError(voteMsgInvalidRate.ValidateBasic())
 
 	// Flattened acceptList symbols to make checks easier
