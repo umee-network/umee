@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/stretchr/testify/suite"
 	"github.com/umee-network/umee/x/oracle/types"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
@@ -18,8 +20,7 @@ func GenerateSalt(length int) (string, error) {
 		return "", fmt.Errorf("failed to generate salt: zero length")
 	}
 
-	n := length / 2
-	bytes := make([]byte, n)
+	bytes := make([]byte, length)
 
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
@@ -32,7 +33,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 	ctx := s.ctx
 
 	exchangeRatesStr := "123.2:UMEE"
-	salt, err := GenerateSalt(2)
+	salt, err := GenerateSalt(40)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 
@@ -41,30 +42,34 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidHash)
-	s.Require().Error(err)
-
 	invalidFeeder := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    "invalid_feeder",
 		Validator: valAddr.String(),
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidFeeder)
-	s.Require().Error(err)
-
 	invalidValidator := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: "invalid_val",
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidValidator)
-	s.Require().Error(err)
-
 	validMsg := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
+
+	// Run ValidateBasics
+	s.Require().Error(invalidHash.ValidateBasic())
+	s.Require().Error(invalidFeeder.ValidateBasic())
+	s.Require().Error(invalidValidator.ValidateBasic())
+	s.Require().NoError(validMsg.ValidateBasic())
+
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidHash)
+	s.Require().Error(err)
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidFeeder)
+	s.Require().Error(err)
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidValidator)
+	s.Require().Error(err)
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), validMsg)
 	s.Require().NoError(err)
 }
@@ -74,7 +79,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 
 	ratesStr := "umee:123.2"
 	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
-	salt, err := GenerateSalt(2)
+	salt, err := GenerateSalt(40)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
@@ -96,6 +101,11 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		Salt:          salt,
 		ExchangeRates: ratesStrInvalidCoin,
 	}
+
+	// Run ValidateBasics
+	s.Require().NoError(prevoteMsg.ValidateBasic())
+	s.Require().NoError(voteMsg.ValidateBasic())
+	s.Require().NoError(voteMsgInvalidRate.ValidateBasic())
 
 	// Flattened acceptList symbols to make checks easier
 	acceptList := s.app.OracleKeeper.GetParams(ctx).AcceptList
@@ -150,9 +160,15 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), &types.MsgDelegateFeedConsent{
+	msg := &types.MsgDelegateFeedConsent{
 		Operator: valAddr.String(),
 		Delegate: feederAddr.String(),
-	})
+	}
+	s.Require().NoError(msg.ValidateBasic())
+	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), msg)
 	s.Require().NoError(err)
+}
+
+func TestKeeperTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
 }

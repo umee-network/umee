@@ -145,9 +145,11 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 		}
 	}
 
-	if len(msg.Salt) > 4 || len(msg.Salt) < 1 {
-		return sdkerrors.Wrap(ErrInvalidSaltLength, "salt length must be [1, 4]")
+	if len(msg.Salt) > 80 || len(msg.Salt) < 60 {
+		return sdkerrors.Wrap(ErrInvalidSaltLength, "salt length must be [60, 80]")
 	}
+	// Will panic if salt is invalid
+	GetAggregateVoteHash(msg.Salt, msg.ExchangeRates, sdk.ValAddress(msg.Validator))
 
 	return nil
 }

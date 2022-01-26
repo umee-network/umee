@@ -229,7 +229,7 @@ func TestGenerateSalt(t *testing.T) {
 	require.Error(t, err)
 	require.Empty(t, salt)
 
-	salt, err = GenerateSalt(5)
+	salt, err = GenerateSalt(40)
 	require.NoError(t, err)
 	require.NotEmpty(t, salt)
 }
