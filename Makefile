@@ -82,6 +82,15 @@ install: go.sum
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
+build-beta: go.sum
+	UMEE_ENABLE_BETA=true $(MAKE) build
+
+install-beta: go.sum
+	UMEE_ENABLE_BETA=true $(MAKE) install
+
+build-linux-beta: go.sum
+	UMEE_ENABLE_BETA=true $(MAKE) build-linux
+
 go-mod-cache: go.sum
 	@echo "--> Download go modules to local cache"
 	@go mod download
@@ -94,7 +103,7 @@ clean:
 	@echo "--> Cleaning..."
 	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
 
-.PHONY: install build build-linux clean
+.PHONY: install build build-linux build-beta install-beta build-linux-beta clean
 
 ###############################################################################
 ##                                  Docker                                   ##
