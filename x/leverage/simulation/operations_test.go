@@ -11,7 +11,6 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
@@ -33,11 +32,8 @@ type SimTestSuite struct {
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
 	s.simApp = simapp.Setup(checkTx)
-	s.app = umeeappbeta.Setup(s.T(), false, 1)
-	s.ctx = s.app.BaseApp.NewContext(false, tmproto.Header{
-		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  1,
-	})
+	s.app = umeeappbeta.Setup(s.T(), checkTx, 1)
+	s.ctx = s.app.BaseApp.NewContext(checkTx, tmproto.Header{})
 }
 
 // getTestingAccounts generates
