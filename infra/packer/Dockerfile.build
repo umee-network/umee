@@ -1,7 +1,7 @@
-FROM ubuntu:focal-20211006
+FROM ubuntu:20.04
 
 # Install system dependencies
-RUN apt update \
+RUN apt-get update \
   && apt install -y --no-install-recommends \
     ca-certificates \
     curl \
