@@ -46,7 +46,7 @@ build {
       , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | tee /etc/apt/trusted.gpg.d/caddy-stable.asc"
       , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list"
       , "apt update"
-      , "sleep 5",
+      , "sleep 5"
       , "apt install -y --no-install-recommends caddy"
       , "apt dist-upgrade -y"
       , "rm -rf /var/lib/{apt,dpkg,cache,log}/"
