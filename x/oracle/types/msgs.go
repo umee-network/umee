@@ -148,7 +148,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	}
 
 	if len(msg.Salt) > 80 || len(msg.Salt) < 60 {
-		return sdkerrors.Wrap(ErrInvalidSaltLength, "salt length must be [60, 80]")
+		return ErrInvalidSaltLength
 	}
 	_, err = AggregateVoteHashFromHexString(msg.Salt)
 	if err != nil {
