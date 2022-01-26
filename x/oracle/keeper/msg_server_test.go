@@ -56,12 +56,6 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 		Validator: valAddr.String(),
 	}
 
-	// Run ValidateBasics
-	s.Require().Error(invalidHash.ValidateBasic())
-	s.Require().Error(invalidFeeder.ValidateBasic())
-	s.Require().Error(invalidValidator.ValidateBasic())
-	s.Require().NoError(validMsg.ValidateBasic())
-
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidHash)
 	s.Require().Error(err)
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidFeeder)
@@ -107,12 +101,6 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 		Salt:          salt,
 		ExchangeRates: ratesStrInvalidCoin,
 	}
-
-	// Run ValidateBasics
-	s.Require().NoError(prevoteMsg.ValidateBasic())
-	s.Require().NoError(voteMsg.ValidateBasic())
-	s.Require().EqualError(voteMsgShortSalt.ValidateBasic(), types.ErrInvalidSaltLength.Error())
-	s.Require().NoError(voteMsgInvalidRate.ValidateBasic())
 
 	// Flattened acceptList symbols to make checks easier
 	acceptList := s.app.OracleKeeper.GetParams(ctx).AcceptList
@@ -167,11 +155,9 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	msg := &types.MsgDelegateFeedConsent{
+	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), &types.MsgDelegateFeedConsent{
 		Operator: valAddr.String(),
 		Delegate: feederAddr.String(),
-	}
-	s.Require().NoError(msg.ValidateBasic())
-	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), msg)
+	})
 	s.Require().NoError(err)
 }
