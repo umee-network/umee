@@ -25,7 +25,7 @@ const (
 	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"
 	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"
 
-	salt = "1234"
+	salt = "111111222222333333444444555555666666777777888888999999000000"
 )
 
 var (
