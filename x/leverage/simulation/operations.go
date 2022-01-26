@@ -16,18 +16,18 @@ import (
 
 // Default simulation operation weights for leverage messages
 const (
-	DefaultWeightMsgLendAsset     int = 100
-	DefaultWeightMsgWithdrawAsset int = 85
-	DefaultWeightMsgBorrowAsset   int = 80
-	DefaultWeightMsgSetCollateral int = 60
-	DefaultWeightMsgRepayAsset    int = 70
-	DefaultWeightMsgLiquidate     int = 75
-	OpWeightMsgLendAsset              = "op_weight_msg_lend_asset"
-	OpWeightMsgWithdrawAsset          = "op_weight_msg_withdraw_asset"
-	OpWeightMsgBorrowAsset            = "op_weight_msg_borrow_asset"
-	OpWeightMsgSetCollateral          = "op_weight_msg_set_collateral"
-	OpWeightMsgRepayAsset             = "op_weight_msg_repay_asset"
-	OpWeightMsgLiquidate              = "op_weight_msg_liquidate"
+	DefaultWeightMsgLendAsset       int = 100
+	DefaultWeightMsgWithdrawAsset   int = 85
+	DefaultWeightMsgBorrowAsset     int = 80
+	DefaultWeightMsgSetCollateral   int = 60
+	DefaultWeightMsgRepayAsset      int = 70
+	DefaultWeightMsgLiquidate       int = 75
+	OperationWeightMsgLendAsset         = "op_weight_msg_lend_asset"
+	OperationWeightMsgWithdrawAsset     = "op_weight_msg_withdraw_asset"
+	OperationWeightMsgBorrowAsset       = "op_weight_msg_borrow_asset"
+	OperationWeightMsgSetCollateral     = "op_weight_msg_set_collateral"
+	OperationWeightMsgRepayAsset        = "op_weight_msg_repay_asset"
+	OperationWeightMsgLiquidate         = "op_weight_msg_liquidate"
 )
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
@@ -44,32 +44,32 @@ func WeightedOperations(
 		weightMsgRepayAsset    int
 		weightMsgLiquidate     int
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgLendAsset, &weightMsgLend, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgLendAsset, &weightMsgLend, nil,
 		func(_ *rand.Rand) {
 			weightMsgLend = DefaultWeightMsgLendAsset
 		},
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgWithdrawAsset, &weightMsgWithdraw, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgWithdrawAsset, &weightMsgWithdraw, nil,
 		func(_ *rand.Rand) {
 			weightMsgWithdraw = DefaultWeightMsgWithdrawAsset
 		},
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgBorrowAsset, &weightMsgBorrow, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgBorrowAsset, &weightMsgBorrow, nil,
 		func(_ *rand.Rand) {
 			weightMsgBorrow = DefaultWeightMsgBorrowAsset
 		},
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgSetCollateral, &weightMsgSetCollateral, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgSetCollateral, &weightMsgSetCollateral, nil,
 		func(_ *rand.Rand) {
 			weightMsgSetCollateral = DefaultWeightMsgSetCollateral
 		},
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgRepayAsset, &weightMsgRepayAsset, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgRepayAsset, &weightMsgRepayAsset, nil,
 		func(_ *rand.Rand) {
 			weightMsgRepayAsset = DefaultWeightMsgRepayAsset
 		},
 	)
-	appParams.GetOrGenerate(cdc, OpWeightMsgLiquidate, &weightMsgLiquidate, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgLiquidate, &weightMsgLiquidate, nil,
 		func(_ *rand.Rand) {
 			weightMsgLiquidate = DefaultWeightMsgLiquidate
 		},
@@ -202,7 +202,11 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 
 // SimulateMsgSetCollateralSetting tests and runs a single msg send where
 // an account set some denom as collateral.
-func SimulateMsgSetCollateralSetting(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+func SimulateMsgSetCollateralSetting(
+	ak simulation.AccountKeeper,
+	bk types.BankKeeper,
+	lk keeper.Keeper,
+) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
