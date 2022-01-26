@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/stretchr/testify/suite"
 	"github.com/umee-network/umee/x/oracle/types"
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
@@ -167,8 +165,4 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 	s.Require().NoError(msg.ValidateBasic())
 	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), msg)
 	s.Require().NoError(err)
-}
-
-func TestKeeperTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -240,4 +241,8 @@ func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
 	app.OracleKeeper.DeleteExchangeRate(ctx, exchangeRate)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
 	s.Require().Error(err)
+}
+
+func TestKeeperTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
 }
