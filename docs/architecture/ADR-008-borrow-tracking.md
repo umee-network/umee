@@ -26,7 +26,7 @@ Chain state will now store an `InterestScalar` for each accepted asset denom, wh
 
 Instead of directly storing `sdk.Int BorrowedAmount` for each of a user's borrowed denoms, state records their `sdk.Dec AdjustedBorrow`, respecting the following definition:
 
-> `AdjustedBorrow(denom,user)` * `InterestScalar(denom)` = `BorrowedAmount(denom,user)`
+> `AdjustedBorrow(denom, address)` * `InterestScalar(denom)` = `BorrowedAmount(denom, address)`
 
 State will additionally store a value `TotalAdjustedBorrows` for each denom, which tracks the sum of all users' adjusted borrows in the chosen denomination.
 It must increase or decrease every time assets are borrowed or repaid (including bad debt repayment), but is not modified when interest accrues.
