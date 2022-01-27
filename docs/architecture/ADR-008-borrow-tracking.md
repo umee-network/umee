@@ -29,7 +29,7 @@ Instead of directly storing `sdk.Int BorrowedAmount` for each of a user's borrow
 > `AdjustedBorrow(denom,user)` * `InterestScalar(denom)` = `BorrowedAmount(denom,user)`
 
 State will additionally store a value `TotalAdjustedBorrows` for each denom, which tracks the sum of all users' adjusted borrows in the chosen denomination.
-It must increase or decrease every time assets are borrowed or repaid (including bad debt repayment), but it not modified when interest accrues.
+It must increase or decrease every time assets are borrowed or repaid (including bad debt repayment), but is not modified when interest accrues.
 
 This change in borrow storage will be opaque to other parts of the leverage module: functions like `GetBorrow`, `GetTotalBorrows`, and `SetBorrow` will use `InterestScalar` internally, such that their inputs and outputs contain the real borrowed amount.
 
