@@ -45,7 +45,7 @@ This decision mainly updates existing features, rather than adding new ones. The
 - Remove `InterestEpoch`
 
 **State:**
-- Add `InterestScalar` and `TotalAdjustedBorrows` to state, and add `Get/Set` functions 
+- Add `InterestScalar` and `TotalAdjustedBorrows` to state, and add `Get/Set` functions
 - Remove `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` from state, and remove `Set` functions
 
 **Getters:**
