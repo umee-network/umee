@@ -89,10 +89,6 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
 // GetExchangeRateBase gets the consensus exchange rate of an asset
 // in the base denom (e.g. ATOM -> uatom)
 func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	if strings.Contains(strings.ToUpper(denom), types.USDDenom) {
-		return sdk.OneDec(), nil
-	}
-
 	var symbol string
 
 	// Translate the base denom -> symbol
