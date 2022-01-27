@@ -2,7 +2,13 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
+
+// AccountKeeper defines the expected account keeper used for leverage simulations (noalias)
+type AccountKeeper interface {
+	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
+}
 
 // BankKeeper defines the expected x/bank keeper interface.
 type BankKeeper interface {
