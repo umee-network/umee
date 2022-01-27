@@ -13,6 +13,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/app"
 	umeeappbeta "github.com/umee-network/umee/app/beta"
+	"github.com/umee-network/umee/x/leverage"
 	"github.com/umee-network/umee/x/leverage/simulation"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -28,8 +29,8 @@ type SimTestSuite struct {
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	s.app = umeeappbeta.Setup(s.T(), checkTx, 1)
-	s.ctx = s.app.BaseApp.NewContext(checkTx, tmproto.Header{})
+	betaApp := umeeappbeta.Setup(s.T(), checkTx, 1)
+	ctx := betaApp.NewContext(checkTx, tmproto.Header{})
 
 	// Note: Setting umee collateral weight to 1.0 to allow lender to borrow heavily
 	umeeToken := types.Token{
@@ -42,11 +43,18 @@ func (s *SimTestSuite) SetupTest() {
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+
+	betaApp.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
+	betaApp.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("0.9"))
+	betaApp.OracleKeeper.SetExchangeRate(ctx, umeeapp.DisplayDenom, sdk.OneDec())
+	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
+
+	s.app = betaApp
+	s.ctx = ctx
 }
 
-// getTestingAccounts generates
-func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int) []simtypes.Account {
+// getTestingAccounts generates accounts with stake and umee balance
+func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAccount simtypes.Account)) []simtypes.Account {
 	accounts := simtypes.RandomAccounts(r, n)
 
 	initAmt := sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
@@ -60,6 +68,7 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int) []simtypes.Accoun
 		s.Require().NoError(
 			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), initCoins),
 		)
+		cb(account)
 	}
 
 	return accounts
@@ -74,7 +83,7 @@ func (s *SimTestSuite) TestWeightedOperations() {
 
 	// setup 3 accounts
 	r := rand.New(rand.NewSource(1))
-	accs := s.getTestingAccounts(r, 3)
+	accs := s.getTestingAccounts(r, 3, func(acc simtypes.Account) {})
 
 	expected := []struct {
 		weight     int
@@ -100,32 +109,168 @@ func (s *SimTestSuite) TestWeightedOperations() {
 	}
 }
 
-// TestWeightedOperations tests the weights of the operations.
 func (s *SimTestSuite) TestSimulateMsgLendAsset() {
-	// cdc := s.app.AppCodec()
-	// appParams := make(simtypes.AppParams)
-
-	// weightesOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper)
-
-	// setup 3 accounts
 	r := rand.New(rand.NewSource(1))
-	accs := s.getTestingAccounts(r, 3)
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
 	op := simulation.SimulateMsgLendAsset(s.app.AccountKeeper, s.app.BankKeeper)
-	// test failing for check signature ??
-	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "") // s.ctx.ChainID()
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
-
-	// fmt.Print(operationMsg, futureOperations)
 
 	var msg types.MsgLendAsset
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
-	// s.Require().Equal("cosmos1ghekyjucln7y67ntx7cf27m9dpuxxemn4c8g4r", msg.Lender)
-	// s.Require().Equal("cosmos1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7u4x9a0", msg.Amount.String())
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
+	s.Require().Equal(types.EventTypeLoanAsset, msg.Type())
+	s.Require().Equal("23872177uumee", msg.Amount.String())
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
+	r := rand.New(rand.NewSource(1))
+	lendValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, lendValue)
+		if err != nil {
+			s.Require().NoError(err)
+		}
+
+		s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true)
+		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendValue)
+	})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgWithdrawAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgWithdrawAsset
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
+	s.Require().Equal(types.EventTypeWithdrawLoanedAsset, msg.Type())
+	s.Require().Equal("73u/uumee", msg.Amount.String())
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
+	r := rand.New(rand.NewSource(1))
+	lendValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, lendValue)
+		if err != nil {
+			s.Require().NoError(err)
+		}
+
+		s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true)
+		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendValue)
+	})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgBorrowAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgBorrowAsset
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
+	s.Require().Equal(types.EventTypeBorrowAsset, msg.Type())
+	s.Require().Equal("65uumee", msg.Amount.String())
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgSetCollateralSetting() {
+	r := rand.New(rand.NewSource(1))
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgSetCollateralSetting(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgSetCollateral
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
+	s.Require().Equal(types.EventTypeSetCollateralSetting, msg.Type())
+	s.Require().Equal(true, msg.Enable)
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
+	r := rand.New(rand.NewSource(1))
+	borrowValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(190))
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, borrowValue)
+		if err != nil {
+			s.Require().NoError(err)
+		}
+
+		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true))
+		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, borrowValue.AddAmount(sdk.NewInt(50)))
+		s.Require().NoError(s.app.LeverageKeeper.BorrowAsset(s.ctx, fundedAccount.Address, borrowValue))
+	})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgRepayAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgRepayAsset
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
+	s.Require().Equal(types.EventTypeRepayBorrowedAsset, msg.Type())
+	s.Require().Equal("48uumee", msg.Amount.String())
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgLiquidate() {
+	r := rand.New(rand.NewSource(1))
+	borrowValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(190))
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, borrowValue)
+		if err != nil {
+			s.Require().NoError(err)
+		}
+
+		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true))
+		s.Require().NoError(s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, borrowValue))
+		s.Require().NoError(s.app.LeverageKeeper.SetBorrow(s.ctx, fundedAccount.Address, borrowValue))
+	})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgLiquidate
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea", msg.Liquidator)
+	s.Require().Equal("umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea", msg.Borrower)
+	s.Require().Equal("u/uumee", msg.RewardDenom)
+	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
+	s.Require().Equal("65uumee", msg.Repayment.String())
 	s.Require().Len(futureOperations, 0)
 }
 
