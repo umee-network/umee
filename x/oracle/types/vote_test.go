@@ -30,4 +30,8 @@ func TestParseExchangeRateTuples(t *testing.T) {
 	negativeCoinsWithValid := "uumee:-1234.5,uatom:123.1"
 	_, err = ParseExchangeRateTuples(negativeCoinsWithValid)
 	require.Error(t, err)
+
+	multiplePricesPerRate := "uumee:123: uumee:456,uusdc:789"
+	_, err = ParseExchangeRateTuples(multiplePricesPerRate)
+	require.Error(t, err)
 }
