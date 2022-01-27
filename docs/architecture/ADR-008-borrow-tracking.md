@@ -57,7 +57,7 @@ This decision mainly updates existing features, rather than adding new ones. The
 - Modify `SetBorrow(addr,denom)` to use `InterestScalar` and a stored `AdjustedBorrow`, and to additionally update `TotalAdjustedBorrows` based on the difference from the previous value (calls get before set.)
 
 **Genesis:**
-- Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, and have it store the new `sdk.Dec`
+- Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, with `Amount` field changing to `sdk.Dec` from `sdk.Int`
 
 **Invariants:**
 - Add invariant which checks `TotalAdjustedBorrows` against the total of all `AdjustedBorrow` returned by `GetAllBorrows()`
