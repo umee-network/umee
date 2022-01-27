@@ -22,7 +22,7 @@ This design proposal seeks to modify how borrows are stored, in order to achieve
 
 ## Decision
 
-Chain state will now store an `InterestScalar` for each accepted asset denom, which starts at `1.0` and increases every time interest would accrue on borrows of that denom.
+Chain state will now store an `InterestScalar` for each accepted asset denom, which starts at `1.0` and increases multiplicatively every time interest would accrue on borrows of that denom.
 
 Instead of directly storing `sdk.Int BorrowedAmount` for each of a user's borrowed denoms, state records their `sdk.Dec AdjustedBorrow`, respecting the following definition:
 
