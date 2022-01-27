@@ -60,7 +60,7 @@ This decision mainly updates existing features, rather than adding new ones. The
 - Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, with `Amount` field changing to `sdk.Dec` from `sdk.Int`
 
 **Invariants:**
-- Add invariant which checks `TotalAdjustedBorrows` against the total of all `AdjustedBorrow` returned by `GetAllBorrows()`
+- Add invariant which checks `TotalAdjustedBorrows` against the sum of all `AdjustedBorrow` returned by `GetAllBorrows()`
 
 ## Consequences
 
