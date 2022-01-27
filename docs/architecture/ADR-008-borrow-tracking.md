@@ -16,7 +16,7 @@ One of the more computationally expensive operations in Umee is "iterate over al
 - When accruing interest (dynamic interest requires borrow utilization, and all borrows must be modified)
 - When deriving uToken exchange rates (require's a denomination's total borrowed)
 
-In order to reduce the perofrmance impact of such iteration, `InterestEpoch` was created, so that such calculations only occurred every N blocks (e.g. 100).
+In order to reduce the performance impact of such iteration, `InterestEpoch` was created, so that such calculations only occurred every N blocks (e.g. 100).
 
 This design proposal seeks to modify how borrows are stored, in order to achieve the same functionality without ever iterating over all borrows. As a result, `InterestEpoch` can also be eliminated, effectively happening every block.
 
