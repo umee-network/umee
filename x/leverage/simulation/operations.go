@@ -143,12 +143,12 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coin, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawLoanedAsset, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgWithdrawAsset(from.Address, coin)
+		msg := types.NewMsgWithdrawAsset(from.Address, uToken)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -175,16 +175,16 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, uCoin, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "skip all transfers"), nil, nil
 		}
 
-		coin, err := lk.ExchangeUToken(ctx, uCoin)
+		token, err := lk.ExchangeUToken(ctx, uToken)
 		if err != nil {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "error exchange uToken"), nil, err
 		}
-		msg := types.NewMsgBorrowAsset(from.Address, coin)
+		msg := types.NewMsgBorrowAsset(from.Address, token)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -215,12 +215,12 @@ func SimulateMsgSetCollateralSetting(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coin, skip := randomSpendableFields(r, ctx, accs, bk)
+		from, token, skip := randomSpendableFields(r, ctx, accs, bk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSetCollateralSetting, "skip all transfers"), nil, nil
 		}
 
-		uDenom := lk.FromTokenToUTokenDenom(ctx, coin.Denom)
+		uDenom := lk.FromTokenToUTokenDenom(ctx, token.Denom)
 		enable := lk.GetCollateralSetting(ctx, from.Address.Bytes(), uDenom)
 		msg := types.NewMsgSetCollateral(from.Address, uDenom, !enable)
 
@@ -249,16 +249,16 @@ func SimulateMsgRepayAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk 
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, uCoin, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepayBorrowedAsset, "skip all transfers"), nil, nil
 		}
 
-		coin, err := lk.ExchangeUToken(ctx, uCoin)
+		token, err := lk.ExchangeUToken(ctx, uToken)
 		if err != nil {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepayBorrowedAsset, "error exchange uToken"), nil, err
 		}
-		msg := types.NewMsgRepayAsset(from.Address, coin)
+		msg := types.NewMsgRepayAsset(from.Address, token)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -285,17 +285,17 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		liquidator, borrower, uRepaymentCoin, skip := randomLiquidateFields(r, ctx, accs, lk)
+		liquidator, borrower, uRepaymentToken, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
 		}
 
-		repaymentCoin, err := lk.ExchangeUToken(ctx, uRepaymentCoin)
+		repaymentToken, err := lk.ExchangeUToken(ctx, uRepaymentToken)
 		if err != nil {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "error in exchange token"), nil, err
 		}
 
-		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentCoin, uRepaymentCoin.Denom)
+		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, uRepaymentToken.Denom)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -326,39 +326,39 @@ func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 // randomSpendableFields returns an random account and coins to spend in the simulation.
 func randomSpendableFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
-) (acc simtypes.Account, spendableCoin sdk.Coin, skip bool) {
+) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	spendableBalances := bk.SpendableCoins(ctx, acc.Address)
 
-	spendableCoins := simtypes.RandSubsetCoins(r, spendableBalances)
-	if spendableCoins.Empty() {
+	spendableTokens := simtypes.RandSubsetCoins(r, spendableBalances)
+	if spendableTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, spendableCoins), false
+	return acc, randomCoin(r, spendableTokens), false
 }
 
 // randomCollateralFields returns an random account and coins to withdraw in the simulation.
 func randomCollateralFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
-) (acc simtypes.Account, withdrawCoin sdk.Coin, skip bool) {
+) (acc simtypes.Account, withdrawToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	collateralBalances := lk.GetBorrowerCollateral(ctx, acc.Address)
 
-	withdrawCoins := simtypes.RandSubsetCoins(r, collateralBalances)
-	if withdrawCoins.Empty() {
+	withdrawTokens := simtypes.RandSubsetCoins(r, collateralBalances)
+	if withdrawTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, withdrawCoins), false
+	return acc, randomCoin(r, withdrawTokens), false
 }
 
 // randomLiquidateFields returns two random account and coins to liquidate in the simulation.
 func randomLiquidateFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
-) (liquidator simtypes.Account, borrower simtypes.Account, repaymentCoin sdk.Coin, skip bool) {
+) (liquidator simtypes.Account, borrower simtypes.Account, repaymentToken sdk.Coin, skip bool) {
 	idxLiquidator := r.Intn(len(accs) - 1)
 
 	liquidator = accs[idxLiquidator]
@@ -366,10 +366,10 @@ func randomLiquidateFields(
 
 	collateralBalances := lk.GetBorrowerCollateral(ctx, borrower.Address)
 
-	repaymentCoins := simtypes.RandSubsetCoins(r, collateralBalances)
-	if repaymentCoins.Empty() {
+	repaymentTokens := simtypes.RandSubsetCoins(r, collateralBalances)
+	if repaymentTokens.Empty() {
 		return liquidator, borrower, sdk.Coin{}, true
 	}
 
-	return liquidator, borrower, randomCoin(r, repaymentCoins), false
+	return liquidator, borrower, randomCoin(r, repaymentTokens), false
 }
