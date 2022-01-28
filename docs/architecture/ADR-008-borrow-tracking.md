@@ -89,6 +89,12 @@ The following example scenario should help clarify the meaning of the `AdjustedB
 > Now Alice wished to borrow an additional `500 ured`, so whe will owe a total of 2000. Her adjusted borrow is increased by the newly borrowed amount divided by InterestScalar: `AdjustedBorrow(alice,"ured") = 1000.000 + (500 / 1.5) = 1333.333`.
 >
 > In addition, `TotalAdustedBorrow("ured") = 3000.000 + (500 / 1.5) = 3333.333` reflects the increase. Note that the total `ured` borrowed across the system is now `3333.333 * 1.5 = 4500 + 500 = 5000`.
+> 
+> Finally, Bob will attempt to repay 1000 of his `3000 ured` owed. Note that `AdjustedBorrow(bob,"ured") = 2000.000` before the transaction.
+>
+> After Bob makes his repayment, `AdjustedBorrow(bob,"ured") = 2000.000 - (1000 / 1.5) = 1333.333` and `TotalAdjustedBorrow("ured") = 3333.333 - (1000 / 1.5) = 2666.666`. The same amount is subtracted from both quantities.
+
+The scenerio above illustrates how borrowing, repayment, and interest accrual work with `InterestScalar`. Accruing interest and calculating total borrowed amounts of a token denom do not require iterating over all borrows, as long as `AdjustedBorrow` is used and `TotalAdjustedBorrow` is kept up to date on borrow and repay.
 
 ## Consequences
 
