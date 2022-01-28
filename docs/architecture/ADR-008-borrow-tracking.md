@@ -68,6 +68,28 @@ This decision mainly updates existing features, rather than adding new ones. The
 
 - Add invariant which checks `TotalAdjustedBorrows` against the sum of all `AdjustedBorrow` returned by `GetAllBorrows()`
 
+### Example Scenarios
+
+The following example scenario should help clarify the meaning of the `AdjustedBorrow` and `InterestScalar`:
+
+> Assume a fresh system, containing a token denom `ured` which has never been borrowed or accrued interest before.
+>
+> By definition, `TotalAdjustedBorrowed("ured") = 0.0` and `InterestScalar("ured") = 1.0`
+>
+> User `Alice` borrows `1000 ured`. This information is stored in state as `AdjustedBorrow(alice,"ured") = 1000.000`, because adjusted borrow amount is real borrow amount divided by interest scalar. As a result, `TotalAdjustedBorrow("ured") = 1000.000`. Interest scalar is unchanged by borrowing.
+>
+> User `Bob` also borrows `2000 ured`, which is stored as  `AdjustedBorrow(alice,"ured") = 2000.000`. As a result, `TotalAdjustedBorrow("ured") = 3000.000`. Interest scalar is unchanged.
+>
+> Suppose that the interest rate for `ured` borrows works out to be `0.0003% per block`. On the next EndBlock, `InterestScalar("ured") *= 1.000003`. Both `AdjustedBorrow` values and `TotalAdjustedBorrow` are unchanged.
+>
+> Fast forward without any additional borrow or repay activity, to where `InterestScalar("ured") = 1.5`. Due to interest accrued, Alice's real borrowed amount is `1500 ured`, and Bob's is `3000 ured`. Total borrowed acroos the system is thus `4500 ured`. This has been accomplished by changing InterestScalar, so `AdjustedBorrow` and `TotalAdjustedBorrow` values are unchanged.
+>
+> For example, `AdjustedBorrow(alice,"ured") == 1000.000`, so to get alice's real borrowed amount, `GetBorrow(alice,"ured") = 1000.000 * 1.5 = 1500ured`.
+>
+> Now Alice wished to borrow an additional `500 ured`, so whe will owe a total of 2000. Her adjusted borrow is increased by the newly borrowed amount divided by InterestScalar: `AdjustedBorrow(alice,"ured") = 1000.000 + (500 / 1.5) = 1333.333`.
+>
+> In addition, `TotalAdustedBorrow("ured") = 3000.000 + (500 / 1.5) = 3333.333` reflects the increase. Note that the total `ured` borrowed across the system is now `3333.333 * 1.5 = 4500 + 500 = 5000`.
+
 ## Consequences
 
 This design change should address our lingering tradeoff between performance and `InterestEpoch`
