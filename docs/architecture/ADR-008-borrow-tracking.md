@@ -42,24 +42,30 @@ Additionally, the values `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` will b
 This decision mainly updates existing features, rather than adding new ones. The following changes are required to update the leverage module:
 
 **Params:**
+
 - Remove `InterestEpoch`
 
 **State:**
+
 - Add `InterestScalar` and `TotalAdjustedBorrows` to state, and add `Get/Set` functions
 - Remove `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` from state, and remove `Set` functions
 
 **Getters:**
+
 - Modify `Get` functions for `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` to calculate values in real time.
 - Modify `GetBorrow(addr,denom)`, `GetBorrowerBorrows(addr)`, and `GetAllBorrows()` to use `InterestScalar` and `AdjustedBorrow`
 - Modify `GetTotalBorrows(denom)` to use `InterestScalar` and `TotalAdjustedBorrows`
 
 **Setters:**
+
 - Modify `SetBorrow(addr,denom)` to use `InterestScalar` and a stored `AdjustedBorrow`, and to additionally update `TotalAdjustedBorrows` based on the difference from the previous value (calls get before set.)
 
 **Genesis:**
+
 - Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, with `Amount` field changing to `sdk.Dec` from `sdk.Int`
 
 **Invariants:**
+
 - Add invariant which checks `TotalAdjustedBorrows` against the sum of all `AdjustedBorrow` returned by `GetAllBorrows()`
 
 ## Consequences
@@ -67,11 +73,13 @@ This decision mainly updates existing features, rather than adding new ones. The
 This design change should address our lingering tradeoff between performance and `InterestEpoch`
 
 ### Positive
+
 - Borrow totals and borrow utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
 - Periodic functions can now take place every block instead of every `InterestEpoch` blocks
 - Quantities like uToken exchange rates and lend APYs now update instantly to new borrow and lend activity, even between multiple transactions within the same block.
 
 ### Negative
+
 - The concepts of `AdjustedBorrow` and `InterestScalar` are introduced, increasing conceptual complexity
 
 ## References
