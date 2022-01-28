@@ -198,14 +198,6 @@ func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	s.Require().Equal(rate, sdk.OneDec())
 }
 
-func (s *IntegrationTestSuite) TestGetExchangeRate_USD() {
-	app, ctx := s.app, s.ctx
-
-	rate, err := app.OracleKeeper.GetExchangeRateBase(ctx, "uusd")
-	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
-}
-
 func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
 	app, ctx := s.app, s.ctx
 
