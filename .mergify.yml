@@ -18,20 +18,11 @@ pull_request_rules:
           {{ title }} (#{{ number }})
           {{ body }}
 
-  - name: Backport patches to the release/v0.5.x branch
+  - name: Backport patches to the release/v0.7.x branch
     conditions:
       - base=main
-      - label=S:backport/v0.5.x
+      - label=S:backport/v0.7.x
     actions:
       backport:
         branches:
-          - release/v0.5.x
-
-  - name: Backport patches to the release/v0.6.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v0.6.x
-    actions:
-      backport:
-        branches:
-          - release/v0.6.x
+          - release/v0.7.x
