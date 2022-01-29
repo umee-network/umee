@@ -78,11 +78,11 @@ The following example scenario should help clarify the meaning of the `AdjustedB
 >
 > User `Alice` borrows `1000 ured`. This information is stored in state as `AdjustedBorrow(alice,"ured") = 1000.000`, because adjusted borrow amount is real borrow amount divided by interest scalar. As a result, `TotalAdjustedBorrow("ured") = 1000.000`. Interest scalar is unchanged by borrowing.
 >
-> User `Bob` also borrows `2000 ured`, which is stored as  `AdjustedBorrow(alice,"ured") = 2000.000`. As a result, `TotalAdjustedBorrow("ured") = 3000.000`. Interest scalar is unchanged.
+> User `Bob` also borrows `2000 ured`, which is stored as  `AdjustedBorrow(bob,"ured") = 2000.000`. As a result, `TotalAdjustedBorrow("ured") = 3000.000`. Interest scalar is unchanged.
 >
 > Suppose that the interest rate for `ured` borrows works out to be `0.0003% per block`. On the next EndBlock, `InterestScalar("ured") *= 1.000003`. Both `AdjustedBorrow` values and `TotalAdjustedBorrow` are unchanged.
 >
-> Fast forward without any additional borrow or repay activity, to where `InterestScalar("ured") = 1.5`. Due to interest accrued, Alice's real borrowed amount is `1500 ured`, and Bob's is `3000 ured`. Total borrowed acroos the system is thus `4500 ured`. This has been accomplished by changing InterestScalar, so `AdjustedBorrow` and `TotalAdjustedBorrow` values are unchanged.
+> Fast forward without any additional borrow or repay activity, to where `InterestScalar("ured") = 1.5`. Due to interest accrued, Alice's real borrowed amount is `1500 ured`, and Bob's is `3000 ured`. Total borrowed across the system is thus `4500 ured`. This has been accomplished by changing InterestScalar, so `AdjustedBorrow` and `TotalAdjustedBorrow` values are unchanged.
 >
 > For example, `AdjustedBorrow(alice,"ured") == 1000.000`, so to get alice's real borrowed amount, `GetBorrow(alice,"ured") = 1000.000 * 1.5 = 1500ured`.
 >
