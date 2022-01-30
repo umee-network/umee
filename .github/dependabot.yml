@@ -5,6 +5,7 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+
   - package-ecosystem: gomod
     directory: "/"
     schedule:
@@ -12,7 +13,23 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - alexanderbez
-      - fedekunze
+      - toteki
+      - adamewozniak
+      - facundomedica
+    labels:
+      - "A:Automerge"
+      - "T:Dependencies"
+
+  - package-ecosystem: gomod
+    directory: "/price-feeder"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    reviewers:
+      - alexanderbez
+      - toteki
+      - adamewozniak
+      - facundomedica
     labels:
       - "A:Automerge"
       - "T:Dependencies"
