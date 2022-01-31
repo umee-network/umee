@@ -66,7 +66,7 @@ func (s *SimTestSuite) SetupTest() {
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.87"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
-		Exponent:             5,
+		Exponent:             6,
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
@@ -82,28 +82,25 @@ func (s *SimTestSuite) SetupTest() {
 	s.ctx = ctx
 }
 
-// getTestingAccounts generates accounts with stake and umee balance
+// getTestingAccounts generates accounts with balance in all registered token types
 func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAccount simtypes.Account)) []simtypes.Account {
 	accounts := simtypes.RandomAccounts(r, n)
 
-	initAmt := sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
-	bankCoins := sdk.NewCoins()
+	initAmt := sdk.NewInt(200000000) // 200 * 10^6
 	accCoins := sdk.NewCoins()
 
 	tokens, err := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
 	s.Require().NoError(err)
 
 	for _, token := range tokens {
-		bankCoins = bankCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt))
-		accCoins = accCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt.Sub(sdk.NewInt(200))))
+		accCoins = accCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt))
 	}
 
 	// add coins to the accounts
 	for _, account := range accounts {
 		acc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, account.Address)
 		s.app.AccountKeeper.SetAccount(s.ctx, acc)
-		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, bankCoins))
-		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, types.ModuleName, bankCoins))
+		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, accCoins))
 		s.Require().NoError(
 			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), accCoins),
 		)
