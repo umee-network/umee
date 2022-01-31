@@ -277,12 +277,12 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		liquidator, borrower, repaymentToken, uRewardToken, skip := randomLiquidateFields(r, ctx, accs, lk)
+		liquidator, borrower, repaymentToken, rewardDenom, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, uRewardToken.Denom)
+		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, rewardDenom)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -408,7 +408,7 @@ func randomLiquidateFields(
 	liquidator simtypes.Account,
 	borrower simtypes.Account,
 	repaymentToken sdk.Coin,
-	uRewardToken sdk.Coin,
+	rewardDenom string,
 	skip bool,
 ) {
 	idxLiquidator := r.Intn(len(accs) - 1)
@@ -416,15 +416,15 @@ func randomLiquidateFields(
 	liquidator = accs[idxLiquidator]
 	borrower = accs[idxLiquidator+1]
 
-	uRewardTokens := lk.GetBorrowerCollateral(ctx, borrower.Address)
-	if uRewardTokens.Empty() {
-		return liquidator, borrower, sdk.Coin{}, sdk.Coin{}, true
+	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
+	if collateral.Empty() {
+		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	repaymentTokens := lk.GetBorrowerBorrows(ctx, borrower.Address)
-	if uRewardTokens.Empty() {
-		return liquidator, borrower, sdk.Coin{}, sdk.Coin{}, true
+	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
+	if borrowed.Empty() {
+		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	return liquidator, borrower, randomCoin(r, repaymentTokens), randomCoin(r, uRewardTokens), false
+	return liquidator, borrower, randomCoin(r, borrowed), randomCoin(r, collateral).Denom, false
 }
