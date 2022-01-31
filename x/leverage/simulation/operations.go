@@ -249,16 +249,12 @@ func SimulateMsgRepayAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk 
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, borrowToken, skip := randomBorrowedFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepayBorrowedAsset, "skip all transfers"), nil, nil
 		}
 
-		token, err := lk.ExchangeUToken(ctx, uToken)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepayBorrowedAsset, "error exchange uToken"), nil, err
-		}
-		msg := types.NewMsgRepayAsset(from.Address, token)
+		msg := types.NewMsgRepayAsset(from.Address, borrowToken)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -348,6 +344,21 @@ func randomCollateralFields(
 	}
 
 	return acc, randomCoin(r, uRewardTokens), false
+}
+
+// randomBorrowedFields returns a random account and an sdk.Coin from an open borrow position.
+// It returns skip=true if no borrow position was open.
+func randomBorrowedFields(
+	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
+) (acc simtypes.Account, borrowToken sdk.Coin, skip bool) {
+	acc, _ = simtypes.RandomAcc(r, accs)
+
+	borrowTokens := lk.GetBorrowerBorrows(ctx, acc.Address)
+	if borrowTokens.Empty() {
+		return acc, sdk.Coin{}, true
+	}
+
+	return acc, randomCoin(r, borrowTokens), false
 }
 
 // randomLiquidateFields returns two random accounts to be used as a liquidator
