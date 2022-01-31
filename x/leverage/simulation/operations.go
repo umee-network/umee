@@ -371,10 +371,11 @@ func randomWithdrawFields(
 func getSpendableBalancesUTokens(
 	ctx sdk.Context, addr sdk.AccAddress,
 	bk types.BankKeeper, lk keeper.Keeper,
-) (spendableUTokens sdk.Coins) {
+) sdk.Coins {
+	spendableUTokens := sdk.NewCoins()
 	spendableBalances := bk.SpendableCoins(ctx, addr)
 	for _, spendableBalance := range spendableBalances {
-		if !lk.IsAcceptedUToken(ctx, spendableBalance.Denom) {
+		if lk.IsAcceptedUToken(ctx, spendableBalance.Denom) {
 			continue
 		}
 		spendableUTokens.Add(spendableBalance)
