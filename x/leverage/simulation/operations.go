@@ -143,12 +143,12 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawLoanedAsset, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgWithdrawAsset(from.Address, uToken)
+		msg := types.NewMsgWithdrawAsset(from.Address, withdrawUToken)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -344,6 +344,43 @@ func randomCollateralFields(
 	}
 
 	return acc, randomCoin(r, uRewardTokens), false
+}
+
+// randomWithdrawFields returns a random account and an sdk.Coin from its collateral.
+// It returns skip=true if no collateral was found.
+func randomWithdrawFields(
+	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account,
+	bk types.BankKeeper, lk keeper.Keeper,
+) (acc simtypes.Account, withdrawUToken sdk.Coin, skip bool) {
+	acc, _ = simtypes.RandomAcc(r, accs)
+
+	uRewardTokens := lk.GetBorrowerCollateral(ctx, acc.Address)
+	spendableUTokens := getSpendableBalancesUTokens(ctx, acc.Address, bk, lk)
+
+	uRewardTokens = uRewardTokens.Add(spendableUTokens...)
+	if uRewardTokens.Empty() {
+		return acc, sdk.Coin{}, true
+	}
+
+	return acc, randomCoin(r, uRewardTokens.Add(spendableUTokens...)), false
+}
+
+// getSpendableBalancesUTokens returns all the uTokens
+// from the spendable coins which could be the all the
+// collateral-disabled uTokens (start with "u/").
+func getSpendableBalancesUTokens(
+	ctx sdk.Context, addr sdk.AccAddress,
+	bk types.BankKeeper, lk keeper.Keeper,
+) (spendableUTokens sdk.Coins) {
+	spendableBalances := bk.SpendableCoins(ctx, addr)
+	for _, spendableBalance := range spendableBalances {
+		if !lk.IsAcceptedUToken(ctx, spendableBalance.Denom) {
+			continue
+		}
+		spendableUTokens.Add(spendableBalance)
+	}
+
+	return spendableUTokens
 }
 
 // randomBorrowedFields returns a random account and an sdk.Coin from an open borrow position.
