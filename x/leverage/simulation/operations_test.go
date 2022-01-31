@@ -43,9 +43,34 @@ func (s *SimTestSuite) SetupTest() {
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
+	atomIBCToken := types.Token{
+		BaseDenom:            "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.05"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.3"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("0.9"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.75"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
+	}
+	uabc := types.Token{
+		BaseDenom:            "uabc",
+		ReserveFactor:        sdk.MustNewDecFromStr("0"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.87"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
 
-	betaApp.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
-	betaApp.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("1.1"))
+	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
+
+	for _, token := range tokens {
+		betaApp.LeverageKeeper.SetRegisteredToken(ctx, token)
+		betaApp.LeverageKeeper.SetExchangeRate(ctx, token.BaseDenom, sdk.MustNewDecFromStr("1.1"))
+	}
+
 	betaApp.OracleKeeper.SetExchangeRate(ctx, umeeapp.DisplayDenom, sdk.OneDec())
 	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
 
@@ -58,15 +83,25 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAcc
 	accounts := simtypes.RandomAccounts(r, n)
 
 	initAmt := sdk.TokensFromConsensusPower(200, sdk.DefaultPowerReduction)
-	initCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, initAmt), sdk.NewCoin(umeeapp.BondDenom, initAmt))
+	bankCoins := sdk.NewCoins()
+	accCoins := sdk.NewCoins()
+
+	tokens, err := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
+	s.Require().NoError(err)
+
+	for _, token := range tokens {
+		bankCoins = bankCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt))
+		accCoins = accCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt.Sub(sdk.NewInt(200))))
+	}
 
 	// add coins to the accounts
 	for _, account := range accounts {
 		acc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, account.Address)
 		s.app.AccountKeeper.SetAccount(s.ctx, acc)
-		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, initCoins))
+		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, bankCoins))
+		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, types.ModuleName, bankCoins))
 		s.Require().NoError(
-			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), initCoins),
+			s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, acc.GetAddress(), accCoins),
 		)
 		cb(account)
 	}
@@ -125,7 +160,7 @@ func (s *SimTestSuite) TestSimulateMsgLendAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
 	s.Require().Equal(types.EventTypeLoanAsset, msg.Type())
-	s.Require().Equal("23872177uumee", msg.Amount.String())
+	s.Require().Equal("185121068uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -160,7 +195,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 }
 
 func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
-	r := rand.New(rand.NewSource(2))
+	r := rand.New(rand.NewSource(8))
 	lendValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
@@ -183,9 +218,9 @@ func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
-	s.Require().Equal("umee1670x2hxvr4js9tlax880xl4h50rekec5u0mjgp", msg.Borrower)
+	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
 	s.Require().Equal(types.EventTypeBorrowAsset, msg.Type())
-	s.Require().Equal("2uumee", msg.Amount.String())
+	s.Require().Equal("67uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
 
