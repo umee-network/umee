@@ -323,7 +323,8 @@ func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 	return coins[r.Int31n(int32(coins.Len()))]
 }
 
-// randomSpendableFields returns an random account and coins to spend in the simulation.
+// randomSpendableFields returns a random account and an sdk.Coin from its spendable
+// coins. It returns skip=true if the account has zero spendable coins.
 func randomSpendableFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
 ) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
@@ -339,7 +340,8 @@ func randomSpendableFields(
 	return acc, randomCoin(r, spendableTokens), false
 }
 
-// randomCollateralFields returns an random account and coins to withdraw in the simulation.
+// randomCollateralFields returns a random account and an sdk.Coin from its collateral.
+// It returns skip=true if no collateral was found.
 func randomCollateralFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, withdrawToken sdk.Coin, skip bool) {
@@ -355,7 +357,9 @@ func randomCollateralFields(
 	return acc, randomCoin(r, withdrawTokens), false
 }
 
-// randomLiquidateFields returns two random account and coins to liquidate in the simulation.
+// randomLiquidateFields returns two random accounts to be used as a liquidator
+// and a borrower in a MsgLiquidate transaction, as well as a random sdk.Coin from
+// the borrower's collateral. It returns skip=true if no collateral is found.
 func randomLiquidateFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (liquidator simtypes.Account, borrower simtypes.Account, repaymentToken sdk.Coin, skip bool) {
