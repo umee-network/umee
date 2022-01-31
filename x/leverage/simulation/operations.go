@@ -211,7 +211,7 @@ func SimulateMsgSetCollateralSetting(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, token, skip := randomSpendableFields(r, ctx, accs, bk)
+		from, token, skip := randomTokenFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSetCollateralSetting, "skip all transfers"), nil, nil
 		}
