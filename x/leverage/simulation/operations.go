@@ -371,16 +371,14 @@ func getSpendableUTokens(
 	ctx sdk.Context, addr sdk.AccAddress,
 	bk types.BankKeeper, lk keeper.Keeper,
 ) sdk.Coins {
-	spendableUTokens := sdk.NewCoins()
-	spendableBalances := bk.SpendableCoins(ctx, addr)
-	for _, spendableBalance := range spendableBalances {
-		if lk.IsAcceptedUToken(ctx, spendableBalance.Denom) {
-			continue
+	uTokens := sdk.NewCoins()
+	for _, coin := range bk.SpendableCoins(ctx, addr) {
+		if lk.IsAcceptedUToken(ctx, coin.Denom) {
+			uTokens = uTokens.Add(coin)
 		}
-		spendableUTokens.Add(spendableBalance)
 	}
 
-	return spendableUTokens
+	return uTokens
 }
 
 // randomBorrowedFields returns a random account and an sdk.Coin from an open borrow position.
