@@ -103,8 +103,8 @@ func WeightedOperations(
 	}
 }
 
-// SimulateMsgLendAsset tests and runs a single msg send where
-// an account lends some available asset.
+// SimulateMsgLendAsset tests and runs a single msg lend where
+// an account lends some available assets.
 func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -136,8 +136,8 @@ func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simt
 	}
 }
 
-// SimulateMsgWithdrawAsset tests and runs a single msg send where
-// an account withdraw some lended asset.
+// SimulateMsgWithdrawAsset tests and runs a single msg withdraw where
+// an account attempts to withdraw some lent assets.
 func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -168,8 +168,8 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 	}
 }
 
-// SimulateMsgBorrowAsset tests and runs a single msg send where
-// an account borrow some asset.
+// SimulateMsgBorrowAsset tests and runs a single msg borrow where
+// an account attempts to borrow some assets.
 func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -200,8 +200,8 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 	}
 }
 
-// SimulateMsgSetCollateralSetting tests and runs a single msg send where
-// an account set some denom as collateral.
+// SimulateMsgSetCollateralSetting tests and runs a single msg set collateral
+// where an account enables or disables a uToken denom as collateral.
 func SimulateMsgSetCollateralSetting(
 	ak simulation.AccountKeeper,
 	bk types.BankKeeper,
@@ -238,8 +238,8 @@ func SimulateMsgSetCollateralSetting(
 	}
 }
 
-// SimulateMsgRepayAsset tests and runs a single msg send where
-// an account repay some asset borrowed.
+// SimulateMsgRepayAsset tests and runs a single msg repay where
+// an account repays some borrowed assets.
 func SimulateMsgRepayAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -270,8 +270,8 @@ func SimulateMsgRepayAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk 
 	}
 }
 
-// SimulateMsgLiquidate tests and runs a single msg send where
-// some asset borrowed is liquidated.
+// SimulateMsgLiquidate tests and runs a single msg liquidate where
+// one user attempts to liquidate another user's borrow.
 func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -346,8 +346,9 @@ func randomTokenFields(
 	return acc, token, false
 }
 
-// randomWithdrawFields returns a random account and an sdk.Coin from its collateral.
-// It returns skip=true if no collateral was found.
+// randomWithdrawFields returns a random account and an sdk.Coin from its uTokens
+// (including both collateral and spendable uTokens). It returns skip=true
+// if no uTokens were found.
 func randomWithdrawFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account,
 	bk types.BankKeeper, lk keeper.Keeper,
@@ -355,7 +356,7 @@ func randomWithdrawFields(
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	uRewardTokens := lk.GetBorrowerCollateral(ctx, acc.Address)
-	spendableUTokens := getSpendableBalancesUTokens(ctx, acc.Address, bk, lk)
+	spendableUTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
 
 	uRewardTokens = uRewardTokens.Add(spendableUTokens...)
 	if uRewardTokens.Empty() {
@@ -365,10 +366,8 @@ func randomWithdrawFields(
 	return acc, randomCoin(r, uRewardTokens.Add(spendableUTokens...)), false
 }
 
-// getSpendableBalancesUTokens returns all the uTokens
-// from the spendable coins which could be the all the
-// collateral-disabled uTokens (start with "u/").
-func getSpendableBalancesUTokens(
+// getSpendableUTokens returns all uTokens from an account's spendable coins.
+func getSpendableUTokens(
 	ctx sdk.Context, addr sdk.AccAddress,
 	bk types.BankKeeper, lk keeper.Keeper,
 ) sdk.Coins {
@@ -401,7 +400,7 @@ func randomBorrowedFields(
 
 // randomLiquidateFields returns two random accounts to be used as a liquidator
 // and a borrower in a MsgLiquidate transaction, as well as a random sdk.Coin
-// open borrower position and a random sdk.Coin from the borrower's collateral.
+// from the borrower's borrows and a random sdk.Coin from the borrower's collateral.
 // It returns skip=true if no collateral is found.
 func randomLiquidateFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
