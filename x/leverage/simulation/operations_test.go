@@ -32,26 +32,29 @@ func (s *SimTestSuite) SetupTest() {
 	betaApp := umeeappbeta.Setup(s.T(), checkTx, 1)
 	ctx := betaApp.NewContext(checkTx, tmproto.Header{})
 
-	// Note: Setting umee collateral weight to 1.0 to allow lender to borrow heavily
 	umeeToken := types.Token{
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("1.0"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          umeeapp.DisplayDenom,
+		Exponent:             6,
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:            "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.05"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.3"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0.9"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.75"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
+		SymbolDenom:          "ATOM",
+		Exponent:             6,
 	}
 	uabc := types.Token{
 		BaseDenom:            "uabc",
@@ -62,17 +65,18 @@ func (s *SimTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.87"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "ABC",
+		Exponent:             5,
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
 
+	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
+
 	for _, token := range tokens {
 		betaApp.LeverageKeeper.SetRegisteredToken(ctx, token)
-		betaApp.LeverageKeeper.SetExchangeRate(ctx, token.BaseDenom, sdk.MustNewDecFromStr("1.1"))
+		betaApp.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("10.0"))
 	}
-
-	betaApp.OracleKeeper.SetExchangeRate(ctx, umeeapp.DisplayDenom, sdk.OneDec())
-	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
 
 	s.app = betaApp
 	s.ctx = ctx
