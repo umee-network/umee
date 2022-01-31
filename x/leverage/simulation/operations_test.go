@@ -45,7 +45,7 @@ func (s *SimTestSuite) SetupTest() {
 	}
 
 	betaApp.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
-	betaApp.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("0.9"))
+	betaApp.LeverageKeeper.SetExchangeRate(ctx, umeeapp.BondDenom, sdk.MustNewDecFromStr("1.1"))
 	betaApp.OracleKeeper.SetExchangeRate(ctx, umeeapp.DisplayDenom, sdk.OneDec())
 	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
 
@@ -155,7 +155,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
 	s.Require().Equal(types.EventTypeWithdrawLoanedAsset, msg.Type())
-	s.Require().Equal("111u/uumee", msg.Amount.String())
+	s.Require().Equal("90u/uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
 
