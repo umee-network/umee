@@ -285,17 +285,12 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		liquidator, borrower, uRepaymentToken, skip := randomLiquidateFields(r, ctx, accs, lk)
+		liquidator, borrower, repaymentToken, uRewardToken, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
 		}
 
-		repaymentToken, err := lk.ExchangeUToken(ctx, uRepaymentToken)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "error in exchange token"), nil, err
-		}
-
-		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, uRepaymentToken.Denom)
+		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, uRewardToken.Denom)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -347,33 +342,41 @@ func randomCollateralFields(
 ) (acc simtypes.Account, withdrawToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
-	collateralBalances := lk.GetBorrowerCollateral(ctx, acc.Address)
-
-	withdrawTokens := simtypes.RandSubsetCoins(r, collateralBalances)
-	if withdrawTokens.Empty() {
+	uRewardTokens := lk.GetBorrowerCollateral(ctx, acc.Address)
+	if uRewardTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, withdrawTokens), false
+	return acc, randomCoin(r, uRewardTokens), false
 }
 
 // randomLiquidateFields returns two random accounts to be used as a liquidator
-// and a borrower in a MsgLiquidate transaction, as well as a random sdk.Coin from
-// the borrower's collateral. It returns skip=true if no collateral is found.
+// and a borrower in a MsgLiquidate transaction, as well as a random sdk.Coin
+// open borrower position and a random sdk.Coin from the borrower's collateral.
+// It returns skip=true if no collateral is found.
 func randomLiquidateFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
-) (liquidator simtypes.Account, borrower simtypes.Account, repaymentToken sdk.Coin, skip bool) {
+) (
+	liquidator simtypes.Account,
+	borrower simtypes.Account,
+	repaymentToken sdk.Coin,
+	uRewardToken sdk.Coin,
+	skip bool,
+) {
 	idxLiquidator := r.Intn(len(accs) - 1)
 
 	liquidator = accs[idxLiquidator]
 	borrower = accs[idxLiquidator+1]
 
-	collateralBalances := lk.GetBorrowerCollateral(ctx, borrower.Address)
-
-	repaymentTokens := simtypes.RandSubsetCoins(r, collateralBalances)
-	if repaymentTokens.Empty() {
-		return liquidator, borrower, sdk.Coin{}, true
+	uRewardTokens := lk.GetBorrowerCollateral(ctx, borrower.Address)
+	if uRewardTokens.Empty() {
+		return liquidator, borrower, sdk.Coin{}, sdk.Coin{}, true
 	}
 
-	return liquidator, borrower, randomCoin(r, repaymentTokens), false
+	repaymentTokens := lk.GetBorrowerBorrows(ctx, borrower.Address)
+	if uRewardTokens.Empty() {
+		return liquidator, borrower, sdk.Coin{}, sdk.Coin{}, true
+	}
+
+	return liquidator, borrower, randomCoin(r, repaymentTokens), randomCoin(r, uRewardTokens), false
 }

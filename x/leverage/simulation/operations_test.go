@@ -270,7 +270,7 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	s.Require().Equal("umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea", msg.Borrower)
 	s.Require().Equal("u/uumee", msg.RewardDenom)
 	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
-	s.Require().Equal("65uumee", msg.Repayment.String())
+	s.Require().Equal("190uumee", msg.Repayment.String())
 	s.Require().Len(futureOperations, 0)
 }
 
