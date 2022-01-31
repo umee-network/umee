@@ -175,15 +175,11 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, uToken, skip := randomCollateralFields(r, ctx, accs, lk)
+		from, token, skip := randomTokenFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "skip all transfers"), nil, nil
 		}
 
-		token, err := lk.ExchangeUToken(ctx, uToken)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "error exchange uToken"), nil, err
-		}
 		msg := types.NewMsgBorrowAsset(from.Address, token)
 
 		txCtx := simulation.OperationInput{
@@ -331,19 +327,23 @@ func randomSpendableFields(
 	return acc, randomCoin(r, spendableTokens), false
 }
 
-// randomCollateralFields returns a random account and an sdk.Coin from its collateral.
-// It returns skip=true if no collateral was found.
-func randomCollateralFields(
+// randomTokenFields returns a random account and an sdk.Coin from all
+// the registered tokens with an random amount [0, 150].
+// It returns skip=true if no registered token was found.
+func randomTokenFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
-) (acc simtypes.Account, withdrawToken sdk.Coin, skip bool) {
+) (acc simtypes.Account, token sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
-	uRewardTokens := lk.GetBorrowerCollateral(ctx, acc.Address)
-	if uRewardTokens.Empty() {
+	allTokens, err := lk.GetAllRegisteredTokens(ctx)
+	if err != nil || len(allTokens) == 0 {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, uRewardTokens), false
+	registeredToken := allTokens[r.Int31n(int32(len(allTokens)))]
+	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(150)))
+
+	return acc, token, false
 }
 
 // randomWithdrawFields returns a random account and an sdk.Coin from its collateral.

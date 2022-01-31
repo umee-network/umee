@@ -160,7 +160,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 }
 
 func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
-	r := rand.New(rand.NewSource(1))
+	r := rand.New(rand.NewSource(2))
 	lendValue := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
@@ -183,9 +183,9 @@ func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
-	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
+	s.Require().Equal("umee1670x2hxvr4js9tlax880xl4h50rekec5u0mjgp", msg.Borrower)
 	s.Require().Equal(types.EventTypeBorrowAsset, msg.Type())
-	s.Require().Equal("99uumee", msg.Amount.String())
+	s.Require().Equal("2uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
 
