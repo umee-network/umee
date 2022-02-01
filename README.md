@@ -33,7 +33,7 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Active Networks
 
-### Public:
+### Public
 - [umeeverse-party-1](networks/umeeverse-party-1)
 
 ## Install
