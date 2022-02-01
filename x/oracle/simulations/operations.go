@@ -122,6 +122,16 @@ func SimulateMsgAggregateExchangeRatePrevote(
 			), nil, nil
 		}
 
+		// check for an existing prevote
+		_, err := k.GetAggregateExchangeRatePrevote(ctx, address)
+		if err == nil {
+			return simtypes.NoOpMsg(
+				types.ModuleName,
+				types.TypeMsgAggregateExchangeRatePrevote,
+				"prevote already exists for this validator",
+			), nil, nil
+		}
+
 		prices := make(map[string]sdk.Dec, len(acceptList))
 		for _, denom := range acceptList {
 			prices[denom] = umeePrice.Add(simtypes.RandomDecAmount(r, sdk.NewDec(1)))
