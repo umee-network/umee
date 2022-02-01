@@ -29,6 +29,7 @@ source "googlecompute" "final" {
   ssh_username = "root"
   zone         = "us-central1-a"
   image_name   = "umee-node-${var.git_sha}"
+  machine_type = "n1-standard-2"
 }
 
 build {
