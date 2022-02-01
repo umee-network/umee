@@ -6,7 +6,7 @@ You can build from the same tag as the network or you can run the docker image (
 
 ### Beta Build
 To enable the beta build you just need to set an environment variable before running make build:
-```
+```bash
 UMEE_ENABLE_BETA=true make build
 ```
 
@@ -20,12 +20,12 @@ docker run --entrypoint umeed-beta -it us-docker.pkg.dev/umeedefi/stack/node:v0.
 
 ### Getting x86_64 binaries
 You can also just extract the binaries from the docker image (if you are running x86_64) and work with things that way if you prefer.
-```
+```bash
 export CONTAINER=$(docker create us-docker.pkg.dev/umeedefi/stack/node:v0.7.2)
 docker cp "$CONTAINER:/usr/local/bin" umee-bin
 ```
 
-```
+```bash
 $ ls umee-bin
 gaiad        hermes        peggo        price-feeder    umeed        umeed-beta
 ```
@@ -41,17 +41,17 @@ Chain ID: `umeeverse-party-1`
 [Peers](umee-peers.txt)
 
 
-### Cosmos API
+### Umee Cosmos API
  * `https://api.placebo.umeeverse-party-1.network.umee.cc`
  * `https://api.myosynizesis.umeeverse-party-1.network.umee.cc`
  * `https://api.semicupium.umeeverse-party-1.network.umee.cc`
 
-### Cosmos GRPC
+### Umee Cosmos GRPC
  * `grpc.placebo.umeeverse-party-1.network.umee.cc:443`
  * `grpc.myosynizesis.umeeverse-party-1.network.umee.cc:443`
  * `grpc.semicupium.umeeverse-party-1.network.umee.cc:443`
 
-### Tendermint RPC
+### Umee Tendermint RPC
  * `https://rpc.placebo.umeeverse-party-1.network.umee.cc`
  * `https://rpc.myosynizesis.umeeverse-party-1.network.umee.cc`
  * `https://rpc.semicupium.umeeverse-party-1.network.umee.cc`
@@ -62,12 +62,12 @@ Chain ID: `gaia-umeeverse-party-1`
 
 [Peers](gaia-peers.txt)
 
-### Cosmos API
+### Gaia Cosmos API
  * `https://api.toot.gaia-umeeverse-party-1.network.umee.cc`
 
-### Cosmos GRPC
+### Gaia Cosmos GRPC
  * `grpc.toot.gaia-umeeverse-party-1.network.umee.cc:443`
 
-### Tendermint RPC
+### Gaia Tendermint RPC
  * `https://rpc.toot.gaia-umeeverse-party-1.network.umee.cc`
 
