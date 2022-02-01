@@ -18,8 +18,34 @@ Chain ID: umeeverse-party-1
 
 [Peers](umee-peers.txt)
 
+
+### Cosmos API
+ * `https://api.placebo.umeeverse-party-1.network.umee.cc`
+ * `https://api.myosynizesis.umeeverse-party-1.network.umee.cc`
+ * `https://api.semicupium.umeeverse-party-1.network.umee.cc`
+
+### Cosmos GRPC
+ * `grpc.placebo.umeeverse-party-1.network.umee.cc:443`
+ * `grpc.myosynizesis.umeeverse-party-1.network.umee.cc:443`
+ * `grpc.semicupium.umeeverse-party-1.network.umee.cc:443`
+
+### Tendermint RPC
+ * `https://rpc.placebo.umeeverse-party-1.network.umee.cc`
+ * `https://rpc.myosynizesis.umeeverse-party-1.network.umee.cc`
+ * `https://rpc.semicupium.umeeverse-party-1.network.umee.cc`
+
 ## Gaia Chain Information
 
 Chain ID: gaia-umeeverse-party-1
 
 [Peers](gaia-peers.txt)
+
+### Cosmos API
+ * `https://api.toot.gaia-umeeverse-party-1.network.umee.cc`
+
+### Cosmos GRPC
+ * `grpc.toot.gaia-umeeverse-party-1.network.umee.cc:443`
+
+### Tendermint RPC
+ * `https://rpc.toot.gaia-umeeverse-party-1.network.umee.cc`
+
