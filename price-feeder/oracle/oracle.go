@@ -360,7 +360,7 @@ func (o *Oracle) tick() error {
 		return nil
 	}
 
-	salt, err := GenerateSalt(40)
+	salt, err := GenerateSalt(32)
 	if err != nil {
 		return err
 	}

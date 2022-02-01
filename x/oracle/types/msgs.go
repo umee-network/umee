@@ -145,7 +145,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 		}
 	}
 
-	if len(msg.Salt) > 80 || len(msg.Salt) < 60 {
+	if len(msg.Salt) != 64 {
 		return ErrInvalidSaltLength
 	}
 	_, err = AggregateVoteHashFromHexString(msg.Salt)

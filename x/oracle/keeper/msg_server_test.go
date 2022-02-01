@@ -31,7 +31,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 	ctx := s.ctx
 
 	exchangeRatesStr := "123.2:UMEE"
-	salt, err := GenerateSalt(40)
+	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 
@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 
 	ratesStr := "umee:123.2"
 	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
-	salt, err := GenerateSalt(40)
+	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
