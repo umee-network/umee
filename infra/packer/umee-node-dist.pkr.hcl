@@ -34,10 +34,16 @@ source "googlecompute" "final" {
 
 build {
   name = "umee-node"
+
   sources = [
     "source.docker.final",
     "source.googlecompute.final"
   ]
+
+  provisioner "shell" {
+    inline = [ "/usr/bin/cloud-init status --wait" ]
+    only = ["googlecompute.final"]
+  }
 
   provisioner "shell" {
     inline = [ "sed -i 's/http:\\/\\/.\\+\\/ubuntu/http:\\/\\/mirrors.edge.kernel.org\\/ubuntu/g' /etc/apt/sources.list"
