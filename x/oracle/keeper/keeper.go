@@ -285,10 +285,8 @@ func (k Keeper) HasAggregateExchangeRatePrevote(
 	ctx sdk.Context,
 	voter sdk.ValAddress,
 ) bool {
-	if _, err := k.GetAggregateExchangeRatePrevote(ctx, voter); err != nil {
-		return false
-	}
-	return true
+	store := ctx.KVStore(k.storeKey)
+	return store.Has(types.GetAggregateExchangeRatePrevoteKey(voter))
 }
 
 // SetAggregateExchangeRatePrevote set an oracle aggregate prevote to the store.
