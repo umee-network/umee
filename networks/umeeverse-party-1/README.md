@@ -5,9 +5,15 @@
 You can build from the same tag as the network or you can run the docker image (note: you will need to map config files and systemd scripts if you want to use systemd)
 
 ### Version
-This testnet will run [v0.7.2](https://github.com/umee-network/umee/tree/v0.7.2)
+This testnet will run the beta enabled binary from [v0.7.2](https://github.com/umee-network/umee/tree/v0.7.2)
 
-### Docker Image
+### Beta Build
+To enable the beta build you just need to set an environment variable before running make build:
+```
+UMEE_ENABLE_BETA=true make build
+```
+
+### Running the Docker Image
 ```bash
 docker run --entrypoint umeed-beta -it us-docker.pkg.dev/umeedefi/stack/node:v0.7.2
 ```
