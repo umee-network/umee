@@ -34,17 +34,12 @@ Umee will allow a multitude of decentralized debt products.
 ## Active Networks
 
 ### Public:
-
- - [umee-betanet-v5](https://github.com/umee-network/testnets/tree/main/networks/umee-betanet-v5)
-
-### Private:
-
-  - [umee-alpha-mainnet-2](https://github.com/umee-network/testnets/tree/main/networks/umee-alpha-mainnet-2)
+- [umeeverse-party-1](networks/umeeverse-party-1)
 
 ## Install
 
 To install the `umeed` binary:
 
 ```shell
-$ make install
+UMEE_ENABLE_BETA=true make install
 ```
