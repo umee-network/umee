@@ -38,7 +38,7 @@ RUN make build
 
 # Clone/Build Peggo
 WORKDIR /tmp/build/peggo
-RUN git clone https://github.com/umee-network/peggo.git --branch main --single-branch --depth 1 .
+RUN git clone https://github.com/umee-network/peggo.git --branch v0.2.1 --single-branch --depth 1 .
 RUN make build
 
 WORKDIR /root
