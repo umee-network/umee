@@ -45,18 +45,14 @@ type (
 func NewBinanceProvider() *BinanceProvider {
 	return &BinanceProvider{
 		baseURL: binanceBaseURL,
-		client: &http.Client{
-			Timeout: defaultTimeout,
-		},
+		client:  newDefaultHttpClient(),
 	}
 }
 
 func NewBinanceProviderWithTimeout(timeout time.Duration) *BinanceProvider {
 	return &BinanceProvider{
 		baseURL: binanceBaseURL,
-		client: &http.Client{
-			Timeout: timeout,
-		},
+		client:  newHttpClientWithTimeout(timeout),
 	}
 }
 

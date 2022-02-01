@@ -31,9 +31,7 @@ type (
 func NewMockProvider() *MockProvider {
 	return &MockProvider{
 		baseURL: mockBaseURL,
-		client: &http.Client{
-			Timeout: defaultTimeout,
-		},
+		client:  newDefaultHttpClient(),
 	}
 }
 
