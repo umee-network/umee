@@ -341,7 +341,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		}
 
 		// Return error if borrow limit would drop below borrowed value
-		if newBorrowLimit.GT(borrowedValue) {
+		if newBorrowLimit.LT(borrowedValue) {
 			return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
 		}
 
