@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gopkg.in/yaml.v3"
+
 	"github.com/umee-network/umee/x/leverage/types"
-	"gopkg.in/yaml.v2"
 )
 
 func NewAggregateExchangeRatePrevote(
