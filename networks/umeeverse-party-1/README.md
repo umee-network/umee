@@ -2,10 +2,7 @@
 
 ## Software Information
 
-You can build from the same tag as the network or you can run the docker image (note: you will need to map config files and systemd scripts if you want to use systemd)
-
-### Version
-This testnet will run the beta enabled binary from [v0.7.2](https://github.com/umee-network/umee/tree/v0.7.2)
+You can build from the same tag as the network or you can run the docker image (note: you will need to map config files and systemd scripts if you want to use systemd).
 
 ### Beta Build
 To enable the beta build you just need to set an environment variable before running make build:
@@ -13,9 +10,24 @@ To enable the beta build you just need to set an environment variable before run
 UMEE_ENABLE_BETA=true make build
 ```
 
+### Version
+This testnet will run the beta enabled binary from [v0.7.2](https://github.com/umee-network/umee/tree/v0.7.2)
+
 ### Running the Docker Image
 ```bash
 docker run --entrypoint umeed-beta -it us-docker.pkg.dev/umeedefi/stack/node:v0.7.2
+```
+
+### Getting x86_64 binaries
+You can also just extract the binaries from the docker image (if you are running x86_64) and work with things that way if you prefer.
+```
+export CONTAINER=$(docker create us-docker.pkg.dev/umeedefi/stack/node:v0.7.2)
+docker cp "$CONTAINER:/usr/local/bin" umee-bin
+```
+
+```
+$ ls umee-bin
+gaiad        hermes        peggo        price-feeder    umeed        umeed-beta
 ```
 
 ## Gravity Contract Information (Goerli)
