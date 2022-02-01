@@ -18,8 +18,7 @@ func GenerateSalt(length int) (string, error) {
 		return "", fmt.Errorf("failed to generate salt: zero length")
 	}
 
-	n := length / 2
-	bytes := make([]byte, n)
+	bytes := make([]byte, length)
 
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
@@ -32,7 +31,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 	ctx := s.ctx
 
 	exchangeRatesStr := "123.2:UMEE"
-	salt, err := GenerateSalt(2)
+	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 
@@ -41,30 +40,28 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidHash)
-	s.Require().Error(err)
-
 	invalidFeeder := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    "invalid_feeder",
 		Validator: valAddr.String(),
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidFeeder)
-	s.Require().Error(err)
-
 	invalidValidator := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: "invalid_val",
 	}
-	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidValidator)
-	s.Require().Error(err)
-
 	validMsg := &types.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
+
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidHash)
+	s.Require().Error(err)
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidFeeder)
+	s.Require().Error(err)
+	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), invalidValidator)
+	s.Require().Error(err)
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), validMsg)
 	s.Require().NoError(err)
 }
@@ -74,7 +71,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 
 	ratesStr := "umee:123.2"
 	ratesStrInvalidCoin := "umee:123.2,badcoin:234.5"
-	salt, err := GenerateSalt(2)
+	salt, err := GenerateSalt(32)
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)

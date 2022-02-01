@@ -74,20 +74,22 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	zeroExchangeRates := "foo:0.0,bar:1232.132"
 	negativeExchangeRates := "foo:-1234.5,bar:1232.132"
 	overFlowExchangeRates := "foo:1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0,bar:1232.132"
-
+	validSalt := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025f"
+	saltWithColon := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025:"
 	tests := []struct {
 		voter         sdk.AccAddress
 		salt          string
 		exchangeRates string
 		expectPass    bool
 	}{
-		{addrs[0], "123", exchangeRates, true},
-		{addrs[0], "123", invalidExchangeRates, false},
-		{addrs[0], "123", zeroExchangeRates, false},
-		{addrs[0], "123", negativeExchangeRates, false},
-		{addrs[0], "123", overFlowExchangeRates, false},
-		{sdk.AccAddress{}, "123", exchangeRates, false},
+		{addrs[0], validSalt, exchangeRates, true},
+		{addrs[0], validSalt, invalidExchangeRates, false},
+		{addrs[0], validSalt, zeroExchangeRates, false},
+		{addrs[0], validSalt, negativeExchangeRates, false},
+		{addrs[0], validSalt, overFlowExchangeRates, false},
+		{sdk.AccAddress{}, validSalt, exchangeRates, false},
 		{addrs[0], "", exchangeRates, false},
+		{addrs[0], saltWithColon, exchangeRates, false},
 	}
 
 	for i, tc := range tests {
