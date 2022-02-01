@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+      - 'release/**'
+
 jobs:
   publish:
     if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Enable:ImagePublish')
