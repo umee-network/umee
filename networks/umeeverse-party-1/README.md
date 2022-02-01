@@ -12,7 +12,7 @@ This testnet will run [v0.7.2](https://github.com/umee-network/umee/tree/v0.7.2)
 docker run --entrypoint umeed-beta -it us-docker.pkg.dev/umeedefi/stack/node:v0.7.2
 ```
 
-## Gravity Contract Information
+## Gravity Contract Information (Goerli)
 
 Gravity Address: [0x568645530B377903e59EeC004C4dc18f94FD4501](https://goerli.etherscan.io/address/0x568645530B377903e59EeC004C4dc18f94FD4501)
 
