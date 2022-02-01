@@ -39,7 +39,7 @@ Let `M` be the weighted median, `𝜎` be the standard deviation of the votes in
 
 ## Reward Pool
 
-The Oracle module's reward pool is composed of any tokens present in its module account. This pool is funded by the `x/leverage` module as portion of interest accrued on borrowed tokens.
+The Oracle module's reward pool is composed of any tokens present in its module account. This pool is funded by the `x/leverage` module as portion of interest accrued on borrowed tokens. If there are no tokens present in the Oracle module reward pool during a reward period, no tokens are distributed.
 
 From the Oracle module's perspective, tokens of varied denominations from the `AcceptList` simply appear in the module account at a regular interval.
 The interval is the `x/Leverage` module's `InterestEpoch` parameter, e.g. every 100 blocks, which is generally not equal to the Oracle's `VotePeriod` or other parameters.
