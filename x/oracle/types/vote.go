@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gopkg.in/yaml.v3"
+
 	"github.com/umee-network/umee/x/leverage/types"
-	"gopkg.in/yaml.v2"
 )
 
 func NewAggregateExchangeRatePrevote(
@@ -70,7 +71,6 @@ func (tuples ExchangeRateTuples) String() string {
 
 // ParseExchangeRateTuples ExchangeRateTuple parser
 func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
-	tuplesStr = strings.TrimSpace(tuplesStr)
 	if len(tuplesStr) == 0 {
 		return nil, nil
 	}
@@ -81,7 +81,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 	duplicateCheckMap := make(map[string]bool)
 	for i, tupleStr := range tupleStrs {
 		denomAmountStr := strings.Split(tupleStr, ":")
-		if len(denomAmountStr) < 2 {
+		if len(denomAmountStr) != 2 {
 			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
 		}
 

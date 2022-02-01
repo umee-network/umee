@@ -166,6 +166,13 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRatePrevote() {
 	s.Require().Error(err)
 }
 
+func (s *IntegrationTestSuite) TestAggregateExchangeRatePrevoteError() {
+	app, ctx := s.app, s.ctx
+
+	_, err := app.OracleKeeper.GetAggregateExchangeRatePrevote(ctx, valAddr)
+	s.Require().Errorf(err, types.ErrNoAggregatePrevote.Error())
+}
+
 func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 	app, ctx := s.app, s.ctx
 
@@ -190,18 +197,17 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 	s.Require().Error(err)
 }
 
+func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
+	app, ctx := s.app, s.ctx
+
+	_, err := app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	s.Require().Errorf(err, types.ErrNoAggregateVote.Error())
+}
+
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
 	app.OracleKeeper.SetExchangeRateWithEvent(ctx, exchangeRate, sdk.OneDec())
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
-	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
-}
-
-func (s *IntegrationTestSuite) TestGetExchangeRate_USD() {
-	app, ctx := s.app, s.ctx
-
-	rate, err := app.OracleKeeper.GetExchangeRateBase(ctx, "uusd")
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
 }
