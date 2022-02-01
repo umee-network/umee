@@ -41,8 +41,7 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 	}
 
 	// Ensure prevote wasn't already submitted
-	_, err = ms.GetAggregateExchangeRatePrevote(ctx, valAddr)
-	if err == nil {
+	if ms.HasAggregateExchangeRatePrevote(ctx, valAddr) {
 		return nil, types.ErrExistingPrevote
 	}
 
