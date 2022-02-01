@@ -23,4 +23,5 @@ var (
 	ErrNoAggregateVote       = sdkerrors.Register(ModuleName, 12, "no aggregate vote")
 	ErrUnknownDenom          = sdkerrors.Register(ModuleName, 14, "unknown denom")
 	ErrNegativeOrZeroRate    = sdkerrors.Register(ModuleName, 15, "invalid exchange rate; should be positive")
+	ErrExistingPrevote       = sdkerrors.Register(ModuleName, 16, "prevote already submitted for this voting period")
 )
