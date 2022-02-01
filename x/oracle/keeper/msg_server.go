@@ -40,6 +40,12 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 		return nil, err
 	}
 
+	// Ensure prevote wasn't already submitted
+	_, err = ms.GetAggregateExchangeRatePrevote(ctx, valAddr)
+	if err == nil {
+		return nil, types.ErrExistingPrevote
+	}
+
 	// Convert hex string to votehash
 	voteHash, err := types.AggregateVoteHashFromHexString(msg.Hash)
 	if err != nil {
