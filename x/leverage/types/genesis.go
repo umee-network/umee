@@ -19,19 +19,17 @@ func NewGenesisState(
 	lastInterestTime int64,
 	badDebts []BadDebt,
 	interestScalars []InterestScalar,
-	adjustedTotalsBorrowed []AdjustedTotalBorrowed,
 ) *GenesisState {
 
 	return &GenesisState{
-		Params:                 params,
-		Registry:               tokens,
-		AdjustedBorrows:        adjustedBorrows,
-		CollateralSettings:     collateralSettings,
-		Collateral:             collateral,
-		LastInterestTime:       lastInterestTime,
-		BadDebts:               badDebts,
-		InterestScalars:        interestScalars,
-		AdjustedTotalsBorrowed: adjustedTotalsBorrowed,
+		Params:             params,
+		Registry:           tokens,
+		AdjustedBorrows:    adjustedBorrows,
+		CollateralSettings: collateralSettings,
+		Collateral:         collateral,
+		LastInterestTime:   lastInterestTime,
+		BadDebts:           badDebts,
+		InterestScalars:    interestScalars,
 	}
 }
 
@@ -112,16 +110,6 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	for _, total := range gs.AdjustedTotalsBorrowed {
-		if err := sdk.ValidateDenom(total.Denom); err != nil {
-			return err
-		}
-
-		if total.Amount.IsNegative() {
-			return sdkerrors.Wrap(ErrNegativeTotalBorrowed, total.String())
-		}
-	}
-
 	return nil
 }
 
@@ -174,13 +162,5 @@ func NewInterestScalar(denom string, scalar sdk.Dec) InterestScalar {
 	return InterestScalar{
 		Denom:  denom,
 		Scalar: scalar,
-	}
-}
-
-// NewAdjustedTotalBorrowed creates the TotalBorrowed struct used in GenesisState
-func NewAdjustedTotalBorrowed(denom string, amount sdk.Dec) AdjustedTotalBorrowed {
-	return AdjustedTotalBorrowed{
-		Denom:  denom,
-		Amount: amount,
 	}
 }

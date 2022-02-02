@@ -20,6 +20,14 @@ The following serialization methods are used unless otherwise stated:
 
 Note that collateral settings and instances of bad debt are both tracked using a value of `0x01`. In both cases, the `0x01` means `true` ("enabled" or "present") and a missing or deleted entry means `false`. No value besides `0x01` is ever stored.
 
+## Adjusted Total Borrowed
+
+Unlike all other quantities in state, `AdjustedTotalBorrowed` values are not present in imported and exported genesis state.
+
+Instead, every time an individual `AdjustedBorrow` is set during `ImportGenesis`, its respective token's `AdjustedTotalBorrowed` is increased by the same amount. Thus, it is indirectly imported as the sum of individual positions.
+
+Similarly, `AdjustedTotalBorrowed` is never set independently during regular operations. It is modified during calls to `setAdjustedBorrow`, always increasing or decreasing by the change in the individual borrow being set.
+
 ## Token Registry
 
 The `0x01` prefix above allows a governance-controlled `Token Registry` to be stored in state. The token registry is a list of all accepted base asset types and their parameters:

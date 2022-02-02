@@ -71,16 +71,6 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 	}
-
-	for _, total := range genState.AdjustedTotalsBorrowed {
-		// AdjustedTotalsBorrowed are only set by setAdjustedBorrow -
-		// that is, these values should already be correct after all
-		// individual borrows have been added. Only check for
-		// and reject inconsistency in the imported state here.
-		if total.Amount != k.getAdjustedTotalBorrowed(ctx, total.Denom) {
-			panic(types.ErrInconsistentTotalBorrow)
-		}
-	}
 }
 
 // ExportGenesis returns the x/leverage module's exported genesis state.
@@ -95,7 +85,6 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.GetLastInterestTime(ctx),
 		k.getAllBadDebts(ctx),
 		k.getAllInterestScalars(ctx),
-		k.getAllAdjustedTotalsBorrowed(ctx),
 	)
 }
 
@@ -226,31 +215,4 @@ func (k Keeper) getAllInterestScalars(ctx sdk.Context) []types.InterestScalar {
 	}
 
 	return interestScalars
-}
-
-// getAllAdjustedTotalsBorrowed returns adjusted totals borrowed for all asset types. Uses the
-// AdjustedTotalBorrowed struct found  in GenesisState.
-func (k Keeper) getAllAdjustedTotalsBorrowed(ctx sdk.Context) []types.AdjustedTotalBorrowed {
-	prefix := types.KeyPrefixAdjustedTotalBorrow
-	totalsBorrowed := []types.AdjustedTotalBorrowed{}
-
-	iterator := func(key, val []byte) error {
-		denom := types.DenomFromKey(key, prefix)
-
-		var total sdk.Dec
-		if err := total.Unmarshal(val); err != nil {
-			// improperly marshaled exchange rate should never happen
-			return err
-		}
-
-		totalsBorrowed = append(totalsBorrowed, types.NewAdjustedTotalBorrowed(denom, total))
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return totalsBorrowed
 }

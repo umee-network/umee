@@ -49,12 +49,12 @@ func AllInvariants(k Keeper) sdk.Invariant {
 			return res, stop
 		}
 
-		res, stop = InterestScalarsInvariant(k)(ctx)
+		res, stop = LendAPYInvariant(k)(ctx)
 		if stop {
 			return res, stop
 		}
 
-		return LendAPYInvariant(k)(ctx)
+		return InterestScalarsInvariant(k)(ctx)
 	}
 }
 
