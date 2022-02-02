@@ -68,37 +68,6 @@ func (k Keeper) DeriveBorrowUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	return totalBorrowed.Quo(tokenSupply)
 }
 
-// DeriveBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
-// An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) DeriveBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	limit := sdk.ZeroDec()
-
-	for _, coin := range collateral {
-		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// get USD value of base assets
-		value, err := k.TokenValue(ctx, baseAsset)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		weight, err := k.GetCollateralWeight(ctx, baseAsset.Denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// add each collateral coin's weighted value to borrow limit
-		limit = limit.Add(value.Mul(weight))
-	}
-
-	return limit, nil
-}
-
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
 // An error is returned if any input coins are not uTokens or if value calculation fails.

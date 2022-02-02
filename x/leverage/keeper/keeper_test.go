@@ -47,11 +47,11 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	umeeToken := types.Token{
 		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 	}
@@ -588,9 +588,18 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, rewardDenom)
 	s.Require().Error(err)
 
-	// amount owed is forcefully increased to 200 umee (over borrow limit)
-	err = s.app.LeverageKeeper.SetBorrow(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
-	s.Require().NoError(err)
+	// Note: Setting umee collateral weight to 0.0 to allow liquidation
+	umeeToken := types.Token{
+		BaseDenom:            umeeapp.BondDenom,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.0"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+	}
+	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
 	// liquidator partially liquidates lender, receiving some collateral
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
@@ -599,9 +608,9 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	s.Require().Equal(repayment.Amount, repaid)
 	s.Require().Equal(sdk.NewInt(11000000), reward)
 
-	// verify lender's new loan amount is 190 umee (still over borrow limit)
+	// verify lender's new loan amount is 80 umee (still over borrow limit)
 	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
-	s.Require().Equal(loanBalance.String(), sdk.NewInt64Coin(umeeapp.BondDenom, 190000000).String())
+	s.Require().Equal(loanBalance.String(), sdk.NewInt64Coin(umeeapp.BondDenom, 80000000).String())
 
 	// verify liquidator's new u/umee balance = 11 = (10 + liquidation incentive)
 	uTokenBalance := app.BankKeeper.GetBalance(ctx, liquidatorAddr, rewardDenom)
@@ -615,23 +624,23 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 300000000) // 300 umee
 	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, rewardDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt(190000000), repaid)
-	s.Require().Equal(sdk.NewInt(209000000), reward)
+	s.Require().Equal(sdk.NewInt(80000000), repaid)
+	s.Require().Equal(sdk.NewInt(88000000), reward)
 
 	// verify that repayment has not been modified
 	s.Require().Equal(sdk.NewInt(300000000), repayment.Amount)
 
-	// verify liquidator's new u/umee balance = 220 = (200 + liquidation incentive)
+	// verify liquidator's new u/umee balance = 99 = (90 + liquidation incentive)
 	uTokenBalance = app.BankKeeper.GetBalance(ctx, liquidatorAddr, rewardDenom)
-	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin(rewardDenom, 220000000))
+	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin(rewardDenom, 99000000))
 
 	// verify lender's new loan amount is zero
 	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, lenderAddr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
-	// verify liquidator's new umee balance (10k - 200) = 9800 umee
+	// verify liquidator's new umee balance (10k - 90) = 9910 umee
 	tokenBalance = app.BankKeeper.GetBalance(ctx, liquidatorAddr, umeeapp.BondDenom)
-	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9800000000))
+	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9910000000))
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
@@ -735,14 +744,14 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	// borrow APY at utilization = 4%
 	// when kink utilization = 80%, and base/kink APY are 0.02 and 0.22
 	borrowAPY := s.app.LeverageKeeper.DeriveBorrowAPY(s.ctx, umeeapp.BondDenom)
-	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.03"), borrowAPY)
 
 	// lend APY when borrow APY is 3%
-	// and utilization is 4%, and reservefactor is 25%
+	// and utilization is 4%, and reservefactor is 20%, and OracleRewardFactor is 1%
+	// 0.03 * 0.04 * (1 - 0.21) = 0.000948
 	lendAPY := s.app.LeverageKeeper.DeriveLendAPY(s.ctx, umeeapp.BondDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("0.0009"), lendAPY)
+	s.Require().Equal(sdk.MustNewDecFromStr("0.000948"), lendAPY)
 }
 
 func (s *IntegrationTestSuite) TestBorrowUtilizationNoReserves() {

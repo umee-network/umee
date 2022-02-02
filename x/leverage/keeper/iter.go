@@ -133,7 +133,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 
 		// use collateral weights to compute borrow limit from enabled collateral
-		borrowLimit, err := k.DeriveBorrowLimit(ctx, collateral)
+		borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
 		if err != nil {
 			return err
 		}
