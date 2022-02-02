@@ -97,7 +97,7 @@ func (p BinanceProvider) getTickerPrice(ticker string) (TickerPrice, error) {
 		)
 	}
 
-	if strings.ToUpper(tickerResp.Symbol) != strings.ToUpper(ticker) {
+	if !strings.EqualFold(tickerResp.Symbol, ticker) {
 		return TickerPrice{}, fmt.Errorf(
 			"received unexpected symbol from Binance response; expected: %s, got: %s",
 			ticker, tickerResp.Symbol,
