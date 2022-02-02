@@ -159,7 +159,7 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 		borrowPrefix := types.KeyPrefixAdjustedBorrow
 
 		// Iterate through all adjusted borrow amounts stored in the keeper,
-		// ensuring all sucessfully unmarshal to positive values.
+		// ensuring all successfully unmarshal to positive values.
 		err := k.iterate(ctx, borrowPrefix, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
 			denom := types.DenomFromKeyWithAddress(key, borrowPrefix)
