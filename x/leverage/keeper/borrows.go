@@ -48,36 +48,6 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
 }
 
-// GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
-// associated with an address.
-func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	prefix := types.CreateAdjustedBorrowKeyNoDenom(borrowerAddr)
-	totalBorrowed := sdk.NewCoins()
-
-	iterator := func(key, val []byte) error {
-		// get borrow denom from key
-		denom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
-
-		// get borrowed amount
-		var adjustedAmount sdk.Dec
-		if err := adjustedAmount.Unmarshal(val); err != nil {
-			// improperly marshaled borrow amount should never happen
-			panic(err)
-		}
-
-		// apply interest scalar
-		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).TruncateInt()
-
-		// add to totalBorrowed
-		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
-		return nil
-	}
-
-	_ = k.iterate(ctx, prefix, iterator)
-
-	return totalBorrowed.Sort()
-}
-
 // DeriveBorrowUtilization derives the current borrow utilization of a token denom.
 func (k Keeper) DeriveBorrowUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Borrow utilization is equal to total borrows divided by the token supply
