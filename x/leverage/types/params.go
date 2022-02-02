@@ -11,28 +11,25 @@ import (
 var _ paramtypes.ParamSet = &Params{}
 
 var (
-	KeyInterestEpoch                = []byte("InterestEpoch")
 	KeyCompleteLiquidationThreshold = []byte("CompleteLiquidationThreshold")
 	KeyMinimumCloseFactor           = []byte("MinimumCloseFactor")
 	KeyOracleRewardFactor           = []byte("OracleRewardFactor")
 )
 
 var (
-	defaultInterestEpoch                = int64(100)
 	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
 	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
 	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
 )
 
-func NewParams(epoch int64) Params {
-	return Params{InterestEpoch: epoch}
+func NewParams() Params {
+	return Params{}
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value
 // pairs pairs of x/leverage module's parameters.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyInterestEpoch, &p.InterestEpoch, validateInterestEpoch),
 		paramtypes.NewParamSetPair(KeyCompleteLiquidationThreshold, &p.CompleteLiquidationThreshold,
 			validateLiquidationThreshold),
 		paramtypes.NewParamSetPair(KeyMinimumCloseFactor, &p.MinimumCloseFactor, validateMinimumCloseFactor),
@@ -55,7 +52,6 @@ func ParamKeyTable() paramtypes.KeyTable {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		InterestEpoch:                defaultInterestEpoch,
 		CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
 		MinimumCloseFactor:           defaultMinimumCloseFactor,
 		OracleRewardFactor:           defaultOracleRewardFactor,
@@ -64,9 +60,6 @@ func DefaultParams() Params {
 
 // validate a set of params
 func (p Params) Validate() error {
-	if err := validateInterestEpoch(p.InterestEpoch); err != nil {
-		return err
-	}
 	if err := validateLiquidationThreshold(p.CompleteLiquidationThreshold); err != nil {
 		return err
 	}
@@ -75,18 +68,6 @@ func (p Params) Validate() error {
 	}
 	if err := validateOracleRewardFactor(p.OracleRewardFactor); err != nil {
 		return err
-	}
-	return nil
-}
-
-func validateInterestEpoch(i interface{}) error {
-	v, ok := i.(int64)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
-	if v <= 0 {
-		return fmt.Errorf("interest epoch must be positive: %d", v)
 	}
 	return nil
 }
