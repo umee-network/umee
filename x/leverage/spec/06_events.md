@@ -83,7 +83,7 @@ In addition to handlers events, the leverage keeper will produce events from the
 | interest_accrual | total_interest | {totalInterest}        |
 | interest_accrual | reserved       | {newReserves}          |
 
-Interest epochs emit an event with their current block height and time, as well as total interest accrued across all borrows and the amount of each token added to reserves. Occurs every block.
+Interest accrual emits an event with the current block height and time, as well as total interest accrued across all borrows and the amount of each token added to reserves. Occurs every block.
 
 ### FundOracle
 
