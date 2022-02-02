@@ -39,6 +39,15 @@ func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow s
 	return nil
 }
 
+// GetTotalBorrowed returns the total borrowed in a given denom.
+func (k Keeper) GetTotalBorrowed(ctx sdk.Context, denom string) sdk.Coin {
+	adjustedTotal := k.getAdjustedTotalBorrowed(ctx, denom)
+
+	// Apply interest scalar
+	total := adjustedTotal.Mul(k.getInterestScalar(ctx, denom)).TruncateInt()
+	return sdk.NewCoin(denom, total)
+}
+
 // GetAvailableToBorrow gets the amount available to borrow of a given token.
 func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 	// Available for borrow = Module Balance - Reserve Amount
@@ -54,7 +63,7 @@ func (k Keeper) DeriveBorrowUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
 	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
 	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
-	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
+	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount.ToDec()
 
 	// Derive effective token supply
 	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
@@ -100,7 +109,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 }
 
 // SetBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
-func (k Keeper) SetBadDebtAddress(ctx sdk.Context, denom string, borrowerAddr sdk.AccAddress, hasDebt bool) {
+func (k Keeper) SetBadDebtAddress(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, hasDebt bool) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateBadDebtKey(denom, borrowerAddr)
 

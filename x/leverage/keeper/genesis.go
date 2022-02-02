@@ -63,7 +63,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 
-		k.SetBadDebtAddress(ctx, badDebt.Denom, borrower, true)
+		k.SetBadDebtAddress(ctx, borrower, badDebt.Denom, true)
 	}
 
 	for _, rate := range genState.InterestScalars {

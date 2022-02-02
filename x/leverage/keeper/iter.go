@@ -48,6 +48,55 @@ func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	return badDebts
 }
 
+// GetAllRegisteredTokens returns all the registered tokens from the x/leverage
+// module's KVStore.
+func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
+	tokens := []types.Token{}
+
+	iterator := func(key, val []byte) error {
+		var t types.Token
+		if err := t.Unmarshal(val); err != nil {
+			// improperly marshaled Token should never happen
+			return err
+		}
+
+		tokens = append(tokens, t)
+		return nil
+	}
+
+	if err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator); err != nil {
+		panic(err)
+	}
+
+	return tokens
+}
+
+// GetAllReserves returns all reserves.
+func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
+	prefix := types.KeyPrefixReserveAmount
+	reserves := sdk.NewCoins()
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled reserve amount should never happen
+			return err
+		}
+
+		reserves = reserves.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return reserves
+}
+
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
@@ -75,7 +124,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 
 	_ = k.iterate(ctx, prefix, iterator)
 
-	return totalBorrowed.Sort()
+	return totalBorrowed
 }
 
 // GetBorrowerCollateral returns an sdk.Coins containing all of a borrower's collateral.
@@ -101,7 +150,7 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 
 	_ = k.iterate(ctx, prefix, iterator)
 
-	return totalCollateral.Sort()
+	return totalCollateral
 }
 
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
@@ -152,4 +201,28 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	}
 
 	return liquidationTargets, nil
+}
+
+// SweepBadDebts attempts to repay all bad debts in the system.
+func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
+	prefix := types.KeyPrefixBadDebt
+
+	iterator := func(key, value []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		// attempt to repay a single address's debt in this denom
+		fullyRepaid, err := k.RepayBadDebt(ctx, addr, denom)
+		if err != nil {
+			return err
+		}
+		if fullyRepaid {
+			// If the bad debt of this denom at the given address was fully repaid,
+			// clear the address|denom pair from the bad debt address list
+			k.SetBadDebtAddress(ctx, addr, denom, false)
+		}
+		return nil
+	}
+
+	return k.iterate(ctx, prefix, iterator)
 }

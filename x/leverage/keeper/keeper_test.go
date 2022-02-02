@@ -655,7 +655,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	s.Require().NoError(err)
 
 	// Manually mark the bad debt for repayment
-	s.app.LeverageKeeper.SetBadDebtAddress(s.ctx, umeeapp.BondDenom, bumAddr, true)
+	s.app.LeverageKeeper.SetBadDebtAddress(s.ctx, bumAddr, umeeapp.BondDenom, true)
 
 	// Manually set reserves to 60 umee
 	reserve := sdk.NewInt64Coin(umeeapp.BondDenom, 60000000)

@@ -82,28 +82,6 @@ func (k Keeper) DeleteRegisteredToken(ctx sdk.Context, denom string) {
 	store.Delete(types.CreateRegisteredTokenKey(denom))
 }
 
-// GetAllRegisteredTokens returns all the registered tokens from the x/leverage
-// module's KVStore.
-func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixRegisteredToken)
-	defer iter.Close()
-
-	var tokens []types.Token
-	for ; iter.Valid(); iter.Next() {
-		var t types.Token
-		if err := t.Unmarshal(iter.Value()); err != nil {
-			// Improperly marshaled Token should never happen
-			panic(err)
-		}
-
-		tokens = append(tokens, t)
-	}
-
-	return tokens
-}
-
 // GetRegisteredToken gets a token from the x/leverage module's KVStore.
 func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, error) {
 	store := ctx.KVStore(k.storeKey)
