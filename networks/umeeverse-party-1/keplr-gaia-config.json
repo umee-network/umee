@@ -2,7 +2,7 @@
   "rpc": "https://rpc.sphaeralcea.gaia-umeeverse-party-1.network.umee.cc",
   "rest": "https://api.sphaeralcea.gaia-umeeverse-party-1.network.umee.cc",
   "chainId": "gaia-umeeverse-party-1",
-  "chainName": "Gaia",
+  "chainName": "Gaia (Umeeverse)",
   "bip44": {
     "coinType": 118
   },
