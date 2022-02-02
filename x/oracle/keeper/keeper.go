@@ -280,6 +280,15 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 	return aggregatePrevote, nil
 }
 
+// HasAggregateExchangeRatePrevote checks if a validator has an existing prevote.
+func (k Keeper) HasAggregateExchangeRatePrevote(
+	ctx sdk.Context,
+	voter sdk.ValAddress,
+) bool {
+	store := ctx.KVStore(k.storeKey)
+	return store.Has(types.GetAggregateExchangeRatePrevoteKey(voter))
+}
+
 // SetAggregateExchangeRatePrevote set an oracle aggregate prevote to the store.
 func (k Keeper) SetAggregateExchangeRatePrevote(
 	ctx sdk.Context,
