@@ -17,7 +17,11 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
+<<<<<<< HEAD
 	github.com/umee-network/umee v0.7.0
+=======
+	github.com/umee-network/umee v0.7.2
+>>>>>>> 70e6a03 (build(deps): Bump github.com/umee-network/umee from 0.7.1 to 0.7.2 in /price-feeder (#478))
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
