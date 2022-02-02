@@ -25,26 +25,38 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			cdc.MustUnmarshal(kvB.Value, &registeredTokenB)
 			return fmt.Sprintf("%v\n%v", registeredTokenA, registeredTokenB)
 
-		case bytes.Equal(prefixA, types.KeyPrefixLoanToken):
-			var loanTokenA, loanTokenB sdk.Coin
-			cdc.MustUnmarshal(kvA.Value, &loanTokenA)
-			cdc.MustUnmarshal(kvB.Value, &loanTokenB)
-			return fmt.Sprintf("%v\n%v", loanTokenA, loanTokenB)
+		case bytes.Equal(prefixA, types.KeyPrefixAdjustedBorrow):
+			var amountA, amountB sdk.Dec
+			if err := amountA.Unmarshal(kvA.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			if err := amountB.Unmarshal(kvB.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixCollateralSetting):
 			return fmt.Sprintf("%v\n%v", kvA, kvB) // it is bytes: []byte{0x01}
 
 		case bytes.Equal(prefixA, types.KeyPrefixCollateralAmount):
-			var collateralAmountA, collateralAmountB sdk.Coin
-			cdc.MustUnmarshal(kvA.Value, &collateralAmountA)
-			cdc.MustUnmarshal(kvB.Value, &collateralAmountB)
-			return fmt.Sprintf("%v\n%v", collateralAmountA, collateralAmountB)
+			var amountA, amountB sdk.Int
+			if err := amountA.Unmarshal(kvA.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			if err := amountB.Unmarshal(kvB.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixReserveAmount):
-			var collateralAmountA, collateralAmountB sdk.Coin
-			cdc.MustUnmarshal(kvA.Value, &collateralAmountA)
-			cdc.MustUnmarshal(kvB.Value, &collateralAmountB)
-			return fmt.Sprintf("%v\n%v", collateralAmountA, collateralAmountB)
+			var amountA, amountB sdk.Int
+			if err := amountA.Unmarshal(kvA.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			if err := amountB.Unmarshal(kvB.Value); err != nil {
+				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
+			}
+			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixLastInterestTime):
 			var lastInterestTimeA, lastInterestTimeB gogotypes.Int64Value
@@ -52,38 +64,28 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			cdc.MustUnmarshal(kvA.Value, &lastInterestTimeB)
 			return fmt.Sprintf("%v\n%v", lastInterestTimeA, lastInterestTimeB)
 
-		case bytes.Equal(prefixA, types.KeyPrefixExchangeRate):
-			exchangeRateA, exchangeRateB := sdk.ZeroDec(), sdk.ZeroDec()
-			if err := exchangeRateA.Unmarshal(kvA.Value); err != nil {
-				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
-			}
-			if err := exchangeRateB.Unmarshal(kvB.Value); err != nil {
-				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
-			}
-			return fmt.Sprintf("%v\n%v", exchangeRateA, exchangeRateB)
-
 		case bytes.Equal(prefixA, types.KeyPrefixBadDebt):
 			return fmt.Sprintf("%v\n%v", kvA, kvB) // it is bytes: []byte{0x01}
 
-		case bytes.Equal(prefixA, types.KeyPrefixBorrowAPY):
-			var borrowAPYA, borrowAPYB sdk.Dec
-			if err := borrowAPYA.Unmarshal(kvA.Value); err != nil {
+		case bytes.Equal(prefixA, types.KeyPrefixInterestScalar):
+			var scalarA, scalarB sdk.Dec
+			if err := scalarA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
-			if err := borrowAPYB.Unmarshal(kvB.Value); err != nil {
+			if err := scalarB.Unmarshal(kvB.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
-			return fmt.Sprintf("%v\n%v", borrowAPYA, borrowAPYB)
+			return fmt.Sprintf("%v\n%v", scalarA, scalarB)
 
-		case bytes.Equal(prefixA, types.KeyPrefixLendAPY):
-			var lendAPYA, lendAPYB sdk.Dec
-			if err := lendAPYA.Unmarshal(kvA.Value); err != nil {
+		case bytes.Equal(prefixA, types.KeyPrefixAdjustedTotalBorrow):
+			var totalA, totalB sdk.Dec
+			if err := totalA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
-			if err := lendAPYB.Unmarshal(kvB.Value); err != nil {
+			if err := totalB.Unmarshal(kvB.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
-			return fmt.Sprintf("%v\n%v", lendAPYA, lendAPYB)
+			return fmt.Sprintf("%v\n%v", totalA, totalB)
 
 		default:
 			panic(fmt.Sprintf("invalid leverage key prefix %X", kvA.Key[:1]))
