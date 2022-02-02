@@ -17,11 +17,7 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
-<<<<<<< HEAD
-	github.com/umee-network/umee v0.7.0
-=======
 	github.com/umee-network/umee v0.7.2
->>>>>>> 70e6a03 (build(deps): Bump github.com/umee-network/umee from 0.7.1 to 0.7.2 in /price-feeder (#478))
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -32,7 +28,7 @@ require (
 	github.com/99designs/keyring v1.1.6 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/DataDog/zstd v1.4.5 // indirect
-	github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119145013-642d08945c63 // indirect
+	github.com/Gravity-Bridge/Gravity-Bridge/module v1.3.5 // indirect
 	github.com/Workiva/go-datastructures v1.0.52 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect

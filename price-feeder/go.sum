@@ -79,8 +79,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/zstd v1.4.1/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119145013-642d08945c63 h1:Gg4xHNv0x3NmH+89o+QNkdJc10Xg2gcX3slQXcNTA7I=
-github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119145013-642d08945c63/go.mod h1:lYUvMDrp8YFrGLrZlv1nGRNy6jo/3AgDxnb4KoLXpQw=
+github.com/Gravity-Bridge/Gravity-Bridge/module v1.3.5 h1:mEYkvyZRxHDQcqPAeASiZciOXJVqeDDkkWGMzUr1xNY=
+github.com/Gravity-Bridge/Gravity-Bridge/module v1.3.5/go.mod h1:lYUvMDrp8YFrGLrZlv1nGRNy6jo/3AgDxnb4KoLXpQw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.5.0/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOpzfwIujj1a84=
@@ -1029,16 +1029,8 @@ github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVM
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
-<<<<<<< HEAD
-github.com/umee-network/umee v0.7.0 h1:LMpOB7C+lW+DULR6m4AK0DTQYEVgEJdaYijzUo0fd6M=
-github.com/umee-network/umee v0.7.0/go.mod h1:gdYmWpyIqz5aKkJ+FWYfYRVSrP52EJpHhLhAgc/KPWE=
-=======
-github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
-github.com/ultraware/whitespace v0.0.4/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/umee-network/umee v0.7.2 h1:mcnzPboNLAy4qv7QFnK3aBC+RpIMqem0gwobjuL70rg=
 github.com/umee-network/umee v0.7.2/go.mod h1:6Bha4TmsXKWu1OzUkgNQO7pyQd2BMCd2W6T0WzFrGDg=
-github.com/urfave/cli v0.0.0-20171014202726-7bc6a0acffa5/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
->>>>>>> 70e6a03 (build(deps): Bump github.com/umee-network/umee from 0.7.1 to 0.7.2 in /price-feeder (#478))
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=
