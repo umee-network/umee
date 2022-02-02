@@ -1,8 +1,6 @@
 # End Block
 
-At the end of every block, the leverage module checks whether the current block height is a multiple of `InterestEpoch`.
-
-Every `InterestEpoch`, it runs the following steps in order:
+Every block, the leverage module runs the following steps in order:
 - Repay bad debts using reserves
 - Update borrow and lend APY and accrue interest on borrows
 - Update uToken exchange rates
@@ -25,7 +23,3 @@ Borrow APY is then used to accrue interest on all open borrows.
 After interest accrues, a portion of the amount for each denom is added to the state's `ReservedAmount` of each borrowed denomination.
 
 Then, an additional portion of interest accrued is transferred from the `leverage` module account to the `oracle` module to fund its reward pool.
-
-## Update Exchange Rates
-
-Because [uToken Exchange Rates](01_concepts.md#uToken-Exchange-Rate) only change with interest accrual, they are reculculated and stored every epoch for each accepted asset type.
