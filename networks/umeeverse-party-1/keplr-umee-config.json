@@ -2,7 +2,7 @@
   "rpc": "https://rpc.biplosion.umeeverse-party-1.network.umee.cc",
   "rest": "https://api.biplosion.umeeverse-party-1.network.umee.cc",
   "chainId": "umeeverse-party-1",
-  "chainName": "Umeeverse",
+  "chainName": "umeeverse-party-1",
   "bip44": {
     "coinType": 118
   },
