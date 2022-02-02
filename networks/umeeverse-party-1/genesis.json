@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2022-02-01T22:00:51.755343Z",
+  "genesis_time": "2022-02-02T16:51:33.205837Z",
   "chain_id": "umeeverse-party-1",
   "initial_height": "1",
   "consensus_params": {
@@ -33,105 +33,105 @@
       "accounts": [
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1g035es8582fawq42j0vmef33w53g7ue9j8cld4",
+          "address": "umee1px2tyw07l7dh2upthclraufgz2mpw4dlgajkyj",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1ejfnwrw7vk7lcr5fg53hjjw9r7a23yrdr2pfkf",
+          "address": "umee18uxg48ejc0ayl0c646rhfqu69z8ln36aaa0q63",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee13e3534kurj32f5d96s99nnsfunj0p27dtdntwv",
+          "address": "umee1n4l9evs3t7rljnuw7el07cpfhapzcrj0jv7mq6",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1x54aq0n37wjva977afatk7mt34nl2fzmhwr3vn",
+          "address": "umee1frelmcs002w6w9cts38h7mxxk4aj5jje5q93fw",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1m23y2gwutfvmnrgz80lj8v9j83chg56xe547pz",
+          "address": "umee1wnevsczfp3end7jqg25xk90ymmnedke02ss2wn",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee14wdu47klusrsc0944rgcl0wa5hfdpsvdy89wsl",
+          "address": "umee1w73lxkaterydl9ytxfzlwn7r2r39j4e47vggdq",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1934q8zne6lq7xr58xmnk9zdxuq3ghzxcw0pu9x",
+          "address": "umee1f9xvvqre0m8hs5ya2ekgwhs9t38y7mvhep0xrl",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1f2zx93f9v6yy59dy3gzakaygkj5tj8e6wy8gw4",
+          "address": "umee1wygzs25jqkegyv6a9jkkhw43uu3f9wgykhze32",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1urytkla83ca2ls2kl2scs59jca2mu5qdav2nj0",
+          "address": "umee1n9223eqg4fwtf0gra3vaghzj4jdjtq7ghxuy7l",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1h00nr00zut5g3d96ndt22fwgwkq7ngtw4p835j",
+          "address": "umee1gxvjglmh9lnjujuzercvnd8a7grmwr8xw3kvwm",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1pskmzxw3tyv5vgfkeu676u2u2z097dcww92ttn",
+          "address": "umee14w4568d337xk9uzljnznvz2zdqsg0ygvv4m4w8",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1v7p40lcglmt2kqfwu4pddxejj6r3zlty6el6v7",
+          "address": "umee1tcne0ha2hpf5yddnug0kz9ywd3sca2uqv0juda",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee1c8ltaa67phms29zr2lr2gelyapuhhuru9eaqgw",
+          "address": "umee1645ejvqsd8szdytvp8rfvr95nzeqs7fy8j5uak",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee17e8zktshvrlz2njyprrm7p22tt047uhls3swg7",
+          "address": "umee12ayg52sw5v7p6g3qs30j0v7a4qqcv2q2sk3ngy",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "umee173xfk9s8qluk7tm0d0w3dltckjv22g5794n3zp",
+          "address": "umee108c46z88f90m5dlp4znjm5vvj46hn9hqmd6a0n",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
@@ -148,7 +148,7 @@
       },
       "balances": [
         {
-          "address": "umee1pskmzxw3tyv5vgfkeu676u2u2z097dcww92ttn",
+          "address": "umee1px2tyw07l7dh2upthclraufgz2mpw4dlgajkyj",
           "coins": [
             {
               "denom": "uumee",
@@ -157,7 +157,7 @@
           ]
         },
         {
-          "address": "umee1934q8zne6lq7xr58xmnk9zdxuq3ghzxcw0pu9x",
+          "address": "umee18uxg48ejc0ayl0c646rhfqu69z8ln36aaa0q63",
           "coins": [
             {
               "denom": "uumee",
@@ -166,7 +166,7 @@
           ]
         },
         {
-          "address": "umee1x54aq0n37wjva977afatk7mt34nl2fzmhwr3vn",
+          "address": "umee1gxvjglmh9lnjujuzercvnd8a7grmwr8xw3kvwm",
           "coins": [
             {
               "denom": "uumee",
@@ -175,7 +175,7 @@
           ]
         },
         {
-          "address": "umee1g035es8582fawq42j0vmef33w53g7ue9j8cld4",
+          "address": "umee1frelmcs002w6w9cts38h7mxxk4aj5jje5q93fw",
           "coins": [
             {
               "denom": "uumee",
@@ -184,7 +184,7 @@
           ]
         },
         {
-          "address": "umee1f2zx93f9v6yy59dy3gzakaygkj5tj8e6wy8gw4",
+          "address": "umee1f9xvvqre0m8hs5ya2ekgwhs9t38y7mvhep0xrl",
           "coins": [
             {
               "denom": "uumee",
@@ -193,7 +193,7 @@
           ]
         },
         {
-          "address": "umee1v7p40lcglmt2kqfwu4pddxejj6r3zlty6el6v7",
+          "address": "umee12ayg52sw5v7p6g3qs30j0v7a4qqcv2q2sk3ngy",
           "coins": [
             {
               "denom": "uumee",
@@ -202,7 +202,7 @@
           ]
         },
         {
-          "address": "umee13e3534kurj32f5d96s99nnsfunj0p27dtdntwv",
+          "address": "umee1tcne0ha2hpf5yddnug0kz9ywd3sca2uqv0juda",
           "coins": [
             {
               "denom": "uumee",
@@ -211,7 +211,7 @@
           ]
         },
         {
-          "address": "umee14wdu47klusrsc0944rgcl0wa5hfdpsvdy89wsl",
+          "address": "umee1wygzs25jqkegyv6a9jkkhw43uu3f9wgykhze32",
           "coins": [
             {
               "denom": "uumee",
@@ -220,7 +220,7 @@
           ]
         },
         {
-          "address": "umee1h00nr00zut5g3d96ndt22fwgwkq7ngtw4p835j",
+          "address": "umee1wnevsczfp3end7jqg25xk90ymmnedke02ss2wn",
           "coins": [
             {
               "denom": "uumee",
@@ -229,7 +229,7 @@
           ]
         },
         {
-          "address": "umee1c8ltaa67phms29zr2lr2gelyapuhhuru9eaqgw",
+          "address": "umee1w73lxkaterydl9ytxfzlwn7r2r39j4e47vggdq",
           "coins": [
             {
               "denom": "uumee",
@@ -238,7 +238,7 @@
           ]
         },
         {
-          "address": "umee1ejfnwrw7vk7lcr5fg53hjjw9r7a23yrdr2pfkf",
+          "address": "umee108c46z88f90m5dlp4znjm5vvj46hn9hqmd6a0n",
           "coins": [
             {
               "denom": "uumee",
@@ -247,7 +247,7 @@
           ]
         },
         {
-          "address": "umee1m23y2gwutfvmnrgz80lj8v9j83chg56xe547pz",
+          "address": "umee1n9223eqg4fwtf0gra3vaghzj4jdjtq7ghxuy7l",
           "coins": [
             {
               "denom": "uumee",
@@ -256,7 +256,7 @@
           ]
         },
         {
-          "address": "umee1urytkla83ca2ls2kl2scs59jca2mu5qdav2nj0",
+          "address": "umee1n4l9evs3t7rljnuw7el07cpfhapzcrj0jv7mq6",
           "coins": [
             {
               "denom": "uumee",
@@ -265,7 +265,7 @@
           ]
         },
         {
-          "address": "umee173xfk9s8qluk7tm0d0w3dltckjv22g5794n3zp",
+          "address": "umee14w4568d337xk9uzljnznvz2zdqsg0ygvv4m4w8",
           "coins": [
             {
               "denom": "uumee",
@@ -274,7 +274,7 @@
           ]
         },
         {
-          "address": "umee17e8zktshvrlz2njyprrm7p22tt047uhls3swg7",
+          "address": "umee1645ejvqsd8szdytvp8rfvr95nzeqs7fy8j5uak",
           "coins": [
             {
               "denom": "uumee",
@@ -351,7 +351,7 @@
               {
                 "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
                 "description": {
-                  "moniker": "semicupium",
+                  "moniker": "biplosion",
                   "identity": "",
                   "website": "",
                   "security_contact": "",
@@ -363,11 +363,11 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "umee1ejfnwrw7vk7lcr5fg53hjjw9r7a23yrdr2pfkf",
-                "validator_address": "umeevaloper1ejfnwrw7vk7lcr5fg53hjjw9r7a23yrdrwxx8r",
+                "delegator_address": "umee1frelmcs002w6w9cts38h7mxxk4aj5jje5q93fw",
+                "validator_address": "umeevaloper1frelmcs002w6w9cts38h7mxxk4aj5jje5yz7cy",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "jgwsIZdvgeF/d5CuDYl5hKlwpdf6/8HTU25qmSHDjzw="
+                  "key": "SUVqIQJYsMD+tliGzJ7XosP1cwLAoZzTCv8SFjOnVHk="
                 },
                 "value": {
                   "denom": "uumee",
@@ -375,7 +375,7 @@
                 }
               }
             ],
-            "memo": "0ca4d8da45ca3abf3409e002b6a941b3d15ab46a@10.0.0.115:26656",
+            "memo": "866bb1032d5f658850796576e3f1a9efba388a51@10.0.0.115:26656",
             "timeout_height": "0",
             "extension_options": [],
             "non_critical_extension_options": []
@@ -385,7 +385,7 @@
               {
                 "public_key": {
                   "@type": "/cosmos.crypto.secp256k1.PubKey",
-                  "key": "A+/DPVagtq6nEmiNqUNTNxUQyt/qvAHPM8cp9INaYucI"
+                  "key": "AoavEFKskZNtOZ3QbHKUb1cghgD4UMm7KTpBPAceOUYC"
                 },
                 "mode_info": {
                   "single": {
@@ -403,7 +403,7 @@
             }
           },
           "signatures": [
-            "UKvbjtIb/XAGSxmRv8Ua2oxvujrU5+qCofn483zCQV50xu2G1VpCuZafmLyvbmAosqsHL+WCOrZyU8Uc475A/Q=="
+            "MDP1r9b0YIxKsMiXWPmYv2s4Amn7Ce0Os5NBsRM3+AQeqaytGf74MzzNvA9me4rGfIrP+IpsWWGt+kXCSlzzCA=="
           ]
         },
         {
@@ -412,7 +412,7 @@
               {
                 "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
                 "description": {
-                  "moniker": "myosynizesis",
+                  "moniker": "scurrility",
                   "identity": "",
                   "website": "",
                   "security_contact": "",
@@ -424,11 +424,11 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "umee14wdu47klusrsc0944rgcl0wa5hfdpsvdy89wsl",
-                "validator_address": "umeevaloper14wdu47klusrsc0944rgcl0wa5hfdpsvdyrzpp4",
+                "delegator_address": "umee14w4568d337xk9uzljnznvz2zdqsg0ygvv4m4w8",
+                "validator_address": "umeevaloper14w4568d337xk9uzljnznvz2zdqsg0ygvv3u6ld",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "fb4s7ZRXdOuKTXGmHb5Wk7srA/hxN3UQarLFlljYV3w="
+                  "key": "28bUlGAdgz8/eOo7fIRO4uXYkPn5ERgsQMEUxZf0SZo="
                 },
                 "value": {
                   "denom": "uumee",
@@ -436,7 +436,7 @@
                 }
               }
             ],
-            "memo": "6f825b478da0591bdc8332aefcd4910a893244e7@10.0.0.115:26656",
+            "memo": "dd8663e271986830865d6cdf539893e2fc4d06ab@10.0.0.115:26656",
             "timeout_height": "0",
             "extension_options": [],
             "non_critical_extension_options": []
@@ -446,7 +446,7 @@
               {
                 "public_key": {
                   "@type": "/cosmos.crypto.secp256k1.PubKey",
-                  "key": "A0ImveCIL7aJDW5xZjr3L2lahh34Z4wBs97Z+eu4AkYy"
+                  "key": "A7OS0qoMHP4eIY8BH7DsUm+qRLhrRSNYZLGlDejMEkvT"
                 },
                 "mode_info": {
                   "single": {
@@ -464,7 +464,7 @@
             }
           },
           "signatures": [
-            "/5UJjFm6aJ/gTACLInEvR9nSLUEtb5oZ+Kj/cBN7m1sQ8tOtBUWhFOb4KE4e89qCSmcWwzlLli8h5fB5d94iJA=="
+            "hzQ/oPaEPlFZF98Yehh0KVadedGZVYFMHjQbHXLFowtHy4x8eN39Jrby7fIy8PWHHBFYjgRTab0E+GD72Fprrg=="
           ]
         },
         {
@@ -473,7 +473,7 @@
               {
                 "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
                 "description": {
-                  "moniker": "placebo",
+                  "moniker": "coppicing",
                   "identity": "",
                   "website": "",
                   "security_contact": "",
@@ -485,11 +485,11 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "umee173xfk9s8qluk7tm0d0w3dltckjv22g5794n3zp",
-                "validator_address": "umeevaloper173xfk9s8qluk7tm0d0w3dltckjv22g579357nt",
+                "delegator_address": "umee1gxvjglmh9lnjujuzercvnd8a7grmwr8xw3kvwm",
+                "validator_address": "umeevaloper1gxvjglmh9lnjujuzercvnd8a7grmwr8xw43rl3",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "VdY4VI2jI+yf9lz0bi/DGTlUe8xMM9y3XLaPYmIhfhQ="
+                  "key": "BU62VlkcYfKvZSa6JV+CjNVO6GhLpiKj6WTo0LbPHac="
                 },
                 "value": {
                   "denom": "uumee",
@@ -497,7 +497,7 @@
                 }
               }
             ],
-            "memo": "b67013307ba276c281372032e787520802a16b3d@10.0.0.115:26656",
+            "memo": "e91691d711889871745f75fe2e07d2afa2fb19b6@10.0.0.115:26656",
             "timeout_height": "0",
             "extension_options": [],
             "non_critical_extension_options": []
@@ -507,7 +507,7 @@
               {
                 "public_key": {
                   "@type": "/cosmos.crypto.secp256k1.PubKey",
-                  "key": "A2naWyBcXGjbI7KfiSdcUeehcsJN4IKyFEc82txCfGHO"
+                  "key": "A2+rMlwk5g9M6O8kzqjsOYqgECcOsLNvodQO3Njvdwnx"
                 },
                 "mode_info": {
                   "single": {
@@ -525,7 +525,7 @@
             }
           },
           "signatures": [
-            "X4eADL6o8dULa6RoTva7lDLkLJ+MiCwt7V4GV6MC2mtqHZhWxRj50TBjPwHXWuPfmlO+eBriJHQVeFWaMGzRXQ=="
+            "OfhYmBdld6dG1+nCKKM0nqdHbF19y3z4fHezeqD4v+BmFuGlFf5Lhmrr/FsqJBudDy/9VBVabMGlWObOGEsAaw=="
           ]
         }
       ]
@@ -545,7 +545,7 @@
         "max_deposit_period": "172800s"
       },
       "voting_params": {
-        "voting_period": "172800s"
+        "voting_period": "600s"
       },
       "tally_params": {
         "quorum": "0.334000000000000000",
@@ -596,18 +596,18 @@
       "delegate_keys": [
         {
           "eth_address": "0xfacf66789DD2fA6d80A36353f900922cb6D990F1",
-          "orchestrator": "umee1x54aq0n37wjva977afatk7mt34nl2fzmhwr3vn",
-          "validator": "umeevaloper1ejfnwrw7vk7lcr5fg53hjjw9r7a23yrdrwxx8r"
+          "orchestrator": "umee1px2tyw07l7dh2upthclraufgz2mpw4dlgajkyj",
+          "validator": "umeevaloper1frelmcs002w6w9cts38h7mxxk4aj5jje5yz7cy"
         },
         {
           "eth_address": "0xfac87ECc6009Be4a856CB30846F82ea0B94d8C01",
-          "orchestrator": "umee1f2zx93f9v6yy59dy3gzakaygkj5tj8e6wy8gw4",
-          "validator": "umeevaloper14wdu47klusrsc0944rgcl0wa5hfdpsvdyrzpp4"
+          "orchestrator": "umee1f9xvvqre0m8hs5ya2ekgwhs9t38y7mvhep0xrl",
+          "validator": "umeevaloper1gxvjglmh9lnjujuzercvnd8a7grmwr8xw43rl3"
         },
         {
           "eth_address": "0xfacEFb63F7CDFf0ca7a7A064639b3956Ad9f3acC",
-          "orchestrator": "umee1v7p40lcglmt2kqfwu4pddxejj6r3zlty6el6v7",
-          "validator": "umeevaloper173xfk9s8qluk7tm0d0w3dltckjv22g579357nt"
+          "orchestrator": "umee1645ejvqsd8szdytvp8rfvr95nzeqs7fy8j5uak",
+          "validator": "umeevaloper14w4568d337xk9uzljnznvz2zdqsg0ygvv3u6ld"
         }
       ],
       "erc20_to_denoms": [],
