@@ -275,25 +275,18 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		prefix := types.KeyPrefixInterestScalar
+		tokenPrefix := types.KeyPrefixRegisteredToken
 
-		// Iterate through all denoms which have an exchange rate stored
-		// in the keeper. If a token is registered but its exchange rate is
-		// lower than 1.0 or it has some error doing the unmarshal it
-		// adds the denom invariant count and message description
-		err := k.iterate(ctx, prefix, func(key, val []byte) error {
-			denom := types.DenomFromKey(key, prefix)
+		// Iterate through all denoms of registered tokens in the
+		// keeper, ensuring none have an interest scalar less than one.
+		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, tokenPrefix)
 
-			scalar := sdk.ZeroDec()
-			if err := scalar.Unmarshal(val); err != nil {
-				count++
-				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
-				return nil
-			}
+			scalar := k.getInterestScalar(ctx, denom)
 
 			if scalar.LT(sdk.OneDec()) {
 				count++
-				msg += fmt.Sprintf("\t%s interest scalar %s is lower than one\n", denom, scalar.String())
+				msg += fmt.Sprintf("\t%s interest scalar %s is less than one\n", denom, scalar.String())
 			}
 			return nil
 		})
