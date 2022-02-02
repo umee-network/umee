@@ -27,17 +27,16 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // GenesisState defines the x/leverage module's genesis state.
 type GenesisState struct {
-	Params             Params                                   `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
-	Registry           []Token                                  `protobuf:"bytes,2,rep,name=registry,proto3" json:"registry"`
-	Borrows            []Borrow                                 `protobuf:"bytes,3,rep,name=borrows,proto3" json:"borrows"`
-	CollateralSettings []CollateralSetting                      `protobuf:"bytes,4,rep,name=collateral_settings,json=collateralSettings,proto3" json:"collateral_settings"`
-	Collateral         []Collateral                             `protobuf:"bytes,5,rep,name=collateral,proto3" json:"collateral"`
-	Reserves           github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,6,rep,name=reserves,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"reserves"`
-	LastInterestTime   int64                                    `protobuf:"varint,7,opt,name=last_interest_time,json=lastInterestTime,proto3" json:"last_interest_time,omitempty"`
-	ExchangeRates      []ExchangeRate                           `protobuf:"bytes,8,rep,name=exchange_rates,json=exchangeRates,proto3" json:"exchange_rates"`
-	BadDebts           []BadDebt                                `protobuf:"bytes,9,rep,name=bad_debts,json=badDebts,proto3" json:"bad_debts"`
-	BorrowRates        []APY                                    `protobuf:"bytes,10,rep,name=borrow_rates,json=borrowRates,proto3" json:"borrow_rates"`
-	LendRates          []APY                                    `protobuf:"bytes,11,rep,name=lend_rates,json=lendRates,proto3" json:"lend_rates"`
+	Params                 Params                                   `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	Registry               []Token                                  `protobuf:"bytes,2,rep,name=registry,proto3" json:"registry"`
+	AdjustedBorrows        []AdjustedBorrow                         `protobuf:"bytes,3,rep,name=adjusted_borrows,json=adjustedBorrows,proto3" json:"adjusted_borrows"`
+	CollateralSettings     []CollateralSetting                      `protobuf:"bytes,4,rep,name=collateral_settings,json=collateralSettings,proto3" json:"collateral_settings"`
+	Collateral             []Collateral                             `protobuf:"bytes,5,rep,name=collateral,proto3" json:"collateral"`
+	Reserves               github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,6,rep,name=reserves,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"reserves"`
+	LastInterestTime       int64                                    `protobuf:"varint,7,opt,name=last_interest_time,json=lastInterestTime,proto3" json:"last_interest_time,omitempty"`
+	BadDebts               []BadDebt                                `protobuf:"bytes,8,rep,name=bad_debts,json=badDebts,proto3" json:"bad_debts"`
+	InterestScalars        []InterestScalar                         `protobuf:"bytes,9,rep,name=interest_scalars,json=interestScalars,proto3" json:"interest_scalars"`
+	AdjustedTotalsBorrowed []AdjustedTotalBorrowed                  `protobuf:"bytes,10,rep,name=adjusted_totals_borrowed,json=adjustedTotalsBorrowed,proto3" json:"adjusted_totals_borrowed"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
@@ -87,9 +86,9 @@ func (m *GenesisState) GetRegistry() []Token {
 	return nil
 }
 
-func (m *GenesisState) GetBorrows() []Borrow {
+func (m *GenesisState) GetAdjustedBorrows() []AdjustedBorrow {
 	if m != nil {
-		return m.Borrows
+		return m.AdjustedBorrows
 	}
 	return nil
 }
@@ -122,13 +121,6 @@ func (m *GenesisState) GetLastInterestTime() int64 {
 	return 0
 }
 
-func (m *GenesisState) GetExchangeRates() []ExchangeRate {
-	if m != nil {
-		return m.ExchangeRates
-	}
-	return nil
-}
-
 func (m *GenesisState) GetBadDebts() []BadDebt {
 	if m != nil {
 		return m.BadDebts
@@ -136,38 +128,38 @@ func (m *GenesisState) GetBadDebts() []BadDebt {
 	return nil
 }
 
-func (m *GenesisState) GetBorrowRates() []APY {
+func (m *GenesisState) GetInterestScalars() []InterestScalar {
 	if m != nil {
-		return m.BorrowRates
+		return m.InterestScalars
 	}
 	return nil
 }
 
-func (m *GenesisState) GetLendRates() []APY {
+func (m *GenesisState) GetAdjustedTotalsBorrowed() []AdjustedTotalBorrowed {
 	if m != nil {
-		return m.LendRates
+		return m.AdjustedTotalsBorrowed
 	}
 	return nil
 }
 
-// Borrow is a loan struct used in the leverage module's genesis state.
-type Borrow struct {
-	Address string     `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Amount  types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
+// AdjustedBorrow is a borrow struct used in the leverage module's genesis state.
+type AdjustedBorrow struct {
+	Address string        `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Amount  types.DecCoin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
 
-func (m *Borrow) Reset()         { *m = Borrow{} }
-func (m *Borrow) String() string { return proto.CompactTextString(m) }
-func (*Borrow) ProtoMessage()    {}
-func (*Borrow) Descriptor() ([]byte, []int) {
+func (m *AdjustedBorrow) Reset()         { *m = AdjustedBorrow{} }
+func (m *AdjustedBorrow) String() string { return proto.CompactTextString(m) }
+func (*AdjustedBorrow) ProtoMessage()    {}
+func (*AdjustedBorrow) Descriptor() ([]byte, []int) {
 	return fileDescriptor_bca558a26db296e9, []int{1}
 }
-func (m *Borrow) XXX_Unmarshal(b []byte) error {
+func (m *AdjustedBorrow) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Borrow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AdjustedBorrow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Borrow.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AdjustedBorrow.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -177,33 +169,33 @@ func (m *Borrow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Borrow) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Borrow.Merge(m, src)
+func (m *AdjustedBorrow) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AdjustedBorrow.Merge(m, src)
 }
-func (m *Borrow) XXX_Size() int {
+func (m *AdjustedBorrow) XXX_Size() int {
 	return m.Size()
 }
-func (m *Borrow) XXX_DiscardUnknown() {
-	xxx_messageInfo_Borrow.DiscardUnknown(m)
+func (m *AdjustedBorrow) XXX_DiscardUnknown() {
+	xxx_messageInfo_AdjustedBorrow.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Borrow proto.InternalMessageInfo
+var xxx_messageInfo_AdjustedBorrow proto.InternalMessageInfo
 
-func (m *Borrow) GetAddress() string {
+func (m *AdjustedBorrow) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *Borrow) GetAmount() types.Coin {
+func (m *AdjustedBorrow) GetAmount() types.DecCoin {
 	if m != nil {
 		return m.Amount
 	}
-	return types.Coin{}
+	return types.DecCoin{}
 }
 
-// CollateralSetting is a borrow collateral setting used in the leverage module's genesis state.
+// CollateralSetting is a collateral setting struct used in the leverage module's genesis state.
 type CollateralSetting struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -256,7 +248,7 @@ func (m *CollateralSetting) GetDenom() string {
 	return ""
 }
 
-// Collateral is a collateral position used in the leverage module's genesis state.
+// Collateral is a collateral struct used in the leverage module's genesis state.
 type Collateral struct {
 	Address string     `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Amount  types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -362,24 +354,24 @@ func (m *BadDebt) GetDenom() string {
 	return ""
 }
 
-// ExchangeRate is a denom's uToken exchange rate used in the leverage module's genesis state.
-type ExchangeRate struct {
-	Denom        string                                 `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-	ExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=exchange_rate,json=exchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"exchange_rate"`
+// InterestScalar is an interest scalar used in the leverage module's genesis state.
+type InterestScalar struct {
+	Denom  string                                 `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	Scalar github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=scalar,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"scalar"`
 }
 
-func (m *ExchangeRate) Reset()         { *m = ExchangeRate{} }
-func (m *ExchangeRate) String() string { return proto.CompactTextString(m) }
-func (*ExchangeRate) ProtoMessage()    {}
-func (*ExchangeRate) Descriptor() ([]byte, []int) {
+func (m *InterestScalar) Reset()         { *m = InterestScalar{} }
+func (m *InterestScalar) String() string { return proto.CompactTextString(m) }
+func (*InterestScalar) ProtoMessage()    {}
+func (*InterestScalar) Descriptor() ([]byte, []int) {
 	return fileDescriptor_bca558a26db296e9, []int{5}
 }
-func (m *ExchangeRate) XXX_Unmarshal(b []byte) error {
+func (m *InterestScalar) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ExchangeRate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *InterestScalar) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ExchangeRate.Marshal(b, m, deterministic)
+		return xxx_messageInfo_InterestScalar.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -389,43 +381,43 @@ func (m *ExchangeRate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 		return b[:n], nil
 	}
 }
-func (m *ExchangeRate) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExchangeRate.Merge(m, src)
+func (m *InterestScalar) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InterestScalar.Merge(m, src)
 }
-func (m *ExchangeRate) XXX_Size() int {
+func (m *InterestScalar) XXX_Size() int {
 	return m.Size()
 }
-func (m *ExchangeRate) XXX_DiscardUnknown() {
-	xxx_messageInfo_ExchangeRate.DiscardUnknown(m)
+func (m *InterestScalar) XXX_DiscardUnknown() {
+	xxx_messageInfo_InterestScalar.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ExchangeRate proto.InternalMessageInfo
+var xxx_messageInfo_InterestScalar proto.InternalMessageInfo
 
-func (m *ExchangeRate) GetDenom() string {
+func (m *InterestScalar) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
 	return ""
 }
 
-// APY is a denom's borrow or lend APY used in the leverage module's genesis state.
-type APY struct {
-	Denom string                                 `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-	APY   github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=APY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"APY"`
+// AdjustedTotalBorrowed is an adjusted borrow total used in the leverage module's genesis state.
+type AdjustedTotalBorrowed struct {
+	Denom  string                                 `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	Amount github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"amount"`
 }
 
-func (m *APY) Reset()         { *m = APY{} }
-func (m *APY) String() string { return proto.CompactTextString(m) }
-func (*APY) ProtoMessage()    {}
-func (*APY) Descriptor() ([]byte, []int) {
+func (m *AdjustedTotalBorrowed) Reset()         { *m = AdjustedTotalBorrowed{} }
+func (m *AdjustedTotalBorrowed) String() string { return proto.CompactTextString(m) }
+func (*AdjustedTotalBorrowed) ProtoMessage()    {}
+func (*AdjustedTotalBorrowed) Descriptor() ([]byte, []int) {
 	return fileDescriptor_bca558a26db296e9, []int{6}
 }
-func (m *APY) XXX_Unmarshal(b []byte) error {
+func (m *AdjustedTotalBorrowed) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *APY) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AdjustedTotalBorrowed) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_APY.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AdjustedTotalBorrowed.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -435,19 +427,19 @@ func (m *APY) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *APY) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_APY.Merge(m, src)
+func (m *AdjustedTotalBorrowed) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AdjustedTotalBorrowed.Merge(m, src)
 }
-func (m *APY) XXX_Size() int {
+func (m *AdjustedTotalBorrowed) XXX_Size() int {
 	return m.Size()
 }
-func (m *APY) XXX_DiscardUnknown() {
-	xxx_messageInfo_APY.DiscardUnknown(m)
+func (m *AdjustedTotalBorrowed) XXX_DiscardUnknown() {
+	xxx_messageInfo_AdjustedTotalBorrowed.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_APY proto.InternalMessageInfo
+var xxx_messageInfo_AdjustedTotalBorrowed proto.InternalMessageInfo
 
-func (m *APY) GetDenom() string {
+func (m *AdjustedTotalBorrowed) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -456,12 +448,12 @@ func (m *APY) GetDenom() string {
 
 func init() {
 	proto.RegisterType((*GenesisState)(nil), "umeenetwork.umee.leverage.v1beta1.GenesisState")
-	proto.RegisterType((*Borrow)(nil), "umeenetwork.umee.leverage.v1beta1.Borrow")
+	proto.RegisterType((*AdjustedBorrow)(nil), "umeenetwork.umee.leverage.v1beta1.AdjustedBorrow")
 	proto.RegisterType((*CollateralSetting)(nil), "umeenetwork.umee.leverage.v1beta1.CollateralSetting")
 	proto.RegisterType((*Collateral)(nil), "umeenetwork.umee.leverage.v1beta1.Collateral")
 	proto.RegisterType((*BadDebt)(nil), "umeenetwork.umee.leverage.v1beta1.BadDebt")
-	proto.RegisterType((*ExchangeRate)(nil), "umeenetwork.umee.leverage.v1beta1.ExchangeRate")
-	proto.RegisterType((*APY)(nil), "umeenetwork.umee.leverage.v1beta1.APY")
+	proto.RegisterType((*InterestScalar)(nil), "umeenetwork.umee.leverage.v1beta1.InterestScalar")
+	proto.RegisterType((*AdjustedTotalBorrowed)(nil), "umeenetwork.umee.leverage.v1beta1.AdjustedTotalBorrowed")
 }
 
 func init() {
@@ -469,48 +461,49 @@ func init() {
 }
 
 var fileDescriptor_bca558a26db296e9 = []byte{
-	// 648 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x95, 0xcb, 0x6e, 0xd3, 0x4e,
-	0x14, 0xc6, 0xe3, 0xa6, 0x4d, 0x9a, 0x93, 0xf4, 0xaf, 0x3f, 0x43, 0x17, 0xa6, 0x0b, 0xb7, 0x04,
-	0x54, 0x05, 0x44, 0x6c, 0x5a, 0x90, 0x10, 0x3b, 0x9a, 0x16, 0x55, 0x05, 0x21, 0x2a, 0xa7, 0x9b,
-	0x72, 0x51, 0x34, 0xb6, 0x8f, 0x5c, 0x2b, 0xb1, 0xa7, 0xf2, 0x4c, 0x6f, 0x6f, 0x81, 0x78, 0x0c,
-	0x9e, 0xa4, 0xcb, 0x2e, 0x11, 0x8b, 0x82, 0x9a, 0x17, 0x41, 0x9e, 0x99, 0x24, 0xe6, 0x56, 0xdc,
-	0x4a, 0xac, 0xe2, 0xf1, 0x39, 0xdf, 0xef, 0x7c, 0x4e, 0xbe, 0x13, 0xc3, 0x9d, 0x83, 0x18, 0xd1,
-	0x19, 0xe0, 0x21, 0xa6, 0x34, 0x44, 0xe7, 0x70, 0xc5, 0x43, 0x41, 0x57, 0x9c, 0x10, 0x13, 0xe4,
-	0x11, 0xb7, 0xf7, 0x53, 0x26, 0x18, 0xb9, 0x9d, 0x35, 0x25, 0x28, 0x8e, 0x58, 0xda, 0xb7, 0xb3,
-	0x6b, 0x7b, 0x24, 0xb0, 0xb5, 0x60, 0x61, 0x3e, 0x64, 0x21, 0x93, 0xdd, 0x4e, 0x76, 0xa5, 0x84,
-	0x0b, 0x96, 0xcf, 0x78, 0xcc, 0xb8, 0xe3, 0x51, 0x3e, 0x61, 0xfb, 0x2c, 0x4a, 0x74, 0xfd, 0xee,
-	0xef, 0xa7, 0x8f, 0xe9, 0xb2, 0xab, 0xf9, 0xb1, 0x0a, 0x8d, 0x4d, 0x65, 0xa8, 0x2b, 0xa8, 0x40,
-	0xb2, 0x09, 0x95, 0x7d, 0x9a, 0xd2, 0x98, 0x9b, 0xc6, 0x92, 0xd1, 0xaa, 0xaf, 0xde, 0xb3, 0xff,
-	0x6a, 0xd0, 0xde, 0x96, 0x82, 0xce, 0xf4, 0xe9, 0xf9, 0x62, 0xc9, 0xd5, 0x72, 0xf2, 0x02, 0x66,
-	0x53, 0x0c, 0x23, 0x2e, 0xd2, 0x13, 0x73, 0x6a, 0xa9, 0xdc, 0xaa, 0xaf, 0xb6, 0x0a, 0xa0, 0x76,
-	0x58, 0x1f, 0x13, 0x4d, 0x1a, 0xeb, 0xc9, 0x16, 0x54, 0x3d, 0x96, 0xa6, 0xec, 0x88, 0x9b, 0x65,
-	0x89, 0x2a, 0xe2, 0xaa, 0x23, 0x15, 0x9a, 0x35, 0xd2, 0x93, 0x3e, 0xdc, 0xf4, 0xd9, 0x60, 0x40,
-	0x05, 0xa6, 0x74, 0xd0, 0xe3, 0x28, 0x44, 0x94, 0x84, 0xdc, 0x9c, 0x96, 0xd8, 0xc7, 0x05, 0xb0,
-	0xeb, 0x63, 0x75, 0x57, 0x89, 0xf5, 0x04, 0xe2, 0xff, 0x5c, 0xe0, 0xa4, 0x0b, 0x30, 0xb9, 0x6b,
-	0xce, 0xc8, 0x19, 0xed, 0x2b, 0xcd, 0xd0, 0xf0, 0x1c, 0x86, 0x84, 0xd9, 0x17, 0xcb, 0x31, 0x3d,
-	0x44, 0x6e, 0x56, 0x24, 0xf2, 0x96, 0xad, 0xb2, 0x60, 0x67, 0x59, 0xc8, 0x41, 0xa2, 0xa4, 0xf3,
-	0x30, 0x93, 0x7f, 0xfa, 0xba, 0xd8, 0x0a, 0x23, 0xb1, 0x77, 0xe0, 0xd9, 0x3e, 0x8b, 0x1d, 0x1d,
-	0x1c, 0xf5, 0xd1, 0xe6, 0x41, 0xdf, 0x11, 0x27, 0xfb, 0xc8, 0xa5, 0x80, 0xbb, 0x63, 0x38, 0x79,
-	0x00, 0x64, 0x40, 0xb9, 0xe8, 0x45, 0x89, 0xc0, 0x14, 0xb9, 0xe8, 0x89, 0x28, 0x46, 0xb3, 0xba,
-	0x64, 0xb4, 0xca, 0xee, 0xff, 0x59, 0x65, 0x4b, 0x17, 0x76, 0xa2, 0x18, 0xc9, 0x3b, 0xf8, 0x0f,
-	0x8f, 0xfd, 0x3d, 0x9a, 0x84, 0xd8, 0x4b, 0xa9, 0x40, 0x6e, 0xce, 0x4a, 0x73, 0x4e, 0x81, 0xe7,
-	0x7d, 0xae, 0x85, 0x2e, 0x15, 0xa8, 0x9f, 0x78, 0x0e, 0x73, 0xf7, 0x38, 0x79, 0x05, 0x35, 0x8f,
-	0x06, 0xbd, 0x00, 0x3d, 0xc1, 0xcd, 0x9a, 0x04, 0xdf, 0x2f, 0x92, 0x01, 0x1a, 0x6c, 0xa0, 0x27,
-	0x46, 0x81, 0xf2, 0xd4, 0x91, 0x93, 0xd7, 0xd0, 0x50, 0x81, 0xd0, 0x56, 0x41, 0x12, 0x97, 0x0b,
-	0x10, 0xd7, 0xb6, 0x77, 0x35, 0xad, 0xae, 0x08, 0xca, 0xdf, 0x4b, 0x80, 0x01, 0x26, 0x81, 0xc6,
-	0xd5, 0xaf, 0x81, 0xab, 0x65, 0x7a, 0x09, 0x6b, 0xbe, 0x85, 0x8a, 0x0a, 0x2f, 0x31, 0xa1, 0x4a,
-	0x83, 0x20, 0x45, 0xae, 0xd6, 0xb1, 0xe6, 0x8e, 0x8e, 0xe4, 0x09, 0x54, 0x68, 0xcc, 0x0e, 0x12,
-	0x61, 0x4e, 0xc9, 0x3d, 0xbd, 0x24, 0x03, 0x7a, 0x2f, 0x55, 0x7b, 0x73, 0x1d, 0x6e, 0xfc, 0x12,
-	0xe1, 0x4b, 0xe6, 0xcc, 0xc3, 0x4c, 0x80, 0x09, 0x8b, 0xe5, 0x98, 0x9a, 0xab, 0x0e, 0xcd, 0x1e,
-	0xc0, 0x04, 0xf2, 0x2f, 0x5c, 0x3e, 0x85, 0xaa, 0xfe, 0xed, 0xae, 0xec, 0xed, 0x04, 0x1a, 0xf9,
-	0x3c, 0x4d, 0xba, 0x8c, 0x5c, 0x17, 0xe9, 0xc2, 0xdc, 0x0f, 0x71, 0x55, 0x8c, 0x8e, 0x9d, 0xb9,
-	0xf8, 0x72, 0xbe, 0xb8, 0x5c, 0x60, 0x5f, 0x36, 0xd0, 0x77, 0x1b, 0xf9, 0x98, 0x36, 0xdf, 0x43,
-	0x79, 0x6d, 0x7b, 0xf7, 0x0f, 0x13, 0x9f, 0xc9, 0xe2, 0x35, 0xe7, 0x64, 0xd2, 0xce, 0xe6, 0xe9,
-	0x85, 0x65, 0x9c, 0x5d, 0x58, 0xc6, 0xb7, 0x0b, 0xcb, 0xf8, 0x30, 0xb4, 0x4a, 0x67, 0x43, 0xab,
-	0xf4, 0x79, 0x68, 0x95, 0xde, 0xb4, 0x73, 0x98, 0x2c, 0x68, 0x6d, 0x9d, 0x3a, 0x79, 0x70, 0x8e,
-	0x27, 0xaf, 0x01, 0x49, 0xf4, 0x2a, 0xf2, 0xcf, 0xff, 0xd1, 0xf7, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0x41, 0xcd, 0xae, 0x76, 0xa2, 0x06, 0x00, 0x00,
+	// 657 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x95, 0xcb, 0x6e, 0xd3, 0x40,
+	0x14, 0x86, 0xe3, 0x5e, 0x92, 0x66, 0x8a, 0x4a, 0x19, 0x0a, 0x1a, 0x2a, 0xe4, 0x96, 0x80, 0x50,
+	0x40, 0xc4, 0xa6, 0x05, 0x89, 0xcb, 0x0e, 0xb7, 0xa2, 0x02, 0x09, 0x09, 0x25, 0x5d, 0xb1, 0x89,
+	0xc6, 0xf6, 0xc1, 0x98, 0xd8, 0x9e, 0x6a, 0xce, 0xa4, 0x97, 0x87, 0x40, 0xe2, 0x39, 0x78, 0x92,
+	0x2e, 0xbb, 0x44, 0x2c, 0x0a, 0x6a, 0x5f, 0x04, 0x79, 0x3c, 0xb9, 0x95, 0x52, 0x5c, 0x56, 0xf1,
+	0xcc, 0x39, 0xdf, 0xff, 0x9f, 0x78, 0xfe, 0x91, 0xc9, 0xdd, 0x7e, 0x0a, 0xe0, 0x26, 0xb0, 0x0b,
+	0x92, 0x47, 0xe0, 0xee, 0xae, 0xf9, 0xa0, 0xf8, 0x9a, 0x1b, 0x41, 0x06, 0x18, 0xa3, 0xb3, 0x23,
+	0x85, 0x12, 0xf4, 0x4e, 0xde, 0x94, 0x81, 0xda, 0x13, 0xb2, 0xe7, 0xe4, 0xcf, 0xce, 0x00, 0x70,
+	0x0c, 0xb0, 0xbc, 0x14, 0x89, 0x48, 0xe8, 0x6e, 0x37, 0x7f, 0x2a, 0xc0, 0x65, 0x3b, 0x10, 0x98,
+	0x0a, 0x74, 0x7d, 0x8e, 0x23, 0xed, 0x40, 0xc4, 0x99, 0xa9, 0xdf, 0x3b, 0xdf, 0x7d, 0xa8, 0xae,
+	0xbb, 0x1a, 0x5f, 0x6a, 0xe4, 0xca, 0x56, 0x31, 0x50, 0x47, 0x71, 0x05, 0x74, 0x8b, 0x54, 0x77,
+	0xb8, 0xe4, 0x29, 0x32, 0x6b, 0xd5, 0x6a, 0xce, 0xaf, 0x3f, 0x70, 0xfe, 0x39, 0xa0, 0xf3, 0x5e,
+	0x03, 0xde, 0xcc, 0xe1, 0xf1, 0x4a, 0xa5, 0x6d, 0x70, 0xfa, 0x96, 0xcc, 0x49, 0x88, 0x62, 0x54,
+	0xf2, 0x80, 0x4d, 0xad, 0x4e, 0x37, 0xe7, 0xd7, 0x9b, 0x25, 0xa4, 0xb6, 0x45, 0x0f, 0x32, 0xa3,
+	0x34, 0xe4, 0xa9, 0x4f, 0x16, 0x79, 0xf8, 0xb9, 0x8f, 0x0a, 0xc2, 0xae, 0x2f, 0xa4, 0x14, 0x7b,
+	0xc8, 0xa6, 0xb5, 0xe6, 0x5a, 0x09, 0xcd, 0x57, 0x06, 0xf5, 0x34, 0x69, 0xc4, 0xaf, 0xf2, 0x89,
+	0x5d, 0xa4, 0x3d, 0x72, 0x3d, 0x10, 0x49, 0xc2, 0x15, 0x48, 0x9e, 0x74, 0x11, 0x94, 0x8a, 0xb3,
+	0x08, 0xd9, 0x8c, 0xb6, 0x79, 0x5a, 0xc2, 0x66, 0x63, 0x48, 0x77, 0x0a, 0xd8, 0x38, 0xd1, 0xe0,
+	0x6c, 0x01, 0x69, 0x87, 0x90, 0xd1, 0x2e, 0x9b, 0xd5, 0x1e, 0xad, 0x4b, 0x79, 0x18, 0xf1, 0x31,
+	0x19, 0x1a, 0xe5, 0x6f, 0x1c, 0x41, 0xee, 0x02, 0xb2, 0xaa, 0x96, 0xbc, 0xe5, 0x14, 0x21, 0x71,
+	0xf2, 0x90, 0x8c, 0x89, 0xc4, 0x99, 0xf7, 0x38, 0xc7, 0xbf, 0xfd, 0x5c, 0x69, 0x46, 0xb1, 0xfa,
+	0xd4, 0xf7, 0x9d, 0x40, 0xa4, 0xae, 0x49, 0x54, 0xf1, 0xd3, 0xc2, 0xb0, 0xe7, 0xaa, 0x83, 0x1d,
+	0x40, 0x0d, 0x60, 0x7b, 0x28, 0x4e, 0x1f, 0x11, 0x9a, 0x70, 0x54, 0xdd, 0x38, 0x53, 0x20, 0x01,
+	0x55, 0x57, 0xc5, 0x29, 0xb0, 0xda, 0xaa, 0xd5, 0x9c, 0x6e, 0x2f, 0xe6, 0x95, 0x37, 0xa6, 0xb0,
+	0x1d, 0xa7, 0x40, 0xdf, 0x91, 0xba, 0xcf, 0xc3, 0x6e, 0x08, 0xbe, 0x42, 0x36, 0xa7, 0xe7, 0x7a,
+	0x58, 0xe2, 0xaf, 0x7a, 0x3c, 0xdc, 0x04, 0x5f, 0x0d, 0xb2, 0xe0, 0x17, 0x4b, 0xcc, 0xb3, 0x30,
+	0xf4, 0xc5, 0x80, 0x27, 0x5c, 0x22, 0xab, 0x97, 0xce, 0xc2, 0x60, 0xb2, 0x8e, 0x26, 0x07, 0x59,
+	0x88, 0x27, 0x76, 0x91, 0xee, 0x13, 0x36, 0xcc, 0x9b, 0x12, 0x8a, 0x27, 0x68, 0x62, 0x07, 0x21,
+	0x23, 0xda, 0xeb, 0xf9, 0x25, 0x72, 0xb7, 0x9d, 0x2b, 0x78, 0x86, 0x37, 0x96, 0x37, 0xf9, 0x78,
+	0x11, 0x07, 0xd5, 0xc6, 0x47, 0xb2, 0x30, 0x19, 0x57, 0xca, 0x48, 0x8d, 0x87, 0xa1, 0x04, 0x2c,
+	0x6e, 0x64, 0xbd, 0x3d, 0x58, 0xd2, 0x97, 0xa4, 0xca, 0x53, 0xd1, 0xcf, 0x14, 0x9b, 0xd2, 0x57,
+	0xf5, 0xf6, 0xb9, 0xa7, 0xbd, 0x09, 0x81, 0x3e, 0x70, 0x73, 0x3b, 0x0b, 0xa2, 0xb1, 0x41, 0xae,
+	0xfd, 0x91, 0xd7, 0x0b, 0xac, 0x96, 0xc8, 0x6c, 0x08, 0x99, 0x48, 0xb5, 0x53, 0xbd, 0x5d, 0x2c,
+	0x1a, 0x5d, 0x42, 0x46, 0x22, 0x17, 0xd0, 0xcf, 0xce, 0x0c, 0x7a, 0x41, 0x2c, 0x27, 0xa7, 0x7c,
+	0x41, 0x6a, 0x26, 0x06, 0x97, 0x9e, 0x2d, 0x23, 0x0b, 0x93, 0x67, 0x3d, 0xea, 0xb3, 0xc6, 0xfa,
+	0xe8, 0x6b, 0x52, 0x2d, 0x52, 0x54, 0xe0, 0x9e, 0x93, 0x0f, 0xf0, 0xe3, 0x78, 0xe5, 0x7e, 0x89,
+	0x7b, 0xb1, 0x09, 0x41, 0xdb, 0xd0, 0x8d, 0x3e, 0xb9, 0x71, 0xee, 0x79, 0xff, 0xdd, 0x76, 0xec,
+	0x95, 0xfc, 0x87, 0x6d, 0x41, 0x7b, 0x5b, 0x87, 0x27, 0xb6, 0x75, 0x74, 0x62, 0x5b, 0xbf, 0x4e,
+	0x6c, 0xeb, 0xeb, 0xa9, 0x5d, 0x39, 0x3a, 0xb5, 0x2b, 0xdf, 0x4f, 0xed, 0xca, 0x87, 0xd6, 0x98,
+	0x52, 0x9e, 0xcf, 0x96, 0x09, 0xab, 0x5e, 0xb8, 0xfb, 0xa3, 0x2f, 0x83, 0x16, 0xf5, 0xab, 0xfa,
+	0x7b, 0xf0, 0xe4, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb3, 0xbe, 0x20, 0xf5, 0xb5, 0x06, 0x00,
+	0x00,
 }
 
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
@@ -533,24 +526,10 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.LendRates) > 0 {
-		for iNdEx := len(m.LendRates) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.AdjustedTotalsBorrowed) > 0 {
+		for iNdEx := len(m.AdjustedTotalsBorrowed) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.LendRates[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintGenesis(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x5a
-		}
-	}
-	if len(m.BorrowRates) > 0 {
-		for iNdEx := len(m.BorrowRates) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.BorrowRates[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.AdjustedTotalsBorrowed[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -561,10 +540,10 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x52
 		}
 	}
-	if len(m.BadDebts) > 0 {
-		for iNdEx := len(m.BadDebts) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.InterestScalars) > 0 {
+		for iNdEx := len(m.InterestScalars) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.BadDebts[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.InterestScalars[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -575,10 +554,10 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x4a
 		}
 	}
-	if len(m.ExchangeRates) > 0 {
-		for iNdEx := len(m.ExchangeRates) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.BadDebts) > 0 {
+		for iNdEx := len(m.BadDebts) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.ExchangeRates[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.BadDebts[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -636,10 +615,10 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x22
 		}
 	}
-	if len(m.Borrows) > 0 {
-		for iNdEx := len(m.Borrows) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.AdjustedBorrows) > 0 {
+		for iNdEx := len(m.AdjustedBorrows) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Borrows[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.AdjustedBorrows[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -677,7 +656,7 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *Borrow) Marshal() (dAtA []byte, err error) {
+func (m *AdjustedBorrow) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -687,12 +666,12 @@ func (m *Borrow) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Borrow) MarshalTo(dAtA []byte) (int, error) {
+func (m *AdjustedBorrow) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Borrow) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AdjustedBorrow) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -831,7 +810,7 @@ func (m *BadDebt) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ExchangeRate) Marshal() (dAtA []byte, err error) {
+func (m *InterestScalar) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -841,20 +820,20 @@ func (m *ExchangeRate) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ExchangeRate) MarshalTo(dAtA []byte) (int, error) {
+func (m *InterestScalar) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ExchangeRate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *InterestScalar) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	{
-		size := m.ExchangeRate.Size()
+		size := m.Scalar.Size()
 		i -= size
-		if _, err := m.ExchangeRate.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Scalar.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintGenesis(dAtA, i, uint64(size))
@@ -871,7 +850,7 @@ func (m *ExchangeRate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *APY) Marshal() (dAtA []byte, err error) {
+func (m *AdjustedTotalBorrowed) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -881,20 +860,20 @@ func (m *APY) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *APY) MarshalTo(dAtA []byte) (int, error) {
+func (m *AdjustedTotalBorrowed) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *APY) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AdjustedTotalBorrowed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	{
-		size := m.APY.Size()
+		size := m.Amount.Size()
 		i -= size
-		if _, err := m.APY.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Amount.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintGenesis(dAtA, i, uint64(size))
@@ -936,8 +915,8 @@ func (m *GenesisState) Size() (n int) {
 			n += 1 + l + sovGenesis(uint64(l))
 		}
 	}
-	if len(m.Borrows) > 0 {
-		for _, e := range m.Borrows {
+	if len(m.AdjustedBorrows) > 0 {
+		for _, e := range m.AdjustedBorrows {
 			l = e.Size()
 			n += 1 + l + sovGenesis(uint64(l))
 		}
@@ -963,26 +942,20 @@ func (m *GenesisState) Size() (n int) {
 	if m.LastInterestTime != 0 {
 		n += 1 + sovGenesis(uint64(m.LastInterestTime))
 	}
-	if len(m.ExchangeRates) > 0 {
-		for _, e := range m.ExchangeRates {
-			l = e.Size()
-			n += 1 + l + sovGenesis(uint64(l))
-		}
-	}
 	if len(m.BadDebts) > 0 {
 		for _, e := range m.BadDebts {
 			l = e.Size()
 			n += 1 + l + sovGenesis(uint64(l))
 		}
 	}
-	if len(m.BorrowRates) > 0 {
-		for _, e := range m.BorrowRates {
+	if len(m.InterestScalars) > 0 {
+		for _, e := range m.InterestScalars {
 			l = e.Size()
 			n += 1 + l + sovGenesis(uint64(l))
 		}
 	}
-	if len(m.LendRates) > 0 {
-		for _, e := range m.LendRates {
+	if len(m.AdjustedTotalsBorrowed) > 0 {
+		for _, e := range m.AdjustedTotalsBorrowed {
 			l = e.Size()
 			n += 1 + l + sovGenesis(uint64(l))
 		}
@@ -990,7 +963,7 @@ func (m *GenesisState) Size() (n int) {
 	return n
 }
 
-func (m *Borrow) Size() (n int) {
+func (m *AdjustedBorrow) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1054,7 +1027,7 @@ func (m *BadDebt) Size() (n int) {
 	return n
 }
 
-func (m *ExchangeRate) Size() (n int) {
+func (m *InterestScalar) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1064,12 +1037,12 @@ func (m *ExchangeRate) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
 	}
-	l = m.ExchangeRate.Size()
+	l = m.Scalar.Size()
 	n += 1 + l + sovGenesis(uint64(l))
 	return n
 }
 
-func (m *APY) Size() (n int) {
+func (m *AdjustedTotalBorrowed) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1079,7 +1052,7 @@ func (m *APY) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
 	}
-	l = m.APY.Size()
+	l = m.Amount.Size()
 	n += 1 + l + sovGenesis(uint64(l))
 	return n
 }
@@ -1188,7 +1161,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Borrows", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AdjustedBorrows", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1215,8 +1188,8 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Borrows = append(m.Borrows, Borrow{})
-			if err := m.Borrows[len(m.Borrows)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.AdjustedBorrows = append(m.AdjustedBorrows, AdjustedBorrow{})
+			if err := m.AdjustedBorrows[len(m.AdjustedBorrows)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1343,40 +1316,6 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			}
 		case 8:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ExchangeRates", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenesis
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenesis
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ExchangeRates = append(m.ExchangeRates, ExchangeRate{})
-			if err := m.ExchangeRates[len(m.ExchangeRates)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 9:
-			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field BadDebts", wireType)
 			}
 			var msglen int
@@ -1409,9 +1348,9 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 10:
+		case 9:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BorrowRates", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field InterestScalars", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1438,14 +1377,14 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.BorrowRates = append(m.BorrowRates, APY{})
-			if err := m.BorrowRates[len(m.BorrowRates)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.InterestScalars = append(m.InterestScalars, InterestScalar{})
+			if err := m.InterestScalars[len(m.InterestScalars)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		case 11:
+		case 10:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LendRates", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AdjustedTotalsBorrowed", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1472,8 +1411,8 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.LendRates = append(m.LendRates, APY{})
-			if err := m.LendRates[len(m.LendRates)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.AdjustedTotalsBorrowed = append(m.AdjustedTotalsBorrowed, AdjustedTotalBorrowed{})
+			if err := m.AdjustedTotalsBorrowed[len(m.AdjustedTotalsBorrowed)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1498,7 +1437,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Borrow) Unmarshal(dAtA []byte) error {
+func (m *AdjustedBorrow) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1521,10 +1460,10 @@ func (m *Borrow) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Borrow: wiretype end group for non-group")
+			return fmt.Errorf("proto: AdjustedBorrow: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Borrow: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AdjustedBorrow: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1956,7 +1895,7 @@ func (m *BadDebt) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
+func (m *InterestScalar) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1979,10 +1918,10 @@ func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ExchangeRate: wiretype end group for non-group")
+			return fmt.Errorf("proto: InterestScalar: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ExchangeRate: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: InterestScalar: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2019,7 +1958,7 @@ func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ExchangeRate", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Scalar", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2047,7 +1986,7 @@ func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.ExchangeRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Scalar.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2072,7 +2011,7 @@ func (m *ExchangeRate) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *APY) Unmarshal(dAtA []byte) error {
+func (m *AdjustedTotalBorrowed) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2095,10 +2034,10 @@ func (m *APY) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: APY: wiretype end group for non-group")
+			return fmt.Errorf("proto: AdjustedTotalBorrowed: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: APY: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AdjustedTotalBorrowed: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2135,7 +2074,7 @@ func (m *APY) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field APY", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2163,7 +2102,7 @@ func (m *APY) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -11,31 +11,30 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 message GenesisState {
   Params                            params              = 1 [(gogoproto.nullable) = false];
   repeated Token                    registry            = 2 [(gogoproto.nullable) = false];
-  repeated Borrow                   borrows             = 3 [(gogoproto.nullable) = false];
+  repeated AdjustedBorrow           adjusted_borrows    = 3 [(gogoproto.nullable) = false];
   repeated CollateralSetting        collateral_settings = 4 [(gogoproto.nullable) = false];
   repeated Collateral               collateral          = 5 [(gogoproto.nullable) = false];
   repeated cosmos.base.v1beta1.Coin reserves            = 6
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
-  int64                 last_interest_time = 7;
-  repeated ExchangeRate exchange_rates     = 8  [(gogoproto.nullable) = false];
-  repeated BadDebt      bad_debts          = 9  [(gogoproto.nullable) = false];
-  repeated APY          borrow_rates       = 10 [(gogoproto.nullable) = false];
-  repeated APY          lend_rates         = 11 [(gogoproto.nullable) = false];
+  int64                           last_interest_time       = 7;
+  repeated BadDebt                bad_debts                = 8 [(gogoproto.nullable) = false];
+  repeated InterestScalar         interest_scalars         = 9 [(gogoproto.nullable) = false];
+  repeated AdjustedTotalBorrowed  adjusted_totals_borrowed = 10 [(gogoproto.nullable) = false];
 }
 
-// Borrow is a loan struct used in the leverage module's genesis state.
-message Borrow {
-  string                   address = 1;
-  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+// AdjustedBorrow is a borrow struct used in the leverage module's genesis state.
+message AdjustedBorrow {
+  string                      address = 1;
+  cosmos.base.v1beta1.DecCoin amount  = 2 [(gogoproto.nullable) = false];
 }
 
-// CollateralSetting is a borrow collateral setting used in the leverage module's genesis state.
+// CollateralSetting is a collateral setting struct used in the leverage module's genesis state.
 message CollateralSetting {
   string address = 1;
   string denom   = 2;
 }
 
-// Collateral is a collateral position used in the leverage module's genesis state.
+// Collateral is a collateral struct used in the leverage module's genesis state.
 message Collateral {
   string                   address = 1;
   cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
@@ -47,21 +46,14 @@ message BadDebt {
   string denom   = 2;
 }
 
-// ExchangeRate is a denom's uToken exchange rate used in the leverage module's genesis state.
-message ExchangeRate {
-  string denom         = 1;
-  string exchange_rate = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+// InterestScalar is an interest scalar used in the leverage module's genesis state.
+message InterestScalar {
+  string denom  = 1;
+  string scalar = 2 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
-// APY is a denom's borrow or lend APY used in the leverage module's genesis state.
-message APY {
-  string denom = 1;
-  string APY = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+// AdjustedTotalBorrowed is an adjusted borrow total used in the leverage module's genesis state.
+message AdjustedTotalBorrowed {
+  string denom  = 1;
+  string amount = 2 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
-
