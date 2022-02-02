@@ -33,6 +33,12 @@ gaiad        hermes        peggo        price-feeder    umeed        umeed-beta
 ## Gravity Contract Information (Goerli)
 
 Gravity Address: [0xB76197AF55D294994Fcec380964131B824132Ec6](https://goerli.etherscan.io/address/0xB76197AF55D294994Fcec380964131B824132Ec6)
+Umee ERC20: [0x850b72fce82e0bccfbe6aaed2db792be5c9e9973](https://goerli.etherscan.io/token/0x850b72fce82e0bccfbe6aaed2db792be5c9e9973)
+Atom ERC20: [0x260edffa7648ddc398b91884d78485612fc6d246](https://goerli.etherscan.io/token/0x260edffa7648ddc398b91884d78485612fc6d246)
+
+## IBC tokens
+
+Atom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2
 
 ## Umee Chain Information
 
