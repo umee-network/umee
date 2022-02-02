@@ -653,9 +653,9 @@ func (s *IntegrationTestSuite) TestQueryLendAPY() {
 			},
 			false,
 			&types.QueryLendAPYResponse{},
-			// Borrow rate * (1 - LiquidationIncentive - OracleRewardFactor)
-			// 1.50 * (1 - 0.18 - 0.01) = 1.215
-			&types.QueryLendAPYResponse{APY: sdk.MustNewDecFromStr("1.215")},
+			// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
+			// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
+			&types.QueryLendAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
 		},
 	}
 	runTestQueries(s, testCasesLendAPY)
