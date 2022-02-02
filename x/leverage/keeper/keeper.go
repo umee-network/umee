@@ -360,15 +360,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		}
 	}
 
-	// Enable sets to true; disable removes from KVstore rather than setting false
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
-	if enable {
-		store.Set(key, []byte{0x01})
-	} else {
-		store.Delete(key)
-	}
-	return nil
+	return k.setCollateralSetting(ctx, borrowerAddr, denom, enable)
 }
 
 // GetCollateralSetting checks if a uToken denom is enabled for use as collateral by a single borrower.
