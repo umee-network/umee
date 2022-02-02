@@ -66,6 +66,7 @@ As a reminder, the following values are always available as a basis for calculat
 - The `leverage` module account balance, available through the `bank` module.
 - Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Borrowed denominations and _adjusted amounts_ for individual borrowers, stored in `leverage` module [State](02_state.md).
+- _Interest scalars_ for all borrowed denominations, which are used with adjusted borrow amounts
 - Total _adjusted borrows_ summed over all borrower accounts.
 - Leverage module [Parameters](07_params.md)
 - Token parameters from the [Token Registry](02_state.md#Token-Registry)
