@@ -175,7 +175,7 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 
 			if !amount.IsPositive() {
 				count++
-				msg += fmt.Sprintf("\t%s - %s adjusted borrow amount %s is not positive\n", denom, address.String(), amount.String())
+				msg += fmt.Sprintf("\t%s - %s adjusted borrow %s is not positive\n", denom, address.String(), amount.String())
 			}
 			return nil
 		})
