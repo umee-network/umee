@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	routeExchangeRates    = "exchange-rates"
+	routeInterestScalars  = "interest-scalars"
 	routeReserveAmount    = "reserve-amount"
 	routeCollateralAmount = "collateral-amount"
 	routeBorrowAmount     = "borrow-amount"
@@ -23,7 +23,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeLendAPY, LendAPYInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeExchangeRates, InterestScalarsInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/leverage module.
@@ -305,7 +305,7 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 		broken := count != 0
 
 		return sdk.FormatInvariant(
-			types.ModuleName, routeExchangeRates,
+			types.ModuleName, routeInterestScalars,
 			fmt.Sprintf("amount of interest scalars lower than one %d\n%s", count, msg),
 		), broken
 	}
