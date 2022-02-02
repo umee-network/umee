@@ -59,15 +59,14 @@ func RandomizedGenState(simState *module.SimulationState) {
 			OracleRewardFactor:           oracleRewardFactor,
 		},
 		[]types.Token{},
-		[]types.Borrow{},
+		[]types.AdjustedBorrow{},
 		[]types.CollateralSetting{},
 		[]types.Collateral{},
 		sdk.Coins{},
 		0,
-		[]types.ExchangeRate{},
 		[]types.BadDebt{},
-		[]types.APY{},
-		[]types.APY{},
+		[]types.InterestScalar{},
+		[]types.AdjustedTotalBorrowed{},
 	)
 
 	bz, err := json.MarshalIndent(&leverageGenesis.Params, "", " ")

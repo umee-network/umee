@@ -1,0 +1,261 @@
+package keeper
+
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/x/leverage/types"
+)
+
+// InitGenesis initializes the x/leverage module state from a provided genesis state.
+func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
+	k.SetParams(ctx, genState.Params)
+
+	for _, token := range genState.Registry {
+		k.SetRegisteredToken(ctx, token)
+	}
+
+	for _, borrow := range genState.AdjustedBorrows {
+		borrower, err := sdk.AccAddressFromBech32(borrow.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if err = k.setAdjustedBorrow(ctx, borrower, borrow.Amount); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, setting := range genState.CollateralSettings {
+		borrower, err := sdk.AccAddressFromBech32(setting.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if err = k.setCollateralSetting(ctx, borrower, setting.Denom, true); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, collateral := range genState.Collateral {
+		borrower, err := sdk.AccAddressFromBech32(collateral.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if err = k.SetCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, reserve := range genState.Reserves {
+		if err := k.SetReserveAmount(ctx, reserve); err != nil {
+			panic(err)
+		}
+	}
+
+	if err := k.SetLastInterestTime(ctx, genState.LastInterestTime); err != nil {
+		panic(err)
+	}
+
+	for _, badDebt := range genState.BadDebts {
+		borrower, err := sdk.AccAddressFromBech32(badDebt.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		k.SetBadDebtAddress(ctx, badDebt.Denom, borrower, true)
+	}
+
+	for _, rate := range genState.InterestScalars {
+		if err := k.setInterestScalar(ctx, rate.Denom, rate.Scalar); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, total := range genState.AdjustedTotalsBorrowed {
+		// AdjustedTotalsBorrowed are only set by setAdjustedBorrow -
+		// that is, these values should already be correct after all
+		// individual borrows have been added. Only check for
+		// and reject inconsistency in the imported state here.
+		if total.Amount != k.getAdjustedTotalBorrowed(ctx, total.Denom) {
+			panic(types.ErrInconsistentTotalBorrow)
+		}
+	}
+}
+
+// ExportGenesis returns the x/leverage module's exported genesis state.
+func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
+	tokens, err := k.GetAllRegisteredTokens(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return types.NewGenesisState(
+		k.GetParams(ctx),
+		tokens,
+		k.getAllAdjustedBorrows(ctx),
+		k.getAllCollateralSettings(ctx),
+		k.getAllCollateral(ctx),
+		k.GetAllReserves(ctx),
+		k.GetLastInterestTime(ctx),
+		k.getAllBadDebts(ctx),
+		k.getAllInterestScalars(ctx),
+		k.getAllAdjustedTotalsBorrowed(ctx),
+	)
+}
+
+// getAllAdjustedBorrows returns all borrows across all borrowers and asset types. Uses the
+// AdjustedBorrow struct found in GenesisState, which stores amount scaled by InterestScalar.
+func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
+	prefix := types.KeyPrefixAdjustedBorrow
+	borrows := []types.AdjustedBorrow{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled borrow amount should never happen
+			return err
+		}
+
+		borrows = append(borrows, types.NewAdjustedBorrow(addr.String(), sdk.NewDecCoin(denom, amount)))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return borrows
+}
+
+// getAllCollateralSettings returns collateral settings for all borrowers. Uses the
+// CollateralSetting struct found in GenesisState, which stores borrower address as a string.
+func (k Keeper) getAllCollateralSettings(ctx sdk.Context) []types.CollateralSetting {
+	prefix := types.KeyPrefixCollateralSetting
+	collateralSettings := []types.CollateralSetting{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		collateralSettings = append(collateralSettings, types.NewCollateralSetting(addr.String(), denom))
+
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return collateralSettings
+}
+
+// getAllCollateral returns all collateral across all borrowers and asset types. Uses the
+// CollateralAmount struct found in GenesisState, which stores borrower address as a string.
+func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
+	prefix := types.KeyPrefixCollateralAmount
+	collateral := []types.Collateral{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled collateral amount should never happen
+			return err
+		}
+
+		collateral = append(collateral, types.NewCollateral(addr.String(), sdk.NewCoin(denom, amount)))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return collateral
+}
+
+// getAllBadDebts gets bad debt instances across all borrowers. Uses the
+// BadDebt struct found  in GenesisState.
+func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
+	prefix := types.KeyPrefixBadDebt
+	badDebts := []types.BadDebt{}
+
+	iterator := func(key, val []byte) error {
+		addr := types.AddressFromKey(key, prefix)
+		denom := types.DenomFromKeyWithAddress(key, prefix)
+
+		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
+
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return badDebts
+}
+
+// getAllInterestScalars returns all interest scalars. Uses the InterestScalar struct found
+// in GenesisState.
+func (k Keeper) getAllInterestScalars(ctx sdk.Context) []types.InterestScalar {
+	prefix := types.KeyPrefixInterestScalar
+	interestScalars := []types.InterestScalar{}
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var scalar sdk.Dec
+		if err := scalar.Unmarshal(val); err != nil {
+			// improperly marshaled interest scalar should never happen
+			return err
+		}
+
+		interestScalars = append(interestScalars, types.NewInterestScalar(denom, scalar))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return interestScalars
+}
+
+// getAllAdjustedTotalsBorrowed returns adjusted totals borrowed for all asset types. Uses the
+// AdjustedTotalBorrowed struct found  in GenesisState.
+func (k Keeper) getAllAdjustedTotalsBorrowed(ctx sdk.Context) []types.AdjustedTotalBorrowed {
+	prefix := types.KeyPrefixAdjustedTotalBorrow
+	totalsBorrowed := []types.AdjustedTotalBorrowed{}
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var total sdk.Dec
+		if err := total.Unmarshal(val); err != nil {
+			// improperly marshaled exchange rate should never happen
+			return err
+		}
+
+		totalsBorrowed = append(totalsBorrowed, types.NewAdjustedTotalBorrowed(denom, total))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return totalsBorrowed
+}
