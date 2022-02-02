@@ -335,8 +335,8 @@ func randomTokenFields(
 ) (acc simtypes.Account, token sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
-	allTokens, err := lk.GetAllRegisteredTokens(ctx)
-	if err != nil || len(allTokens) == 0 {
+	allTokens := lk.GetAllRegisteredTokens(ctx)
+	if len(allTokens) == 0 {
 		return acc, sdk.Coin{}, true
 	}
 

@@ -18,23 +18,18 @@ const (
 
 // RegisterInvariants registers the leverage module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
-	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeReserveAmount, ReserveAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeLendAPY, LendAPYInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeExchangeRates, InterestScalarsInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/leverage module.
 func AllInvariants(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
-		res, stop := ExchangeRatesInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = ReserveAmountInvariant(k)(ctx)
+		res, stop := ReserveAmountInvariant(k)(ctx)
 		if stop {
 			return res, stop
 		}
@@ -54,52 +49,12 @@ func AllInvariants(k Keeper) sdk.Invariant {
 			return res, stop
 		}
 
-		return LendAPYInvariant(k)(ctx)
-	}
-}
-
-// ExchangeRatesInvariant checks that all exchante rate denom are bigger or equal to 1
-func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
-		var (
-			msg   string
-			count int
-		)
-
-		exchangeRatePrefix := types.CreateExchangeRateKeyNoDenom()
-
-		// Iterate through all denoms which have an exchange rate stored
-		// in the keeper. If a token is registered but its exchange rate is
-		// lower than 1.0 or it has some error doing the unmarshal it
-		// adds the denom invariant count and message description
-		err := k.iterate(ctx, exchangeRatePrefix, func(key, val []byte) error {
-			// remove exchangeRatePrefix and null-terminator
-			denom := types.DenomFromKey(key, exchangeRatePrefix)
-
-			amount := sdk.ZeroDec()
-			if err := amount.Unmarshal(val); err != nil {
-				count++
-				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
-				return nil
-			}
-
-			if amount.LT(sdk.OneDec()) {
-				count++
-				msg += fmt.Sprintf("\t%s exchange rate %s is lower than one\n", denom, amount.String())
-			}
-			return nil
-		})
-
-		if err != nil {
-			msg += fmt.Sprintf("\tSome error occurred while iterating through the exchange rates %+v\n", err)
+		res, stop = InterestScalarsInvariant(k)(ctx)
+		if stop {
+			return res, stop
 		}
 
-		broken := count != 0
-
-		return sdk.FormatInvariant(
-			types.ModuleName, routeExchangeRates,
-			fmt.Sprintf("amount of exchange rate lower than one %d\n%s", count, msg),
-		), broken
+		return LendAPYInvariant(k)(ctx)
 	}
 }
 
@@ -158,10 +113,8 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 
 		collateralPrefix := types.CreateCollateralAmountKeyNoAddress()
 
-		// Iterate through all denoms which have an borrow amount stored
-		// in the keeper. If a token is registered but its borrow amount is
-		// not positive or it has some error doing the unmarshal it
-		// adds the denom and address invariant count and message description
+		// Iterate through all collateral amounts stored in the keeper,
+		// ensuring all successfully unmarshal to positive values.
 		err := k.iterate(ctx, collateralPrefix, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
 			denom := types.DenomFromKeyWithAddress(key, collateralPrefix)
@@ -203,19 +156,17 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		loanKeyPrefix := types.CreateLoanKeyNoAddress()
+		borrowPrefix := types.KeyPrefixAdjustedBorrow
 
-		// Iterate through all denoms which have an borrow amount stored
-		// in the keeper. If a token is registered but its borrow amount is
-		// not positive or it has some error doing the unmarshal it
-		// adds the denom and address invariant count and message description
-		err := k.iterate(ctx, loanKeyPrefix, func(key, val []byte) error {
+		// Iterate through all adjusted borrow amounts stored in the keeper,
+		// ensuring all sucessfully unmarshal to positive values.
+		err := k.iterate(ctx, borrowPrefix, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
-			denom := types.DenomFromKeyWithAddress(key, loanKeyPrefix)
+			denom := types.DenomFromKeyWithAddress(key, borrowPrefix)
 			// remove prefix | denom and null-terminator
-			address := types.AddressFromKey(key, loanKeyPrefix)
+			address := types.AddressFromKey(key, borrowPrefix)
 
-			amount := sdk.ZeroInt()
+			amount := sdk.ZeroDec()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
 				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s - %s: %+v\n", denom, address.String(), val)
@@ -224,20 +175,20 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 
 			if !amount.IsPositive() {
 				count++
-				msg += fmt.Sprintf("\t%s - %s borrow amount %s is not positive\n", denom, address.String(), amount.String())
+				msg += fmt.Sprintf("\t%s - %s adjusted borrow amount %s is not positive\n", denom, address.String(), amount.String())
 			}
 			return nil
 		})
 
 		if err != nil {
-			msg += fmt.Sprintf("\tSome error occurred while iterating through the borrow amount %+v\n", err)
+			msg += fmt.Sprintf("\tSome error occurred while iterating through adjusted borrow amounts %+v\n", err)
 		}
 
 		broken := count != 0
 
 		return sdk.FormatInvariant(
 			types.ModuleName, routeBorrowAmount,
-			fmt.Sprintf("number of not positive borrow amount found %d\n%s", count, msg),
+			fmt.Sprintf("number of not positive adjusted borrow amounts found %d\n%s", count, msg),
 		), broken
 	}
 }
@@ -250,21 +201,14 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		borrowAPYprefix := types.CreateBorrowAPYKeyNoDenom()
+		tokenPrefix := types.KeyPrefixRegisteredToken
 
-		// Iterate through all denoms which have an Borrow APY stored
-		// in the keeper. If a borrow APY is registered but it is
-		// negative or it has some error doing the unmarshal it
-		// adds the denom and address invariant count and message description
-		err := k.iterate(ctx, borrowAPYprefix, func(key, val []byte) error {
-			denom := types.DenomFromKey(key, borrowAPYprefix)
+		// Iterate through all denoms of registered tokens in the
+		// keeper, ensuring none have a negative borrow APY.
+		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, tokenPrefix)
 
-			var borrowAPY sdk.Dec
-			if err := borrowAPY.Unmarshal(val); err != nil {
-				count++
-				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
-				return nil
-			}
+			borrowAPY := k.DeriveBorrowAPY(ctx, denom)
 
 			if borrowAPY.IsNegative() {
 				count++
@@ -294,21 +238,14 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		lendAPYprefix := types.CreateLendAPYKeyNoDenom()
+		tokenPrefix := types.KeyPrefixRegisteredToken
 
-		// Iterate through all denoms which have an lend APY stored
-		// in the keeper. If a lend APY is registered but it is
-		// negative or it has some error doing the unmarshal it
-		// adds the denom and address invariant count and message description
-		err := k.iterate(ctx, lendAPYprefix, func(key, val []byte) error {
-			denom := types.DenomFromKey(key, lendAPYprefix)
+		// Iterate through all denoms of registered tokens in the
+		// keeper, ensuring none have a negative lend APY.
+		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, tokenPrefix)
 
-			var lendAPY sdk.Dec
-			if err := lendAPY.Unmarshal(val); err != nil {
-				count++
-				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
-				return nil
-			}
+			lendAPY := k.DeriveLendAPY(ctx, denom)
 
 			if lendAPY.IsNegative() {
 				count++
@@ -326,6 +263,50 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 		return sdk.FormatInvariant(
 			types.ModuleName, routeLendAPY,
 			fmt.Sprintf("number of negative lend APY found %d\n%s", count, msg),
+		), broken
+	}
+}
+
+// InterestScalarsInvariant checks that all denoms have an interest scalar >= 1
+func InterestScalarsInvariant(k Keeper) sdk.Invariant {
+	return func(ctx sdk.Context) (string, bool) {
+		var (
+			msg   string
+			count int
+		)
+
+		prefix := types.KeyPrefixInterestScalar
+
+		// Iterate through all denoms which have an exchange rate stored
+		// in the keeper. If a token is registered but its exchange rate is
+		// lower than 1.0 or it has some error doing the unmarshal it
+		// adds the denom invariant count and message description
+		err := k.iterate(ctx, prefix, func(key, val []byte) error {
+			denom := types.DenomFromKey(key, prefix)
+
+			scalar := sdk.ZeroDec()
+			if err := scalar.Unmarshal(val); err != nil {
+				count++
+				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
+				return nil
+			}
+
+			if scalar.LT(sdk.OneDec()) {
+				count++
+				msg += fmt.Sprintf("\t%s interest scalar %s is lower than one\n", denom, scalar.String())
+			}
+			return nil
+		})
+
+		if err != nil {
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the interest scalars %+v\n", err)
+		}
+
+		broken := count != 0
+
+		return sdk.FormatInvariant(
+			types.ModuleName, routeExchangeRates,
+			fmt.Sprintf("amount of interest scalars lower than one %d\n%s", count, msg),
 		), broken
 	}
 }

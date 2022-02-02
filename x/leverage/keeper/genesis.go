@@ -85,14 +85,9 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 
 // ExportGenesis returns the x/leverage module's exported genesis state.
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
-	tokens, err := k.GetAllRegisteredTokens(ctx)
-	if err != nil {
-		panic(err)
-	}
-
 	return types.NewGenesisState(
 		k.GetParams(ctx),
-		tokens,
+		k.GetAllRegisteredTokens(ctx),
 		k.getAllAdjustedBorrows(ctx),
 		k.getAllCollateralSettings(ctx),
 		k.getAllCollateral(ctx),

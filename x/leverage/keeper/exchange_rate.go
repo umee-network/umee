@@ -19,10 +19,7 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.Denom)
 	}
 
-	exchangeRate, err := k.GetExchangeRate(ctx, token.Denom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
+	exchangeRate := k.DeriveExchangeRate(ctx, token.Denom)
 
 	uTokenAmount := token.Amount.ToDec().Quo(exchangeRate).TruncateInt()
 	return sdk.NewCoin(uTokenDenom, uTokenAmount), nil
@@ -40,137 +37,32 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.Denom)
 	}
 
-	exchangeRate, err := k.GetExchangeRate(ctx, tokenDenom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
+	exchangeRate := k.DeriveExchangeRate(ctx, tokenDenom)
 
 	tokenAmount := uToken.Amount.ToDec().Mul(exchangeRate).TruncateInt()
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
-// GetExchangeRate gets the token:uTokenexchange rate for a given base token
-// denom.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateExchangeRateKey(denom)
+// DeriveExchangeRate calculated the token:uToken exchange rate of a base token denom.
+func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
+	// uToken exchange rate is equal to the token supply (including borrowed
+	// tokens yet to be repaid and excluding tokens reserved) divided by total
+	// uTokens in circulation.
 
-	bz := store.Get(key)
-	if bz == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+	// Get relevant quantities
+	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
+	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
+	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
+	uTokenSupply := k.TotalUTokenSupply(ctx, k.FromTokenToUTokenDenom(ctx, denom)).Amount
+
+	// Derive effective token supply
+	tokenSupply := moduleBalance.Add(totalBorrowed).Sub(reserveAmount)
+
+	// Handle uToken supply == 0 case
+	if !uTokenSupply.IsPositive() {
+		return sdk.OneDec()
 	}
 
-	amount := sdk.ZeroDec()
-	if err := amount.Unmarshal(bz); err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return amount, nil
-}
-
-// GetAllExchangeRates returns all exchange rates.
-func (k Keeper) GetAllExchangeRates(ctx sdk.Context) []types.ExchangeRate {
-	prefix := types.KeyPrefixExchangeRate
-	exchangeRates := []types.ExchangeRate{}
-
-	iterator := func(key, val []byte) error {
-		denom := types.DenomFromKey(key, prefix)
-
-		var rate sdk.Dec
-		if err := rate.Unmarshal(val); err != nil {
-			// improperly marshaled exchange rate should never happen
-			return err
-		}
-
-		exchangeRates = append(exchangeRates, types.NewExchangeRate(denom, rate))
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return exchangeRates
-}
-
-// SetExchangeRate sets the token:uTokenexchange rate for a given base token
-// denom.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) error {
-	store := ctx.KVStore(k.storeKey)
-	if !k.IsAcceptedToken(ctx, denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, denom)
-	}
-
-	bz, err := rate.Marshal()
-	if err != nil {
-		return err
-	}
-
-	store.Set(types.CreateExchangeRateKey(denom), bz)
-	return nil
-}
-
-// UpdateExchangeRates calculates sets the token:uToken exchange rates for all
-// token denoms.
-func (k Keeper) UpdateExchangeRates(ctx sdk.Context) error {
-	store := ctx.KVStore(k.storeKey)
-	totalBorrows := k.GetTotalBorrows(ctx)
-
-	exchangeRatePrefix := types.CreateExchangeRateKeyNoDenom()
-
-	iter := sdk.KVStorePrefixIterator(store, exchangeRatePrefix)
-	defer iter.Close()
-
-	// Calculate exchange rates for all denoms which have an exchange rate stored
-	// in the keeper. If a token is registered but its exchange rate is never
-	// initialized (set to 1.0), this iterator will fail to detect it, and its
-	// exchange rate will remain undefined.
-	for ; iter.Valid(); iter.Next() {
-		// key is exchangeRatePrefix | denom | 0x00
-		key, _ := iter.Key(), iter.Value()
-
-		// remove exchangeRatePrefix and null-terminator
-		denom := types.DenomFromKey(key, exchangeRatePrefix)
-
-		// uToken exchange rate is equal to the token supply (including borrowed
-		// tokens yet to be repaid and excluding tokens reserved) divided by total
-		// uTokens in circulation.
-		//
-		// Mathematically:
-		// tokens:uToken = (module token balance + tokens borrowed - reserved tokens) / uToken supply
-		moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-		tokenSupply := moduleBalance.Add(totalBorrows.AmountOf(denom).Sub(k.GetReserveAmount(ctx, denom)).ToDec())
-		uTokenSupply := k.TotalUTokenSupply(ctx, k.FromTokenToUTokenDenom(ctx, denom)).Amount
-		derivedExchangeRate := sdk.OneDec()
-
-		if uTokenSupply.IsPositive() {
-			derivedExchangeRate = tokenSupply.QuoInt(uTokenSupply)
-		}
-
-		if err := k.SetExchangeRate(ctx, denom, derivedExchangeRate); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// InitializeExchangeRate checks the token:uToken exchange rate for a given base
-// token denom and sets it to 1.0 if no rate has been registered. No-op if a
-// rate already exists.
-func (k Keeper) InitializeExchangeRate(ctx sdk.Context, denom string) error {
-	store := ctx.KVStore(k.storeKey)
-
-	rateKey := types.CreateExchangeRateKey(denom)
-	if !store.Has(rateKey) {
-		bz, err := sdk.OneDec().Marshal()
-		if err != nil {
-			return err
-		}
-
-		store.Set(rateKey, bz)
-	}
-
-	return nil
+	// Derive exchange rate
+	return tokenSupply.QuoInt(uTokenSupply)
 }

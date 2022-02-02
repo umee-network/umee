@@ -10,49 +10,58 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// GetDynamicBorrowInterest derives the current borrow interest rate on an asset
-// type, using utilization and params.
-func (k Keeper) GetDynamicBorrowInterest(ctx sdk.Context, denom string, utilization sdk.Dec) (sdk.Dec, error) {
-	if utilization.IsNegative() || utilization.GT(sdk.OneDec()) {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidUtilization, utilization.String())
-	}
-
-	kinkUtilization, err := k.GetInterestKinkUtilization(ctx, denom)
+// DeriveBorrowAPY derives the current borrow interest rate on a token denom
+// using its borrow utilization and token-specific params. Returns zero on
+// invalid asset.
+func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
+	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdk.ZeroDec()
 	}
 
-	kinkRate, err := k.GetInterestAtKink(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
+	utilization := k.DeriveBorrowUtilization(ctx, denom)
 
-	if utilization.GTE(kinkUtilization) {
-		// utilization is between kink value and 100%
-		maxRate, err := k.GetInterestMax(ctx, denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		return Interpolate(utilization, kinkUtilization, kinkRate, sdk.OneDec(), maxRate), nil
+	if utilization.GTE(token.KinkUtilizationRate) {
+		return Interpolate(
+			utilization,               // x
+			token.KinkUtilizationRate, // x1
+			token.KinkBorrowRate,      // y1
+			sdk.OneDec(),              // x2
+			token.MaxBorrowRate,       // y2
+		)
 	}
 
 	// utilization is between 0% and kink value
-	baseRate, err := k.GetInterestBase(ctx, denom)
+	return Interpolate(
+		utilization,               // x
+		sdk.ZeroDec(),             // x1
+		token.BaseBorrowRate,      // y1
+		token.KinkUtilizationRate, // x2
+		token.KinkBorrowRate,      // y2
+	)
+}
+
+// DeriveLendAPY derives the current lend interest rate on a token denom
+// using its borrow utilization borrow APY. Returns zero on invalid asset.
+func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
+	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdk.ZeroDec()
 	}
 
-	return Interpolate(utilization, sdk.ZeroDec(), baseRate, kinkUtilization, kinkRate), nil
+	borrowRate := k.DeriveBorrowAPY(ctx, denom)
+	borrowUtilization := k.DeriveBorrowUtilization(ctx, denom)
+	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
+
+	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
+	return borrowRate.Mul(borrowUtilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
 // AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
 // It should accrue interest on all open borrows, increase reserves, and set
 // LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
-	store := ctx.KVStore(k.storeKey)
-
-	// Get current unix time in seconds
+	// get current unix time in seconds
 	currentTime := ctx.BlockTime().Unix()
 
 	// get last time at which interest was accrued
@@ -62,104 +71,55 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		prevInterestTime = currentTime
 	}
 
-	// Calculate time elapsed since last interest accrual (measured in years for APR math)
+	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 	if yearsElapsed.IsNegative() {
 		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
 	}
 
-	// Compute total borrows across all borrowers, which are used when calculating
-	// borrow utilization.
-	totalBorrowed := k.GetTotalBorrows(ctx)
+	// fetch required parameters
+	tokens := k.GetAllRegisteredTokens(ctx)
+	oracleRewardFactor := k.GetParams(ctx).OracleRewardFactor
 
-	interestToApply := map[string]sdk.Dec{}
-	reserveFactors := map[string]sdk.Dec{}
-
-	// Derive interest rate from utilization and parameters, for each denom found
-	// in totalBorrowed, then multiply it by YearsElapsed to create the amount of
-	// interest (expressed as a multiple of borrow amount) that will be applied to
-	// each borrow position. Also collect reserve factors.
-	for _, coin := range totalBorrowed {
-		reserveFactor, err := k.GetReserveFactor(ctx, coin.Denom)
-		if err != nil {
-			return err
-		}
-
-		utilization, err := k.GetBorrowUtilization(ctx, coin.Denom, coin.Amount)
-		if err != nil {
-			return err
-		}
-
-		borrowRate, err := k.GetDynamicBorrowInterest(ctx, coin.Denom, utilization)
-		if err != nil {
-			return err
-		}
-
-		reserveFactors[coin.Denom] = reserveFactor
-		interestToApply[coin.Denom] = borrowRate.Mul(yearsElapsed)
-
-		if err := k.SetBorrowAPY(ctx, coin.Denom, borrowRate); err != nil {
-			return err
-		}
-
-		lendRate := borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reserveFactor))
-		if err := k.SetLendAPY(ctx, coin.Denom, lendRate); err != nil {
-			return err
-		}
-	}
-
+	// create sdk.Coins objects to track oracle rewards, new reserves, and total interest accrued
 	oracleRewards := sdk.NewCoins()
 	newReserves := sdk.NewCoins()
 	totalInterest := sdk.NewCoins()
-	borrowPrefix := types.CreateLoanKeyNoAddress()
 
-	iter := sdk.KVStorePrefixIterator(store, borrowPrefix)
-	defer iter.Close()
-
-	// Iterate over all open borrows, accruing interest on each and collecting new
-	// reserves.
-	for ; iter.Valid(); iter.Next() {
-		// key is borrowPrefix | lengthPrefixed(borrowerAddr) | denom | 0x00
-		key, val := iter.Key(), iter.Value()
-
-		// remove prefix | lengthPrefixed(addr) and null-terminator
-		denom := types.DenomFromKeyWithAddress(key, borrowPrefix)
-
-		var currentBorrow sdk.Int
-		if err := currentBorrow.Unmarshal(val); err != nil {
-			return err // improperly marshaled borrow amount should never happen
-		}
-
-		// Use previously calculated interestToApply (interest rate * time elapsed)
-		// to accrue interest.
-		amountToAccrue := interestToApply[denom].MulInt(currentBorrow).TruncateInt()
-		bz, err := currentBorrow.Add(amountToAccrue).Marshal()
-		if err != nil {
+	// iterate over all accepted token denominations
+	for _, token := range tokens {
+		// interest is accrued by multiplying each denom's Interest Scalar by the
+		// quantity (borrowAPY * yearsElapsed) + 1
+		scalar := k.getInterestScalar(ctx, token.BaseDenom)
+		increase := k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed)
+		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(increase.Add(sdk.OneDec()))); err != nil {
 			return err
 		}
 
-		store.Set(key, bz)
+		// apply (pre-accural) interest scalar to borrows to get total borrowed before interest accrued
+		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx, token.BaseDenom).Mul(scalar)
 
-		// Track total interest across all borrowers for logging
-		totalInterest = totalBorrowed.Add(sdk.NewCoin(denom, amountToAccrue))
+		// calculate total interest accrued for this denom
+		totalInterest = totalInterest.Add(sdk.NewCoin(
+			token.BaseDenom,
+			prevTotalBorrowed.Mul(increase).TruncateInt(),
+		))
 
-		// A portion of amountToAccrue defined by the denom's reserve factor will be
-		// set aside as reserves.
-		newReserves = newReserves.Add(sdk.NewCoin(denom, reserveFactors[denom].MulInt(amountToAccrue).TruncateInt()))
+		// calculate new reserves accrued for this denom
+		newReserves = newReserves.Add(sdk.NewCoin(
+			token.BaseDenom,
+			prevTotalBorrowed.Mul(increase).Mul(token.ReserveFactor).TruncateInt(),
+		))
 
-		// A portion of amountToAccrue defined by the param OracleRewardFactor will be
-		// sent to the oracle module account to fund the reward pool.
-		oracleRewards = oracleRewards.Add(
-			sdk.NewCoin(denom, k.GetParams(ctx).OracleRewardFactor.MulInt(amountToAccrue).TruncateInt()),
-		)
+		// calculate oracle rewards accrued for this denom
+		oracleRewards = oracleRewards.Add(sdk.NewCoin(
+			token.BaseDenom,
+			prevTotalBorrowed.Mul(increase).Mul(oracleRewardFactor).TruncateInt(),
+		))
 	}
 
-	// apply all reserve increases accumulated when iterating over borrows
+	// apply all reserve increases accumulated when iterating over denoms
 	for _, coin := range newReserves {
-		if coin.IsNegative() {
-			return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
-		}
-
 		if err := k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
 			return err
 		}
@@ -179,8 +139,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	// Because this action is not caused by a message, logging and
 	// events are here instead of msg_server.go
 	k.Logger(ctx).Debug(
-		"interest epoch",
-		"block_height", fmt.Sprintf("%d", ctx.BlockHeight()),
+		"interest accrued",
 		"unix_time", fmt.Sprintf("%d", currentTime),
 		"interest", totalInterest.String(),
 		"reserved", newReserves.String(),
@@ -188,7 +147,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeInterestEpoch,
+			types.EventTypeInterestAccrual,
 			sdk.NewAttribute(types.EventAttrBlockHeight, fmt.Sprintf("%d", ctx.BlockHeight())),
 			sdk.NewAttribute(types.EventAttrUnixTime, fmt.Sprintf("%d", currentTime)),
 			sdk.NewAttribute(types.EventAttrInterest, totalInterest.String()),

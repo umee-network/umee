@@ -653,7 +653,9 @@ func (s *IntegrationTestSuite) TestQueryLendAPY() {
 			},
 			false,
 			&types.QueryLendAPYResponse{},
-			&types.QueryLendAPYResponse{APY: sdk.ZeroDec()},
+			// Borrow rate * (1 - LiquidationIncentive - OracleRewardFactor)
+			// 1.50 * (1 - 0.18 - 0.01) = 1.215
+			&types.QueryLendAPYResponse{APY: sdk.MustNewDecFromStr("1.215")},
 		},
 	}
 	runTestQueries(s, testCasesLendAPY)
@@ -689,7 +691,10 @@ func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
 			},
 			false,
 			&types.QueryBorrowAPYResponse{},
-			&types.QueryBorrowAPYResponse{APY: sdk.ZeroDec()},
+			// This is an edge case technically - when effective supply, meaning
+			// module balance + total borrows, is zero, utilization (0/0) is
+			// interpreted as 100% so max borrow rate (150% APY) is used.
+			&types.QueryBorrowAPYResponse{APY: sdk.MustNewDecFromStr("1.50")},
 		},
 	}
 	runTestQueries(s, testCasesBorrowAPY)
