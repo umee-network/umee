@@ -2,8 +2,7 @@
 
 Every block, the leverage module runs the following steps in order:
 - Repay bad debts using reserves
-- Update borrow and lend APY and accrue interest on borrows
-- Update uToken exchange rates
+- Accrue interest on borrows
 
 ## Sweep Bad Debt
 
