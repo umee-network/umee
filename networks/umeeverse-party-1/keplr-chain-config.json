@@ -1,0 +1,48 @@
+{
+  "rpc": "https://rpc.orlo.umeetest-beta.network.umee.cc",
+  "rest": "https://api.orlo.umeetest-beta.network.umee.cc",
+  "chainId": "umeetest-beta",
+  "chainName": "Umee",
+  "bip44": {
+    "coinType": 118
+  },
+  "coinType": 118,
+  "currencies": [
+    {
+      "coinDenom": "UMEE",
+      "coinMinimalDenom": "uumee",
+      "coinDecimals": 6
+    },
+    {
+      "coinDenom": "ATOM",
+      "coinMinimalDenom": "???",
+      "coinDecimals": 6
+    }
+  ],
+  "feeCurrencies": [
+    {
+      "coinDenom": "UMEE",
+      "coinMinimalDenom": "uumee",
+      "coinDecimals": 6
+    }
+  ],
+  "stakeCurrency": {
+    "coinDenom": "UMEE",
+    "coinMinimalDenom": "uumee",
+    "coinDecimals": 6
+  },
+  "features": [
+    "stargate",
+    "ibc-transfer",
+    "no-legacy-stdTx"
+  ],
+  "explorerUrlToTx": "https://explorer-git-stacks-umeeverse-party-1-umee.vercel.app/umee/tx/{txHash}",
+  "bech32Config": {
+    "bech32PrefixAccAddr": "umee",
+    "bech32PrefixAccPub": "umeepub",
+    "bech32PrefixValAddr": "umeevaloper",
+    "bech32PrefixValPub": "umeevaloperpub",
+    "bech32PrefixConsAddr": "umeevalcons",
+    "bech32PrefixConsPub": "umeevalconspub"
+  }
+}
