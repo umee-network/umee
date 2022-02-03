@@ -42,12 +42,19 @@ Atom ERC20: [0x260edffa7648ddc398b91884d78485612fc6d246](https://goerli.ethersca
 
 Atom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2
 
+Umee: ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728
+
+## Apps
+
+[Explorer](https://explorer-git-stacks-umeeverse-party-1-umee.vercel.app)
+
+Multisig Wallet: Coming soon
+
 ## Umee Chain Information
 
 Chain ID: `umeeverse-party-1`
 
 [Peers](umee-peers.txt)
-
 
 ### Umee Cosmos API
 * `https://api.biplosion.umeeverse-party-1.network.umee.cc`
