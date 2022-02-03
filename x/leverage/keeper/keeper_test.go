@@ -1306,3 +1306,40 @@ func (s *IntegrationTestSuite) TestLendAPYInvariant() {
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
+
+func (s *IntegrationTestSuite) TestWithdrawAsset_InsufficientCollateral() {
+	app, ctx := s.app, s.ctx
+
+	lenderAddr := sdk.AccAddress([]byte("addr________________"))
+	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
+	app.AccountKeeper.SetAccount(ctx, lenderAcc)
+
+	// mint and send coins
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
+
+	// mint additional coins for just the leverage module; this way it will have available reserve
+	// to meet conditions in the withdrawal logic
+	s.Require().NoError(app.BankKeeper.MintCoins(ctx, types.ModuleName, initCoins))
+
+	// set collateral setting for the account
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	err := s.app.LeverageKeeper.SetCollateralSetting(ctx, lenderAddr, uTokenDenom, true)
+	s.Require().NoError(err)
+
+	// lend asset
+	err = s.app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	s.Require().NoError(err)
+
+	// verify collateral amount and total supply of minted uTokens
+	collateral := s.app.LeverageKeeper.GetCollateralAmount(ctx, lenderAddr, uTokenDenom)
+	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
+	s.Require().Equal(collateral, expected)
+	supply := s.app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	s.Require().Equal(expected, supply)
+
+	// withdraw more collateral than having
+	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
+	err = s.app.LeverageKeeper.WithdrawAsset(ctx, lenderAddr, uToken)
+	s.Require().EqualError(err, "1000000001u/uumee: insufficient balance")
+}
