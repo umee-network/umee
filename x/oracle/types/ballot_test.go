@@ -247,3 +247,34 @@ func TestPBStandardDeviation(t *testing.T) {
 		require.Equal(t, tc.standardDeviation, stdDev)
 	}
 }
+
+func TestPBStandardDeviation_Overflow(t *testing.T) {
+	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
+	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
+	require.NoError(t, err)
+
+	pb := ExchangeRateBallot{
+		NewVoteForTally(
+			sdk.OneDec(),
+			"UMEE",
+			valAddr,
+			2,
+		),
+		NewVoteForTally(
+			sdk.NewDec(1234),
+			"UMEE",
+			valAddr,
+			2,
+		), NewVoteForTally(
+			overflowRate,
+			"UMEE",
+			valAddr,
+			1,
+		),
+	}
+
+	deviation, err := pb.StandardDeviation()
+	expectedDevation, _ := sdk.NewDecFromStr("871.862661203013097586")
+	require.Equal(t, deviation, expectedDevation)
+	require.NotEmpty(t, deviation)
+}
