@@ -25,7 +25,7 @@ const (
 	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"
 	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"
 
-	salt = "1234"
+	salt = "89b8164ca0b4b8703ae9ab25962f3dd6d1de5d656f5442971a93b2ca7893f654"
 )
 
 var (
@@ -119,6 +119,16 @@ func SimulateMsgAggregateExchangeRatePrevote(
 				types.ModuleName,
 				types.TypeMsgAggregateExchangeRatePrevote,
 				"unable to find validator",
+			), nil, nil
+		}
+
+		// check for an existing prevote
+		_, err := k.GetAggregateExchangeRatePrevote(ctx, address)
+		if err == nil {
+			return simtypes.NoOpMsg(
+				types.ModuleName,
+				types.TypeMsgAggregateExchangeRatePrevote,
+				"prevote already exists for this validator",
 			), nil, nil
 		}
 

@@ -10,6 +10,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/keeper"
+	"github.com/umee-network/umee/x/leverage/simulation"
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -97,13 +99,17 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper keeper.Keeper
+	keeper        keeper.Keeper
+	accountKeeper types.AccountKeeper
+	bankKeeper    types.BankKeeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk types.BankKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
+		accountKeeper:  ak,
+		bankKeeper:     bk,
 	}
 }
 
@@ -166,4 +172,11 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)
+}
+
+// WeightedOperations returns the all the leverage module operations with their respective weights.
+func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
+	return simulation.WeightedOperations(
+		simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
+	)
 }

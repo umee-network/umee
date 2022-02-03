@@ -51,7 +51,10 @@ func (pb ExchangeRateBallot) Power() int64 {
 
 // WeightedMedian returns the median weighted by the power of the ExchangeRateVote.
 // CONTRACT: The ballot must be sorted.
-func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
+func (pb ExchangeRateBallot) WeightedMedian() (sdk.Dec, error) {
+	if !sort.IsSorted(pb) {
+		return sdk.ZeroDec(), ErrBallotNotSorted
+	}
 	totalPower := pb.Power()
 
 	if pb.Len() > 0 {
@@ -61,12 +64,12 @@ func (pb ExchangeRateBallot) WeightedMedian() sdk.Dec {
 
 			pivot += votePower
 			if pivot >= (totalPower / 2) {
-				return v.ExchangeRate
+				return v.ExchangeRate, nil
 			}
 		}
 	}
 
-	return sdk.ZeroDec()
+	return sdk.ZeroDec(), nil
 }
 
 // StandardDeviation returns the standard deviation by the power of the ExchangeRateVote.
@@ -75,7 +78,10 @@ func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 		return sdk.ZeroDec(), nil
 	}
 
-	median := pb.WeightedMedian()
+	median, err := pb.WeightedMedian()
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
 
 	sum := sdk.ZeroDec()
 	for _, v := range pb {
@@ -86,7 +92,6 @@ func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 	variance := sum.QuoInt64(int64(len(pb)))
 
 	standardDeviation, err := variance.ApproxSqrt()
-
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
