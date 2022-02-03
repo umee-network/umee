@@ -75,21 +75,31 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 
 func (s *IntegrationTestSuite) TestBallot_Overflow() {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
-	exchangeRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
+	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
 	s.Require().NoError(err)
 
-	pb := types.ExchangeRateBallot{types.NewVoteForTally(
-		sdk.ZeroDec(),
-		"UMEE",
-		valAddr,
-		2,
-	), types.NewVoteForTally(
-		exchangeRate,
-		"UMEE",
-		valAddr,
-		1,
-	)}
+	pb := types.ExchangeRateBallot{
+		types.NewVoteForTally(
+			sdk.OneDec(),
+			"UMEE",
+			valAddr,
+			2,
+		),
+		types.NewVoteForTally(
+			sdk.NewDec(1234),
+			"UMEE",
+			valAddr,
+			2,
+		), types.NewVoteForTally(
+			overflowRate,
+			"UMEE",
+			valAddr,
+			1,
+		),
+	}
 
-	_, err = pb.StandardDeviation()
-	s.Require().NoError(err)
+	deviation, err := pb.StandardDeviation()
+	expectedDevation, _ := sdk.NewDecFromStr("871.862661203013097586")
+	s.Require().Equal(deviation, expectedDevation)
+	s.Require().NotEmpty(deviation)
 }
