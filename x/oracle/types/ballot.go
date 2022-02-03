@@ -86,6 +86,11 @@ func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 	sum := sdk.ZeroDec()
 	for _, v := range pb {
 		deviation := v.ExchangeRate.Sub(median)
+		// check for overflow
+		err := checkMulOverflow(deviation, deviation)
+		if err != nil {
+			continue
+		}
 		sum = sum.Add(deviation.Mul(deviation))
 	}
 

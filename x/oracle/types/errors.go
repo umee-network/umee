@@ -26,4 +26,5 @@ var (
 	ErrNegativeOrZeroRate    = sdkerrors.Register(ModuleName, 14, "invalid exchange rate; should be positive")
 	ErrExistingPrevote       = sdkerrors.Register(ModuleName, 15, "prevote already submitted for this voting period")
 	ErrBallotNotSorted       = sdkerrors.Register(ModuleName, 16, "ballot must be sorted before this operation")
+	ErrDecOverflow           = sdkerrors.Register(ModuleName, 17, "overflow expected for this operation")
 )
