@@ -73,7 +73,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) TestPBStandardDeviationOverflow() {
+func (s *IntegrationTestSuite) TestBallot_Overflow() {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
 	exchangeRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
 	s.Require().NoError(err)
