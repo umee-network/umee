@@ -52,7 +52,7 @@ Chain ID: `umeeverse-party-1`
 [Peers](umee-peers.txt)
 
 ### Umee Keplr Wallet Setup
-Note: try doing this from the [Block Explorer](#apps)
+Note: try doing this from the developer console in the [Block Explorer](#apps)
 
 ```javascript
 await fetch("https://raw.githubusercontent.com/umee-network/umee/main/networks/umeeverse-party-1/keplr-umee-config.json")
@@ -82,7 +82,7 @@ Chain ID: `gaia-umeeverse-party-1`
 [Peers](gaia-peers.txt)
 
 ### Gaia Keplr Wallet Setup
-Note: try doing this from the [Block Explorer](#apps)
+Note: try doing this from the developer console in the [Block Explorer](#apps)
 
 ```javascript
 await fetch("https://raw.githubusercontent.com/umee-network/umee/main/networks/umeeverse-party-1/keplr-gaia-config.json")
