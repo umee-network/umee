@@ -252,7 +252,6 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
 	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
 	require.NoError(t, err)
-
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
 			sdk.OneDec(),
