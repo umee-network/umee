@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/umee-network/umee/x/oracle/types"
 )
@@ -70,4 +71,25 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	s.Require().Error(err)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
 	s.Require().Error(err)
+}
+
+func (s *IntegrationTestSuite) TestPBStandardDeviationOverflow() {
+	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
+	exchangeRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
+	s.Require().NoError(err)
+
+	pb := types.ExchangeRateBallot{types.NewVoteForTally(
+		sdk.ZeroDec(),
+		"UMEE",
+		valAddr,
+		2,
+	), types.NewVoteForTally(
+		exchangeRate,
+		"UMEE",
+		valAddr,
+		1,
+	)}
+
+	_, err = pb.StandardDeviation()
+	s.Require().NoError(err)
 }
