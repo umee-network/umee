@@ -36,7 +36,7 @@
     "ibc-transfer",
     "no-legacy-stdTx"
   ],
-  "explorerUrlToTx": "https://explorer-git-stacks-umeeverse-party-1-umee.vercel.app/gaia/tx/{txHash}",
+  "explorerUrlToTx": "https://explorer-git-stacks-umeeverse-party-1-umee.vercel.app/gaia-umeeverse-party-1/tx/{txHash}",
   "bech32Config": {
     "bech32PrefixAccAddr": "cosmos",
     "bech32PrefixAccPub": "cosmospub",
