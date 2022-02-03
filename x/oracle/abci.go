@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	"sort"
 	"time"
 
 	"github.com/umee-network/umee/x/oracle/keeper"
@@ -121,10 +120,6 @@ func Tally(
 	rewardBand sdk.Dec,
 	validatorClaimMap map[string]types.Claim,
 ) (sdk.Dec, error) {
-	if !sort.IsSorted(ballot) {
-		return sdk.ZeroDec(), types.ErrBallotNotSorted
-	}
-
 	weightedMedian, err := ballot.WeightedMedian()
 	if err != nil {
 		return sdk.ZeroDec(), err
