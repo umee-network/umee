@@ -110,6 +110,7 @@ func TestPBWeightedMedian(t *testing.T) {
 		weights     []int64
 		isValidator []bool
 		median      sdk.Dec
+		success     bool
 	}{
 		{
 			// Supermajority one number
@@ -117,6 +118,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(10),
+			true,
 		},
 		{
 			// Adding fake validator doesn't change outcome
@@ -124,6 +126,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.NewDec(10),
+			true,
 		},
 		{
 			// Tie votes
@@ -131,6 +134,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(2),
+			true,
 		},
 		{
 			// No votes
@@ -138,6 +142,15 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDec(0),
+			true,
+		},
+		{
+			// Out of order
+			[]int64{1, 2, 10, 3},
+			[]int64{1, 1, 100, 1},
+			[]bool{true, true, true, true},
+			sdk.NewDec(10),
+			false,
 		},
 	}
 
@@ -161,7 +174,14 @@ func TestPBWeightedMedian(t *testing.T) {
 			pb = append(pb, vote)
 		}
 
-		require.Equal(t, tc.median, pb.WeightedMedian())
+		median, err := pb.WeightedMedian()
+		if tc.success {
+			require.NoError(t, err)
+			require.Equal(t, tc.median, median)
+		} else {
+			require.Error(t, err)
+		}
+
 	}
 }
 
