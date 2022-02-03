@@ -53,7 +53,7 @@ Chain ID: `umeeverse-party-1`
 
 ### Umee Keplr Wallet Setup
 ```javascript
-await fetch("https://raw.githubusercontent.com/umee-network/umee/matt/add-network-info-umeeverse-party-1/networks/umeeverse-party-1/keplr-umee-config.json")
+await fetch("https://raw.githubusercontent.com/umee-network/umee/main/networks/umeeverse-party-1/keplr-umee-config.json")
   .then(r => r.json())
   .then(keplr.experimentalSuggestChain.bind(keplr))
   .then(() => keplr.enable('umeeverse-party-1'))
@@ -81,7 +81,7 @@ Chain ID: `gaia-umeeverse-party-1`
 
 ### Gaia Keplr Wallet Setup
 ```javascript
-await fetch("https://raw.githubusercontent.com/umee-network/umee/matt/add-network-info-umeeverse-party-1/networks/umeeverse-party-1/keplr-gaia-config.json")
+await fetch("https://raw.githubusercontent.com/umee-network/umee/main/networks/umeeverse-party-1/keplr-gaia-config.json")
   .then(r => r.json())
   .then(keplr.experimentalSuggestChain.bind(keplr))
   .then(() => keplr.enable('gaia-umeeverse-party-1'))
