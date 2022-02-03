@@ -256,18 +256,18 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
 			sdk.OneDec(),
-			"UMEE",
+			UmeeSymbol,
 			valAddr,
 			2,
 		),
 		NewVoteForTally(
 			sdk.NewDec(1234),
-			"UMEE",
+			UmeeSymbol,
 			valAddr,
 			2,
 		), NewVoteForTally(
 			overflowRate,
-			"UMEE",
+			UmeeSymbol,
 			valAddr,
 			1,
 		),
