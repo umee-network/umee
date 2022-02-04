@@ -264,7 +264,8 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 			UmeeSymbol,
 			valAddr,
 			2,
-		), NewVoteForTally(
+		),
+		NewVoteForTally(
 			overflowRate,
 			UmeeSymbol,
 			valAddr,
@@ -273,7 +274,7 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 	}
 
 	deviation, err := pb.StandardDeviation()
+	require.NoError(t, err)
 	expectedDevation, _ := sdk.NewDecFromStr("871.862661203013097586")
-	require.Equal(t, deviation, expectedDevation)
-	require.NotEmpty(t, deviation)
+	require.Equal(t, expectedDevation, deviation)
 }
