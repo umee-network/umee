@@ -46,11 +46,7 @@ func (msg MsgAggregateExchangeRatePrevote) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
-	feeder, err := sdk.AccAddressFromBech32(msg.Feeder)
-	if err != nil {
-		panic(err)
-	}
-
+	feeder, _ := sdk.AccAddressFromBech32(msg.Feeder)
 	return []sdk.AccAddress{feeder}
 }
 
@@ -107,11 +103,7 @@ func (msg MsgAggregateExchangeRateVote) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) GetSigners() []sdk.AccAddress {
-	feeder, err := sdk.AccAddressFromBech32(msg.Feeder)
-	if err != nil {
-		panic(err)
-	}
-
+	feeder, _ := sdk.AccAddressFromBech32(msg.Feeder)
 	return []sdk.AccAddress{feeder}
 }
 
@@ -145,8 +137,12 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 		}
 	}
 
-	if len(msg.Salt) > 4 || len(msg.Salt) < 1 {
-		return sdkerrors.Wrap(ErrInvalidSaltLength, "salt length must be [1, 4]")
+	if len(msg.Salt) != 64 {
+		return ErrInvalidSaltLength
+	}
+	_, err = AggregateVoteHashFromHexString(msg.Salt)
+	if err != nil {
+		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must be a valid hex string")
 	}
 
 	return nil
@@ -173,11 +169,7 @@ func (msg MsgDelegateFeedConsent) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgDelegateFeedConsent) GetSigners() []sdk.AccAddress {
-	operator, err := sdk.ValAddressFromBech32(msg.Operator)
-	if err != nil {
-		panic(err)
-	}
-
+	operator, _ := sdk.ValAddressFromBech32(msg.Operator)
 	return []sdk.AccAddress{sdk.AccAddress(operator)}
 }
 

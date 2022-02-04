@@ -29,14 +29,21 @@ source "googlecompute" "final" {
   ssh_username = "root"
   zone         = "us-central1-a"
   image_name   = "umee-node-${var.git_sha}"
+  machine_type = "n2-standard-2"
 }
 
 build {
   name = "umee-node"
+
   sources = [
     "source.docker.final",
     "source.googlecompute.final"
   ]
+
+  provisioner "shell" {
+    inline = [ "/usr/bin/cloud-init status --wait" ]
+    only = ["googlecompute.final"]
+  }
 
   provisioner "shell" {
     inline = [ "sed -i 's/http:\\/\\/.\\+\\/ubuntu/http:\\/\\/mirrors.edge.kernel.org\\/ubuntu/g' /etc/apt/sources.list"
@@ -47,7 +54,7 @@ build {
       , "apt install -y --no-install-recommends caddy"
       , "apt dist-upgrade -y"
       , "rm -rf /var/lib/{apt,dpkg,cache,log}/"
-      , "curl -sLf https://github.com/informalsystems/ibc-rs/releases/download/v0.10.0/hermes-v0.10.0-x86_64-unknown-linux-gnu.tar.gz | tar -C /usr/local/bin -xz"
+      , "curl -sLf https://github.com/informalsystems/ibc-rs/releases/download/v0.11.0/hermes-v0.11.0-x86_64-unknown-linux-gnu.tar.gz | tar -C /usr/local/bin -xz"
       , "curl -sLf https://github.com/cosmos/gaia/releases/download/v6.0.0/gaiad-v6.0.0-linux-amd64 -o /usr/local/bin/gaiad"
       , "chmod a+x /usr/local/bin/gaiad"
     ]

@@ -5,19 +5,19 @@ go 1.17
 require (
 	github.com/BurntSushi/toml v1.0.0
 	github.com/armon/go-metrics v0.3.10
-	github.com/cosmos/cosmos-sdk v0.45.0
-	github.com/go-playground/validator/v10 v10.9.0
+	github.com/cosmos/cosmos-sdk v0.45.1
+	github.com/go-playground/validator/v10 v10.10.0
 	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
-	github.com/prometheus/client_golang v1.11.0
-	github.com/prometheus/common v0.29.0
-	github.com/rs/cors v1.8.0
+	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/common v0.32.1
+	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.26.1
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
-	github.com/umee-network/umee v0.7.0
+	github.com/umee-network/umee v0.7.3
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -28,7 +28,7 @@ require (
 	github.com/99designs/keyring v1.1.6 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/DataDog/zstd v1.4.5 // indirect
-	github.com/Gravity-Bridge/Gravity-Bridge/module v0.0.0-20220119145013-642d08945c63 // indirect
+	github.com/Gravity-Bridge/Gravity-Bridge/module v1.3.5 // indirect
 	github.com/Workiva/go-datastructures v1.0.52 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
@@ -97,7 +97,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
@@ -119,7 +119,7 @@ require (
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect

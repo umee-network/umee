@@ -190,7 +190,7 @@ func (k Keeper) SetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress, de
 	store.Set(types.GetFeederDelegationKey(operator), delegatedFeeder.Bytes())
 }
 
-type IterateFeederDelegationHandler = func(delegator sdk.ValAddress, delegate sdk.AccAddress) (stop bool)
+type IterateFeederDelegationHandler func(delegator sdk.ValAddress, delegate sdk.AccAddress) (stop bool)
 
 // IterateFeederDelegations iterates over the feed delegates and performs a
 // callback function.
@@ -271,16 +271,22 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 
 	bz := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))
 	if bz == nil {
-		err := sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
-		if err != nil {
-			return types.AggregateExchangeRatePrevote{}, err
-		}
+		return types.AggregateExchangeRatePrevote{}, sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
 	}
 
 	var aggregatePrevote types.AggregateExchangeRatePrevote
 	k.cdc.MustUnmarshal(bz, &aggregatePrevote)
 
 	return aggregatePrevote, nil
+}
+
+// HasAggregateExchangeRatePrevote checks if a validator has an existing prevote.
+func (k Keeper) HasAggregateExchangeRatePrevote(
+	ctx sdk.Context,
+	voter sdk.ValAddress,
+) bool {
+	store := ctx.KVStore(k.storeKey)
+	return store.Has(types.GetAggregateExchangeRatePrevoteKey(voter))
 }
 
 // SetAggregateExchangeRatePrevote set an oracle aggregate prevote to the store.
@@ -332,10 +338,7 @@ func (k Keeper) GetAggregateExchangeRateVote(
 
 	bz := store.Get(types.GetAggregateExchangeRateVoteKey(voter))
 	if bz == nil {
-		err := sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
-		if err != nil {
-			return types.AggregateExchangeRateVote{}, err
-		}
+		return types.AggregateExchangeRateVote{}, sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
 	}
 
 	var aggregateVote types.AggregateExchangeRateVote
