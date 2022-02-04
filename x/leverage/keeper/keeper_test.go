@@ -25,8 +25,9 @@ const (
 )
 
 var (
-	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
+	initTokens          = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
+	initCoins           = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
+	setupAccountCounter = sdk.ZeroInt()
 )
 
 type IntegrationTestSuite struct {
@@ -88,6 +89,45 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
+// setupLender executes some common boilerplate before a test, where a lender account is given tokens of a given denom,
+// may also lend them to receive uTokens, and may also enable those uTokens as collateral.
+func (s *IntegrationTestSuite) setupLender(denom string, mintAmount, lendAmount int64, collateral bool) sdk.AccAddress {
+
+	// create a unique address
+	setupAccountCounter = setupAccountCounter.Add(sdk.OneInt())
+	addr := sdk.AccAddress([]byte("addr" + setupAccountCounter.String()))
+
+	// register the account in AccountKeeper
+	acct := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, addr)
+	s.app.AccountKeeper.SetAccount(s.ctx, acct)
+
+	if mintAmount > 0 {
+		// mint and send mintAmount tokens to account
+		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName,
+			sdk.NewCoins(sdk.NewInt64Coin(denom, mintAmount)),
+		))
+		s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, addr,
+			sdk.NewCoins(sdk.NewInt64Coin(denom, mintAmount)),
+		))
+	}
+
+	if lendAmount > 0 {
+		// lender lends lendAmount tokens and receives uTokens
+		err := s.app.LeverageKeeper.LendAsset(s.ctx, addr, sdk.NewInt64Coin(denom, lendAmount))
+		s.Require().NoError(err)
+	}
+
+	if collateral {
+		// lender enables associated uToken as collateral
+		collatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, denom)
+		err := s.app.LeverageKeeper.SetCollateralSetting(s.ctx, addr, collatDenom, true)
+		s.Require().NoError(err)
+	}
+
+	// return the account addresse
+	return addr
+}
+
 func (s *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
 	app, ctx := s.app, s.ctx
 
@@ -111,7 +151,7 @@ func (s *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
 func (s *IntegrationTestSuite) TestLendAsset_Valid() {
 	app, ctx := s.app, s.ctx
 
-	lenderAddr := sdk.AccAddress([]byte("addr________________"))
+	lenderAddr := sdk.AccAddress([]byte("addr________________1234"))
 	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
 	app.AccountKeeper.SetAccount(ctx, lenderAcc)
 
@@ -232,10 +272,6 @@ func (s *IntegrationTestSuite) TestGetToken() {
 // account has been created with no assets.
 func (s *IntegrationTestSuite) initBorrowScenario() (lender, bum sdk.AccAddress) {
 	app, ctx := s.app, s.ctx
-
-	// set default params
-	params := types.DefaultParams()
-	s.app.LeverageKeeper.SetParams(ctx, params)
 
 	// create an account and address which will represent a lender
 	lenderAddr := sdk.AccAddress([]byte("addr______________01"))
@@ -1193,38 +1229,21 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) TestWithdrawAsset_InsufficientCollateral() {
-	app, ctx := s.app, s.ctx
+	// Create a lender with 1 u/umee collateral by lending 1 umee
+	lenderAddr := s.setupLender(umeeapp.BondDenom, 1000000, 1000000, true)
 
-	lenderAddr := sdk.AccAddress([]byte("addr________________"))
-	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
-	app.AccountKeeper.SetAccount(ctx, lenderAcc)
-
-	// mint and send coins
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, initCoins))
-
-	// mint additional coins for just the leverage module; this way it will have available reserve
-	// to meet conditions in the withdrawal logic
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, types.ModuleName, initCoins))
-
-	// set collateral setting for the account
-	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
-	err := s.app.LeverageKeeper.SetCollateralSetting(ctx, lenderAddr, uTokenDenom, true)
-	s.Require().NoError(err)
-
-	// lend asset
-	err = s.app.LeverageKeeper.LendAsset(ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
-	s.Require().NoError(err)
+	// Create an additional lender so lending pool has extra umee
+	_ = s.setupLender(umeeapp.BondDenom, 1000000, 1000000, true)
 
 	// verify collateral amount and total supply of minted uTokens
-	collateral := s.app.LeverageKeeper.GetCollateralAmount(ctx, lenderAddr, uTokenDenom)
-	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
-	s.Require().Equal(collateral, expected)
-	supply := s.app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
-	s.Require().Equal(expected, supply)
+	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, uTokenDenom)
+	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 1000000), collateral) // 1 u/umee
+	supply := s.app.LeverageKeeper.TotalUTokenSupply(s.ctx, uTokenDenom)
+	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 2000000), supply) // 2 u/umee
 
 	// withdraw more collateral than available
 	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
-	err = s.app.LeverageKeeper.WithdrawAsset(ctx, lenderAddr, uToken)
-	s.Require().EqualError(err, "1000000001u/uumee: insufficient balance")
+	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, lenderAddr, uToken)
+	s.Require().EqualError(err, "1000001u/uumee: insufficient balance")
 }

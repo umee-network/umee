@@ -190,7 +190,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
 	s.Require().Equal(types.EventTypeWithdrawLoanedAsset, msg.Type())
-	s.Require().Equal("9u/uumee", msg.Amount.String())
+	s.Require().Equal("73u/uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
 

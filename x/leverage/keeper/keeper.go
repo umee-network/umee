@@ -85,15 +85,15 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
 	}
 
-	// send token balance to leverage module account
-	loanTokens := sdk.NewCoins(loan)
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
-		return err
-	}
-
 	// determine uToken amount to mint
 	uToken, err := k.ExchangeToken(ctx, loan)
 	if err != nil {
+		return err
+	}
+
+	// send token balance to leverage module account
+	loanTokens := sdk.NewCoins(loan)
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
 		return err
 	}
 
