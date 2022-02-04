@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/BurntSushi/toml v1.0.0
 	github.com/armon/go-metrics v0.3.10
-	github.com/cosmos/cosmos-sdk v0.45.0
+	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
