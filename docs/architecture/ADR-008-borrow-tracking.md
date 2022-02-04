@@ -89,7 +89,7 @@ The following example scenario should help clarify the meaning of the `AdjustedB
 > Now Alice wished to borrow an additional `500 uumee`, so whe will owe a total of 2000. Her adjusted borrow is increased by the newly borrowed amount divided by InterestScalar: `AdjustedBorrow(alice,"uumee") = 1000.000 + (500 / 1.5) = 1333.333`.
 >
 > In addition, `TotalAdustedBorrow("uumee") = 3000.000 + (500 / 1.5) = 3333.333` reflects the increase. Note that the total `uumee` borrowed across the system is now `3333.333 * 1.5 = 4500 + 500 = 5000`.
-> 
+>
 > Finally, Bob will attempt to repay 1000 of his `3000 uumee` owed. Note that `AdjustedBorrow(bob,"uumee") = 2000.000` before the transaction.
 >
 > After Bob makes his repayment, `AdjustedBorrow(bob,"uumee") = 2000.000 - (1000 / 1.5) = 1333.333` and `TotalAdjustedBorrow("uumee") = 3333.333 - (1000 / 1.5) = 2666.666`. The same amount is subtracted from both quantities.
