@@ -8,8 +8,6 @@ option go_package = "github.com/umee-network/umee/x/leverage/types";
 // Params defines the parameters for the leverage module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
-  // The interest_epoch determines how many blocks pass between borrow interest calculations.
-  int64 interest_epoch = 1 [(gogoproto.moretags) = "yaml:\"interest_epoch\""];
   // The complete_liquidation_threshold determines how far over their borrow limit a borrower
   // must be in order for their positions to be liquidated fully in a single event.
   string complete_liquidation_threshold = 2 [

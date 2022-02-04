@@ -65,12 +65,21 @@ As a reminder, the following values are always available as a basis for calculat
 - Total supply of any token or uToken denomination, available through the `bank` module.
 - The `leverage` module account balance, available through the `bank` module.
 - Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
-- Borrowed denominations and amounts for individual borrowers, stored in `leverage` module [State](02_state.md).
-- Total borrows summed over all borrower accounts, derived from the above.
+- Borrowed denominations and _adjusted amounts_ for individual borrowers, stored in `leverage` module [State](02_state.md).
+- _Interest scalars_ for all borrowed denominations, which are used with adjusted borrow amounts
+- Total _adjusted borrows_ summed over all borrower accounts.
 - Leverage module [Parameters](07_params.md)
 - Token parameters from the [Token Registry](02_state.md#Token-Registry)
 
 The more complex derived values must use the values above as a basis.
+
+### Adjusted Borrow Amounts
+
+Borrow amounts stored in state are stored as `AdjustedBorrow` amounts, which can be converted to and from actual borrow amounts using the following relation:
+
+> `AdjustedBorrow(denom,user)` * `InterestScalar(denom)` = `BorrowedAmount(denom,user)`
+
+When interest accrues on borrow positions, the `InterestScalar` of the denom is increased and the adjusted borrow amounts remain unchanged.
 
 ### uToken Exchange Rate
 

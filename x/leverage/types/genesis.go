@@ -12,28 +12,24 @@ import (
 func NewGenesisState(
 	params Params,
 	tokens []Token,
-	borrows []Borrow,
+	adjustedBorrows []AdjustedBorrow,
 	collateralSettings []CollateralSetting,
 	collateral []Collateral,
 	reserves sdk.Coins,
 	lastInterestTime int64,
-	exchangeRates []ExchangeRate,
 	badDebts []BadDebt,
-	borrowAPYs []APY,
-	lendAPYs []APY,
+	interestScalars []InterestScalar,
 ) *GenesisState {
 
 	return &GenesisState{
 		Params:             params,
 		Registry:           tokens,
-		Borrows:            borrows,
+		AdjustedBorrows:    adjustedBorrows,
 		CollateralSettings: collateralSettings,
 		Collateral:         collateral,
 		LastInterestTime:   lastInterestTime,
-		ExchangeRates:      exchangeRates,
 		BadDebts:           badDebts,
-		BorrowRates:        borrowAPYs,
-		LendRates:          lendAPYs,
+		InterestScalars:    interestScalars,
 	}
 }
 
@@ -60,7 +56,7 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	for _, borrow := range gs.Borrows {
+	for _, borrow := range gs.AdjustedBorrows {
 		if _, err := sdk.AccAddressFromBech32(borrow.Address); err != nil {
 			return err
 		}
@@ -94,16 +90,6 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	for _, rate := range gs.ExchangeRates {
-		if err := sdk.ValidateDenom(rate.Denom); err != nil {
-			return err
-		}
-
-		if rate.ExchangeRate.LT(sdk.OneDec()) {
-			return sdkerrors.Wrap(ErrInvalidExchangeRate, rate.String())
-		}
-	}
-
 	for _, badDebt := range gs.BadDebts {
 		if _, err := sdk.AccAddressFromBech32(badDebt.Address); err != nil {
 			return err
@@ -114,23 +100,13 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	for _, rate := range gs.BorrowRates {
+	for _, rate := range gs.InterestScalars {
 		if err := sdk.ValidateDenom(rate.Denom); err != nil {
 			return err
 		}
 
-		if rate.APY.IsNegative() {
-			return sdkerrors.Wrap(ErrNegativeAPY, rate.String())
-		}
-	}
-
-	for _, rate := range gs.LendRates {
-		if err := sdk.ValidateDenom(rate.Denom); err != nil {
-			return err
-		}
-
-		if rate.APY.IsNegative() {
-			return sdkerrors.Wrap(ErrNegativeAPY, rate.String())
+		if rate.Scalar.LT(sdk.OneDec()) {
+			return sdkerrors.Wrap(ErrInvalidExchangeRate, rate.String())
 		}
 	}
 
@@ -149,9 +125,9 @@ func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.R
 	return &genesisState
 }
 
-// NewBorrow creates the Borrow struct used in GenesisState
-func NewBorrow(addr string, amount sdk.Coin) Borrow {
-	return Borrow{
+// NewAdjustedBorrow creates the Borrow struct used in GenesisState
+func NewAdjustedBorrow(addr string, amount sdk.DecCoin) AdjustedBorrow {
+	return AdjustedBorrow{
 		Address: addr,
 		Amount:  amount,
 	}
@@ -181,18 +157,10 @@ func NewBadDebt(addr, denom string) BadDebt {
 	}
 }
 
-// NewExchangeRate creates the APY struct used in GenesisState
-func NewExchangeRate(denom string, rate sdk.Dec) ExchangeRate {
-	return ExchangeRate{
-		Denom:        denom,
-		ExchangeRate: rate,
-	}
-}
-
-// NewAPY creates the APY struct used in GenesisState
-func NewAPY(denom string, rate sdk.Dec) APY {
-	return APY{
-		Denom: denom,
-		APY:   rate,
+// NewInterestScalar creates the InterestScalar struct used in GenesisState
+func NewInterestScalar(denom string, scalar sdk.Dec) InterestScalar {
+	return InterestScalar{
+		Denom:  denom,
+		Scalar: scalar,
 	}
 }
