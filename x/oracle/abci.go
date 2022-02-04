@@ -120,7 +120,10 @@ func Tally(
 	rewardBand sdk.Dec,
 	validatorClaimMap map[string]types.Claim,
 ) (sdk.Dec, error) {
-	weightedMedian := ballot.WeightedMedian()
+	weightedMedian, err := ballot.WeightedMedian()
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
 	standardDeviation, err := ballot.StandardDeviation()
 	if err != nil {
 		return sdk.ZeroDec(), err
