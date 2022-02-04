@@ -129,22 +129,20 @@ func (s *IntegrationTestSuite) setupLender(denom string, mintAmount, lendAmount 
 }
 
 func (s *IntegrationTestSuite) TestLendAsset_InvalidAsset() {
-	app, ctx := s.app, s.ctx
-
 	lenderAddr := sdk.AccAddress([]byte("addr________________"))
-	lenderAcc := app.AccountKeeper.NewAccountWithAddress(ctx, lenderAddr)
-	app.AccountKeeper.SetAccount(ctx, lenderAcc)
+	lenderAcc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, lenderAddr)
+	s.app.AccountKeeper.SetAccount(s.ctx, lenderAcc)
 
 	// create coins of an unregistered base asset type "uabcd"
 	invalidCoin := sdk.NewInt64Coin("uabcd", 1000000000) // 1k abcd
 	invalidCoins := sdk.NewCoins(invalidCoin)
 
 	// mint and send coins
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, invalidCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, lenderAddr, invalidCoins))
+	s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, invalidCoins))
+	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, lenderAddr, invalidCoins))
 
 	// lending should fail as we have not registered token "uabcd"
-	err := s.app.LeverageKeeper.LendAsset(ctx, lenderAddr, invalidCoin)
+	err := s.app.LeverageKeeper.LendAsset(s.ctx, lenderAddr, invalidCoin)
 	s.Require().Error(err)
 }
 
