@@ -12,16 +12,10 @@ import (
 
 // Simulation parameter constants
 const (
-	interestEpochKey                = "interest_epoch"
 	completeLiquidationThresholdKey = "complete_liquidation_threshold"
 	minimumCloseFactorKey           = "minimum_close_factor"
 	oracleRewardFactorKey           = "oracle_reward_factor"
 )
-
-// GenInterestEpoch produces a randomized InterestEpoch in the range of [10, 100]
-func GenInterestEpoch(r *rand.Rand) int64 {
-	return int64(10 + r.Intn(90))
-}
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
 func GenCompleteLiquidationThreshold(r *rand.Rand) sdk.Dec {
@@ -40,12 +34,6 @@ func GenOracleRewardFactor(r *rand.Rand) sdk.Dec {
 
 // RandomizedGenState generates a random GenesisState for oracle
 func RandomizedGenState(simState *module.SimulationState) {
-	var interestEpoch int64
-	simState.AppParams.GetOrGenerate(
-		simState.Cdc, interestEpochKey, &interestEpoch, simState.Rand,
-		func(r *rand.Rand) { interestEpoch = GenInterestEpoch(r) },
-	)
-
 	var completeLiquidationThreshold sdk.Dec
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, completeLiquidationThresholdKey, &completeLiquidationThreshold, simState.Rand,
@@ -66,21 +54,18 @@ func RandomizedGenState(simState *module.SimulationState) {
 
 	leverageGenesis := types.NewGenesisState(
 		types.Params{
-			InterestEpoch:                interestEpoch,
 			CompleteLiquidationThreshold: completeLiquidationThreshold,
 			MinimumCloseFactor:           minimumCloseFactor,
 			OracleRewardFactor:           oracleRewardFactor,
 		},
 		[]types.Token{},
-		[]types.Borrow{},
+		[]types.AdjustedBorrow{},
 		[]types.CollateralSetting{},
 		[]types.Collateral{},
 		sdk.Coins{},
 		0,
-		[]types.ExchangeRate{},
 		[]types.BadDebt{},
-		[]types.APY{},
-		[]types.APY{},
+		[]types.InterestScalar{},
 	)
 
 	bz, err := json.MarshalIndent(&leverageGenesis.Params, "", " ")

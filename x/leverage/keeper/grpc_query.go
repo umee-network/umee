@@ -31,10 +31,7 @@ func (q Querier) RegisteredTokens(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	tokens, err := q.Keeper.GetAllRegisteredTokens(ctx)
-	if err != nil {
-		return nil, err
-	}
+	tokens := q.Keeper.GetAllRegisteredTokens(ctx)
 
 	resp := &types.QueryRegisteredTokensResponse{
 		Registry: make([]types.Token, len(tokens)),
@@ -131,7 +128,7 @@ func (q Querier) BorrowAPY(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	borrowAPY := q.Keeper.GetBorrowAPY(ctx, req.Denom)
+	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
 
 	return &types.QueryBorrowAPYResponse{APY: borrowAPY}, nil
 }
@@ -152,7 +149,7 @@ func (q Querier) LendAPY(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	lendAPY := q.Keeper.GetLendAPY(ctx, req.Denom)
+	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
 
 	return &types.QueryLendAPYResponse{APY: lendAPY}, nil
 }
@@ -289,10 +286,7 @@ func (q Querier) ExchangeRate(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	rate, err := q.Keeper.GetExchangeRate(ctx, req.Denom)
-	if err != nil {
-		return nil, err
-	}
+	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
 
 	return &types.QueryExchangeRateResponse{ExchangeRate: rate}, nil
 }

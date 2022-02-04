@@ -10,7 +10,7 @@ const (
 	EventTypeLiquidate            = "liquidate_borrow_position"
 	EventTypeRepayBadDebt         = "repay_bad_debt"
 	EventTypeReservesExhausted    = "reserves_exhausted"
-	EventTypeInterestEpoch        = "interest_epoch"
+	EventTypeInterestAccrual      = "interest_accrual"
 	EventTypeFundOracle           = "fund_oracle"
 
 	EventAttrModule      = ModuleName

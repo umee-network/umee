@@ -14,11 +14,6 @@ import (
 // on the simulation
 func ParamChanges(r *rand.Rand) []simtypes.ParamChange {
 	return []simtypes.ParamChange{
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyInterestEpoch),
-			func(r *rand.Rand) string {
-				return fmt.Sprintf("\"%d\"", GenInterestEpoch(r))
-			},
-		),
 		simulation.NewSimParamChange(types.ModuleName, string(types.KeyCompleteLiquidationThreshold),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenCompleteLiquidationThreshold(r))
