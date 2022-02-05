@@ -31,7 +31,11 @@ type (
 func NewMockProvider() *MockProvider {
 	return &MockProvider{
 		baseURL: mockBaseURL,
-		client:  newDefaultHttpClient(),
+		client: &http.Client{
+			Timeout: defaultTimeout,
+			// the mock provider is the only one who allows redirect
+			// because it gets the mocked prices from the google spreadsheet
+		},
 	}
 }
 

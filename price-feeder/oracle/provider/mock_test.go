@@ -75,18 +75,4 @@ ATOM,USDC,21.84,1827884.77
 		require.Nil(t, prices)
 	})
 
-	t.Run("check_redirect", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			http.Redirect(rw, r, mp.baseURL, http.StatusTemporaryRedirect)
-		}))
-		defer server.Close()
-
-		server.Client().CheckRedirect = preventRedirect
-		mp.client = server.Client()
-		mp.baseURL = server.URL
-
-		prices, err := mp.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
-		require.Error(t, err)
-		require.Nil(t, prices)
-	})
 }
