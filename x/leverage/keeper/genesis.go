@@ -11,9 +11,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
 	for _, token := range genState.Registry {
-		if err := k.SetRegisteredToken(ctx, token); err != nil {
-			panic(err)
-		}
+		k.SetRegisteredToken(ctx, token)
 	}
 
 	for _, borrow := range genState.AdjustedBorrows {

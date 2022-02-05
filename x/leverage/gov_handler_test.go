@@ -30,8 +30,8 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 	})
 
 	t.Run("valid proposal", func(t *testing.T) {
-		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uosmo"}))
-		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.05")}))
+		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uosmo"})
+		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.05")})
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",

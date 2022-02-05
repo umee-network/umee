@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -48,9 +49,9 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 }
 
 // SetRegisteredToken stores a Token into the x/leverage module's KVStore.
-func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
-	if err := sdk.ValidateDenom(token.BaseDenom); err != nil {
-		return err
+func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
+	if token.BaseDenom == "" {
+		panic("empty base denom")
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -58,12 +59,11 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
 
 	bz, err := k.cdc.Marshal(&token)
 	if err != nil {
-		return sdkerrors.Wrap(err, "failed to encode token")
+		panic(fmt.Sprintf("failed to encode token: %s", err))
 	}
 
 	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
-	return nil
 }
 
 // DeleteRegisteredTokens deletes all registered tokens from the x/leverage
