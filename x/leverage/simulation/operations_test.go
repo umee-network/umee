@@ -89,8 +89,7 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAcc
 	initAmt := sdk.NewInt(200000000) // 200 * 10^6
 	accCoins := sdk.NewCoins()
 
-	tokens, err := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-	s.Require().NoError(err)
+	tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
 
 	for _, token := range tokens {
 		accCoins = accCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt))
@@ -248,7 +247,8 @@ func (s *SimTestSuite) TestSimulateMsgSetCollateralSetting() {
 
 func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
 	r := rand.New(rand.NewSource(1))
-	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(50))
+	lendToken := sdk.NewInt64Coin(umeeapp.BondDenom, 100)
+	borrowToken := sdk.NewInt64Coin(umeeapp.BondDenom, 20)
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, borrowToken)
@@ -257,7 +257,7 @@ func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
 		}
 
 		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true))
-		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, borrowToken.AddAmount(sdk.NewInt(50)))
+		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken)
 		s.Require().NoError(s.app.LeverageKeeper.BorrowAsset(s.ctx, fundedAccount.Address, borrowToken))
 	})
 

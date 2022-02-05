@@ -43,11 +43,10 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		}
 		require.NoError(t, h(ctx, p))
 
-		tokens, err := k.GetAllRegisteredTokens(ctx)
-		require.NoError(t, err)
+		tokens := k.GetAllRegisteredTokens(ctx)
 		require.Len(t, tokens, 2)
 
-		_, err = k.GetRegisteredToken(ctx, "uosmo")
+		_, err := k.GetRegisteredToken(ctx, "uosmo")
 		require.Error(t, err)
 
 		_, err = k.GetRegisteredToken(ctx, "uumee")

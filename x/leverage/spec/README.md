@@ -17,6 +17,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
     - [Reserves](01_concepts.md#Reserves)
     - [Liquidation](01_concepts.md#Liquidation)
     - Important Derived Values:
+        - [Adjusted Borrow Amounts](01_concepts.md#Adjusted-Borrow-Amounts)
         - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
         - [Borrow Utilization](01_concepts.md#Borrow-Utilization)
         - [Borrow Limit](01_concepts.md#Borrow-Limit)
@@ -36,6 +37,5 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 5. **[EndBlock](05_endblock.md)**
     - [Bad Debt Sweeping](05_endblock.md#Sweep-Bad-Debt)
     - [Interest Accrual](05_endblock.md#Accrue-Interest)
-    - [Exchange Rate Updates](05_endblock.md#Update-Exchange-Rates)
 6. **[Events](06_events.md)**
 7. **[Parameters](07_params.md)**

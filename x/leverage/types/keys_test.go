@@ -12,14 +12,14 @@ import (
 
 func TestAddressFromKey(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	key := types.CreateLoanKey(address, app.BondDenom)
-	expectedAddress := types.AddressFromKey(key, types.KeyPrefixLoanToken)
+	key := types.CreateAdjustedBorrowKey(address, app.BondDenom)
+	expectedAddress := types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, address, expectedAddress)
 
 	address = sdk.AccAddress([]byte("anotherAddr________________"))
 	key = types.CreateCollateralAmountKeyNoDenom(address)
-	expectedAddress = types.AddressFromKey(key, types.KeyPrefixLoanToken)
+	expectedAddress = types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, address, expectedAddress)
 }
@@ -27,8 +27,8 @@ func TestAddressFromKey(t *testing.T) {
 func TestDenomFromKeyWithAddress(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
 	denom := app.BondDenom
-	key := types.CreateLoanKey(address, denom)
-	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixLoanToken)
+	key := types.CreateAdjustedBorrowKey(address, denom)
+	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, denom, expectedDenom)
 
@@ -41,14 +41,14 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 
 func TestDenomFromKey(t *testing.T) {
 	denom := app.BondDenom
-	key := types.CreateExchangeRateKey(denom)
-	expectedDenom := types.DenomFromKey(key, types.KeyPrefixExchangeRate)
+	key := types.CreateReserveAmountKey(denom)
+	expectedDenom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
 	require.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
-	key = types.CreateExchangeRateKey(uDenom)
-	expectedDenom = types.DenomFromKey(key, types.KeyPrefixExchangeRate)
+	key = types.CreateReserveAmountKey(uDenom)
+	expectedDenom = types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
 	require.Equal(t, uDenom, expectedDenom)
 }
