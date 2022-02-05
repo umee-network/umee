@@ -28,6 +28,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 
 		p.client = server.Client()
 		p.baseURL = server.URL
+
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
