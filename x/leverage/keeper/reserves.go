@@ -30,8 +30,8 @@ func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
 
 // setReserveAmount sets the amount reserved of a specified token.
 func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
-	if !k.IsAcceptedToken(ctx, coin.Denom) || !coin.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+	if err := coin.Validate(); err != nil {
+		return err
 	}
 
 	store := ctx.KVStore(k.storeKey)
