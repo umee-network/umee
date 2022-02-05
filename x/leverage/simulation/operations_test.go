@@ -74,7 +74,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		betaApp.LeverageKeeper.SetRegisteredToken(ctx, token)
+		_ = betaApp.LeverageKeeper.SetRegisteredToken(ctx, token)
 		betaApp.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 
@@ -279,34 +279,32 @@ func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
 
 func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	r := rand.New(rand.NewSource(1))
-	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(50))
+	lendToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, borrowToken)
-		if err != nil {
-			s.Require().NoError(err)
-		}
+		uDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, borrowToken.Denom)
 
-		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true))
-		s.Require().NoError(s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, borrowToken))
-		s.Require().NoError(s.app.LeverageKeeper.SetBorrow(s.ctx, fundedAccount.Address, borrowToken))
+		s.Require().NoError(s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken))
+		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uDenom, true))
+		s.Require().NoError(s.app.LeverageKeeper.BorrowAsset(s.ctx, fundedAccount.Address, borrowToken))
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
 	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
-	s.Require().NoError(err)
+	s.Require().EqualError(err,
+		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea: borrower not eligible for liquidation",
+	)
 
 	var msg types.MsgLiquidate
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
-	s.Require().True(operationMsg.OK)
-	s.Require().Equal("umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea", msg.Liquidator)
-	s.Require().Equal("umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea", msg.Borrower)
-	s.Require().Equal("u/uumee", msg.RewardDenom)
+	// While it is no longer simple to create an eligible liquidation target using exported keeper methods here,
+	// we can still verify some properties of the resulting operation.
+	s.Require().False(operationMsg.OK)
 	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
-	s.Require().Equal("9uumee", msg.Repayment.String())
 	s.Require().Len(futureOperations, 0)
 }
 

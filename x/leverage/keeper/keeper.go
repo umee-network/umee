@@ -249,7 +249,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	newBorrow := borrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	if err := k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
+	if err := k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
 		return err
 	}
 	return nil
@@ -296,7 +296,7 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	owed.Amount = owed.Amount.Sub(payment.Amount)
 
 	// Store the remaining borrowed amount in keeper
-	if err := k.SetBorrow(ctx, borrowerAddr, owed); err != nil {
+	if err := k.setBorrow(ctx, borrowerAddr, owed); err != nil {
 		return sdk.ZeroInt(), err
 	}
 	return payment.Amount, nil
@@ -486,7 +486,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
-	if err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
+	if err = k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
@@ -519,7 +519,9 @@ func (k Keeper) LiquidateBorrow(
 			// this liquidation. All other borrowed denoms were definitely not
 			// repaid in this liquidation so they are always marked as bad debt.
 			if coin.Denom != repayment.Denom || owed.IsPositive() {
-				k.SetBadDebtAddress(ctx, borrowerAddr, coin.Denom, true)
+				if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+					return sdk.ZeroInt(), sdk.ZeroInt(), err
+				}
 			}
 		}
 	}

@@ -27,7 +27,9 @@ func handleUpdateRegistryProposalHandler(ctx sdk.Context, k keeper.Keeper, p *ty
 	}
 
 	for _, token := range p.Registry {
-		k.SetRegisteredToken(ctx, token)
+		if err := k.SetRegisteredToken(ctx, token); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -33,6 +33,10 @@ func (k Keeper) SetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 		return sdkerrors.Wrap(types.ErrInvalidAsset, collateral.String())
 	}
 
+	if borrowerAddr.Empty() {
+		return types.ErrEmptyAddress
+	}
+
 	bz, err := collateral.Amount.Marshal()
 	if err != nil {
 		return err

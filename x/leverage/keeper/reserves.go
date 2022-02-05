@@ -28,8 +28,8 @@ func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
 	return amount
 }
 
-// SetReserveAmount sets the amount reserved of a specified token.
-func (k Keeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
+// setReserveAmount sets the amount reserved of a specified token.
+func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	if !k.IsAcceptedToken(ctx, coin.Denom) || !coin.IsValid() {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
 	}
@@ -64,11 +64,11 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))
 
 	if amountToRepay.IsPositive() {
-		if err := k.SetBorrow(ctx, borrowerAddr, newBorrowed); err != nil {
+		if err := k.setBorrow(ctx, borrowerAddr, newBorrowed); err != nil {
 			return false, err
 		}
 
-		if err := k.SetReserveAmount(ctx, newReserved); err != nil {
+		if err := k.setReserveAmount(ctx, newReserved); err != nil {
 			return false, err
 		}
 
