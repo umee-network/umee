@@ -74,5 +74,4 @@ ATOM,USDC,21.84,1827884.77
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})
-
 }
