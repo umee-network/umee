@@ -275,6 +275,6 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 
 	deviation, err := pb.StandardDeviation()
 	require.NoError(t, err)
-	expectedDevation, _ := sdk.NewDecFromStr("871.862661203013097586")
+	expectedDevation := sdk.MustNewDecFromStr("871.862661203013097586")
 	require.Equal(t, expectedDevation, deviation)
 }
