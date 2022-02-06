@@ -57,14 +57,14 @@ type (
 func NewHuobiProvider() *HuobiProvider {
 	return &HuobiProvider{
 		baseURL: huobiBaseURL,
-		client:  newDefaultHttpClient(),
+		client:  newDefaultHTTPClient(),
 	}
 }
 
 func NewHuobiProviderWithTimeout(timeout time.Duration) *HuobiProvider {
 	return &HuobiProvider{
 		baseURL: huobiBaseURL,
-		client:  newHttpClientWithTimeout(timeout),
+		client:  newHTTPClientWithTimeout(timeout),
 	}
 }
 

@@ -31,7 +31,7 @@ func preventRedirect(_ *http.Request, _ []*http.Request) error {
 }
 
 func newDefaultHTTPClient() *http.Client {
-	return newHttpClientWithTimeout(defaultTimeout)
+	return newHTTPClientWithTimeout(defaultTimeout)
 }
 
 func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {

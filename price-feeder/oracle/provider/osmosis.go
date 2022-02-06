@@ -42,14 +42,14 @@ type (
 func NewOsmosisProvider() *OsmosisProvider {
 	return &OsmosisProvider{
 		baseURL: osmosisBaseURL,
-		client:  newDefaultHttpClient(),
+		client:  newDefaultHTTPClient(),
 	}
 }
 
 func NewOsmosisProviderWithTimeout(timeout time.Duration) *OsmosisProvider {
 	return &OsmosisProvider{
 		baseURL: osmosisBaseURL,
-		client:  newHttpClientWithTimeout(timeout),
+		client:  newHTTPClientWithTimeout(timeout),
 	}
 }
 
