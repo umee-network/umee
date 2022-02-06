@@ -26,15 +26,15 @@ type TickerPrice struct {
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
-func preventRedirect(req *http.Request, via []*http.Request) error {
+func preventRedirect(_ *http.Request, _ []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 
-func newDefaultHttpClient() *http.Client {
+func newDefaultHTTPClient() *http.Client {
 	return newHttpClientWithTimeout(defaultTimeout)
 }
 
-func newHttpClientWithTimeout(timeout time.Duration) *http.Client {
+func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout:       timeout,
 		CheckRedirect: preventRedirect,
