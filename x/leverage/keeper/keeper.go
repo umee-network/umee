@@ -434,7 +434,7 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	if repayValue.GTE(maxRepayValue) {
+	if repayValue.GT(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
 	}
@@ -456,7 +456,7 @@ func (k Keeper) LiquidateBorrow(
 	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
 	// reward amount cannot exceed available collateral
-	if reward.Amount.GTE(collateral.AmountOf(rewardDenom)) {
+	if reward.Amount.GT(collateral.AmountOf(rewardDenom)) {
 		// reduce repayment.Amount to the maximum value permitted by the available collateral reward
 		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
 		// use all collateral of reward denom
