@@ -49,18 +49,14 @@ type (
 func NewKrakenProvider() *KrakenProvider {
 	return &KrakenProvider{
 		baseURL: krakenBaseURL,
-		client: &http.Client{
-			Timeout: defaultTimeout,
-		},
+		client:  newDefaultHTTPClient(),
 	}
 }
 
 func NewKrakenProviderWithTimeout(timeout time.Duration) *KrakenProvider {
 	return &KrakenProvider{
 		baseURL: krakenBaseURL,
-		client: &http.Client{
-			Timeout: timeout,
-		},
+		client:  newHTTPClientWithTimeout(timeout),
 	}
 }
 
