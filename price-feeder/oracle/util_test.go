@@ -96,6 +96,78 @@ func TestStandardDeviation(t *testing.T) {
 			prices:   nil,
 			expected: map[string]deviation{},
 		},
+		"not enough prices": {
+			prices: map[string]map[string]provider.TickerPrice{
+				config.ProviderBinance: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.21000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.87000000"),
+					},
+				},
+				config.ProviderKraken: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.23000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13050000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.85000000"),
+					},
+				},
+			},
+			expected: map[string]deviation{},
+		},
+		"some prices": {
+			prices: map[string]map[string]provider.TickerPrice{
+				config.ProviderBinance: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.21000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.87000000"),
+					},
+				},
+				config.ProviderKraken: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.23000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13050000"),
+					},
+				},
+				config.ProviderOsmosis: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.40000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.14000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.10000000"),
+					},
+				},
+			},
+			expected: map[string]deviation{
+				"ATOM": {
+					mean:      sdk.MustNewDecFromStr("28.28"),
+					deviation: sdk.MustNewDecFromStr("0.085244745683629475"),
+				},
+				"UMEE": {
+					mean:      sdk.MustNewDecFromStr("1.1335"),
+					deviation: sdk.MustNewDecFromStr("0.004600724580614015"),
+				},
+			},
+		},
+
 		"non empty prices": {
 			prices: map[string]map[string]provider.TickerPrice{
 				config.ProviderBinance: {

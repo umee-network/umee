@@ -84,6 +84,7 @@ func FilterDeviations(
 }
 
 // StandardDeviation returns maps of the standard deviations and means of assets.
+// Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
 	prices map[string]map[string]provider.TickerPrice) (
 	map[string]sdk.Dec, map[string]sdk.Dec, error,
@@ -113,7 +114,7 @@ func StandardDeviation(
 	// Calculate standard deviations for each asset
 	for base, sum := range priceSums {
 		// Skip if asset does not have enough prices
-		if len(priceSlice) < 3 {
+		if len(priceSlice[base]) < 3 {
 			continue
 		}
 		if _, ok := deviations[base]; !ok {
