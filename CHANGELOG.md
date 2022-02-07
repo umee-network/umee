@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 -->
+
 <!--
 Changelog Guiding Principles:
 
@@ -42,6 +44,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 # Changelog
 
 ## [Unreleased]
+
+### Bug Fixes
+
+- [#517](https://github.com/umee-network/umee/pull/517) Fix makefile `build` and `install` targets to support Ledger devices.
 
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/v1.0.0) - 2022-02-07
 
