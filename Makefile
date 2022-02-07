@@ -54,8 +54,6 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
-build_tags += $(BUILD_TAGS)
-build_tags := $(strip $(build_tags))
 whitespace :=
 whitespace += $(whitespace)
 comma := ,
@@ -69,15 +67,18 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
 			-X github.com/umee-network/umee/cmd/umeed/cmd.EnableBeta=$(UMEE_ENABLE_BETA)
 
+ldflags += $(LDFLAGS)
+ldflags := $(strip $(ldflags))
+
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
 install: go.sum
 	@echo "--> Installing..."
-	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build

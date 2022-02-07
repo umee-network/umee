@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD041 -->
+<!-- markdownlint-disable MD013 -->
 ![Logo!](assets/umee-small-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
@@ -21,25 +22,28 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Table of Contents
 
-- [Dependencies](#dependencies)
+- [Compatibility Matrix](#compatibility-matrix)
 - [Active Networks](#active-networks)
+  - [Public](#public)
+  - [Private](#private)
 - [Install](#install)
 
-## Dependencies
+## Compatibility Matrix
 
-- [Go 1.17+](https://golang.org/dl/)
-- [Cosmos SDK v0.44.0+](https://github.com/cosmos/cosmos-sdk/releases)
-- [Starport](https://docs.starport.network/intro/install.html)
+| Version | Mainnet | Experimental | SDK Version | Peggo Version | Price Feeder Version |
+|:-------:|:-------:|:------------:|:-----------:|---------------|----------------------|
+|  v0.7.x |    ✗    |      ✓       |   v0.45.x   | v0.2.x        | v0.1.x               |
+|  v1.x.x |    ✓    |      ✗       |   v0.45.x   | v0.2.x        | v0.1.x               |
 
 ## Active Networks
 
-### Public:
+### Public
 
- - [umee-betanet-v5](https://github.com/umee-network/testnets/tree/main/networks/umee-betanet-v5)
+- [umee-betanet-v5](https://github.com/umee-network/testnets/tree/main/networks/umee-betanet-v5)
 
-### Private:
+### Private
 
-  - [umee-alpha-mainnet-2](https://github.com/umee-network/testnets/tree/main/networks/umee-alpha-mainnet-2)
+- [umee-alpha-mainnet-2](https://github.com/umee-network/testnets/tree/main/networks/umee-alpha-mainnet-2)
 
 ## Install
 

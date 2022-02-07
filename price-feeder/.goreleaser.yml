@@ -32,13 +32,13 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    name_template: '{{ .Binary }}-{{ replace .Version "price-feeder/" "price-feeder-" }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    name_template: '{{ replace .Version "price-feeder/" "price-feeder-" }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:
       - README.md
 
 release:
   disable: false
-  name_template: "price-feeder/{{ .Tag }}"
+  name_template: "{{ .Tag }}"
 
 checksum:
   name_template: 'SHA256SUMS-{{ replace .Version "price-feeder/" "price-feeder-" }}.txt'
