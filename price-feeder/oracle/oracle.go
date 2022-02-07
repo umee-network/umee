@@ -225,6 +225,8 @@ func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 		}
 	}
 
+	providerPrices, err := FilterDeviations(providerPrices)
+
 	vwapPrices, err := ComputeVWAP(providerPrices)
 	if err != nil {
 		return err
