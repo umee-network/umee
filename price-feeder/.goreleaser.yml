@@ -28,7 +28,7 @@ builds:
 
 archives:
   - format: tar.gz
-    wrap_in_directory: true
+    wrap_in_directory: "true"
     format_overrides:
       - goos: windows
         format: zip
@@ -38,7 +38,7 @@ archives:
 
 release:
   disable: false
-  name_template: "price-feeder/{{ .Tag }}"
+  name_template: "price-feeder/v{{ .Tag }}"
 
 checksum:
   name_template: 'SHA256SUMS-{{ replace .Version "price-feeder/" "price-feeder-" }}.txt'
