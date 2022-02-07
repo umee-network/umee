@@ -219,7 +219,9 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		if fullyRepaid {
 			// If the bad debt of this denom at the given address was fully repaid,
 			// clear the address|denom pair from the bad debt address list
-			k.SetBadDebtAddress(ctx, addr, denom, false)
+			if err := k.setBadDebtAddress(ctx, addr, denom, false); err != nil {
+				return err
+			}
 		}
 		return nil
 	}

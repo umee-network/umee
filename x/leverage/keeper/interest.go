@@ -120,7 +120,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// apply all reserve increases accumulated when iterating over denoms
 	for _, coin := range newReserves {
-		if err := k.SetReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
+		if err := k.setReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
 			return err
 		}
 	}
