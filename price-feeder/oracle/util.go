@@ -59,7 +59,6 @@ func StandardDeviation(
 		priceSums  = make(map[string]sdk.Dec)
 	)
 
-	// Calculate sums, create price slice
 	for _, providerPrices := range prices {
 		for base, tp := range providerPrices {
 			if _, ok := priceSums[base]; !ok {
@@ -74,9 +73,8 @@ func StandardDeviation(
 		}
 	}
 
-	// Calculate standard deviations for each asset
 	for base, sum := range priceSums {
-		// Skip if asset does not have enough prices
+		// Skip if standard deviation would not be meaningful
 		if len(priceSlice[base]) < 3 {
 			continue
 		}
