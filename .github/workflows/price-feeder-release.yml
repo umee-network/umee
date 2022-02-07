@@ -31,7 +31,11 @@ jobs:
       - name: Release
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: latest
+          # Note, we have to pin to v0.179.0 due to newer releases enforcing
+          # correct semantic versioning even when '--skip-validate' is provided.
+          #
+          # Ref: https://github.com/goreleaser/goreleaser/pull/2503
+          version: v0.179.0
           args: release --rm-dist --skip-validate --release-notes ./RELEASE_NOTES.md
           workdir: price-feeder
         env:
