@@ -27,7 +27,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 							}
 						]
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 			} else {
@@ -37,7 +37,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 					"tick": {
 						"vol": 16511168.890881622
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 			}
@@ -71,7 +71,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 							}
 						]
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 
@@ -82,7 +82,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 					"tick": {
 						"vol": 16511168.890881622
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 
@@ -97,7 +97,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 							}
 						]
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 
@@ -108,7 +108,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 					"tick": {
 						"vol": 162129738.74087432
 					}
-				}		
+				}
 				`
 				rw.Write([]byte(resp))
 			}
@@ -164,6 +164,21 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 		p.baseURL = server.URL
 
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
+		require.Error(t, err)
+		require.Nil(t, prices)
+	})
+
+	t.Run("check_redirect", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			http.Redirect(rw, r, p.baseURL, http.StatusTemporaryRedirect)
+		}))
+		defer server.Close()
+
+		server.Client().CheckRedirect = preventRedirect
+		p.client = server.Client()
+		p.baseURL = server.URL
+
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})
