@@ -20,7 +20,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 				"symbol": "ATOMUSDT",
 				"lastPrice": "34.69000000",
 				"volume": "2396974.02000000"
-			}			
+			}
 			`
 			rw.Write([]byte(resp))
 		}))
@@ -45,7 +45,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 					"symbol": "ATOMUSDT",
 					"lastPrice": "34.69000000",
 					"volume": "2396974.02000000"
-				}			
+				}
 				`
 				rw.Write([]byte(resp))
 			} else {
@@ -54,7 +54,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 					"symbol": "LUNAUSDT",
 					"lastPrice": "41.35000000",
 					"volume": "2396974.02000000"
-				}			
+				}
 				`
 				rw.Write([]byte(resp))
 			}
@@ -99,7 +99,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 			resp := `{
 				"code": -1121,
 				"msg": "Invalid symbol."
-			}			
+			}
 			`
 			rw.Write([]byte(resp))
 		}))
@@ -109,6 +109,21 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		p.baseURL = server.URL
 
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
+		require.Error(t, err)
+		require.Nil(t, prices)
+	})
+
+	t.Run("check_redirect", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			http.Redirect(rw, r, p.baseURL, http.StatusTemporaryRedirect)
+		}))
+		defer server.Close()
+
+		server.Client().CheckRedirect = preventRedirect
+		p.client = server.Client()
+		p.baseURL = server.URL
+
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})
