@@ -40,7 +40,7 @@ release:
   github:
     owner: umee-network
     name: umee
-  name_template: "{{.Tag}}"
+  name_template: "price-feeder/{{ .Tag }}"
 
 checksum:
   name_template: 'SHA256SUMS-{{ replace .Version "price-feeder/" "price-feeder-" }}.txt'
