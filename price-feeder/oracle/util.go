@@ -54,12 +54,44 @@ func FilterDeviations(
 	map[string]map[string]provider.TickerPrice, error,
 ) {
 	var (
-		deviations     = make(map[string]sdk.Dec)
 		filteredPrices = make(map[string]map[string]provider.TickerPrice)
-		means          = make(map[string]sdk.Dec)
-		priceSlice     = make(map[string][]sdk.Dec)
-		priceSums      = make(map[string]sdk.Dec)
 		threshold      = sdk.MustNewDecFromStr("2")
+	)
+
+	deviations, means, err := StandardDeviation(prices)
+	if err != nil {
+		return make(map[string]map[string]provider.TickerPrice), nil
+	}
+
+	// Accept any prices that are within 2𝜎
+	for providerName, priceMap := range prices {
+		for base, price := range priceMap {
+			if price.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
+				price.Price.LTE(means[base].Add(deviations[base].Mul(threshold))) {
+				if _, ok := filteredPrices[providerName]; !ok {
+					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
+				}
+				filteredPrices[providerName][base] = provider.TickerPrice{
+					Price:  price.Price,
+					Volume: price.Volume,
+				}
+			}
+		}
+	}
+
+	return filteredPrices, nil
+}
+
+// StandardDeviation returns maps of the standard deviations and means of assets.
+func StandardDeviation(
+	prices map[string]map[string]provider.TickerPrice) (
+	map[string]sdk.Dec, map[string]sdk.Dec, error,
+) {
+	var (
+		deviations = make(map[string]sdk.Dec)
+		priceSlice = make(map[string][]sdk.Dec)
+		priceSums  = make(map[string]sdk.Dec)
+		means      = make(map[string]sdk.Dec)
 	)
 
 	// Calculate sums, create price slice
@@ -97,26 +129,10 @@ func FilterDeviations(
 		variance := varianceSum.QuoInt64(priceAmount)
 		standardDeviation, err := variance.ApproxSqrt()
 		if err != nil {
-			return make(map[string]map[string]provider.TickerPrice), err
+			return make(map[string]sdk.Dec), make(map[string]sdk.Dec), err
 		}
 		deviations[base] = standardDeviation
 	}
 
-	// Accept any prices that are within 2𝜎
-	for providerName, priceMap := range prices {
-		for base, price := range priceMap {
-			if price.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-				price.Price.LTE(means[base].Add(deviations[base].Mul(threshold))) {
-				if _, ok := filteredPrices[providerName]; !ok {
-					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
-				}
-				filteredPrices[providerName][base] = provider.TickerPrice{
-					Price:  price.Price,
-					Volume: price.Volume,
-				}
-			}
-		}
-	}
-
-	return filteredPrices, nil
+	return deviations, means, nil
 }
