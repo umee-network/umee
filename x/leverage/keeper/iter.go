@@ -227,8 +227,8 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	return k.iterate(ctx, prefix, iterator)
 }
 
-// GetAllUTokenSupplies returns all uToken supplies.
-func (k Keeper) GetAllUTokenSupplies(ctx sdk.Context) sdk.Coins {
+// GetAllUTokenSupply returns total supply of all uToken denoms.
+func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 	prefix := types.KeyPrefixUtokenSupply
 	supplies := sdk.NewCoins()
 

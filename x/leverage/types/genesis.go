@@ -19,7 +19,7 @@ func NewGenesisState(
 	lastInterestTime int64,
 	badDebts []BadDebt,
 	interestScalars []InterestScalar,
-	uTokenSupplies sdk.Coins,
+	uTokenSupply sdk.Coins,
 ) *GenesisState {
 
 	return &GenesisState{
@@ -31,7 +31,7 @@ func NewGenesisState(
 		LastInterestTime:   lastInterestTime,
 		BadDebts:           badDebts,
 		InterestScalars:    interestScalars,
-		UtokenSupplies:     uTokenSupplies,
+		UtokenSupply:       uTokenSupply,
 	}
 }
 
@@ -112,7 +112,7 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	if err := gs.UtokenSupplies.Validate(); err != nil {
+	if err := gs.UtokenSupply.Validate(); err != nil {
 		return err
 	}
 
