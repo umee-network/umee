@@ -225,7 +225,7 @@ func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 		}
 	}
 
-	providerPrices, err := filterDeviations(providerPrices)
+	providerPrices, err := o.filterDeviations(providerPrices)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 
 // filterDeviations find the standard deviations of the prices of
 // all assets, and filter out any providers that are not within 2𝜎 of the mean.
-func filterDeviations(
+func (o *Oracle) filterDeviations(
 	prices map[string]map[string]provider.TickerPrice) (
 	map[string]map[string]provider.TickerPrice, error,
 ) {
@@ -326,6 +326,11 @@ func filterDeviations(
 					Price:  price.Price,
 					Volume: price.Volume,
 				}
+			} else {
+				telemetry.IncrCounter(1, "failure", "provider")
+				o.logger.Warn().Str("base", base).Str("provider", providerName).Msg(
+					"provider deviating from other prices",
+				)
 			}
 		}
 	}
