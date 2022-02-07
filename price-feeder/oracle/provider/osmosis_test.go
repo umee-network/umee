@@ -138,4 +138,19 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, prices)
 	})
+
+	t.Run("check_redirect", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			http.Redirect(rw, r, p.baseURL, http.StatusTemporaryRedirect)
+		}))
+		defer server.Close()
+
+		server.Client().CheckRedirect = preventRedirect
+		p.client = server.Client()
+		p.baseURL = server.URL
+
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+		require.Error(t, err)
+		require.Nil(t, prices)
+	})
 }

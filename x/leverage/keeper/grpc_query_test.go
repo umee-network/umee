@@ -39,7 +39,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 func (s *IntegrationTestSuite) TestQuerier_Params() {
 	resp, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
-	s.Require().NotZero(resp.Params.InterestEpoch)
+	s.Require().NotZero(resp.Params.MinimumCloseFactor)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Borrowed() {

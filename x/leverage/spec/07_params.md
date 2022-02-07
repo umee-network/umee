@@ -4,15 +4,9 @@ The leverage module contains the following parameters:
 
 | Key                          | Type    | Example |
 | -----------------------------| ------- | ------- |
-| InterestEpoch                | int64   | 100     |
 | CompleteLiquidationThreshold | sdk.Dec | 0.1     |
 | MinimumCloseFactor           | sdk.Dec | 0.01    |
 | OracleRewardFactor           | sdk.Dec | 0.01    |
-
-## InterestEpoch
-
-InterestEpoch is the number of blocks that pass between interest accruals and
-other periodic functions.
 
 ## CompleteLiquidationThreshold
 
