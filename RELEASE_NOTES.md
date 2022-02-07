@@ -1,4 +1,6 @@
+<!-- markdownlint-disable MD013 -->
 # Release Notes
 
-Initial release of `umeed`! This release will be the official version used for
-Umee's mainnet.
+## Bug Fixes
+
+- [#517](https://github.com/umee-network/umee/pull/517) Fix makefile `build` and `install` targets to support Ledger devices.

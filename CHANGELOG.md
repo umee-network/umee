@@ -45,6 +45,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v1.0.1](https://github.com/umee-network/umee/releases/tag/v1.0.1) - 2022-02-07
+
 ### Bug Fixes
 
 - [#517](https://github.com/umee-network/umee/pull/517) Fix makefile `build` and `install` targets to support Ledger devices.
