@@ -42,7 +42,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 
-		if err = k.SetCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
+		if err = k.setCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
 			panic(err)
 		}
 	}

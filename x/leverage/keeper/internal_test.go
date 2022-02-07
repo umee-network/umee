@@ -50,6 +50,10 @@ func (tk *TestKeeper) SetBorrow(ctx sdk.Context, addr sdk.AccAddress, amount sdk
 	return tk.Keeper.setBorrow(ctx, addr, amount)
 }
 
+func (tk *TestKeeper) SetCollateralAmount(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
+	return tk.Keeper.setCollateralAmount(ctx, addr, collateral)
+}
+
 func (tk *TestKeeper) GetInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
 	return tk.Keeper.getInterestScalar(ctx, denom)
 }

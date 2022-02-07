@@ -569,22 +569,6 @@ func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) TestGetCollateral() {
-	// The "lender" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral. The "bum" user is used because
-	// it has none.
-	lenderAddr, bumAddr := s.initBorrowScenario()
-
-	// Verify lender collateral is 1k u/umee
-	collateral := s.app.LeverageKeeper.GetBorrowerCollateral(s.ctx, lenderAddr)
-	collatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, umeeapp.BondDenom)
-	s.Require().Equal(collateral, sdk.NewCoins(sdk.NewInt64Coin(collatDenom, 1000000000)))
-
-	// Verify bum collateral is empty
-	collateral = s.app.LeverageKeeper.GetBorrowerCollateral(s.ctx, bumAddr)
-	s.Require().Equal(collateral, sdk.NewCoins())
-}
-
 func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	lenderAddr, _ := s.initBorrowScenario()
 	app, ctx := s.app, s.ctx

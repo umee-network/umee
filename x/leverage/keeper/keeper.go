@@ -107,7 +107,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		// For uToken denoms enabled as collateral by this lender, the
 		// minted uTokens stay in the module account and the keeper tracks the amount.
 		currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
-		if err = k.SetCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
+		if err = k.setCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
 			return err
 		}
 	} else if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
@@ -173,7 +173,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 			// reduce the lender's collateral by amountFromCollateral
 			newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(amountFromCollateral))
-			if err = k.SetCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
+			if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 				return err
 			}
 		} else {
@@ -316,7 +316,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 		if uToken.Amount.IsPositive() {
 			currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
-			if err := k.SetCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
+			if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
 				return err
 			}
 
@@ -351,7 +351,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		uTokens := sdk.NewCoins(currentCollateral)
 
 		if currentCollateral.IsPositive() {
-			if err := k.SetCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
+			if err := k.setCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
 				return err
 			}
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, uTokens); err != nil {
@@ -492,7 +492,7 @@ func (k Keeper) LiquidateBorrow(
 
 	// Reduce borrower collateral by reward amount
 	newBorrowerCollateral := sdk.NewCoin(rewardDenom, collateral.AmountOf(rewardDenom).Sub(reward.Amount))
-	if err = k.SetCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
+	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
@@ -501,7 +501,7 @@ func (k Keeper) LiquidateBorrow(
 		// For uToken denoms enabled as collateral by liquidator, the uTokens remain in the
 		// module account and the keeper tracks the amount
 		liquidatorCollateral := k.GetCollateralAmount(ctx, liquidatorAddr, reward.Denom)
-		if err = k.SetCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
+		if err = k.setCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
 		}
 	} else {
