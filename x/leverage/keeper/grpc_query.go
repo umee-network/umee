@@ -171,7 +171,7 @@ func (q Querier) MarketSize(
 	}
 
 	uTokenDenom := q.Keeper.FromTokenToUTokenDenom(ctx, req.Denom)
-	marketSizeCoin, err := q.Keeper.ExchangeUToken(ctx, q.Keeper.TotalUTokenSupply(ctx, uTokenDenom))
+	marketSizeCoin, err := q.Keeper.ExchangeUToken(ctx, q.Keeper.GetUTokenSupply(ctx, uTokenDenom))
 	if err != nil {
 		return nil, err
 	}

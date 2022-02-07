@@ -128,3 +128,38 @@ func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec)
 	ctx.KVStore(k.storeKey).Set(key, bz)
 	return nil
 }
+
+// GetUTokenSupply gets the total supply of a specified utoken, as tracked by
+// module state. On invalid asset or non-uToken, the supply is zero.
+func (k Keeper) GetUTokenSupply(ctx sdk.Context, denom string) sdk.Coin {
+	store := ctx.KVStore(k.storeKey)
+	key := types.CreateUTokenSupplyKey(denom)
+	amount := sdk.ZeroInt()
+
+	if bz := store.Get(key); bz != nil {
+		err := amount.Unmarshal(bz)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return sdk.NewCoin(denom, amount)
+}
+
+// setUTokenSupply sets the total supply of a uToken.
+func (k Keeper) setUTokenSupply(ctx sdk.Context, coin sdk.Coin) error {
+	if !coin.IsValid() || !k.IsAcceptedUToken(ctx, coin.Denom) {
+		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+	}
+
+	key := types.CreateUTokenSupplyKey(coin.Denom)
+
+	// save the new reserve amount
+	bz, err := coin.Amount.Marshal()
+	if err != nil {
+		return err
+	}
+
+	ctx.KVStore(k.storeKey).Set(key, bz)
+	return nil
+}

@@ -66,6 +66,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 		0,
 		[]types.BadDebt{},
 		[]types.InterestScalar{},
+		sdk.Coins{},
 	)
 
 	bz, err := json.MarshalIndent(&leverageGenesis.Params, "", " ")

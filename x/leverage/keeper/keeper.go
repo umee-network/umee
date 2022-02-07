@@ -59,19 +59,6 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 	return k
 }
 
-// TotalUTokenSupply returns an sdk.Coin representing the total balance of a
-// given uToken type if valid. If the denom is not an accepted uToken type,
-// we return a zero amount.
-func (k Keeper) TotalUTokenSupply(ctx sdk.Context, uTokenDenom string) sdk.Coin {
-	if k.IsAcceptedUToken(ctx, uTokenDenom) {
-		return k.bankKeeper.GetSupply(ctx, uTokenDenom)
-		// TODO - Question: Does bank module still track balances sent (locked) via IBC? If it doesn't
-		// then the balance returned here would decrease when the tokens are sent off, which is not
-		// what we want. In that case, the keeper should keep an sdk.Int total supply for each uToken type.
-	}
-	return sdk.NewCoin(uTokenDenom, sdk.ZeroInt())
-}
-
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
 func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 	return k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
@@ -97,9 +84,12 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return err
 	}
 
-	// mint uToken
+	// mint uToken and set new total uToken supply
 	uTokens := sdk.NewCoins(uToken)
 	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
+		return err
+	}
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Add(uToken)); err != nil {
 		return err
 	}
 
@@ -194,8 +184,11 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 		return err
 	}
 
-	// burn the uTokens
+	// burn the uTokens and set the new total uToken supply
 	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
+		return err
+	}
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken)); err != nil {
 		return err
 	}
 

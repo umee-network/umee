@@ -165,7 +165,7 @@ func (s *IntegrationTestSuite) TestLendAsset_Valid() {
 
 	// verify the total supply of the minted uToken
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
-	supply := s.app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	supply := s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
 
@@ -194,7 +194,7 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 
 	// verify the total supply of the minted uToken
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
-	supply := s.app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	supply := s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
 
@@ -204,7 +204,7 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	s.Require().NoError(err)
 
 	// verify total supply of the uTokens
-	supply = s.app.LeverageKeeper.TotalUTokenSupply(ctx, uTokenDenom)
+	supply = s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	s.Require().Equal(int64(0), supply.Amount.Int64())
 
 	// verify the lender's balances
@@ -1239,7 +1239,7 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_InsufficientCollateral() {
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, uTokenDenom)
 	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 1000000), collateral) // 1 u/umee
-	supply := s.app.LeverageKeeper.TotalUTokenSupply(s.ctx, uTokenDenom)
+	supply := s.app.LeverageKeeper.GetUTokenSupply(s.ctx, uTokenDenom)
 	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 2000000), supply) // 2 u/umee
 
 	// withdraw more collateral than available
