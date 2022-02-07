@@ -24,4 +24,5 @@ var (
 	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 1114, "exchange rate less than one")
 	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 1115, "total adjusted borrow inconsistency")
 	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 1116, "interest scalar less than one")
+	ErrEmptyAddress            = sdkerrors.Register(ModuleName, 1117, "empty address")
 )
