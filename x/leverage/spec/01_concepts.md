@@ -62,7 +62,7 @@ Some important quantities that govern the behavior of the `leverage` module are 
 
 As a reminder, the following values are always available as a basis for calculations:
 - Account token and uToken balances, available through the `bank` module.
-- Total supply of any token or uToken denomination, available through the `bank` module.
+- Total supply of any uToken denomination, stored in `leverage` module [State](02_state.md).
 - The `leverage` module account balance, available through the `bank` module.
 - Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Borrowed denominations and _adjusted amounts_ for individual borrowers, stored in `leverage` module [State](02_state.md).
