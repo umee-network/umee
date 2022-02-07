@@ -28,23 +28,12 @@ jobs:
         run: |-
           git tag -d ${{ env.RELEASE_VERSION }} || echo "No such a tag exists before"
           git tag ${{ env.RELEASE_VERSION }} HEAD
-      - name: Build
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          # Skip validate skips initial sanity checks in order to be able to
-          # fully run.
-          args: build --rm-dist --skip-validate
-          workdir: price-feeder
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
       - name: Release
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist --release-notes ./RELEASE_NOTES.md
+          args: release --rm-dist --skip-validate --release-notes ./RELEASE_NOTES.md
           workdir: price-feeder
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+          GORELEASER_CURRENT_TAG: price-feeder/${{ env.RELEASE_VERSION }}
