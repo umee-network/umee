@@ -42,13 +42,13 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 
-		if err = k.SetCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
+		if err = k.setCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
 			panic(err)
 		}
 	}
 
 	for _, reserve := range genState.Reserves {
-		if err := k.SetReserveAmount(ctx, reserve); err != nil {
+		if err := k.setReserveAmount(ctx, reserve); err != nil {
 			panic(err)
 		}
 	}
@@ -63,7 +63,9 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 
-		k.SetBadDebtAddress(ctx, borrower, badDebt.Denom, true)
+		if err := k.setBadDebtAddress(ctx, borrower, badDebt.Denom, true); err != nil {
+			panic(err)
+		}
 	}
 
 	for _, rate := range genState.InterestScalars {
