@@ -24,13 +24,17 @@ func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 	return collateral
 }
 
-// SetCollateralAmount sets the amount of a given denom the x/leverage module account
+// setCollateralAmount sets the amount of a given denom the x/leverage module account
 // currently holds as collateral for a given borrower. If the amount is zero, any
 // stored value is cleared. A negative amount or invalid coin causes an error.
 // This function does not move coins to or from the module account.
-func (k Keeper) SetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, collateral sdk.Coin) error {
+func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, collateral sdk.Coin) error {
 	if !collateral.IsValid() {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, collateral.String())
+	}
+
+	if borrowerAddr.Empty() {
+		return types.ErrEmptyAddress
 	}
 
 	bz, err := collateral.Amount.Marshal()
