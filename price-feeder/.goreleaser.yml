@@ -37,9 +37,7 @@ archives:
       - README.md
 
 release:
-  github:
-    owner: umee-network
-    name: umee
+  disable: false
   name_template: "price-feeder/{{ .Tag }}"
 
 checksum:
