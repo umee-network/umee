@@ -50,6 +50,10 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 
 // SetRegisteredToken stores a Token into the x/leverage module's KVStore.
 func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
+	if token.BaseDenom == "" {
+		panic("empty base denom")
+	}
+
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.CreateRegisteredTokenKey(token.BaseDenom)
 

@@ -26,9 +26,9 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
-// SetBorrow sets the amount borrowed by an address in a given denom.
+// setBorrow sets the amount borrowed by an address in a given denom.
 // If the amount is zero, any stored value is cleared.
-func (k Keeper) SetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
 	// Apply interest scalar to determine adjusted amount
 	newAdjustedAmount := borrow.Amount.ToDec().Quo(k.getInterestScalar(ctx, borrow.Denom))
 
@@ -108,14 +108,22 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 	return limit, nil
 }
 
-// SetBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
-func (k Keeper) SetBadDebtAddress(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string, hasDebt bool) {
+// setBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
+func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom string, hasDebt bool) error {
+	if err := sdk.ValidateDenom(denom); err != nil {
+		return err
+	}
+	if addr.Empty() {
+		return types.ErrEmptyAddress
+	}
+
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBadDebtKey(denom, borrowerAddr)
+	key := types.CreateBadDebtKey(denom, addr)
 
 	if hasDebt {
 		store.Set(key, []byte{0x01})
 	} else {
 		store.Delete(key)
 	}
+	return nil
 }
