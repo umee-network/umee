@@ -46,43 +46,6 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 	return vwap, nil
 }
 
-// FilterDeviations find the standard deviation of the price
-// of an asset, and filter out any providers that are not within
-// two deviations of the mean.
-func FilterDeviations(
-	prices map[string]map[string]provider.TickerPrice) (
-	map[string]map[string]provider.TickerPrice, error,
-) {
-	var (
-		filteredPrices = make(map[string]map[string]provider.TickerPrice)
-		threshold      = sdk.MustNewDecFromStr("2")
-	)
-
-	deviations, means, err := StandardDeviation(prices)
-	if err != nil {
-		return make(map[string]map[string]provider.TickerPrice), nil
-	}
-
-	// Accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
-	for providerName, priceMap := range prices {
-		for base, price := range priceMap {
-			if _, ok := deviations[base]; !ok ||
-				(price.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-					price.Price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
-				if _, ok := filteredPrices[providerName]; !ok {
-					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
-				}
-				filteredPrices[providerName][base] = provider.TickerPrice{
-					Price:  price.Price,
-					Volume: price.Volume,
-				}
-			}
-		}
-	}
-
-	return filteredPrices, nil
-}
-
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
