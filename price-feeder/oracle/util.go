@@ -63,11 +63,12 @@ func FilterDeviations(
 		return make(map[string]map[string]provider.TickerPrice), nil
 	}
 
-	// Accept any prices that are within 2𝜎
+	// Accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
 	for providerName, priceMap := range prices {
 		for base, price := range priceMap {
-			if price.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-				price.Price.LTE(means[base].Add(deviations[base].Mul(threshold))) {
+			if _, ok := deviations[base]; !ok ||
+				(price.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
+					price.Price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
 				if _, ok := filteredPrices[providerName]; !ok {
 					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
@@ -89,9 +90,9 @@ func StandardDeviation(
 ) {
 	var (
 		deviations = make(map[string]sdk.Dec)
+		means      = make(map[string]sdk.Dec)
 		priceSlice = make(map[string][]sdk.Dec)
 		priceSums  = make(map[string]sdk.Dec)
-		means      = make(map[string]sdk.Dec)
 	)
 
 	// Calculate sums, create price slice
@@ -111,6 +112,10 @@ func StandardDeviation(
 
 	// Calculate standard deviations for each asset
 	for base, sum := range priceSums {
+		// Skip if asset does not have enough prices
+		if len(priceSlice) < 3 {
+			continue
+		}
 		if _, ok := deviations[base]; !ok {
 			deviations[base] = sdk.ZeroDec()
 		}
