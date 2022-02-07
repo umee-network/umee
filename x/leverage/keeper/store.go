@@ -38,12 +38,15 @@ func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec 
 }
 
 // setAdjustedBorrow sets the adjusted amount borrowed by an address in a given denom directly instead
-// of computing it from real borrowed amount. Should only be used by genesis and SetBorrow, as other
-// functions deal in non-adjusted amounts using SetBorrow. Also updates AdjustedTotalBorrowed by the
+// of computing it from real borrowed amount. Should only be used by genesis and setBorrow, as other
+// functions deal in non-adjusted amounts using setBorrow. Also updates AdjustedTotalBorrowed by the
 // resulting changes in borrowed amount. If either amount to store is zero, any stored value is cleared.
 func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, borrow sdk.DecCoin) error {
 	if err := borrow.Validate(); err != nil {
 		return err
+	}
+	if addr.Empty() {
+		return types.ErrEmptyAddress
 	}
 
 	// Update total adjusted borrow based on the change in this borrow's adjusted amount
@@ -83,6 +86,9 @@ func (k Keeper) setCollateralSetting(ctx sdk.Context, addr sdk.AccAddress, denom
 	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
+	if addr.Empty() {
+		return types.ErrEmptyAddress
+	}
 
 	// Enable sets to true; disable removes from KVstore rather than setting false
 	store := ctx.KVStore(k.storeKey)
@@ -115,7 +121,7 @@ func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec)
 	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
-	if scalar.LT(sdk.OneDec()) {
+	if scalar.IsNil() || scalar.LT(sdk.OneDec()) {
 		return sdkerrors.Wrap(types.ErrInvalidInteresrScalar, scalar.String()+denom)
 	}
 

@@ -97,7 +97,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		// For uToken denoms enabled as collateral by this lender, the
 		// minted uTokens stay in the module account and the keeper tracks the amount.
 		currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
-		if err = k.SetCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
+		if err = k.setCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
 			return err
 		}
 	} else if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
@@ -163,7 +163,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 
 			// reduce the lender's collateral by amountFromCollateral
 			newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(amountFromCollateral))
-			if err = k.SetCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
+			if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 				return err
 			}
 		} else {
@@ -242,7 +242,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	newBorrow := borrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	if err := k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
+	if err := k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
 		return err
 	}
 	return nil
@@ -289,7 +289,7 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	owed.Amount = owed.Amount.Sub(payment.Amount)
 
 	// Store the remaining borrowed amount in keeper
-	if err := k.SetBorrow(ctx, borrowerAddr, owed); err != nil {
+	if err := k.setBorrow(ctx, borrowerAddr, owed); err != nil {
 		return sdk.ZeroInt(), err
 	}
 	return payment.Amount, nil
@@ -309,7 +309,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 		if uToken.Amount.IsPositive() {
 			currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
-			if err := k.SetCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
+			if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
 				return err
 			}
 
@@ -344,7 +344,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		uTokens := sdk.NewCoins(currentCollateral)
 
 		if currentCollateral.IsPositive() {
-			if err := k.SetCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
+			if err := k.setCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(denom, sdk.ZeroInt())); err != nil {
 				return err
 			}
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, uTokens); err != nil {
@@ -434,7 +434,7 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	if repayValue.GTE(maxRepayValue) {
+	if repayValue.GT(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
 	}
@@ -456,7 +456,7 @@ func (k Keeper) LiquidateBorrow(
 	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
 	// reward amount cannot exceed available collateral
-	if reward.Amount.GTE(collateral.AmountOf(rewardDenom)) {
+	if reward.Amount.GT(collateral.AmountOf(rewardDenom)) {
 		// reduce repayment.Amount to the maximum value permitted by the available collateral reward
 		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
 		// use all collateral of reward denom
@@ -479,13 +479,13 @@ func (k Keeper) LiquidateBorrow(
 
 	// store the remaining borrowed amount in keeper
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
-	if err = k.SetBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
+	if err = k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Reduce borrower collateral by reward amount
 	newBorrowerCollateral := sdk.NewCoin(rewardDenom, collateral.AmountOf(rewardDenom).Sub(reward.Amount))
-	if err = k.SetCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
+	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
@@ -494,7 +494,7 @@ func (k Keeper) LiquidateBorrow(
 		// For uToken denoms enabled as collateral by liquidator, the uTokens remain in the
 		// module account and the keeper tracks the amount
 		liquidatorCollateral := k.GetCollateralAmount(ctx, liquidatorAddr, reward.Denom)
-		if err = k.SetCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
+		if err = k.setCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
 		}
 	} else {
@@ -512,7 +512,9 @@ func (k Keeper) LiquidateBorrow(
 			// this liquidation. All other borrowed denoms were definitely not
 			// repaid in this liquidation so they are always marked as bad debt.
 			if coin.Denom != repayment.Denom || owed.IsPositive() {
-				k.SetBadDebtAddress(ctx, borrowerAddr, coin.Denom, true)
+				if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+					return sdk.ZeroInt(), sdk.ZeroInt(), err
+				}
 			}
 		}
 	}
