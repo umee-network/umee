@@ -225,12 +225,12 @@ func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 		}
 	}
 
-	providerPrices, err := o.filterDeviations(providerPrices)
+	filteredProviderPrices, err := o.filterDeviations(providerPrices)
 	if err != nil {
 		return err
 	}
 
-	vwapPrices, err := ComputeVWAP(providerPrices)
+	vwapPrices, err := ComputeVWAP(filteredProviderPrices)
 	if err != nil {
 		return err
 	}
@@ -301,8 +301,7 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 // all assets, and filter out any providers that are not within 2𝜎 of the mean.
 func (o *Oracle) filterDeviations(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]map[string]provider.TickerPrice, error,
-) {
+	map[string]map[string]provider.TickerPrice, error) {
 	var (
 		filteredPrices = make(map[string]map[string]provider.TickerPrice)
 		threshold      = sdk.MustNewDecFromStr("2")

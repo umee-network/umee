@@ -50,8 +50,7 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]sdk.Dec, map[string]sdk.Dec, error,
-) {
+	map[string]sdk.Dec, map[string]sdk.Dec, error) {
 	var (
 		deviations = make(map[string]sdk.Dec)
 		means      = make(map[string]sdk.Dec)
@@ -85,19 +84,22 @@ func StandardDeviation(
 			means[base] = sdk.ZeroDec()
 		}
 
-		priceAmount := int64(len(priceSlice))
-		means[base] = sum.QuoInt64(priceAmount)
+		numPrices := int64(len(priceSlice))
+		means[base] = sum.QuoInt64(numPrices)
 		varianceSum := sdk.ZeroDec()
 
 		for _, price := range priceSlice[base] {
 			deviation := price.Sub(means[base])
 			varianceSum = varianceSum.Add(deviation.Mul(deviation))
 		}
-		variance := varianceSum.QuoInt64(priceAmount)
+
+		variance := varianceSum.QuoInt64(numPrices)
+
 		standardDeviation, err := variance.ApproxSqrt()
 		if err != nil {
 			return make(map[string]sdk.Dec), make(map[string]sdk.Dec), err
 		}
+
 		deviations[base] = standardDeviation
 	}
 
