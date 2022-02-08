@@ -78,3 +78,161 @@ func TestComputeVWAP(t *testing.T) {
 		})
 	}
 }
+
+func TestStandardDeviation(t *testing.T) {
+	type deviation struct {
+		mean      sdk.Dec
+		deviation sdk.Dec
+	}
+	testCases := map[string]struct {
+		prices   map[string]map[string]provider.TickerPrice
+		expected map[string]deviation
+	}{
+		"empty prices": {
+			prices:   make(map[string]map[string]provider.TickerPrice),
+			expected: map[string]deviation{},
+		},
+		"nil prices": {
+			prices:   nil,
+			expected: map[string]deviation{},
+		},
+		"not enough prices": {
+			prices: map[string]map[string]provider.TickerPrice{
+				config.ProviderBinance: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.21000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.87000000"),
+					},
+				},
+				config.ProviderKraken: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.23000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13050000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.85000000"),
+					},
+				},
+			},
+			expected: map[string]deviation{},
+		},
+		"some prices": {
+			prices: map[string]map[string]provider.TickerPrice{
+				config.ProviderBinance: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.21000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.87000000"),
+					},
+				},
+				config.ProviderKraken: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.23000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13050000"),
+					},
+				},
+				config.ProviderOsmosis: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.40000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.14000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.10000000"),
+					},
+				},
+			},
+			expected: map[string]deviation{
+				"ATOM": {
+					mean:      sdk.MustNewDecFromStr("28.28"),
+					deviation: sdk.MustNewDecFromStr("0.085244745683629475"),
+				},
+				"UMEE": {
+					mean:      sdk.MustNewDecFromStr("1.1335"),
+					deviation: sdk.MustNewDecFromStr("0.004600724580614015"),
+				},
+			},
+		},
+
+		"non empty prices": {
+			prices: map[string]map[string]provider.TickerPrice{
+				config.ProviderBinance: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.21000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.87000000"),
+					},
+				},
+				config.ProviderKraken: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.23000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.13050000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.85000000"),
+					},
+				},
+				config.ProviderOsmosis: {
+					"ATOM": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("28.40000000"),
+					},
+					"UMEE": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("1.14000000"),
+					},
+					"LUNA": provider.TickerPrice{
+						Price: sdk.MustNewDecFromStr("64.10000000"),
+					},
+				},
+			},
+			expected: map[string]deviation{
+				"ATOM": {
+					mean:      sdk.MustNewDecFromStr("28.28"),
+					deviation: sdk.MustNewDecFromStr("0.085244745683629475"),
+				},
+				"UMEE": {
+					mean:      sdk.MustNewDecFromStr("1.1335"),
+					deviation: sdk.MustNewDecFromStr("0.004600724580614015"),
+				},
+				"LUNA": {
+					mean:      sdk.MustNewDecFromStr("64.606666666666666666"),
+					deviation: sdk.MustNewDecFromStr("0.358360464089193609"),
+				},
+			},
+		},
+	}
+
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			deviation, mean, err := oracle.StandardDeviation(tc.prices)
+			require.NoError(t, err)
+			require.Len(t, deviation, len(tc.expected))
+			require.Len(t, mean, len(tc.expected))
+			for k, v := range tc.expected {
+				require.Equalf(t, v.deviation, deviation[k], "unexpected deviation for %s", k)
+				require.Equalf(t, v.mean, mean[k], "unexpected mean for %s", k)
+			}
+		})
+	}
+}
