@@ -12,7 +12,6 @@ type AccountKeeper interface {
 
 // BankKeeper defines the expected x/bank keeper interface.
 type BankKeeper interface {
-	GetSupply(ctx sdk.Context, denom string) sdk.Coin
 	MintCoins(ctx sdk.Context, moduleName string, amounts sdk.Coins) error
 	BurnCoins(ctx sdk.Context, moduleName string, amounts sdk.Coins) error
 	SendCoinsFromModuleToAccount(

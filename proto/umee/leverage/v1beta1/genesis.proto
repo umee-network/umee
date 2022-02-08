@@ -16,9 +16,11 @@ message GenesisState {
   repeated Collateral               collateral          = 5 [(gogoproto.nullable) = false];
   repeated cosmos.base.v1beta1.Coin reserves            = 6
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
-  int64                           last_interest_time = 7;
-  repeated BadDebt                bad_debts          = 8 [(gogoproto.nullable) = false];
-  repeated InterestScalar         interest_scalars   = 9 [(gogoproto.nullable) = false];
+  int64                             last_interest_time = 7;
+  repeated BadDebt                  bad_debts          = 8 [(gogoproto.nullable) = false];
+  repeated InterestScalar           interest_scalars   = 9 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin utoken_supply      = 10
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
 }
 
 // AdjustedBorrow is a borrow struct used in the leverage module's genesis state.

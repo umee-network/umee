@@ -228,3 +228,29 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 	return k.iterate(ctx, prefix, iterator)
 }
+
+// GetAllUTokenSupply returns total supply of all uToken denoms.
+func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
+	prefix := types.KeyPrefixUtokenSupply
+	supplies := sdk.NewCoins()
+
+	iterator := func(key, val []byte) error {
+		denom := types.DenomFromKey(key, prefix)
+
+		var amount sdk.Int
+		if err := amount.Unmarshal(val); err != nil {
+			// improperly marshaled utoken supply should never happen
+			return err
+		}
+
+		supplies = supplies.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
+
+	return supplies
+}
