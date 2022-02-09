@@ -136,7 +136,8 @@ base = "ATOM"
 quote = "USDT"
 providers = [
 	"kraken",
-	"binance"
+	"binance",
+	"huobi"
 ]
 
 [[currency_pairs]]
@@ -144,7 +145,8 @@ base = "UMEE"
 quote = "USDT"
 providers = [
 	"kraken",
-	"binance"
+	"binance",
+	"huobi"
 ]
 
 [account]
@@ -184,7 +186,7 @@ global_labels = [["chain-id", "umee-local-beta-testnet"]]
 	require.Len(t, cfg.CurrencyPairs, 2)
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
-	require.Len(t, cfg.CurrencyPairs[0].Providers, 2)
+	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
 	require.Equal(t, "kraken", cfg.CurrencyPairs[0].Providers[0])
 	require.Equal(t, "binance", cfg.CurrencyPairs[0].Providers[1])
 }
