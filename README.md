@@ -33,7 +33,7 @@ Umee will allow a multitude of decentralized debt products.
 | Version | Mainnet | Experimental | SDK Version | Peggo Version | Price Feeder Version |
 |:-------:|:-------:|:------------:|:-----------:|---------------|----------------------|
 |  v0.7.x |    ✗    |      ✓       |   v0.45.x   | v0.2.x        | v0.1.x               |
-|  v1.x.x |    ✓    |      ✗       |   v0.45.x   | v0.2.x        | v0.1.x               |
+|  v1.x.x |    ✓    |      ✗       |   v0.45.x   | v0.2.x        | N/A                  |
 
 ## Active Networks
 
