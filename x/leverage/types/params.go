@@ -78,8 +78,8 @@ func validateLiquidationThreshold(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v.IsNegative() {
-		return fmt.Errorf("complete liquidation threshold cannot be negative: %d", v)
+	if !v.IsPositive() {
+		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
 	}
 	return nil
 }
