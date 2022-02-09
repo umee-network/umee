@@ -130,6 +130,16 @@ func (c Config) Validate() error {
 	return validate.Struct(c)
 }
 
+// contains checks if a string is present in a slice
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
 func ParseConfig(configPath string) (Config, error) {
@@ -158,15 +168,26 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.Server.ReadTimeout = defaultSrvReadTimeout.String()
 	}
 
+	pairs := make(map[string][]string)
 	for _, cp := range cfg.CurrencyPairs {
 		if !strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
 			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
+		}
+		if _, ok := pairs[cp.Base]; !ok {
+			pairs[cp.Base] = []string{}
 		}
 
 		for _, provider := range cp.Providers {
 			if _, ok := SupportedProviders[provider]; !ok {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
+			pairs[cp.Base] = append(pairs[cp.Base], provider)
+		}
+	}
+
+	for base, providers := range pairs {
+		if len(providers) < 3 && !contains(providers, "mock") {
+			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
