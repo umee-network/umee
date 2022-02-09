@@ -94,10 +94,14 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 	}
 
 	if k.GetCollateralSetting(ctx, lenderAddr, uToken.Denom) {
+		// Prevent lending which creates collateral "dust"
+		newCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom).Add(uToken)
+		if err = k.detectCollateralDust(ctx, newCollateral); err != nil {
+			return err
+		}
 		// For uToken denoms enabled as collateral by this lender, the
 		// minted uTokens stay in the module account and the keeper tracks the amount.
-		currentCollateral := k.GetCollateralAmount(ctx, lenderAddr, uToken.Denom)
-		if err = k.setCollateralAmount(ctx, lenderAddr, currentCollateral.Add(uToken)); err != nil {
+		if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 			return err
 		}
 	} else if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
@@ -161,8 +165,13 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken
 				return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
 			}
 
-			// reduce the lender's collateral by amountFromCollateral
+			// prevent withdrawals that leave collateral "dust"
 			newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(amountFromCollateral))
+			if err = k.detectCollateralDust(ctx, newCollateral); err != nil {
+				return err
+			}
+
+			// reduce the lender's collateral by amountFromCollateral
 			if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 				return err
 			}
@@ -308,8 +317,14 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		uTokens := sdk.NewCoins(uToken)
 
 		if uToken.Amount.IsPositive() {
-			currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
-			if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
+			// prevent enabling collateral if it would be of "dust" value
+			newCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom).Add(uToken)
+			if err := k.detectCollateralDust(ctx, newCollateral); err != nil {
+				return err
+			}
+
+			// set collateral
+			if err := k.setCollateralAmount(ctx, borrowerAddr, newCollateral); err != nil {
 				return err
 			}
 
@@ -483,8 +498,13 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// Reduce borrower collateral by reward amount
+	// Prevent liquidations which leave collateral "dust"
 	newBorrowerCollateral := sdk.NewCoin(rewardDenom, collateral.AmountOf(rewardDenom).Sub(reward.Amount))
+	if err = k.detectCollateralDust(ctx, newBorrowerCollateral); err != nil {
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
+	}
+
+	// Reduce borrower collateral by reward amount
 	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}

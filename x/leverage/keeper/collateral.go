@@ -52,3 +52,23 @@ func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 	}
 	return nil
 }
+
+// detectCollateralDust returns an error if the input collateral is worth less than 0.1 of a
+// token's display denom, if it is nonzero. For example, if 10^6 uatom = 1 atom, this
+// function would return an error for u/uatom amounts 0 < (amount * uTokenExchangeRate) < 10^5.
+func (k Keeper) detectCollateralDust(ctx sdk.Context, collateral sdk.Coin) error {
+	if collateral.Amount.IsPositive() {
+		token, err := k.ExchangeUToken(ctx, collateral)
+		if err != nil {
+			return err
+		}
+		baseToken, err := k.GetRegisteredToken(ctx, token.Denom)
+		if err != nil {
+			return err
+		}
+		if token.Amount.LT(oneTenthFromExponent(baseToken.Exponent)) {
+			return sdkerrors.Wrap(types.ErrCollateralDust, collateral.String())
+		}
+	}
+	return nil
+}
