@@ -287,6 +287,13 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 		case config.ProviderHuobi:
 			priceProvider = provider.NewHuobiProvider()
 
+		case config.ProviderOkx:
+			pp, err := provider.NewOkxProvider(context.TODO(), o.providerPairs[config.ProviderOkx]...)
+			if err != nil {
+				fmt.Printf("ProviderOkx error %+v", err)
+			}
+			priceProvider = pp
+
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()
 		}

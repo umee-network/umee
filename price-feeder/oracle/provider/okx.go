@@ -64,7 +64,7 @@ type (
 )
 
 // NewOkxProvider creates a new OkxProvider
-func NewOkxProvider(ctx context.Context) *OkxProvider {
+func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvider, error) {
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   okxHost,
@@ -73,7 +73,7 @@ func NewOkxProvider(ctx context.Context) *OkxProvider {
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
-		fmt.Printf("Error connecting to ws: %+v", err)
+		return nil, fmt.Errorf("error connecting to ws: %+v", err)
 	}
 
 	p := &OkxProvider{
@@ -84,9 +84,13 @@ func NewOkxProvider(ctx context.Context) *OkxProvider {
 		msReadNewMessage: 200,
 	}
 
+	if err := p.newTickerSubscription(pairs...); err != nil {
+		return nil, err
+	}
+
 	go p.handleTickers(ctx)
 
-	return p
+	return p, nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map
@@ -131,21 +135,7 @@ func (p OkxProvider) getMapTicker(instrumentId string) (pair OkxTickerPair, exis
 func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	instrumentId := getInstrumentId(cp)
 	tickerPair, exist := p.getMapTicker(instrumentId)
-	if !exist {
-		// subscribe to this new instrument id
-		if err := p.newTickerSubscription(instrumentId); err != nil {
-			return TickerPrice{}, err
-		}
-
-		// retry only 2 times awaiting for msReadNewMessage
-		for i := 0; i < 2; i++ {
-			time.Sleep(time.Duration(p.msReadNewMessage) * time.Millisecond)
-			tickerPair, exist := p.getMapTicker(instrumentId)
-			if !exist {
-				continue
-			}
-			return tickerPair.ToTickerPrice()
-		}
+	if !exist { // it should exist the ticker will be
 		return TickerPrice{}, fmt.Errorf("ticker pair not found %+v", cp)
 	}
 
@@ -169,9 +159,16 @@ func (p OkxProvider) messageReceivedWS(messageType int, bz []byte) {
 	}
 }
 
-func (p OkxProvider) newTickerSubscription(instId string) error {
-	subsTopic := newSubscriptionTopic(instId)
-	subsMsg := newSubscriptionMsg(subsTopic)
+// newTickerSubscription subscribe to all Currency pairs
+func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
+	topics := make([]SubscriptionTopic, len(cps))
+
+	for _, cp := range cps {
+		instId := getInstrumentId(cp)
+		topics = append(topics, newSubscriptionTopic(instId))
+	}
+
+	subsMsg := newSubscriptionMsg(topics...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
