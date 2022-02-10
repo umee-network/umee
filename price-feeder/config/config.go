@@ -158,15 +158,26 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.Server.ReadTimeout = defaultSrvReadTimeout.String()
 	}
 
+	pairs := make(map[string]map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
 		if !strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
 			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
+		}
+		if _, ok := pairs[cp.Base]; !ok {
+			pairs[cp.Base] = make(map[string]struct{})
 		}
 
 		for _, provider := range cp.Providers {
 			if _, ok := SupportedProviders[provider]; !ok {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
+			pairs[cp.Base][provider] = struct{}{}
+		}
+	}
+
+	for base, providers := range pairs {
+		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
+			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
