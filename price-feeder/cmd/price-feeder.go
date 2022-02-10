@@ -112,12 +112,16 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
+	// Set up keyring
+	keyring, err := config.NewKeyring()
+	if err != nil {
+		return err
+	}
+
 	oracleClient, err := client.NewOracleClient(
 		logger,
 		cfg.Account.ChainID,
-		cfg.Keyring.Backend,
-		cfg.Keyring.Dir,
-		cfg.Keyring.Pass,
+		keyring,
 		cfg.RPC.TMRPCEndpoint,
 		timeout,
 		cfg.Account.Address,

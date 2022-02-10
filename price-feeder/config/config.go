@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -23,6 +24,10 @@ const (
 	ProviderOsmosis = "osmosis"
 	ProviderHuobi   = "huobi"
 	ProviderMock    = "mock"
+
+	EnvVariableBackend = "PRICE_FEEDER_BACKEND"
+	EnvVariableDir     = "PRICE_FEEDER_DIR"
+	EnvVariablePass    = "PRICE_FEEDER_PASS"
 )
 
 var (
@@ -48,7 +53,6 @@ type (
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
 		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
 		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
 		Telemetry     Telemetry      `toml:"telemetry"`
 		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
@@ -81,9 +85,9 @@ type (
 
 	// Keyring defines the required Umee keyring configuration.
 	Keyring struct {
-		Backend string `toml:"backend" validate:"required"`
-		Pass    string `toml:"pass"`
-		Dir     string `toml:"dir" validate:"required"`
+		Backend string
+		Pass    string
+		Dir     string
 	}
 
 	// RPC defines RPC configuration of both the Umee gRPC and Tendermint nodes.
@@ -187,4 +191,25 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	return cfg, cfg.Validate()
+}
+
+// NewKeyring parses the environment variables and returns a keyring object.
+// If the necessary environment variables aren't set, return an error.
+func NewKeyring() (Keyring, error) {
+	keyring := Keyring{
+		Backend: os.Getenv(EnvVariableBackend),
+		Pass:    os.Getenv(EnvVariableDir),
+		Dir:     os.Getenv(EnvVariablePass),
+	}
+	if keyring.Validate() != nil {
+		return Keyring{}, fmt.Errorf("invalid environment variables set for keyring")
+	}
+	return keyring, nil
+}
+
+func (k Keyring) Validate() error {
+	if k.Backend == "" || k.Pass == "" || k.Dir == "" {
+		return fmt.Errorf("keyring is invalid")
+	}
+	return nil
 }

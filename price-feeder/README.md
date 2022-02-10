@@ -35,7 +35,9 @@ The list of current supported providers:
 
 The `price-feeder` tool runs off of a single configuration file. This configuration
 file defines what exchange rates to fetch and what providers to get them from.
-In addition, it defines the oracle's keyring and feeder account information.
+In addition, it defines the oracle's feeder account information.
+The keyring is defined via environment variables.
+More information on the keyring can be found [here](#keyring)
 Please see the [example configuration](price-feeder.example.toml) for more details.
 
 ```shell
@@ -84,13 +86,23 @@ vote messages using a volume-weighted average price (VWAP).
 The `account` section contains the oracle's feeder and validator account information.
 These are used to sign and populate data in pre-vote and vote oracle messages.
 
-### `keyring`
-
-The `keyring` section contains Keyring related material used to fetch the key pair
-associated with the oracle account that signs pre-vote and vote oracle messages.
-
 ### `rpc`
 
 The `rpc` section contains the Tendermint and Cosmos application gRPC endpoints.
 These endpoints are used to query for on-chain data that pertain to oracle
 functionality and for broadcasting signed pre-vote and vote oracle messages.
+
+## Keyring
+
+Our keyring must be set up to sign transactions before running the price feeder.
+Additional info on the different keyring modes is available [here](https://docs.cosmos.network/master/run-node/keyring.html).
+**Please note that the `test` and `memory` modes are only for testing purposes.**
+**Do not use these modes for running the price feeder against mainnet.**
+### Setting environment variables
+
+In order to use the keyring you must set three environment variables : `PRICE_FEEDER_BACKEND`, `PRICE_FEEDER_DIR`, and `PRICE_FEEDER_PASS`.
+
+Ex :
+`export PRICE_FEEDER_BACKEND=test`
+`export PRICE_FEEDER_DIR=/Users/username/.umee`
+`export PRICE_FEEDER_PASS=keyringPassword`

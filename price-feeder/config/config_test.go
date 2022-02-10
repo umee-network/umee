@@ -31,11 +31,6 @@ func TestValidate(t *testing.T) {
 					Validator: "valaddr",
 					ChainID:   "chain-id",
 				},
-				Keyring: config.Keyring{
-					Backend: "test",
-					Pass:    "keyringPassword",
-					Dir:     "/Users/username/.umee",
-				},
 				RPC: config.RPC{
 					TMRPCEndpoint: "http://localhost:26657",
 					GRPCEndpoint:  "localhost:9090",
