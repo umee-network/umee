@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -17,8 +16,9 @@ import (
 )
 
 const (
-	okxHost = "ws.okx.com:8443"
-	okxPath = "/ws/v5/public"
+	okxHost          = "ws.okx.com:8443"
+	okxPath          = "/ws/v5/public"
+	msReadNewMessage = 50
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -30,7 +30,6 @@ type (
 	// REF: https://www.okx.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
 	OkxProvider struct {
 		wsURL            url.URL
-		client           *http.Client
 		wsClient         *websocket.Conn
 		tickersMap       *sync.Map // InstId => OkxTickerPair
 		msReadNewMessage uint16
@@ -41,8 +40,6 @@ type (
 		InstId string `json:"instId"` // Instrument ID ex.: BTC-USDT
 		Last   string `json:"last"`   // Last traded price ex.: 43508.9
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
-		// Ts ticker data generation time, Unix timestamp format in milliseconds, e.g. 1597026383085
-		Ts string `json:"ts"`
 	}
 
 	// OkxTickerResponseWS defines the response structure of a Okx ticker
@@ -78,10 +75,9 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 
 	p := &OkxProvider{
 		wsURL:            wsURL,
-		client:           newDefaultHTTPClient(),
 		wsClient:         wsConn,
 		tickersMap:       &sync.Map{},
-		msReadNewMessage: 200,
+		msReadNewMessage: msReadNewMessage,
 	}
 
 	if err := p.newTickerSubscription(pairs...); err != nil {
@@ -118,6 +114,16 @@ func (p OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]Ti
 	return tickerPrices, nil
 }
 
+func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+	instrumentId := getInstrumentId(cp)
+	tickerPair, exist := p.getMapTicker(instrumentId)
+	if !exist { // it should exist the ticker will be
+		return TickerPrice{}, fmt.Errorf("ticker pair not found %s", instrumentId)
+	}
+
+	return tickerPair.ToTickerPrice()
+}
+
 func (p OkxProvider) getMapTicker(instrumentId string) (pair OkxTickerPair, exists bool) {
 	value, ok := p.tickersMap.Load(instrumentId)
 	if !ok {
@@ -132,14 +138,22 @@ func (p OkxProvider) getMapTicker(instrumentId string) (pair OkxTickerPair, exis
 	return pair, true
 }
 
-func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
-	instrumentId := getInstrumentId(cp)
-	tickerPair, exist := p.getMapTicker(instrumentId)
-	if !exist { // it should exist the ticker will be
-		return TickerPrice{}, fmt.Errorf("ticker pair not found %+v", cp)
+func (p OkxProvider) handleTickers(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Done handling tickers")
+			return
+		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
+			// time after to avoid asking for prices too freequently
+			messageType, bz, err := p.wsClient.ReadMessage()
+			if err != nil {
+				fmt.Printf("Error reading message %+v", err)
+				continue
+			}
+			go p.messageReceivedWS(messageType, bz)
+		}
 	}
-
-	return tickerPair.ToTickerPrice()
 }
 
 func (p OkxProvider) messageReceivedWS(messageType int, bz []byte) {
@@ -159,7 +173,7 @@ func (p OkxProvider) messageReceivedWS(messageType int, bz []byte) {
 	}
 }
 
-// newTickerSubscription subscribe to all Currency pairs
+// newTickerSubscription subscribe to all currency pairs
 func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
 	topics := make([]SubscriptionTopic, len(cps))
 
@@ -170,23 +184,6 @@ func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
 
 	subsMsg := newSubscriptionMsg(topics...)
 	return p.wsClient.WriteJSON(subsMsg)
-}
-
-func (p OkxProvider) handleTickers(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("Done handling tickers")
-			return
-		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				fmt.Printf("Error reading message %+v", err)
-				continue
-			}
-			go p.messageReceivedWS(messageType, bz)
-		}
-	}
 }
 
 func (tickerPair OkxTickerPair) ToTickerPrice() (TickerPrice, error) {
