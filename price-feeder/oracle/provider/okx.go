@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -92,23 +90,15 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 // GetTickerPrices returns the tickerPrices based on the saved map
 func (p OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
-	g := new(errgroup.Group)
 
 	for _, currencyPair := range pairs {
 		cp := currencyPair
-		g.Go(func() error {
-			price, err := p.getTickerPrice(cp)
-			if err != nil {
-				return err
-			}
+		price, err := p.getTickerPrice(cp)
+		if err != nil {
+			return nil, err
+		}
 
-			tickerPrices[cp.String()] = price
-			return nil
-		})
-	}
-
-	if err := g.Wait(); err != nil {
-		return nil, err
+		tickerPrices[cp.String()] = price
 	}
 
 	return tickerPrices, nil
