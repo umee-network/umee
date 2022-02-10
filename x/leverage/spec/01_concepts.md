@@ -21,10 +21,18 @@ Users have the following actions available to them:
 - [Lend](04_messages.md#MsgLendAsset) accepted asset types to the module, receiving _uTokens_ in exchange.
 
   Lenders earn interest at an effective rate of the asset's [Lending APY](01_concepts.md#Lending-APY) as the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) increases over time.
+  
+  Additionally, for assets denominations already enabled as collateral, the lent assets immediately become collateral as well, causing their borrow limit to increase.
+  
+  If a lender is undercollateralized (borrowed value > borrow limit), lent assets are eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
+  
+  Care should be taken by undercollateralized users when lending token amounts too small to restore the health of their borrows, as the newly lent assets will be eligible for liquidation immediately.
 
 - [Enable or Disable](04_messages.md#MsgSetCollateral) a uToken denomination as collateral for borrowing.
 
   Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
+
+  If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
 - [Withdraw](04_messages.md#MsgWithdrawAsset) lent assets by turning in uTokens of the associated denomination.
 
@@ -62,7 +70,7 @@ Some important quantities that govern the behavior of the `leverage` module are 
 
 As a reminder, the following values are always available as a basis for calculations:
 - Account token and uToken balances, available through the `bank` module.
-- Total supply of any token or uToken denomination, available through the `bank` module.
+- Total supply of any uToken denomination, stored in `leverage` module [State](02_state.md).
 - The `leverage` module account balance, available through the `bank` module.
 - Collateral uToken amounts held in the `leverage` module account for individual borrowers, stored in `leverage` module [State](02_state.md).
 - Borrowed denominations and _adjusted amounts_ for individual borrowers, stored in `leverage` module [State](02_state.md).

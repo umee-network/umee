@@ -11,6 +11,7 @@ The `x/leverage` module keeps the following objects in state:
 - Bad Debt Instance: `0x07 | borrowerAddress | denom -> 0x01`
 - Interest Scalar: `0x08 | denom -> sdk.Dec`
 - Total Borrowed: `0x09 | denom -> sdk.Dec`
+- Totak UToken Supply:  `0x0A | denom -> sdk.Int`
 
 The following serialization methods are used unless otherwise stated:
 - `sdk.Dec.Marshal()` and `sdk.Int.Marshal()` for numeric types

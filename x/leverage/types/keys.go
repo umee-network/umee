@@ -30,6 +30,7 @@ var (
 	KeyPrefixBadDebt             = []byte{0x07}
 	KeyPrefixInterestScalar      = []byte{0x08}
 	KeyPrefixAdjustedTotalBorrow = []byte{0x09}
+	KeyPrefixUtokenSupply        = []byte{0x0A}
 )
 
 // CreateRegisteredTokenKey returns a KVStore key for getting and setting a Token.
@@ -155,6 +156,15 @@ func CreateAdjustedTotalBorrowKey(tokenDenom string) []byte {
 	var key []byte
 	key = append(key, KeyPrefixAdjustedTotalBorrow...)
 	key = append(key, []byte(tokenDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// CreateUTokenSupplyKey returns a KVStore key for getting and setting a utoken's total supply.
+func CreateUTokenSupplyKey(uTokenDenom string) []byte {
+	// supplyprefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixUtokenSupply...)
+	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
 
