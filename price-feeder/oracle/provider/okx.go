@@ -40,7 +40,7 @@ type (
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
 	}
 
-	// OkxTickerResponseWS defines the response structure of a Okx ticker
+	// OkxTickerResponse defines the response structure of a Okx ticker
 	// request.
 	OkxTickerResponse struct {
 		Data []OkxTickerPair   `json:"data"`
@@ -77,6 +77,7 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 		tickersMap:       &sync.Map{},
 		msReadNewMessage: msReadNewMessage,
 	}
+
 	if err := provider.newTickerSubscription(pairs...); err != nil {
 		return nil, err
 	}
