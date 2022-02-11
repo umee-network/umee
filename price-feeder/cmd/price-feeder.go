@@ -113,7 +113,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	// Set up keyring
-	keyring, err := config.NewKeyring()
+	keyring, err := config.InitKeyring()
 	if err != nil {
 		return err
 	}

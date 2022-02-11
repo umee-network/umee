@@ -18,25 +18,21 @@ type Keyring struct {
 	Dir     string
 }
 
-// NewKeyring parses the environment variables and returns a keyring object.
-// If the necessary environment variables aren't set, return an error.
-func NewKeyring() (Keyring, error) {
-	keyring := Keyring{
-		Backend: os.Getenv(EnvVariableBackend),
-		Pass:    os.Getenv(EnvVariablePass),
-		Dir:     os.Getenv(EnvVariableDir),
+// NewKeyring returns a new Keyring object
+func NewKeyring(backend string, dir string, pass string) Keyring {
+	return Keyring{
+		Backend: backend,
+		Dir:     dir,
+		Pass:    pass,
 	}
-	if keyring.Validate() != nil {
-		keyring, err := keyring.GetStdInput()
-		if err != nil {
-			return Keyring{}, err
-		}
-		if keyring.Validate() != nil {
-			return Keyring{}, fmt.Errorf("invalid values set for keyring")
-		}
-		return keyring, nil
+}
+
+// Validate makes sure no empty strings were entered
+func (k Keyring) Validate() error {
+	if k.Backend == "" || k.Pass == "" || k.Dir == "" {
+		return fmt.Errorf("keyring is invalid")
 	}
-	return keyring, nil
+	return nil
 }
 
 // GetStdInput gets the keyring from console input
@@ -51,10 +47,24 @@ func (Keyring) GetStdInput() (Keyring, error) {
 	return keyring, nil
 }
 
-// Validate makes sure no empty strings were entered
-func (k Keyring) Validate() error {
-	if k.Backend == "" || k.Pass == "" || k.Dir == "" {
-		return fmt.Errorf("keyring is invalid")
+// InitKeyring parses the environment variables and returns a keyring object.
+// If the necessary environment variables aren't set, get them from console input.
+func InitKeyring() (Keyring, error) {
+	keyring := NewKeyring(
+		os.Getenv(EnvVariableBackend),
+		os.Getenv(EnvVariablePass),
+		os.Getenv(EnvVariableDir),
+	)
+
+	if keyring.Validate() != nil {
+		keyring, err := keyring.GetStdInput()
+		if err != nil {
+			return Keyring{}, err
+		}
+		if keyring.Validate() != nil {
+			return Keyring{}, fmt.Errorf("invalid values set for keyring")
+		}
+		return keyring, nil
 	}
-	return nil
+	return keyring, nil
 }
