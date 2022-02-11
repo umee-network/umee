@@ -161,7 +161,10 @@ func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
-		priceProvider := o.getOrSetProvider(providerName)
+		priceProvider, err := o.getOrSetProvider(providerName)
+		if err != nil {
+			return err
+		}
 
 		var acceptedPairs []types.CurrencyPair
 		for _, pair := range currencyPairs {
@@ -266,7 +269,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
+func (o *Oracle) getOrSetProvider(providerName string) (provider.Provider, error) {
 	var (
 		priceProvider provider.Provider
 		ok            bool
@@ -288,10 +291,11 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 			priceProvider = provider.NewHuobiProvider()
 
 		case config.ProviderOkx:
-			priceProvider, err := provider.NewOkxProvider(context.TODO(), o.providerPairs[config.ProviderOkx]...)
+			okxProvider, err := provider.NewOkxProvider(context.TODO(), o.providerPairs[config.ProviderOkx]...)
 			if err != nil {
-				provider.Provider{}, err
+				return nil, err
 			}
+			priceProvider = okxProvider
 
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()
@@ -300,7 +304,7 @@ func (o *Oracle) getOrSetProvider(providerName string) provider.Provider {
 		o.priceProviders[providerName] = priceProvider
 	}
 
-	return priceProvider
+	return priceProvider, nil
 }
 
 // filterDeviations find the standard deviations of the prices of

@@ -81,9 +81,9 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 		return nil, err
 	}
 
-	go p.handleTickers(ctx)
+	go provider.handleTickers(ctx)
 
-	return p, nil
+	return provider, nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map
@@ -105,9 +105,9 @@ func (p OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]Ti
 
 func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	instrumentId := getInstrumentId(cp)
-	tickerPair, exist := p.getMapTicker(instrumentId)
-	if !exist { // it should exist the ticker will be
-		return TickerPrice{}, fmt.Errorf("ticker pair not found %s", instrumentId)
+	tickerPair, err := p.getMapTicker(instrumentId)
+	if err != nil { // it should exist the ticker
+		return TickerPrice{}, fmt.Errorf("failed to get %s - %+v", instrumentId, err)
 	}
 
 	return tickerPair.ToTickerPrice()
@@ -116,15 +116,15 @@ func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) 
 func (p OkxProvider) getMapTicker(instrumentId string) (OkxTickerPair, error) {
 	value, ok := p.tickersMap.Load(instrumentId)
 	if !ok {
-		return OkxTickerPair{}, false
+		return OkxTickerPair{}, fmt.Errorf("ticker not found in map %s", instrumentId)
 	}
 
-	pair, ok = value.(OkxTickerPair)
+	pair, ok := value.(OkxTickerPair)
 	if !ok {
-		return OkxTickerPair{}, false
+		return OkxTickerPair{}, fmt.Errorf("ticker found %s, but failed on casting to OkxTickerPair", instrumentId)
 	}
 
-	return pair, true
+	return pair, nil
 }
 
 func (p OkxProvider) handleTickers(ctx context.Context) {
@@ -140,7 +140,7 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 				fmt.Printf("Error reading message %+v", err)
 				continue
 			}
-			go p.messageReceivedWS(messageType, bz)
+			go p.messageReceived(messageType, bz)
 		}
 	}
 }
@@ -150,7 +150,7 @@ func (p OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerRespWS OkxTickerResponseWS
+	var tickerRespWS OkxTickerResponse
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
 		// sometimes it returns another messages that are not tickerResponses
 		fmt.Printf("\n Error marshalling the OkxTickerResponseWS %+v - %s", err, err.Error())
