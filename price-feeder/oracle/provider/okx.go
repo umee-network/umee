@@ -106,7 +106,7 @@ func (p OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]Ti
 func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	instrumentId := getInstrumentId(cp)
 	tickerPair, err := p.getMapTicker(instrumentId)
-	if err != nil { // it should exist the ticker
+	if err != nil {
 		return TickerPrice{}, fmt.Errorf("failed to get %s - %+v", instrumentId, err)
 	}
 
@@ -131,10 +131,9 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Done handling tickers")
 			return
 		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
-			// time after to avoid asking for prices too freequently
+			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				fmt.Printf("Error reading message %+v", err)
@@ -152,8 +151,7 @@ func (p OkxProvider) messageReceived(messageType int, bz []byte) {
 
 	var tickerRespWS OkxTickerResponse
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
-		// sometimes it returns another messages that are not tickerResponses
-		fmt.Printf("\n Error marshalling the OkxTickerResponseWS %+v - %s", err, err.Error())
+		// sometimes it returns other messages which are not tickerResponses
 		return
 	}
 

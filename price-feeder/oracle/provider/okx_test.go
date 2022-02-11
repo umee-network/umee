@@ -37,8 +37,8 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
 		lastPriceAtom := "34.69000000"
-		volume := "2396974.02000000"
 		lastPriceLuna := "41.35000000"
+		volume := "2396974.02000000"
 
 		syncMap := &sync.Map{}
 		syncMap.Store("ATOM-USDT", OkxTickerPair{
