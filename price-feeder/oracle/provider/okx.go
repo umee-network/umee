@@ -42,7 +42,7 @@ type (
 
 	// OkxTickerResponseWS defines the response structure of a Okx ticker
 	// request.
-	OkxTickerResponseWS struct {
+	OkxTickerResponse struct {
 		Data []OkxTickerPair   `json:"data"`
 		Arg  SubscriptionTopic `json:"arg"`
 	}
@@ -71,14 +71,13 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 		return nil, fmt.Errorf("error connecting to ws: %+v", err)
 	}
 
-	p := &OkxProvider{
+	provider := &OkxProvider{
 		wsURL:            wsURL,
 		wsClient:         wsConn,
 		tickersMap:       &sync.Map{},
 		msReadNewMessage: msReadNewMessage,
 	}
-
-	if err := p.newTickerSubscription(pairs...); err != nil {
+	if err := provider.newTickerSubscription(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -114,7 +113,7 @@ func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) 
 	return tickerPair.ToTickerPrice()
 }
 
-func (p OkxProvider) getMapTicker(instrumentId string) (pair OkxTickerPair, exists bool) {
+func (p OkxProvider) getMapTicker(instrumentId string) (OkxTickerPair, error) {
 	value, ok := p.tickersMap.Load(instrumentId)
 	if !ok {
 		return OkxTickerPair{}, false
@@ -146,7 +145,7 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 	}
 }
 
-func (p OkxProvider) messageReceivedWS(messageType int, bz []byte) {
+func (p OkxProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
