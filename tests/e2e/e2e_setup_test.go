@@ -843,9 +843,8 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
 			},
 			Env: []string{
-				"PRICE_FEEDER_BACKEND=test",
-				"PRICE_FEEDER_DIR=/root/.umee",
-				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
+				"UMEE_E2E_UMEE_VAL_KEY_DIR=/root/.umee",
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_KEY_PASS=%s", keyringPassphrase),
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeVal.keyInfo.GetAddress()),
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeVal.keyInfo.GetAddress())),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),

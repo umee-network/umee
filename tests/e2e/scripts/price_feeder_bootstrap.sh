@@ -6,6 +6,11 @@ set -ex
 mkdir -p /root/.price-feeder/
 touch /root/.price-feeder/config.toml
 
+# set up price feeder env vars
+PRICE_FEEDER_DIR = $UMEE_E2E_UMEE_VAL_KEY_DIR
+PRICE_FEEDER_PASS = $UMEE_E2E_UMEE_VAL_KEY_PASS
+PRICE_FEEDER_BACKEND = "test"
+
 # setup price-feeder configuration
 tee /root/.price-feeder/config.toml <<EOF
 gas_adjustment = 1.5
