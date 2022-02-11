@@ -102,7 +102,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 
 			startTime := time.Now()
 
-			if err := o.tick(); err != nil {
+			if err := o.tick(ctx); err != nil {
 				telemetry.IncrCounter(1, "failure", "tick")
 				o.logger.Err(err).Msg("oracle tick failed")
 			}
@@ -151,7 +151,7 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 // SetPrices retrieve all the prices from our set of providers as determined
 // in the config, average them out, and update the oracle's current exchange
 // rates.
-func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
+func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
@@ -161,7 +161,7 @@ func (o *Oracle) SetPrices(acceptList oracletypes.DenomList) error {
 		providerName := providerName
 		currencyPairs := currencyPairs
 
-		priceProvider, err := o.getOrSetProvider(providerName)
+		priceProvider, err := o.getOrSetProvider(ctx, providerName)
 		if err != nil {
 			return err
 		}
@@ -269,7 +269,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) getOrSetProvider(providerName string) (provider.Provider, error) {
+func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (provider.Provider, error) {
 	var (
 		priceProvider provider.Provider
 		ok            bool
@@ -291,7 +291,7 @@ func (o *Oracle) getOrSetProvider(providerName string) (provider.Provider, error
 			priceProvider = provider.NewHuobiProvider()
 
 		case config.ProviderOkx:
-			okxProvider, err := provider.NewOkxProvider(context.TODO(), o.providerPairs[config.ProviderOkx]...)
+			okxProvider, err := provider.NewOkxProvider(ctx, o.providerPairs[config.ProviderOkx]...)
 			if err != nil {
 				return nil, err
 			}
@@ -356,7 +356,7 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 	}
 }
 
-func (o *Oracle) tick() error {
+func (o *Oracle) tick(ctx context.Context) error {
 	o.logger.Debug().Msg("executing oracle tick")
 
 	clientCtx, err := o.oracleClient.CreateClientContext()
@@ -367,7 +367,7 @@ func (o *Oracle) tick() error {
 	if err != nil {
 		return err
 	}
-	if err := o.SetPrices(oracleParams.AcceptList); err != nil {
+	if err := o.SetPrices(ctx, oracleParams.AcceptList); err != nil {
 		return err
 	}
 
