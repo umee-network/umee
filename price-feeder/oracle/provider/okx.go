@@ -135,8 +135,8 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
 			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
+			// if some error occurs continue to try to read the next message
 			if err != nil {
-				fmt.Printf("Error reading message %+v", err)
 				continue
 			}
 			go p.messageReceived(messageType, bz)
