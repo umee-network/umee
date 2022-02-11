@@ -153,6 +153,21 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
+// HasCollateral returns true if a borrower has any collateral.
+func (k Keeper) HasCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) bool {
+	iter := sdk.KVStorePrefixIterator(
+		ctx.KVStore(k.storeKey),
+		types.KeyPrefixCollateralAmount,
+	)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		// Stored collateral amounts are never zero, so this is enough
+		return true
+	}
+	return false
+}
+
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
 	prefix := types.KeyPrefixAdjustedBorrow
@@ -211,14 +226,20 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		// attempt to repay a single address's debt in this denom
-		fullyRepaid, err := k.RepayBadDebt(ctx, addr, denom)
-		if err != nil {
-			return err
+		// first check if the borrower has gained collateral since the bad debt was identified
+		done := k.HasCollateral(ctx, addr)
+
+		// if collateral is still zero, attempt to repay a single address's debt in this denom
+		if !done {
+			err := error(nil)
+			done, err = k.RepayBadDebt(ctx, addr, denom)
+			if err != nil {
+				return err
+			}
 		}
-		if fullyRepaid {
-			// If the bad debt of this denom at the given address was fully repaid,
-			// clear the address|denom pair from the bad debt address list
+
+		// if collateral found or debt fully repaid, clear the bad debt entry for this address|denom
+		if done {
 			if err := k.setBadDebtAddress(ctx, addr, denom, false); err != nil {
 				return err
 			}
