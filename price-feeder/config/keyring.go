@@ -23,8 +23,8 @@ type Keyring struct {
 func NewKeyring() (Keyring, error) {
 	keyring := Keyring{
 		Backend: os.Getenv(EnvVariableBackend),
-		Pass:    os.Getenv(EnvVariableDir),
-		Dir:     os.Getenv(EnvVariablePass),
+		Pass:    os.Getenv(EnvVariablePass),
+		Dir:     os.Getenv(EnvVariableDir),
 	}
 	if keyring.Validate() != nil {
 		keyring, err := keyring.GetStdInput()
