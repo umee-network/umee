@@ -36,7 +36,7 @@ The list of current supported providers:
 The `price-feeder` tool runs off of a single configuration file. This configuration
 file defines what exchange rates to fetch and what providers to get them from.
 In addition, it defines the oracle's feeder account information.
-The keyring is defined via environment variables.
+The keyring is defined via environment variables or user input.
 More information on the keyring can be found [here](#keyring)
 Please see the [example configuration](price-feeder.example.toml) for more details.
 
@@ -98,11 +98,13 @@ Our keyring must be set up to sign transactions before running the price feeder.
 Additional info on the different keyring modes is available [here](https://docs.cosmos.network/master/run-node/keyring.html).
 **Please note that the `test` and `memory` modes are only for testing purposes.**
 **Do not use these modes for running the price feeder against mainnet.**
-### Setting environment variables
+### Setup
 
-In order to use the keyring you must set three environment variables : `PRICE_FEEDER_BACKEND`, `PRICE_FEEDER_DIR`, and `PRICE_FEEDER_PASS`.
+You may use these environment variables to set up our keyring : `PRICE_FEEDER_BACKEND`, `PRICE_FEEDER_DIR`, and `PRICE_FEEDER_PASS`.
 
 Ex :
 `export PRICE_FEEDER_BACKEND=test`
 `export PRICE_FEEDER_DIR=/Users/username/.umee`
 `export PRICE_FEEDER_PASS=keyringPassword`
+
+If these environment variables are not set, the price feeder will prompt the user for input.
