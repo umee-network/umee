@@ -655,21 +655,22 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
-	_, bumAddr := s.initBorrowScenario()
+	// Creating a lender so module account has some uumee
+	_ = s.setupAccount(umeeDenom, 200000000, 200000000, 0, false) // 200 umee
 
-	// The "bum" user from the init scenario is being used because it
-	// has no assets or collateral.
+	// Using an address with no assets
+	addr := s.setupAccount(umeeDenom, 0, 0, 0, false)
 
 	// Create an uncollateralized debt position
-	badDebt := sdk.NewInt64Coin(umeeapp.BondDenom, 100000000) // 100 umee
-	err := s.tk.SetBorrow(s.ctx, bumAddr, badDebt)
+	badDebt := sdk.NewInt64Coin(umeeDenom, 100000000) // 100 umee
+	err := s.tk.SetBorrow(s.ctx, addr, badDebt)
 	s.Require().NoError(err)
 
 	// Manually mark the bad debt for repayment
-	s.Require().NoError(s.tk.SetBadDebtAddress(s.ctx, bumAddr, umeeapp.BondDenom, true))
+	s.Require().NoError(s.tk.SetBadDebtAddress(s.ctx, addr, umeeDenom, true))
 
 	// Manually set reserves to 60 umee
-	reserve := sdk.NewInt64Coin(umeeapp.BondDenom, 60000000)
+	reserve := sdk.NewInt64Coin(umeeDenom, 60000000)
 	err = s.tk.SetReserveAmount(s.ctx, reserve)
 	s.Require().NoError(err)
 
@@ -678,15 +679,15 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	s.Require().NoError(err)
 
 	// Confirm that a debt of 40 umee remains
-	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, bumAddr, umeeapp.BondDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 40000000), remainingDebt)
+	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 40000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
-	remainingReserve := s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
+	remainingReserve := s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.ZeroInt(), remainingReserve)
 
 	// Manually set reserves to 70 umee
-	reserve = sdk.NewInt64Coin(umeeapp.BondDenom, 70000000)
+	reserve = sdk.NewInt64Coin(umeeDenom, 70000000)
 	err = s.tk.SetReserveAmount(s.ctx, reserve)
 	s.Require().NoError(err)
 
@@ -695,11 +696,11 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	s.Require().NoError(err)
 
 	// Confirm that the debt is eliminated
-	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, bumAddr, umeeapp.BondDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 0), remainingDebt)
+	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), remainingDebt)
 
 	// Confirm that reserves are now at 30 umee
-	remainingReserve = s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
+	remainingReserve = s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt(30000000), remainingReserve)
 
 	// Sweep all bad debts - but there are none
