@@ -68,7 +68,7 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to ws: %+v", err)
+		return nil, fmt.Errorf("error connecting to Okx websocket: %w", err)
 	}
 
 	provider := &OkxProvider{
@@ -136,8 +136,8 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
 			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
-			// if some error occurs continue to try to read the next message
 			if err != nil {
+				// if some error occurs continue to try to read the next message
 				continue
 			}
 			go p.messageReceived(messageType, bz)
@@ -165,9 +165,9 @@ func (p OkxProvider) messageReceived(messageType int, bz []byte) {
 func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
 	topics := make([]SubscriptionTopic, len(cps))
 
-	for _, cp := range cps {
+	for i, cp := range cps {
 		instId := getInstrumentId(cp)
-		topics = append(topics, newSubscriptionTopic(instId))
+		topics[i] = newSubscriptionTopic(instId)
 	}
 
 	subsMsg := newSubscriptionMsg(topics...)
