@@ -29,7 +29,8 @@ type (
 	OkxProvider struct {
 		wsURL            url.URL
 		wsClient         *websocket.Conn
-		tickersMap       *sync.Map // InstId => OkxTickerPair
+		mu               sync.Mutex
+		tickers          map[string]OkxTickerPair // InstId => OkxTickerPair
 		msReadNewMessage uint16
 	}
 
@@ -47,11 +48,13 @@ type (
 		Arg  SubscriptionTopic `json:"arg"`
 	}
 
+	// SubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
 	SubscriptionTopic struct {
 		Channel string `json:"channel"` // Channel name ex.: tickers
 		InstId  string `json:"instId"`  // Instrument ID ex.: BTC-USDT
 	}
 
+	// SubscriptionMsg Message to subscribe/unsubscribe with N Topics
 	SubscriptionMsg struct {
 		Op   string              `json:"op"` // Operation ex.: subscribe
 		Args []SubscriptionTopic `json:"args"`
@@ -74,61 +77,46 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 	provider := &OkxProvider{
 		wsURL:            wsURL,
 		wsClient:         wsConn,
-		tickersMap:       &sync.Map{},
+		tickers:          map[string]OkxTickerPair{},
 		msReadNewMessage: msReadNewMessage,
 	}
 
-	if err := provider.newTickerSubscription(pairs...); err != nil {
+	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
 
-	go provider.handleTickers(ctx)
+	go provider.handleReceivedTickers(ctx)
 
 	return provider, nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map
-func (p OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
-		cp := currencyPair
-		price, err := p.getTickerPrice(cp)
+		price, err := p.getTickerPrice(currencyPair)
 		if err != nil {
 			return nil, err
 		}
 
-		tickerPrices[cp.String()] = price
+		tickerPrices[currencyPair.String()] = price
 	}
 
 	return tickerPrices, nil
 }
 
-func (p OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	instrumentId := getInstrumentId(cp)
-	tickerPair, err := p.getMapTicker(instrumentId)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to get %s - %+v", instrumentId, err)
+	tickerPair, ok := p.tickers[instrumentId]
+	if !ok {
+		return TickerPrice{}, fmt.Errorf("failed to get %s", instrumentId)
 	}
 
-	return tickerPair.ToTickerPrice()
+	return tickerPair.toTickerPrice()
 }
 
-func (p OkxProvider) getMapTicker(instrumentId string) (OkxTickerPair, error) {
-	value, ok := p.tickersMap.Load(instrumentId)
-	if !ok {
-		return OkxTickerPair{}, fmt.Errorf("ticker not found in map %s", instrumentId)
-	}
-
-	pair, ok := value.(OkxTickerPair)
-	if !ok {
-		return OkxTickerPair{}, fmt.Errorf("ticker found %s, but failed on casting to OkxTickerPair", instrumentId)
-	}
-
-	return pair, nil
-}
-
-func (p OkxProvider) handleTickers(ctx context.Context) {
+func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -140,12 +128,12 @@ func (p OkxProvider) handleTickers(ctx context.Context) {
 				// if some error occurs continue to try to read the next message
 				continue
 			}
-			go p.messageReceived(messageType, bz)
+			p.messageReceived(messageType, bz)
 		}
 	}
 }
 
-func (p OkxProvider) messageReceived(messageType int, bz []byte) {
+func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
@@ -157,12 +145,18 @@ func (p OkxProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	for _, tickerPair := range tickerRespWS.Data {
-		p.tickersMap.Store(tickerPair.InstId, tickerPair)
+		p.setTickerPair(tickerPair)
 	}
 }
 
-// newTickerSubscription subscribe to all currency pairs
-func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
+func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.tickers[tickerPair.InstId] = tickerPair
+}
+
+// subscribeTickers subscribe to all currency pairs
+func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	topics := make([]SubscriptionTopic, len(cps))
 
 	for i, cp := range cps {
@@ -174,7 +168,7 @@ func (p OkxProvider) newTickerSubscription(cps ...types.CurrencyPair) error {
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-func (tickerPair OkxTickerPair) ToTickerPrice() (TickerPrice, error) {
+func (tickerPair OkxTickerPair) toTickerPrice() (TickerPrice, error) {
 	price, err := sdk.NewDecFromStr(tickerPair.Last)
 	if err != nil {
 		return TickerPrice{}, fmt.Errorf("failed to parse Okx price (%s) for %s", tickerPair.Last, tickerPair.InstId)

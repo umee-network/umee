@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"sync"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,14 +18,14 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 		lastPrice := "34.69000000"
 		volume := "2396974.02000000"
 
-		syncMap := &sync.Map{}
-		syncMap.Store("ATOM-USDT", OkxTickerPair{
+		syncMap := map[string]OkxTickerPair{}
+		syncMap["ATOM-USDT"] = OkxTickerPair{
 			InstId: "ATOM-USDT",
 			Last:   lastPrice,
 			Vol24h: volume,
-		})
+		}
 
-		p.tickersMap = syncMap
+		p.tickers = syncMap
 
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.NoError(t, err)
@@ -40,20 +39,20 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 		lastPriceLuna := "41.35000000"
 		volume := "2396974.02000000"
 
-		syncMap := &sync.Map{}
-		syncMap.Store("ATOM-USDT", OkxTickerPair{
+		syncMap := map[string]OkxTickerPair{}
+		syncMap["ATOM-USDT"] = OkxTickerPair{
 			InstId: "ATOM-USDT",
 			Last:   lastPriceAtom,
 			Vol24h: volume,
-		})
-		syncMap.Store("LUNA-USDT", OkxTickerPair{
+		}
+
+		syncMap["LUNA-USDT"] = OkxTickerPair{
 			InstId: "LUNA-USDT",
 			Last:   lastPriceLuna,
 			Vol24h: volume,
-		})
+		}
 
-		p.tickersMap = syncMap
-
+		p.tickers = syncMap
 		prices, err := p.GetTickerPrices(
 			types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 			types.CurrencyPair{Base: "LUNA", Quote: "USDT"},
@@ -69,7 +68,7 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
-		require.Equal(t, "failed to get FOO-BAR - ticker not found in map FOO-BAR", err.Error())
+		require.Equal(t, "failed to get FOO-BAR", err.Error())
 		require.Nil(t, prices)
 	})
 }
