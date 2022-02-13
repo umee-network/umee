@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -8,6 +9,12 @@ import (
 )
 
 func TestKeyring_Validate(t *testing.T) {
+	os.Setenv(config.EnvVariableBackend, "test")
+	os.Setenv(config.EnvVariableDir, "dir")
+	os.Setenv(config.EnvVariablePass, "pass")
+
+	envKeyring, err := config.InitKeyring()
+	require.NoError(t, err)
 	testCases := []struct {
 		name      string
 		keyring   config.Keyring
@@ -43,6 +50,11 @@ func TestKeyring_Validate(t *testing.T) {
 				"dir",
 				"pass",
 			),
+			false,
+		},
+		{
+			"using environment variables",
+			envKeyring,
 			false,
 		},
 	}
