@@ -52,8 +52,8 @@ func (Keyring) GetStdInput() (Keyring, error) {
 func InitKeyring() (Keyring, error) {
 	keyring := NewKeyring(
 		os.Getenv(EnvVariableBackend),
-		os.Getenv(EnvVariablePass),
 		os.Getenv(EnvVariableDir),
+		os.Getenv(EnvVariablePass),
 	)
 
 	if keyring.Validate() != nil {
