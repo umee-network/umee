@@ -29,7 +29,6 @@ validator = "umeevaloper12tysz6mzrawenca2t3t7ltym4hfjj8a5upsn2k"
 [keyring]
 backend = "test"
 dir = "/Users/username/.umee"
-pass = "keyringPassword"
 
 [rpc]
 grpc_endpoint = "localhost:9090"
