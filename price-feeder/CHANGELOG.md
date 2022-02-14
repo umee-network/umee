@@ -47,6 +47,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+<<<<<<< HEAD
+=======
+- [#540](https://github.com/umee-network/umee/pull/536) Use environment vars / standard input for the keyring password instead of the config file.
+- [#522](https://github.com/umee-network/umee/pull/522) Add Okx as a provider.
+>>>>>>> 1f8dd4b (feat: use environment variables / stdinput for keyring pass (#540))
 - [#536](https://github.com/umee-network/umee/pull/536) Force a minimum of three providers per asset.
 - [#502](https://github.com/umee-network/umee/pull/502) Faulty provider detection: discard prices that are not within 2𝜎 of others.
 
