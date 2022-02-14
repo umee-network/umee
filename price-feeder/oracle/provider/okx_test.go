@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	ctx := context.TODO()
-	p, err := NewOkxProvider(ctx, types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewOkxProvider(ctx, zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {

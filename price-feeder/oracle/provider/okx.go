@@ -10,6 +10,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
+
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -29,6 +31,7 @@ type (
 	OkxProvider struct {
 		wsURL            url.URL
 		wsClient         *websocket.Conn
+		logger           zerolog.Logger
 		mu               sync.Mutex
 		tickers          map[string]OkxTickerPair // InstId => OkxTickerPair
 		msReadNewMessage uint16
@@ -62,7 +65,7 @@ type (
 )
 
 // NewOkxProvider creates a new OkxProvider
-func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvider, error) {
+func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*OkxProvider, error) {
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   okxHost,
@@ -77,6 +80,7 @@ func NewOkxProvider(ctx context.Context, pairs ...types.CurrencyPair) (*OkxProvi
 	provider := &OkxProvider{
 		wsURL:            wsURL,
 		wsClient:         wsConn,
+		logger:           logger.With().Str("module", "oracle").Logger(),
 		tickers:          map[string]OkxTickerPair{},
 		msReadNewMessage: msReadNewMessage,
 	}
@@ -126,6 +130,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
+				p.logger.Debug().Msg(fmt.Sprintf("Okx provider could not read message error: %+v - bytes: %s", err, bz))
 				continue
 			}
 			p.messageReceived(messageType, bz)
@@ -141,6 +146,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	var tickerRespWS OkxTickerResponse
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
 		// sometimes it returns other messages which are not tickerResponses
+		p.logger.Debug().Msg(fmt.Sprintf("Okx provider could not unmarshal error: %+v - bytes: %s", err, bz))
 		return
 	}
 
