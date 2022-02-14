@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,4 +40,18 @@ func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 		Timeout:       timeout,
 		CheckRedirect: preventRedirect,
 	}
+}
+
+func toTickerPrice(provider, symbol, lastPrice, volume string) (TickerPrice, error) {
+	price, err := sdk.NewDecFromStr(lastPrice)
+	if err != nil {
+		return TickerPrice{}, fmt.Errorf("failed to parse %s price (%s) for %s", provider, lastPrice, symbol)
+	}
+
+	volumeDec, err := sdk.NewDecFromStr(volume)
+	if err != nil {
+		return TickerPrice{}, fmt.Errorf("failed to parse %s volume (%s) for %s", provider, volume, symbol)
+	}
+
+	return TickerPrice{Price: price, Volume: volumeDec}, nil
 }

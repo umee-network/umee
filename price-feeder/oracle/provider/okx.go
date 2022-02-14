@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
@@ -50,16 +49,16 @@ type (
 		Data []OkxTickerPair `json:"data"`
 	}
 
-	// SubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
-	SubscriptionTopic struct {
+	// OkxSubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
+	OkxSubscriptionTopic struct {
 		Channel string `json:"channel"` // Channel name ex.: tickers
 		InstId  string `json:"instId"`  // Instrument ID ex.: BTC-USDT
 	}
 
-	// SubscriptionMsg Message to subscribe/unsubscribe with N Topics
-	SubscriptionMsg struct {
-		Op   string              `json:"op"` // Operation ex.: subscribe
-		Args []SubscriptionTopic `json:"args"`
+	// OkxSubscriptionMsg Message to subscribe/unsubscribe with N Topics
+	OkxSubscriptionMsg struct {
+		Op   string                 `json:"op"` // Operation ex.: subscribe
+		Args []OkxSubscriptionTopic `json:"args"`
 	}
 )
 
@@ -162,29 +161,19 @@ func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 
 // subscribeTickers subscribe to all currency pairs
 func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	topics := make([]SubscriptionTopic, len(cps))
+	topics := make([]OkxSubscriptionTopic, len(cps))
 
 	for i, cp := range cps {
 		instId := getInstrumentId(cp)
-		topics[i] = newSubscriptionTopic(instId)
+		topics[i] = newOkxSubscriptionTopic(instId)
 	}
 
-	subsMsg := newSubscriptionMsg(topics...)
+	subsMsg := newOkxSubscriptionMsg(topics...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-func (tickerPair OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	price, err := sdk.NewDecFromStr(tickerPair.Last)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Okx price (%s) for %s", tickerPair.Last, tickerPair.InstId)
-	}
-
-	volume, err := sdk.NewDecFromStr(tickerPair.Vol24h)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Okx volume (%s) for %s", tickerPair.Vol24h, tickerPair.InstId)
-	}
-
-	return TickerPrice{Price: price, Volume: volume}, nil
+func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
+	return toTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
 }
 
 // getInstrumentId returns the expected pair instrument ID for Okx ex.: BTC-USDT
@@ -192,17 +181,17 @@ func getInstrumentId(pair types.CurrencyPair) string {
 	return pair.Base + "-" + pair.Quote
 }
 
-// newSubscriptionTopic returns a new subscription topic
-func newSubscriptionTopic(instId string) SubscriptionTopic {
-	return SubscriptionTopic{
+// newOkxSubscriptionTopic returns a new subscription topic
+func newOkxSubscriptionTopic(instId string) OkxSubscriptionTopic {
+	return OkxSubscriptionTopic{
 		Channel: "tickers",
 		InstId:  instId,
 	}
 }
 
-// newSubscriptionMsg returns a new subscription Msg
-func newSubscriptionMsg(args ...SubscriptionTopic) SubscriptionMsg {
-	return SubscriptionMsg{
+// newOkxSubscriptionMsg returns a new subscription Msg for Okx
+func newOkxSubscriptionMsg(args ...OkxSubscriptionTopic) OkxSubscriptionMsg {
+	return OkxSubscriptionMsg{
 		Op:   "subscribe",
 		Args: args,
 	}
