@@ -33,7 +33,6 @@ func TestValidate(t *testing.T) {
 				},
 				Keyring: config.Keyring{
 					Backend: "test",
-					Pass:    "keyringPassword",
 					Dir:     "/Users/username/.umee",
 				},
 				RPC: config.RPC{
