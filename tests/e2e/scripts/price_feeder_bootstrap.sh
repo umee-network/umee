@@ -35,6 +35,10 @@ address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
 chain_id = "umee-local-beta-testnet"
 validator = '$UMEE_E2E_PRICE_FEEDER_VALIDATOR'
 
+[keyring]
+backend = "test"
+dir = '$UMEE_E2E_UMEE_VAL_KEY_DIR'
+
 [rpc]
 grpc_endpoint = 'tcp://$UMEE_E2E_UMEE_VAL_HOST:9090'
 rpc_timeout = "100ms"
