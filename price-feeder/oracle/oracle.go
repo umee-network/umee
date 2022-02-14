@@ -279,7 +279,7 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 	if !ok {
 		switch providerName {
 		case config.ProviderBinance:
-			binanceProvider, err := provider.NewBinanceProvider(ctx, o.logger, o.providerPairs[config.ProviderOkx]...)
+			binanceProvider, err := provider.NewBinanceProvider(ctx, o.logger, o.providerPairs[config.ProviderBinance]...)
 			if err != nil {
 				return nil, err
 			}
