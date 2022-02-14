@@ -47,8 +47,7 @@ type (
 	// OkxTickerResponse defines the response structure of a Okx ticker
 	// request.
 	OkxTickerResponse struct {
-		Data []OkxTickerPair   `json:"data"`
-		Arg  SubscriptionTopic `json:"arg"`
+		Data []OkxTickerPair `json:"data"`
 	}
 
 	// SubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
