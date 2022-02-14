@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -117,7 +118,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().Error(ots.oracle.SetPrices(acceptList))
+	ots.Require().Error(ots.oracle.SetPrices(context.TODO(), acceptList))
 	ots.Require().Empty(ots.oracle.GetPrices())
 
 	// use a mock provider to provide prices for the configured exchange pairs
@@ -140,7 +141,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
@@ -166,7 +167,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
@@ -191,7 +192,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
@@ -216,7 +217,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 1)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])

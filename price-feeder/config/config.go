@@ -22,6 +22,7 @@ const (
 	ProviderBinance = "binance"
 	ProviderOsmosis = "osmosis"
 	ProviderHuobi   = "huobi"
+	ProviderOkx     = "okx"
 	ProviderMock    = "mock"
 )
 
@@ -37,6 +38,7 @@ var (
 		ProviderKraken:  {},
 		ProviderBinance: {},
 		ProviderOsmosis: {},
+		ProviderOkx:     {},
 		ProviderHuobi:   {},
 		ProviderMock:    {},
 	}
