@@ -35,8 +35,8 @@ The list of current supported providers:
 
 The `price-feeder` tool runs off of a single configuration file. This configuration
 file defines what exchange rates to fetch and what providers to get them from.
-In addition, it defines the oracle's feeder account information.
-The keyring is defined via environment variables or user input.
+In addition, it defines the oracle's keyring and feeder account information.
+The keyring's password is defined via environment variables or user input.
 More information on the keyring can be found [here](#keyring)
 Please see the [example configuration](price-feeder.example.toml) for more details.
 
@@ -86,6 +86,11 @@ vote messages using a volume-weighted average price (VWAP).
 The `account` section contains the oracle's feeder and validator account information.
 These are used to sign and populate data in pre-vote and vote oracle messages.
 
+### `keyring`
+
+The `keyring` section contains Keyring related material used to fetch the key pair
+associated with the oracle account that signs pre-vote and vote oracle messages.
+
 ### `rpc`
 
 The `rpc` section contains the Tendermint and Cosmos application gRPC endpoints.
@@ -98,13 +103,13 @@ Our keyring must be set up to sign transactions before running the price feeder.
 Additional info on the different keyring modes is available [here](https://docs.cosmos.network/master/run-node/keyring.html).
 **Please note that the `test` and `memory` modes are only for testing purposes.**
 **Do not use these modes for running the price feeder against mainnet.**
+
 ### Setup
 
-You may use these environment variables to set up our keyring : `PRICE_FEEDER_BACKEND`, `PRICE_FEEDER_DIR`, and `PRICE_FEEDER_PASS`.
+The keyring `dir` and `backend` are defined in config file.
+You may use the `PRICE_FEEDER_PASS` environment variable to set up the keyring password.
 
 Ex :
-`export PRICE_FEEDER_BACKEND=test`
-`export PRICE_FEEDER_DIR=/Users/username/.umee`
 `export PRICE_FEEDER_PASS=keyringPassword`
 
-If these environment variables are not set, the price feeder will prompt the user for input.
+If this environment variable is not set, the price feeder will prompt the user for input.

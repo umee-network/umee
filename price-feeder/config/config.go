@@ -47,6 +47,7 @@ type (
 	Config struct {
 		Server        Server         `toml:"server"`
 		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
 		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
 		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
 		Telemetry     Telemetry      `toml:"telemetry"`
@@ -76,6 +77,12 @@ type (
 		ChainID   string `toml:"chain_id" validate:"required"`
 		Address   string `toml:"address" validate:"required"`
 		Validator string `toml:"validator" validate:"required"`
+	}
+
+	// Keyring defines the required Umee keyring configuration.
+	Keyring struct {
+		Backend string `toml:"backend" validate:"required"`
+		Dir     string `toml:"dir" validate:"required"`
 	}
 
 	// RPC defines RPC configuration of both the Umee gRPC and Tendermint nodes.

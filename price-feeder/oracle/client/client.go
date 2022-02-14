@@ -22,7 +22,6 @@ import (
 
 	umeeappbeta "github.com/umee-network/umee/app/beta"
 	umeeparams "github.com/umee-network/umee/app/params"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
@@ -56,7 +55,9 @@ type (
 func NewOracleClient(
 	logger zerolog.Logger,
 	chainID string,
-	keyring config.Keyring,
+	keyringBackend string,
+	keyringDir string,
+	keyringPass string,
 	tmRPC string,
 	rpcTimeout time.Duration,
 	oracleAddrString string,
@@ -72,9 +73,9 @@ func NewOracleClient(
 	return OracleClient{
 		Logger:              logger.With().Str("module", "oracle_client").Logger(),
 		ChainID:             chainID,
-		KeyringBackend:      keyring.Backend,
-		KeyringDir:          keyring.Dir,
-		KeyringPass:         keyring.Pass,
+		KeyringBackend:      keyringBackend,
+		KeyringDir:          keyringDir,
+		KeyringPass:         keyringPass,
 		TMRPC:               tmRPC,
 		RPCTimeout:          rpcTimeout,
 		OracleAddr:          oracleAddr,

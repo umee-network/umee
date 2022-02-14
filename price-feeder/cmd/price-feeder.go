@@ -29,6 +29,8 @@ const (
 
 	flagLogLevel  = "log-level"
 	flagLogFormat = "log-format"
+
+	envVariablePass = "PRICE_FEEDER_PASS"
 )
 
 var rootCmd = &cobra.Command{
@@ -112,8 +114,8 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
-	// Set up keyring
-	keyring, err := config.InitKeyring()
+	// Gather pass via env variable || std input
+	keyringPass, err := getKeyringPassword()
 	if err != nil {
 		return err
 	}
@@ -121,7 +123,9 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	oracleClient, err := client.NewOracleClient(
 		logger,
 		cfg.Account.ChainID,
-		keyring,
+		cfg.Keyring.Backend,
+		cfg.Keyring.Dir,
+		keyringPass,
 		cfg.RPC.TMRPCEndpoint,
 		timeout,
 		cfg.Account.Address,
@@ -152,6 +156,18 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	// Block main process until all spawned goroutines have gracefully exited and
 	// signal has been captured in the main process or if an error occurs.
 	return g.Wait()
+}
+
+func getKeyringPassword() (string, error) {
+	pass := os.Getenv(envVariablePass)
+	if pass == "" {
+		fmt.Printf("Enter keyring password: ")
+		fmt.Scanf("%s", &pass)
+		if pass == "" {
+			return "", fmt.Errorf("keyring password is invalid")
+		}
+	}
+	return pass, nil
 }
 
 // trapSignal will listen for any OS signal and invoke Done on the main
