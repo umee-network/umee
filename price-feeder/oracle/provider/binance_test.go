@@ -11,7 +11,7 @@ import (
 )
 
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {
-	p, err := NewBinanceProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewBinanceProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {

@@ -38,11 +38,16 @@ type (
 	}
 
 	// BinanceTicker defines the response structure of a Binance ticker
-	// request.
+	// request. https://pkg.go.dev/encoding/json#Unmarshal
+	// Unmarshal matches incoming object keys to the keys
+	// used by Marshal (either the struct field name or its tag),
+	// preferring an exact match but also accepting a case-insensitive match
+	// C is not used, but it avoids to implement specific UnmarshalJSON
 	BinanceTicker struct {
 		Symbol    string `json:"s"` // Symbol ex.: BTCUSDT
 		LastPrice string `json:"c"` // Last price ex.: 0.0025
 		Volume    string `json:"v"` // Total traded base asset volume ex.: 1000
+		C         uint64 `json:"C"` // Statistics close time
 	}
 
 	BinanceSubscribeMsg struct {
@@ -114,6 +119,10 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
 		// sometimes it returns other messages which are not tickerResponses
 		p.logger.Err(err).Msg("Binance provider could not unmarshal")
+		return
+	}
+
+	if len(tickerRespWS.LastPrice) == 0 {
 		return
 	}
 
