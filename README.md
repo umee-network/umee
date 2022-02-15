@@ -37,7 +37,7 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Active Networks
 
-### Main Net
+### Mainnet
 
 [umee-1](networks/umee-1)
 
