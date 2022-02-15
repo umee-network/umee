@@ -37,13 +37,13 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Active Networks
 
-### Public
+### Mainnet
 
-- [umee-betanet-v5](https://github.com/umee-network/testnets/tree/main/networks/umee-betanet-v5)
+[umee-1](networks/umee-1)
 
 ### Private
 
-- [umee-alpha-mainnet-2](https://github.com/umee-network/testnets/tree/main/networks/umee-alpha-mainnet-2)
+- [umee-alpha-mainnet-2](networks/umee-alpha-mainnet-2)
 
 ## Install
 
