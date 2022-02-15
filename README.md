@@ -45,7 +45,7 @@ Umee will allow a multitude of decentralized debt products.
 
 - [umee-betanet-v5](networks/umee-betanet-v5)
 
-### Private Test
+### Private
 
 - [umee-alpha-mainnet-2](networks/umee-alpha-mainnet-2)
 
