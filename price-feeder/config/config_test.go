@@ -47,7 +47,7 @@ func TestValidate(t *testing.T) {
 					EnableHostnameLabel: true,
 					EnableServiceLabel:  true,
 					GlobalLabels:        make([][]string, 1),
-					Type:                "genesis",
+					Type:                "generic",
 				},
 				GasAdjustment: 1.5,
 			},
