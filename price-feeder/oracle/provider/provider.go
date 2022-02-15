@@ -42,7 +42,7 @@ func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	}
 }
 
-func toTickerPrice(provider, symbol, lastPrice, volume string) (TickerPrice, error) {
+func newTickerPrice(provider, symbol, lastPrice, volume string) (TickerPrice, error) {
 	price, err := sdk.NewDecFromStr(lastPrice)
 	if err != nil {
 		return TickerPrice{}, fmt.Errorf("failed to parse %s price (%s) for %s", provider, lastPrice, symbol)

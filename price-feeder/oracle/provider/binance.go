@@ -15,10 +15,8 @@ import (
 )
 
 const (
-	binanceHost           = "stream.binance.com:9443"
-	binancePath           = "/ws/umeestream"
-	binanceBaseURL        = "https://api.binance.com"
-	binanceTickerEndpoint = "/api/v3/ticker/24hr"
+	binanceHost = "stream.binance.com:9443"
+	binancePath = "/ws/umeestream"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -117,7 +115,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 
 	var tickerRespWS BinanceTicker
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
-		// sometimes it returns other messages which are not tickerResponses
+		// sometimes it returns other messages which are not ticker responses
 		p.logger.Err(err).Msg("Binance provider could not unmarshal")
 		return
 	}
@@ -136,7 +134,7 @@ func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return toTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
 // subscribeTickers subscribe to all currency pairs

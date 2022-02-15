@@ -173,7 +173,7 @@ func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return toTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
+	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
 }
 
 // getInstrumentId returns the expected pair instrument ID for Okx ex.: BTC-USDT
