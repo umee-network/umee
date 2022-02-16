@@ -8,7 +8,6 @@ import (
 
 	bridgecmd "github.com/Gravity-Bridge/Gravity-Bridge/module/cmd/gravity/cmd"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
@@ -136,7 +135,7 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 		),
 		bridgeGenTxCmd,
 		tmcli.NewCompletionCmd(rootCmd, true),
-		debug.Cmd(),
+		debugCmd(),
 	)
 
 	server.AddCommands(rootCmd, app.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
