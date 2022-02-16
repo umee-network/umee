@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	binanceHost = "stream.binance.com:9443"
-	binancePath = "/ws/umeestream"
+	binanceHost          = "stream.binance.com:9443"
+	binancePath          = "/ws/umeestream"
+	binanceReconnectTime = time.Hour * 23
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -27,11 +28,13 @@ type (
 	//
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#aggregate-trade-streams
 	BinanceProvider struct {
-		wsURL    url.URL
-		wsClient *websocket.Conn
-		logger   zerolog.Logger
-		mu       sync.Mutex
-		tickers  map[string]BinanceTicker // Symbol => BinanceTicker
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mu              sync.Mutex
+		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
+		reconnectTimer  *time.Ticker
+		subscribedPairs []types.CurrencyPair
 	}
 
 	// BinanceTicker defines the response structure of a Binance ticker
@@ -67,15 +70,17 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 
 	provider := &BinanceProvider{
-		wsURL:    wsURL,
-		wsClient: wsConn,
-		logger:   logger.With().Str("module", "oracle").Logger(),
-		tickers:  map[string]BinanceTicker{},
+		wsURL:          wsURL,
+		wsClient:       wsConn,
+		logger:         logger.With().Str("module", "oracle").Logger(),
+		tickers:        map[string]BinanceTicker{},
+		reconnectTimer: time.NewTicker(binanceReconnectTime),
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
+	provider.subscribedPairs = pairs
 
 	go provider.handleReceivedTickers(ctx)
 
@@ -161,9 +166,38 @@ func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
 				continue
 			}
 
+			if len(bz) == 0 {
+				continue
+			}
+
 			p.messageReceived(messageType, bz)
+
+		case <-p.reconnectTimer.C:
+			if err := p.reconnect(); err != nil {
+				p.logger.Err(err).Msg("binance provider error reconnecting")
+			}
 		}
 	}
+}
+
+// reconnect closes the last WS connection and create a new one
+// A single connection to stream.binance.com is only valid for 24 hours;
+// expect to be disconnected at the 24 hour mark
+// The websocket server will send a ping frame every 3 minutes.
+// If the websocket server does not receive a pong frame back from
+// the connection within a 10 minute period, the connection will be disconnected.
+// Unsolicited pong frames are allowed.
+func (p *BinanceProvider) reconnect() error {
+	p.wsClient.Close()
+
+	p.logger.Debug().Msg("binance reconnecting websocket")
+	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	if err != nil {
+		return fmt.Errorf("error reconnect to binance websocket: %w", err)
+	}
+	p.wsClient = wsConn
+
+	return p.subscribeTickers(p.subscribedPairs...)
 }
 
 // newSubscriptionMsg returns a new subscription Msg

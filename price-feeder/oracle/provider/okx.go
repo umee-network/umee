@@ -193,6 +193,7 @@ func (p *OkxProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(okxPingCheck)
 }
 
+// reconnect closes the last WS connection and create a new one
 // If there’s a network problem, the system will automatically disable the connection.
 // The connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds.
