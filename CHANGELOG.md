@@ -45,6 +45,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [#556](https://github.com/umee-network/umee/pull/556) Refactor the `debug addr` command to convert addresses between any Bech32 HRP.
+
 ## [v1.0.1](https://github.com/umee-network/umee/releases/tag/v1.0.1) - 2022-02-07
 
 ### Bug Fixes
