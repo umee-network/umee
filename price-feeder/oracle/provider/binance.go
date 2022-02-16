@@ -53,7 +53,7 @@ type (
 	BinanceSubscribeMsg struct {
 		Method string   `json:"method"`
 		Params []string `json:"params"`
-		Id     uint16   `json:"id"`
+		ID     uint16   `json:"id"`
 	}
 )
 
@@ -153,6 +153,9 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
+	reconnectTicker := time.NewTicker(binanceReconnectTime)
+	defer reconnectTicker.Stop()
+	
 	for {
 		select {
 		case <-ctx.Done():
