@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	okxHost          = "ws.okx.com:8443"
-	okxPath          = "/ws/v5/public"
-	msReadNewMessage = 50
+	okxHost      = "ws.okx.com:8443"
+	okxPath      = "/ws/v5/public"
+	okxPingCheck = time.Second * 28 // should be < 30
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -28,12 +28,13 @@ type (
 	//
 	// REF: https://www.okx.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
 	OkxProvider struct {
-		wsURL            url.URL
-		wsClient         *websocket.Conn
-		logger           zerolog.Logger
-		mu               sync.Mutex
-		tickers          map[string]OkxTickerPair // InstId => OkxTickerPair
-		msReadNewMessage uint16
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mu              sync.Mutex
+		tickers         map[string]OkxTickerPair // InstId => OkxTickerPair
+		reconnectTimer  *time.Ticker
+		subscribedPairs []types.CurrencyPair
 	}
 
 	// OkxTickerPair defines a ticker pair of Okx
@@ -76,16 +77,18 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 
 	provider := &OkxProvider{
-		wsURL:            wsURL,
-		wsClient:         wsConn,
-		logger:           logger.With().Str("module", "oracle").Logger(),
-		tickers:          map[string]OkxTickerPair{},
-		msReadNewMessage: msReadNewMessage,
+		wsURL:          wsURL,
+		wsClient:       wsConn,
+		logger:         logger.With().Str("module", "oracle").Logger(),
+		tickers:        map[string]OkxTickerPair{},
+		reconnectTimer: time.NewTicker(okxPingCheck),
 	}
+	provider.wsClient.SetPongHandler(provider.pongHandler)
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
+	provider.subscribedPairs = pairs
 
 	go provider.handleReceivedTickers(ctx)
 
@@ -123,15 +126,28 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
+		case <-time.After(defaultReadNewMessage):
 			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
 				p.logger.Err(err).Msg("Okx provider could not read message")
+				if err := p.ping(); err != nil { // send ping to check connection
+					p.logger.Err(err).Msg("Okx provider could not send ping")
+				}
 				continue
 			}
+
+			if len(bz) == 0 {
+				continue
+			}
+
 			p.messageReceived(messageType, bz)
+
+		case <-p.reconnectTimer.C: // reseted by the pongHandler
+			if err := p.reconnect(); err != nil {
+				p.logger.Err(err).Msg("Okx provider error reconnecting")
+			}
 		}
 	}
 }
@@ -148,6 +164,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
+	p.resetReconnectTimer()
 	for _, tickerPair := range tickerRespWS.Data {
 		p.setTickerPair(tickerPair)
 	}
@@ -170,6 +187,41 @@ func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 
 	subsMsg := newOkxSubscriptionMsg(topics...)
 	return p.wsClient.WriteJSON(subsMsg)
+}
+
+func (p *OkxProvider) resetReconnectTimer() {
+	p.reconnectTimer.Reset(okxPingCheck)
+}
+
+// If there’s a network problem, the system will automatically disable the connection.
+// The connection will break automatically if the subscription is not established or
+// data has not been pushed for more than 30 seconds.
+// To keep the connection stable:
+// 1. Set a timer of N seconds whenever a response message is received, where N is less than 30.
+// 2. If the timer is triggered, which means that no new message is received within N seconds, send the String 'ping'.
+// 3. Expect a 'pong' as a response. If the response message is not received within N seconds, please raise an error or reconnect.
+func (p *OkxProvider) reconnect() error {
+	p.wsClient.Close()
+
+	p.logger.Debug().Msg("Okx reconnecting websocket")
+	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	if err != nil {
+		return fmt.Errorf("error reconnect to Okx websocket: %w", err)
+	}
+	wsConn.SetPongHandler(p.pongHandler)
+	p.wsClient = wsConn
+
+	return p.subscribeTickers(p.subscribedPairs...)
+}
+
+// ping to check websocket connection
+func (p *OkxProvider) ping() error {
+	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+}
+
+func (p *OkxProvider) pongHandler(appData string) error {
+	p.resetReconnectTimer()
+	return nil
 }
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {

@@ -27,12 +27,11 @@ type (
 	//
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#aggregate-trade-streams
 	BinanceProvider struct {
-		wsURL            url.URL
-		wsClient         *websocket.Conn
-		logger           zerolog.Logger
-		mu               sync.Mutex
-		tickers          map[string]BinanceTicker // Symbol => BinanceTicker
-		msReadNewMessage uint16
+		wsURL    url.URL
+		wsClient *websocket.Conn
+		logger   zerolog.Logger
+		mu       sync.Mutex
+		tickers  map[string]BinanceTicker // Symbol => BinanceTicker
 	}
 
 	// BinanceTicker defines the response structure of a Binance ticker
@@ -68,11 +67,10 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 
 	provider := &BinanceProvider{
-		wsURL:            wsURL,
-		wsClient:         wsConn,
-		logger:           logger.With().Str("module", "oracle").Logger(),
-		tickers:          map[string]BinanceTicker{},
-		msReadNewMessage: msReadNewMessage,
+		wsURL:    wsURL,
+		wsClient: wsConn,
+		logger:   logger.With().Str("module", "oracle").Logger(),
+		tickers:  map[string]BinanceTicker{},
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
@@ -154,7 +152,7 @@ func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
+		case <-time.After(defaultReadNewMessage):
 			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
