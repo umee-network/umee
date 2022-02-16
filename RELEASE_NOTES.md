@@ -1,6 +1,8 @@
 <!-- markdownlint-disable MD013 -->
+<!-- markdownlint-disable MD024 -->
+
 # Release Notes
 
-## Bug Fixes
+## Features
 
-- [#517](https://github.com/umee-network/umee/pull/517) Fix makefile `build` and `install` targets to support Ledger devices.
+- [#556](https://github.com/umee-network/umee/pull/556) Refactor the `debug addr` command to convert addresses between any Bech32 HRP.
