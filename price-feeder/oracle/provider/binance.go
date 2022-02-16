@@ -17,7 +17,7 @@ import (
 const (
 	binanceHost          = "stream.binance.com:9443"
 	binancePath          = "/ws/umeestream"
-	binanceReconnectTime = time.Hour * 23
+	binanceReconnectTime = time.Hour * 23 //  should be < 24
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -26,19 +26,18 @@ type (
 	// BinanceProvider defines an Oracle provider implemented by the Binance public
 	// API.
 	//
-	// REF: https://binance-docs.github.io/apidocs/spot/en/#aggregate-trade-streams
+	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
 	BinanceProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mu              sync.Mutex
 		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
-		reconnectTimer  *time.Ticker
 		subscribedPairs []types.CurrencyPair
 	}
 
-	// BinanceTicker defines the response structure of a Binance ticker
-	// request. https://pkg.go.dev/encoding/json#Unmarshal
+	// BinanceTicker ticker price response
+	// https://pkg.go.dev/encoding/json#Unmarshal
 	// Unmarshal matches incoming object keys to the keys
 	// used by Marshal (either the struct field name or its tag),
 	// preferring an exact match but also accepting a case-insensitive match
@@ -50,10 +49,11 @@ type (
 		C         uint64 `json:"C"` // Statistics close time
 	}
 
+	// BinanceSubscribeMsg Msg to subscribe all the tickers channels
 	BinanceSubscribeMsg struct {
-		Method string   `json:"method"`
-		Params []string `json:"params"`
-		ID     uint16   `json:"id"`
+		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
+		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
+		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 )
 
@@ -70,11 +70,10 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 
 	provider := &BinanceProvider{
-		wsURL:          wsURL,
-		wsClient:       wsConn,
-		logger:         logger.With().Str("module", "oracle").Logger(),
-		tickers:        map[string]BinanceTicker{},
-		reconnectTimer: time.NewTicker(binanceReconnectTime),
+		wsURL:    wsURL,
+		wsClient: wsConn,
+		logger:   logger.With().Str("module", "oracle").Logger(),
+		tickers:  map[string]BinanceTicker{},
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
@@ -145,7 +144,7 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	params := make([]string, len(cps))
 
 	for i, cp := range cps {
-		params[i] = strings.ToLower(cp.Base + cp.Quote + "@ticker")
+		params[i] = strings.ToLower(cp.String() + "@ticker")
 	}
 
 	subsMsg := newBinanceSubscriptionMsg(params...)
@@ -155,7 +154,7 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
 	reconnectTicker := time.NewTicker(binanceReconnectTime)
 	defer reconnectTicker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -175,7 +174,7 @@ func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
 
 			p.messageReceived(messageType, bz)
 
-		case <-p.reconnectTimer.C:
+		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("binance provider error reconnecting")
 			}
@@ -208,6 +207,6 @@ func newBinanceSubscriptionMsg(params ...string) BinanceSubscribeMsg {
 	return BinanceSubscribeMsg{
 		Method: "SUBSCRIBE",
 		Params: params,
-		Id:     1,
+		ID:     1,
 	}
 }
