@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD013 -->
+<!-- markdownlint-disable MD024 -->
 
 <!--
 Changelog Guiding Principles:

@@ -54,14 +54,14 @@ $ %s debug addr cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 				err error
 			)
 
-			bech32HRP, err := cmd.Flags().GetString(flagBech32HRP)
-			if err != nil {
-				return err
-			}
-
-			// try hex then bech32
+			// try HEX then Bech32
 			bz, err = hex.DecodeString(addrStr)
 			if err != nil {
+				bech32HRP, err := cmd.Flags().GetString(flagBech32HRP)
+				if err != nil {
+					return err
+				}
+
 				bz, err = sdk.GetFromBech32(addrStr, bech32HRP)
 				if err != nil {
 					return errors.New("failed to decode address as HEX and Bech32")
@@ -74,7 +74,7 @@ $ %s debug addr cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 
 			cmd.Printf("Address (HEX): %X\n", bz)
 			cmd.Printf("Address Bech32 Account: %s\n", sdk.AccAddress(bz))
-			cmd.Printf("Address Bech32 Validator: %s\n", sdk.ValAddress(bz))
+			cmd.Printf("Address Bech32 Validator Operator: %s\n", sdk.ValAddress(bz))
 
 			return nil
 		},
