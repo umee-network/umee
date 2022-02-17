@@ -132,7 +132,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 			if err != nil {
 				// if some error occurs continue to try to read the next message
 				p.logger.Err(err).Msg("Okx provider could not read message")
-				if err := p.ping(); err != nil { // send ping to check connection
+				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("Okx provider could not send ping")
 				}
 				continue
@@ -144,7 +144,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 
 			p.messageReceived(messageType, bz)
 
-		case <-p.reconnectTimer.C: // reseted by the pongHandler
+		case <-p.reconnectTimer.C: // reset by the pongHandler
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("Okx provider error reconnecting")
 			}
@@ -193,7 +193,7 @@ func (p *OkxProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(okxPingCheck)
 }
 
-// reconnect closes the last WS connection and create a new one
+// reconnect closes the last WS connection and creates a new one.
 // If there’s a network problem, the system will automatically disable the connection.
 // The connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds.
@@ -207,7 +207,7 @@ func (p *OkxProvider) reconnect() error {
 	p.logger.Debug().Msg("Okx reconnecting websocket")
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
-		return fmt.Errorf("error reconnect to Okx websocket: %w", err)
+		return fmt.Errorf("error reconnecting to Okx websocket: %w", err)
 	}
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn

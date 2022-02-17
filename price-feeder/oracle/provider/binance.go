@@ -50,7 +50,7 @@ type (
 	}
 
 	// BinanceSubscribeMsg Msg to subscribe all the tickers channels
-	BinanceSubscribeMsg struct {
+	BinanceSubscriptionMsg struct {
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
 		ID     uint16   `json:"id"`     // identify messages going back and forth
@@ -115,7 +115,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerRespWS BinanceTicker
+	var tickerResp BinanceTicker
 	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
 		// sometimes it returns other messages which are not ticker responses
 		p.logger.Err(err).Msg("Binance provider could not unmarshal")
