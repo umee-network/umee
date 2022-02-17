@@ -22,6 +22,7 @@ const (
 	ProviderBinance = "binance"
 	ProviderOsmosis = "osmosis"
 	ProviderHuobi   = "huobi"
+	ProviderOkx     = "okx"
 	ProviderMock    = "mock"
 )
 
@@ -37,6 +38,7 @@ var (
 		ProviderKraken:  {},
 		ProviderBinance: {},
 		ProviderOsmosis: {},
+		ProviderOkx:     {},
 		ProviderHuobi:   {},
 		ProviderMock:    {},
 	}
@@ -82,7 +84,6 @@ type (
 	// Keyring defines the required Umee keyring configuration.
 	Keyring struct {
 		Backend string `toml:"backend" validate:"required"`
-		Pass    string `toml:"pass"`
 		Dir     string `toml:"dir" validate:"required"`
 	}
 
@@ -96,37 +97,52 @@ type (
 	// Telemetry defines the configuration options for application telemetry.
 	Telemetry struct {
 		// Prefixed with keys to separate services
-		ServiceName string `toml:"service_name" validate:"required"`
+		ServiceName string `toml:"service_name"`
 
 		// Enabled enables the application telemetry functionality. When enabled,
 		// an in-memory sink is also enabled by default. Operators may also enabled
 		// other sinks such as Prometheus.
-		Enabled bool `toml:"enabled" validate:"required"`
+		Enabled bool `toml:"enabled"`
 
 		// Enable prefixing gauge values with hostname
-		EnableHostname bool `toml:"enable_hostname" validate:"required"`
+		EnableHostname bool `toml:"enable_hostname"`
 
 		// Enable adding hostname to labels
-		EnableHostnameLabel bool `toml:"enable_hostname_label" validate:"required"`
+		EnableHostnameLabel bool `toml:"enable_hostname_label"`
 
 		// Enable adding service to labels
-		EnableServiceLabel bool `toml:"enable_service_label" validate:"required"`
+		EnableServiceLabel bool `toml:"enable_service_label"`
 
 		// GlobalLabels defines a global set of name/value label tuples applied to all
 		// metrics emitted using the wrapper functions defined in telemetry package.
 		//
 		// Example:
 		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels" validate:"required"`
+		GlobalLabels [][]string `toml:"global_labels""`
 
 		// Type determines which type of telemetry to use
 		// Valid values are "prometheus" or "generic"
-		Type string `toml:"type" validate:"required"`
+		Type string `toml:"type"`
 	}
 )
 
+// telemetryValidation is custom validation for the Telemetry struct
+func telemetryValidation(sl validator.StructLevel) {
+	tel := sl.Current().Interface().(Telemetry)
+
+	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0 ||
+		len(tel.Type) == 0) {
+		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
+	} else if tel.Enabled &&
+		(len(tel.Type) == 0 ||
+			(tel.Type != "prometheus" && tel.Type != "generic")) {
+		sl.ReportError(tel.Enabled, "type", "Type", "unsupportedTelemetryType", "")
+	}
+}
+
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
+	validate.RegisterStructValidation(telemetryValidation, Telemetry{})
 	return validate.Struct(c)
 }
 
@@ -179,11 +195,6 @@ func ParseConfig(configPath string) (Config, error) {
 		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
-	}
-
-	if len(cfg.Telemetry.Type) == 0 ||
-		(cfg.Telemetry.Type != "prometheus" && cfg.Telemetry.Type != "generic") {
-		return cfg, fmt.Errorf("unsupported telemetry type: %s", cfg.Telemetry.Type)
 	}
 
 	return cfg, cfg.Validate()

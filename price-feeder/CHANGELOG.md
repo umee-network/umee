@@ -47,8 +47,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [#540](https://github.com/umee-network/umee/pull/536) Use environment vars / standard input for the keyring password instead of the config file.
+- [#522](https://github.com/umee-network/umee/pull/522) Add Okx as a provider.
 - [#536](https://github.com/umee-network/umee/pull/536) Force a minimum of three providers per asset.
 - [#502](https://github.com/umee-network/umee/pull/502) Faulty provider detection: discard prices that are not within 2𝜎 of others.
+
+### Bug Fixes
+
+- [#552](https://github.com/umee-network/umee/pull/552) Stop requiring telemetry during config validation.
 
 ## [v0.1.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.0) - 2022-02-07
 

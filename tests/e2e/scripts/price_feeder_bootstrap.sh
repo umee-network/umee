@@ -38,7 +38,6 @@ validator = '$UMEE_E2E_PRICE_FEEDER_VALIDATOR'
 [keyring]
 backend = "test"
 dir = '$UMEE_E2E_UMEE_VAL_KEY_DIR'
-pass = '$UMEE_E2E_UMEE_VAL_KEY_PASS'
 
 [rpc]
 grpc_endpoint = 'tcp://$UMEE_E2E_UMEE_VAL_HOST:9090'

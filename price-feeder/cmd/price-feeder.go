@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	input "github.com/cosmos/cosmos-sdk/client/input"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -29,6 +32,8 @@ const (
 
 	flagLogLevel  = "log-level"
 	flagLogFormat = "log-format"
+
+	envVariablePass = "PRICE_FEEDER_PASS"
 )
 
 var rootCmd = &cobra.Command{
@@ -112,12 +117,18 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
 
+	// Gather pass via env variable || std input
+	keyringPass, err := getKeyringPassword()
+	if err != nil {
+		return err
+	}
+
 	oracleClient, err := client.NewOracleClient(
 		logger,
 		cfg.Account.ChainID,
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
-		cfg.Keyring.Pass,
+		keyringPass,
 		cfg.RPC.TMRPCEndpoint,
 		timeout,
 		cfg.Account.Address,
@@ -148,6 +159,16 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	// Block main process until all spawned goroutines have gracefully exited and
 	// signal has been captured in the main process or if an error occurs.
 	return g.Wait()
+}
+
+func getKeyringPassword() (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	pass := os.Getenv(envVariablePass)
+	if pass == "" {
+		return input.GetString("Enter keyring password", reader)
+	}
+	return pass, nil
 }
 
 // trapSignal will listen for any OS signal and invoke Done on the main

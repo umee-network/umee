@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD013 -->
-![Logo!](assets/umee-small-logo.png)
+![Logo!](assets/umee-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://godoc.org/github.com/umee-network/umee)
@@ -37,13 +37,13 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Active Networks
 
-### Public
+### Mainnet
 
-- [umee-betanet-v5](https://github.com/umee-network/testnets/tree/main/networks/umee-betanet-v5)
+[umee-1](networks/umee-1)
 
 ### Private
 
-- [umee-alpha-mainnet-2](https://github.com/umee-network/testnets/tree/main/networks/umee-alpha-mainnet-2)
+- [umee-alpha-mainnet-2](networks/umee-alpha-mainnet-2)
 
 ## Install
 
