@@ -202,6 +202,8 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 		},
 	}
 
+	// 51 borrowed will be returned from query due to adjusted borrow rounding up
+
 	testCases := []testQuery{
 		{
 			"invalid address",
@@ -223,7 +225,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 50),
+					sdk.NewInt64Coin(app.BondDenom, 51),
 				),
 			},
 		},
@@ -249,11 +251,13 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 50),
+					sdk.NewInt64Coin(app.BondDenom, 51),
 				),
 			},
 		},
 	}
+
+	// 51 will need to be repaid due to adjusted borrow rounding up
 
 	cleanupCommands := []testTransaction{
 		{
@@ -261,7 +265,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				"50uumee",
+				"51uumee",
 			},
 			nil,
 		},
@@ -949,13 +953,15 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 		},
 	}
 
+	// 51 will need to be repaid due to adjusted borrow rounding up
+
 	cleanupCommands := []testTransaction{
 		{
 			"repay",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				"50uumee",
+				"51uumee",
 			},
 			nil,
 		},
@@ -1122,7 +1128,8 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				"50uumee",
+				// 51 will need to be repaid due to adjusted borrow rounding up
+				"51uumee",
 			},
 			nil,
 		},

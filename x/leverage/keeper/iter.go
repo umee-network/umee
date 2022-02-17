@@ -115,7 +115,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		}
 
 		// apply interest scalar
-		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).TruncateInt()
+		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).Ceil().TruncateInt()
 
 		// add to totalBorrowed
 		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
