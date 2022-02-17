@@ -3,7 +3,6 @@ module github.com/umee-network/umee
 go 1.17
 
 require (
-	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.1
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v2 v2.0.3
@@ -23,6 +22,7 @@ require (
 	github.com/tendermint/starport v0.19.3
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tendermint/tm-db v0.6.6
+	github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220217130213-b3cdbcaa3b93
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
