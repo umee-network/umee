@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
@@ -16,9 +15,9 @@ import (
 )
 
 const (
-	okxHost          = "ws.okx.com:8443"
-	okxPath          = "/ws/v5/public"
-	msReadNewMessage = 50
+	okxHost      = "ws.okx.com:8443"
+	okxPath      = "/ws/v5/public"
+	okxPingCheck = time.Second * 28 // should be < 30
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -29,12 +28,13 @@ type (
 	//
 	// REF: https://www.okx.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
 	OkxProvider struct {
-		wsURL            url.URL
-		wsClient         *websocket.Conn
-		logger           zerolog.Logger
-		mu               sync.Mutex
-		tickers          map[string]OkxTickerPair // InstId => OkxTickerPair
-		msReadNewMessage uint16
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mu              sync.Mutex
+		tickers         map[string]OkxTickerPair // InstId => OkxTickerPair
+		reconnectTimer  *time.Ticker
+		subscribedPairs []types.CurrencyPair
 	}
 
 	// OkxTickerPair defines a ticker pair of Okx
@@ -50,16 +50,16 @@ type (
 		Data []OkxTickerPair `json:"data"`
 	}
 
-	// SubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
-	SubscriptionTopic struct {
+	// OkxSubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
+	OkxSubscriptionTopic struct {
 		Channel string `json:"channel"` // Channel name ex.: tickers
 		InstId  string `json:"instId"`  // Instrument ID ex.: BTC-USDT
 	}
 
-	// SubscriptionMsg Message to subscribe/unsubscribe with N Topics
-	SubscriptionMsg struct {
-		Op   string              `json:"op"` // Operation ex.: subscribe
-		Args []SubscriptionTopic `json:"args"`
+	// OkxSubscriptionMsg Message to subscribe/unsubscribe with N Topics
+	OkxSubscriptionMsg struct {
+		Op   string                 `json:"op"` // Operation ex.: subscribe
+		Args []OkxSubscriptionTopic `json:"args"`
 	}
 )
 
@@ -77,16 +77,18 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 
 	provider := &OkxProvider{
-		wsURL:            wsURL,
-		wsClient:         wsConn,
-		logger:           logger.With().Str("module", "oracle").Logger(),
-		tickers:          map[string]OkxTickerPair{},
-		msReadNewMessage: msReadNewMessage,
+		wsURL:          wsURL,
+		wsClient:       wsConn,
+		logger:         logger.With().Str("module", "oracle").Logger(),
+		tickers:        map[string]OkxTickerPair{},
+		reconnectTimer: time.NewTicker(okxPingCheck),
 	}
+	provider.wsClient.SetPongHandler(provider.pongHandler)
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
+	provider.subscribedPairs = pairs
 
 	go provider.handleReceivedTickers(ctx)
 
@@ -124,15 +126,28 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Duration(p.msReadNewMessage) * time.Millisecond):
+		case <-time.After(defaultReadNewMessage):
 			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
 				p.logger.Err(err).Msg("Okx provider could not read message")
+				if err := p.ping(); err != nil {
+					p.logger.Err(err).Msg("Okx provider could not send ping")
+				}
 				continue
 			}
+
+			if len(bz) == 0 {
+				continue
+			}
+
 			p.messageReceived(messageType, bz)
+
+		case <-p.reconnectTimer.C: // reset by the pongHandler
+			if err := p.reconnect(); err != nil {
+				p.logger.Err(err).Msg("Okx provider error reconnecting")
+			}
 		}
 	}
 }
@@ -142,14 +157,15 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerRespWS OkxTickerResponse
-	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
+	var tickerResp OkxTickerResponse
+	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not tickerResponses
 		p.logger.Err(err).Msg("Okx provider could not unmarshal")
 		return
 	}
 
-	for _, tickerPair := range tickerRespWS.Data {
+	p.resetReconnectTimer()
+	for _, tickerPair := range tickerResp.Data {
 		p.setTickerPair(tickerPair)
 	}
 }
@@ -162,29 +178,55 @@ func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 
 // subscribeTickers subscribe to all currency pairs
 func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	topics := make([]SubscriptionTopic, len(cps))
+	topics := make([]OkxSubscriptionTopic, len(cps))
 
 	for i, cp := range cps {
 		instId := getInstrumentId(cp)
-		topics[i] = newSubscriptionTopic(instId)
+		topics[i] = newOkxSubscriptionTopic(instId)
 	}
 
-	subsMsg := newSubscriptionMsg(topics...)
+	subsMsg := newOkxSubscriptionMsg(topics...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-func (tickerPair OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	price, err := sdk.NewDecFromStr(tickerPair.Last)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Okx price (%s) for %s", tickerPair.Last, tickerPair.InstId)
-	}
+func (p *OkxProvider) resetReconnectTimer() {
+	p.reconnectTimer.Reset(okxPingCheck)
+}
 
-	volume, err := sdk.NewDecFromStr(tickerPair.Vol24h)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Okx volume (%s) for %s", tickerPair.Vol24h, tickerPair.InstId)
-	}
+// reconnect closes the last WS connection and creates a new one.
+// If there’s a network problem, the system will automatically disable the connection.
+// The connection will break automatically if the subscription is not established or
+// data has not been pushed for more than 30 seconds.
+// To keep the connection stable:
+// 1. Set a timer of N seconds whenever a response message is received, where N is less than 30.
+// 2. If the timer is triggered, which means that no new message is received within N seconds, send the String 'ping'.
+// 3. Expect a 'pong' as a response. If the response message is not received within N seconds, please raise an error or reconnect.
+func (p *OkxProvider) reconnect() error {
+	p.wsClient.Close()
 
-	return TickerPrice{Price: price, Volume: volume}, nil
+	p.logger.Debug().Msg("Okx reconnecting websocket")
+	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	if err != nil {
+		return fmt.Errorf("error reconnecting to Okx websocket: %w", err)
+	}
+	wsConn.SetPongHandler(p.pongHandler)
+	p.wsClient = wsConn
+
+	return p.subscribeTickers(p.subscribedPairs...)
+}
+
+// ping to check websocket connection
+func (p *OkxProvider) ping() error {
+	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+}
+
+func (p *OkxProvider) pongHandler(appData string) error {
+	p.resetReconnectTimer()
+	return nil
+}
+
+func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
+	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
 }
 
 // getInstrumentId returns the expected pair instrument ID for Okx ex.: BTC-USDT
@@ -192,17 +234,17 @@ func getInstrumentId(pair types.CurrencyPair) string {
 	return pair.Base + "-" + pair.Quote
 }
 
-// newSubscriptionTopic returns a new subscription topic
-func newSubscriptionTopic(instId string) SubscriptionTopic {
-	return SubscriptionTopic{
+// newOkxSubscriptionTopic returns a new subscription topic
+func newOkxSubscriptionTopic(instId string) OkxSubscriptionTopic {
+	return OkxSubscriptionTopic{
 		Channel: "tickers",
 		InstId:  instId,
 	}
 }
 
-// newSubscriptionMsg returns a new subscription Msg
-func newSubscriptionMsg(args ...SubscriptionTopic) SubscriptionMsg {
-	return SubscriptionMsg{
+// newOkxSubscriptionMsg returns a new subscription Msg for Okx
+func newOkxSubscriptionMsg(args ...OkxSubscriptionTopic) OkxSubscriptionMsg {
+	return OkxSubscriptionMsg{
 		Op:   "subscribe",
 		Args: args,
 	}
