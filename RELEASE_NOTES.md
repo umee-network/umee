@@ -3,6 +3,6 @@
 
 # Release Notes
 
-## Features
-
-- [#556](https://github.com/umee-network/umee/pull/556) Refactor the `debug addr` command to convert addresses between any Bech32 HRP.
+⚠️ This release contains a modified fork of the [Gravity-Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge/tree/main/module)
+module where slashing is **disabled**. Validators are required to update to this
+version on `umee-1`.
