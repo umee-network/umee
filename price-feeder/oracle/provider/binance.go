@@ -1,20 +1,24 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"net/url"
 	"strings"
+	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	binanceBaseURL        = "https://api.binance.com"
-	binanceTickerEndpoint = "/api/v3/ticker/24hr"
+	binanceHost           = "stream.binance.com:9443"
+	binancePath           = "/ws/umeestream"
+	binanceConnectionTime = time.Hour * 23 //  should be < 24
+	binanceReconnectTime  = time.Minute * 15
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -23,96 +27,202 @@ type (
 	// BinanceProvider defines an Oracle provider implemented by the Binance public
 	// API.
 	//
-	// REF: https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md
+	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
 	BinanceProvider struct {
-		baseURL string
-		client  *http.Client
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mu              sync.Mutex
+		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
+		subscribedPairs []types.CurrencyPair
 	}
 
-	// BinanceTickerResponse defines the response structure of a Binance ticker
-	// request.
-	BinanceTickerResponse struct {
-		Symbol    string `json:"symbol"`
-		LastPrice string `json:"lastPrice"`
-		Volume    string `json:"volume"`
+	// BinanceTicker ticker price response
+	// https://pkg.go.dev/encoding/json#Unmarshal
+	// Unmarshal matches incoming object keys to the keys
+	// used by Marshal (either the struct field name or its tag),
+	// preferring an exact match but also accepting a case-insensitive match
+	// C is not used, but it avoids to implement specific UnmarshalJSON
+	BinanceTicker struct {
+		Symbol    string `json:"s"` // Symbol ex.: BTCUSDT
+		LastPrice string `json:"c"` // Last price ex.: 0.0025
+		Volume    string `json:"v"` // Total traded base asset volume ex.: 1000
+		C         uint64 `json:"C"` // Statistics close time
+	}
 
-		// Code and Msg are populated on failed requests
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
+	// BinanceSubscribeMsg Msg to subscribe all the tickers channels
+	BinanceSubscriptionMsg struct {
+		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
+		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
+		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 )
 
-func NewBinanceProvider() *BinanceProvider {
-	return &BinanceProvider{
-		baseURL: binanceBaseURL,
-		client:  newDefaultHTTPClient(),
+func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*BinanceProvider, error) {
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   binanceHost,
+		Path:   binancePath,
 	}
+
+	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to Binance websocket: %w", err)
+	}
+
+	provider := &BinanceProvider{
+		wsURL:    wsURL,
+		wsClient: wsConn,
+		logger:   logger.With().Str("module", "oracle").Logger(),
+		tickers:  map[string]BinanceTicker{},
+	}
+
+	if err := provider.subscribeTickers(pairs...); err != nil {
+		return nil, err
+	}
+	provider.subscribedPairs = pairs
+
+	go provider.handleWebSocketMsgs(ctx)
+
+	return provider, nil
 }
 
-func NewBinanceProviderWithTimeout(timeout time.Duration) *BinanceProvider {
-	return &BinanceProvider{
-		baseURL: binanceBaseURL,
-		client:  newHTTPClientWithTimeout(timeout),
-	}
-}
-
-func (p BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
+
 	for _, cp := range pairs {
-		price, err := p.getTickerPrice(cp.String())
+		key := cp.String()
+		price, err := p.getTickerPrice(key)
 		if err != nil {
 			return nil, err
 		}
-
-		tickerPrices[cp.String()] = price
+		tickerPrices[key] = price
 	}
 
 	return tickerPrices, nil
 }
 
-func (p BinanceProvider) getTickerPrice(ticker string) (TickerPrice, error) {
-	path := fmt.Sprintf("%s%s?symbol=%s", p.baseURL, binanceTickerEndpoint, ticker)
-
-	resp, err := p.client.Get(path)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to make Binance request: %w", err)
+func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
+	ticker, ok := p.tickers[key]
+	if !ok {
+		return TickerPrice{}, fmt.Errorf("failed to get %s", key)
 	}
 
-	defer resp.Body.Close()
+	return ticker.toTickerPrice()
+}
 
-	bz, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to read Binance response body: %w", err)
+func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
+	if messageType != websocket.TextMessage {
+		return
 	}
 
-	var tickerResp BinanceTickerResponse
+	var tickerResp BinanceTicker
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to unmarshal Binance response body: %w", err)
+		// sometimes it returns other messages which are not ticker responses
+		p.logger.Err(err).Msg("Binance provider could not unmarshal")
+		return
 	}
 
-	if tickerResp.Code != 0 {
-		return TickerPrice{}, fmt.Errorf(
-			"received unexpected error from Binance response: %v (%d)",
-			tickerResp.Msg, tickerResp.Code,
-		)
+	if len(tickerResp.LastPrice) == 0 {
+		return
 	}
 
-	if !strings.EqualFold(tickerResp.Symbol, ticker) {
-		return TickerPrice{}, fmt.Errorf(
-			"received unexpected symbol from Binance response; expected: %s, got: %s",
-			ticker, tickerResp.Symbol,
-		)
+	p.setTickerPair(tickerResp)
+}
+
+func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.tickers[ticker.Symbol] = ticker
+}
+
+func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
+	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+}
+
+// subscribeTickers subscribe to all currency pairs
+func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
+	params := make([]string, len(cps))
+
+	for i, cp := range cps {
+		params[i] = strings.ToLower(cp.String() + "@ticker")
 	}
 
-	price, err := sdk.NewDecFromStr(tickerResp.LastPrice)
+	subsMsg := newBinanceSubscriptionMsg(params...)
+	return p.wsClient.WriteJSON(subsMsg)
+}
+
+func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
+	reconnectTicker := time.NewTicker(binanceConnectionTime)
+	defer reconnectTicker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(defaultReadNewMessage):
+			// time after to avoid asking for prices too frequently
+			messageType, bz, err := p.wsClient.ReadMessage()
+			if err != nil {
+				// if some error occurs continue to try to read the next message
+				p.logger.Err(err).Msg("Binance provider could not read message")
+				continue
+			}
+
+			if len(bz) == 0 {
+				continue
+			}
+
+			p.messageReceived(messageType, bz)
+
+		case <-reconnectTicker.C:
+			if err := p.reconnect(); err != nil {
+				p.logger.Err(err).Msg("binance provider error reconnecting")
+				p.keepReconnecting()
+			}
+		}
+	}
+}
+
+// reconnect closes the last WS connection and create a new one
+// A single connection to stream.binance.com is only valid for 24 hours;
+// expect to be disconnected at the 24 hour mark
+// The websocket server will send a ping frame every 3 minutes.
+// If the websocket server does not receive a pong frame back from
+// the connection within a 10 minute period, the connection will be disconnected.
+// Unsolicited pong frames are allowed.
+func (p *BinanceProvider) reconnect() error {
+	p.wsClient.Close()
+
+	p.logger.Debug().Msg("binance reconnecting websocket")
+	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Binance price (%s) for %s", tickerResp.LastPrice, ticker)
+		return fmt.Errorf("error reconnect to binance websocket: %w", err)
 	}
+	p.wsClient = wsConn
 
-	volume, err := sdk.NewDecFromStr(tickerResp.Volume)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Binance volume (%s) for %s", tickerResp.Volume, ticker)
+	return p.subscribeTickers(p.subscribedPairs...)
+}
+
+// keepReconnecting keeps trying to reconnect if an error occurs in recconnect
+func (p *BinanceProvider) keepReconnecting() {
+	reconnectTicker := time.NewTicker(binanceConnectionTime)
+	defer reconnectTicker.Stop()
+
+	for time := range reconnectTicker.C {
+		if err := p.reconnect(); err != nil {
+			p.logger.Err(err).Msg("binance provider error recconecting at " + time.String())
+			continue
+		}
+		return
 	}
+}
 
-	return TickerPrice{Price: price, Volume: volume}, nil
+// newBinanceSubscriptionMsg returns a new subscription Msg
+func newBinanceSubscriptionMsg(params ...string) BinanceSubscriptionMsg {
+	return BinanceSubscriptionMsg{
+		Method: "SUBSCRIBE",
+		Params: params,
+		ID:     1,
+	}
 }
