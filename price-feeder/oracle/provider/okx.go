@@ -157,15 +157,15 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerRespWS OkxTickerResponse
-	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
+	var tickerResp OkxTickerResponse
+	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not tickerResponses
 		p.logger.Err(err).Msg("Okx provider could not unmarshal")
 		return
 	}
 
 	p.resetReconnectTimer()
-	for _, tickerPair := range tickerRespWS.Data {
+	for _, tickerPair := range tickerResp.Data {
 		p.setTickerPair(tickerPair)
 	}
 }

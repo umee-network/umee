@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	binanceHost          = "stream.binance.com:9443"
-	binancePath          = "/ws/umeestream"
-	binanceReconnectTime = time.Hour * 23 //  should be < 24
+	binanceHost           = "stream.binance.com:9443"
+	binancePath           = "/ws/umeestream"
+	binanceConnectionTime = time.Hour * 23 //  should be < 24
+	binanceReconnectTime  = time.Minute * 15
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -81,7 +82,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 	provider.subscribedPairs = pairs
 
-	go provider.handleReceivedTickers(ctx)
+	go provider.handleWebSocketMsgs(ctx)
 
 	return provider, nil
 }
@@ -116,17 +117,17 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	var tickerResp BinanceTicker
-	if err := json.Unmarshal(bz, &tickerRespWS); err != nil {
+	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not ticker responses
 		p.logger.Err(err).Msg("Binance provider could not unmarshal")
 		return
 	}
 
-	if len(tickerRespWS.LastPrice) == 0 {
+	if len(tickerResp.LastPrice) == 0 {
 		return
 	}
 
-	p.setTickerPair(tickerRespWS)
+	p.setTickerPair(tickerResp)
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
@@ -151,8 +152,8 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
-	reconnectTicker := time.NewTicker(binanceReconnectTime)
+func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
+	reconnectTicker := time.NewTicker(binanceConnectionTime)
 	defer reconnectTicker.Stop()
 
 	for {
@@ -177,6 +178,7 @@ func (p *BinanceProvider) handleReceivedTickers(ctx context.Context) {
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("binance provider error reconnecting")
+				p.keepReconnecting()
 			}
 		}
 	}
@@ -202,9 +204,23 @@ func (p *BinanceProvider) reconnect() error {
 	return p.subscribeTickers(p.subscribedPairs...)
 }
 
-// newSubscriptionMsg returns a new subscription Msg
-func newBinanceSubscriptionMsg(params ...string) BinanceSubscribeMsg {
-	return BinanceSubscribeMsg{
+// keepReconnecting keeps trying to reconnect if an error occurs in recconnect
+func (p *BinanceProvider) keepReconnecting() {
+	reconnectTicker := time.NewTicker(binanceConnectionTime)
+	defer reconnectTicker.Stop()
+
+	for time := range reconnectTicker.C {
+		if err := p.reconnect(); err != nil {
+			p.logger.Err(err).Msg("binance provider error recconecting at " + time.String())
+			continue
+		}
+		return
+	}
+}
+
+// newBinanceSubscriptionMsg returns a new subscription Msg
+func newBinanceSubscriptionMsg(params ...string) BinanceSubscriptionMsg {
+	return BinanceSubscriptionMsg{
 		Method: "SUBSCRIBE",
 		Params: params,
 		ID:     1,
