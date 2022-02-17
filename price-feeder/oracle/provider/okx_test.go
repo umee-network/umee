@@ -11,8 +11,7 @@ import (
 )
 
 func TestOkxProvider_GetTickerPrices(t *testing.T) {
-	ctx := context.TODO()
-	p, err := NewOkxProvider(ctx, zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
