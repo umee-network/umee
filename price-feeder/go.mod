@@ -18,7 +18,11 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.14
+<<<<<<< HEAD
 	github.com/umee-network/umee v0.7.4
+=======
+	github.com/umee-network/umee v1.0.3
+>>>>>>> b31bbe2 (chore: update deps (#566))
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
