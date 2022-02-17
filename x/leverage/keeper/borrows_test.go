@@ -57,12 +57,12 @@ func (s *IntegrationTestSuite) TestSetBorrow() {
 	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("2.33")))
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 466), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
 
-	// interest scalar edge cases - at high enough scalar, rounding down becomes evident on initial borrow
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("5444333222111")))
+	// interest scalar extreme case - rounding up becomes apparent at high borrow amount
+	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("555444333222111")))
 	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1)))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 199), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 1), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 20000)))
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 20001), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
 
 	// we do not test empty denom, as that will cause a panic
 }
