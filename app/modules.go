@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,6 +22,7 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
 
 // BankModule defines a custom wrapper around the x/bank module's AppModuleBasic
