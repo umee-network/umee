@@ -203,7 +203,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	}
 
 	// 51 borrowed will be returned from query due to adjusted borrow rounding up
-
 	testCases := []testQuery{
 		{
 			"invalid address",
@@ -258,7 +257,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	}
 
 	// 51 will need to be repaid due to adjusted borrow rounding up
-
 	cleanupCommands := []testTransaction{
 		{
 			"repay",
@@ -954,7 +952,6 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 	}
 
 	// 51 will need to be repaid due to adjusted borrow rounding up
-
 	cleanupCommands := []testTransaction{
 		{
 			"repay",
