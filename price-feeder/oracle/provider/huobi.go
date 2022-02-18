@@ -156,7 +156,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 	p.setTickerPair(tickerResp)
 }
 
-// pong return a ping message sent by the provider as pong
+// pong return a heartbeat message when a "ping" is received
 // After connected to Huobi's Websocket server,
 // the server will send heartbeat periodically (5s interval).
 // When client receives an heartbeat message, it should respond
@@ -204,15 +204,15 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	ticker, ok := p.tickers[getChannelTicker(cp)]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get %s", cp.String())
+		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", cp.String())
 	}
 
 	return ticker.toTickerPrice()
 }
 
 // uncompressGzip uncompress gzip compressed messages
-// All return data of websocket Market APIs are compressed
-// with GZIP so they need to be unzipped.
+// All data returned from the websocket Market APIs is compressed
+// with GZIP, so it needs to be unzipped.
 func uncompressGzip(bz []byte) ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(bz))
 	if err != nil {
