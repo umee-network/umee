@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	huobiHost = "api-aws.huobi.pro"
-	huobiPath = "/ws"
+	huobiHost          = "api-aws.huobi.pro"
+	huobiPath          = "/ws"
+	huobiReconnectTime = time.Minute * 2
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -37,6 +38,7 @@ type (
 		mu              sync.Mutex
 		tickers         map[string]HuobiTicker // market.$symbol.ticker => HuobiTicker
 		subscribedPairs []types.CurrencyPair
+		reconnectTicker *time.Ticker
 	}
 
 	// HuobiTicker defines the response type for the channel and
@@ -72,10 +74,11 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	}
 
 	provider := &HuobiProvider{
-		wsURL:    wsURL,
-		wsClient: wsConn,
-		logger:   logger.With().Str("module", "oracle").Logger(),
-		tickers:  map[string]HuobiTicker{},
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]HuobiTicker{},
+		reconnectTicker: time.NewTicker(huobiReconnectTime),
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
@@ -111,6 +114,12 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			if err != nil {
 				// if some error occurs continue to try to read the next message
 				p.logger.Err(err).Msg("Huobi provider could not read message")
+				if err := p.ping(); err != nil {
+					p.logger.Err(err).Msg("Error sending ping")
+					if err := p.reconnect(); err != nil {
+						p.logger.Err(err).Msg("huobi provider error reconnecting")
+					}
+				}
 				continue
 			}
 
@@ -119,6 +128,11 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			}
 
 			p.messageReceived(messageType, bz)
+
+		case <-p.reconnectTicker.C:
+			if err := p.reconnect(); err != nil {
+				p.logger.Err(err).Msg("huobi provider error reconnecting")
+			}
 		}
 	}
 }
@@ -157,6 +171,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 }
 
 // pong return a heartbeat message when a "ping" is received
+// and reset the recconnect ticker because the connection is alive
 // After connected to Huobi's Websocket server,
 // the server will send heartbeat periodically (5s interval).
 // When client receives an heartbeat message, it should respond
@@ -164,6 +179,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 // {"ping": 1492420473027} and the return should be
 // {"pong": 1492420473027}
 func (p *HuobiProvider) pong(bz []byte) {
+	p.reconnectTicker.Reset(huobiReconnectTime)
 	var heartbeat struct {
 		Ping uint64 `json:"ping"`
 	}
@@ -180,10 +196,29 @@ func (p *HuobiProvider) pong(bz []byte) {
 	}
 }
 
+// ping to check websocket connection
+func (p *HuobiProvider) ping() error {
+	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+}
+
 func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.tickers[ticker.CH] = ticker
+}
+
+// reconnect closes the last WS connection and create a new one
+func (p *HuobiProvider) reconnect() error {
+	p.wsClient.Close()
+
+	p.logger.Debug().Msg("huobi reconnecting websocket")
+	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	if err != nil {
+		return fmt.Errorf("error reconnect to huobi websocket: %w", err)
+	}
+	p.wsClient = wsConn
+
+	return p.subscribeTickers(p.subscribedPairs...)
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map
