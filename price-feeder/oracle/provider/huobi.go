@@ -1,22 +1,26 @@
 package provider
 
 import (
+	"bytes"
+	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	huobiBaseURL        = "https://api.huobi.pro"
-	huobiTradeEndpoint  = "/market/trade"
-	huobiMarketEndpoint = "/market/detail"
+	huobiHost = "api-aws.huobi.pro"
+	huobiPath = "/ws"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -27,140 +31,214 @@ type (
 	//
 	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-data
 	HuobiProvider struct {
-		baseURL string
-		client  *http.Client
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mu              sync.Mutex
+		tickers         map[string]HuobiTicker // market.$symbol.ticker => HuobiTicker
+		subscribedPairs []types.CurrencyPair
 	}
 
-	// HuobiTraceResponse defines the response type for the last executed trade
-	// for a given ticker/symbol.
-	HuobiTraceResponse struct {
-		Status string `json:"status"`
-		ErrMsg string `json:"err-msg"`
-		Tick   struct {
-			Data []struct {
-				Price float64 `json:"price"`
-			} `json:"data"`
-		} `json:"tick"`
+	// HuobiTicker defines the response type for the channel and
+	// the tick object for a given ticker/symbol
+	HuobiTicker struct {
+		CH   string    `json:"ch"` // Data belonged channel，Format：market.$symbol.ticker
+		Tick HuobiTick `json:"tick"`
 	}
 
-	// HuobiMarketResponse defines the response type for the last 24h market summary
-	// for a given ticker/symbol.
-	HuobiMarketResponse struct {
-		Status string `json:"status"`
-		ErrMsg string `json:"err-msg"`
-		Tick   struct {
-			Vol float64 `json:"vol"`
-		} `json:"tick"`
+	// HuobiTick defines the response type for the last 24h market summary
+	// and the last traded price for a given ticker/symbol
+	HuobiTick struct {
+		Vol       float64 `json:"vol"`       // Accumulated trading value of last 24 hours
+		LastPrice float64 `json:"lastPrice"` // Last traded price
+	}
+
+	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
+	HuobiSubscriptionMsg struct {
+		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
 	}
 )
 
-func NewHuobiProvider() *HuobiProvider {
-	return &HuobiProvider{
-		baseURL: huobiBaseURL,
-		client:  newDefaultHTTPClient(),
+func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*HuobiProvider, error) {
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   huobiHost,
+		Path:   huobiPath,
+	}
+
+	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to Huobi websocket: %w", err)
+	}
+
+	provider := &HuobiProvider{
+		wsURL:    wsURL,
+		wsClient: wsConn,
+		logger:   logger.With().Str("module", "oracle").Logger(),
+		tickers:  map[string]HuobiTicker{},
+	}
+
+	if err := provider.subscribeTickers(pairs...); err != nil {
+		return nil, err
+	}
+	provider.subscribedPairs = pairs
+
+	go provider.handleWebSocketMsgs(ctx)
+
+	return provider, nil
+}
+
+// subscribeTickers subscribe to all currency pairs.
+func (p *HuobiProvider) subscribeTickers(cps ...types.CurrencyPair) error {
+	for _, cp := range cps {
+		huobiSubscriptionMsg := newHuobiSubscriptionMsg(cp)
+		if err := p.wsClient.WriteJSON(huobiSubscriptionMsg); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(defaultReadNewMessage):
+			// time after to avoid asking for prices too frequently
+			messageType, bz, err := p.wsClient.ReadMessage()
+			if err != nil {
+				// if some error occurs continue to try to read the next message
+				p.logger.Err(err).Msg("Huobi provider could not read message")
+				continue
+			}
+
+			if len(bz) == 0 {
+				continue
+			}
+
+			p.messageReceived(messageType, bz)
+		}
 	}
 }
 
-func NewHuobiProviderWithTimeout(timeout time.Duration) *HuobiProvider {
-	return &HuobiProvider{
-		baseURL: huobiBaseURL,
-		client:  newHTTPClientWithTimeout(timeout),
+// messageReceived handles the received data from Huobi
+// All return data of websocket Market APIs are compressed with
+// GZIP so they need to be unzipped.
+func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
+	if messageType != websocket.BinaryMessage {
+		return
+	}
+
+	bz, err := uncompressGzip(bz)
+	if err != nil {
+		p.logger.Err(err).Msg("Huobi provider could not uncompress gzip message")
+		return
+	}
+
+	if bytes.Contains(bz, []byte("ping")) {
+		p.pong(bz)
+		return
+	}
+
+	var tickerResp HuobiTicker
+	if err := json.Unmarshal(bz, &tickerResp); err != nil {
+		// sometimes it returns other messages which are not ticker responses
+		p.logger.Err(err).Msg("Huobi provider could not unmarshal")
+		return
+	}
+
+	if tickerResp.Tick.LastPrice == 0 {
+		return
+	}
+
+	p.setTickerPair(tickerResp)
+}
+
+// pong return a ping message sent by the provider as pong
+// After connected to Huobi's Websocket server,
+// the server will send heartbeat periodically (5s interval).
+// When client receives an heartbeat message, it should respond
+// with a matching "pong" message which has the same integer in it, e.g.
+// {"ping": 1492420473027} and the return should be
+// {"pong": 1492420473027}
+func (p *HuobiProvider) pong(bz []byte) {
+	var heartbeat struct {
+		Ping uint64 `json:"ping"`
+	}
+
+	if err := json.Unmarshal(bz, &heartbeat); err != nil {
+		p.logger.Err(err).Msg("Huobi provider could not unmarshal heartbeat")
+		return
+	}
+
+	if err := p.wsClient.WriteJSON(struct {
+		Pong uint64 `json:"pong"`
+	}{Pong: heartbeat.Ping}); err != nil {
+		p.logger.Err(err).Msg("Huobi provider could not send pong message back")
 	}
 }
 
-func (p HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.tickers[ticker.CH] = ticker
+}
+
+// GetTickerPrices returns the tickerPrices based on the saved map
+func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
+
 	for _, cp := range pairs {
-		price, err := p.getTickerPrice(cp.String())
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
 			return nil, err
 		}
-
 		tickerPrices[cp.String()] = price
 	}
 
 	return tickerPrices, nil
 }
 
-func (p HuobiProvider) getTickerPrice(ticker string) (TickerPrice, error) {
-	path := fmt.Sprintf("%s%s?symbol=%s", p.baseURL, huobiTradeEndpoint, strings.ToLower(ticker))
-
-	resp, err := p.client.Get(path)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to make Huobi request: %w", err)
+func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+	ticker, ok := p.tickers[getChannelTicker(cp)]
+	if !ok {
+		return TickerPrice{}, fmt.Errorf("failed to get %s", cp.String())
 	}
 
-	defer resp.Body.Close()
-
-	bz, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to read Huobi response body: %w", err)
-	}
-
-	var tradeResp HuobiTraceResponse
-	if err := json.Unmarshal(bz, &tradeResp); err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to unmarshal Huobi response body: %w", err)
-	}
-
-	if !strings.EqualFold(tradeResp.Status, "ok") {
-		return TickerPrice{}, fmt.Errorf(
-			"received unexpected error from Huobi response: %s",
-			tradeResp.ErrMsg,
-		)
-	}
-
-	if len(tradeResp.Tick.Data) == 0 {
-		return TickerPrice{}, fmt.Errorf("latest Huobi trade empty for %s", ticker)
-	}
-
-	rawPrice := tradeResp.Tick.Data[0].Price
-	price, err := sdk.NewDecFromStr(strconv.FormatFloat(rawPrice, 'f', -1, 64))
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse Huobi price (%f) for %s", rawPrice, ticker)
-	}
-
-	// We have to fetch the volume separately since the last trade response does
-	// not include the last 24h volume.
-	volume, err := p.getTickerVolume(ticker)
-	if err != nil {
-		return TickerPrice{}, err
-	}
-
-	return TickerPrice{Price: price, Volume: volume}, nil
+	return ticker.toTickerPrice()
 }
 
-func (p HuobiProvider) getTickerVolume(ticker string) (sdk.Dec, error) {
-	path := fmt.Sprintf("%s%s?symbol=%s", p.baseURL, huobiMarketEndpoint, strings.ToLower(ticker))
-
-	resp, err := p.client.Get(path)
+// uncompressGzip uncompress gzip compressed messages
+// All return data of websocket Market APIs are compressed
+// with GZIP so they need to be unzipped.
+func uncompressGzip(bz []byte) ([]byte, error) {
+	r, err := gzip.NewReader(bytes.NewReader(bz))
 	if err != nil {
-		return sdk.ZeroDec(), fmt.Errorf("failed to make Huobi request: %w", err)
+		return nil, err
 	}
 
-	defer resp.Body.Close()
+	return ioutil.ReadAll(r)
+}
 
-	bz, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return sdk.ZeroDec(), fmt.Errorf("failed to read Huobi response body: %w", err)
+func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
+	return newTickerPrice(
+		"Huobi",
+		ticker.CH,
+		strconv.FormatFloat(ticker.Tick.LastPrice, 'f', -1, 64),
+		strconv.FormatFloat(ticker.Tick.Vol, 'f', -1, 64),
+	)
+}
+
+// newHuobiSubscriptionMsg returns a new subscription Msg
+func newHuobiSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
+	return HuobiSubscriptionMsg{
+		Sub: getChannelTicker(cp),
 	}
+}
 
-	var marketResp HuobiMarketResponse
-	if err := json.Unmarshal(bz, &marketResp); err != nil {
-		return sdk.ZeroDec(), fmt.Errorf("failed to unmarshal Huobi response body: %w", err)
-	}
-
-	if !strings.EqualFold(marketResp.Status, "ok") {
-		return sdk.ZeroDec(), fmt.Errorf(
-			"received unexpected error from Huobi response: %s",
-			marketResp.ErrMsg,
-		)
-	}
-
-	rawVolume := marketResp.Tick.Vol
-	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(rawVolume, 'f', -1, 64))
-	if err != nil {
-		return sdk.ZeroDec(), fmt.Errorf("failed to parse Huobi volume (%f) for %s", rawVolume, ticker)
-	}
-
-	return volume, nil
+// getChannelTicker returns the channel name in the Format：market.$symbol.ticker
+func getChannelTicker(cp types.CurrencyPair) string {
+	return strings.ToLower("market." + cp.String() + ".ticker")
 }

@@ -292,7 +292,11 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 			priceProvider = provider.NewOsmosisProvider()
 
 		case config.ProviderHuobi:
-			priceProvider = provider.NewHuobiProvider()
+			huobiProvider, err := provider.NewHuobiProvider(ctx, o.logger, o.providerPairs[config.ProviderHuobi]...)
+			if err != nil {
+				return nil, err
+			}
+			priceProvider = huobiProvider
 
 		case config.ProviderOkx:
 			okxProvider, err := provider.NewOkxProvider(ctx, o.logger, o.providerPairs[config.ProviderOkx]...)
