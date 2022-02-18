@@ -106,7 +106,7 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get %s", key)
+		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
