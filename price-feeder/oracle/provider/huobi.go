@@ -117,7 +117,7 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("Error sending ping")
 					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("huobi provider error reconnecting")
+						p.logger.Err(err).Msg("error reconnecting to the huobi provider")
 					}
 				}
 				continue
@@ -131,7 +131,7 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-p.reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("huobi provider error reconnecting")
+				p.logger.Err(err).Msg("error reconnecting to the huobi provider")
 			}
 		}
 	}
@@ -214,7 +214,7 @@ func (p *HuobiProvider) reconnect() error {
 	p.logger.Debug().Msg("huobi reconnecting websocket")
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
-		return fmt.Errorf("error reconnect to huobi websocket: %w", err)
+		return fmt.Errorf("error reconnecting to huobi websocket: %w", err)
 	}
 	p.wsClient = wsConn
 
