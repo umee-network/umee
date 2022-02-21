@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#536](https://github.com/umee-network/umee/pull/536) Force a minimum of three providers per asset.
 - [#502](https://github.com/umee-network/umee/pull/502) Faulty provider detection: discard prices that are not within 2𝜎 of others.
 - [#551](https://github.com/umee-network/umee/pull/551) Update Binance provider to use WebSocket.
+- [#569](https://github.com/umee-network/umee/pull/569) Update Huobi provider to use WebSocket.
 
 ### Bug Fixes
 

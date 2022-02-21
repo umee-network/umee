@@ -71,22 +71,23 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 
 	provider := &BinanceProvider{
-		wsURL:    wsURL,
-		wsClient: wsConn,
-		logger:   logger.With().Str("module", "oracle").Logger(),
-		tickers:  map[string]BinanceTicker{},
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]BinanceTicker{},
+		subscribedPairs: pairs,
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	provider.subscribedPairs = pairs
 
 	go provider.handleWebSocketMsgs(ctx)
 
 	return provider, nil
 }
 
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
@@ -105,7 +106,7 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get %s", key)
+		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
@@ -160,8 +161,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(defaultReadNewMessage):
-			// time after to avoid asking for prices too frequently
+		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
