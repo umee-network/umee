@@ -30,7 +30,7 @@ type (
 	// HuobiProvider defines an Oracle provider implemented by the Huobi public
 	// API.
 	//
-	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-data
+	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-ticker
 	HuobiProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
@@ -42,14 +42,14 @@ type (
 	}
 
 	// HuobiTicker defines the response type for the channel and
-	// the tick object for a given ticker/symbol
+	// the tick object for a given ticker/symbol.
 	HuobiTicker struct {
 		CH   string    `json:"ch"` // Data belonged channel，Format：market.$symbol.ticker
 		Tick HuobiTick `json:"tick"`
 	}
 
 	// HuobiTick defines the response type for the last 24h market summary
-	// and the last traded price for a given ticker/symbol
+	// and the last traded price for a given ticker/symbol.
 	HuobiTick struct {
 		Vol       float64 `json:"vol"`       // Accumulated trading value of last 24 hours
 		LastPrice float64 `json:"lastPrice"` // Last traded price
@@ -113,11 +113,11 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("Huobi provider could not read message")
+				p.logger.Err(err).Msg(" failed to read message from Huobi provider")
 				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("Error sending ping")
+					p.logger.Err(err).Msg("failed to send ping")
 					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting to the huobi provider")
+						p.logger.Err(err).Msg("error reconnecting to the Huobi provider")
 					}
 				}
 				continue
@@ -131,15 +131,15 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-p.reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting to the huobi provider")
+				p.logger.Err(err).Msg("error reconnecting to the Huobi provider")
 			}
 		}
 	}
 }
 
-// messageReceived handles the received data from Huobi
+// messageReceived handles the received data from the Huobi websocket.
 // All return data of websocket Market APIs are compressed with
-// GZIP so they need to be unzipped.
+// GZIP so they need to be decompressed.
 func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.BinaryMessage {
 		return
@@ -147,7 +147,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 
 	bz, err := uncompressGzip(bz)
 	if err != nil {
-		p.logger.Err(err).Msg("Huobi provider could not uncompress gzip message")
+		p.logger.Err(err).Msg("failed to decompress Huobi gziped message")
 		return
 	}
 
@@ -159,7 +159,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp HuobiTicker
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not ticker responses
-		p.logger.Err(err).Msg("Huobi provider could not unmarshal")
+		p.logger.Err(err).Msg("failed to unmarshal message from Huobi provider")
 		return
 	}
 
@@ -245,10 +245,10 @@ func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, erro
 	return ticker.toTickerPrice()
 }
 
-// uncompressGzip uncompress gzip compressed messages
+// decompressGzip uncompress gzip compressed messages
 // All data returned from the websocket Market APIs is compressed
 // with GZIP, so it needs to be unzipped.
-func uncompressGzip(bz []byte) ([]byte, error) {
+func decompressGzip(bz []byte) ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(bz))
 	if err != nil {
 		return nil, err
