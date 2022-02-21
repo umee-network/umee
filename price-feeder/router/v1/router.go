@@ -66,10 +66,12 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		mChain.ThenFunc(r.pricesHandler()),
 	).Methods(httputil.MethodGET)
 
-	v1Router.Handle(
-		"/metrics",
-		mChain.ThenFunc(r.metricsHandler()),
-	).Methods(httputil.MethodGET)
+	if r.cfg.Telemetry.Enabled {
+		v1Router.Handle(
+			"/metrics",
+			mChain.ThenFunc(r.metricsHandler()),
+		).Methods(httputil.MethodGET)
+	}
 }
 
 func (r *Router) healthzHandler() http.HandlerFunc {
