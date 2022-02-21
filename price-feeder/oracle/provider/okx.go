@@ -77,18 +77,18 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 
 	provider := &OkxProvider{
-		wsURL:          wsURL,
-		wsClient:       wsConn,
-		logger:         logger.With().Str("module", "oracle").Logger(),
-		tickers:        map[string]OkxTickerPair{},
-		reconnectTimer: time.NewTicker(okxPingCheck),
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]OkxTickerPair{},
+		reconnectTimer:  time.NewTicker(okxPingCheck),
+		subscribedPairs: pairs,
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	provider.subscribedPairs = pairs
 
 	go provider.handleReceivedTickers(ctx)
 
@@ -115,7 +115,7 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 	instrumentId := getInstrumentId(cp)
 	tickerPair, ok := p.tickers[instrumentId]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get %s", instrumentId)
+		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", instrumentId)
 	}
 
 	return tickerPair.toTickerPrice()
@@ -126,8 +126,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(defaultReadNewMessage):
-			// time after to avoid asking for prices too frequently
+		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
@@ -217,7 +216,7 @@ func (p *OkxProvider) reconnect() error {
 
 // ping to check websocket connection
 func (p *OkxProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 func (p *OkxProvider) pongHandler(appData string) error {
