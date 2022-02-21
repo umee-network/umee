@@ -108,10 +108,10 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(defaultReadNewWSMessage):
-			// time after to avoid asking for prices too frequently
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
-				// if some error occurs continue to try to read the next message
+				// if some error occurs, check if connection is alive
+				// and continue to try to read the next message
 				p.logger.Err(err).Msg(" failed to read message from Huobi provider")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
