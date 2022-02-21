@@ -38,7 +38,6 @@ type (
 		mu              sync.Mutex
 		tickers         map[string]HuobiTicker // market.$symbol.ticker => HuobiTicker
 		subscribedPairs []types.CurrencyPair
-		reconnectTicker *time.Ticker
 	}
 
 	// HuobiTicker defines the response type for the channel and
@@ -74,11 +73,10 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	}
 
 	provider := &HuobiProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("module", "oracle").Logger(),
-		tickers:         map[string]HuobiTicker{},
-		reconnectTicker: time.NewTicker(huobiReconnectTime),
+		wsURL:    wsURL,
+		wsClient: wsConn,
+		logger:   logger.With().Str("module", "oracle").Logger(),
+		tickers:  map[string]HuobiTicker{},
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
@@ -104,6 +102,7 @@ func (p *HuobiProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
+	reconnectTicker := time.NewTicker(huobiReconnectTime)
 	for {
 		select {
 		case <-ctx.Done():
@@ -127,9 +126,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 				continue
 			}
 
-			p.messageReceived(messageType, bz)
+			p.messageReceived(messageType, bz, reconnectTicker)
 
-		case <-p.reconnectTicker.C:
+		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting to the Huobi provider")
 			}
@@ -140,19 +139,19 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 // messageReceived handles the received data from the Huobi websocket.
 // All return data of websocket Market APIs are compressed with
 // GZIP so they need to be decompressed.
-func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
+func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
 	if messageType != websocket.BinaryMessage {
 		return
 	}
 
-	bz, err := uncompressGzip(bz)
+	bz, err := decompressGzip(bz)
 	if err != nil {
 		p.logger.Err(err).Msg("failed to decompress Huobi gziped message")
 		return
 	}
 
 	if bytes.Contains(bz, []byte("ping")) {
-		p.pong(bz)
+		p.pong(bz, reconnectTicker)
 		return
 	}
 
@@ -178,8 +177,8 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 // with a matching "pong" message which has the same integer in it, e.g.
 // {"ping": 1492420473027} and the return should be
 // {"pong": 1492420473027}
-func (p *HuobiProvider) pong(bz []byte) {
-	p.reconnectTicker.Reset(huobiReconnectTime)
+func (p *HuobiProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
+	reconnectTicker.Reset(huobiReconnectTime)
 	var heartbeat struct {
 		Ping uint64 `json:"ping"`
 	}
