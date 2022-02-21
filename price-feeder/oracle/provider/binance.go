@@ -71,16 +71,16 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	}
 
 	provider := &BinanceProvider{
-		wsURL:    wsURL,
-		wsClient: wsConn,
-		logger:   logger.With().Str("module", "oracle").Logger(),
-		tickers:  map[string]BinanceTicker{},
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]BinanceTicker{},
+		subscribedPairs: pairs,
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	provider.subscribedPairs = pairs
 
 	go provider.handleWebSocketMsgs(ctx)
 

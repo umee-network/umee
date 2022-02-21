@@ -73,16 +73,16 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	}
 
 	provider := &HuobiProvider{
-		wsURL:    wsURL,
-		wsClient: wsConn,
-		logger:   logger.With().Str("module", "oracle").Logger(),
-		tickers:  map[string]HuobiTicker{},
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]HuobiTicker{},
+		subscribedPairs: pairs,
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	provider.subscribedPairs = pairs
 
 	go provider.handleWebSocketMsgs(ctx)
 

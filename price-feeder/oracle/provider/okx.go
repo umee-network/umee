@@ -77,18 +77,18 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 
 	provider := &OkxProvider{
-		wsURL:          wsURL,
-		wsClient:       wsConn,
-		logger:         logger.With().Str("module", "oracle").Logger(),
-		tickers:        map[string]OkxTickerPair{},
-		reconnectTimer: time.NewTicker(okxPingCheck),
+		wsURL:           wsURL,
+		wsClient:        wsConn,
+		logger:          logger.With().Str("module", "oracle").Logger(),
+		tickers:         map[string]OkxTickerPair{},
+		reconnectTimer:  time.NewTicker(okxPingCheck),
+		subscribedPairs: pairs,
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	provider.subscribedPairs = pairs
 
 	go provider.handleReceivedTickers(ctx)
 
