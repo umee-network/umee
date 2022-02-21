@@ -112,7 +112,7 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			if err != nil {
 				// If some error occurs, check if connection is alive
 				// and continue to try to read the next message.
-				p.logger.Err(err).Msg(" failed to read message from Huobi provider")
+				p.logger.Err(err).Msg("failed to read message from Huobi provider")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
 					if err := p.reconnect(); err != nil {
