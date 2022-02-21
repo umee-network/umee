@@ -43,9 +43,14 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 	mChain := middleware.Build(r.logger, r.cfg)
 
 	// handle all preflight request
-	v1Router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-		w.Header().Set("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS")
+	v1Router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		for _, origin := range r.cfg.Server.AllowedOrigins {
+			if origin == req.Header.Get("Origin") {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+			}
+		}
+
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.WriteHeader(http.StatusOK)
