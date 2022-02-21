@@ -14,6 +14,10 @@ const (
 	defaultReadNewWSMessage = 50 * time.Millisecond
 )
 
+var (
+	ping = []byte("ping")
+)
+
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)

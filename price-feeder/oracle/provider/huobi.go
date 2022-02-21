@@ -150,7 +150,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if bytes.Contains(bz, []byte("ping")) {
+	if bytes.Contains(bz, ping) {
 		p.pong(bz, reconnectTicker)
 		return
 	}
@@ -197,7 +197,7 @@ func (p *HuobiProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
 
 // ping to check websocket connection
 func (p *HuobiProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {

@@ -216,7 +216,7 @@ func (p *OkxProvider) reconnect() error {
 
 // ping to check websocket connection
 func (p *OkxProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, []byte("ping"))
+	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 func (p *OkxProvider) pongHandler(appData string) error {
