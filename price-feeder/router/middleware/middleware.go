@@ -46,17 +46,17 @@ func AddRequestLoggingMiddleware(mChain alice.Chain, logger zerolog.Logger) alic
 func AddCORSMiddleware(mChain alice.Chain, logger zerolog.Logger, cfg config.Config) alice.Chain {
 	opts := cors.Options{
 		AllowedMethods: []string{
-			http.MethodHead,
 			http.MethodGet,
-			http.MethodPost,
-			http.MethodPut,
-			http.MethodPatch,
-			http.MethodDelete,
 			http.MethodOptions,
 		},
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"*"},
-		AllowedOrigins:   cfg.Server.AllowedOrigins,
+		AllowedHeaders: []string{
+			"Content-Type",
+			"Access-Control-Allow-Headers",
+			"Authorization",
+			"X-Requested-With",
+		},
+		AllowedOrigins: cfg.Server.AllowedOrigins,
 	}
 
 	if cfg.Server.VerboseCORS {
