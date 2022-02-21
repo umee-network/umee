@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	defaultTimeout        = 10 * time.Second
-	defaultReadNewMessage = 50 * time.Millisecond
+	defaultTimeout          = 10 * time.Second
+	defaultReadNewWSMessage = 50 * time.Millisecond
 )
 
 // Provider defines an interface an exchange price provider must implement.
