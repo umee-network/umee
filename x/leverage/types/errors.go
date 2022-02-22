@@ -25,5 +25,5 @@ var (
 	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 1115, "total adjusted borrow inconsistency")
 	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 1116, "interest scalar less than one")
 	ErrEmptyAddress            = sdkerrors.Register(ModuleName, 1117, "empty address")
-	ErrLiquidationRewardRatio  = sdkerrors.Register(ModuleName, 1118, "requested minimum liquidation reward exceeds derived amount")
+	ErrLiquidationRewardRatio  = sdkerrors.Register(ModuleName, 1118, "requested liquidation reward not met")
 )
