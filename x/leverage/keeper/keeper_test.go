@@ -594,9 +594,11 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	))
 
 	// liquidator attempts to liquidate lender, but lender is ineligible (not over borrow limit)
+	// liquidator does not specify a minimum reward (hence 0 u/umee)
 	repayment := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000) // 30 umee
 	rewardDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(ctx, umeeapp.BondDenom)
-	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, rewardDenom)
+	unrestrictedReward := sdk.NewInt64Coin(umeeapp.BondDenom, 0) // 0 umee (rewardDenom = u/umee)
+	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, unrestrictedReward)
 	s.Require().Error(err)
 
 	// Note: Setting umee collateral weight to 0.0 to allow liquidation
@@ -612,9 +614,15 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
+	// liquidator attempts to liquidate lender, but specifies too high of a minimum reward
+	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000)        // 10 umee
+	excessiveReward := sdk.NewInt64Coin(umeeapp.BondDenom, 20000000) // 20 umee (rewardDenom = u/umee)
+	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, excessiveReward)
+	s.Require().Error(err)
+
 	// liquidator partially liquidates lender, receiving some collateral
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
-	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, rewardDenom)
+	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, unrestrictedReward)
 	s.Require().NoError(err)
 	s.Require().Equal(repayment.Amount, repaid)
 	s.Require().Equal(sdk.NewInt(11000000), reward)
@@ -633,7 +641,7 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 
 	// liquidator fully liquidates lender, receiving more collateral and reducing borrowed amount to zero
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 300000000) // 300 umee
-	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, rewardDenom)
+	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, unrestrictedReward)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(80000000), repaid)
 	s.Require().Equal(sdk.NewInt(88000000), reward)

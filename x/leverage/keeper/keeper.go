@@ -368,7 +368,9 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 }
 
 // LiquidateBorrow attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
-// for a selected denomination of uToken collateral. If the borrower is not over their borrow limit, or
+// for a selected denomination of uToken collateral, specified by its associated token denom. The liquidator
+// may also specify a minimum reward amount, again in base token denom that will be adjusted by uToken exchange
+// rate, they would accept for the specified repayment. If the borrower is not over their borrow limit, or
 // the repayment or reward denominations are invalid, an error is returned. If the attempted repayment
 // is greater than the amount owed or the maximum that can be repaid due to parameters (close factor)
 // then a partial liquidation, equal to the maximum valid amount, is performed. The same occurs if the
@@ -376,13 +378,13 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 // Because partial liquidation is possible and exchange rates vary, LiquidateBorrow returns the actual
 // amount of tokens repaid and uTokens rewarded (in that order).
 func (k Keeper) LiquidateBorrow(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepayment sdk.Coin, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepayment sdk.Coin, desiredReward sdk.Coin,
 ) (sdk.Int, sdk.Int, error) {
 	if !desiredRepayment.IsValid() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredRepayment.String())
 	}
-	if !k.IsAcceptedUToken(ctx, rewardDenom) {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, rewardDenom)
+	if !k.IsAcceptedToken(ctx, desiredReward.Denom) {
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredReward.String())
 	}
 
 	// get total borrowed by borrower (all denoms)
@@ -409,7 +411,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// get reward-specific incentive and dynamic close factor
-	baseRewardDenom := k.FromUTokenToTokenDenom(ctx, rewardDenom)
+	baseRewardDenom := desiredReward.Denom
 	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, borrowLimit)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
@@ -456,16 +458,29 @@ func (k Keeper) LiquidateBorrow(
 	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
 	// reward amount cannot exceed available collateral
-	if reward.Amount.GT(collateral.AmountOf(rewardDenom)) {
+	if reward.Amount.GT(collateral.AmountOf(reward.Denom)) {
 		// reduce repayment.Amount to the maximum value permitted by the available collateral reward
-		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(rewardDenom)).Quo(reward.Amount)
+		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(reward.Denom)).Quo(reward.Amount)
 		// use all collateral of reward denom
-		reward.Amount = collateral.AmountOf(rewardDenom)
+		reward.Amount = collateral.AmountOf(reward.Denom)
 	}
 
 	// final check for invalid liquidation (negative/zero value after reductions above)
 	if !repayment.Amount.IsPositive() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
+	}
+
+	if desiredReward.Amount.IsPositive() {
+		// user-controlled minimum ratio of reward to repayment, expressed in base:base assets (not uTokens)
+		rewardTokenEquivalent, err := k.ExchangeUToken(ctx, reward)
+		if err != nil {
+			return sdk.ZeroInt(), sdk.ZeroInt(), err
+		}
+		minimumRewardRatio := sdk.NewDecFromInt(desiredReward.Amount).QuoInt(desiredRepayment.Amount)
+		actualRewardRatio := sdk.NewDecFromInt(rewardTokenEquivalent.Amount).QuoInt(repayment.Amount)
+		if actualRewardRatio.LT(minimumRewardRatio) {
+			return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrLiquidationRewardRatio
+		}
 	}
 
 	// send repayment to leverage module account
@@ -484,7 +499,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Reduce borrower collateral by reward amount
-	newBorrowerCollateral := sdk.NewCoin(rewardDenom, collateral.AmountOf(rewardDenom).Sub(reward.Amount))
+	newBorrowerCollateral := sdk.NewCoin(reward.Denom, collateral.AmountOf(reward.Denom).Sub(reward.Amount))
 	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}

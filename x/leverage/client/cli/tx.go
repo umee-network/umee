@@ -229,13 +229,12 @@ func GetCmdLiquidate() *cobra.Command {
 				return err
 			}
 
-			rewardDenom := args[3]
-			err = sdk.ValidateDenom(rewardDenom)
+			reward, err := sdk.ParseCoinNormalized(args[3])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
+			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, reward)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

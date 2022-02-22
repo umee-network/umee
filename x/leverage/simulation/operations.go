@@ -282,7 +282,7 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, rewardDenom)
+		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, sdk.NewInt64Coin(rewardDenom, 0))
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -425,5 +425,7 @@ func randomLiquidateFields(
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	return liquidator, borrower, randomCoin(r, borrowed), randomCoin(r, collateral).Denom, false
+	rewardDenom = lk.FromUTokenToTokenDenom(ctx, randomCoin(r, collateral).Denom)
+
+	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
 }

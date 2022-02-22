@@ -1,8 +1,6 @@
 package types
 
 import (
-	"errors"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -173,12 +171,12 @@ func (msg *MsgRepayAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, reward sdk.Coin) *MsgLiquidate {
 	return &MsgLiquidate{
-		Liquidator:  borrower.String(),
-		Borrower:    borrower.String(),
-		Repayment:   repayment,
-		RewardDenom: rewardDenom,
+		Liquidator: borrower.String(),
+		Borrower:   borrower.String(),
+		Repayment:  repayment,
+		Reward:     reward,
 	}
 }
 
@@ -199,8 +197,8 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 
-	if msg.GetRewardDenom() == "" {
-		return errors.New("empty reward denom")
+	if asset := msg.GetReward(); !asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 
 	return nil
