@@ -89,19 +89,25 @@ The message will fail under the following conditions:
 
 A user liquidates all or part of an undercollateralized borrower's borrow positions in exchange for an equivalent value of the borrower's collateral, plus liquidation incentive. If the requested repayment amount would overpay or is limited by available collateral rewards or the dynamic `CloseFactor`, the repayment amount will be reduced to the maximum acceptable value before liquidation is attempted.
 
+The user specifies a minimum reward amount (in a base token denom) that they would accept for the full repayment amount. This is used to compute a ratio of actual repayment (which could be lower than intended) to token equivalent of actual uToken reward. Transactions that would result in a reward:repayment amount lower than the minimum will fail instead.
+
+A minimum reward amount of zero ignores this check and trusts oracle prices.
+
 ```protobuf
 message MsgLiquidate {
   string                   liquidator = 1;
   string                   borrower = 2;
   cosmos.base.v1beta1.Coin repayment = 3;
-  string                   reward_denom = 4;
+  cosmos.base.v1beta1.Coin reward = 4;
 }
 ```
 
 The message will fail under the following conditions:
-- `repayment` is not a valid amount of an accepted asset
+- `repayment` is not a valid amount of an accepted base asset
+- `reward` is not a valid amount of an accepted base asset
 - `borrower` has not borrowed any of the specified asset to repay
 - `borrower` has no collateral of the requested reward denom
 - `borrower`'s total borrowed value does not exceed their `BorrowLimit`
 - `liquidator` balance is insufficient
+- the message's ratio of `reward` to `repayment` is higher than the ratio that would result from liquidation at the current oracle prices and liquidation incentives
 - Borrowed value or `BorrowLimit` cannot be computed due to a missing `x/oracle` price

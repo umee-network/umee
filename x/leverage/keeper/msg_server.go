@@ -237,13 +237,13 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	repaid, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
+	repaid, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.Reward)
 	if err != nil {
 		return nil, err
 	}
 
 	repaidCoin := sdk.NewCoin(msg.Repayment.Denom, repaid)
-	rewardCoin := sdk.NewCoin(msg.RewardDenom, reward)
+	rewardCoin := sdk.NewCoin(msg.Reward.Denom, reward)
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid by liquidator",
