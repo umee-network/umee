@@ -476,6 +476,7 @@ func (k Keeper) LiquidateBorrow(
 		if err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
 		}
+
 		minimumRewardRatio := sdk.NewDecFromInt(desiredReward.Amount).QuoInt(desiredRepayment.Amount)
 		actualRewardRatio := sdk.NewDecFromInt(rewardTokenEquivalent.Amount).QuoInt(repayment.Amount)
 		if actualRewardRatio.LT(minimumRewardRatio) {
