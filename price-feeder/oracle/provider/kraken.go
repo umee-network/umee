@@ -119,6 +119,23 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	return tickerPrices, nil
 }
 
+// SubscribeTickers subscribe to all currency pairs and
+// add the new ones into the provider subscribed pairs.
+func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
+	pairs := make([]string, len(cps))
+
+	for i, cp := range cps {
+		pairs[i] = currencyPairToKrakenPair(cp)
+	}
+
+	if err := p.subscribePairs(pairs...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
 // handleWebSocketMsgs receive all the messages from the provider
 // and controls to reconnect the web socket.
 func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
@@ -306,23 +323,6 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 	p.muTickers.Lock()
 	defer p.muTickers.Unlock()
 	p.tickers[symbol] = ticker
-}
-
-// SubscribeTickers subscribe to all currency pairs and
-// add the new ones into the provider subscribed pairs.
-func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToKrakenPair(cp)
-	}
-
-	if err := p.subscribePairs(pairs...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	return nil
 }
 
 // ping to check websocket connection.
