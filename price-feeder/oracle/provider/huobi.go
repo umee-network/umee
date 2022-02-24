@@ -60,6 +60,7 @@ type (
 	}
 )
 
+// NewHuobiProvider returns a new Huobi provider with the WS connection and msg handler.
 func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*HuobiProvider, error) {
 	wsURL := url.URL{
 		Scheme: "wss",
@@ -220,7 +221,7 @@ func (p *HuobiProvider) reconnect() error {
 	return p.subscribeTickers(p.subscribedPairs...)
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map
+// GetTickerPrices returns the tickerPrices based on the saved map.
 func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
