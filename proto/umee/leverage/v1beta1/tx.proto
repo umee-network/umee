@@ -56,25 +56,23 @@ message MsgSetCollateral {
 // from the module.
 message MsgBorrowAsset {
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgRepayAsset represents a lender's request to repay a borrowed base asset type
 // to the module.
 message MsgRepayAsset {
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
 // borrowed base asset type to the module in exchange for collateral reward.
 message MsgLiquidate {
   string                   liquidator = 1;
-  string                   borrower = 2;
-  cosmos.base.v1beta1.Coin repayment = 3 [(gogoproto.nullable) = false];
-  string                   reward_denom = 4 [
-    (gogoproto.moretags)   = "yaml:\"reward_denom\""
-  ];
+  string                   borrower   = 2;
+  cosmos.base.v1beta1.Coin repayment  = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin reward     = 4 [(gogoproto.nullable) = false];
 }
 
 // MsgLendAssetResponse defines the Msg/LendAsset response type.

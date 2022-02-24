@@ -1230,7 +1230,7 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 				val.Address.String(),
 				// note: partial liquidation, so cleanup still requires a CmdRepay
 				"5uumee",
-				"u/uumee",
+				"0uumee",
 			},
 			nil,
 		},

@@ -99,7 +99,7 @@ Thus, the uToken exchange rate for a given `denom` and associated `uDenom` is ca
 
 `exchangeRate(denom) = [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ] / TotalSupply(uDenom)`
 
-For efficiency, and because the exchange rate can only be affected by interest accruing (and not by `Lend`, `Withdraw`, `Borrow`, `Repay`, and `Liquidate` transactions), uToken exchange rates are calculated every `InterestEpoch` and stored in state.
+In state, uToken exchange rates are not stored as the can be calculated on demand.
 
 Exchange rates satisfy the invariant `exchangeRate(denom) >= 1.0`
 
