@@ -239,7 +239,7 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	ticker, ok := p.tickers[getChannelTicker(cp)]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", cp.String())
+		return TickerPrice{}, fmt.Errorf("huobi provider failed to get ticker price for %s", cp.String())
 	}
 
 	return ticker.toTickerPrice()
