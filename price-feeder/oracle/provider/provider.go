@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	defaultTimeout          = 10 * time.Second
-	defaultReadNewWSMessage = 50 * time.Millisecond
+	defaultTimeout           = 10 * time.Second
+	defaultReadNewWSMessage  = 50 * time.Millisecond
+	defaultMaxConnectionTime = time.Hour * 23 //  should be < 24
+	defaultReconnectTime     = time.Minute * 15
 )
 
 var (

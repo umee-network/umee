@@ -286,7 +286,11 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 			priceProvider = binanceProvider
 
 		case config.ProviderKraken:
-			priceProvider = provider.NewKrakenProvider()
+			krakenProvider, err := provider.NewKrakenProvider(ctx, o.logger, o.providerPairs[config.ProviderKraken]...)
+			if err != nil {
+				return nil, err
+			}
+			priceProvider = krakenProvider
 
 		case config.ProviderOsmosis:
 			priceProvider = provider.NewOsmosisProvider()
