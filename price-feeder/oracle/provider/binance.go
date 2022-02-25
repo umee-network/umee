@@ -15,9 +15,8 @@ import (
 )
 
 const (
-	binanceHost           = "stream.binance.com:9443"
-	binancePath           = "/ws/umeestream"
-	binanceConnectionTime = time.Hour * 23 //  should be < 24
+	binanceHost = "stream.binance.com:9443"
+	binancePath = "/ws/umeestream"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
