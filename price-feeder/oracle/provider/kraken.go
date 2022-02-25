@@ -28,13 +28,12 @@ type (
 	//
 	// REF: https://docs.kraken.com/websockets/#overview
 	KrakenProvider struct {
-		wsURL             url.URL
-		wsClient          *websocket.Conn
-		logger            zerolog.Logger
-		muTickers         sync.Mutex
-		tickers           map[string]TickerPrice // Symbol => TickerPrice
-		mtx sync.Mutex
-		subscribedPairs   map[string]types.CurrencyPair // Symbol => types.CurrencyPair
+		wsURL           url.URL
+		wsClient        *websocket.Conn
+		logger          zerolog.Logger
+		mtx             sync.Mutex
+		tickers         map[string]TickerPrice        // Symbol => TickerPrice
+		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
 	// KrakenTicker ticker price response from Kraken ticker channel.
@@ -326,8 +325,8 @@ func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 
 // setTickerPair sets an ticker to the map thread safe by the mutex.
 func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
-	p.muTickers.Lock()
-	defer p.muTickers.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 	p.tickers[symbol] = ticker
 }
 
@@ -344,8 +343,8 @@ func (p *KrakenProvider) subscribePairs(pairs ...string) error {
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *KrakenProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.muSubscribedPairs.Lock()
-	defer p.muSubscribedPairs.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
@@ -354,8 +353,8 @@ func (p *KrakenProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // removeSubscribedTickers delete N pairs from the subscribed map.
 func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
-	p.muSubscribedPairs.Lock()
-	defer p.muSubscribedPairs.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 
 	for _, tickerSymbol := range tickerSymbols {
 		delete(p.subscribedPairs, tickerSymbol)
