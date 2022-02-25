@@ -28,7 +28,6 @@ enabled = false
 enabled = true
 clear_interval = 100
 clear_on_start = true
-filter = false
 tx_confirmation = true
 
 [rest]
