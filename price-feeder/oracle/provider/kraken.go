@@ -33,7 +33,7 @@ type (
 		logger            zerolog.Logger
 		muTickers         sync.Mutex
 		tickers           map[string]TickerPrice // Symbol => TickerPrice
-		muSubscribedPairs sync.Mutex
+		mtx sync.Mutex
 		subscribedPairs   map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
