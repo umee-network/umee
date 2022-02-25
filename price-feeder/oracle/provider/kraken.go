@@ -180,21 +180,21 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	var krakenEvent KrakenEvent
-	if err := json.Unmarshal(bz, &krakenEvent); err != nil
-		switch krakenEvent.Event {
-		case krakenEventSystemStatus:
-			p.messageReceivedSystemStatus(bz)
-			return
-		case krakenEventSubscriptionStatus:
-			p.messageReceivedSubscriptionStatus(bz)
-			return
-		}
+	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
+		p.logger.Debug().Msg("kraken provider received a message that is not an event")
+		// msg is not an event, it will try to marshal to ticker message
+		p.messageReceivedTickerPrice(bz)
 		return
-	} else {
-		p.logger.Debug().Msg("kraken provider received a message that is an invalid event")
 	}
 
-	p.messageReceivedTickerPrice(bz)
+	switch krakenEvent.Event {
+	case krakenEventSystemStatus:
+		p.messageReceivedSystemStatus(bz)
+		return
+	case krakenEventSubscriptionStatus:
+		p.messageReceivedSubscriptionStatus(bz)
+		return
+	}
 }
 
 // messageReceivedTickerPrice handles the ticker price msg.
@@ -236,7 +236,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) {
 		return
 	}
 
-	krakenPair = normalizeKrakenPair(krakenPair)
+	krakenPair = normalizeKrakenBTCPair(krakenPair)
 	currencyPairSymbol := krakenPairToCurrencyPairSymbol(krakenPair)
 
 	tickerPrice, err := krakenTicker.toTickerPrice(currencyPairSymbol)
@@ -390,7 +390,7 @@ func currencyPairToKrakenPair(cp types.CurrencyPair) string {
 }
 
 // normalizeKrakenBTCPair changes XBT pairs to BTC,
-// since other providers list bitcoin as BTC 
+// since other providers list bitcoin as BTC
 func normalizeKrakenBTCPair(ticker string) string {
 	return strings.Replace(ticker, "XBT", "BTC", 1)
 }

@@ -82,11 +82,11 @@ func TestKrakenCurrencyPairToKrakenPair(t *testing.T) {
 	require.Equal(t, krakenSymbol, "ATOM/USDT")
 }
 
-func TestNormalizeKrakenPair(t *testing.T) {
-	btcSymbol := normalizeKrakenPair("XBT/USDT")
+func TestNormalizeKrakenBTCPair(t *testing.T) {
+	btcSymbol := normalizeKrakenBTCPair("XBT/USDT")
 	require.Equal(t, btcSymbol, "BTC/USDT")
 
-	atomSymbol := normalizeKrakenPair("ATOM/USDT")
+	atomSymbol := normalizeKrakenBTCPair("ATOM/USDT")
 	require.Equal(t, atomSymbol, "ATOM/USDT")
 }
 
