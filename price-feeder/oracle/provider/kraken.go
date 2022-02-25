@@ -33,6 +33,7 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.Mutex
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
+		candles         map[string]KrakenCandle       // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
@@ -41,6 +42,14 @@ type (
 	KrakenTicker struct {
 		C []string `json:"c"` // Close with Price in the first position
 		V []string `json:"v"` // Volume with the value over last 24 hours in the second position
+	}
+
+	KrakenCandle struct {
+		Open   string
+		High   string
+		Low    string
+		Close  string
+		Volume string
 	}
 
 	// KrakenSubscriptionMsg Msg to subscribe to all the pairs at once.
@@ -90,10 +99,14 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 		wsClient:        wsConn,
 		logger:          logger.With().Str("module", "oracle").Logger(),
 		tickers:         map[string]TickerPrice{},
+		candles:         map[string]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
 	if err := provider.SubscribeTickers(pairs...); err != nil {
+		return nil, err
+	}
+	if err := provider.SubscribeCandles(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -128,6 +141,21 @@ func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	}
 
 	if err := p.subscribePairs(pairs...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
+func (p *KrakenProvider) SubscribeCandles(cps ...types.CurrencyPair) error {
+	candles := make([]string, len(cps))
+
+	for i, cp := range cps {
+		candles[i] = currencyPairToKrakenPair(cp)
+	}
+
+	if err := p.subscribeCandlePairs(candles...); err != nil {
 		return err
 	}
 
@@ -182,7 +210,11 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
 		p.logger.Debug().Msg("kraken provider received a message that is not an event")
 		// msg is not an event, it will try to marshal to ticker message
-		p.messageReceivedTickerPrice(bz)
+		if err = p.messageReceivedTickerPrice(bz); err != nil {
+			if err = p.messageReceivedCandle(bz); err != nil {
+				p.logger.Debug().Err(err).Msg("kraken provider was unable to unmarshall")
+			}
+		}
 		return
 	}
 
@@ -197,42 +229,36 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 }
 
 // messageReceivedTickerPrice handles the ticker price msg.
-func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) {
+func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	// the provider response is an array with different types at each index
 	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
 	var tickerMessage []interface{}
 	if err := json.Unmarshal(bz, &tickerMessage); err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not unmarshal")
-		return
+		return err
 	}
 
 	if len(tickerMessage) != 4 {
-		p.logger.Debug().Msg("Kraken provider sent something different than ticker")
-		return
+		return fmt.Errorf("Kraken provider sent something different than ticker")
 	}
 
 	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
-		p.logger.Debug().Msg("Kraken provider sent an unexpected channel name")
-		return
+		return fmt.Errorf("Kraken provider sent an unexpected channel name")
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
 	if err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not marshal ticker message")
-		return
+		return err
 	}
 
 	var krakenTicker KrakenTicker
 	if err := json.Unmarshal(tickerBz, &krakenTicker); err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not unmarshal ticker")
-		return
+		return err
 	}
 
 	krakenPair, ok := tickerMessage[3].(string)
 	if !ok {
-		p.logger.Debug().Msg("Kraken provider sent an unexpected pair")
-		return
+		return fmt.Errorf("Kraken provider sent an unexpected pair")
 	}
 
 	krakenPair = normalizeKrakenBTCPair(krakenPair)
@@ -241,10 +267,93 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) {
 	tickerPrice, err := krakenTicker.toTickerPrice(currencyPairSymbol)
 	if err != nil {
 		p.logger.Err(err).Msg("Kraken provider could not parse kraken ticker to ticker price")
-		return
+		return err
 	}
 
 	p.setTickerPair(currencyPairSymbol, tickerPrice)
+	return nil
+}
+
+func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if len(tmp) != 9 {
+		return fmt.Errorf("wrong number of fields in candle")
+	}
+
+	open, ok := tmp[2].(string)
+	if !ok {
+		return fmt.Errorf("open field must be a string")
+	}
+	kc.Open = open
+
+	high, ok := tmp[3].(string)
+	if !ok {
+		return fmt.Errorf("high must be a string")
+	}
+	kc.High = high
+
+	low, ok := tmp[4].(string)
+	if !ok {
+		return fmt.Errorf("low field must be a string")
+	}
+	kc.Low = low
+
+	close, ok := tmp[5].(string)
+	if !ok {
+		return fmt.Errorf("close field must be a string")
+	}
+	kc.Close = close
+
+	volume, ok := tmp[7].(string)
+	if !ok {
+		return fmt.Errorf("volume field must be a string")
+	}
+	kc.Volume = volume
+
+	return nil
+}
+
+// messageReceivedTickerPrice handles the ticker price msg.
+func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
+	// the provider response is an array with different types at each index
+	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
+	var candleMessage []interface{}
+	if err := json.Unmarshal(bz, &candleMessage); err != nil {
+		return err
+	}
+
+	if len(candleMessage) != 4 {
+		return fmt.Errorf("Kraken provider sent something different than candle")
+	}
+
+	channelName, ok := candleMessage[2].(string)
+	if !ok || channelName != "ohlc-1" {
+		return fmt.Errorf("Kraken provider sent an unexpected channel name")
+	}
+
+	tickerBz, err := json.Marshal(candleMessage[1])
+	if err != nil {
+		return fmt.Errorf("Kraken provider could not marshal ticker message")
+	}
+
+	var krakenCandle KrakenCandle
+	if err = krakenCandle.UnmarshalJSON(tickerBz); err != nil {
+		return err
+	}
+
+	krakenPair, ok := candleMessage[3].(string)
+	if !ok {
+		return fmt.Errorf("Kraken provider sent an unexpected pair")
+	}
+
+	krakenPair = normalizeKrakenBTCPair(krakenPair)
+	currencyPairSymbol := krakenPairToCurrencyPairSymbol(krakenPair)
+
+	p.setCandlePair(currencyPairSymbol, krakenCandle)
+	return nil
 }
 
 // reconnect closes the last WS connection and create a new one.
@@ -330,6 +439,12 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 	p.tickers[symbol] = ticker
 }
 
+func (p *KrakenProvider) setCandlePair(symbol string, candle KrakenCandle) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+	p.candles[symbol] = candle
+}
+
 // ping to check websocket connection.
 func (p *KrakenProvider) ping() error {
 	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
@@ -338,6 +453,12 @@ func (p *KrakenProvider) ping() error {
 // subscribePairs write the subscription msg to the provider.
 func (p *KrakenProvider) subscribePairs(pairs ...string) error {
 	subsMsg := newKrakenSubscriptionMsg(pairs...)
+	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// subscribeCandlePairs write the subscription msg to the provider.
+func (p *KrakenProvider) subscribeCandlePairs(pairs ...string) error {
+	subsMsg := newKrakenCandleSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
@@ -378,6 +499,17 @@ func newKrakenSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
 		Pair:  pairs,
 		Subscription: KrakenSubscriptionChannel{
 			Name: "ticker",
+		},
+	}
+}
+
+// newKrakenSubscriptionMsg returns a new subscription Msg.
+func newKrakenCandleSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
+	return KrakenSubscriptionMsg{
+		Event: "subscribe",
+		Pair:  pairs,
+		Subscription: KrakenSubscriptionChannel{
+			Name: "ohlc",
 		},
 	}
 }
