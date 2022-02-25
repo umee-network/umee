@@ -115,7 +115,7 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 	instrumentId := getInstrumentId(cp)
 	tickerPair, ok := p.tickers[instrumentId]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", instrumentId)
+		return TickerPrice{}, fmt.Errorf("okx provider failed to get ticker price for %s", instrumentId)
 	}
 
 	return tickerPair.toTickerPrice()
@@ -141,6 +141,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 				continue
 			}
 
+			p.resetReconnectTimer()
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler
@@ -163,7 +164,6 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	p.resetReconnectTimer()
 	for _, tickerPair := range tickerResp.Data {
 		p.setTickerPair(tickerPair)
 	}
