@@ -141,6 +141,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 				continue
 			}
 
+			p.resetReconnectTimer()
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler
@@ -163,7 +164,6 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	p.resetReconnectTimer()
 	for _, tickerPair := range tickerResp.Data {
 		p.setTickerPair(tickerPair)
 	}
