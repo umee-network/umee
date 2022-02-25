@@ -302,7 +302,7 @@ func (p *KrakenProvider) messageReceivedSubscriptionStatus(bz []byte) {
 		p.removeSubscribedTickers(krakenPairToCurrencyPairSymbol(subscriptionStatus.Pair))
 		return
 	case "unsubscribed":
-		p.logger.Debug().Msg("ticker " + subscriptionStatus.Pair + " was unsubscribed")
+		p.logger.Debug().Msgf("ticker %s was unsubscribed", subscriptionStatus.Pair)
 		p.removeSubscribedTickers(krakenPairToCurrencyPairSymbol(subscriptionStatus.Pair))
 		return
 	}
@@ -398,18 +398,4 @@ func currencyPairToKrakenPair(cp types.CurrencyPair) string {
 // since other providers list bitcoin as BTC
 func normalizeKrakenBTCPair(ticker string) string {
 	return strings.Replace(ticker, "XBT", "BTC", 1)
-}
-
-// krakenPairToCurrencyPair receives a kraken pair formated
-// ex.: ATOM/USDT and return currencyPair base: ATOM quote:USDT.
-func krakenPairToCurrencyPair(krakenPair string) (types.CurrencyPair, error) {
-	pairSymbol := strings.Split(krakenPair, "/")
-	if len(pairSymbol) != 2 {
-		return types.CurrencyPair{}, fmt.Errorf("error spliting kraken pair")
-	}
-
-	return types.CurrencyPair{
-		Base:  pairSymbol[0],
-		Quote: pairSymbol[1],
-	}, nil
 }

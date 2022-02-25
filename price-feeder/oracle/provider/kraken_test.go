@@ -89,14 +89,3 @@ func TestNormalizeKrakenBTCPair(t *testing.T) {
 	atomSymbol := normalizeKrakenBTCPair("ATOM/USDT")
 	require.Equal(t, atomSymbol, "ATOM/USDT")
 }
-
-func TestKrakenPairToCurrencyPair(t *testing.T) {
-	btcCurrencyPair, err := krakenPairToCurrencyPair("BTC/USDT")
-	require.NoError(t, err)
-	require.Equal(t, btcCurrencyPair.String(), "BTCUSDT")
-
-	wrongeCurrencyPair, err := krakenPairToCurrencyPair("BTC/USDT/ANY")
-	require.Error(t, err)
-	require.Equal(t, wrongeCurrencyPair.String(), "")
-
-}
