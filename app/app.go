@@ -160,6 +160,8 @@ var (
 )
 
 func init() {
+	fmt.Println("DEBUG DO NOT MERGE")
+
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(fmt.Sprintf("failed to get user home directory: %s", err))
