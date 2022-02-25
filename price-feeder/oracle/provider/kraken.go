@@ -123,7 +123,7 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		key := cp.String()
 		tickerPrice, ok := p.tickers[key]
 		if !ok {
-			return nil, fmt.Errorf("kraken provider failed to get ticker price for %s", key)
+			return nil, fmt.Errorf("failed to get ticker price for %s", key)
 		}
 		tickerPrices[key] = tickerPrice
 	}
@@ -212,7 +212,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 		// msg is not an event, it will try to marshal to ticker message
 		if err = p.messageReceivedTickerPrice(bz); err != nil {
 			if err = p.messageReceivedCandle(bz); err != nil {
-				p.logger.Debug().Err(err).Msg("kraken provider was unable to unmarshall")
+				p.logger.Debug().Err(err).Msg("unable to unmarshal")
 			}
 		}
 		return
@@ -239,14 +239,12 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	}
 
 	if len(tickerMessage) != 4 {
-		p.logger.Debug().Msg("sent an unexpected structure")
-		return err
+		return fmt.Errorf("sent an unexpected structure")
 	}
 
 	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
-		p.logger.Debug().Msg("sent an unexpected channel name")
-		return err
+		return fmt.Errorf("sent an channel name")
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
@@ -332,17 +330,17 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	if len(candleMessage) != 4 {
-		return fmt.Errorf("Kraken provider sent something different than candle")
+		return fmt.Errorf("sent something different than candle")
 	}
 
 	channelName, ok := candleMessage[2].(string)
 	if !ok || channelName != "ohlc-1" {
-		return fmt.Errorf("Kraken provider sent an unexpected channel name")
+		return fmt.Errorf("sent an unexpected channel name")
 	}
 
 	tickerBz, err := json.Marshal(candleMessage[1])
 	if err != nil {
-		return fmt.Errorf("Kraken provider could not marshal ticker message")
+		return fmt.Errorf("could not marshal ticker message")
 	}
 
 	var krakenCandle KrakenCandle
@@ -352,7 +350,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 
 	krakenPair, ok := candleMessage[3].(string)
 	if !ok {
-		return fmt.Errorf("Kraken provider sent an unexpected pair")
+		return fmt.Errorf("sent an unexpected pair")
 	}
 
 	krakenPair = normalizeKrakenBTCPair(krakenPair)

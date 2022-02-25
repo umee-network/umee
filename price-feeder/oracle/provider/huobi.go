@@ -203,7 +203,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	}
 
 	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Err(err).Msg("failed to unmarshal message from Huobi provider")
+		p.logger.Err(err).Msg("failed to unmarshal message")
 		return
 	}
 
