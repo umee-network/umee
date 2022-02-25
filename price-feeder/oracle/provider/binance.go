@@ -118,7 +118,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp BinanceTicker
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not ticker responses
-		p.logger.Err(err).Msg("provider could not unmarshal")
+		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return
 	}
 
@@ -163,7 +163,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("provider could not read message")
+				p.logger.Err(err).Msg("could not read message")
 				continue
 			}
 
@@ -175,7 +175,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("provider error reconnecting")
+				p.logger.Err(err).Msg("error reconnecting")
 				p.keepReconnecting()
 			}
 		}
@@ -210,12 +210,12 @@ func (p *BinanceProvider) keepReconnecting() {
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("provider attempted to reconnect %d times at %s", connectionTries, time.String())
+			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("provider failed to reconnect %d times", connectionTries)
+			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
 		}
 		connectionTries++
 		return
