@@ -13,7 +13,8 @@ const (
 	defaultTimeout           = 10 * time.Second
 	defaultReadNewWSMessage  = 50 * time.Millisecond
 	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
-	defaultReconnectTime     = time.Minute * 15
+	defaultReconnectTime     = time.Minute * 20
+	maxReconnectionTries     = 3
 )
 
 var (

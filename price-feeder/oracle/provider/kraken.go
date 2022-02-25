@@ -272,12 +272,18 @@ func (p *KrakenProvider) reconnect() error {
 func (p *KrakenProvider) keepReconnecting() {
 	reconnectTicker := time.NewTicker(defaultReconnectTime)
 	defer reconnectTicker.Stop()
+	connectionTries := 1
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msg("kraken provider attempted reconnecting at " + time.String())
+			p.logger.Err(err).Msgf("kraken provider attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
+
+		if connectionTries > maxReconnectionTries {
+			p.logger.Warn().Msgf("kraken provider failed to reconnect %d times", connectionTries)
+		}
+		connectionTries++
 		return
 	}
 }

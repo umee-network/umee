@@ -202,16 +202,22 @@ func (p *BinanceProvider) reconnect() error {
 	return p.subscribeTickers(p.subscribedPairs...)
 }
 
-// keepReconnecting keeps trying to reconnect if an error occurs in recconnect
+// keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
 func (p *BinanceProvider) keepReconnecting() {
 	reconnectTicker := time.NewTicker(defaultReconnectTime)
 	defer reconnectTicker.Stop()
+	connectionTries := 1
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msg("binance provider error recconecting at " + time.String())
+			p.logger.Err(err).Msgf("binance provider attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
+
+		if connectionTries > maxReconnectionTries {
+			p.logger.Warn().Msgf("binance provider failed to reconnect %d times", connectionTries)
+		}
+		connectionTries++
 		return
 	}
 }
