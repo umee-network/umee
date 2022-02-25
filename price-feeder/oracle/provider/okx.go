@@ -79,7 +79,7 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	provider := &OkxProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("provider", "okx").Logger(),
 		tickers:         map[string]OkxTickerPair{},
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		subscribedPairs: pairs,
@@ -130,9 +130,9 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("Okx provider could not read message")
+				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("Okx provider could not send ping")
+					p.logger.Err(err).Msg("could not send ping")
 				}
 				continue
 			}
@@ -146,7 +146,7 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("Okx provider error reconnecting")
+				p.logger.Err(err).Msg("error reconnecting")
 			}
 		}
 	}
@@ -160,7 +160,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp OkxTickerResponse
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not tickerResponses
-		p.logger.Err(err).Msg("Okx provider could not unmarshal")
+		p.logger.Err(err).Msg("could not unmarshal")
 		return
 	}
 
@@ -203,7 +203,7 @@ func (p *OkxProvider) resetReconnectTimer() {
 func (p *OkxProvider) reconnect() error {
 	p.wsClient.Close()
 
-	p.logger.Debug().Msg("Okx reconnecting websocket")
+	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Okx websocket: %w", err)
