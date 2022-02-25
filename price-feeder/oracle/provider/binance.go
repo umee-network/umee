@@ -15,10 +15,8 @@ import (
 )
 
 const (
-	binanceHost           = "stream.binance.com:9443"
-	binancePath           = "/ws/umeestream"
-	binanceConnectionTime = time.Hour * 23 //  should be < 24
-	binanceReconnectTime  = time.Minute * 15
+	binanceHost = "stream.binance.com:9443"
+	binancePath = "/ws/umeestream"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -106,7 +104,7 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", key)
+		return TickerPrice{}, fmt.Errorf("binance provider failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
@@ -154,7 +152,7 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(binanceConnectionTime)
+	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
 
 	for {
@@ -204,16 +202,22 @@ func (p *BinanceProvider) reconnect() error {
 	return p.subscribeTickers(p.subscribedPairs...)
 }
 
-// keepReconnecting keeps trying to reconnect if an error occurs in recconnect
+// keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
 func (p *BinanceProvider) keepReconnecting() {
-	reconnectTicker := time.NewTicker(binanceConnectionTime)
+	reconnectTicker := time.NewTicker(defaultReconnectTime)
 	defer reconnectTicker.Stop()
+	connectionTries := 1
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msg("binance provider error recconecting at " + time.String())
+			p.logger.Err(err).Msgf("binance provider attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
+
+		if connectionTries > maxReconnectionTries {
+			p.logger.Warn().Msgf("binance provider failed to reconnect %d times", connectionTries)
+		}
+		connectionTries++
 		return
 	}
 }

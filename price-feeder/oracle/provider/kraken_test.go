@@ -1,127 +1,91 @@
 package provider
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"context"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestKrakenProvider_GetTickerPrices(t *testing.T) {
-	p := NewKrakenProvider()
+	p, err := NewKrakenProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/0/public/Ticker?pair=ATOMUSD", req.URL.String())
-			resp := `{
-				"error": [],
-				"result": {
-					"ATOMUSD": {
-						"c": ["35.0872000", "0.32546988"],
-						"v": ["1920.83610601", "7954.00219674"]
-					}
-				}
-			}
-			`
-			rw.Write([]byte(resp))
-		}))
-		defer server.Close()
+		lastPrice := sdk.MustNewDecFromStr("34.69000000")
+		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		p.client = server.Client()
-		p.baseURL = server.URL
+		tickerMap := map[string]TickerPrice{}
+		tickerMap["ATOMUSDT"] = TickerPrice{
+			Price:  lastPrice,
+			Volume: volume,
+		}
 
-		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USD"})
+		p.tickers = tickerMap
+
+		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
-		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["ATOMUSD"].Volume)
+		require.Equal(t, lastPrice, prices["ATOMUSDT"].Price)
+		require.Equal(t, volume, prices["ATOMUSDT"].Volume)
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/0/public/Ticker?pair=ATOMUSD,XXBTZUSD", req.URL.String())
-			resp := `{
-				"error": [],
-				"result": {
-					"ATOMUSD": {
-						"c": ["35.0872000", "0.32546988"],
-						"v": ["1920.83610601", "7954.00219674"]
-					},
-					"XXBTZUSD": {
-						"c": ["63339.40000", "0.00010000"],
-						"v": ["1920.83610601", "7954.00219674"]
-					}
-				}
-			}
-			`
-			rw.Write([]byte(resp))
-		}))
-		defer server.Close()
+		lastPriceAtom := sdk.MustNewDecFromStr("34.69000000")
+		lastPriceLuna := sdk.MustNewDecFromStr("41.35000000")
+		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		p.client = server.Client()
-		p.baseURL = server.URL
+		tickerMap := map[string]TickerPrice{}
+		tickerMap["ATOMUSDT"] = TickerPrice{
+			Price:  lastPriceAtom,
+			Volume: volume,
+		}
 
+		tickerMap["LUNAUSDT"] = TickerPrice{
+			Price:  lastPriceLuna,
+			Volume: volume,
+		}
+
+		p.tickers = tickerMap
 		prices, err := p.GetTickerPrices(
-			types.CurrencyPair{Base: "ATOM", Quote: "USD"},
-			types.CurrencyPair{Base: "XXBTZ", Quote: "USD"},
+			types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+			types.CurrencyPair{Base: "LUNA", Quote: "USDT"},
 		)
 		require.NoError(t, err)
 		require.Len(t, prices, 2)
-		require.Equal(t, sdk.MustNewDecFromStr("35.0872"), prices["ATOMUSD"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["ATOMUSD"].Volume)
-		require.Equal(t, sdk.MustNewDecFromStr("63339.40000"), prices["XXBTZUSD"].Price)
-		require.Equal(t, sdk.MustNewDecFromStr("7954.00219674"), prices["XXBTZUSD"].Volume)
-	})
-
-	t.Run("invalid_request_bad_response", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/0/public/Ticker?pair=ATOMUSD", req.URL.String())
-			rw.Write([]byte(`FOO`))
-		}))
-		defer server.Close()
-
-		p.client = server.Client()
-		p.baseURL = server.URL
-
-		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USD"})
-		require.Error(t, err)
-		require.Nil(t, prices)
+		require.Equal(t, lastPriceAtom, prices["ATOMUSDT"].Price)
+		require.Equal(t, volume, prices["ATOMUSDT"].Volume)
+		require.Equal(t, lastPriceLuna, prices["LUNAUSDT"].Price)
+		require.Equal(t, volume, prices["LUNAUSDT"].Volume)
 	})
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/0/public/Ticker?pair=FOOBAR", req.URL.String())
-			resp := `{
-				"error": ["EQuery:Unknown asset pair"]
-			}
-			`
-			rw.Write([]byte(resp))
-		}))
-		defer server.Close()
-
-		p.client = server.Client()
-		p.baseURL = server.URL
-
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
+		require.Equal(t, "kraken provider failed to get ticker price for FOOBAR", err.Error())
 		require.Nil(t, prices)
 	})
+}
 
-	t.Run("check_redirect", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			http.Redirect(rw, r, p.baseURL, http.StatusTemporaryRedirect)
-		}))
-		defer server.Close()
+func TestKrakenPairToCurrencyPairSymbol(t *testing.T) {
+	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
+	currencyPairSymbol := krakenPairToCurrencyPairSymbol("ATOM/USDT")
+	require.Equal(t, cp.String(), currencyPairSymbol)
+}
 
-		server.Client().CheckRedirect = preventRedirect
-		p.client = server.Client()
-		p.baseURL = server.URL
+func TestKrakenCurrencyPairToKrakenPair(t *testing.T) {
+	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
+	krakenSymbol := currencyPairToKrakenPair(cp)
+	require.Equal(t, krakenSymbol, "ATOM/USDT")
+}
 
-		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
-		require.Error(t, err)
-		require.Nil(t, prices)
-	})
+func TestNormalizeKrakenBTCPair(t *testing.T) {
+	btcSymbol := normalizeKrakenBTCPair("XBT/USDT")
+	require.Equal(t, btcSymbol, "BTC/USDT")
+
+	atomSymbol := normalizeKrakenBTCPair("ATOM/USDT")
+	require.Equal(t, atomSymbol, "ATOM/USDT")
 }
