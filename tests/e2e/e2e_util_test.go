@@ -227,7 +227,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
 
 	var broadcastResp map[string]interface{}
-	s.Require().NoError(json.Unmarshal(outBuf.Bytes(), &broadcastResp))
+	s.Require().NoError(json.Unmarshal(outBuf.Bytes(), &broadcastResp), outBuf.String())
 
 	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
 	txHash := broadcastResp["txhash"].(string)
