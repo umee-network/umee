@@ -150,7 +150,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("Kraken provider could not read message")
+				p.logger.Err(err).Msg("kraken provider could not read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
 					p.keepReconnecting()
@@ -166,7 +166,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("Kraken provider receved reconnecting")
+				p.logger.Err(err).Msg("kraken provider attempted to reconnect")
 				p.keepReconnecting()
 			}
 		}
@@ -180,7 +180,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	var krakenEvent KrakenEvent
-	if json.Unmarshal(bz, &krakenEvent) == nil {
+	if err := json.Unmarshal(bz, &krakenEvent); err != nil
 		switch krakenEvent.Event {
 		case krakenEventSystemStatus:
 			p.messageReceivedSystemStatus(bz)
@@ -191,7 +191,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 		}
 		return
 	} else {
-		p.logger.Debug().Msg("Kraken provider received an message that is not an event")
+		p.logger.Debug().Msg("kraken provider received a message that is an invalid event")
 	}
 
 	p.messageReceivedTickerPrice(bz)
@@ -275,7 +275,7 @@ func (p *KrakenProvider) keepReconnecting() {
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msg("Kraken provider received recconecting at " + time.String())
+			p.logger.Err(err).Msg("kraken provider attempted reconnecting at " + time.String())
 			continue
 		}
 		return
@@ -389,9 +389,9 @@ func currencyPairToKrakenPair(cp types.CurrencyPair) string {
 	return strings.ToUpper(cp.Base + "/" + cp.Quote)
 }
 
-// normalizeKrakenPair checks if there is an anomaly
-// in the ticker, like the pair of BTC is returned as XBT.
-func normalizeKrakenPair(ticker string) string {
+// normalizeKrakenBTCPair changes XBT pairs to BTC,
+// since other providers list bitcoin as BTC 
+func normalizeKrakenBTCPair(ticker string) string {
 	return strings.Replace(ticker, "XBT", "BTC", 1)
 }
 
