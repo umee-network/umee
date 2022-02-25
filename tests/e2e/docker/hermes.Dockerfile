@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 FROM informalsystems/hermes:0.10.0 AS hermes-builder
+=======
+FROM informalsystems/hermes:0.12.0 AS hermes-builder
+>>>>>>> 2a9cf5f (chore: e2e + dep updates (#582))
 
 FROM debian:buster-slim
 USER root
