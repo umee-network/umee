@@ -91,13 +91,13 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Kraken websocket: %w", err)
+		return nil, fmt.Errorf("error connecting to websocket: %w", err)
 	}
 
 	provider := &KrakenProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("provider", "kraken").Logger(),
 		tickers:         map[string]TickerPrice{},
 		candles:         map[string]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -177,7 +177,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("kraken provider could not read message")
+				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
 					p.keepReconnecting()
@@ -193,7 +193,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("kraken provider attempted to reconnect")
+				p.logger.Err(err).Msg("attempted to reconnect")
 				p.keepReconnecting()
 			}
 		}
@@ -208,7 +208,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 
 	var krakenEvent KrakenEvent
 	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
-		p.logger.Debug().Msg("kraken provider received a message that is not an event")
+		p.logger.Debug().Msg("received a message that is not an event")
 		// msg is not an event, it will try to marshal to ticker message
 		if err = p.messageReceivedTickerPrice(bz); err != nil {
 			if err = p.messageReceivedCandle(bz); err != nil {
@@ -234,31 +234,37 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
 	var tickerMessage []interface{}
 	if err := json.Unmarshal(bz, &tickerMessage); err != nil {
+		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return err
 	}
 
 	if len(tickerMessage) != 4 {
-		return fmt.Errorf("Kraken provider sent something different than ticker")
+		p.logger.Debug().Msg("sent an unexpected structure")
+		return err
 	}
 
 	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
-		return fmt.Errorf("Kraken provider sent an unexpected channel name")
+		p.logger.Debug().Msg("sent an unexpected channel name")
+		return err
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
 	if err != nil {
+		p.logger.Err(err).Msg("could not marshal ticker message")
 		return err
 	}
 
 	var krakenTicker KrakenTicker
 	if err := json.Unmarshal(tickerBz, &krakenTicker); err != nil {
+		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return err
 	}
 
 	krakenPair, ok := tickerMessage[3].(string)
 	if !ok {
-		return fmt.Errorf("Kraken provider sent an unexpected pair")
+		p.logger.Debug().Msg("sent an unexpected pair")
+		return err
 	}
 
 	krakenPair = normalizeKrakenBTCPair(krakenPair)
@@ -266,7 +272,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 
 	tickerPrice, err := krakenTicker.toTickerPrice(currencyPairSymbol)
 	if err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not parse kraken ticker to ticker price")
+		p.logger.Err(err).Msg("could not parse kraken ticker to ticker price")
 		return err
 	}
 
@@ -384,12 +390,12 @@ func (p *KrakenProvider) keepReconnecting() {
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("kraken provider attempted to reconnect %d times at %s", connectionTries, time.String())
+			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("kraken provider failed to reconnect %d times", connectionTries)
+			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
 		}
 		connectionTries++
 		return
@@ -401,7 +407,7 @@ func (p *KrakenProvider) keepReconnecting() {
 func (p *KrakenProvider) messageReceivedSubscriptionStatus(bz []byte) {
 	var subscriptionStatus KrakenEventSubscriptionStatus
 	if err := json.Unmarshal(bz, &subscriptionStatus); err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not unmarshal KrakenEventSubscriptionStatus")
+		p.logger.Err(err).Msg("provider could not unmarshal KrakenEventSubscriptionStatus")
 		return
 	}
 
@@ -421,7 +427,7 @@ func (p *KrakenProvider) messageReceivedSubscriptionStatus(bz []byte) {
 func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 	var systemStatus KrakenEventSystemStatus
 	if err := json.Unmarshal(bz, &systemStatus); err != nil {
-		p.logger.Err(err).Msg("Kraken provider could not unmarshal KrakenEventSystemStatus")
+		p.logger.Err(err).Msg("could not unmarshal event system status")
 		return
 	}
 

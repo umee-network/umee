@@ -92,7 +92,7 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	provider := &HuobiProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("provider", "huobi").Logger(),
 		tickers:         map[string]HuobiTicker{},
 		candles:         map[string]HuobiCandle{},
 		subscribedPairs: pairs,
@@ -145,11 +145,11 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			if err != nil {
 				// If some error occurs, check if connection is alive
 				// and continue to try to read the next message.
-				p.logger.Err(err).Msg("failed to read message from Huobi provider")
+				p.logger.Err(err).Msg("failed to read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
 					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting to the Huobi provider")
+						p.logger.Err(err).Msg("error reconnecting")
 					}
 				}
 				continue
@@ -163,7 +163,7 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting to the Huobi provider")
+				p.logger.Err(err).Msg("error reconnecting")
 			}
 		}
 	}
@@ -179,7 +179,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 
 	bz, err := decompressGzip(bz)
 	if err != nil {
-		p.logger.Err(err).Msg("failed to decompress Huobi gziped message")
+		p.logger.Err(err).Msg("failed to decompress gziped message")
 		return
 	}
 
@@ -191,9 +191,9 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	var tickerResp HuobiTicker
 	var candleResp HuobiCandle
 
-	// sometimes it returns other messages which are not ticker responses
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Err(err).Msg("failed to unmarshal message from Huobi provider")
+		// sometimes it returns other messages which are not ticker responses
+		p.logger.Err(err).Msg("failed to unmarshal message")
 		return
 	}
 
@@ -227,14 +227,14 @@ func (p *HuobiProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
 	}
 
 	if err := json.Unmarshal(bz, &heartbeat); err != nil {
-		p.logger.Err(err).Msg("Huobi provider could not unmarshal heartbeat")
+		p.logger.Err(err).Msg("could not unmarshal heartbeat")
 		return
 	}
 
 	if err := p.wsClient.WriteJSON(struct {
 		Pong uint64 `json:"pong"`
 	}{Pong: heartbeat.Ping}); err != nil {
-		p.logger.Err(err).Msg("Huobi provider could not send pong message back")
+		p.logger.Err(err).Msg("could not send pong message back")
 	}
 }
 
@@ -259,10 +259,10 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 func (p *HuobiProvider) reconnect() error {
 	p.wsClient.Close()
 
-	p.logger.Debug().Msg("huobi reconnecting websocket")
+	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
-		return fmt.Errorf("error reconnecting to huobi websocket: %w", err)
+		return fmt.Errorf("error reconnecting to Huobi websocket: %w", err)
 	}
 	p.wsClient = wsConn
 
