@@ -71,7 +71,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	provider := &BinanceProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("module", "oracle").Logger(),
+		logger:          logger.With().Str("provider", "binance").Logger(),
 		tickers:         map[string]BinanceTicker{},
 		subscribedPairs: pairs,
 	}
@@ -118,7 +118,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp BinanceTicker
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		// sometimes it returns other messages which are not ticker responses
-		p.logger.Err(err).Msg("Binance provider could not unmarshal")
+		p.logger.Err(err).Msg("provider could not unmarshal")
 		return
 	}
 
@@ -163,7 +163,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("Binance provider could not read message")
+				p.logger.Err(err).Msg("provider could not read message")
 				continue
 			}
 
@@ -175,7 +175,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("binance provider error reconnecting")
+				p.logger.Err(err).Msg("provider error reconnecting")
 				p.keepReconnecting()
 			}
 		}
@@ -192,7 +192,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 func (p *BinanceProvider) reconnect() error {
 	p.wsClient.Close()
 
-	p.logger.Debug().Msg("binance reconnecting websocket")
+	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
 		return fmt.Errorf("error reconnect to binance websocket: %w", err)
@@ -210,12 +210,12 @@ func (p *BinanceProvider) keepReconnecting() {
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("binance provider attempted to reconnect %d times at %s", connectionTries, time.String())
+			p.logger.Err(err).Msgf("provider attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("binance provider failed to reconnect %d times", connectionTries)
+			p.logger.Warn().Msgf("provider failed to reconnect %d times", connectionTries)
 		}
 		connectionTries++
 		return
