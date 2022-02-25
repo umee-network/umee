@@ -149,7 +149,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
 				// if some error occurs continue to try to read the next message
-				p.logger.Err(err).Msg("provider could not read message")
+				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
 					p.keepReconnecting()
@@ -165,7 +165,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("provider attempted to reconnect")
+				p.logger.Err(err).Msg("attempted to reconnect")
 				p.keepReconnecting()
 			}
 		}
@@ -180,7 +180,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 
 	var krakenEvent KrakenEvent
 	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
-		p.logger.Debug().Msg("provider received a message that is not an event")
+		p.logger.Debug().Msg("received a message that is not an event")
 		// msg is not an event, it will try to marshal to ticker message
 		p.messageReceivedTickerPrice(bz)
 		return
@@ -202,36 +202,36 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) {
 	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
 	var tickerMessage []interface{}
 	if err := json.Unmarshal(bz, &tickerMessage); err != nil {
-		p.logger.Err(err).Msg("provider could not unmarshal")
+		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return
 	}
 
 	if len(tickerMessage) != 4 {
-		p.logger.Debug().Msg("provider sent something different than ticker")
+		p.logger.Debug().Msg("sent an unexpected structure")
 		return
 	}
 
 	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
-		p.logger.Debug().Msg("provider sent an unexpected channel name")
+		p.logger.Debug().Msg("sent an unexpected channel name")
 		return
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
 	if err != nil {
-		p.logger.Err(err).Msg("provider could not marshal ticker message")
+		p.logger.Err(err).Msg("could not marshal ticker message")
 		return
 	}
 
 	var krakenTicker KrakenTicker
 	if err := json.Unmarshal(tickerBz, &krakenTicker); err != nil {
-		p.logger.Err(err).Msg("provider could not unmarshal ticker")
+		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return
 	}
 
 	krakenPair, ok := tickerMessage[3].(string)
 	if !ok {
-		p.logger.Debug().Msg("provider sent an unexpected pair")
+		p.logger.Debug().Msg("sent an unexpected pair")
 		return
 	}
 
@@ -240,7 +240,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) {
 
 	tickerPrice, err := krakenTicker.toTickerPrice(currencyPairSymbol)
 	if err != nil {
-		p.logger.Err(err).Msg("provider could not parse kraken ticker to ticker price")
+		p.logger.Err(err).Msg("could not parse kraken ticker to ticker price")
 		return
 	}
 
@@ -275,12 +275,12 @@ func (p *KrakenProvider) keepReconnecting() {
 
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("provider attempted to reconnect %d times at %s", connectionTries, time.String())
+			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("provider failed to reconnect %d times", connectionTries)
+			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
 		}
 		connectionTries++
 		return
@@ -312,7 +312,7 @@ func (p *KrakenProvider) messageReceivedSubscriptionStatus(bz []byte) {
 func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 	var systemStatus KrakenEventSystemStatus
 	if err := json.Unmarshal(bz, &systemStatus); err != nil {
-		p.logger.Err(err).Msg("provider could not unmarshal KrakenEventSystemStatus")
+		p.logger.Err(err).Msg("could not unmarshal event system status")
 		return
 	}
 
