@@ -89,6 +89,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsClient:        wsConn,
 		logger:          logger.With().Str("module", "oracle").Logger(),
 		tickers:         map[string]BinanceTicker{},
+		candles:         map[string]BinanceCandle{},
 		subscribedPairs: pairs,
 	}
 
