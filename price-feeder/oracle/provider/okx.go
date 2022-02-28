@@ -53,8 +53,6 @@ type (
 
 	OkxCandlePair struct {
 		Open   string `json:"o"`
-		High   string `json:"h"`
-		Low    string `json:"l"`
 		Close  string `json:"c"`
 		Volume string `json:"vol"`
 	}
@@ -215,8 +213,6 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	// the candlesticks channel uses an array of stringss
 	p.candles[instID] = OkxCandlePair{
 		Open:   pairData[1],
-		High:   pairData[2],
-		Low:    pairData[3],
 		Close:  pairData[4],
 		Volume: pairData[5],
 	}

@@ -46,8 +46,6 @@ type (
 
 	KrakenCandle struct {
 		Open   string
-		High   string
-		Low    string
 		Close  string
 		Volume string
 	}
@@ -292,18 +290,6 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 		return fmt.Errorf("open field must be a string")
 	}
 	kc.Open = open
-
-	high, ok := tmp[3].(string)
-	if !ok {
-		return fmt.Errorf("high must be a string")
-	}
-	kc.High = high
-
-	low, ok := tmp[4].(string)
-	if !ok {
-		return fmt.Errorf("low field must be a string")
-	}
-	kc.Low = low
 
 	close, ok := tmp[5].(string)
 	if !ok {

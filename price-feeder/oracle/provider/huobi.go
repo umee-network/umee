@@ -63,11 +63,7 @@ type (
 	HuobiCandleTick struct {
 		Open   float64 `json:"open"`
 		Close  float64 `json:"close"`
-		Low    float64 `json:"low"`
-		High   float64 `json:"high"`
-		Amount float64 `json:"amount"`
 		Volume float64 `json:"volume"`
-		Count  float64 `json:"count"`
 	}
 
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
@@ -207,7 +203,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if candleResp.Tick.Amount != 0 {
+	if candleResp.Tick.Open != 0 {
 		p.setCandlePair(candleResp)
 	}
 }
