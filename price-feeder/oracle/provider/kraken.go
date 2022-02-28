@@ -243,7 +243,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		return fmt.Errorf("sent an unexpected structure")
 	}
 
-	channelName, ok := tickerMessage[2].(string)
+	channelName, ok := tickerMessage[1].(string)
 	if !ok || channelName != "ticker" {
 		return fmt.Errorf("sent an unexpected channel name")
 	}
