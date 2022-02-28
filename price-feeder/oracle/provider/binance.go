@@ -190,7 +190,7 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-// subscribeTickers subscribe to all candles
+// subscribeCandles subscribe to all candles
 func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	params := make([]string, len(cps))
 

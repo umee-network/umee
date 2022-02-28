@@ -44,7 +44,7 @@ type (
 	// HuobiTicker defines the response type for the channel and
 	// the tick object for a given ticker/symbol.
 	HuobiTicker struct {
-		CH   string    `json:"ch"` // Data belonged channel，Format：market.$symbol.ticker
+		CH   string    `json:"ch"` // Channel name.$symbol.ticker
 		Tick HuobiTick `json:"tick"`
 	}
 
@@ -56,7 +56,7 @@ type (
 	}
 
 	HuobiCandle struct {
-		CH   string          `json:"ch"` // Data belonged channel，Format：market.$symbol.kline.$period
+		CH   string          `json:"ch"` // Channel name. Format：market.$symbol.kline.$period
 		Tick HuobiCandleTick `json:"tick"`
 	}
 

@@ -181,9 +181,10 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp OkxTickerResponse
 	var candleResp OkxCandleResponse
 
+	// sometimes it returns other messages which are not
+	// tickerResponses or candleResponses
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		if err := json.Unmarshal(bz, &candleResp); err != nil {
-			// sometimes it returns other messages which are not tickerResponses
 			p.logger.Err(err).Msg("could not unmarshal")
 			return
 		}
@@ -210,7 +211,7 @@ func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	// the candlesticks channel uses an array of stringss
+	// the candlesticks channel uses an array of strings
 	p.candles[instID] = OkxCandlePair{
 		Open:   pairData[1],
 		Close:  pairData[4],

@@ -242,7 +242,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 
 	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
-		return fmt.Errorf("sent an channel name")
+		return fmt.Errorf("sent an unexpected channel name")
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
@@ -306,27 +306,27 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	return nil
 }
 
-// messageReceivedTickerPrice handles the ticker price msg.
+// messageReceivedCandle handles the candle msg.
 func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	// the provider response is an array with different types at each index
-	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
+	// kraken documentation https://docs.kraken.com/websockets/#message-ohlc
 	var candleMessage []interface{}
 	if err := json.Unmarshal(bz, &candleMessage); err != nil {
 		return err
 	}
 
 	if len(candleMessage) != 4 {
-		return fmt.Errorf("sent something different than candle")
+		return fmt.Errorf("received something different than candle")
 	}
 
 	channelName, ok := candleMessage[2].(string)
 	if !ok || channelName != "ohlc-1" {
-		return fmt.Errorf("sent an unexpected channel name")
+		return fmt.Errorf("received an unexpected channel name")
 	}
 
 	tickerBz, err := json.Marshal(candleMessage[1])
 	if err != nil {
-		return fmt.Errorf("could not marshal ticker message")
+		return fmt.Errorf("could not marshal candle message")
 	}
 
 	var krakenCandle KrakenCandle
@@ -336,7 +336,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 
 	krakenPair, ok := candleMessage[3].(string)
 	if !ok {
-		return fmt.Errorf("sent an unexpected pair")
+		return fmt.Errorf("received an unexpected pair")
 	}
 
 	krakenPair = normalizeKrakenBTCPair(krakenPair)
