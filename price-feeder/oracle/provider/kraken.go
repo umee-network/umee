@@ -47,10 +47,10 @@ type (
 	// KrakenCandle candle response from Kraken candle channel.
 	// REF : https://docs.kraken.com/websockets/#message-ohlc
 	KrakenCandle struct {
-		Open      string
-		Close     string
-		Volume    string
-		TimeStamp int64
+		Open      string // Open price during this period
+		Close     string // Close price during this period
+		Volume    string // Volume during this period
+		TimeStamp int64  // Linux epoch timestamp
 	}
 
 	// KrakenSubscriptionMsg Msg to subscribe to all the pairs at once.

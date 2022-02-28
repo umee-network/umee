@@ -52,20 +52,25 @@ type (
 		Data []OkxTickerPair `json:"data"`
 	}
 
+	// OkxCandlePair defines a candle for Okx
 	OkxCandlePair struct {
-		Open      string `json:"o"`
-		Close     string `json:"c"`
-		Volume    string `json:"vol"`
-		TimeStamp int64  `json:"ts"`
+		Open      string `json:"o"`   // Open price for this time period
+		Close     string `json:"c"`   // Close price for this time period
+		Volume    string `json:"vol"` // Volume for this time period
+		TimeStamp int64  `json:"ts"`  // Linux epoch timestamp
 	}
 
-	OkxCandleArg struct {
+	// OkxInst defines the structure containing ID information for the
+	// OkxCandleResponse
+	OkxID struct {
 		InstID string `json:"instId"`
 	}
 
+	// OkxCandleResponse defines the response structure of a Okx candle
+	// request.
 	OkxCandleResponse struct {
-		Data [][]string   `json:"data"`
-		Arg  OkxCandleArg `json:"arg"`
+		Data [][]string `json:"data"`
+		ID   OkxID      `json:"arg"`
 	}
 
 	// OkxSubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
@@ -194,7 +199,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 
 	if len(candleResp.Data) > 0 {
 		for _, candlePair := range candleResp.Data {
-			p.setCandlePair(candlePair, candleResp.Arg.InstID)
+			p.setCandlePair(candlePair, candleResp.ID.InstID)
 		}
 		return
 	}
@@ -218,7 +223,6 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	if err != nil {
 		ts = 0
 	}
-
 	// the candlesticks channel uses an array of strings
 	p.candles[instID] = OkxCandlePair{
 		Open:      pairData[1],

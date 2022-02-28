@@ -54,18 +54,21 @@ type (
 	HuobiTick struct {
 		Vol       float64 `json:"vol"`       // Accumulated trading value of last 24 hours
 		LastPrice float64 `json:"lastPrice"` // Last traded price
-		TimeStamp int64   `json:"id"`        // TimeStamp for this as an ID
 	}
 
+	// HuobiCandle defines the response type for the channel and
+	// the tick object for a given ticker/symbol.
 	HuobiCandle struct {
 		CH   string          `json:"ch"` // Channel name. Format：market.$symbol.kline.$period
 		Tick HuobiCandleTick `json:"tick"`
 	}
 
+	// HuobiCandleTick defines the response type for the candle.
 	HuobiCandleTick struct {
-		Open   float64 `json:"open"`
-		Close  float64 `json:"close"`
-		Volume float64 `json:"volume"`
+		Open      float64 `json:"open"`   // Opening price during this period
+		Close     float64 `json:"close"`  // Closing price during this period
+		Volume    float64 `json:"volume"` // Volume during this period
+		TimeStamp int64   `json:"id"`     // TimeStamp for this as an ID
 	}
 
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
