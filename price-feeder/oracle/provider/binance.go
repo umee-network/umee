@@ -195,7 +195,7 @@ func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	params := make([]string, len(cps))
 
 	for i, cp := range cps {
-		params[i] = strings.ToLower(cp.String() + "@kline_30m")
+		params[i] = strings.ToLower(cp.String() + "@kline_1m")
 	}
 
 	subsMsg := newBinanceSubscriptionMsg(params...)

@@ -314,7 +314,7 @@ func newOkxSubscriptionTopic(instId string) OkxSubscriptionTopic {
 // newOkxSubscriptionTopic returns a new subscription topic
 func newOkxCandleSubscriptionTopic(instId string) OkxSubscriptionTopic {
 	return OkxSubscriptionTopic{
-		Channel: "candle15m",
+		Channel: "candle1m",
 		InstId:  instId,
 	}
 }

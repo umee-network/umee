@@ -341,5 +341,5 @@ func newHuobiCandleSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 
 // getCandleTicker returns the channel name in the Format：market.$symbol.line.$period
 func getCandleTicker(cp types.CurrencyPair) string {
-	return strings.ToLower("market." + cp.String() + ".kline.15min")
+	return strings.ToLower("market." + cp.String() + ".kline.1min")
 }
