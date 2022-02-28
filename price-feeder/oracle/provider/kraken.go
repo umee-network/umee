@@ -44,10 +44,13 @@ type (
 		V []string `json:"v"` // Volume with the value over last 24 hours in the second position
 	}
 
+	// KrakenCandle candle response from Kraken candle channel.
+	// REF : https://docs.kraken.com/websockets/#message-ohlc
 	KrakenCandle struct {
-		Open   string
-		Close  string
-		Volume string
+		Open      string
+		Close     string
+		Volume    string
+		TimeStamp int64
 	}
 
 	// KrakenSubscriptionMsg Msg to subscribe to all the pairs at once.
@@ -284,6 +287,12 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if len(tmp) != 9 {
 		return fmt.Errorf("wrong number of fields in candle")
 	}
+
+	time, ok := tmp[2].(int64)
+	if !ok {
+		return fmt.Errorf("time field must be an int64")
+	}
+	kc.TimeStamp = time
 
 	open, ok := tmp[2].(string)
 	if !ok {

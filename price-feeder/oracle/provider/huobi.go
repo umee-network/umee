@@ -31,6 +31,7 @@ type (
 	// API.
 	//
 	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-ticker
+	// REF : https://huobiapi.github.io/docs/spot/v1/en/#get-klines-candles
 	HuobiProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
@@ -53,6 +54,7 @@ type (
 	HuobiTick struct {
 		Vol       float64 `json:"vol"`       // Accumulated trading value of last 24 hours
 		LastPrice float64 `json:"lastPrice"` // Last traded price
+		TimeStamp int64   `json:"id"`        // TimeStamp for this as an ID
 	}
 
 	HuobiCandle struct {

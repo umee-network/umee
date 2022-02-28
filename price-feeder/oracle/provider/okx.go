@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
 
@@ -52,9 +53,10 @@ type (
 	}
 
 	OkxCandlePair struct {
-		Open   string `json:"o"`
-		Close  string `json:"c"`
-		Volume string `json:"vol"`
+		Open      string `json:"o"`
+		Close     string `json:"c"`
+		Volume    string `json:"vol"`
+		TimeStamp int64  `json:"ts"`
 	}
 
 	OkxCandleArg struct {
@@ -211,11 +213,18 @@ func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	ts, err := strconv.ParseInt(pairData[0], 10, 64)
+	if err != nil {
+		ts = 0
+	}
+
 	// the candlesticks channel uses an array of strings
 	p.candles[instID] = OkxCandlePair{
-		Open:   pairData[1],
-		Close:  pairData[4],
-		Volume: pairData[5],
+		Open:      pairData[1],
+		Close:     pairData[4],
+		Volume:    pairData[5],
+		TimeStamp: ts,
 	}
 }
 
