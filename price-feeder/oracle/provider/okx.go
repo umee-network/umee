@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
 
@@ -33,6 +34,7 @@ type (
 		logger          zerolog.Logger
 		mu              sync.Mutex
 		tickers         map[string]OkxTickerPair // InstId => OkxTickerPair
+		candles         map[string]OkxCandlePair // InstId => 0kxCandlePair
 		reconnectTimer  *time.Ticker
 		subscribedPairs []types.CurrencyPair
 	}
@@ -44,10 +46,32 @@ type (
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
 	}
 
+	// OkxInst defines the structure containing ID information for the
+	// OkxResponses
+	OkxID struct {
+		Channel string `json:"channel"`
+		InstID  string `json:"instId"`
+	}
+
 	// OkxTickerResponse defines the response structure of a Okx ticker
 	// request.
 	OkxTickerResponse struct {
 		Data []OkxTickerPair `json:"data"`
+		ID   OkxID           `json:"arg"`
+	}
+
+	// OkxCandlePair defines a candle for Okx
+	OkxCandlePair struct {
+		Close     string `json:"c"`   // Close price for this time period
+		TimeStamp int64  `json:"ts"`  // Linux epoch timestamp
+		Volume    string `json:"vol"` // Volume for this time period
+	}
+
+	// OkxCandleResponse defines the response structure of a Okx candle
+	// request.
+	OkxCandleResponse struct {
+		Data [][]string `json:"data"`
+		ID   OkxID      `json:"arg"`
 	}
 
 	// OkxSubscriptionTopic Topic with the ticker to be subscribed/unsubscribed
@@ -81,12 +105,17 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "okx").Logger(),
 		tickers:         map[string]OkxTickerPair{},
+		candles:         map[string]OkxCandlePair{},
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		subscribedPairs: pairs,
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
+		return nil, err
+	}
+
+	if err := provider.subscribeCandles(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -157,15 +186,28 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerResp OkxTickerResponse
+	var (
+		tickerResp OkxTickerResponse
+		candleResp OkxCandleResponse
+	)
+
+	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		// sometimes it returns other messages which are not tickerResponses
-		p.logger.Err(err).Msg("could not unmarshal")
-		return
+		p.logger.Debug().Err(err).Msg("could not unmarshal ticker resp")
+	}
+	if err := json.Unmarshal(bz, &candleResp); err != nil {
+		p.logger.Debug().Err(err).Msg("could not unmarshal candle resp")
 	}
 
-	for _, tickerPair := range tickerResp.Data {
-		p.setTickerPair(tickerPair)
+	if tickerResp.ID.Channel == "tickers" {
+		for _, tickerPair := range tickerResp.Data {
+			p.setTickerPair(tickerPair)
+		}
+	}
+	if candleResp.ID.Channel == "candle1m" {
+		for _, candlePair := range candleResp.Data {
+			p.setCandlePair(candlePair, candleResp.ID.InstID)
+		}
 	}
 }
 
@@ -175,6 +217,22 @@ func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 	p.tickers[tickerPair.InstId] = tickerPair
 }
 
+func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	ts, err := strconv.ParseInt(pairData[0], 10, 64)
+	if err != nil {
+		return
+	}
+	// the candlesticks channel uses an array of strings
+	p.candles[instID] = OkxCandlePair{
+		Close:     pairData[4],
+		Volume:    pairData[5],
+		TimeStamp: ts,
+	}
+}
+
 // subscribeTickers subscribe to all currency pairs
 func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	topics := make([]OkxSubscriptionTopic, len(cps))
@@ -182,6 +240,19 @@ func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	for i, cp := range cps {
 		instId := getInstrumentId(cp)
 		topics[i] = newOkxSubscriptionTopic(instId)
+	}
+
+	subsMsg := newOkxSubscriptionMsg(topics...)
+	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// subscribeCandles subscribe to all candles pairs
+func (p *OkxProvider) subscribeCandles(cps ...types.CurrencyPair) error {
+	topics := make([]OkxSubscriptionTopic, len(cps))
+
+	for i, cp := range cps {
+		instId := getInstrumentId(cp)
+		topics[i] = newOkxCandleSubscriptionTopic(instId)
 	}
 
 	subsMsg := newOkxSubscriptionMsg(topics...)
@@ -237,6 +308,14 @@ func getInstrumentId(pair types.CurrencyPair) string {
 func newOkxSubscriptionTopic(instId string) OkxSubscriptionTopic {
 	return OkxSubscriptionTopic{
 		Channel: "tickers",
+		InstId:  instId,
+	}
+}
+
+// newOkxSubscriptionTopic returns a new subscription topic
+func newOkxCandleSubscriptionTopic(instId string) OkxSubscriptionTopic {
+	return OkxSubscriptionTopic{
+		Channel: "candle1m",
 		InstId:  instId,
 	}
 }
