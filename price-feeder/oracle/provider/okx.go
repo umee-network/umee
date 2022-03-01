@@ -184,8 +184,10 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerResp OkxTickerResponse
-	var candleResp OkxCandleResponse
+	var (
+		tickerResp OkxTickerResponse
+		candleResp OkxCandleResponse
+	)
 
 	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
