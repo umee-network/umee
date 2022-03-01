@@ -1,4 +1,10 @@
+<!-- markdownlint-disable MD034 -->
+<!-- markdownlint-disable MD013 -->
 # umee-1 mainnet
+
+## Snapshot Providers
+
+- https://snapshots.stake2.me/umee/
 
 ## Umee Archival Nodes
 
