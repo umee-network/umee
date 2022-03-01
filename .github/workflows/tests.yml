@@ -18,11 +18,7 @@ jobs:
   install-tparse:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - name: Display Go Version
@@ -38,11 +34,7 @@ jobs:
   test-unit-cover:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: actions/checkout@v2
@@ -66,11 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: actions/checkout@v2
@@ -170,11 +158,7 @@ jobs:
   #       part: ["00", "01", "02", "03"]
   #   steps:
   #     - uses: actions/checkout@v2
-<<<<<<< HEAD
-  #     - uses: actions/setup-go@v2.1.5
-=======
   #     - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
   #       with:
   #         go-version: 1.17
   #     - uses: technote-space/get-diff-action@v6.0.1
@@ -199,11 +183,7 @@ jobs:
   price-feeder:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: actions/checkout@v2
@@ -223,11 +203,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: technote-space/get-diff-action@v6.0.1
@@ -256,11 +232,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: technote-space/get-diff-action@v6.0.1

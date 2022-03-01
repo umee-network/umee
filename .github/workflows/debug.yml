@@ -11,11 +11,7 @@ jobs:
   ssh-debug:
     runs-on: ubuntu-latest
     steps:
-<<<<<<< HEAD
-      - uses: actions/setup-go@v2.1.5
-=======
       - uses: actions/setup-go@v3
->>>>>>> 69c66b2 (build(deps): Bump actions/setup-go from 2.2.0 to 3 (#590))
         with:
           go-version: 1.17
       - uses: actions/checkout@v2
