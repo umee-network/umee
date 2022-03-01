@@ -223,7 +223,7 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 
 	ts, err := strconv.ParseInt(pairData[0], 10, 64)
 	if err != nil {
-		ts = 0
+		return
 	}
 	// the candlesticks channel uses an array of strings
 	p.candles[instID] = OkxCandlePair{

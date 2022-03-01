@@ -22,7 +22,6 @@ var ping = []byte("ping")
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
-	// GetVolumes(...types.CurrencyPair) (map[string]TickerVolume, error)
 }
 
 // TickerPrice defines price and volume information for a symbol or ticker
