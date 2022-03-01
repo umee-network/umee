@@ -22,7 +22,6 @@ COPY Makefile go.mod go.sum ./
 COPY ante/ ante/
 COPY app/ app/
 COPY cmd/ cmd/
-COPY price-feeder/ price-feeder/
 COPY tests/ tests/
 COPY x/ x/
 
@@ -32,8 +31,10 @@ RUN mv build/umeed build/umeed-beta
 # Build umeed
 RUN make build
 
-# Build price-feeder
-WORKDIR /tmp/build/umee/price-feeder
+# Clone/Build price-feeder
+WORKDIR /tmp/build/price-feeder
+RUN git clone https://github.com/umee-network/umee.git --branch price-feeder/v0.1.1 --single-branch --depth 1 .
+WORKDIR /tmp/build/price-feeder/price-feeder
 RUN make build
 
 # Clone/Build Peggo
