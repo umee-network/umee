@@ -240,12 +240,12 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	}
 
 	if len(tickerMessage) != 4 {
-		return fmt.Errorf("sent an unexpected structure")
+		return fmt.Errorf("received an unexpected structure")
 	}
 
 	channelName, ok := tickerMessage[1].(string)
 	if !ok || channelName != "ticker" {
-		return fmt.Errorf("sent an unexpected channel name")
+		return fmt.Errorf("received an unexpected channel name")
 	}
 
 	tickerBz, err := json.Marshal(tickerMessage[1])
@@ -262,7 +262,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 
 	krakenPair, ok := tickerMessage[3].(string)
 	if !ok {
-		p.logger.Debug().Msg("sent an unexpected pair")
+		p.logger.Debug().Msg("received an unexpected pair")
 		return err
 	}
 
