@@ -8,7 +8,7 @@ CONTAINER=`docker create $TAG`
 
 docker cp "$CONTAINER:/tmp/build/umee/build/umeed-beta" dist/x86_64/
 docker cp "$CONTAINER:/tmp/build/umee/build/umeed" dist/x86_64/
-docker cp "$CONTAINER:/tmp/build/umee/price-feeder/build/price-feeder" dist/x86_64/
+docker cp "$CONTAINER:/tmp/build/price-feeder/price-feeder/build/price-feeder" dist/x86_64/
 docker cp "$CONTAINER:/tmp/build/peggo/build/peggo" dist/x86_64/
 
 docker rm -v "$CONTAINER"
