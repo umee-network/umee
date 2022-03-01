@@ -26,12 +26,14 @@ type (
 	// API.
 	//
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
+	// REF: https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
 	BinanceProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mu              sync.Mutex
 		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
+		candles         map[string]BinanceCandle // Symbol => BinanceCandle
 		subscribedPairs []types.CurrencyPair
 	}
 
@@ -46,6 +48,17 @@ type (
 		LastPrice string `json:"c"` // Last price ex.: 0.0025
 		Volume    string `json:"v"` // Total traded base asset volume ex.: 1000
 		C         uint64 `json:"C"` // Statistics close time
+	}
+
+	BinanceCandleMetadata struct {
+		Close     string `json:"c"` // Price at close
+		TimeStamp int64  `json:"T"` // Close time in unix epoch ex.: 1645756200000
+		Volume    string `json:"v"` // Volume during period
+	}
+
+	BinanceCandle struct {
+		Symbol   string                `json:"s"` // Symbol ex.: BTCUSDT
+		Metadata BinanceCandleMetadata `json:"k"` // Metadata for candle
 	}
 
 	// BinanceSubscribeMsg Msg to subscribe all the tickers channels
@@ -73,10 +86,14 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
 		tickers:         map[string]BinanceTicker{},
+		candles:         map[string]BinanceCandle{},
 		subscribedPairs: pairs,
 	}
 
 	if err := provider.subscribeTickers(pairs...); err != nil {
+		return nil, err
+	}
+	if err := provider.subscribeCandles(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -110,29 +127,51 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	return ticker.toTickerPrice()
 }
 
+func (p *BinanceProvider) getTickerTrades(key string) (BinanceCandle, error) {
+	candle, ok := p.candles[key]
+	if !ok {
+		return BinanceCandle{}, fmt.Errorf("failed to get ticker trades for %s", key)
+	}
+
+	return candle, nil
+}
+
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
 
-	var tickerResp BinanceTicker
+	var (
+		tickerResp BinanceTicker
+		candleResp BinanceCandle
+	)
+
+	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		// sometimes it returns other messages which are not ticker responses
-		p.logger.Err(err).Msg("could not unmarshal ticker")
-		return
+		p.logger.Debug().Err(err).Msg("could not unmarshal ticker response")
+	}
+	if err := json.Unmarshal(bz, &candleResp); err != nil {
+		p.logger.Debug().Err(err).Msg("could not unmarshal candle response")
 	}
 
-	if len(tickerResp.LastPrice) == 0 {
-		return
+	if len(tickerResp.LastPrice) != 0 {
+		p.setTickerPair(tickerResp)
 	}
-
-	p.setTickerPair(tickerResp)
+	if len(candleResp.Metadata.Close) != 0 {
+		p.setCandlePair(candleResp)
+	}
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.tickers[ticker.Symbol] = ticker
+}
+
+func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.candles[candle.Symbol] = candle
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
@@ -145,6 +184,18 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 
 	for i, cp := range cps {
 		params[i] = strings.ToLower(cp.String() + "@ticker")
+	}
+
+	subsMsg := newBinanceSubscriptionMsg(params...)
+	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// subscribeCandles subscribe to all candles
+func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
+	params := make([]string, len(cps))
+
+	for i, cp := range cps {
+		params[i] = strings.ToLower(cp.String() + "@kline_1m")
 	}
 
 	subsMsg := newBinanceSubscriptionMsg(params...)
@@ -199,10 +250,13 @@ func (p *BinanceProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
+	if err := p.subscribeCandles(p.subscribedPairs...); err != nil {
+		return err
+	}
 	return p.subscribeTickers(p.subscribedPairs...)
 }
 
-// keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
+// keepReconnecting keeps trying to reconnect if an error occurs in reconnect.
 func (p *BinanceProvider) keepReconnecting() {
 	reconnectTicker := time.NewTicker(defaultReconnectTime)
 	defer reconnectTicker.Stop()
