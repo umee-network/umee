@@ -208,23 +208,27 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 
 	var krakenEvent KrakenEvent
 	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
-		p.logger.Debug().Msg("received a message that is not an event")
 		// msg is not an event, it will try to marshal to ticker message
-		if err = p.messageReceivedTickerPrice(bz); err != nil {
-			if err = p.messageReceivedCandle(bz); err != nil {
-				p.logger.Debug().Err(err).Msg("unable to unmarshal")
-			}
+		p.logger.Debug().Msg("received a message that is not an event")
+	} else {
+		switch krakenEvent.Event {
+		case krakenEventSystemStatus:
+			p.messageReceivedSystemStatus(bz)
+			return
+		case krakenEventSubscriptionStatus:
+			p.messageReceivedSubscriptionStatus(bz)
+			return
 		}
-		return
 	}
 
-	switch krakenEvent.Event {
-	case krakenEventSystemStatus:
-		p.messageReceivedSystemStatus(bz)
+	if err := p.messageReceivedTickerPrice(bz); err != nil {
+		// msg is not a ticker, it will try to marshal to candle message
+		p.logger.Debug().Err(err).Msg("unable to unmarshal ticker")
+	} else {
 		return
-	case krakenEventSubscriptionStatus:
-		p.messageReceivedSubscriptionStatus(bz)
-		return
+	}
+	if err := p.messageReceivedCandle(bz); err != nil {
+		p.logger.Debug().Err(err).Msg("unable to unmarshal candle")
 	}
 }
 
@@ -234,7 +238,6 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	// kraken documentation https://docs.kraken.com/websockets/#message-ticker
 	var tickerMessage []interface{}
 	if err := json.Unmarshal(bz, &tickerMessage); err != nil {
-		p.logger.Err(err).Msg("could not unmarshal ticker")
 		return err
 	}
 
@@ -255,7 +258,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 
 	var krakenTicker KrakenTicker
 	if err := json.Unmarshal(tickerBz, &krakenTicker); err != nil {
-		p.logger.Err(err).Msg("could not unmarshal ticker")
+		p.logger.Err(err).Msg("could not unmarshal ticker message")
 		return err
 	}
 

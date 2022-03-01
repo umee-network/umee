@@ -46,10 +46,18 @@ type (
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
 	}
 
+	// OkxInst defines the structure containing ID information for the
+	// OkxResponses
+	OkxID struct {
+		Channel string `json:"channel"`
+		InstID  string `json:"instId"`
+	}
+
 	// OkxTickerResponse defines the response structure of a Okx ticker
 	// request.
 	OkxTickerResponse struct {
 		Data []OkxTickerPair `json:"data"`
+		ID   OkxID           `json:"arg"`
 	}
 
 	// OkxCandlePair defines a candle for Okx
@@ -57,12 +65,6 @@ type (
 		Close     string `json:"c"`   // Close price for this time period
 		TimeStamp int64  `json:"ts"`  // Linux epoch timestamp
 		Volume    string `json:"vol"` // Volume for this time period
-	}
-
-	// OkxInst defines the structure containing ID information for the
-	// OkxCandleResponse
-	OkxID struct {
-		InstID string `json:"instId"`
 	}
 
 	// OkxCandleResponse defines the response structure of a Okx candle
@@ -197,11 +199,15 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		p.logger.Debug().Err(err).Msg("could not unmarshal candle resp")
 	}
 
-	for _, tickerPair := range tickerResp.Data {
-		p.setTickerPair(tickerPair)
+	if tickerResp.ID.Channel == "tickers" {
+		for _, tickerPair := range tickerResp.Data {
+			p.setTickerPair(tickerPair)
+		}
 	}
-	for _, candlePair := range candleResp.Data {
-		p.setCandlePair(candlePair, candleResp.ID.InstID)
+	if candleResp.ID.Channel == "candle1m" {
+		for _, candlePair := range candleResp.Data {
+			p.setCandlePair(candlePair, candleResp.ID.InstID)
+		}
 	}
 }
 

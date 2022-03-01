@@ -148,10 +148,10 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 
 	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Err(err).Msg("could not unmarshal ticker response")
+		p.logger.Debug().Err(err).Msg("could not unmarshal ticker response")
 	}
 	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Err(err).Msg("could not unmarshal candle response")
+		p.logger.Debug().Err(err).Msg("could not unmarshal candle response")
 	}
 
 	if len(tickerResp.LastPrice) != 0 {
