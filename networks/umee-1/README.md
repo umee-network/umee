@@ -1,4 +1,14 @@
+<!-- markdownlint-disable MD034 -->
+<!-- markdownlint-disable MD013 -->
 # umee-1 mainnet
+
+## State Sync Providers
+
+- https://www.theamsolutions.info/umee-state-sync
+
+## Snapshot Providers (Quick Sync)
+
+- https://snapshots.stake2.me/umee/
 
 ## Umee Archival Nodes
 
