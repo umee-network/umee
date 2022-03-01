@@ -250,7 +250,7 @@ func (p *HuobiProvider) subscribePair(cp types.CurrencyPair) error {
 }
 
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
-	ticker, ok := p.tickers[getChannelTicker(cp)]
+	ticker, ok := p.tickers[currencyPairToHuobiPair(cp)]
 	if !ok {
 		return TickerPrice{}, fmt.Errorf("huobi provider failed to get ticker price for %s", cp.String())
 	}
@@ -292,11 +292,11 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 // newHuobiSubscriptionMsg returns a new subscription Msg
 func newHuobiSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 	return HuobiSubscriptionMsg{
-		Sub: getChannelTicker(cp),
+		Sub: currencyPairToHuobiPair(cp),
 	}
 }
 
-// getChannelTicker returns the channel name in the Format：market.$symbol.ticker
-func getChannelTicker(cp types.CurrencyPair) string {
+// currencyPairToHuobiPair returns the channel name in the Format：market.$symbol.ticker
+func currencyPairToHuobiPair(cp types.CurrencyPair) string {
 	return strings.ToLower("market." + cp.String() + ".ticker")
 }
