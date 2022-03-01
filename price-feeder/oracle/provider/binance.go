@@ -51,13 +51,11 @@ type (
 	}
 
 	BinanceCandleMetadata struct {
-		StartTime  int64  `json:"t"` // Start time in unix epoch ex.: 1645756200000
 		CloseTime  int64  `json:"T"` // Close time in unix epoch ex.: 1645756200000
-		Interval   string `json:"i"` // Interval ex.: 1m/15m/1h
-		OpenPrice  string `json:"o"` // Price at open
 		ClosePrice string `json:"c"` // Price at close
-		Closed     string `json:"x"` // Whether or not this kline is closed
+		Volume     string `json:"v"` // Volume during period
 	}
+
 	BinanceCandle struct {
 		Symbol   string                `json:"s"` // Symbol ex.: BTCUSDT
 		Metadata BinanceCandleMetadata `json:"k"` // Metadata for candle
@@ -143,15 +141,17 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var tickerResp BinanceTicker
-	var candleResp BinanceCandle
+	var (
+		tickerResp BinanceTicker
+		candleResp BinanceCandle
+	)
 
+	// sometimes the message received is not a ticker or a candle response.
+	if err := json.Unmarshal(bz, &tickerResp); err != nil {
+		p.logger.Err(err).Msg("could not unmarshal ticker response")
+	}
 	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		// sometimes it returns other messages which are not ticker responses
-		if err := json.Unmarshal(bz, &tickerResp); err != nil {
-			p.logger.Err(err).Msg("could not unmarshal ticker")
-			return
-		}
+		p.logger.Err(err).Msg("could not unmarshal candle response")
 	}
 
 	if len(tickerResp.LastPrice) != 0 {

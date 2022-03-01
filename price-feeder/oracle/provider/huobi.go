@@ -65,7 +65,6 @@ type (
 
 	// HuobiCandleTick defines the response type for the candle.
 	HuobiCandleTick struct {
-		Open      float64 `json:"open"`   // Opening price during this period
 		Close     float64 `json:"close"`  // Closing price during this period
 		Volume    float64 `json:"volume"` // Volume during this period
 		TimeStamp int64   `json:"id"`     // TimeStamp for this as an ID
@@ -189,11 +188,17 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	var tickerResp HuobiTicker
-	var candleResp HuobiCandle
+	var (
+		tickerResp HuobiTicker
+		candleResp HuobiCandle
+	)
 
+	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		// sometimes it returns other messages which are not ticker responses
+		p.logger.Err(err).Msg("failed to unmarshal message")
+		return
+	}
+	if err := json.Unmarshal(bz, &candleResp); err != nil {
 		p.logger.Err(err).Msg("failed to unmarshal message")
 		return
 	}
@@ -202,13 +207,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		p.setTickerPair(tickerResp)
 		return
 	}
-
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Err(err).Msg("failed to unmarshal message")
-		return
-	}
-
-	if candleResp.Tick.Open != 0 {
+	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
 	}
 }

@@ -188,24 +188,19 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	var tickerResp OkxTickerResponse
 	var candleResp OkxCandleResponse
 
-	// sometimes it returns other messages which are not
-	// tickerResponses or candleResponses
+	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		if err := json.Unmarshal(bz, &candleResp); err != nil {
-			p.logger.Err(err).Msg("could not unmarshal")
-			return
-		}
+		p.logger.Debug().Err(err).Msg("could not unmarshal ticker resp")
 	}
-
-	if len(candleResp.Data) > 0 {
-		for _, candlePair := range candleResp.Data {
-			p.setCandlePair(candlePair, candleResp.ID.InstID)
-		}
-		return
+	if err := json.Unmarshal(bz, &candleResp); err != nil {
+		p.logger.Debug().Err(err).Msg("could not unmarshal candle resp")
 	}
 
 	for _, tickerPair := range tickerResp.Data {
 		p.setTickerPair(tickerPair)
+	}
+	for _, candlePair := range candleResp.Data {
+		p.setCandlePair(candlePair, candleResp.ID.InstID)
 	}
 }
 
