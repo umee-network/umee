@@ -196,11 +196,9 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	// sometimes the message received is not a ticker or a candle response.
 	if err := json.Unmarshal(bz, &tickerResp); err != nil {
 		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-		return
 	}
 	if err := json.Unmarshal(bz, &candleResp); err != nil {
 		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-		return
 	}
 
 	if tickerResp.Tick.LastPrice != 0 {
