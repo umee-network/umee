@@ -31,10 +31,10 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mu              sync.Mutex
-		tickers         map[string]OkxTickerPair // InstId => OkxTickerPair
 		reconnectTimer  *time.Ticker
-		subscribedPairs []types.CurrencyPair
+		mtx             sync.Mutex
+		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
+		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
 	// OkxTickerPair defines a ticker pair of Okx
@@ -82,11 +82,11 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 		logger:          logger.With().Str("provider", "okx").Logger(),
 		tickers:         map[string]OkxTickerPair{},
 		reconnectTimer:  time.NewTicker(okxPingCheck),
-		subscribedPairs: pairs,
+		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.subscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -111,8 +111,25 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]T
 	return tickerPrices, nil
 }
 
+// SubscribeTickers subscribe to all currency pairs and
+// add the new ones into the provider subscribed pairs.
+func (p *OkxProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
+	topics := make([]OkxSubscriptionTopic, len(cps))
+
+	for i, cp := range cps {
+		topics[i] = newOkxSubscriptionTopic(currencyPairToOkxPair(cp))
+	}
+
+	if err := p.subscribePairs(topics...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
-	instrumentId := getInstrumentId(cp)
+	instrumentId := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentId]
 	if !ok {
 		return TickerPrice{}, fmt.Errorf("okx provider failed to get ticker price for %s", instrumentId)
@@ -170,22 +187,25 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 }
 
 func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 	p.tickers[tickerPair.InstId] = tickerPair
 }
 
-// subscribeTickers subscribe to all currency pairs
-func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	topics := make([]OkxSubscriptionTopic, len(cps))
-
-	for i, cp := range cps {
-		instId := getInstrumentId(cp)
-		topics[i] = newOkxSubscriptionTopic(instId)
-	}
-
-	subsMsg := newOkxSubscriptionMsg(topics...)
+// subscribePairs write the subscription msg to the provider.
+func (p *OkxProvider) subscribePairs(pairs ...OkxSubscriptionTopic) error {
+	subsMsg := newOkxSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
+func (p *OkxProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	for _, cp := range cps {
+		p.subscribedPairs[cp.String()] = cp
+	}
 }
 
 func (p *OkxProvider) resetReconnectTimer() {
@@ -211,7 +231,14 @@ func (p *OkxProvider) reconnect() error {
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn
 
-	return p.subscribeTickers(p.subscribedPairs...)
+	topics := make([]OkxSubscriptionTopic, len(p.subscribedPairs))
+	iterator := 0
+	for _, cp := range p.subscribedPairs {
+		topics[iterator] = newOkxSubscriptionTopic(currencyPairToOkxPair(cp))
+		iterator++
+	}
+
+	return p.subscribePairs(topics...)
 }
 
 // ping to check websocket connection
@@ -228,8 +255,8 @@ func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
 }
 
-// getInstrumentId returns the expected pair instrument ID for Okx ex.: BTC-USDT
-func getInstrumentId(pair types.CurrencyPair) string {
+// currencyPairToOkxPair returns the expected pair instrument ID for Okx ex.: BTC-USDT
+func currencyPairToOkxPair(pair types.CurrencyPair) string {
 	return pair.Base + "-" + pair.Quote
 }
 

@@ -72,3 +72,9 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 		require.Nil(t, prices)
 	})
 }
+
+func TestOkxCurrencyPairToOkxPair(t *testing.T) {
+	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
+	okxSymbol := currencyPairToOkxPair(cp)
+	require.Equal(t, okxSymbol, "ATOM-USDT")
+}
