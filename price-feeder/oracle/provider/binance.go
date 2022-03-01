@@ -30,9 +30,9 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mu              sync.Mutex
-		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
-		subscribedPairs []types.CurrencyPair
+		mtx             sync.Mutex
+		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
+		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
 	// BinanceTicker ticker price response
@@ -73,16 +73,33 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
 		tickers:         map[string]BinanceTicker{},
-		subscribedPairs: pairs,
+		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.subscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
 
 	go provider.handleWebSocketMsgs(ctx)
 
 	return provider, nil
+}
+
+// SubscribeTickers subscribe to all currency pairs and
+// add the new ones into the provider subscribed pairs.
+func (p *BinanceProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
+	pairs := make([]string, len(cps))
+
+	for i, cp := range cps {
+		pairs[i] = currencyPairToBinancePair(cp)
+	}
+
+	if err := p.subscribePairs(pairs...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
@@ -130,25 +147,13 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 	p.tickers[ticker.Symbol] = ticker
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
-}
-
-// subscribeTickers subscribe to all currency pairs
-func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	params := make([]string, len(cps))
-
-	for i, cp := range cps {
-		params[i] = strings.ToLower(cp.String() + "@ticker")
-	}
-
-	subsMsg := newBinanceSubscriptionMsg(params...)
-	return p.wsClient.WriteJSON(subsMsg)
 }
 
 func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
@@ -199,7 +204,14 @@ func (p *BinanceProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
-	return p.subscribeTickers(p.subscribedPairs...)
+	pairs := make([]string, len(p.subscribedPairs))
+	iterator := 0
+	for _, cp := range p.subscribedPairs {
+		pairs[iterator] = currencyPairToBinancePair(cp)
+		iterator++
+	}
+
+	return p.subscribePairs(pairs...)
 }
 
 // keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
@@ -220,6 +232,28 @@ func (p *BinanceProvider) keepReconnecting() {
 		connectionTries++
 		return
 	}
+}
+
+// setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
+func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	for _, cp := range cps {
+		p.subscribedPairs[cp.String()] = cp
+	}
+}
+
+// subscribePairs write the subscription msg to the provider.
+func (p *BinanceProvider) subscribePairs(pairs ...string) error {
+	subsMsg := newBinanceSubscriptionMsg(pairs...)
+	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// currencyPairToBinancePair receives a currency pair
+// and return binance ticker symbol atomusdt@ticker.
+func currencyPairToBinancePair(cp types.CurrencyPair) string {
+	return strings.ToLower(cp.String() + "@ticker")
 }
 
 // newBinanceSubscriptionMsg returns a new subscription Msg
