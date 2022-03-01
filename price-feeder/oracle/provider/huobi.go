@@ -35,9 +35,9 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mu              sync.Mutex
-		tickers         map[string]HuobiTicker // market.$symbol.ticker => HuobiTicker
-		subscribedPairs []types.CurrencyPair
+		mtx             sync.Mutex
+		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
+		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
 	// HuobiTicker defines the response type for the channel and
@@ -78,10 +78,10 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "huobi").Logger(),
 		tickers:         map[string]HuobiTicker{},
-		subscribedPairs: pairs,
+		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.subscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -90,15 +90,31 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	return provider, nil
 }
 
-// subscribeTickers subscribe to all currency pairs.
-func (p *HuobiProvider) subscribeTickers(cps ...types.CurrencyPair) error {
+// GetTickerPrices returns the tickerPrices based on the saved map.
+func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+	tickerPrices := make(map[string]TickerPrice, len(pairs))
+
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
+		if err != nil {
+			return nil, err
+		}
+		tickerPrices[cp.String()] = price
+	}
+
+	return tickerPrices, nil
+}
+
+// SubscribeTickers subscribe to all currency pairs and
+// add the new ones into the provider subscribed pairs.
+func (p *HuobiProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	for _, cp := range cps {
-		huobiSubscriptionMsg := newHuobiSubscriptionMsg(cp)
-		if err := p.wsClient.WriteJSON(huobiSubscriptionMsg); err != nil {
+		if err := p.subscribePair(cp); err != nil {
 			return err
 		}
 	}
 
+	p.setSubscribedPairs(cps...)
 	return nil
 }
 
@@ -202,8 +218,8 @@ func (p *HuobiProvider) ping() error {
 }
 
 func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 	p.tickers[ticker.CH] = ticker
 }
 
@@ -218,22 +234,19 @@ func (p *HuobiProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
-	return p.subscribeTickers(p.subscribedPairs...)
-}
-
-// GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
-
-	for _, cp := range pairs {
-		price, err := p.getTickerPrice(cp)
-		if err != nil {
-			return nil, err
+	for _, cp := range p.subscribedPairs {
+		if err := p.subscribePair(cp); err != nil {
+			return err
 		}
-		tickerPrices[cp.String()] = price
 	}
 
-	return tickerPrices, nil
+	return nil
+}
+
+// subscribePair write the subscription msg to the provider.
+func (p *HuobiProvider) subscribePair(cp types.CurrencyPair) error {
+	huobiSubscriptionMsg := newHuobiSubscriptionMsg(cp)
+	return p.wsClient.WriteJSON(huobiSubscriptionMsg)
 }
 
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -243,6 +256,16 @@ func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, erro
 	}
 
 	return ticker.toTickerPrice()
+}
+
+// setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
+func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	for _, cp := range cps {
+		p.subscribedPairs[cp.String()] = cp
+	}
 }
 
 // decompressGzip uncompress gzip compressed messages
