@@ -47,10 +47,9 @@ type (
 	// KrakenCandle candle response from Kraken candle channel.
 	// REF : https://docs.kraken.com/websockets/#message-ohlc
 	KrakenCandle struct {
-		Open      string // Open price during this period
 		Close     string // Close price during this period
-		Volume    string // Volume during this period
 		TimeStamp int64  // Linux epoch timestamp
+		Volume    string // Volume during this period
 	}
 
 	// KrakenSubscriptionMsg Msg to subscribe to all the pairs at once.
@@ -293,12 +292,6 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 		return fmt.Errorf("time field must be an int64")
 	}
 	kc.TimeStamp = time
-
-	open, ok := tmp[2].(string)
-	if !ok {
-		return fmt.Errorf("open field must be a string")
-	}
-	kc.Open = open
 
 	close, ok := tmp[5].(string)
 	if !ok {

@@ -54,10 +54,9 @@ type (
 
 	// OkxCandlePair defines a candle for Okx
 	OkxCandlePair struct {
-		Open      string `json:"o"`   // Open price for this time period
 		Close     string `json:"c"`   // Close price for this time period
-		Volume    string `json:"vol"` // Volume for this time period
 		TimeStamp int64  `json:"ts"`  // Linux epoch timestamp
+		Volume    string `json:"vol"` // Volume for this time period
 	}
 
 	// OkxInst defines the structure containing ID information for the
@@ -220,7 +219,6 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	}
 	// the candlesticks channel uses an array of strings
 	p.candles[instID] = OkxCandlePair{
-		Open:      pairData[1],
 		Close:     pairData[4],
 		Volume:    pairData[5],
 		TimeStamp: ts,

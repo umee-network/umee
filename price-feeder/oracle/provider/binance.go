@@ -51,9 +51,9 @@ type (
 	}
 
 	BinanceCandleMetadata struct {
-		CloseTime  int64  `json:"T"` // Close time in unix epoch ex.: 1645756200000
-		ClosePrice string `json:"c"` // Price at close
-		Volume     string `json:"v"` // Volume during period
+		Close     string `json:"c"` // Price at close
+		TimeStamp int64  `json:"T"` // Close time in unix epoch ex.: 1645756200000
+		Volume    string `json:"v"` // Volume during period
 	}
 
 	BinanceCandle struct {
@@ -157,7 +157,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
 	}
-	if len(candleResp.Metadata.ClosePrice) != 0 {
+	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
 	}
 }

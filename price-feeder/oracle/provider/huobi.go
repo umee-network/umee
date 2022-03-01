@@ -66,8 +66,8 @@ type (
 	// HuobiCandleTick defines the response type for the candle.
 	HuobiCandleTick struct {
 		Close     float64 `json:"close"`  // Closing price during this period
-		Volume    float64 `json:"volume"` // Volume during this period
 		TimeStamp int64   `json:"id"`     // TimeStamp for this as an ID
+		Volume    float64 `json:"volume"` // Volume during this period
 	}
 
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
