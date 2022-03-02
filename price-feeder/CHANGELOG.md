@@ -54,6 +54,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#551](https://github.com/umee-network/umee/pull/551) Update Binance provider to use WebSocket.
 - [#569](https://github.com/umee-network/umee/pull/569) Update Huobi provider to use WebSocket.
 - [#580](https://github.com/umee-network/umee/pull/580) Update Kraken provider to use WebSocket.
+- [#592](https://github.com/umee-network/umee/pull/592) Add subscribe ticker function to the following providers: Binance, Huobi, Kraken, and Okx.
 
 ### Bug Fixes
 
