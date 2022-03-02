@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -289,7 +290,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		return fmt.Errorf("received an unexpected structure")
 	}
 
-	channelName, ok := tickerMessage[1].(string)
+	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
 		return fmt.Errorf("received an unexpected channel name")
 	}
@@ -334,11 +335,16 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 		return fmt.Errorf("wrong number of fields in candle")
 	}
 
-	time, ok := tmp[2].(int64)
+	// timestamps come as a float string
+	time, ok := tmp[1].(string)
 	if !ok {
-		return fmt.Errorf("time field must be an int64")
+		return fmt.Errorf("time field must be a string")
 	}
-	kc.TimeStamp = time
+	timeFloat, err := strconv.ParseFloat(time, 64)
+	if err != nil {
+		return fmt.Errorf("unable to convert time to float")
+	}
+	kc.TimeStamp = int64(timeFloat)
 
 	close, ok := tmp[5].(string)
 	if !ok {
@@ -379,7 +385,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	var krakenCandle KrakenCandle
-	if err = krakenCandle.UnmarshalJSON(tickerBz); err != nil {
+	if err := krakenCandle.UnmarshalJSON(tickerBz); err != nil {
 		return err
 	}
 
