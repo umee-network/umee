@@ -37,12 +37,11 @@ type (
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
-	// BinanceTicker ticker price response
-	// https://pkg.go.dev/encoding/json#Unmarshal
-	// Unmarshal matches incoming object keys to the keys
-	// used by Marshal (either the struct field name or its tag),
-	// preferring an exact match but also accepting a case-insensitive match
-	// C is not used, but it avoids to implement specific UnmarshalJSON
+	// BinanceTicker ticker price response. https://pkg.go.dev/encoding/json#Unmarshal
+	// Unmarshal matches incoming object keys to the keys used by Marshal (either the
+	// struct field name or its tag), preferring an exact match but also accepting a
+	// case-insensitive match. C field which is Statistics close time is not used, but
+	// it avoids to implement specific UnmarshalJSON.
 	BinanceTicker struct {
 		Symbol    string `json:"s"` // Symbol ex.: BTCUSDT
 		LastPrice string `json:"c"` // Last price ex.: 0.0025
@@ -50,18 +49,20 @@ type (
 		C         uint64 `json:"C"` // Statistics close time
 	}
 
+	// BinanceCandleMetadata candle metadata used to compute tvwap price.
 	BinanceCandleMetadata struct {
 		Close     string `json:"c"` // Price at close
 		TimeStamp int64  `json:"T"` // Close time in unix epoch ex.: 1645756200000
 		Volume    string `json:"v"` // Volume during period
 	}
 
+	// BinanceCandle candle binance websocket channel "kline_1m" response.
 	BinanceCandle struct {
 		Symbol   string                `json:"s"` // Symbol ex.: BTCUSDT
 		Metadata BinanceCandleMetadata `json:"k"` // Metadata for candle
 	}
 
-	// BinanceSubscribeMsg Msg to subscribe all the tickers channels
+	// BinanceSubscribeMsg Msg to subscribe all the tickers channels.
 	BinanceSubscriptionMsg struct {
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
@@ -99,8 +100,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 	return provider, nil
 }
 
-// SubscribeTickers subscribe to all currency pairs and
-// add the new ones into the provider subscribed pairs.
+// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
 func (p *BinanceProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	pairs := make([]string, len(cps)*2)
 
@@ -209,7 +209,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
-				// if some error occurs continue to try to read the next message
+				// if some error occurs continue to try to read the next message.
 				p.logger.Err(err).Msg("could not read message")
 				continue
 			}
@@ -229,13 +229,12 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 	}
 }
 
-// reconnect closes the last WS connection and create a new one
-// A single connection to stream.binance.com is only valid for 24 hours;
-// expect to be disconnected at the 24 hour mark
-// The websocket server will send a ping frame every 3 minutes.
-// If the websocket server does not receive a pong frame back from
-// the connection within a 10 minute period, the connection will be disconnected.
-// Unsolicited pong frames are allowed.
+// reconnect closes the last WS connection then create a new one and subscribe to
+// all subscribed pairs in the ticker and candle pais. A single connection to
+// stream.binance.com is only valid for 24 hours; expect to be disconnected at the
+// 24 hour mark. The websocket server will send a ping frame every 3 minutes. If
+// the websocket server does not receive a pong frame back from the connection
+// within a 10 minute period, the connection will be disconnected.
 func (p *BinanceProvider) reconnect() error {
 	p.wsClient.Close()
 
@@ -294,19 +293,19 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-// currencyPairToBinanceTickerPair receives a currency pair
-// and return binance ticker symbol atomusdt@ticker.
+// currencyPairToBinanceTickerPair receives a currency pair and return binance
+// ticker symbol atomusdt@ticker.
 func currencyPairToBinanceTickerPair(cp types.CurrencyPair) string {
 	return strings.ToLower(cp.String() + "@ticker")
 }
 
-// currencyPairToBinanceCandlePair receives a currency pair
-// and return binance candle symbol atomusdt@kline_1m.
+// currencyPairToBinanceCandlePair receives a currency pair and return binance
+// candle symbol atomusdt@kline_1m.
 func currencyPairToBinanceCandlePair(cp types.CurrencyPair) string {
 	return strings.ToLower(cp.String() + "@kline_1m")
 }
 
-// newBinanceSubscriptionMsg returns a new subscription Msg
+// newBinanceSubscriptionMsg returns a new subscription Msg.
 func newBinanceSubscriptionMsg(params ...string) BinanceSubscriptionMsg {
 	return BinanceSubscriptionMsg{
 		Method: "SUBSCRIBE",
