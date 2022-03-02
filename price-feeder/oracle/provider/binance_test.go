@@ -75,6 +75,6 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 
 func TestBinanceCurrencyPairToBinancePair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
-	binanceSymbol := currencyPairToBinancePair(cp)
+	binanceSymbol := currencyPairToBinanceTickerPair(cp)
 	require.Equal(t, binanceSymbol, "atomusdt@ticker")
 }

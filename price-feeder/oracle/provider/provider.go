@@ -17,9 +17,7 @@ const (
 	maxReconnectionTries     = 3
 )
 
-var (
-	ping = []byte("ping")
-)
+var ping = []byte("ping")
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {

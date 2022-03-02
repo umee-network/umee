@@ -82,6 +82,6 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 
 func TestHuobiCurrencyPairToHuobiPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
-	binanceSymbol := currencyPairToHuobiPair(cp)
+	binanceSymbol := currencyPairToHuobiTickerPair(cp)
 	require.Equal(t, binanceSymbol, "market.atomusdt.ticker")
 }
