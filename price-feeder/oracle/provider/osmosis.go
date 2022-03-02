@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	osmosisBaseURL       = "https://api-osmosis.imperator.co"
-	osmosisTokenEndpoint = "/tokens/v1"
+	osmosisBaseURL        = "https://api-osmosis.imperator.co"
+	osmosisTokenEndpoint  = "/tokens/v1"
+	osmosisCandleEndpoint = "/tokens/v2/historical"
 )
 
 var _ Provider = (*OsmosisProvider)(nil)
@@ -36,6 +37,14 @@ type (
 		Price  float64 `json:"price"`
 		Symbol string  `json:"symbol"`
 		Volume float64 `json:"volume_24h"`
+	}
+
+	// OsmosisCandleResponse defines the response structure for an Osmosis candle
+	// request.
+	OsmosisCandleResponse struct {
+		Time   int64   `json:"time"`
+		Close  float64 `json:"close"`
+		Volume float64 `json:"volume"`
 	}
 )
 
@@ -114,4 +123,46 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	}
 
 	return tickerPrices, nil
+}
+
+func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candles := make(map[string][]CandlePrice)
+	for _, pair := range pairs {
+		if _, ok := candles[pair.Base]; !ok {
+			candles[pair.Base] = []CandlePrice{}
+		}
+
+		path := fmt.Sprintf("%s%s/%s/chart?tf=5", p.baseURL, osmosisCandleEndpoint, pair.Base)
+
+		resp, err := p.client.Get(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to make Osmosis request: %w", err)
+		}
+
+		defer resp.Body.Close()
+
+		bz, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read Osmosis response body: %w", err)
+		}
+
+		var candlesResp []OsmosisCandleResponse
+		if err := json.Unmarshal(bz, &candlesResp); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Osmosis response body: %w", err)
+		}
+
+		candlePrices := []CandlePrice{}
+		for _, responseCandle := range candlesResp {
+			closeStr := fmt.Sprintf("%f", responseCandle.Close)
+			volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
+			candlePrices = append(candlePrices, CandlePrice{
+				Price:     sdk.MustNewDecFromStr(closeStr),
+				Volume:    sdk.MustNewDecFromStr(volumeStr),
+				TimeStamp: responseCandle.Time,
+			})
+		}
+		candles[pair.Base] = candlePrices
+	}
+
+	return candles, nil
 }
