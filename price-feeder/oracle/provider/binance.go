@@ -200,7 +200,7 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	candleList = append(candleList, candle)
 
 	for _, c := range p.candles[candle.Symbol] {
-		if timePeriod < candle.Metadata.TimeStamp {
+		if timePeriod < c.Metadata.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}

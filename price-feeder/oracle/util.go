@@ -52,9 +52,10 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 
 func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[string]sdk.Dec, error) {
 	var (
-		tvwap     = make(map[string]sdk.Dec)
-		volumeSum = make(map[string]sdk.Dec)
-		now       = time.Now().Unix() * 1000
+		tvwap      = make(map[string]sdk.Dec)
+		volumeSum  = make(map[string]sdk.Dec)
+		now        = time.Now().Unix() * 1000
+		timePeriod = time.Now().Add(time.Minute*-3).Unix() * 1000
 	)
 
 	for _, providerPrices := range prices {
@@ -78,14 +79,17 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 			}
 			weightUnit := sdk.OneDec().Sub(minimumTimeWeight).Quo(period)
 
-			// Get tvwap
+			// get tvwap
 			for _, candle := range cp {
-				timeDiff := sdk.NewDec(now - candle.TimeStamp)
-				vol := candle.Volume.Mul(
-					weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
-				)
-				volumeSum[base] = volumeSum[base].Add(vol)
-				tvwap[base] = tvwap[base].Add(candle.Price.Mul(vol))
+				// we only want candles within the last timePeriod
+				if timePeriod < candle.TimeStamp {
+					timeDiff := sdk.NewDec(now - candle.TimeStamp)
+					vol := candle.Volume.Mul(
+						weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
+					)
+					volumeSum[base] = volumeSum[base].Add(vol)
+					tvwap[base] = tvwap[base].Add(candle.Price.Mul(vol))
+				}
 			}
 
 		}

@@ -250,12 +250,14 @@ func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
 func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	// huobi time period comes in seconds
+	candle.Tick.TimeStamp = candle.Tick.TimeStamp * 1000
 	timePeriod := time.Now().Add(time.Minute*-10).Unix() * 1000
 	candleList := []HuobiCandle{}
 	candleList = append(candleList, candle)
 
 	for _, c := range p.candles[candle.CH] {
-		if timePeriod < candle.Tick.TimeStamp {
+		if timePeriod < c.Tick.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}
