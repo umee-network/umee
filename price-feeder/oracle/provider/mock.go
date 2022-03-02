@@ -94,3 +94,20 @@ func (p MockProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]T
 
 	return tickerPrices, nil
 }
+
+func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	price, err := p.GetTickerPrices(pairs...)
+	if err != nil {
+		return nil, err
+	}
+	candles := make(map[string][]CandlePrice)
+	for pair, price := range price {
+		candles[pair] = []CandlePrice{
+			{
+				Price:  price.Price,
+				Volume: price.Volume,
+			},
+		}
+	}
+	return candles, nil
+}

@@ -62,9 +62,10 @@ type (
 
 	// OkxCandlePair defines a candle for Okx
 	OkxCandlePair struct {
-		Close     string `json:"c"`   // Close price for this time period
-		TimeStamp int64  `json:"ts"`  // Linux epoch timestamp
-		Volume    string `json:"vol"` // Volume for this time period
+		Close     string `json:"c"`      // Close price for this time period
+		TimeStamp int64  `json:"ts"`     // Linux epoch timestamp
+		Volume    string `json:"vol"`    // Volume for this time period
+		InstId    string `json:"instId"` // Instrument ID ex.: BTC-USDT
 	}
 
 	// OkxCandleResponse defines the response structure of a Okx candle
@@ -140,6 +141,22 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]T
 	return tickerPrices, nil
 }
 
+// GetCandlePrices returns the candlePrices based on the saved map
+func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candlePrices := make(map[string][]CandlePrice, len(pairs))
+
+	for _, currencyPair := range pairs {
+		candles, err := p.getCandlePrices(currencyPair)
+		if err != nil {
+			return nil, err
+		}
+
+		candlePrices[currencyPair.String()] = candles
+	}
+
+	return candlePrices, nil
+}
+
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	instrumentId := getInstrumentId(cp)
 	tickerPair, ok := p.tickers[instrumentId]
@@ -148,6 +165,24 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 	}
 
 	return tickerPair.toTickerPrice()
+}
+
+func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+	instrumentId := getInstrumentId(cp)
+	candles, ok := p.candles[instrumentId]
+	if !ok {
+		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", instrumentId)
+	}
+	candleList := []CandlePrice{}
+	for _, candle := range candles {
+		cp, err := candle.toCandlePrice()
+		if err != nil {
+			return []CandlePrice{}, err
+		}
+		candleList = append(candleList, cp)
+	}
+
+	return candleList, nil
 }
 
 func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
@@ -228,6 +263,7 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 	// the candlesticks channel uses an array of strings
 	candle := OkxCandlePair{
 		Close:     pairData[4],
+		InstId:    instID,
 		Volume:    pairData[5],
 		TimeStamp: ts,
 	}
@@ -306,6 +342,10 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
+}
+
+func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
+	return newCandlePrice("Okx", candle.InstId, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // getInstrumentId returns the expected pair instrument ID for Okx ex.: BTC-USDT

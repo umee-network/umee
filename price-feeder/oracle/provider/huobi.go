@@ -295,13 +295,45 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 	return tickerPrices, nil
 }
 
+// GetTickerPrices returns the tickerPrices based on the saved map.
+func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candlePrices := make(map[string][]CandlePrice, len(pairs))
+
+	for _, cp := range pairs {
+		price, err := p.getCandlePrices(cp)
+		if err != nil {
+			return nil, err
+		}
+		candlePrices[cp.String()] = price
+	}
+
+	return candlePrices, nil
+}
+
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
 	ticker, ok := p.tickers[getChannelTicker(cp)]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("huobi provider failed to get ticker price for %s", cp.String())
+		return TickerPrice{}, fmt.Errorf("failed to get candle prices for %s", cp.String())
 	}
 
 	return ticker.toTickerPrice()
+}
+
+func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+	candles, ok := p.candles[getChannelCandle(cp)]
+	if !ok {
+		return []CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
+	}
+
+	candleList := []CandlePrice{}
+	for _, candle := range candles {
+		cp, err := candle.toCandlePrice()
+		if err != nil {
+			return []CandlePrice{}, err
+		}
+		candleList = append(candleList, cp)
+	}
+	return candleList, nil
 }
 
 // decompressGzip uncompress gzip compressed messages
@@ -325,6 +357,16 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	)
 }
 
+func (candle HuobiCandle) toCandlePrice() (CandlePrice, error) {
+	return newCandlePrice(
+		"Huobi",
+		candle.CH,
+		strconv.FormatFloat(candle.Tick.Close, 'f', -1, 64),
+		strconv.FormatFloat(candle.Tick.Volume, 'f', -1, 64),
+		candle.Tick.TimeStamp,
+	)
+}
+
 // newHuobiSubscriptionMsg returns a new subscription Msg
 func newHuobiSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 	return HuobiSubscriptionMsg{
@@ -340,11 +382,11 @@ func getChannelTicker(cp types.CurrencyPair) string {
 // newHuobiSubscriptionMsg returns a new subscription Msg
 func newHuobiCandleSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 	return HuobiSubscriptionMsg{
-		Sub: getCandleTicker(cp),
+		Sub: getChannelCandle(cp),
 	}
 }
 
 // getCandleTicker returns the channel name in the Format：market.$symbol.line.$period
-func getCandleTicker(cp types.CurrencyPair) string {
+func getChannelCandle(cp types.CurrencyPair) string {
 	return strings.ToLower("market." + cp.String() + ".kline.1min")
 }

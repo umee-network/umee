@@ -118,6 +118,22 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 	return tickerPrices, nil
 }
 
+// GetCandlePrices returns the candlePrices based on the provided pairs.
+func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candlePrices := make(map[string][]CandlePrice, len(pairs))
+
+	for _, cp := range pairs {
+		key := cp.String()
+		price, err := p.getCandlePrices(key)
+		if err != nil {
+			return nil, err
+		}
+		candlePrices[key] = price
+	}
+
+	return candlePrices, nil
+}
+
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	ticker, ok := p.tickers[key]
 	if !ok {
@@ -125,6 +141,23 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	}
 
 	return ticker.toTickerPrice()
+}
+
+func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+	candles, ok := p.candles[key]
+	if !ok {
+		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+	}
+
+	candleList := []CandlePrice{}
+	for _, candle := range candles {
+		cp, err := candle.toCandlePrice()
+		if err != nil {
+			return []CandlePrice{}, err
+		}
+		candleList = append(candleList, cp)
+	}
+	return candleList, nil
 }
 
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
@@ -175,6 +208,11 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+}
+
+func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
+	return newCandlePrice("Binance", candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+		candle.Metadata.TimeStamp)
 }
 
 // subscribeTickers subscribe to all currency pairs
