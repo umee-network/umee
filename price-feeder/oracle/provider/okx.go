@@ -33,8 +33,8 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mu              sync.Mutex
-		tickers         map[string]OkxTickerPair // InstId => OkxTickerPair
-		candles         map[string]OkxCandlePair // InstId => 0kxCandlePair
+		tickers         map[string]OkxTickerPair   // InstId => OkxTickerPair
+		candles         map[string][]OkxCandlePair // InstId => 0kxCandlePair
 		reconnectTimer  *time.Ticker
 		subscribedPairs []types.CurrencyPair
 	}
@@ -105,7 +105,7 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "okx").Logger(),
 		tickers:         map[string]OkxTickerPair{},
-		candles:         map[string]OkxCandlePair{},
+		candles:         map[string][]OkxCandlePair{},
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		subscribedPairs: pairs,
 	}
@@ -226,11 +226,20 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 		return
 	}
 	// the candlesticks channel uses an array of strings
-	p.candles[instID] = OkxCandlePair{
+	candle := OkxCandlePair{
 		Close:     pairData[4],
 		Volume:    pairData[5],
 		TimeStamp: ts,
 	}
+	t := time.Now().Add(time.Minute * -10)
+	candleList := []OkxCandlePair{}
+	candleList = append(candleList, candle)
+	for _, c := range p.candles[instID] {
+		if t.Unix() < candle.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[instID] = candleList
 }
 
 // subscribeTickers subscribe to all currency pairs

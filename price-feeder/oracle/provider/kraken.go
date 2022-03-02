@@ -33,7 +33,7 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.Mutex
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
-		candles         map[string]KrakenCandle       // Symbol => KrakenCandle
+		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
@@ -99,7 +99,7 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "kraken").Logger(),
 		tickers:         map[string]TickerPrice{},
-		candles:         map[string]KrakenCandle{},
+		candles:         map[string][]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
@@ -437,7 +437,15 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 func (p *KrakenProvider) setCandlePair(symbol string, candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.candles[symbol] = candle
+	t := time.Now().Add(time.Minute * -10)
+	candleList := []KrakenCandle{}
+	candleList = append(candleList, candle)
+	for _, c := range p.candles[symbol] {
+		if t.Unix() < candle.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[symbol] = candleList
 }
 
 // ping to check websocket connection.

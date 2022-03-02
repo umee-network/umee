@@ -32,8 +32,8 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mu              sync.Mutex
-		tickers         map[string]BinanceTicker // Symbol => BinanceTicker
-		candles         map[string]BinanceCandle // Symbol => BinanceCandle
+		tickers         map[string]BinanceTicker   // Symbol => BinanceTicker
+		candles         map[string][]BinanceCandle // Symbol => BinanceCandle
 		subscribedPairs []types.CurrencyPair
 	}
 
@@ -86,7 +86,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
 		tickers:         map[string]BinanceTicker{},
-		candles:         map[string]BinanceCandle{},
+		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: pairs,
 	}
 
@@ -127,15 +127,6 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	return ticker.toTickerPrice()
 }
 
-func (p *BinanceProvider) getTickerTrades(key string) (BinanceCandle, error) {
-	candle, ok := p.candles[key]
-	if !ok {
-		return BinanceCandle{}, fmt.Errorf("failed to get ticker trades for %s", key)
-	}
-
-	return candle, nil
-}
-
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
@@ -171,7 +162,15 @@ func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.candles[candle.Symbol] = candle
+	t := time.Now().Add(time.Minute * -10)
+	candleList := []BinanceCandle{}
+	candleList = append(candleList, candle)
+	for _, c := range p.candles[candle.Symbol] {
+		if t.Unix() < candle.Metadata.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[candle.Symbol] = candleList
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {

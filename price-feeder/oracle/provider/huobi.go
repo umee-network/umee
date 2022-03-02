@@ -37,8 +37,8 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mu              sync.Mutex
-		tickers         map[string]HuobiTicker // market.$symbol.ticker => HuobiTicker
-		candles         map[string]HuobiCandle // market.$symbol.kline.$period => HuobiCandle
+		tickers         map[string]HuobiTicker   // market.$symbol.ticker => HuobiTicker
+		candles         map[string][]HuobiCandle // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs []types.CurrencyPair
 	}
 
@@ -65,9 +65,9 @@ type (
 
 	// HuobiCandleTick defines the response type for the candle.
 	HuobiCandleTick struct {
-		Close     float64 `json:"close"`  // Closing price during this period
-		TimeStamp int64   `json:"id"`     // TimeStamp for this as an ID
-		Volume    float64 `json:"volume"` // Volume during this period
+		Close     float64 `json:"close"` // Closing price during this period
+		TimeStamp int64   `json:"id"`    // TimeStamp for this as an ID
+		Volume    float64 `json:"vol"`   // Volume during this period
 	}
 
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
@@ -94,7 +94,7 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "huobi").Logger(),
 		tickers:         map[string]HuobiTicker{},
-		candles:         map[string]HuobiCandle{},
+		candles:         map[string][]HuobiCandle{},
 		subscribedPairs: pairs,
 	}
 
@@ -250,7 +250,15 @@ func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
 func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.candles[candle.CH] = candle
+	t := time.Now().Add(time.Minute * -3)
+	candleList := []HuobiCandle{}
+	candleList = append(candleList, candle)
+	for _, c := range p.candles[candle.CH] {
+		if t.Unix() < candle.Tick.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[candle.CH] = candleList
 }
 
 // reconnect closes the last WS connection and create a new one
