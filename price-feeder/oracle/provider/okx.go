@@ -104,9 +104,9 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 		wsURL:           wsURL,
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "okx").Logger(),
+		reconnectTimer:  time.NewTicker(okxPingCheck),
 		tickers:         map[string]OkxTickerPair{},
 		candles:         map[string]OkxCandlePair{},
-		reconnectTimer:  time.NewTicker(okxPingCheck),
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
@@ -292,7 +292,7 @@ func (p *OkxProvider) reconnect() error {
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn
 
-	topics := make([]OkxSubscriptionTopic, len(p.subscribedPairs))
+	topics := make([]OkxSubscriptionTopic, len(p.subscribedPairs)*2)
 	iterator := 0
 	for _, cp := range p.subscribedPairs {
 		instId := currencyPairToOkxPair(cp)
