@@ -487,7 +487,7 @@ func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 
 	candleList = append(candleList, candle)
 	for _, c := range p.candles[candle.Symbol] {
-		if timePeriod < candle.TimeStamp {
+		if timePeriod < c.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}
