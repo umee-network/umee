@@ -106,9 +106,6 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 	if err := provider.SubscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	if err := provider.SubscribeCandles(pairs...); err != nil {
-		return nil, err
-	}
 
 	go provider.handleWebSocketMsgs(ctx)
 
@@ -438,7 +435,7 @@ func (p *KrakenProvider) ping() error {
 
 // subscribeTickerPairs write the subscription msg to the provider.
 func (p *KrakenProvider) subscribeTickerPairs(pairs ...string) error {
-	subsMsg := newKrakenSubscriptionMsg(pairs...)
+	subsMsg := newKrakenTickerSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
@@ -478,8 +475,8 @@ func (ticker KrakenTicker) toTickerPrice(symbol string) (TickerPrice, error) {
 	return newTickerPrice("Kraken", symbol, ticker.C[0], ticker.V[1])
 }
 
-// newKrakenSubscriptionMsg returns a new subscription Msg.
-func newKrakenSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
+// newKrakenTickerSubscriptionMsg returns a new subscription Msg.
+func newKrakenTickerSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
 	return KrakenSubscriptionMsg{
 		Event: "subscribe",
 		Pair:  pairs,
