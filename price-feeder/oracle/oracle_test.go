@@ -27,12 +27,29 @@ func (m mockProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]provi
 	return m.prices, nil
 }
 
+func (m mockProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]provider.CandlePrice, error) {
+	candles := make(map[string][]provider.CandlePrice)
+	for pair, price := range m.prices {
+		candles[pair] = []provider.CandlePrice{
+			{
+				Price:  price.Price,
+				Volume: price.Volume,
+			},
+		}
+	}
+	return candles, nil
+}
+
 type failingProvider struct {
 	prices map[string]provider.TickerPrice
 }
 
 func (m failingProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]provider.TickerPrice, error) {
 	return nil, fmt.Errorf("unable to get ticker prices")
+}
+
+func (m failingProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]provider.CandlePrice, error) {
+	return nil, fmt.Errorf("unable to get candle prices")
 }
 
 type OracleTestSuite struct {

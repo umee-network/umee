@@ -2,10 +2,14 @@ package oracle
 
 import (
 	"fmt"
+	"sort"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
+
+var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
 
 // ComputeVWAP computes the volume weighted average price for all price points
 // for each ticker/exchange pair. The provided prices argument reflects a mapping
@@ -44,6 +48,55 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 	}
 
 	return vwap, nil
+}
+
+func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[string]sdk.Dec, error) {
+	var (
+		tvwap     = make(map[string]sdk.Dec)
+		volumeSum = make(map[string]sdk.Dec)
+		now       = time.Now()
+	)
+
+	for _, providerPrices := range prices {
+		// Sort providerPrices
+		for base, cp := range providerPrices {
+			if _, ok := tvwap[base]; !ok {
+				tvwap[base] = sdk.ZeroDec()
+			}
+			if _, ok := volumeSum[base]; !ok {
+				volumeSum[base] = sdk.ZeroDec()
+			}
+
+			// Sort by timestamp
+			sort.SliceStable(cp, func(i, j int) bool {
+				return cp[i].TimeStamp > cp[i].TimeStamp
+			})
+
+			period := sdk.NewDec(now.Unix() - cp[0].TimeStamp)
+			weightUnit := sdk.OneDec().Sub(minimumTimeWeight).Quo(period)
+
+			// Get tvwap
+			for _, candle := range cp {
+				timeDiff := sdk.NewDec(now.Unix() - candle.TimeStamp)
+				vol := candle.Volume.Mul(
+					weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
+				)
+				volumeSum[base] = volumeSum[base].Add(vol)
+				tvwap[base] = tvwap[base].Add(candle.Price.Mul(vol))
+			}
+
+		}
+	}
+
+	// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
+	for base, p := range tvwap {
+		if volumeSum[base] == sdk.ZeroDec() {
+			return nil, fmt.Errorf("unable to divide by zero")
+		}
+		tvwap[base] = p.Quo(volumeSum[base])
+	}
+
+	return tvwap, nil
 }
 
 // StandardDeviation returns maps of the standard deviations and means of assets.

@@ -155,6 +155,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
+	providerCandles := make(map[string]map[string][]provider.CandlePrice)
 	requiredRates := make(map[string]struct{})
 
 	for providerName, currencyPairs := range o.providerPairs {
@@ -184,17 +185,31 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				telemetry.IncrCounter(1, "failure", "provider")
 				return err
 			}
+			candles, err := priceProvider.GetCandlePrices(acceptedPairs...)
+			if err != nil {
+				telemetry.IncrCounter(1, "failure", "provider")
+				return err
+			}
 
 			// flatten and collect prices based on the base currency per provider
 			//
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, cp := range acceptedPairs {
+			for _, pair := range acceptedPairs {
 				if _, ok := providerPrices[providerName]; !ok {
 					providerPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
-				if tp, ok := prices[cp.String()]; ok {
-					providerPrices[providerName][cp.Base] = tp
+				if _, ok := providerCandles[providerName]; !ok {
+					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+				}
+				if tp, ok := prices[pair.String()]; ok {
+					providerPrices[providerName][pair.Base] = tp
+				} else {
+					mtx.Unlock()
+					return fmt.Errorf("failed to find exchange rate in provider response")
+				}
+				if cp, ok := candles[pair.String()]; ok {
+					providerCandles[providerName][pair.Base] = cp
 				} else {
 					mtx.Unlock()
 					return fmt.Errorf("failed to find exchange rate in provider response")
@@ -228,17 +243,25 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 	}
 
-	filteredProviderPrices, err := o.filterDeviations(providerPrices)
+	tvwapPrices, err := ComputeTVWAP(providerCandles)
 	if err != nil {
 		return err
 	}
 
-	vwapPrices, err := ComputeVWAP(filteredProviderPrices)
-	if err != nil {
-		return err
-	}
+	if len(tvwapPrices) < 1 {
+		filteredProviderPrices, err := o.filterDeviations(providerPrices)
+		if err != nil {
+			return err
+		}
 
-	o.prices = vwapPrices
+		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
+		if err != nil {
+			return err
+		}
+		o.prices = vwapPrices
+	} else {
+		o.prices = tvwapPrices
+	}
 
 	return nil
 }
