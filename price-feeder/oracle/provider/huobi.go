@@ -31,7 +31,7 @@ type (
 	// API.
 	//
 	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-ticker
-	// REF : https://huobiapi.github.io/docs/spot/v1/en/#get-klines-candles
+	// REF: https://huobiapi.github.io/docs/spot/v1/en/#get-klines-candles
 	HuobiProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
@@ -42,22 +42,22 @@ type (
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
-	// HuobiTicker defines the response type for the channel and
-	// the tick object for a given ticker/symbol.
+	// HuobiTicker defines the response type for the channel and the tick object for a
+	// given ticker/symbol.
 	HuobiTicker struct {
 		CH   string    `json:"ch"` // Channel name. Format：market.$symbol.ticker
 		Tick HuobiTick `json:"tick"`
 	}
 
-	// HuobiTick defines the response type for the last 24h market summary
-	// and the last traded price for a given ticker/symbol.
+	// HuobiTick defines the response type for the last 24h market summary and the last
+	// traded price for a given ticker/symbol.
 	HuobiTick struct {
 		Vol       float64 `json:"vol"`       // Accumulated trading value of last 24 hours
 		LastPrice float64 `json:"lastPrice"` // Last traded price
 	}
 
-	// HuobiCandle defines the response type for the channel and
-	// the tick object for a given ticker/symbol.
+	// HuobiCandle defines the response type for the channel and the tick object for a
+	// given ticker/symbol.
 	HuobiCandle struct {
 		CH   string          `json:"ch"` // Channel name. Format：market.$symbol.kline.$period
 		Tick HuobiCandleTick `json:"tick"`
@@ -70,7 +70,7 @@ type (
 		Volume    float64 `json:"volume"` // Volume during this period
 	}
 
-	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time
+	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time.
 	HuobiSubscriptionMsg struct {
 		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
 	}
@@ -122,8 +122,7 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 	return tickerPrices, nil
 }
 
-// SubscribeTickers subscribe to all currency pairs and
-// add the new ones into the provider subscribed pairs.
+// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
 func (p *HuobiProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	for _, cp := range cps {
 		if err := p.subscribeTickerPair(cp); err != nil {
@@ -173,9 +172,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 	}
 }
 
-// messageReceived handles the received data from the Huobi websocket.
-// All return data of websocket Market APIs are compressed with
-// GZIP so they need to be decompressed.
+// messageReceived handles the received data from the Huobi websocket. All return
+// data of websocket Market APIs are compressed with GZIP so they need to be
+// decompressed.
 func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
 	if messageType != websocket.BinaryMessage {
 		return
@@ -215,14 +214,12 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	}
 }
 
-// pong return a heartbeat message when a "ping" is received
-// and reset the recconnect ticker because the connection is alive
-// After connected to Huobi's Websocket server,
-// the server will send heartbeat periodically (5s interval).
-// When client receives an heartbeat message, it should respond
-// with a matching "pong" message which has the same integer in it, e.g.
-// {"ping": 1492420473027} and the return should be
-// {"pong": 1492420473027}
+// pong return a heartbeat message when a "ping" is received and reset the
+// recconnect ticker because the connection is alive. After connected to Huobi's
+// Websocket server, the server will send heartbeat periodically (5s interval).
+// When client receives an heartbeat message, it should respond with a matching
+// "pong" message which has the same integer in it, e.g. {"ping": 1492420473027}
+// and then the return pong message should be {"pong": 1492420473027}.
 func (p *HuobiProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
 	reconnectTicker.Reset(huobiReconnectTime)
 	var heartbeat struct {
@@ -258,7 +255,7 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.candles[candle.CH] = candle
 }
 
-// reconnect closes the last WS connection and create a new one
+// reconnect closes the last WS connection and create a new one.
 func (p *HuobiProvider) reconnect() error {
 	p.wsClient.Close()
 
@@ -312,9 +309,8 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	}
 }
 
-// decompressGzip uncompress gzip compressed messages
-// All data returned from the websocket Market APIs is compressed
-// with GZIP, so it needs to be unzipped.
+// decompressGzip uncompress gzip compressed messages. All data returned from the
+// websocket Market APIs is compressed with GZIP, so it needs to be unzipped.
 func decompressGzip(bz []byte) ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(bz))
 	if err != nil {
@@ -324,6 +320,7 @@ func decompressGzip(bz []byte) ([]byte, error) {
 	return ioutil.ReadAll(r)
 }
 
+// toTickerPrice converts current HuobiTicker to TickerPrice.
 func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
 		"Huobi",
@@ -333,26 +330,28 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	)
 }
 
-// newHuobiTickerSubscriptionMsg returns a new subscription Msg
+// newHuobiTickerSubscriptionMsg returns a new ticker subscription Msg.
 func newHuobiTickerSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 	return HuobiSubscriptionMsg{
 		Sub: currencyPairToHuobiTickerPair(cp),
 	}
 }
 
-// currencyPairToHuobiTickerPair returns the channel name in the Format：market.$symbol.ticker
+// currencyPairToHuobiTickerPair returns the channel name in the following format:
+// "market.$symbol.ticker".
 func currencyPairToHuobiTickerPair(cp types.CurrencyPair) string {
 	return strings.ToLower("market." + cp.String() + ".ticker")
 }
 
-// newHuobiSubscriptionMsg returns a new subscription Msg
+// newHuobiSubscriptionMsg returns a new candle subscription Msg.
 func newHuobiCandleSubscriptionMsg(cp types.CurrencyPair) HuobiSubscriptionMsg {
 	return HuobiSubscriptionMsg{
 		Sub: currencyPairToHuobiCandlePair(cp),
 	}
 }
 
-// currencyPairToHuobiCandlePair returns the channel name in the Format：market.$symbol.line.$period
+// currencyPairToHuobiCandlePair returns the channel name in the following format:
+// "market.$symbol.line.$period".
 func currencyPairToHuobiCandlePair(cp types.CurrencyPair) string {
 	return strings.ToLower("market." + cp.String() + ".kline.1min")
 }
