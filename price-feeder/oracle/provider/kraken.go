@@ -476,7 +476,7 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	timePeriod := time.Now().Add(time.Minute*-10).Unix() * 1000
+	timePeriod := PastUnixTime(providerCandlePeriod)
 	candleList := []KrakenCandle{}
 
 	candleList = append(candleList, candle)

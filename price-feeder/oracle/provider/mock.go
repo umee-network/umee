@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -107,7 +106,7 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 			{
 				Price:     price.Price,
 				Volume:    price.Volume,
-				TimeStamp: time.Now().Add(time.Minute*-1).Unix() * 1000,
+				TimeStamp: PastUnixTime(1),
 			},
 		}
 	}

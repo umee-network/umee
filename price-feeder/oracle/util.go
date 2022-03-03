@@ -3,13 +3,15 @@ package oracle
 import (
 	"fmt"
 	"sort"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
 var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
+
+// tvwapCandlePeriod represents the time period we use for tvwap in minutes.
+const tvwapCandlePeriod = 3
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
 func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
@@ -64,8 +66,8 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)
-		now            = time.Now().Unix() * 1000
-		timePeriod     = time.Now().Add(time.Minute*-3).Unix() * 1000
+		now            = provider.PastUnixTime(0)
+		timePeriod     = provider.PastUnixTime(tvwapCandlePeriod)
 	)
 
 	for _, providerPrices := range prices {

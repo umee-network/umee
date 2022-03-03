@@ -19,6 +19,11 @@ const (
 
 var ping = []byte("ping")
 
+// providerCandlePeriod represents the cutoff in minutes for old candles.
+const (
+	providerCandlePeriod = 10
+)
+
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
@@ -83,4 +88,10 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 	}
 
 	return CandlePrice{Price: price, Volume: volumeDec, TimeStamp: timeStamp}, nil
+}
+
+// PastUnixTime returns a millisecond timestamp that represents the unix time
+// n number of minutes ago
+func PastUnixTime(minutes int64) int64 {
+	return time.Now().Add(time.Minute*time.Duration(minutes)*-1).Unix() * 1000
 }

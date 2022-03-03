@@ -215,7 +215,7 @@ func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	timePeriod := time.Now().Add(time.Minute*-10).Unix() * 1000
+	timePeriod := PastUnixTime(providerCandlePeriod)
 	candleList := []BinanceCandle{}
 	candleList = append(candleList, candle)
 

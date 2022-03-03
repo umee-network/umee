@@ -289,7 +289,7 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 		Volume:    pairData[5],
 		TimeStamp: ts,
 	}
-	timePeriod := time.Now().Add(time.Minute*-10).Unix() * 1000
+	timePeriod := PastUnixTime(providerCandlePeriod)
 	candleList := []OkxCandlePair{}
 
 	candleList = append(candleList, candle)

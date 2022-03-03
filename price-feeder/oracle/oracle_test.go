@@ -33,7 +33,7 @@ func (m mockProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]pro
 		candles[pair] = []provider.CandlePrice{
 			{
 				Price:     price.Price,
-				TimeStamp: time.Now().Add(time.Minute*-1).Unix() * 1000,
+				TimeStamp: provider.PastUnixTime(1),
 				Volume:    price.Volume,
 			},
 		}

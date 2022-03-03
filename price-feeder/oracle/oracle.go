@@ -206,18 +206,18 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
 				}
 
-				if tp, ok := prices[pair.String()]; ok {
+				tp, pricesOk := prices[pair.String()]
+				cp, candlesOk := candles[pair.String()]
+				if pricesOk {
 					providerPrices[providerName][pair.Base] = tp
-				} else {
-					mtx.Unlock()
-					return fmt.Errorf("failed to find exchange rate in provider response")
+				}
+				if candlesOk {
+					providerCandles[providerName][pair.Base] = cp
 				}
 
-				if cp, ok := candles[pair.String()]; ok {
-					providerCandles[providerName][pair.Base] = cp
-				} else {
+				if !pricesOk && !candlesOk {
 					mtx.Unlock()
-					return fmt.Errorf("failed to find exchange rate in provider response")
+					return fmt.Errorf("failed to find any exchange rates in provider response")
 				}
 			}
 			mtx.Unlock()
@@ -255,8 +255,8 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		return err
 	}
 
-	// if tvwap candles are not available or were filtered out due to staleness,
-	// use most recent prices & vwap instead
+	// If TVWAP candles are not available or were filtered out due to staleness,
+	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
 		filteredProviderPrices, err := o.filterDeviations(providerPrices)
 		if err != nil {
@@ -272,6 +272,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	} else {
 		o.prices = tvwapPrices
 	}
+
 	return nil
 }
 
