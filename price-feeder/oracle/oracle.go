@@ -148,9 +148,11 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
-// SetPrices retrieve all the prices from our set of providers as determined
-// in the config, average them out, and update the oracle's current exchange
-// rates.
+// SetPrices retrieve all the prices and candles from our set of providers as
+// determined in the config. If candles are available, use TVWAP in order
+// to determine prices. If candles are not available, use the most recent prices
+// with VWAP. Warn the the user of any missing prices, and filter out any faulty
+// providers which do not report prices within 2𝜎 of the others.
 func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
@@ -185,6 +187,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				telemetry.IncrCounter(1, "failure", "provider")
 				return err
 			}
+
 			candles, err := priceProvider.GetCandlePrices(acceptedPairs...)
 			if err != nil {
 				telemetry.IncrCounter(1, "failure", "provider")
@@ -202,12 +205,14 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				if _, ok := providerCandles[providerName]; !ok {
 					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
 				}
+
 				if tp, ok := prices[pair.String()]; ok {
 					providerPrices[providerName][pair.Base] = tp
 				} else {
 					mtx.Unlock()
 					return fmt.Errorf("failed to find exchange rate in provider response")
 				}
+
 				if cp, ok := candles[pair.String()]; ok {
 					providerCandles[providerName][pair.Base] = cp
 				} else {
@@ -234,6 +239,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 	}
 
+	// warn the user of any missing prices
 	if len(reportedRates) != len(requiredRates) {
 		return fmt.Errorf("unable to get prices for all exchange rates")
 	}
@@ -243,20 +249,25 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 	}
 
+	// attempt to use candles for tvwap calculations
 	tvwapPrices, err := ComputeTVWAP(providerCandles)
 	if err != nil {
 		return err
 	}
 
-	if len(tvwapPrices) < 1 {
+	// if tvwap candles are not available or all candles are not recent enough,
+	// use most recent prices & vwap instead
+	if len(tvwapPrices) == 0 {
 		filteredProviderPrices, err := o.filterDeviations(providerPrices)
 		if err != nil {
 			return err
 		}
+
 		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
 		if err != nil {
 			return err
 		}
+
 		o.prices = vwapPrices
 	} else {
 		o.prices = tvwapPrices

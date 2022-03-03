@@ -54,6 +54,12 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 	return vwap(weightedPrices, volumeSum)
 }
 
+// ComputeTVWAP computes the time volume weighted average price for all points
+// for each exchange pair. Filters out any candles that did not occur within
+// timePeriod. The provided prices argument reflects a mapping of
+// provider => {<base> => <TickerPrice>, ...}.
+//
+// Ref : https://en.wikipedia.org/wiki/Time-weighted_average_price
 func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[string]sdk.Dec, error) {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
