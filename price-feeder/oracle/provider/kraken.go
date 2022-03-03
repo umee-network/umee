@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -33,7 +34,7 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.Mutex
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
-		candles         map[string]KrakenCandle       // Symbol => KrakenCandle
+		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
@@ -50,6 +51,7 @@ type (
 		Close     string // Close price during this period
 		TimeStamp int64  // Linux epoch timestamp
 		Volume    string // Volume during this period
+		Symbol    string // Symbol for this candle
 	}
 
 	// KrakenSubscriptionMsg Msg to subscribe to all the pairs at once.
@@ -99,7 +101,7 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "kraken").Logger(),
 		tickers:         map[string]TickerPrice{},
-		candles:         map[string]KrakenCandle{},
+		candles:         map[string][]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
@@ -126,6 +128,49 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	}
 
 	return tickerPrices, nil
+}
+
+// GetCandlePrices returns the candlePrices based on the saved map.
+func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candlePrices := make(map[string][]CandlePrice, len(pairs))
+
+	for _, cp := range pairs {
+		key := cp.String()
+		candlePrice, err := p.getCandlePrices(key)
+		if err != nil {
+			return nil, err
+		}
+		candlePrices[key] = candlePrice
+	}
+
+	return candlePrices, nil
+}
+
+func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
+	return newCandlePrice(
+		"Kraken",
+		candle.Symbol,
+		candle.Close,
+		candle.Volume,
+		candle.TimeStamp,
+	)
+}
+
+func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+	candles, ok := p.candles[key]
+	if !ok {
+		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+	}
+
+	candleList := []CandlePrice{}
+	for _, candle := range candles {
+		cp, err := candle.toCandlePrice()
+		if err != nil {
+			return []CandlePrice{}, err
+		}
+		candleList = append(candleList, cp)
+	}
+	return candleList, nil
 }
 
 // SubscribeTickers subscribe all currency pairs into ticker and candle channels.
@@ -229,7 +274,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		return fmt.Errorf("received an unexpected structure")
 	}
 
-	channelName, ok := tickerMessage[1].(string)
+	channelName, ok := tickerMessage[2].(string)
 	if !ok || channelName != "ticker" {
 		return fmt.Errorf("received an unexpected channel name")
 	}
@@ -274,11 +319,16 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 		return fmt.Errorf("wrong number of fields in candle")
 	}
 
-	time, ok := tmp[2].(int64)
+	// timestamps come as a float string
+	time, ok := tmp[1].(string)
 	if !ok {
-		return fmt.Errorf("time field must be an int64")
+		return fmt.Errorf("time field must be a string")
 	}
-	kc.TimeStamp = time
+	timeFloat, err := strconv.ParseFloat(time, 64)
+	if err != nil {
+		return fmt.Errorf("unable to convert time to float")
+	}
+	kc.TimeStamp = int64(timeFloat)
 
 	close, ok := tmp[5].(string)
 	if !ok {
@@ -319,7 +369,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	var krakenCandle KrakenCandle
-	if err = krakenCandle.UnmarshalJSON(tickerBz); err != nil {
+	if err := krakenCandle.UnmarshalJSON(tickerBz); err != nil {
 		return err
 	}
 
@@ -330,8 +380,9 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 
 	krakenPair = normalizeKrakenBTCPair(krakenPair)
 	currencyPairSymbol := krakenPairToCurrencyPairSymbol(krakenPair)
+	krakenCandle.Symbol = currencyPairSymbol
 
-	p.setCandlePair(currencyPairSymbol, krakenCandle)
+	p.setCandlePair(krakenCandle)
 	return nil
 }
 
@@ -422,10 +473,19 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 	p.tickers[symbol] = ticker
 }
 
-func (p *KrakenProvider) setCandlePair(symbol string, candle KrakenCandle) {
+func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.candles[symbol] = candle
+	timePeriod := time.Now().Add(time.Minute*-10).Unix() * 1000
+	candleList := []KrakenCandle{}
+
+	candleList = append(candleList, candle)
+	for _, c := range p.candles[candle.Symbol] {
+		if timePeriod < c.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[candle.Symbol] = candleList
 }
 
 // ping to check websocket connection.

@@ -75,7 +75,7 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
-		require.Equal(t, "huobi provider failed to get ticker price for FOOBAR", err.Error())
+		require.Equal(t, "failed to get ticker price for FOOBAR", err.Error())
 		require.Nil(t, prices)
 	})
 }
