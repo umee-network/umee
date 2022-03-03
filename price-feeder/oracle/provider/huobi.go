@@ -317,6 +317,9 @@ func (p *HuobiProvider) subscribeCandlePair(cp types.CurrencyPair) error {
 }
 
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	ticker, ok := p.tickers[currencyPairToHuobiTickerPair(cp)]
 	if !ok {
 		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", cp.String())
@@ -326,6 +329,9 @@ func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, erro
 }
 
 func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	candles, ok := p.candles[currencyPairToHuobiCandlePair(cp)]
 	if !ok {
 		return []CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())

@@ -116,6 +116,9 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
 func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
@@ -157,6 +160,9 @@ func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 }
 
 func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	candles, ok := p.candles[key]
 	if !ok {
 		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)

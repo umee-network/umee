@@ -153,6 +153,9 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	ticker, ok := p.tickers[key]
 	if !ok {
 		return TickerPrice{}, fmt.Errorf("binance provider failed to get ticker price for %s", key)
@@ -162,6 +165,9 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 }
 
 func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	candles, ok := p.candles[key]
 	if !ok {
 		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)

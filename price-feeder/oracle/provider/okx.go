@@ -172,6 +172,9 @@ func (p *OkxProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	instrumentId := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentId]
 	if !ok {
@@ -182,6 +185,9 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 }
 
 func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	instrumentId := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentId]
 	if !ok {
