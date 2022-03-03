@@ -80,18 +80,21 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 			if period.Equal(sdk.ZeroDec()) {
 				return nil, fmt.Errorf("unable to divide by zero")
 			}
+			// weightUnit = (1 - minimumTimeWeight) / period
 			weightUnit := sdk.OneDec().Sub(minimumTimeWeight).Quo(period)
 
-			// get tvwap
+			// get weighted prices, and sum of volumes
 			for _, candle := range cp {
 				// we only want candles within the last timePeriod
 				if timePeriod < candle.TimeStamp {
+					// timeDiff = now - candle.TimeStamp
 					timeDiff := sdk.NewDec(now - candle.TimeStamp)
-					vol := candle.Volume.Mul(
+					// volume = candle.Volume * (weightUnit * (period - timeDiff) + minimumTimeWeight)
+					volume := candle.Volume.Mul(
 						weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
 					)
-					volumeSum[base] = volumeSum[base].Add(vol)
-					weightedPrices[base] = weightedPrices[base].Add(candle.Price.Mul(vol))
+					volumeSum[base] = volumeSum[base].Add(volume)
+					weightedPrices[base] = weightedPrices[base].Add(candle.Price.Mul(volume))
 				}
 			}
 
