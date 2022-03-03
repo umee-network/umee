@@ -31,7 +31,7 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mtx             sync.Mutex
+		mtx             sync.RWMutex
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -153,8 +153,8 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[key]
 	if !ok {
@@ -165,8 +165,8 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 }
 
 func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {

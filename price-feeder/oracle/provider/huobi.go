@@ -36,7 +36,7 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mtx             sync.Mutex
+		mtx             sync.RWMutex
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -317,8 +317,8 @@ func (p *HuobiProvider) subscribeCandlePair(cp types.CurrencyPair) error {
 }
 
 func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[currencyPairToHuobiTickerPair(cp)]
 	if !ok {
@@ -329,8 +329,8 @@ func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, erro
 }
 
 func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[currencyPairToHuobiCandlePair(cp)]
 	if !ok {

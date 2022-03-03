@@ -32,7 +32,7 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mtx             sync.Mutex
+		mtx             sync.RWMutex
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -116,8 +116,8 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
 func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	tickerPrices := make(map[string]TickerPrice, len(pairs))
 
@@ -160,8 +160,8 @@ func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 }
 
 func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {

@@ -33,7 +33,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
-		mtx             sync.Mutex
+		mtx             sync.RWMutex
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -172,8 +172,8 @@ func (p *OkxProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	instrumentId := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentId]
@@ -185,8 +185,8 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 }
 
 func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 
 	instrumentId := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentId]
