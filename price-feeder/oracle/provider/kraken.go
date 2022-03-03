@@ -38,14 +38,14 @@ type (
 	}
 
 	// KrakenTicker ticker price response from Kraken ticker channel.
-	// https://docs.kraken.com/websockets/#message-ticker
+	// REF: https://docs.kraken.com/websockets/#message-ticker
 	KrakenTicker struct {
 		C []string `json:"c"` // Close with Price in the first position
 		V []string `json:"v"` // Volume with the value over last 24 hours in the second position
 	}
 
 	// KrakenCandle candle response from Kraken candle channel.
-	// REF : https://docs.kraken.com/websockets/#message-ohlc
+	// REF: https://docs.kraken.com/websockets/#message-ohlc
 	KrakenCandle struct {
 		Close     string // Close price during this period
 		TimeStamp int64  // Linux epoch timestamp
@@ -106,9 +106,6 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 	if err := provider.SubscribeTickers(pairs...); err != nil {
 		return nil, err
 	}
-	if err := provider.SubscribeCandles(pairs...); err != nil {
-		return nil, err
-	}
 
 	go provider.handleWebSocketMsgs(ctx)
 
@@ -131,8 +128,7 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	return tickerPrices, nil
 }
 
-// SubscribeTickers subscribe to all currency pairs and
-// add the new ones into the provider subscribed pairs.
+// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
 func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	pairs := make([]string, len(cps))
 
@@ -140,7 +136,10 @@ func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 		pairs[i] = currencyPairToKrakenPair(cp)
 	}
 
-	if err := p.subscribePairs(pairs...); err != nil {
+	if err := p.subscribeTickerPairs(pairs...); err != nil {
+		return err
+	}
+	if err := p.subscribeCandlePairs(pairs...); err != nil {
 		return err
 	}
 
@@ -148,23 +147,8 @@ func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
 	return nil
 }
 
-func (p *KrakenProvider) SubscribeCandles(cps ...types.CurrencyPair) error {
-	candles := make([]string, len(cps))
-
-	for i, cp := range cps {
-		candles[i] = currencyPairToKrakenPair(cp)
-	}
-
-	if err := p.subscribeCandlePairs(candles...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	return nil
-}
-
-// handleWebSocketMsgs receive all the messages from the provider
-// and controls to reconnect the web socket.
+// handleWebSocketMsgs receive all the messages from the provider and controls the
+// reconnect function to the web socket.
 func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
@@ -176,7 +160,7 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
-				// if some error occurs continue to try to read the next message
+				// if some error occurs continue to try to read the next message.
 				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
@@ -208,7 +192,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 
 	var krakenEvent KrakenEvent
 	if err := json.Unmarshal(bz, &krakenEvent); err != nil {
-		// msg is not an event, it will try to marshal to ticker message
+		// msg is not an event, it will try to marshal to ticker message.
 		p.logger.Debug().Msg("received a message that is not an event")
 	} else {
 		switch krakenEvent.Event {
@@ -222,7 +206,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	if err := p.messageReceivedTickerPrice(bz); err != nil {
-		// msg is not a ticker, it will try to marshal to candle message
+		// msg is not a ticker, it will try to marshal to candle message.
 		p.logger.Debug().Err(err).Msg("unable to unmarshal ticker")
 	} else {
 		return
@@ -368,7 +352,10 @@ func (p *KrakenProvider) reconnect() error {
 		iterator++
 	}
 
-	return p.subscribePairs(pairs...)
+	if err := p.subscribeTickerPairs(pairs...); err != nil {
+		return err
+	}
+	return p.subscribeCandlePairs(pairs...)
 }
 
 // keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
@@ -412,7 +399,8 @@ func (p *KrakenProvider) messageReceivedSubscriptionStatus(bz []byte) {
 	}
 }
 
-// messageReceivedSystemStatus handle the system status and try to reconnect if it is not online.
+// messageReceivedSystemStatus handle the system status and try to reconnect if it
+// is not online.
 func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 	var systemStatus KrakenEventSystemStatus
 	if err := json.Unmarshal(bz, &systemStatus); err != nil {
@@ -445,9 +433,9 @@ func (p *KrakenProvider) ping() error {
 	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
-// subscribePairs write the subscription msg to the provider.
-func (p *KrakenProvider) subscribePairs(pairs ...string) error {
-	subsMsg := newKrakenSubscriptionMsg(pairs...)
+// subscribeTickerPairs write the subscription msg to the provider.
+func (p *KrakenProvider) subscribeTickerPairs(pairs ...string) error {
+	subsMsg := newKrakenTickerSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
@@ -482,13 +470,13 @@ func (ticker KrakenTicker) toTickerPrice(symbol string) (TickerPrice, error) {
 	if len(ticker.C) != 2 || len(ticker.V) != 2 {
 		return TickerPrice{}, fmt.Errorf("error converting KrakenTicker to TickerPrice")
 	}
-	// ticker.C has the Price in the first position
-	// ticker.V has the totla	Value over last 24 hours in the second position
+	// ticker.C has the Price in the first position.
+	// ticker.V has the totla	Value over last 24 hours in the second position.
 	return newTickerPrice("Kraken", symbol, ticker.C[0], ticker.V[1])
 }
 
-// newKrakenSubscriptionMsg returns a new subscription Msg.
-func newKrakenSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
+// newKrakenTickerSubscriptionMsg returns a new subscription Msg.
+func newKrakenTickerSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
 	return KrakenSubscriptionMsg{
 		Event: "subscribe",
 		Pair:  pairs,
@@ -522,7 +510,7 @@ func currencyPairToKrakenPair(cp types.CurrencyPair) string {
 }
 
 // normalizeKrakenBTCPair changes XBT pairs to BTC,
-// since other providers list bitcoin as BTC
+// since other providers list bitcoin as BTC.
 func normalizeKrakenBTCPair(ticker string) string {
 	return strings.Replace(ticker, "XBT", "BTC", 1)
 }
