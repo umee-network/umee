@@ -15,14 +15,10 @@ const (
 	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
 	defaultReconnectTime     = time.Minute * 20
 	maxReconnectionTries     = 3
+	providerCandlePeriod     = 10 * time.Minute
 )
 
 var ping = []byte("ping")
-
-// providerCandlePeriod represents the cutoff in minutes for old candles.
-const (
-	providerCandlePeriod = 10
-)
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
@@ -91,7 +87,7 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 }
 
 // PastUnixTime returns a millisecond timestamp that represents the unix time
-// n number of minutes ago
-func PastUnixTime(minutes int64) int64 {
-	return time.Now().Add(time.Minute*time.Duration(minutes)*-1).Unix() * 1000
+// minus t.
+func PastUnixTime(t time.Duration) int64 {
+	return time.Now().Add(t*-1).Unix() * 1000
 }
