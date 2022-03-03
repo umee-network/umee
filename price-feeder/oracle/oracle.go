@@ -255,7 +255,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		return err
 	}
 
-	// if tvwap candles are not available or all candles are not recent enough,
+	// if tvwap candles are not available or were filtered out due to staleness,
 	// use most recent prices & vwap instead
 	if len(tvwapPrices) == 0 {
 		filteredProviderPrices, err := o.filterDeviations(providerPrices)
