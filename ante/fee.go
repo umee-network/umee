@@ -3,18 +3,19 @@ package ante
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// MaxOracleMsgGasUsage is constant expected oracle msg gas cost
+// MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
 const MaxOracleMsgGasUsage = uint64(100000)
 
-// MempoolFeeDecorator will check if the transaction's fee is at least as large
-// as the local validator's minimum gasFee (defined in validator config).
-// If fee is too low, decorator returns error and tx is rejected from mempool.
-// Note this only applies when ctx.CheckTx = true
-// If fee is high enough or not CheckTx, then call next AnteHandler
-// CONTRACT: Tx must implement FeeTx to use MempoolFeeDecorator
+// MempoolFeeDecorator defines a custom Umee AnteHandler decorator that is
+// responsible for allowing oracle transactions from oracle feeders to bypass
+// the minimum fee CheckTx check. However, if an oracle transaction's gas limit
+// is beyond the accepted threshold, the minimum fee check is still applied.
+//
+// For non-oracle transactions, the minimum fee check is applied.
 type MempoolFeeDecorator struct{}
 
 func NewMempoolFeeDecorator() MempoolFeeDecorator {
@@ -71,8 +72,10 @@ func isOracleTx(msgs []sdk.Msg) bool {
 		switch msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote:
 			continue
+
 		case *oracletypes.MsgAggregateExchangeRateVote:
 			continue
+
 		default:
 			return false
 		}
