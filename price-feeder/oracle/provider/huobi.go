@@ -267,7 +267,7 @@ func (p *HuobiProvider) setTickerPair(ticker HuobiTicker) {
 func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	// huobi time period comes in seconds
+	// convert huobi timestamp seconds -> milliseconds
 	candle.Tick.TimeStamp = candle.Tick.TimeStamp * 1000
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []HuobiCandle{}
