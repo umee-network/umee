@@ -295,12 +295,12 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 		Volume:    pairData[5],
 		TimeStamp: ts,
 	}
-	timePeriod := PastUnixTime(providerCandlePeriod)
+	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []OkxCandlePair{}
 
 	candleList = append(candleList, candle)
 	for _, c := range p.candles[instID] {
-		if timePeriod < c.TimeStamp {
+		if staleTime < c.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}

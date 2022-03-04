@@ -148,10 +148,10 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
-// SetPrices retrieve all the prices and candles from our set of providers as
-// determined in the config. If candles are available, use TVWAP in order
-// to determine prices. If candles are not available, use the most recent prices
-// with VWAP. Warn the the user of any missing prices, and filter out any faulty
+// SetPrices retrieves all the prices and candles from our set of providers as
+// determined in the config. If candles are available, uses TVWAP in order
+// to determine prices. If candles are not available, uses the most recent prices
+// with VWAP. Warns the the user of any missing prices, and filters out any faulty
 // providers which do not report prices within 2𝜎 of the others.
 func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
 	g := new(errgroup.Group)
@@ -356,7 +356,8 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 // all assets, and filter out any providers that are not within 2𝜎 of the mean.
 func (o *Oracle) filterDeviations(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]map[string]provider.TickerPrice, error) {
+	map[string]map[string]provider.TickerPrice, error,
+) {
 	var (
 		filteredPrices = make(map[string]map[string]provider.TickerPrice)
 		threshold      = sdk.MustNewDecFromStr("2")

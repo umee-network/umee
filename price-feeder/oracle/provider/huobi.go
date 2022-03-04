@@ -269,12 +269,12 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	defer p.mtx.Unlock()
 	// huobi time period comes in seconds
 	candle.Tick.TimeStamp = candle.Tick.TimeStamp * 1000
-	timePeriod := PastUnixTime(providerCandlePeriod)
+	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []HuobiCandle{}
 	candleList = append(candleList, candle)
 
 	for _, c := range p.candles[candle.CH] {
-		if timePeriod < c.Tick.TimeStamp {
+		if staleTime < c.Tick.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}

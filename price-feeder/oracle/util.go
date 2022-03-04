@@ -80,7 +80,7 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 				volumeSum[base] = sdk.ZeroDec()
 			}
 
-			// Sort by timestamp
+			// Sort by timestamp old -> new
 			sort.SliceStable(cp, func(i, j int) bool {
 				return cp[i].TimeStamp < cp[j].TimeStamp
 			})
@@ -117,7 +117,8 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]sdk.Dec, map[string]sdk.Dec, error) {
+	map[string]sdk.Dec, map[string]sdk.Dec, error,
+) {
 	var (
 		deviations = make(map[string]sdk.Dec)
 		means      = make(map[string]sdk.Dec)

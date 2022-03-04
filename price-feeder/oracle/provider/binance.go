@@ -142,11 +142,11 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 
 	for _, cp := range pairs {
 		key := cp.String()
-		price, err := p.getCandlePrices(key)
+		prices, err := p.getCandlePrices(key)
 		if err != nil {
 			return nil, err
 		}
-		candlePrices[key] = price
+		candlePrices[key] = prices
 	}
 
 	return candlePrices, nil
@@ -221,12 +221,12 @@ func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	timePeriod := PastUnixTime(providerCandlePeriod)
+	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []BinanceCandle{}
 	candleList = append(candleList, candle)
 
 	for _, c := range p.candles[candle.Symbol] {
-		if timePeriod < c.Metadata.TimeStamp {
+		if staleTime < c.Metadata.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}
