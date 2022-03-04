@@ -148,13 +148,16 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
-// SetPrices retrieve all the prices from our set of providers as determined
-// in the config, average them out, and update the oracle's current exchange
-// rates.
+// SetPrices retrieves all the prices and candles from our set of providers as
+// determined in the config. If candles are available, uses TVWAP in order
+// to determine prices. If candles are not available, uses the most recent prices
+// with VWAP. Warns the the user of any missing prices, and filters out any faulty
+// providers which do not report prices within 2𝜎 of the others.
 func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(map[string]map[string]provider.TickerPrice)
+	providerCandles := make(map[string]map[string][]provider.CandlePrice)
 	requiredRates := make(map[string]struct{})
 
 	for providerName, currencyPairs := range o.providerPairs {
@@ -185,19 +188,36 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				return err
 			}
 
+			candles, err := priceProvider.GetCandlePrices(acceptedPairs...)
+			if err != nil {
+				telemetry.IncrCounter(1, "failure", "provider")
+				return err
+			}
+
 			// flatten and collect prices based on the base currency per provider
 			//
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, cp := range acceptedPairs {
+			for _, pair := range acceptedPairs {
 				if _, ok := providerPrices[providerName]; !ok {
 					providerPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
-				if tp, ok := prices[cp.String()]; ok {
-					providerPrices[providerName][cp.Base] = tp
-				} else {
+				if _, ok := providerCandles[providerName]; !ok {
+					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+				}
+
+				tp, pricesOk := prices[pair.String()]
+				cp, candlesOk := candles[pair.String()]
+				if pricesOk {
+					providerPrices[providerName][pair.Base] = tp
+				}
+				if candlesOk {
+					providerCandles[providerName][pair.Base] = cp
+				}
+
+				if !pricesOk && !candlesOk {
 					mtx.Unlock()
-					return fmt.Errorf("failed to find exchange rate in provider response")
+					return fmt.Errorf("failed to find any exchange rates in provider response")
 				}
 			}
 			mtx.Unlock()
@@ -219,6 +239,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 	}
 
+	// warn the user of any missing prices
 	if len(reportedRates) != len(requiredRates) {
 		return fmt.Errorf("unable to get prices for all exchange rates")
 	}
@@ -228,17 +249,29 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 	}
 
-	filteredProviderPrices, err := o.filterDeviations(providerPrices)
+	// attempt to use candles for tvwap calculations
+	tvwapPrices, err := ComputeTVWAP(providerCandles)
 	if err != nil {
 		return err
 	}
 
-	vwapPrices, err := ComputeVWAP(filteredProviderPrices)
-	if err != nil {
-		return err
-	}
+	// If TVWAP candles are not available or were filtered out due to staleness,
+	// use most recent prices & VWAP instead.
+	if len(tvwapPrices) == 0 {
+		filteredProviderPrices, err := o.filterDeviations(providerPrices)
+		if err != nil {
+			return err
+		}
 
-	o.prices = vwapPrices
+		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
+		if err != nil {
+			return err
+		}
+
+		o.prices = vwapPrices
+	} else {
+		o.prices = tvwapPrices
+	}
 
 	return nil
 }
@@ -323,7 +356,8 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 // all assets, and filter out any providers that are not within 2𝜎 of the mean.
 func (o *Oracle) filterDeviations(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]map[string]provider.TickerPrice, error) {
+	map[string]map[string]provider.TickerPrice, error,
+) {
 	var (
 		filteredPrices = make(map[string]map[string]provider.TickerPrice)
 		threshold      = sdk.MustNewDecFromStr("2")
