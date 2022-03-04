@@ -9,8 +9,9 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// SpamPreventionDecorator will check if the transaction's gas is smaller than
-// configured hard cap.
+// SpamPreventionDecorator defines a custom Umee AnteHandler decorator that is
+// responsible for preventing oracle message spam. Specifically, it prohibits
+// oracle feeders from submitting multiple oracle messages in a single block.
 type SpamPreventionDecorator struct {
 	oracleKeeper     OracleKeeper
 	oraclePrevoteMap map[string]int64
@@ -18,7 +19,6 @@ type SpamPreventionDecorator struct {
 	mu               sync.Mutex
 }
 
-// NewSpamPreventionDecorator returns new spamming prevention decorator instance
 func NewSpamPreventionDecorator(oracleKeeper OracleKeeper) *SpamPreventionDecorator {
 	return &SpamPreventionDecorator{
 		oracleKeeper:     oracleKeeper,
@@ -28,7 +28,6 @@ func NewSpamPreventionDecorator(oracleKeeper OracleKeeper) *SpamPreventionDecora
 	}
 }
 
-// AnteHandle handles msg tax fee checking
 func (spd *SpamPreventionDecorator) AnteHandle(
 	ctx sdk.Context,
 	tx sdk.Tx,
@@ -48,7 +47,9 @@ func (spd *SpamPreventionDecorator) AnteHandle(
 	return next(ctx, tx, simulate)
 }
 
-// CheckOracleSpam check whether the msgs are spamming on purpose or not
+// CheckOracleSpam performs the check of whether or not we've seen an oracle
+// message from an oracle feeder in the current block or not. If we have, we
+// return an error which prohibits the transaction from being processed.
 func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.Msg) error {
 	spd.mu.Lock()
 	defer spd.mu.Unlock()
@@ -81,6 +82,7 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 
 			spd.oraclePrevoteMap[msg.Validator] = curHeight
 			continue
+
 		case *oracletypes.MsgAggregateExchangeRateVote:
 			feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
 			if err != nil {
@@ -106,6 +108,7 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 
 			spd.oracleVoteMap[msg.Validator] = curHeight
 			continue
+
 		default:
 			return nil
 		}
