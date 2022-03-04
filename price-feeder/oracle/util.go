@@ -16,14 +16,19 @@ const tvwapCandlePeriod = 3 * time.Minute
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
 func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
+	vwap := make(map[string]sdk.Dec)
+
 	for base, p := range weightedPrices {
-		if volumeSum[base].Equal(sdk.ZeroDec()) {
-			return nil, fmt.Errorf("unable to divide by zero")
+		if !volumeSum[base].Equal(sdk.ZeroDec()) {
+			if _, ok := vwap[base]; !ok {
+				vwap[base] = sdk.ZeroDec()
+			}
+
+			vwap[base] = p.Quo(volumeSum[base])
 		}
-		weightedPrices[base] = p.Quo(volumeSum[base])
 	}
 
-	return weightedPrices, nil
+	return vwap, nil
 }
 
 // ComputeVWAP computes the volume weighted average price for all price points
