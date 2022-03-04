@@ -31,9 +31,9 @@ type (
 		wsURL           url.URL
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
-		mtx             sync.Mutex
+		mtx             sync.RWMutex
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
-		candles         map[string]BinanceCandle      // Symbol => BinanceCandle
+		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
@@ -87,7 +87,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
 		tickers:         map[string]BinanceTicker{},
-		candles:         map[string]BinanceCandle{},
+		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
@@ -136,7 +136,26 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 	return tickerPrices, nil
 }
 
+// GetCandlePrices returns the candlePrices based on the provided pairs.
+func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+	candlePrices := make(map[string][]CandlePrice, len(pairs))
+
+	for _, cp := range pairs {
+		key := cp.String()
+		prices, err := p.getCandlePrices(key)
+		if err != nil {
+			return nil, err
+		}
+		candlePrices[key] = prices
+	}
+
+	return candlePrices, nil
+}
+
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
 	ticker, ok := p.tickers[key]
 	if !ok {
 		return TickerPrice{}, fmt.Errorf("binance provider failed to get ticker price for %s", key)
@@ -145,13 +164,24 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 	return ticker.toTickerPrice()
 }
 
-func (p *BinanceProvider) getTickerTrades(key string) (BinanceCandle, error) {
-	candle, ok := p.candles[key]
+func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	candles, ok := p.candles[key]
 	if !ok {
-		return BinanceCandle{}, fmt.Errorf("failed to get ticker trades for %s", key)
+		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
 	}
 
-	return candle, nil
+	candleList := []CandlePrice{}
+	for _, candle := range candles {
+		cp, err := candle.toCandlePrice()
+		if err != nil {
+			return []CandlePrice{}, err
+		}
+		candleList = append(candleList, cp)
+	}
+	return candleList, nil
 }
 
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
@@ -191,11 +221,25 @@ func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
 func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.candles[candle.Symbol] = candle
+	staleTime := PastUnixTime(providerCandlePeriod)
+	candleList := []BinanceCandle{}
+	candleList = append(candleList, candle)
+
+	for _, c := range p.candles[candle.Symbol] {
+		if staleTime < c.Metadata.TimeStamp {
+			candleList = append(candleList, c)
+		}
+	}
+	p.candles[candle.Symbol] = candleList
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+}
+
+func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
+	return newCandlePrice("Binance", candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+		candle.Metadata.TimeStamp)
 }
 
 func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {

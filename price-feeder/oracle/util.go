@@ -2,10 +2,34 @@ package oracle
 
 import (
 	"fmt"
+	"sort"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
+
+var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
+
+// tvwapCandlePeriod represents the time period we use for tvwap in minutes.
+const tvwapCandlePeriod = 3 * time.Minute
+
+// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
+func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
+	vwap := make(map[string]sdk.Dec)
+
+	for base, p := range weightedPrices {
+		if !volumeSum[base].Equal(sdk.ZeroDec()) {
+			if _, ok := vwap[base]; !ok {
+				vwap[base] = sdk.ZeroDec()
+			}
+
+			vwap[base] = p.Quo(volumeSum[base])
+		}
+	}
+
+	return vwap, nil
+}
 
 // ComputeVWAP computes the volume weighted average price for all price points
 // for each ticker/exchange pair. The provided prices argument reflects a mapping
@@ -14,43 +38,92 @@ import (
 // Ref: https://en.wikipedia.org/wiki/Volume-weighted_average_price
 func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]sdk.Dec, error) {
 	var (
-		vwap      = make(map[string]sdk.Dec)
-		volumeSum = make(map[string]sdk.Dec)
+		weightedPrices = make(map[string]sdk.Dec)
+		volumeSum      = make(map[string]sdk.Dec)
 	)
 
 	for _, providerPrices := range prices {
 		for base, tp := range providerPrices {
-			if _, ok := vwap[base]; !ok {
-				vwap[base] = sdk.ZeroDec()
+			if _, ok := weightedPrices[base]; !ok {
+				weightedPrices[base] = sdk.ZeroDec()
 			}
 			if _, ok := volumeSum[base]; !ok {
 				volumeSum[base] = sdk.ZeroDec()
 			}
 
-			// vwap[base] = Σ {P * V} for all TickerPrice
-			vwap[base] = vwap[base].Add(tp.Price.Mul(tp.Volume))
+			// weightedPrices[base] = Σ {P * V} for all TickerPrice
+			weightedPrices[base] = weightedPrices[base].Add(tp.Price.Mul(tp.Volume))
 
 			// track total volume for each base
 			volumeSum[base] = volumeSum[base].Add(tp.Volume)
 		}
 	}
 
-	// compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
-	for base, p := range vwap {
-		if volumeSum[base] == sdk.ZeroDec() {
-			return nil, fmt.Errorf("unable to divide by zero")
+	return vwap(weightedPrices, volumeSum)
+}
+
+// ComputeTVWAP computes the time volume weighted average price for all points
+// for each exchange pair. Filters out any candles that did not occur within
+// timePeriod. The provided prices argument reflects a mapping of
+// provider => {<base> => <TickerPrice>, ...}.
+//
+// Ref : https://en.wikipedia.org/wiki/Time-weighted_average_price
+func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[string]sdk.Dec, error) {
+	var (
+		weightedPrices = make(map[string]sdk.Dec)
+		volumeSum      = make(map[string]sdk.Dec)
+		now            = provider.PastUnixTime(0)
+		timePeriod     = provider.PastUnixTime(tvwapCandlePeriod)
+	)
+
+	for _, providerPrices := range prices {
+		for base, cp := range providerPrices {
+			if _, ok := weightedPrices[base]; !ok {
+				weightedPrices[base] = sdk.ZeroDec()
+			}
+			if _, ok := volumeSum[base]; !ok {
+				volumeSum[base] = sdk.ZeroDec()
+			}
+
+			// Sort by timestamp old -> new
+			sort.SliceStable(cp, func(i, j int) bool {
+				return cp[i].TimeStamp < cp[j].TimeStamp
+			})
+
+			period := sdk.NewDec(now - cp[0].TimeStamp)
+			if period.Equal(sdk.ZeroDec()) {
+				return nil, fmt.Errorf("unable to divide by zero")
+			}
+			// weightUnit = (1 - minimumTimeWeight) / period
+			weightUnit := sdk.OneDec().Sub(minimumTimeWeight).Quo(period)
+
+			// get weighted prices, and sum of volumes
+			for _, candle := range cp {
+				// we only want candles within the last timePeriod
+				if timePeriod < candle.TimeStamp {
+					// timeDiff = now - candle.TimeStamp
+					timeDiff := sdk.NewDec(now - candle.TimeStamp)
+					// volume = candle.Volume * (weightUnit * (period - timeDiff) + minimumTimeWeight)
+					volume := candle.Volume.Mul(
+						weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
+					)
+					volumeSum[base] = volumeSum[base].Add(volume)
+					weightedPrices[base] = weightedPrices[base].Add(candle.Price.Mul(volume))
+				}
+			}
+
 		}
-		vwap[base] = p.Quo(volumeSum[base])
 	}
 
-	return vwap, nil
+	return vwap(weightedPrices, volumeSum)
 }
 
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
 	prices map[string]map[string]provider.TickerPrice) (
-	map[string]sdk.Dec, map[string]sdk.Dec, error) {
+	map[string]sdk.Dec, map[string]sdk.Dec, error,
+) {
 	var (
 		deviations = make(map[string]sdk.Dec)
 		means      = make(map[string]sdk.Dec)
