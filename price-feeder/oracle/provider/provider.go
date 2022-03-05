@@ -89,5 +89,5 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 // PastUnixTime returns a millisecond timestamp that represents the unix time
 // minus t.
 func PastUnixTime(t time.Duration) int64 {
-	return time.Now().Add(t*-1).Unix() * 1000
+	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
