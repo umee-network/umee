@@ -63,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#574](https://github.com/umee-network/umee/pull/574) Stop registering metrics endpoint if telemetry is disabled.
 - [#573](https://github.com/umee-network/umee/pull/573) Strengthen CORS settings.
 - [#607](https://github.com/umee-network/umee/pull/607) Fix kraken provider timestamp unit.
+
 ### Refactor
 
 - [#587](https://github.com/umee-network/umee/pull/587) Clean up logs from price feeder providers.
