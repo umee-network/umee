@@ -418,7 +418,7 @@ func (o *Oracle) filterCandleDeviations(
 	provider.CandlePriceMap, error,
 ) {
 	var (
-		tvwapMap        = make(map[string]map[string]sdk.Dec)
+		tvwaps          = make(map[string]map[string]sdk.Dec)
 		filteredCandles = make(provider.CandlePriceMap)
 	)
 
@@ -438,30 +438,30 @@ func (o *Oracle) filterCandleDeviations(
 		}
 
 		for assetName, asset := range tvwap {
-			if _, ok := tvwapMap[providerName]; !ok {
-				tvwapMap[providerName] = make(map[string]sdk.Dec)
+			if _, ok := tvwaps[providerName]; !ok {
+				tvwaps[providerName] = make(map[string]sdk.Dec)
 			}
 
-			tvwapMap[providerName][assetName] = asset
+			tvwaps[providerName][assetName] = asset
 		}
 	}
 
-	deviations, means, err := StandardDeviation(tvwapMap)
+	deviations, means, err := StandardDeviation(tvwaps)
 	if err != nil {
 		return nil, err
 	}
 
 	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
-	for providerName, candleMap := range candles {
-		for base, candle := range candleMap {
+	for providerName, priceMap := range tvwaps {
+		for base, price := range priceMap {
 			if _, ok := deviations[base]; !ok ||
-				(tvwapMap[providerName][base].GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					tvwapMap[providerName][base].LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 
 				if _, ok := filteredCandles[providerName]; !ok {
 					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
 				}
-				filteredCandles[providerName][base] = candle
+				filteredCandles[providerName][base] = candles[providerName][base]
 
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider")
