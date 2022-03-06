@@ -36,7 +36,7 @@ const (
 
 // deviationThreshold defines how many 𝜎 a provider can be away from the mean
 // without being considered faulty.
-var deviationThreshhold = sdk.MustNewDecFromStr("2")
+var deviationThreshold = sdk.MustNewDecFromStr("2")
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -390,8 +390,8 @@ func (o *Oracle) filterTickerDeviations(
 	for providerName, priceMap := range prices {
 		for base, price := range priceMap {
 			if _, ok := deviations[base]; !ok ||
-				(price.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshhold))) &&
-					price.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshhold)))) {
+				(price.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					price.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 				if _, ok := filteredPrices[providerName]; !ok {
 					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
@@ -455,8 +455,8 @@ func (o *Oracle) filterCandleDeviations(
 	for providerName, candleMap := range candles {
 		for base, candle := range candleMap {
 			if _, ok := deviations[base]; !ok ||
-				(tvwapMap[providerName][base].GTE(means[base].Sub(deviations[base].Mul(deviationThreshhold))) &&
-					tvwapMap[providerName][base].LTE(means[base].Add(deviations[base].Mul(deviationThreshhold)))) {
+				(tvwapMap[providerName][base].GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					tvwapMap[providerName][base].LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 
 				if _, ok := filteredCandles[providerName]; !ok {
 					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
