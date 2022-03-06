@@ -482,6 +482,8 @@ func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
 func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
+	// convert kraken timestamp seconds -> milliseconds
+	candle.TimeStamp = candle.TimeStamp * int64(time.Second/time.Millisecond)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []KrakenCandle{}
 
