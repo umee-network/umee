@@ -36,7 +36,7 @@ func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[
 // of provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref: https://en.wikipedia.org/wiki/Volume-weighted_average_price
-func ComputeVWAP(prices provider.TickerPriceMap) (map[string]sdk.Dec, error) {
+func ComputeVWAP(prices provider.AggregatedProviderPrices) (map[string]sdk.Dec, error) {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)
@@ -68,7 +68,7 @@ func ComputeVWAP(prices provider.TickerPriceMap) (map[string]sdk.Dec, error) {
 // provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref : https://en.wikipedia.org/wiki/Time-weighted_average_price
-func ComputeTVWAP(prices provider.CandlePriceMap) (map[string]sdk.Dec, error) {
+func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec, error) {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)

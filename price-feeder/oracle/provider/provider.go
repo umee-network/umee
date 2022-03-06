@@ -33,9 +33,9 @@ type TickerPrice struct {
 	Volume sdk.Dec // 24h volume
 }
 
-// TickerPriceMap defines a type alias for a map
+// AggregatedProviderPrices defines a type alias for a map
 // of provider -> asset -> TickerPrice
-type TickerPriceMap = map[string]map[string]TickerPrice
+type AggregatedProviderPrices map[string]map[string]TickerPrice
 
 // CandlePrice defines price, volume, and time information for an
 // exchange rate.
@@ -45,9 +45,9 @@ type CandlePrice struct {
 	TimeStamp int64   // timestamp
 }
 
-// CandlePriceMap defines a type alias for a map
+// AggregatedProviderCandles defines a type alias for a map
 // of provider -> asset -> []CandlePrice
-type CandlePriceMap = map[string]map[string][]CandlePrice
+type AggregatedProviderCandles map[string]map[string][]CandlePrice
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
