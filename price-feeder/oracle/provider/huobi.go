@@ -98,7 +98,7 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPais(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -137,19 +137,60 @@ func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string
 	return candlePrices, nil
 }
 
-// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
-func (p *HuobiProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
+// SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
+func (p *HuobiProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error {
+	if err := p.subscribeChannels(cps...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
+// subscribeChannels subscribe all currency pairs into ticker and candle channels.
+func (p *HuobiProvider) subscribeChannels(cps ...types.CurrencyPair) error {
+	if err := p.subscribeTickers(cps...); err != nil {
+		return err
+	}
+
+	return p.subscribeCandles(cps...)
+}
+
+// subscribeTickers subscribe all currency pairs into ticker channel.
+func (p *HuobiProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	for _, cp := range cps {
 		if err := p.subscribeTickerPair(cp); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// subscribeCandles subscribe all currency pairs into candle channel.
+func (p *HuobiProvider) subscribeCandles(cps ...types.CurrencyPair) error {
+	for _, cp := range cps {
 		if err := p.subscribeCandlePair(cp); err != nil {
 			return err
 		}
 	}
 
-	p.setSubscribedPairs(cps...)
 	return nil
+}
+
+// subscribedPairsToSlice returns the map of subscribed pairs as slice
+func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	currencyPairs := make([]types.CurrencyPair, len(p.subscribedPairs))
+	iterator := 0
+	for _, cp := range p.subscribedPairs {
+		currencyPairs[iterator] = cp
+		iterator++
+	}
+
+	return currencyPairs
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
@@ -292,16 +333,8 @@ func (p *HuobiProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
-	for _, cp := range p.subscribedPairs {
-		if err := p.subscribeTickerPair(cp); err != nil {
-			return err
-		}
-		if err := p.subscribeCandlePair(cp); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	currencyPairs := p.subscribedPairsToSlice()
+	return p.subscribeChannels(currencyPairs...)
 }
 
 // subscribeTickerPair write the subscription ticker msg to the provider.
