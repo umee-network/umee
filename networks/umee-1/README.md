@@ -8,7 +8,8 @@
 
 ## Snapshot Providers (Quick Sync)
 
-- https://snapshots.stake2.me/umee/
+- https://snapshots.stake2.me/umee
+- https://polkachu.com/tendermint_snapshots/umee
 
 ## Umee Archival Nodes
 
