@@ -109,7 +109,7 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.SubscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -150,25 +150,53 @@ func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 	return candlePrices, nil
 }
 
-// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
-func (p *OkxProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
-	topics := make([]OkxSubscriptionTopic, len(cps)*2)
-
-	iterator := 0
-	for _, cp := range cps {
-		instId := currencyPairToOkxPair(cp)
-		topics[iterator] = newOkxSubscriptionTopic(instId)
-		iterator++
-		topics[iterator] = newOkxCandleSubscriptionTopic(instId)
-		iterator++
-	}
-
-	if err := p.subscribePairs(topics...); err != nil {
+// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
 
 	p.setSubscribedPairs(cps...)
 	return nil
+}
+
+// subscribeChannels subscribe all currency pairs into ticker and candle channels.
+func (p *OkxProvider) subscribeChannels(cps ...types.CurrencyPair) error {
+	if err := p.subscribeTickers(cps...); err != nil {
+		return err
+	}
+
+	return p.subscribeCandles(cps...)
+}
+
+// subscribeTickers subscribe all currency pairs into ticker channel.
+func (p *OkxProvider) subscribeTickers(cps ...types.CurrencyPair) error {
+	topics := make([]OkxSubscriptionTopic, len(cps))
+
+	for i, cp := range cps {
+		topics[i] = newOkxTickerSubscriptionTopic(currencyPairToOkxPair(cp))
+	}
+
+	return p.subscribePairs(topics...)
+}
+
+// subscribeCandles subscribe all currency pairs into candle channel.
+func (p *OkxProvider) subscribeCandles(cps ...types.CurrencyPair) error {
+	topics := make([]OkxSubscriptionTopic, len(cps))
+
+	for i, cp := range cps {
+		topics[i] = newOkxCandleSubscriptionTopic(currencyPairToOkxPair(cp))
+	}
+
+	return p.subscribePairs(topics...)
+}
+
+// subscribedPairsToSlice returns the map of subscribed pairs as slice
+func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -342,17 +370,8 @@ func (p *OkxProvider) reconnect() error {
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn
 
-	topics := make([]OkxSubscriptionTopic, len(p.subscribedPairs)*2)
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		instId := currencyPairToOkxPair(cp)
-		topics[iterator] = newOkxSubscriptionTopic(instId)
-		iterator++
-		topics[iterator] = newOkxCandleSubscriptionTopic(instId)
-		iterator++
-	}
-
-	return p.subscribePairs(topics...)
+	currencyPairs := p.subscribedPairsToSlice()
+	return p.subscribeChannels(currencyPairs...)
 }
 
 // ping to check websocket connection.
@@ -379,8 +398,8 @@ func currencyPairToOkxPair(pair types.CurrencyPair) string {
 	return pair.Base + "-" + pair.Quote
 }
 
-// newOkxSubscriptionTopic returns a new subscription topic.
-func newOkxSubscriptionTopic(instId string) OkxSubscriptionTopic {
+// newOkxTickerSubscriptionTopic returns a new subscription topic.
+func newOkxTickerSubscriptionTopic(instId string) OkxSubscriptionTopic {
 	return OkxSubscriptionTopic{
 		Channel: "tickers",
 		InstId:  instId,
