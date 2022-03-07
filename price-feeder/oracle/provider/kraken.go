@@ -225,6 +225,12 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
+				if websocket.IsCloseError(err, websocket.CloseAbnormalClosure) {
+					p.logger.Err(err).Msg("WebSocket closed unexpectedly")
+					p.keepReconnecting()
+					continue
+				}
+
 				// if some error occurs continue to try to read the next message.
 				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
@@ -409,6 +415,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 // reconnect closes the last WS connection and create a new one.
 func (p *KrakenProvider) reconnect() error {
 	p.wsClient.Close()
+	p.logger.Debug().Msg("trying to reconnect")
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	if err != nil {
