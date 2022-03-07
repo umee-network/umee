@@ -293,7 +293,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-/*
 func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 	val := s.network.Validators[0]
 
@@ -328,7 +327,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdLendAsset(),
 			[]string{
 				val.Address.String(),
-				"20000000uumee", // 20 umee
+				"1000uumee",
 			},
 			nil,
 		},
@@ -347,7 +346,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdBorrowAsset(),
 			[]string{
 				val.Address.String(),
-				"999999uumee", // 1 umee - 1 uumee (will round up because of AdjustedBorrowValue)
+				"49uumee", // will round up to 50 due to adjusted borrow value
 			},
 			nil,
 		},
@@ -364,8 +363,8 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("34.21"),
-				// 1 umee * 34.21 = 34.21
+				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
+				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
 		},
 		{
@@ -379,8 +378,8 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("34.21"),
-				// 1 umee * 34.21 = 34.21
+				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
+				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
 		},
 	}
@@ -391,7 +390,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				"1000000uumee",
+				"50uumee",
 			},
 			nil,
 		},
@@ -410,7 +409,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdWithdrawAsset(),
 			[]string{
 				val.Address.String(),
-				"20000000uumee",
+				"1000u/uumee",
 			},
 			nil,
 		},
@@ -421,7 +420,6 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 	runTestQueries(s, nonzeroCase)
 	runTestTransactions(s, cleanupCommands)
 }
-*/
 
 func (s *IntegrationTestSuite) TestQueryLent() {
 	val := s.network.Validators[0]
