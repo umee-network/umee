@@ -91,33 +91,13 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
 	go provider.handleWebSocketMsgs(ctx)
 
 	return provider, nil
-}
-
-// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
-func (p *BinanceProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps)*2)
-
-	iterator := 0
-	for _, cp := range cps {
-		pairs[iterator] = currencyPairToBinanceTickerPair(cp)
-		iterator++
-		pairs[iterator] = currencyPairToBinanceCandlePair(cp)
-		iterator++
-	}
-
-	if err := p.subscribePairs(pairs...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
@@ -150,6 +130,55 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 	}
 
 	return candlePrices, nil
+}
+
+// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if err := p.subscribeChannels(cps...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
+// subscribeChannels subscribe to the ticker and candle channels for all currency pairs.
+func (p *BinanceProvider) subscribeChannels(cps ...types.CurrencyPair) error {
+	if err := p.subscribeTickers(cps...); err != nil {
+		return err
+	}
+
+	return p.subscribeCandles(cps...)
+}
+
+// subscribeTickers subscribe to the ticker channel for all currency pairs.
+func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
+	pairs := make([]string, len(cps))
+
+	for i, cp := range cps {
+		pairs[i] = currencyPairToBinanceTickerPair(cp)
+	}
+
+	return p.subscribePairs(pairs...)
+}
+
+// subscribeCandles subscribe to the candle channel for all currency pairs.
+func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
+	pairs := make([]string, len(cps))
+
+	for i, cp := range cps {
+		pairs[i] = currencyPairToBinanceCandlePair(cp)
+	}
+
+	return p.subscribePairs(pairs...)
+}
+
+// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
+func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
@@ -289,16 +318,8 @@ func (p *BinanceProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
-	pairs := make([]string, len(p.subscribedPairs)*2)
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		pairs[iterator] = currencyPairToBinanceTickerPair(cp)
-		iterator++
-		pairs[iterator] = currencyPairToBinanceCandlePair(cp)
-		iterator++
-	}
-
-	return p.subscribePairs(pairs...)
+	currencyPairs := p.subscribedPairsToSlice()
+	return p.subscribeChannels(currencyPairs...)
 }
 
 // keepReconnecting keeps trying to reconnect if an error occurs in reconnect.
