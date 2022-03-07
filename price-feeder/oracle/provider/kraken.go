@@ -105,7 +105,7 @@ func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...type
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPais(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -149,6 +149,39 @@ func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 	return candlePrices, nil
 }
 
+// SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
+func (p *KrakenProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error {
+	if err := p.subscribeChannels(cps...); err != nil {
+		return err
+	}
+
+	p.setSubscribedPairs(cps...)
+	return nil
+}
+
+// subscribeChannels subscribe all currency pairs into ticker and candle channels.
+func (p *KrakenProvider) subscribeChannels(cps ...types.CurrencyPair) error {
+	pairs := make([]string, len(cps))
+
+	for i, cp := range cps {
+		pairs[i] = currencyPairToKrakenPair(cp)
+	}
+
+	if err := p.subscribeTickers(pairs...); err != nil {
+		return err
+	}
+
+	return p.subscribeCandles(pairs...)
+}
+
+// subscribedPairsToSlice returns the map of subscribed pairs as slice
+func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	return subscribedPairsToSlice(p.subscribedPairs)
+}
+
 func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
 		"Kraken",
@@ -177,25 +210,6 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 		candleList = append(candleList, cp)
 	}
 	return candleList, nil
-}
-
-// SubscribeTickers subscribe all currency pairs into ticker and candle channels.
-func (p *KrakenProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToKrakenPair(cp)
-	}
-
-	if err := p.subscribeTickerPairs(pairs...); err != nil {
-		return err
-	}
-	if err := p.subscribeCandlePairs(pairs...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	return nil
 }
 
 // handleWebSocketMsgs receive all the messages from the provider and controls the
@@ -402,17 +416,8 @@ func (p *KrakenProvider) reconnect() error {
 	}
 	p.wsClient = wsConn
 
-	pairs := make([]string, len(p.subscribedPairs))
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		pairs[iterator] = currencyPairToKrakenPair(cp)
-		iterator++
-	}
-
-	if err := p.subscribeTickerPairs(pairs...); err != nil {
-		return err
-	}
-	return p.subscribeCandlePairs(pairs...)
+	currencyPairs := p.subscribedPairsToSlice()
+	return p.subscribeChannels(currencyPairs...)
 }
 
 // keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
@@ -501,14 +506,14 @@ func (p *KrakenProvider) ping() error {
 	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
-// subscribeTickerPairs write the subscription msg to the provider.
-func (p *KrakenProvider) subscribeTickerPairs(pairs ...string) error {
+// subscribeTickers write the subscription msg to the provider.
+func (p *KrakenProvider) subscribeTickers(pairs ...string) error {
 	subsMsg := newKrakenTickerSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-// subscribeCandlePairs write the subscription msg to the provider.
-func (p *KrakenProvider) subscribeCandlePairs(pairs ...string) error {
+// subscribeCandles write the subscription msg to the provider.
+func (p *KrakenProvider) subscribeCandles(pairs ...string) error {
 	subsMsg := newKrakenCandleSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
 }
