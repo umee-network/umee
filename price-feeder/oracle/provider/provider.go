@@ -92,11 +92,11 @@ func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
 
-// subscribedPairsToSlice returns the map of subscribed pairs as slice
-func subscribedPairsToSlice(subscribedPairs map[string]types.CurrencyPair) []types.CurrencyPair {
+// mapPairsToSlice returns the map of currency pairs as slice.
+func mapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
 	var currencyPairs []types.CurrencyPair
-	
-	for _, cp := range subscribedPairs {
+
+	for _, cp := range mapPairs {
 		currencyPairs = append(currencyPairs, cp)
 	}
 

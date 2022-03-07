@@ -132,7 +132,7 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
+// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
@@ -178,7 +178,7 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return subscribedPairsToSlice(p.subscribedPairs)
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {

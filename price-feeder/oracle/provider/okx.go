@@ -109,7 +109,7 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.SubscribeCurrencyPais(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -150,8 +150,8 @@ func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
-func (p *OkxProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error {
+// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return subscribedPairsToSlice(p.subscribedPairs)
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {

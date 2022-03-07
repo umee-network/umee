@@ -98,7 +98,7 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPais(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -137,8 +137,8 @@ func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
-func (p *HuobiProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error {
+// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return subscribedPairsToSlice(p.subscribedPairs)
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
