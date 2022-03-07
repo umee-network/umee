@@ -43,7 +43,7 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
-// ExchangeUTokens converts an sdk.Coins containing uTokens to their values in a base
+// ExchangeUTokens converts an sdk.Coins containing uTokens to their values in base
 // tokens.
 func (k Keeper) ExchangeUTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
 	if !uTokens.IsValid() {
