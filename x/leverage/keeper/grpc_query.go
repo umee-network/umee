@@ -109,7 +109,7 @@ func (q Querier) BorrowedValue(
 		return nil, err
 	}
 
-	tokens := sdk.Coins{}
+	var tokens sdk.Coins
 
 	if len(req.Denom) == 0 {
 		tokens = q.Keeper.GetBorrowerBorrows(ctx, borrower)
