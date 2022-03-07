@@ -186,7 +186,7 @@ func (q Querier) LentValue(
 		return nil, err
 	}
 
-	tokens := sdk.Coins{}
+	var tokens sdk.Coins
 
 	if len(req.Denom) == 0 {
 		tokens, err = q.Keeper.GetLenderLent(ctx, lender)
