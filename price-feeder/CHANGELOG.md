@@ -56,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#580](https://github.com/umee-network/umee/pull/580) Update Kraken provider to use WebSocket.
 - [#592](https://github.com/umee-network/umee/pull/592) Add subscribe ticker function to the following providers: Binance, Huobi, Kraken, and Okx.
 - [#601](https://github.com/umee-network/umee/pull/601) Use TVWAP formula for determining prices when available.
+- [#609](https://github.com/umee-network/umee/pull/609) TVWAP faulty provider detection.
 
 ### Bug Fixes
 
