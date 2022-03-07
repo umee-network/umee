@@ -91,7 +91,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPais(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -133,7 +133,7 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 }
 
 // SubscribeCurrencyPais subscribe all currency pairs into ticker and candle channels.
-func (p *BinanceProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error {
+func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (p *BinanceProvider) SubscribeCurrencyPais(cps ...types.CurrencyPair) error
 	return nil
 }
 
-// subscribeChannels subscribe all currency pairs into ticker and candle channels.
+// subscribeChannels subscribe to the ticker and candle channels for all currency pairs.
 func (p *BinanceProvider) subscribeChannels(cps ...types.CurrencyPair) error {
 	if err := p.subscribeTickers(cps...); err != nil {
 		return err
@@ -151,7 +151,7 @@ func (p *BinanceProvider) subscribeChannels(cps ...types.CurrencyPair) error {
 	return p.subscribeCandles(cps...)
 }
 
-// subscribeTickers subscribe all currency pairs into ticker channel.
+// subscribeTickers subscribe to the ticker channel for all currency pairs.
 func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	pairs := make([]string, len(cps))
 
@@ -162,7 +162,7 @@ func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	return p.subscribePairs(pairs...)
 }
 
-// subscribeCandles subscribe all currency pairs into candle channel.
+// subscribeCandles subscribe to the candle channel for all currency pairs.
 func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	pairs := make([]string, len(cps))
 
@@ -173,7 +173,7 @@ func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	return p.subscribePairs(pairs...)
 }
 
-// subscribedPairsToSlice returns the map of subscribed pairs as slice
+// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
 func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
