@@ -36,7 +36,7 @@ func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[
 // of provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref: https://en.wikipedia.org/wiki/Volume-weighted_average_price
-func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]sdk.Dec, error) {
+func ComputeVWAP(prices provider.AggregatedProviderPrices) (map[string]sdk.Dec, error) {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)
@@ -68,7 +68,7 @@ func ComputeVWAP(prices map[string]map[string]provider.TickerPrice) (map[string]
 // provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref : https://en.wikipedia.org/wiki/Time-weighted_average_price
-func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[string]sdk.Dec, error) {
+func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec, error) {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)
@@ -121,7 +121,7 @@ func ComputeTVWAP(prices map[string]map[string][]provider.CandlePrice) (map[stri
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
-	prices map[string]map[string]provider.TickerPrice) (
+	prices map[string]map[string]sdk.Dec) (
 	map[string]sdk.Dec, map[string]sdk.Dec, error,
 ) {
 	var (
@@ -140,8 +140,8 @@ func StandardDeviation(
 				priceSlice[base] = []sdk.Dec{}
 			}
 
-			priceSums[base] = priceSums[base].Add(tp.Price)
-			priceSlice[base] = append(priceSlice[base], tp.Price)
+			priceSums[base] = priceSums[base].Add(tp)
+			priceSlice[base] = append(priceSlice[base], tp)
 		}
 	}
 
