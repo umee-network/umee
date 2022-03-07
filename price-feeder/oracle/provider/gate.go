@@ -90,7 +90,7 @@ func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.
 	}
 	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.SubscribeTickers(pairs...); err != nil {
+	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
 		return nil, err
 	}
 
@@ -121,7 +121,7 @@ func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string]
 }
 
 // SubscribeTickers subscribe all currency pairs into ticker and candle channels.
-func (p *GateProvider) SubscribeTickers(cps ...types.CurrencyPair) error {
+func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	topics := []string{}
 
 	for _, cp := range cps {
