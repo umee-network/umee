@@ -346,7 +346,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdBorrowAsset(),
 			[]string{
 				val.Address.String(),
-				"1000000uumee", // 1 umee
+				"999999uumee", // 1 umee - 1 uumee (will round up because of AdjustedBorrowValue)
 			},
 			nil,
 		},
@@ -384,14 +384,13 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 		},
 	}
 
-	// 1000001 will need to be repaid due to adjusted borrow rounding up
 	cleanupCommands := []testTransaction{
 		{
 			"repay",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
-				"1000001uumee",
+				"1000000uumee",
 			},
 			nil,
 		},
