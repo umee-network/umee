@@ -180,7 +180,7 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 }
 
 // GetCmdQueryLoaned returns a CLI command handler to query for the amount of
-// total loaned tokens for a given address.
+// tokens loaned by a given address.
 func GetCmdQueryLoaned() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "loaned [addr]",
