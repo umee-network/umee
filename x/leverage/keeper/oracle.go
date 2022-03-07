@@ -23,7 +23,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 
 	price, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdk.ZeroDec(), sdkerrors.Wrap(err, "oracle")
 	}
 
 	if price.IsNil() || !price.IsPositive() {
