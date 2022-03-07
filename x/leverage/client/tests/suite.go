@@ -293,6 +293,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	runTestTransactions(s, cleanupCommands)
 }
 
+/*
 func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 	val := s.network.Validators[0]
 
@@ -420,6 +421,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 	runTestQueries(s, nonzeroCase)
 	runTestTransactions(s, cleanupCommands)
 }
+*/
 
 func (s *IntegrationTestSuite) TestQueryLent() {
 	val := s.network.Validators[0]
