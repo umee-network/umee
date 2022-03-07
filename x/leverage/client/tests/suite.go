@@ -372,7 +372,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			cli.GetCmdQueryBorrowedValue(),
 			[]string{
 				val.Address.String(),
-				"uumee",
+				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
 			},
 			false,
 			&types.QueryBorrowedValueResponse{},
