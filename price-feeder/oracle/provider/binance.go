@@ -178,14 +178,7 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	currencyPairs := make([]types.CurrencyPair, len(p.subscribedPairs))
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		currencyPairs[iterator] = cp
-		iterator++
-	}
-
-	return currencyPairs
+	return subscribedPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {

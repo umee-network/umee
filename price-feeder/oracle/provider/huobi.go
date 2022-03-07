@@ -183,14 +183,7 @@ func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	currencyPairs := make([]types.CurrencyPair, len(p.subscribedPairs))
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		currencyPairs[iterator] = cp
-		iterator++
-	}
-
-	return currencyPairs
+	return subscribedPairsToSlice(p.subscribedPairs)
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {

@@ -91,3 +91,16 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
+
+// subscribedPairsToSlice returns the map of subscribed pairs as slice
+func subscribedPairsToSlice(subscribedPairs map[string]types.CurrencyPair) []types.CurrencyPair {
+	currencyPairs := make([]types.CurrencyPair, len(subscribedPairs))
+
+	iterator := 0
+	for _, cp := range subscribedPairs {
+		currencyPairs[iterator] = cp
+		iterator++
+	}
+
+	return currencyPairs
+}
