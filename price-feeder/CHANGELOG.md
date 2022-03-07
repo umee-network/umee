@@ -67,6 +67,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Refactor
 
 - [#587](https://github.com/umee-network/umee/pull/587) Clean up logs from price feeder providers.
+- [#610](https://github.com/umee-network/umee/pull/610) Split subscribtion of ticker and candle channels.
 
 ## [v0.1.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.0) - 2022-02-07
 

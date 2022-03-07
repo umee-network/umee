@@ -91,3 +91,16 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
+
+// mapPairsToSlice returns the map of currency pairs as slice.
+func mapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
+	currencyPairs := make([]types.CurrencyPair, len(mapPairs))
+
+	iterator := 0
+	for _, cp := range mapPairs {
+		currencyPairs[iterator] = cp
+		iterator++
+	}
+
+	return currencyPairs
+}
