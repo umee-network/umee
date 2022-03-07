@@ -34,18 +34,18 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed_value";
   }
 
-  // Lent queries for the lent amount of a user by token denomination.
-  // If the denomination is not supplied, the total for each lent token is
+  // Loaned queries for the amount of tokens loaned by a user by denomination.
+  // If the denomination is not supplied, the total for each loaned token is
   // returned.
-  rpc Lent(QueryLentRequest) returns (QueryLentResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/lent";
+  rpc Loaned(QueryLoanedRequest) returns (QueryLoanedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/loaned";
   }
 
-  // LentValue queries for the USD value lent amount of a user by token
+  // LoanedValue queries for the USD value loaned by a user by token
   // denomination. If the denomination is not supplied, the sum across all
-  // lent tokens is returned.
-  rpc LentValue(QueryLentValueRequest) returns (QueryLentValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/lent_value";
+  // loaned tokens is returned.
+  rpc LoanedValue(QueryLoanedValueRequest) returns (QueryLoanedValueResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/loaned_value";
   }
 
   // AvailableBorrow queries for the available amount to borrow of a specified denomination.
@@ -64,13 +64,14 @@ service Query {
   }
 
   // MarketSize queries for the Market Size in USD of a specified denomination, which
-  // is the USD value of total tokens lent plus borrow interest owed across all users.
+  // is the USD value of total tokens loaned by all users plus borrow interest owed
+  // by all users.
   rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/market_size";
   }
 
   // TokenMarketSize queries for the Market Size in base tokens of a specified denomination,
-  // which is the total tokens lent plus borrow interest owed across all users.
+  // which is the total tokens loaned by all users plus borrow interest owed by all users.
   rpc TokenMarketSize(QueryTokenMarketSizeRequest) returns (QueryTokenMarketSizeResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/token_market_size";
   }
@@ -221,27 +222,27 @@ message QueryBorrowedValueResponse {
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
-// QueryLentRequest defines the request structure for the Lent gRPC service handler.
-message QueryLentRequest {
+// QueryLoanedRequest defines the request structure for the Loaned gRPC service handler.
+message QueryLoanedRequest {
   string address = 1;
   string denom   = 2;
 }
 
-// QueryLentResponse defines the response structure for the Lent gRPC service handler.
-message QueryLentResponse {
-  repeated cosmos.base.v1beta1.Coin lent = 1
+// QueryLoanedResponse defines the response structure for the Loaned gRPC service handler.
+message QueryLoanedResponse {
+  repeated cosmos.base.v1beta1.Coin loaned = 1
       [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
 }
 
-// QueryLentValueRequest defines the request structure for the LentValue gRPC service handler.
-message QueryLentValueRequest {
+// QueryLoanedValueRequest defines the request structure for the LoanedValue gRPC service handler.
+message QueryLoanedValueRequest {
   string address = 1;
   string denom   = 2;
 }
 
-// QueryLentValueResponse defines the response structure for the LentValue gRPC service handler.
-message QueryLentValueResponse {
-  string lent_value = 1
+// QueryLoanedValueResponse defines the response structure for the LoanedValue gRPC service handler.
+message QueryLoanedValueResponse {
+  string loaned_value = 1
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 

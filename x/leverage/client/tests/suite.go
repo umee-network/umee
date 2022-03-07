@@ -421,7 +421,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestQueryLent() {
+func (s *IntegrationTestSuite) TestQueryLoaned() {
 	val := s.network.Validators[0]
 
 	setupCommands := []testTransaction{
@@ -439,7 +439,7 @@ func (s *IntegrationTestSuite) TestQueryLent() {
 	testCases := []testQuery{
 		{
 			"invalid address",
-			cli.GetCmdQueryLent(),
+			cli.GetCmdQueryLoaned(),
 			[]string{
 				"xyz",
 			},
@@ -448,22 +448,22 @@ func (s *IntegrationTestSuite) TestQueryLent() {
 			nil,
 		},
 		{
-			"query all lent",
-			cli.GetCmdQueryLent(),
+			"query all loaned",
+			cli.GetCmdQueryLoaned(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLentResponse{},
-			&types.QueryLentResponse{
-				Lent: sdk.NewCoins(
+			&types.QueryLoanedResponse{},
+			&types.QueryLoanedResponse{
+				Loaned: sdk.NewCoins(
 					sdk.NewInt64Coin(app.BondDenom, 1000),
 				),
 			},
 		},
 		{
 			"invalid denom",
-			cli.GetCmdQueryLent(),
+			cli.GetCmdQueryLoaned(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
@@ -473,16 +473,16 @@ func (s *IntegrationTestSuite) TestQueryLent() {
 			nil,
 		},
 		{
-			"query denom lent",
-			cli.GetCmdQueryLent(),
+			"query denom loaned",
+			cli.GetCmdQueryLoaned(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
 			},
 			false,
-			&types.QueryLentResponse{},
-			&types.QueryLentResponse{
-				Lent: sdk.NewCoins(
+			&types.QueryLoanedResponse{},
+			&types.QueryLoanedResponse{
+				Loaned: sdk.NewCoins(
 					sdk.NewInt64Coin(app.BondDenom, 1000),
 				),
 			},
@@ -506,13 +506,13 @@ func (s *IntegrationTestSuite) TestQueryLent() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestQueryLentValue() {
+func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 	val := s.network.Validators[0]
 
 	simpleCases := []testQuery{
 		{
 			"invalid address",
-			cli.GetCmdQueryLentValue(),
+			cli.GetCmdQueryLoanedValue(),
 			[]string{
 				"xyz",
 			},
@@ -521,15 +521,15 @@ func (s *IntegrationTestSuite) TestQueryLentValue() {
 			nil,
 		},
 		{
-			"query zero lent value",
-			cli.GetCmdQueryLentValue(),
+			"query zero loaned value",
+			cli.GetCmdQueryLoanedValue(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLentValueResponse{},
-			&types.QueryLentValueResponse{
-				LentValue: sdk.ZeroDec(),
+			&types.QueryLoanedValueResponse{},
+			&types.QueryLoanedValueResponse{
+				LoanedValue: sdk.ZeroDec(),
 			},
 		},
 	}
@@ -549,7 +549,7 @@ func (s *IntegrationTestSuite) TestQueryLentValue() {
 	testCases := []testQuery{
 		{
 			"invalid address",
-			cli.GetCmdQueryLentValue(),
+			cli.GetCmdQueryLoanedValue(),
 			[]string{
 				"xyz",
 			},
@@ -558,33 +558,33 @@ func (s *IntegrationTestSuite) TestQueryLentValue() {
 			nil,
 		},
 		{
-			"query all lent value",
-			cli.GetCmdQueryLentValue(),
+			"query all loaned value",
+			cli.GetCmdQueryLoanedValue(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLentValueResponse{},
-			&types.QueryLentValueResponse{
+			&types.QueryLoanedValueResponse{},
+			&types.QueryLoanedValueResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
-				// amount lent, times its initial oracle exchange rate.
-				LentValue: sdk.MustNewDecFromStr("34.21"),
+				// amount loaned, times its initial oracle exchange rate.
+				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
 		},
 		{
-			"query denom lent",
-			cli.GetCmdQueryLentValue(),
+			"query denom loaned",
+			cli.GetCmdQueryLoanedValue(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
 			},
 			false,
-			&types.QueryLentValueResponse{},
-			&types.QueryLentValueResponse{
+			&types.QueryLoanedValueResponse{},
+			&types.QueryLoanedValueResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
-				LentValue: sdk.MustNewDecFromStr("34.21"),
+				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
 		},
@@ -905,7 +905,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			&types.QueryBorrowLimitResponse{
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
-				// amount lent, times its initial oracle exchange rate.
+				// amount loaned, times its initial oracle exchange rate.
 				BorrowLimit: sdk.MustNewDecFromStr("34.21"),
 				// 0.05 * 20 * 34.21 = 34.21
 			},

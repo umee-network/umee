@@ -83,7 +83,7 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously lent
+// MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
 // base asset type from the module
 type MsgWithdrawAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
@@ -695,7 +695,7 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// LendAsset defines a method for lending coins to the capital facility.
 	LendAsset(ctx context.Context, in *MsgLendAsset, opts ...grpc.CallOption) (*MsgLendAssetResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously lent coins from
+	// WithdrawAsset defines a method for withdrawing previously loaned coins from
 	// the capital facility.
 	WithdrawAsset(ctx context.Context, in *MsgWithdrawAsset, opts ...grpc.CallOption) (*MsgWithdrawAssetResponse, error)
 	// SetCollateral defines a method for users to enable or disable a uToken
@@ -776,7 +776,7 @@ func (c *msgClient) Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grp
 type MsgServer interface {
 	// LendAsset defines a method for lending coins to the capital facility.
 	LendAsset(context.Context, *MsgLendAsset) (*MsgLendAssetResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously lent coins from
+	// WithdrawAsset defines a method for withdrawing previously loaned coins from
 	// the capital facility.
 	WithdrawAsset(context.Context, *MsgWithdrawAsset) (*MsgWithdrawAssetResponse, error)
 	// SetCollateral defines a method for users to enable or disable a uToken

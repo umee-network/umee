@@ -129,10 +129,10 @@ func (q Querier) BorrowedValue(
 	return &types.QueryBorrowedValueResponse{BorrowedValue: value}, nil
 }
 
-func (q Querier) Lent(
+func (q Querier) Loaned(
 	goCtx context.Context,
-	req *types.QueryLentRequest,
-) (*types.QueryLentResponse, error) {
+	req *types.QueryLoanedRequest,
+) (*types.QueryLoanedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -148,30 +148,30 @@ func (q Querier) Lent(
 	}
 
 	if len(req.Denom) == 0 {
-		tokens, err := q.Keeper.GetLenderLent(ctx, lender)
+		tokens, err := q.Keeper.GetLenderLoaned(ctx, lender)
 		if err != nil {
 			return nil, err
 		}
 
-		return &types.QueryLentResponse{Lent: tokens}, nil
+		return &types.QueryLoanedResponse{Loaned: tokens}, nil
 	}
 
 	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	token, err := q.Keeper.GetLent(ctx, lender, req.Denom)
+	token, err := q.Keeper.GetLoaned(ctx, lender, req.Denom)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryLentResponse{Lent: sdk.NewCoins(token)}, nil
+	return &types.QueryLoanedResponse{Loaned: sdk.NewCoins(token)}, nil
 }
 
-func (q Querier) LentValue(
+func (q Querier) LoanedValue(
 	goCtx context.Context,
-	req *types.QueryLentValueRequest,
-) (*types.QueryLentValueResponse, error) {
+	req *types.QueryLoanedValueRequest,
+) (*types.QueryLoanedValueResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -189,7 +189,7 @@ func (q Querier) LentValue(
 	var tokens sdk.Coins
 
 	if len(req.Denom) == 0 {
-		tokens, err = q.Keeper.GetLenderLent(ctx, lender)
+		tokens, err = q.Keeper.GetLenderLoaned(ctx, lender)
 		if err != nil {
 			return nil, err
 		}
@@ -198,12 +198,12 @@ func (q Querier) LentValue(
 			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 		}
 
-		lent, err := q.Keeper.GetLent(ctx, lender, req.Denom)
+		loaned, err := q.Keeper.GetLoaned(ctx, lender, req.Denom)
 		if err != nil {
 			return nil, err
 		}
 
-		tokens = sdk.NewCoins(lent)
+		tokens = sdk.NewCoins(loaned)
 	}
 
 	value, err := q.Keeper.TotalTokenValue(ctx, tokens)
@@ -211,7 +211,7 @@ func (q Querier) LentValue(
 		return nil, err
 	}
 
-	return &types.QueryLentValueResponse{LentValue: value}, nil
+	return &types.QueryLoanedValueResponse{LoanedValue: value}, nil
 }
 
 func (q Querier) AvailableBorrow(
@@ -293,7 +293,7 @@ func (q Querier) MarketSize(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	marketSizeCoin, err := q.Keeper.GetTotalLent(ctx, req.Denom)
+	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -322,7 +322,7 @@ func (q Querier) TokenMarketSize(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	marketSizeCoin, err := q.Keeper.GetTotalLent(ctx, req.Denom)
+	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
 	if err != nil {
 		return nil, err
 	}

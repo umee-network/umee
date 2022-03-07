@@ -7,9 +7,9 @@ import (
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
-// GetLent returns an sdk.Coin representing how much of a given denom a
-// lender has lent, including interest accrued.
-func (k Keeper) GetLent(ctx sdk.Context, lenderAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
+// GetLoaned returns an sdk.Coin representing how much of a given denom a
+// lender has loaned, including interest accrued.
+func (k Keeper) GetLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
@@ -23,9 +23,9 @@ func (k Keeper) GetLent(ctx sdk.Context, lenderAddr sdk.AccAddress, denom string
 	return k.ExchangeUToken(ctx, balance.Add(collateral))
 }
 
-// GetLenderLent returns the total tokens lent by a lender across all denoms,
+// GetLenderLoaned returns the total tokens loaned by a lender across all denoms,
 // including any interest accrued.
-func (k Keeper) GetLenderLent(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) GetLenderLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk.Coins, error) {
 	// get all uTokens set as collateral
 	collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
 
@@ -42,9 +42,9 @@ func (k Keeper) GetLenderLent(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk.C
 	return k.ExchangeUTokens(ctx, collateral.Add(uTokens...))
 }
 
-// GetTotalLent returns the total lent by all lenders in a given denom,
+// GetTotalLoaned returns the total loaned by all lenders in a given denom,
 // including any interest accrued.
-func (k Keeper) GetTotalLent(ctx sdk.Context, denom string) (sdk.Coin, error) {
+func (k Keeper) GetTotalLoaned(ctx sdk.Context, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}

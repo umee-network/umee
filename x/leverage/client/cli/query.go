@@ -30,8 +30,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryBorrowed(),
 		GetCmdQueryBorrowedValue(),
-		GetCmdQueryLent(),
-		GetCmdQueryLentValue(),
+		GetCmdQueryLoaned(),
+		GetCmdQueryLoanedValue(),
 		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralSetting(),
@@ -179,13 +179,13 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLent returns a CLI command handler to query for the amount of
-// total lent tokens for a given address.
-func GetCmdQueryLent() *cobra.Command {
+// GetCmdQueryLoaned returns a CLI command handler to query for the amount of
+// total loaned tokens for a given address.
+func GetCmdQueryLoaned() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lent [addr]",
+		Use:   "loaned [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of lent tokens for an address",
+		Short: "Query for the total amount of tokens loaned by an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -194,14 +194,14 @@ func GetCmdQueryLent() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLentRequest{
+			req := &types.QueryLoanedRequest{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
 
-			resp, err := queryClient.Lent(cmd.Context(), req)
+			resp, err := queryClient.Loaned(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
@@ -216,13 +216,13 @@ func GetCmdQueryLent() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLentValue returns a CLI command handler to query for the USD value of
-// total lent tokens for a given address.
-func GetCmdQueryLentValue() *cobra.Command {
+// GetCmdQueryLoanedValue returns a CLI command handler to query for the USD value of
+// total tokens loaned by a given address.
+func GetCmdQueryLoanedValue() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lent-value [addr]",
+		Use:   "loaned-value [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD value of lent tokens for an address",
+		Short: "Query for the USD value of tokens loaned by an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -231,14 +231,14 @@ func GetCmdQueryLentValue() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLentValueRequest{
+			req := &types.QueryLoanedValueRequest{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
 
-			resp, err := queryClient.LentValue(cmd.Context(), req)
+			resp, err := queryClient.LoanedValue(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

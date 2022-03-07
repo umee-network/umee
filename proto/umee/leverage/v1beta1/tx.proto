@@ -11,7 +11,7 @@ service Msg {
   // LendAsset defines a method for lending coins to the capital facility.
   rpc LendAsset(MsgLendAsset) returns (MsgLendAssetResponse);
 
-  // WithdrawAsset defines a method for withdrawing previously lent coins from
+  // WithdrawAsset defines a method for withdrawing previously loaned coins from
   // the capital facility.
   rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
 
@@ -37,7 +37,7 @@ message MsgLendAsset {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously lent
+// MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
 // base asset type from the module
 message MsgWithdrawAsset {
   string                   lender = 1;
