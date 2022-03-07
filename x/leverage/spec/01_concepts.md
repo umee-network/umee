@@ -24,7 +24,7 @@ Users have the following actions available to them:
   
   Additionally, for assets denominations already enabled as collateral, the lent assets immediately become collateral as well, causing their borrow limit to increase.
   
-  If a lender is undercollateralized (borrowed value > borrow limit), lent assets are eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
+  If a lender is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
   
   Care should be taken by undercollateralized users when lending token amounts too small to restore the health of their borrows, as the newly lent assets will be eligible for liquidation immediately.
 
@@ -170,6 +170,6 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
 
 ### Market Size
 
-The `MarketSize` of a token denom is the USD value of all tokens lent to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
+The `MarketSize` of a token denom is the USD value of all tokens loaned to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
 
 `MarketSize(denom) = oracle.Price(denom) * [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`

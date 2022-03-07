@@ -29,6 +29,9 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryAllRegisteredTokens(),
 		GetCmdQueryParams(),
 		GetCmdQueryBorrowed(),
+		GetCmdQueryBorrowedValue(),
+		GetCmdQueryLoaned(),
+		GetCmdQueryLoanedValue(),
 		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralSetting(),
@@ -36,6 +39,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryLendAPY(),
 		GetCmdQueryBorrowAPY(),
 		GetCmdQueryMarketSize(),
+		GetCmdQueryTokenMarketSize(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationTargets(),
 	)
@@ -133,6 +137,117 @@ func GetCmdQueryBorrowed() *cobra.Command {
 	}
 
 	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryBorrowedValue returns a CLI command handler to query for the USD
+// value of total borrowed tokens for a given address.
+func GetCmdQueryBorrowedValue() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "borrowed-value [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total USD value of borrowed tokens for an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryBorrowedValueRequest{
+				Address: args[0],
+			}
+			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
+				req.Denom = d
+			}
+
+			resp, err := queryClient.BorrowedValue(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryLoaned returns a CLI command handler to query for the amount of
+// tokens loaned by a given address.
+func GetCmdQueryLoaned() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "loaned [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total amount of tokens loaned by an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryLoanedRequest{
+				Address: args[0],
+			}
+			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
+				req.Denom = d
+			}
+
+			resp, err := queryClient.Loaned(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryLoanedValue returns a CLI command handler to query for the USD value of
+// total tokens loaned by a given address.
+func GetCmdQueryLoanedValue() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "loaned-value [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the USD value of tokens loaned by an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryLoanedValueRequest{
+				Address: args[0],
+			}
+			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
+				req.Denom = d
+			}
+
+			resp, err := queryClient.LoanedValue(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
 	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
@@ -394,6 +509,39 @@ func GetCmdQueryMarketSize() *cobra.Command {
 			}
 
 			resp, err := queryClient.MarketSize(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryTokenMarketSize returns a CLI command handler to query for the
+// Market Size of a specific token, in token denomination instead of USD.
+func GetCmdQueryTokenMarketSize() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "token-market-size [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the market size of a specified denomination measured in base tokens",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryTokenMarketSizeRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.TokenMarketSize(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
