@@ -94,7 +94,7 @@ func PastUnixTime(t time.Duration) int64 {
 
 // mapPairsToSlice returns the map of currency pairs as slice.
 func mapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
-	var currencyPairs []types.CurrencyPair
+	currencyPairs := make([]types.CurrencyPair, len(mapPairs))
 
 	for _, cp := range mapPairs {
 		currencyPairs = append(currencyPairs, cp)
