@@ -42,6 +42,10 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		(*sdk.Msg)(nil),
 		&MsgLendAsset{},
 		&MsgWithdrawAsset{},
+		&MsgSetCollateral{},
+		&MsgBorrowAsset{},
+		&MsgRepayAsset{},
+		&MsgLiquidate{},
 	)
 
 	registry.RegisterImplementations(
