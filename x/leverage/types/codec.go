@@ -31,6 +31,10 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLendAsset{}, "umee/leverage/MsgLendAsset", nil)
 	cdc.RegisterConcrete(&MsgWithdrawAsset{}, "umee/leverage/MsgWithdrawAsset", nil)
 	cdc.RegisterConcrete(&UpdateRegistryProposal{}, "umee/leverage/UpdateRegistryProposal", nil)
+	cdc.RegisterConcrete(&MsgSetCollateral{}, "umee/leverage/MsgSetCollateral", nil)
+	cdc.RegisterConcrete(&MsgBorrowAsset{}, "umee/leverage/MsgBorrowAsset", nil)
+	cdc.RegisterConcrete(&MsgRepayAsset{}, "umee/leverage/MsgRepayAsset", nil)
+	cdc.RegisterConcrete(&MsgLiquidate{}, "umee/leverage/MsgLiquidate", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
