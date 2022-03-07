@@ -43,6 +43,25 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
+// ExchangeUTokens converts an sdk.Coins containing uTokens to their values in a base
+// tokens.
+func (k Keeper) ExchangeUTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
+	if !uTokens.IsValid() {
+		return sdk.Coins{}, sdkerrors.Wrap(types.ErrInvalidAsset, uTokens.String())
+	}
+
+	tokens := sdk.Coins{}
+	for _, coin := range uTokens {
+		token, err := k.ExchangeUToken(ctx, coin)
+		if err != nil {
+			return sdk.Coins{}, err
+		}
+		tokens = tokens.Add(token)
+	}
+
+	return tokens, nil
+}
+
 // DeriveExchangeRate calculated the token:uToken exchange rate of a base token denom.
 func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 	// uToken exchange rate is equal to the token supply (including borrowed
