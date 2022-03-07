@@ -293,6 +293,322 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 	runTestTransactions(s, cleanupCommands)
 }
 
+func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
+	val := s.network.Validators[0]
+
+	simpleCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryBorrowedValue(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query zero borrowed value",
+			cli.GetCmdQueryBorrowedValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryBorrowedValueResponse{},
+			&types.QueryBorrowedValueResponse{
+				BorrowedValue: sdk.ZeroDec(),
+			},
+		},
+	}
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"20000000uumee", // 20 umee
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+		{
+			"borrow",
+			cli.GetCmdBorrowAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000uumee", // 1 umee
+			},
+			nil,
+		},
+	}
+
+	nonzeroCase := []testQuery{
+		{
+			"query nonzero borrowed value",
+			cli.GetCmdQueryBorrowedValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryBorrowedValueResponse{},
+			&types.QueryBorrowedValueResponse{
+				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				BorrowedValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+		{
+			"query nonzero borrowed value of denom",
+			cli.GetCmdQueryBorrowedValue(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryBorrowedValueResponse{},
+			&types.QueryBorrowedValueResponse{
+				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				BorrowedValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+	}
+
+	// 1000001 will need to be repaid due to adjusted borrow rounding up
+	cleanupCommands := []testTransaction{
+		{
+			"repay",
+			cli.GetCmdRepayAsset(),
+			[]string{
+				val.Address.String(),
+				"1000001uumee",
+			},
+			nil,
+		},
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"20000000uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, nonzeroCase)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestQueryLent() {
+	val := s.network.Validators[0]
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000uumee",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryLent(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query all lent",
+			cli.GetCmdQueryLent(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryLentResponse{},
+			&types.QueryLentResponse{
+				Lent: sdk.NewCoins(
+					sdk.NewInt64Coin(app.BondDenom, 1000),
+				),
+			},
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryLent(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query denom lent",
+			cli.GetCmdQueryLent(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+			},
+			false,
+			&types.QueryLentResponse{},
+			&types.QueryLentResponse{
+				Lent: sdk.NewCoins(
+					sdk.NewInt64Coin(app.BondDenom, 1000),
+				),
+			},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestQueryLentValue() {
+	val := s.network.Validators[0]
+
+	simpleCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryLentValue(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query zero lent value",
+			cli.GetCmdQueryLentValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryLentValueResponse{},
+			&types.QueryLentValueResponse{
+				LentValue: sdk.ZeroDec(),
+			},
+		},
+	}
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000uumee",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryLentValue(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query all lent value",
+			cli.GetCmdQueryLentValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryLentValueResponse{},
+			&types.QueryLentValueResponse{
+				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// This result is umee's collateral weight times the collateral
+				// amount lent, times its initial oracle exchange rate.
+				LentValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+		{
+			"query denom lent",
+			cli.GetCmdQueryLentValue(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+			},
+			false,
+			&types.QueryLentValueResponse{},
+			&types.QueryLentValueResponse{
+				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				LentValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
 func (s *IntegrationTestSuite) TestQueryReserveAmount() {
 	testCases := []testQuery{
 		{
@@ -703,7 +1019,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
 }
 
 func (s *IntegrationTestSuite) TestQueryMarketSize() {
-	testCasesMarketSizeBeforeLend := []testQuery{
+	simpleCases := []testQuery{
 		{
 			"not accepted Token denom",
 			cli.GetCmdQueryMarketSize(),
@@ -737,7 +1053,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 	}
 
 	val := s.network.Validators[0]
-	lendCommands := []testTransaction{
+	setupCommands := []testTransaction{
 		{
 			"lend",
 			cli.GetCmdLendAsset(),
@@ -749,7 +1065,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 		},
 	}
 
-	testCasesMarketSizeAfterLend := []testQuery{
+	testCases := []testQuery{
 		{
 			"valid asset",
 			cli.GetCmdQueryMarketSize(),
@@ -774,9 +1090,87 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 		},
 	}
 
-	runTestQueries(s, testCasesMarketSizeBeforeLend)
-	runTestTransactions(s, lendCommands)
-	runTestQueries(s, testCasesMarketSizeAfterLend)
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestQueryTokenMarketSize() {
+	simpleCases := []testQuery{
+		{
+			"not accepted Token denom",
+			cli.GetCmdQueryTokenMarketSize(),
+			[]string{
+				"invalidToken",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"invalid denom",
+			cli.GetCmdQueryTokenMarketSize(),
+			[]string{
+				"",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"valid asset",
+			cli.GetCmdQueryTokenMarketSize(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryTokenMarketSizeResponse{},
+			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.ZeroInt()},
+		},
+	}
+
+	val := s.network.Validators[0]
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000uumee",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testQuery{
+		{
+			"valid asset",
+			cli.GetCmdQueryTokenMarketSize(),
+			[]string{
+				app.BondDenom,
+			},
+			false,
+			&types.QueryTokenMarketSizeResponse{},
+			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.NewInt(1000000)},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
 	runTestTransactions(s, cleanupCommands)
 }
 
