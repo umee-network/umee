@@ -364,9 +364,8 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 // filterTickerDeviations finds the standard deviations of the prices of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
 func (o *Oracle) filterTickerDeviations(
-	prices provider.AggregatedProviderPrices) (
-	provider.AggregatedProviderPrices, error,
-) {
+	prices provider.AggregatedProviderPrices,
+) (provider.AggregatedProviderPrices, error) {
 	var (
 		filteredPrices = make(provider.AggregatedProviderPrices)
 		priceMap       = make(map[string]map[string]sdk.Dec)
@@ -383,7 +382,7 @@ func (o *Oracle) filterTickerDeviations(
 
 	deviations, means, err := StandardDeviation(priceMap)
 	if err != nil {
-		return make(provider.AggregatedProviderPrices), nil
+		return nil, err
 	}
 
 	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
@@ -414,9 +413,8 @@ func (o *Oracle) filterTickerDeviations(
 // filterCandleDeviations finds the standard deviations of the tvwaps of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
 func (o *Oracle) filterCandleDeviations(
-	candles provider.AggregatedProviderCandles) (
-	provider.AggregatedProviderCandles, error,
-) {
+	candles provider.AggregatedProviderCandles,
+) (provider.AggregatedProviderCandles, error) {
 	var (
 		filteredCandles = make(provider.AggregatedProviderCandles)
 		tvwaps          = make(map[string]map[string]sdk.Dec)
