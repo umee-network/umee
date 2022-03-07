@@ -397,9 +397,8 @@ func (o *Oracle) filterTickerDeviations(
 				filteredPrices[providerName][base] = ticker
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider")
-				o.logger.Warn().Str("base", base).Str("provider", providerName).Msg(
-					"provider deviating from other prices",
-				)
+				o.logger.Warn().Str("base", base).Str("provider", providerName).Str(
+					"price", ticker.Price.String()).Msg("provider deviating from other prices")
 			}
 		}
 	}
@@ -457,9 +456,8 @@ func (o *Oracle) filterCandleDeviations(
 				filteredCandles[providerName][base] = candles[providerName][base]
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider")
-				o.logger.Warn().Str("base", base).Str("provider", providerName).Msg(
-					"provider deviating from other candles",
-				)
+				o.logger.Warn().Str("base", base).Str("provider", providerName).Str(
+					"price", price.String()).Msg("provider deviating from other candles")
 			}
 		}
 	}
