@@ -94,12 +94,10 @@ func PastUnixTime(t time.Duration) int64 {
 
 // subscribedPairsToSlice returns the map of subscribed pairs as slice
 func subscribedPairsToSlice(subscribedPairs map[string]types.CurrencyPair) []types.CurrencyPair {
-	currencyPairs := make([]types.CurrencyPair, len(subscribedPairs))
-
-	iterator := 0
+	var currencyPairs []types.CurrencyPair
+	
 	for _, cp := range subscribedPairs {
-		currencyPairs[iterator] = cp
-		iterator++
+		currencyPairs = append(currencyPairs, cp)
 	}
 
 	return currencyPairs
