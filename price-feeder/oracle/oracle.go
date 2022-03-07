@@ -386,18 +386,15 @@ func (o *Oracle) filterTickerDeviations(
 	}
 
 	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
-	for providerName, priceMap := range prices {
-		for base, price := range priceMap {
+	for providerName, priceTickers := range prices {
+		for base, ticker := range priceTickers {
 			if _, ok := deviations[base]; !ok ||
-				(price.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					price.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				(ticker.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					ticker.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 				if _, ok := filteredPrices[providerName]; !ok {
 					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
-				filteredPrices[providerName][base] = provider.TickerPrice{
-					Price:  price.Price,
-					Volume: price.Volume,
-				}
+				filteredPrices[providerName][base] = ticker
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider")
 				o.logger.Warn().Str("base", base).Str("provider", providerName).Msg(
