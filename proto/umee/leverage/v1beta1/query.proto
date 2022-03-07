@@ -29,7 +29,7 @@ service Query {
 
   // BorrowedValue queries for the usd value of the borrowed amount of a user
   // by token denomination.  If the denomination is not supplied, the sum across
-  // all borrowed tokens isreturned.
+  // all borrowed tokens is returned.
   rpc BorrowedValue(QueryBorrowedValueRequest) returns (QueryBorrowedValueResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrowed_value";
   }
