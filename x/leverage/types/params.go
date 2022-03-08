@@ -30,10 +30,21 @@ func NewParams() Params {
 // pairs pairs of x/leverage module's parameters.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyCompleteLiquidationThreshold, &p.CompleteLiquidationThreshold,
-			validateLiquidationThreshold),
-		paramtypes.NewParamSetPair(KeyMinimumCloseFactor, &p.MinimumCloseFactor, validateMinimumCloseFactor),
-		paramtypes.NewParamSetPair(KeyOracleRewardFactor, &p.OracleRewardFactor, validateOracleRewardFactor),
+		paramtypes.NewParamSetPair(
+			KeyCompleteLiquidationThreshold,
+			&p.CompleteLiquidationThreshold,
+			validateLiquidationThreshold,
+		),
+		paramtypes.NewParamSetPair(
+			KeyMinimumCloseFactor,
+			&p.MinimumCloseFactor,
+			validateMinimumCloseFactor,
+		),
+		paramtypes.NewParamSetPair(
+			KeyOracleRewardFactor,
+			&p.OracleRewardFactor,
+			validateOracleRewardFactor,
+		),
 	}
 }
 
@@ -81,6 +92,7 @@ func validateLiquidationThreshold(i interface{}) error {
 	if !v.IsPositive() {
 		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
 	}
+
 	return nil
 }
 
@@ -96,6 +108,7 @@ func validateMinimumCloseFactor(i interface{}) error {
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("minimum close factor cannot exceed 1: %d", v)
 	}
+
 	return nil
 }
 
@@ -111,5 +124,6 @@ func validateOracleRewardFactor(i interface{}) error {
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("oracle reward factor cannot exceed 1: %d", v)
 	}
+
 	return nil
 }
