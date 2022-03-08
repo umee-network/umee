@@ -21,7 +21,6 @@ func NewGenesisState(
 	interestScalars []InterestScalar,
 	uTokenSupply sdk.Coins,
 ) *GenesisState {
-
 	return &GenesisState{
 		Params:             params,
 		Registry:           tokens,
@@ -37,7 +36,6 @@ func NewGenesisState(
 
 // DefaultGenesis returns the default genesis state of the x/leverage module.
 func DefaultGenesis() *GenesisState {
-
 	return &GenesisState{
 		Params:           DefaultParams(),
 		Registry:         []Token{},

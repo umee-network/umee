@@ -30,10 +30,10 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Compatibility Matrix
 
-| Version | Mainnet | Experimental | SDK Version | Peggo Version | Price Feeder Version |
-|:-------:|:-------:|:------------:|:-----------:|---------------|----------------------|
-|  v0.8.x |    ✗    |      ✓       |   v0.45.x   | v0.2.x        | v0.1.x               |
-|  v1.x.x |    ✓    |      ✗       |   v0.45.x   | v0.2.x        | N/A                  |
+| Version | Mainnet | Experimental | SDK Version | IBC Version | Peggo Version | Price Feeder Version |
+|:-------:|:-------:|:------------:|:-----------:|:-----------:|:-------------:|:--------------------:|
+|  v0.8.x |    ✗    |      ✓       |   v0.45.x   |    v2.0.x   |     v0.2.x    |        v0.1.x        |
+|  v1.x.x |    ✓    |      ✗       |   v0.45.x   |    v2.0.x   |     v0.2.x    |         N/A          |
 
 ## Active Networks
 
