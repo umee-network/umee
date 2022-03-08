@@ -351,6 +351,13 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 			}
 			priceProvider = okxProvider
 
+		case config.ProviderGate:
+			gateProvider, err := provider.NewGateProvider(ctx, o.logger, o.providerPairs[config.ProviderGate]...)
+			if err != nil {
+				return nil, err
+			}
+			priceProvider = gateProvider
+
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()
 		}

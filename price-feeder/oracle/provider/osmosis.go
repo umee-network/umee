@@ -166,3 +166,8 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 
 	return candles, nil
 }
+
+// SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
+func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}

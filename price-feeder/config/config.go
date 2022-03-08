@@ -23,6 +23,7 @@ const (
 	ProviderOsmosis = "osmosis"
 	ProviderHuobi   = "huobi"
 	ProviderOkx     = "okx"
+	ProviderGate    = "gate"
 	ProviderMock    = "mock"
 )
 
@@ -40,6 +41,7 @@ var (
 		ProviderOsmosis: {},
 		ProviderOkx:     {},
 		ProviderHuobi:   {},
+		ProviderGate:    {},
 		ProviderMock:    {},
 	}
 )
@@ -195,6 +197,16 @@ func ParseConfig(configPath string) (Config, error) {
 		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
+	}
+
+	gatePairs := []string{}
+	for base, providers := range pairs {
+		if _, ok := providers["gate"]; ok {
+			gatePairs = append(gatePairs, base)
+		}
+	}
+	if len(gatePairs) > 1 {
+		return cfg, fmt.Errorf("gate provider does not support multiple pairs: %v", gatePairs)
 	}
 
 	return cfg, cfg.Validate()
