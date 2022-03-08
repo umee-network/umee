@@ -260,7 +260,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 
 		// warn the user of any missing prices
 		reportedPrices := make(map[string]struct{})
-		for _, providers := range providerPrices {
+		for _, providers := range filteredProviderPrices {
 			for base := range providers {
 				if _, ok := reportedPrices[base]; !ok {
 					reportedPrices[base] = struct{}{}
@@ -281,7 +281,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	} else {
 		// warn the user of any missing candles
 		reportedCandles := make(map[string]struct{})
-		for _, providers := range providerCandles {
+		for _, providers := range filteredCandles {
 			for base := range providers {
 				if _, ok := reportedCandles[base]; !ok {
 					reportedCandles[base] = struct{}{}
