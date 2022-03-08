@@ -249,7 +249,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	}
 	for base := range requiredRates {
 		if _, ok := reportedPrices[base]; !ok {
-			return fmt.Errorf("reported rates were not equal to required prices")
+			return fmt.Errorf("reported prices were not equal to required rates")
 		}
 	}
 
@@ -268,7 +268,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	}
 	for base := range requiredRates {
 		if _, ok := reportedCandles[base]; !ok {
-			return fmt.Errorf("reported rates were not equal to required candles")
+			return fmt.Errorf("reported candles were not equal to required rates")
 		}
 	}
 
