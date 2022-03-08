@@ -344,19 +344,19 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 			}
 			priceProvider = huobiProvider
 
-		case config.ProviderGate:
-			gateProvider, err := provider.NewGateProvider(ctx, o.logger, o.providerPairs[config.ProviderGate]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = gateProvider
-
 		case config.ProviderOkx:
 			okxProvider, err := provider.NewOkxProvider(ctx, o.logger, o.providerPairs[config.ProviderOkx]...)
 			if err != nil {
 				return nil, err
 			}
 			priceProvider = okxProvider
+
+		case config.ProviderGate:
+			gateProvider, err := provider.NewGateProvider(ctx, o.logger, o.providerPairs[config.ProviderGate]...)
+			if err != nil {
+				return nil, err
+			}
+			priceProvider = gateProvider
 
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()

@@ -26,7 +26,7 @@ type (
 	// GateProvider defines an Oracle provider implemented by the Gate public
 	// API.
 	//
-	// REF: https://www.gate.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
+	// REF: https://www.gate.io/docs/websocket/index.html
 	GateProvider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
@@ -41,7 +41,7 @@ type (
 	GateTicker struct {
 		Last   string `json:"last"`       // Last traded price ex.: 43508.9
 		Vol    string `json:"baseVolume"` // Trading volume ex.: 11159.87127845
-		Symbol string // Symbol ex.: ATOM_UDST
+		Symbol string `json:"symbol"`     // Symbol ex.: ATOM_UDST
 	}
 
 	GateCandle struct {
@@ -61,16 +61,20 @@ type (
 	// GateCandleSubscriptionMsg Msg to subscribe to a candle channel.
 	GateCandleSubscriptionMsg struct {
 		Method string        `json:"method"` // ticker.subscribe
-		Params []interface{} `json:"params"` // streams to subscribe ex.: ["BOT_USDT", 1800]
+		Params []interface{} `json:"params"` // streams to subscribe ex.: ["BOT_USDT": 1800]
 		ID     uint16        `json:"id"`     // identify messages going back and forth
 	}
 
-	// GateTickerResponse defines the response body for gate tickers
+	// GateTickerResponse defines the response body for gate tickers.
 	GateTickerResponse struct {
 		Method string        `json:"method"`
 		Params []interface{} `json:"params"`
 	}
 
+	// GateTickerResponse defines the response body for gate tickers.
+	// The Params response is a 2D slice of multiple candles and their data.
+	//
+	// REF: https://www.gate.io/docs/websocket/index.html
 	GateCandleResponse struct {
 		Method string          `json:"method"`
 		Params [][]interface{} `json:"params"`
@@ -78,11 +82,11 @@ type (
 
 	// GateEvent defines the response body for gate subscription statuses
 	GateEvent struct {
-		ID     int             `json:"id"`
-		Result GateEventResult `json:"result"`
+		ID     int             `json:"id"`     // subscription id, ex.: 123
+		Result GateEventResult `json:"result"` // event result body
 	}
 	GateEventResult struct {
-		Status string `json:"status"`
+		Status string `json:"status"` // ex. "successful"
 	}
 )
 
@@ -167,12 +171,14 @@ func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 		if err != nil {
 			return []CandlePrice{}, err
 		}
+
 		candleList = append(candleList, cp)
 	}
+
 	return candleList, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribeTickers(cps...); err != nil {
 		return err
@@ -203,7 +209,7 @@ func (p *GateProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 // subscribeCandles subscribes to the candle channels for all pairs one-by-one.
 // The gate API currently only supports subscribing to one kline market at a time.
 //
-// REF: https://www.gate.io/docs/websocket/#kline-subscription
+// REF: https://www.gate.io/docs/websocket/index.html
 func (p *GateProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	gatePairs := make([]string, len(cps))
 
@@ -228,12 +234,11 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	defer p.mtx.RUnlock()
 
 	gp := currencyPairToGatePair(cp)
-	tickerPair, ok := p.tickers[gp]
-	if !ok {
+	if tickerPair, ok := p.tickers[gp]; ok {
+		return tickerPair.toTickerPrice()
+	} else {
 		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 	}
-
-	return tickerPair.toTickerPrice()
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
@@ -298,9 +303,10 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 }
 
 // messageReceivedTickerPrice handles the ticker price msg.
+// The provider response is a slice with different types at each index.
+//
+// REF: https://www.gate.io/docs/websocket/index.html
 func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
-	// the provider response is an array with different types at each index
-	// gate documentation https://www.gate.io/docs/websocket/index.html
 	var tickerMessage GateTickerResponse
 	if err := json.Unmarshal(bz, &tickerMessage); err != nil {
 		return err
@@ -322,46 +328,26 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 		return err
 	}
 
-	pairName, ok := tickerMessage.Params[0].(string)
+	symbol, ok := tickerMessage.Params[0].(string)
 	if !ok {
-		return fmt.Errorf("unable to unmarshal pair name")
+		return fmt.Errorf("symbol should be a string")
 	}
-	gateTicker.Symbol = pairName
+	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
 	return nil
 }
 
-// messageReceivedCandle handles the candle price msg.
-func (p *GateProvider) messageReceivedCandle(bz []byte) error {
-	// the provider response is an array with different types at each index
-	// gate documentation https://www.gate.io/docs/websocket/index.html
-	var candleMessage GateCandleResponse
-	if err := json.Unmarshal(bz, &candleMessage); err != nil {
-		return err
-	}
-
-	if candleMessage.Method != "kline.update" {
-		return fmt.Errorf("message is not a kline update")
-	}
-
-	// response is an array of an array interfaces
-	var gateCandle GateCandle
-	if err := gateCandle.UnmarshalJSON(candleMessage.Params); err != nil {
-		return err
-	}
-
-	p.setCandlePairs(gateCandle)
-	return nil
-}
-
-func (gc *GateCandle) UnmarshalJSON(params [][]interface{}) error {
+// UnmarshalParams is a helper function which unmarshals the 2d slice of interfaces
+// from a GateCandleResponse into the GateCandle.
+func (gc *GateCandle) UnmarshalParams(params [][]interface{}) error {
 	var tmp []interface{}
 
 	if len(params) == 0 {
 		return fmt.Errorf("no candles in response")
 	}
-	// the last candle reported is the most recent
+
+	// use the most recent candle
 	tmp = params[len(params)-1]
 	if len(tmp) != 8 {
 		return fmt.Errorf("wrong number of fields in candle")
@@ -394,13 +380,36 @@ func (gc *GateCandle) UnmarshalJSON(params [][]interface{}) error {
 	return nil
 }
 
+// messageReceivedCandle handles the candle price msg.
+// The provider response is a slice with different types at each index.
+//
+// REF: https://www.gate.io/docs/websocket/index.html
+func (p *GateProvider) messageReceivedCandle(bz []byte) error {
+	var candleMessage GateCandleResponse
+	if err := json.Unmarshal(bz, &candleMessage); err != nil {
+		return err
+	}
+
+	if candleMessage.Method != "kline.update" {
+		return fmt.Errorf("message is not a kline update")
+	}
+
+	var gateCandle GateCandle
+	if err := gateCandle.UnmarshalParams(candleMessage.Params); err != nil {
+		return err
+	}
+
+	p.setCandlePair(gateCandle)
+	return nil
+}
+
 func (p *GateProvider) setTickerPair(ticker GateTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	p.tickers[ticker.Symbol] = ticker
 }
 
-func (p *GateProvider) setCandlePairs(candle GateCandle) {
+func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert gate timestamp seconds -> milliseconds
@@ -422,7 +431,7 @@ func (p *GateProvider) subscribeTickerPairs(msg GateTickerSubscriptionMsg) error
 	return p.wsClient.WriteJSON(msg)
 }
 
-// subscribeCandlePairs write the subscription msg to the provider.
+// subscribeCandlePair write the subscription msg to the provider.
 func (p *GateProvider) subscribeCandlePair(msg GateCandleSubscriptionMsg) error {
 	return p.wsClient.WriteJSON(msg)
 }
@@ -514,8 +523,8 @@ func newGateTickerSubscription(cp ...string) GateTickerSubscriptionMsg {
 // newGateCandleSubscription returns a new subscription topic for candles.
 func newGateCandleSubscription(gatePair string) GateCandleSubscriptionMsg {
 	params := []interface{}{
-		gatePair,
-		60, // time interval in seconds
+		gatePair, // currency pair ex. "ATOM_USDT"
+		60,       // time interval in seconds
 	}
 	return GateCandleSubscriptionMsg{
 		Method: "kline.subscribe",
