@@ -199,5 +199,15 @@ func ParseConfig(configPath string) (Config, error) {
 		}
 	}
 
+	gatePairs := []string{}
+	for base, providers := range pairs {
+		if _, ok := providers["gate"]; ok {
+			gatePairs = append(gatePairs, base)
+		}
+	}
+	if len(gatePairs) > 1 {
+		return cfg, fmt.Errorf("gate provider does not support multiple pairs: %v", gatePairs)
+	}
+
 	return cfg, cfg.Validate()
 }
