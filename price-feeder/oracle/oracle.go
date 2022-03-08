@@ -234,44 +234,6 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	// warn the user of any missing prices
-	reportedPrices := make(map[string]struct{})
-	for _, providers := range providerPrices {
-		for base := range providers {
-			if _, ok := reportedPrices[base]; !ok {
-				reportedPrices[base] = struct{}{}
-			}
-		}
-	}
-
-	if len(reportedPrices) != len(requiredRates) {
-		return fmt.Errorf("unable to get prices for all exchange prices")
-	}
-	for base := range requiredRates {
-		if _, ok := reportedPrices[base]; !ok {
-			return fmt.Errorf("reported prices were not equal to required rates")
-		}
-	}
-
-	// warn the user of any missing candles
-	reportedCandles := make(map[string]struct{})
-	for _, providers := range providerCandles {
-		for base := range providers {
-			if _, ok := reportedCandles[base]; !ok {
-				reportedCandles[base] = struct{}{}
-			}
-		}
-	}
-
-	if len(reportedCandles) != len(requiredRates) {
-		return fmt.Errorf("unable to get prices for all exchange candles")
-	}
-	for base := range requiredRates {
-		if _, ok := reportedCandles[base]; !ok {
-			return fmt.Errorf("reported candles were not equal to required rates")
-		}
-	}
-
 	filteredCandles, err := o.filterCandleDeviations(providerCandles)
 	if err != nil {
 		return err
@@ -296,8 +258,46 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			return err
 		}
 
+		// warn the user of any missing prices
+		reportedPrices := make(map[string]struct{})
+		for _, providers := range providerPrices {
+			for base := range providers {
+				if _, ok := reportedPrices[base]; !ok {
+					reportedPrices[base] = struct{}{}
+				}
+			}
+		}
+
+		if len(reportedPrices) != len(requiredRates) {
+			return fmt.Errorf("unable to get prices for all exchange prices")
+		}
+		for base := range requiredRates {
+			if _, ok := reportedPrices[base]; !ok {
+				return fmt.Errorf("reported prices were not equal to required rates")
+			}
+		}
+
 		o.prices = vwapPrices
 	} else {
+		// warn the user of any missing candles
+		reportedCandles := make(map[string]struct{})
+		for _, providers := range providerCandles {
+			for base := range providers {
+				if _, ok := reportedCandles[base]; !ok {
+					reportedCandles[base] = struct{}{}
+				}
+			}
+		}
+
+		if len(reportedCandles) != len(requiredRates) {
+			return fmt.Errorf("unable to get prices for all exchange candles")
+		}
+		for base := range requiredRates {
+			if _, ok := reportedCandles[base]; !ok {
+				return fmt.Errorf("reported candles were not equal to required rates")
+			}
+		}
+
 		o.prices = tvwapPrices
 	}
 
