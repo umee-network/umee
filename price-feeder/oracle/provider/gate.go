@@ -80,11 +80,12 @@ type (
 		Params [][]interface{} `json:"params"`
 	}
 
-	// GateEvent defines the response body for gate subscription statuses
+	// GateEvent defines the response body for gate subscription statuses.
 	GateEvent struct {
 		ID     int             `json:"id"`     // subscription id, ex.: 123
 		Result GateEventResult `json:"result"` // event result body
 	}
+	// GateEventResult defines the Result body for the GateEvent response.
 	GateEventResult struct {
 		Status string `json:"status"` // ex. "successful"
 	}
@@ -227,6 +228,13 @@ func (p *GateProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	}
 
 	return nil
+}
+
+func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	return mapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -471,14 +479,8 @@ func (p *GateProvider) reconnect() error {
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn
 
-	cps := make([]types.CurrencyPair, len(p.subscribedPairs))
-	iterator := 0
-	for _, cp := range p.subscribedPairs {
-		cps[iterator] = cp
-		iterator++
-	}
-
-	return p.SubscribeCurrencyPairs(cps...)
+	currencyPairs := p.subscribedPairsToSlice()
+	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
 // ping to check websocket connection.
