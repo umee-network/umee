@@ -137,7 +137,7 @@ func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simt
 }
 
 // SimulateMsgWithdrawAsset tests and runs a single msg withdraw where
-// an account attempts to withdraw some lent assets.
+// an account attempts to withdraw some loaned assets.
 func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,

@@ -206,7 +206,7 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
 
-	// withdraw the total amount of assets lent
+	// withdraw the total amount of assets loaned
 	uToken := expected
 	err = s.app.LeverageKeeper.WithdrawAsset(ctx, lenderAddr, uToken)
 	s.Require().NoError(err)

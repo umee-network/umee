@@ -98,14 +98,14 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	available := s.tk.GetAvailableToBorrow(s.ctx, "abcd")
 	s.Require().Equal(sdk.ZeroInt(), available)
 
-	// creates account which has lent 1000 uumee, and borrowed 0 uumee
+	// creates account which has loaned 1000 uumee, and borrowed 0 uumee
 	_ = s.setupAccount(umeeDenom, 1000, 1000, 0, true)
 
 	// confirm lending pool is 1000 uumee
 	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt(1000), available)
 
-	// creates account which has lent 1000 uumee, and borrowed 123 uumee
+	// creates account which has loaned 1000 uumee, and borrowed 123 uumee
 	_ = s.setupAccount(umeeDenom, 1000, 1000, 123, true)
 
 	// confirm lending pool is 1877 uumee
@@ -125,7 +125,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization := s.tk.DeriveBorrowUtilization(s.ctx, "abcd")
 	s.Require().Equal(sdk.OneDec(), utilization)
 
-	// creates account which has lent 1000 uumee, and borrowed 0 uumee
+	// creates account which has loaned 1000 uumee, and borrowed 0 uumee
 	addr := s.setupAccount(umeeDenom, 1000, 1000, 0, true)
 
 	// All tests below are commented with the following equation in mind:
