@@ -10,6 +10,7 @@
 
 - https://snapshots.stake2.me/umee
 - https://polkachu.com/tendermint_snapshots/umee
+- https://snapshots.weakhand.xyz/umee/
 
 ## Umee Archival Nodes
 
