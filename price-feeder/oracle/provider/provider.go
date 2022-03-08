@@ -24,6 +24,7 @@ var ping = []byte("ping")
 type Provider interface {
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
 	GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+	SubscribeCurrencyPairs(...types.CurrencyPair) error
 }
 
 // TickerPrice defines price and volume information for a symbol or ticker
