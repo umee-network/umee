@@ -137,6 +137,7 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 						Exponent:             6,
 						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+						LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
 						BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 						KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
