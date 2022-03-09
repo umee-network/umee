@@ -116,10 +116,10 @@ docker-build-debug:
 	@docker build -t umeenet/umeed --build-arg IMG_TAG=debug .
 
 docker-push-hermes:
-	@cd tests/e2e/docker; docker build -t umeenet/hermes:latest -f hermes.Dockerfile .; docker push umeenet/hermes:latest
+	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
-	@cd tests/e2e/docker; docker build -t umeenet/gaia:latest -f gaia.Dockerfile .; docker push umeenet/gaia:latest
+	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
 .PHONY: docker-build docker-build-debug docker-push-hermes docker-push-gaia
 

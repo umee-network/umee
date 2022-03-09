@@ -77,6 +77,7 @@ jobs:
           make test-e2e
         if: env.GIT_DIFF
 
+<<<<<<< HEAD
   # split-test-files:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -180,6 +181,8 @@ jobs:
   #         name: "${{ github.sha }}-${{ matrix.part }}-coverage"
   #         path: ./${{ matrix.part }}profile.out
 
+=======
+>>>>>>> 8a794c8 (chore: E2E Test Suite GHCR #630)
   price-feeder:
     runs-on: ubuntu-latest
     steps:
