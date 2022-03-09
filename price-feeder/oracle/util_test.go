@@ -184,6 +184,7 @@ func TestStandardDeviation(t *testing.T) {
 			require.NoError(t, err)
 			require.Len(t, deviation, len(tc.expected))
 			require.Len(t, mean, len(tc.expected))
+
 			for k, v := range tc.expected {
 				require.Equalf(t, v.deviation, deviation[k], "unexpected deviation for %s", k)
 				require.Equalf(t, v.mean, mean[k], "unexpected mean for %s", k)
