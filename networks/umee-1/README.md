@@ -5,6 +5,7 @@
 ## State Sync Providers
 
 - https://www.theamsolutions.info/umee-state-sync
+- https://stakeangle.com/state-sync/umee
 
 ## Snapshot Providers (Quick Sync)
 
