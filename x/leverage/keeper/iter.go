@@ -196,15 +196,15 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 			return err
 		}
 
-		// compute liquidation threshold from enabled collateral
-		liquidationThreshold, err := k.CalculateLiquidationLimit(ctx, collateral)
+		// compute liquidation limit from enabled collateral
+		liquidationLimit, err := k.CalculateLiquidationLimit(ctx, collateral)
 		if err != nil {
 			return err
 		}
 
-		// If liquidation threshold is smaller than borrowed value then the
+		// If liquidation limit is smaller than borrowed value then the
 		// address is eligible for liquidation.
-		if liquidationThreshold.LT(borrowValue) {
+		if liquidationLimit.LT(borrowValue) {
 			liquidationTargets = append(liquidationTargets, addr)
 		}
 
