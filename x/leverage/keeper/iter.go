@@ -202,7 +202,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 			return err
 		}
 
-		// If liquidation threshold is smaller than borrowed value then the 
+		// If liquidation threshold is smaller than borrowed value then the
 		// address is eligible for liquidation.
 		if liquidationThreshold.LT(borrowValue) {
 			liquidationTargets = append(liquidationTargets, addr)
