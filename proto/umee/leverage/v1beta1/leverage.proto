@@ -57,8 +57,8 @@ message Token {
   ];
   
   // The liquidation_threshold defines what amount of the total value of the asset
-  // can contribute to a users borrow limit for the purposes of liquidation
-  // eligibility.
+  // can contribute to a user's liquidation threshold (above which they become
+  // eligible for liquidation).
   string liquidation_threshold = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
