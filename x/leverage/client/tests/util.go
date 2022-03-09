@@ -174,7 +174,7 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 		clientCtx,
 		types.NewUpdateRegistryProposal(
 			fmt.Sprintf("collateral weight update - %d", proposalCounter),
-			"update collateral weight and liquidation threshold to "+collateralWeight.String(),
+			fmt.Sprintf("update collateral weight and liquidation threshold to %s", collateralWeight.String()),
 			newTokens,
 		),
 		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
