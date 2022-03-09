@@ -1664,9 +1664,9 @@ func (s *IntegrationTestSuite) TestCmdLiquidate() {
 
 	runTestQueries(s, noTargetsQuery)
 	runTestTransactions(s, setupCommands)
-	updateLiquidationThreshold(s, "uumee", sdk.MustNewDecFromStr("0.01")) // lower to allow liquidation
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.01")) // lower to allow liquidation
 	runTestQueries(s, oneTargetQuery)
 	runTestTransactions(s, testCases)
-	updateLiquidationThreshold(s, "uumee", sdk.MustNewDecFromStr("0.05")) // reset to original
+	updateCollateralWeight(s, "uumee", sdk.MustNewDecFromStr("0.05")) // reset to original
 	runTestTransactions(s, cleanupCommands)
 }

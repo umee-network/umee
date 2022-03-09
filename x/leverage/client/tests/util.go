@@ -140,8 +140,9 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	)
 }
 
-// updateLiquidationThreshold modifies the liquidation threshold  of a registered token identified by baseDenom.
-func updateLiquidationThreshold(s *IntegrationTestSuite, baseDenom string, liquidationThreshold sdk.Dec) {
+// updateCollateralWeight modifies the collateral weight and liquidation threshold of a registered
+// token identified by baseDenom.
+func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) {
 	val := s.network.Validators[0]
 	clientCtx := s.network.Validators[0].ClientCtx
 
@@ -156,11 +157,12 @@ func updateLiquidationThreshold(s *IntegrationTestSuite, baseDenom string, liqui
 	resp := &types.QueryRegisteredTokensResponse{}
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
 
-	// Replace the liquidation threshold of the selected token with the new value
+	// Replace the liquidation threshold and collateral weight of the selected token with the new value
 	newTokens := resp.GetRegistry()
 	for i := range newTokens {
 		if newTokens[i].BaseDenom == baseDenom {
-			newTokens[i].LiquidationThreshold = liquidationThreshold
+			newTokens[i].CollateralWeight = collateralWeight
+			newTokens[i].LiquidationThreshold = collateralWeight
 		}
 	}
 
@@ -171,8 +173,8 @@ func updateLiquidationThreshold(s *IntegrationTestSuite, baseDenom string, liqui
 	s.UpdateRegistry(
 		clientCtx,
 		types.NewUpdateRegistryProposal(
-			fmt.Sprintf("liquidation threshold update - %d", proposalCounter),
-			"update liquidation threshold to "+liquidationThreshold.String(),
+			fmt.Sprintf("collateral weight update - %d", proposalCounter),
+			"update collateral weight and liquidation threshold to "+collateralWeight.String(),
 			newTokens,
 		),
 		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
