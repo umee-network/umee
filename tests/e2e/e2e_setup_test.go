@@ -493,7 +493,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.gaiaResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       gaiaVal.instanceName(),
-			Repository: "umeenet/gaia",
+			Repository: "ghcr.io/umee-network/gaia-e2e",
 			Tag:        "latest",
 			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
@@ -569,7 +569,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.hermesResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-gaia-relayer",
-			Repository: "umeenet/hermes",
+			Repository: "ghcr.io/umee-network/hermes-e2e",
 			Tag:        "latest",
 			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
