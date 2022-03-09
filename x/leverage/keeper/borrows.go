@@ -133,7 +133,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 			return sdk.ZeroDec(), err
 		}
 
-		// add each collateral threshold value to borrow limit
+		// add each liquidation threshold value to total
 		threshold = threshold.Add(value.Mul(weight))
 	}
 
