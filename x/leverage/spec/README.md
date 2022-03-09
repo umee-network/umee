@@ -21,7 +21,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
         - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
         - [Borrow Utilization](01_concepts.md#Borrow-Utilization)
         - [Borrow Limit](01_concepts.md#Borrow-Limit)
-        - [Liquidation Threshold](01_concepts.md#Liquidation-Threshold)
+        - [Liquidation Limit](01_concepts.md#Liquidation-Limit)
         - [Borrow APY](01_concepts.md#Borrow-APY)
         - [Lending APY](01_concepts.md#Lending-APY)
         - [Close Factor](01_concepts.md#Close-Factor)

@@ -124,16 +124,16 @@ A user's borrow limit is the sum of the contributions from each denomination of 
   }
 ```
 
-### Liquidation Threshold
+### Liquidation Limit
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a user's liquidation threshold, when the token is used as collateral.
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a user's liquidation limit, when the token is used as collateral.
 
-A user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited.
+A user's liquidation limit is the sum of the contributions from each denomination of collateral they have deposited. Any user whose borrow value is above their liquidation limit is eligible to be liquidated.
 
 ```go
   collateral := GetBorrowerCollateral(borrower) // sdk.Coins
   for _, coin := range collateral {
-     liquidationThreshold += GetLiquidationThreshold(coin.Denom) * TokenValue(coin) // TokenValue is in usd
+     liquidationLimit += GetLiquidationThreshold(coin.Denom) * TokenValue(coin) // TokenValue is in usd
   }
 ```
 

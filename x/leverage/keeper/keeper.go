@@ -400,7 +400,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// compute liquidation threshold from enabled collateral
-	liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, collateral)
+	liquidationThreshold, err := k.CalculateLiquidationLimit(ctx, collateral)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
