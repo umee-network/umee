@@ -34,9 +34,11 @@ const (
 	tickerTimeout = 1000 * time.Millisecond
 )
 
-// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-// without being considered faulty.
-var deviationThreshold = sdk.MustNewDecFromStr("2")
+var (
+	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
+	// without being considered faulty.
+	deviationThreshold = sdk.MustNewDecFromStr("2")
+)
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
