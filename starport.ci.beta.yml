@@ -14,6 +14,7 @@ genesis:
           exponent: 6
           reserve_factor: "0.100000000000000000"
           collateral_weight: "0.050000000000000000"
+          liquidation_threshold: "0.050000000000000000"
           base_borrow_rate: "0.020000000000000000"
           kink_borrow_rate: "0.200000000000000000"
           max_borrow_rate: "1.50000000000000000"
@@ -23,7 +24,8 @@ genesis:
           symbol_denom: "ATOM"
           exponent: 6
           reserve_factor: "0.100000000000000000"
-          collateral_weight: "0.050000000000000000"
+          collateral_weight: "0.550000000000000000"
+          liquidation_threshold: "0.600000000000000000"
           base_borrow_rate: "0.020000000000000000"
           kink_borrow_rate: "0.200000000000000000"
           max_borrow_rate: "1.50000000000000000"

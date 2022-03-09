@@ -52,6 +52,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
@@ -62,6 +63,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		BaseDenom:            atomIBCDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.5"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -239,13 +241,14 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 
 func (s *IntegrationTestSuite) TestGetToken() {
 	uabc := types.Token{
-		BaseDenom:           "uabc",
-		ReserveFactor:       sdk.MustNewDecFromStr("0.1"),
-		CollateralWeight:    sdk.MustNewDecFromStr("0.2"),
-		BaseBorrowRate:      sdk.MustNewDecFromStr("0.3"),
-		KinkBorrowRate:      sdk.MustNewDecFromStr("0.4"),
-		MaxBorrowRate:       sdk.MustNewDecFromStr("0.5"),
-		KinkUtilizationRate: sdk.MustNewDecFromStr("0.6"),
+		BaseDenom:            "uabc",
+		ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.2"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.2"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.3"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.4"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("0.5"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.6"),
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, uabc)
 
@@ -256,6 +259,10 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	collateralWeight, err := s.app.LeverageKeeper.GetCollateralWeight(s.ctx, "uabc")
 	s.Require().NoError(err)
 	s.Require().Equal(collateralWeight, sdk.MustNewDecFromStr("0.2"))
+
+	liquidationThreshold, err := s.app.LeverageKeeper.GetLiquidationThreshold(s.ctx, "uabc")
+	s.Require().NoError(err)
+	s.Require().Equal(liquidationThreshold, sdk.MustNewDecFromStr("0.2"))
 
 	baseBorrowRate, err := s.app.LeverageKeeper.GetInterestBase(s.ctx, "uabc")
 	s.Require().NoError(err)
@@ -457,6 +464,7 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("1.0"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("1.0"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -606,6 +614,7 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.0"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.0"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -783,6 +792,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
 		CollateralWeight:     sdk.MustNewDecFromStr("1.0"), // to allow high utilization
+		LiquidationThreshold: sdk.MustNewDecFromStr("1.0"), // to allow high utilization
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
@@ -903,7 +913,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 	// already has 1k u/umee enabled as collateral.
 	lenderAddr, _ := s.initBorrowScenario()
 
-	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// lender borrows 100 umee (max current allowed) lender amount enabled as collateral * CollateralWeight
 	// = 1000 * 0.1
 	// = 100
 	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
@@ -918,6 +928,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -940,7 +951,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	// already has 1k u/umee enabled as collateral.
 	lenderAddr, _ := s.initBorrowScenario()
 
-	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// lender borrows 100 umee (max current allowed) lender amount enabled as collateral * CollateralWeight
 	// = 1000 * 0.1
 	// = 100
 	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
@@ -957,7 +968,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	// enable 50 u/atom as collateral.
 	s.mintAndLendAtom(lenderAddr, mintAmountAtom, lendAmountAtom)
 
-	// lender borrows 4 atom (max current allowed - 1) lender amount enabled as colateral * CollateralWeight
+	// lender borrows 4 atom (max current allowed - 1) lender amount enabled as collateral * CollateralWeight
 	// = (50 * 0.1) - 1
 	// = 4
 	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
@@ -968,6 +979,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -981,6 +993,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		BaseDenom:            atomIBCDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.01"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -999,7 +1012,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	// already has 1k u/umee enabled as collateral.
 	lenderAddr, anotherLender := s.initBorrowScenario()
 
-	// lender borrows 100 umee (max current allowed) lender amount enabled as colateral * CollateralWeight
+	// lender borrows 100 umee (max current allowed) lender amount enabled as collateral * CollateralWeight
 	// = 1000 * 0.1
 	// = 100
 	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
@@ -1016,7 +1029,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	// enable 50 u/atom as collateral.
 	s.mintAndLendAtom(anotherLender, mintAmountAtom, lendAmountAtom)
 
-	// anotherLender borrows 4 atom (max current allowed - 1) anotherLender amount enabled as colateral * CollateralWeight
+	// anotherLender borrows 4 atom (max current allowed - 1) anotherLender amount enabled as collateral * CollateralWeight
 	// = (50 * 0.1) - 1
 	// = 4
 	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, anotherLender, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
@@ -1027,6 +1040,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		BaseDenom:            umeeapp.BondDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
@@ -1040,6 +1054,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		BaseDenom:            atomIBCDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.01"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
