@@ -572,10 +572,10 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, thre
 	var closeFactor sdk.Dec
 	closeFactor = Interpolate(
 		borrowed.Quo(threshold).Sub(sdk.OneDec()), // x
-		sdk.ZeroDec(),                       // xMin
-		params.MinimumCloseFactor,           // yMin
-		params.CompleteLiquidationThreshold, // xMax
-		sdk.OneDec(),                        // yMax
+		sdk.ZeroDec(),                             // xMin
+		params.MinimumCloseFactor,                 // yMin
+		params.CompleteLiquidationThreshold,       // xMax
+		sdk.OneDec(),                              // yMax
 	)
 	if closeFactor.GTE(sdk.OneDec()) {
 		closeFactor = sdk.OneDec()
