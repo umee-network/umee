@@ -9,10 +9,14 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
-var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
+var (
+	minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
+)
 
-// tvwapCandlePeriod represents the time period we use for tvwap in minutes.
-const tvwapCandlePeriod = 3 * time.Minute
+const (
+	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
+	tvwapCandlePeriod = 3 * time.Minute
+)
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
 func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
@@ -121,9 +125,8 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
-	prices map[string]map[string]sdk.Dec) (
-	map[string]sdk.Dec, map[string]sdk.Dec, error,
-) {
+	prices map[string]map[string]sdk.Dec,
+) (map[string]sdk.Dec, map[string]sdk.Dec, error) {
 	var (
 		deviations = make(map[string]sdk.Dec)
 		means      = make(map[string]sdk.Dec)
@@ -132,7 +135,7 @@ func StandardDeviation(
 	)
 
 	for _, providerPrices := range prices {
-		for base, tp := range providerPrices {
+		for base, p := range providerPrices {
 			if _, ok := priceSums[base]; !ok {
 				priceSums[base] = sdk.ZeroDec()
 			}
@@ -140,8 +143,8 @@ func StandardDeviation(
 				priceSlice[base] = []sdk.Dec{}
 			}
 
-			priceSums[base] = priceSums[base].Add(tp)
-			priceSlice[base] = append(priceSlice[base], tp)
+			priceSums[base] = priceSums[base].Add(p)
+			priceSlice[base] = append(priceSlice[base], p)
 		}
 	}
 
