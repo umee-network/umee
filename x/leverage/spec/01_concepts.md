@@ -120,7 +120,20 @@ A user's borrow limit is the sum of the contributions from each denomination of 
 ```go
   collateral := GetBorrowerCollateral(borrower) // sdk.Coins
   for _, coin := range collateral {
-    borrowLimit += TokenValue(coin) // Oracle price of denomination * Amount
+    borrowLimit += GetCollateralWeight(coin.Denom) * TokenValue(coin) // TokenValue is in usd
+  }
+```
+
+### Liquidation Threshold
+
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a user's liquidation threshold, when the token is used as collateral.
+
+A user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited.
+
+```go
+  collateral := GetBorrowerCollateral(borrower) // sdk.Coins
+  for _, coin := range collateral {
+     liquidationThreshold += GetLiquidationThreshold(coin.Denom) * TokenValue(coin) // TokenValue is in usd
   }
 ```
 

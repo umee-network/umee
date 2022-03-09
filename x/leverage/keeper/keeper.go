@@ -399,20 +399,20 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// use collateral weights to compute borrow limit from enabled collateral
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
+	// compute liquidation threshold from enabled collateral
+	liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// confirm borrower's eligibility for liquidation
-	if borrowLimit.GTE(borrowValue) {
+	if liquidationThreshold.GTE(borrowValue) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
 	}
 
 	// get reward-specific incentive and dynamic close factor
 	baseRewardDenom := desiredReward.Denom
-	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, borrowLimit)
+	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, liquidationThreshold)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}

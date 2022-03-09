@@ -108,6 +108,38 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 	return limit, nil
 }
 
+// CalculateLiquidationThreshold uses the price oracle to determine the liquidation threshold
+// (in USD) provided by collateral sdk.Coins, using each token's uToken exchange rate and
+// liquidation threshold. An error is returned if any input coins are not uTokens or if value
+// calculation fails.
+func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+	threshold := sdk.ZeroDec()
+
+	for _, coin := range collateral {
+		// convert uToken collateral to base assets
+		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		// get USD value of base assets
+		value, err := k.TokenValue(ctx, baseAsset)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		weight, err := k.GetLiquidationThreshold(ctx, baseAsset.Denom)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		// add each collateral threshold value to borrow limit
+		threshold = threshold.Add(value.Mul(weight))
+	}
+
+	return threshold, nil
+}
+
 // setBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
 func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom string, hasDebt bool) error {
 	if err := sdk.ValidateDenom(denom); err != nil {

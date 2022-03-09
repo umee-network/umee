@@ -38,6 +38,7 @@ type Token struct {
     BaseDenom            string
     ReserveFactor        sdk.Dec
     CollateralWeight     sdk.Dec
+    LiquidationThreshold sdk.Dec
     BaseBorrowRate       sdk.Dec
     KinkBorrowRate       sdk.Dec
     MaxBorrowRate        sdk.Dec

@@ -230,6 +230,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.050000000000000000"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
