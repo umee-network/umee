@@ -154,6 +154,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 		BaseDenom:            umeeDenom,
 		ReserveFactor:        sdk.MustNewDecFromStr("0"),
 		CollateralWeight:     sdk.MustNewDecFromStr("1"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("1"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0"),

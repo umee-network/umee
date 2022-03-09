@@ -274,6 +274,7 @@ Where proposal.json contains:
       "base_denom": "uumee",
       "reserve_factor": "0.1",
       "collateral_weight": "0.05",
+      "liquidation_threshold": "0.05",
       "base_borrow_rate": "0.02",
       "kink_borrow_rate": "0.2",
       "max_borrow_rate": "1.5",

@@ -1695,7 +1695,7 @@ type QueryClient interface {
 	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
 	// by token denomination.  If the denomination is not supplied, the sum across
-	// all borrowed tokens isreturned.
+	// all borrowed tokens is returned.
 	BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error)
 	// Loaned queries for the amount of tokens loaned by a user by denomination.
 	// If the denomination is not supplied, the total for each loaned token is
@@ -1909,7 +1909,7 @@ type QueryServer interface {
 	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
 	// by token denomination.  If the denomination is not supplied, the sum across
-	// all borrowed tokens isreturned.
+	// all borrowed tokens is returned.
 	BorrowedValue(context.Context, *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error)
 	// Loaned queries for the amount of tokens loaned by a user by denomination.
 	// If the denomination is not supplied, the total for each loaned token is
