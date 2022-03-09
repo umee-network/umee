@@ -4,7 +4,10 @@
 # most precedence.
 
 # Primary repo maintainers
-*       @alexanderbez @toteki @adamewozniak @facundomedica
+*       @umee-network/core-devs
 
 # Infrastructure & devops maintainers
-/infra/ @dreamcodez
+/infra/ @umee-network/core-sre
+
+# Documentation
+*.md @umee-network/core-docs
