@@ -539,15 +539,15 @@ func (k Keeper) LiquidateBorrow(
 }
 
 // LiquidationParams computes dynamic liquidation parameters based on collateral denomination,
-// borrowed value, and borrow limit. Returns liquidationIncentive (the ratio of bonus collateral
+// borrowed value, and liquidation threshold. Returns liquidationIncentive (the ratio of bonus collateral
 // awarded during Liquidate transactions, and closeFactor (the fraction of a borrower's total
 // borrowed value that can be repaid by a liquidator in a single liquidation event.)
-func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limit sdk.Dec) (sdk.Dec, sdk.Dec, error) {
+func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, threshold sdk.Dec) (sdk.Dec, sdk.Dec, error) {
 	if borrowed.IsNegative() {
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
 	}
-	if limit.IsNegative() {
-		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
+	if threshold.IsNegative() {
+		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, threshold.String())
 	}
 
 	// liquidation incentive is determined by collateral reward denom
@@ -556,8 +556,8 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 		return sdk.ZeroDec(), sdk.ZeroDec(), err
 	}
 
-	// special case: If borrow limit is zero, close factor is always 1
-	if limit.IsZero() {
+	// special case: If liquidation threshold is zero, close factor is always 1
+	if threshold.IsZero() {
 		return liquidationIncentive, sdk.OneDec(), nil
 	}
 
@@ -568,14 +568,14 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 	}
 
 	// outside of special cases, close factor scales linearly between MinimumCloseFactor and 1.0,
-	// reaching max value when (borrowed / limit) = 1 + CompleteLiquidationThreshold
+	// reaching max value when (borrowed / threshold) = 1 + CompleteLiquidationThreshold
 	var closeFactor sdk.Dec
 	closeFactor = Interpolate(
-		borrowed.Quo(limit).Sub(sdk.OneDec()), // x
-		sdk.ZeroDec(),                         // xMin
-		params.MinimumCloseFactor,             // yMin
-		params.CompleteLiquidationThreshold,   // xMax
-		sdk.OneDec(),                          // yMax
+		borrowed.Quo(threshold).Sub(sdk.OneDec()), // x
+		sdk.ZeroDec(),                       // xMin
+		params.MinimumCloseFactor,           // yMin
+		params.CompleteLiquidationThreshold, // xMax
+		sdk.OneDec(),                        // yMax
 	)
 	if closeFactor.GTE(sdk.OneDec()) {
 		closeFactor = sdk.OneDec()
