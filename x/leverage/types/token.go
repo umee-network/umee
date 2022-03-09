@@ -46,6 +46,11 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
 
+	// Liquidation threshold ranges between collateral weight and 1, inclusive.
+	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GT(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", t.LiquidationThreshold)
+	}
+
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
 	// multiple interest rates being defined at exactly 0% or 100% utilization
 	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.

@@ -370,7 +370,7 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 // LiquidateBorrow attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
 // for a selected denomination of uToken collateral, specified by its associated token denom. The liquidator
 // may also specify a minimum reward amount, again in base token denom that will be adjusted by uToken exchange
-// rate, they would accept for the specified repayment. If the borrower is not over their borrow limit, or
+// rate, they would accept for the specified repayment. If the borrower is not over their liquidation limit, or
 // the repayment or reward denominations are invalid, an error is returned. If the attempted repayment
 // is greater than the amount owed or the maximum that can be repaid due to parameters (close factor)
 // then a partial liquidation, equal to the maximum valid amount, is performed. The same occurs if the
@@ -399,20 +399,20 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// use collateral weights to compute borrow limit from enabled collateral
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
+	// compute liquidation limit from enabled collateral
+	liquidationLimit, err := k.CalculateLiquidationLimit(ctx, collateral)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// confirm borrower's eligibility for liquidation
-	if borrowLimit.GTE(borrowValue) {
+	if liquidationLimit.GTE(borrowValue) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
 	}
 
 	// get reward-specific incentive and dynamic close factor
 	baseRewardDenom := desiredReward.Denom
-	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, borrowLimit)
+	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, liquidationLimit)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
@@ -539,10 +539,15 @@ func (k Keeper) LiquidateBorrow(
 }
 
 // LiquidationParams computes dynamic liquidation parameters based on collateral denomination,
-// borrowed value, and borrow limit. Returns liquidationIncentive (the ratio of bonus collateral
+// borrowed value, and liquidation limit. Returns liquidationIncentive (the ratio of bonus collateral
 // awarded during Liquidate transactions, and closeFactor (the fraction of a borrower's total
 // borrowed value that can be repaid by a liquidator in a single liquidation event.)
-func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limit sdk.Dec) (sdk.Dec, sdk.Dec, error) {
+func (k Keeper) LiquidationParams(
+	ctx sdk.Context,
+	reward string,
+	borrowed sdk.Dec,
+	limit sdk.Dec,
+) (sdk.Dec, sdk.Dec, error) {
 	if borrowed.IsNegative() {
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
 	}
@@ -556,7 +561,7 @@ func (k Keeper) LiquidationParams(ctx sdk.Context, reward string, borrowed, limi
 		return sdk.ZeroDec(), sdk.ZeroDec(), err
 	}
 
-	// special case: If borrow limit is zero, close factor is always 1
+	// special case: If liquidation limit is zero, close factor is always 1
 	if limit.IsZero() {
 		return liquidationIncentive, sdk.OneDec(), nil
 	}
