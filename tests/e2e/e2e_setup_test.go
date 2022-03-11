@@ -421,7 +421,7 @@ func (s *IntegrationTestSuite) runValidators() {
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.umee", val.configDir()),
 			},
-			Repository: "umeenet/umeed",
+			Repository: "umeenet/umeed-e2e",
 		}
 
 		// expose the first validator for debugging and communication
@@ -640,7 +640,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 		&dockertest.RunOptions{
 			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/umeed",
+			Repository: "umeenet/umeed-e2e",
 			// NOTE: container names are prefixed with '/'
 			Entrypoint: []string{
 				"peggo",
@@ -742,7 +742,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			&dockertest.RunOptions{
 				Name:       s.chain.orchestrators[i].instanceName(),
 				NetworkID:  s.dkrNet.Network.ID,
-				Repository: "umeenet/umeed",
+				Repository: "umeenet/umeed-e2e",
 				// NOTE: container names are prefixed with '/'
 				Entrypoint: []string{
 					"peggo",
@@ -835,7 +835,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 		&dockertest.RunOptions{
 			Name:       "umee-price-feeder",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/umeed",
+			Repository: "umeenet/umeed-e2e",
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
