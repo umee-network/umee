@@ -57,6 +57,10 @@ build {
       , "curl -sLf https://github.com/informalsystems/ibc-rs/releases/download/v0.12.0/hermes-v0.12.0-x86_64-unknown-linux-gnu.tar.gz | tar -C /usr/local/bin -xz"
       , "curl -sLf https://github.com/cosmos/gaia/releases/download/v6.0.3/gaiad-v6.0.3-linux-amd64 -o /usr/local/bin/gaiad"
       , "chmod a+x /usr/local/bin/gaiad"
+      , "cd /tmp && curl -sLqf https://github.com/umee-network/umee/releases/download/price-feeder/v0.1.2/price-feeder-v0.1.2-linux-amd64.tar.gz | tar --strip-components 1 -xz"
+      , "cp /tmp/price-feeder /usr/local/bin/"
+      , "cd /tmp && curl -sLqf https://github.com/umee-network/peggo/releases/download/v0.2.6/peggo-v0.2.6-linux-amd64.tar.gz | tar --strip-components 1 -xz"
+      , "cp /tmp/peggo /usr/local/bin/"
     ]
   }
 
