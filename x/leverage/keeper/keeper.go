@@ -114,8 +114,10 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 // If the token or uToken denom is invalid or account balance insufficient for either
 // lender or module, we return an error.
 func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdrawal sdk.Coin) error {
-	var uToken sdk.Coin
-	var err error
+	var (
+		uToken sdk.Coin
+		err    error
+	)
 
 	if k.IsAcceptedToken(ctx, withdrawal.Denom) {
 		// Automatically convert base token input to equivalent uTokens
