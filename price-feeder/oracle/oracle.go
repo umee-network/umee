@@ -27,18 +27,18 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// We define TickerTimeout as the minimum timeout between each oracle loop. We
+// We define tickerTimeout as the minimum timeout between each oracle loop. We
 // define this value empirically based on enough time to collect exchange rates,
 // and broadcast pre-vote and vote transactions such that they're committed in a
 // block during each voting period.
 const (
-	TickerTimeout = 1000 * time.Millisecond
+	tickerTimeout = 1000 * time.Millisecond
 )
 
 var (
-	// DeviationThreshold defines how many 𝜎 a provider can be away from the mean
+	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
 	// without being considered faulty.
-	DeviationThreshold = sdk.MustNewDecFromStr("2")
+	deviationThreshold = sdk.MustNewDecFromStr("2")
 )
 
 // PreviousPrevote defines a structure for defining the previous prevote
@@ -119,7 +119,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 			telemetry.MeasureSince(startTime, "runtime", "tick")
 			telemetry.IncrCounter(1, "new", "tick")
 
-			time.Sleep(TickerTimeout)
+			time.Sleep(tickerTimeout)
 		}
 	}
 }
@@ -428,8 +428,8 @@ func (o *Oracle) filterTickerDeviations(
 	for providerName, priceTickers := range prices {
 		for base, tp := range priceTickers {
 			if _, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(DeviationThreshold))) &&
-					tp.Price.LTE(means[base].Add(deviations[base].Mul(DeviationThreshold)))) {
+				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					tp.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 				if _, ok := filteredPrices[providerName]; !ok {
 					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
@@ -493,8 +493,8 @@ func (o *Oracle) filterCandleDeviations(
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
 			if _, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(deviations[base].Mul(DeviationThreshold))) &&
-					price.LTE(means[base].Add(deviations[base].Mul(DeviationThreshold)))) {
+				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
 				if _, ok := filteredCandles[providerName]; !ok {
 					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
 				}
