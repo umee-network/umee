@@ -109,9 +109,27 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 }
 
 // WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
-// for the original tokens loaned. If the uToken type is invalid or account balance
-// insufficient on either side, we return an error.
-func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, uToken sdk.Coin) error {
+// for the original tokens loaned. Accepts either a uToken amount to withdraw or
+// an equivalent base token amount to be converted automatically via exchange rate.
+// If the token or uToken denom is invalid or account balance insufficient for either
+// lender or module, we return an error.
+func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdrawal sdk.Coin) error {
+	var (
+		uToken sdk.Coin
+		err    error
+	)
+
+	if k.IsAcceptedToken(ctx, withdrawal.Denom) {
+		// Automatically convert base token input to equivalent uTokens
+		uToken, err = k.ExchangeToken(ctx, withdrawal)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Otherwise use original input
+		uToken = withdrawal
+	}
+
 	if !k.IsAcceptedUToken(ctx, uToken.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
 	}
