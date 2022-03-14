@@ -19,14 +19,12 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/app/params"
 )
 
 type appCreator struct {
 	encCfg        params.EncodingConfig
 	moduleManager module.BasicManager
-	beta          bool
 }
 
 func (ac appCreator) newApp(
@@ -77,22 +75,6 @@ func (ac appCreator) newApp(
 		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
 	}
 
-	// remove once beta functionality is complete
-	if ac.beta {
-		return umeeappbeta.New(
-			logger,
-			db,
-			traceStore,
-			true,
-			skipUpgradeHeights,
-			cast.ToString(appOpts.Get(flags.FlagHome)),
-			cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-			ac.encCfg,
-			appOpts,
-			baseAppOpts...,
-		)
-	}
-
 	return app.New(
 		logger,
 		db,
@@ -126,29 +108,6 @@ func (ac appCreator) appExport(
 	var loadLatest bool
 	if height == -1 {
 		loadLatest = true
-	}
-
-	// remove once beta functionality is complete
-	if ac.beta {
-		umeeApp := umeeappbeta.New(
-			logger,
-			db,
-			traceStore,
-			loadLatest,
-			map[int64]bool{},
-			homePath,
-			uint(1),
-			ac.encCfg,
-			appOpts,
-		)
-
-		if height != -1 {
-			if err := umeeApp.LoadHeight(height); err != nil {
-				return servertypes.ExportedApp{}, err
-			}
-		}
-
-		return umeeApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
 	}
 
 	umeeApp := app.New(

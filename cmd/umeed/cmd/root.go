@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -11,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingcli "github.com/cosmos/cosmos-sdk/x/auth/vesting/client/cli"
@@ -24,51 +21,13 @@ import (
 	bridgecmd "github.com/umee-network/Gravity-Bridge/module/cmd/gravity/cmd"
 
 	"github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/app/params"
 )
 
-// EnableBeta defines an ldflag that enables the beta version of the application
-// to be built.
-var EnableBeta string
-
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	var beta bool
-
-	switch {
-	case len(EnableBeta) > 0:
-		// Handle the case where a build flag is provided, which used when building
-		// the binary.
-		v, err := strconv.ParseBool(EnableBeta)
-		if err != nil {
-			panic(fmt.Sprintf("failed to parse EnableBeta build flag: %s", err))
-		}
-
-		beta = v
-
-	case len(os.Getenv("UMEE_ENABLE_BETA")) > 0:
-		// Handle the case where an env var is provided, which is used when running
-		// with Starport where we cannot control build flags/inputs.
-		v, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
-		if err != nil {
-			panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
-		}
-
-		beta = v
-	}
-
-	var (
-		encodingConfig params.EncodingConfig
-		moduleManager  module.BasicManager
-	)
-	if beta {
-		encodingConfig = umeeappbeta.MakeEncodingConfig()
-		moduleManager = umeeappbeta.ModuleBasics
-	} else {
-		encodingConfig = app.MakeEncodingConfig()
-		moduleManager = app.ModuleBasics
-	}
+	encodingConfig := app.MakeEncodingConfig()
+	moduleManager := app.ModuleBasics
 
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
@@ -98,7 +57,6 @@ towards borrowing assets on another blockchain.`,
 	ac := appCreator{
 		encCfg:        encodingConfig,
 		moduleManager: moduleManager,
-		beta:          beta,
 	}
 
 	initRootCmd(rootCmd, ac)
