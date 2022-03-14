@@ -32,7 +32,7 @@ quote = "USDC"
 
 [account]
 address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
-chain_id = "umee-local-beta-testnet"
+chain_id = "umee-local-testnet"
 validator = '$UMEE_E2E_PRICE_FEEDER_VALIDATOR'
 
 [keyring]
@@ -51,7 +51,7 @@ enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
 type = "prometheus"
-global_labels = [["chain-id", "umee-local-beta-testnet"]]
+global_labels = [["chain-id", "umee-local-testnet"]]
 EOF
 
 # start price-feeder

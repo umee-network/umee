@@ -21,10 +21,6 @@ ifeq (,$(VERSION))
   endif
 endif
 
-ifneq (,$(UMEE_ENABLE_BETA))
-	VERSION := $(VERSION)-beta
-endif
-
 ###############################################################################
 ##                                   Build                                   ##
 ###############################################################################
@@ -64,8 +60,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
-			-X github.com/umee-network/umee/cmd/umeed/cmd.EnableBeta=$(UMEE_ENABLE_BETA)
+			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
@@ -83,15 +78,6 @@ install: go.sum
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
-build-beta: go.sum
-	UMEE_ENABLE_BETA=true $(MAKE) build
-
-install-beta: go.sum
-	UMEE_ENABLE_BETA=true $(MAKE) install
-
-build-linux-beta: go.sum
-	UMEE_ENABLE_BETA=true $(MAKE) build-linux
-
 go-mod-cache: go.sum
 	@echo "--> Download go modules to local cache"
 	@go mod download
@@ -104,7 +90,7 @@ clean:
 	@echo "--> Cleaning..."
 	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
 
-.PHONY: install build build-linux build-beta install-beta build-linux-beta clean
+.PHONY: install build build-linux clean
 
 ###############################################################################
 ##                                  Docker                                   ##

@@ -8,7 +8,7 @@ RUN go mod download
 COPY . .
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
 RUN apk add --no-cache $PACKAGES
-RUN UMEE_ENABLE_BETA=true CGO_ENABLED=0 make install
+RUN CGO_ENABLED=0 make install
 RUN cd price-feeder && make install
 
 # Fetch peggo (gravity bridge) binary
