@@ -118,7 +118,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdr
 	var err error
 
 	if k.IsAcceptedToken(ctx, withdrawal.Denom) {
-		// Automatically convert base token requests to equivalent uTokens
+		// Automatically convert base token input to equivalent uTokens
 		uToken, err = k.ExchangeToken(ctx, withdrawal)
 		if err != nil {
 			return err
