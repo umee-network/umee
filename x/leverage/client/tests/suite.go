@@ -131,7 +131,7 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 			&types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					{
-						// must match app/beta/test_helpers.go/IntegrationTestNetworkConfig
+						// must match app/test_helpers.go/IntegrationTestNetworkConfig
 						BaseDenom:            app.BondDenom,
 						SymbolDenom:          app.DisplayDenom,
 						Exponent:             6,
@@ -363,7 +363,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			false,
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
 				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
@@ -378,7 +378,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			false,
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
 				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
@@ -567,7 +567,7 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			false,
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
 				// amount loaned, times its initial oracle exchange rate.
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
@@ -584,7 +584,7 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			false,
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
@@ -904,7 +904,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			false,
 			&types.QueryBorrowLimitResponse{},
 			&types.QueryBorrowLimitResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
 				// amount loaned, times its initial oracle exchange rate.
 				BorrowLimit: sdk.MustNewDecFromStr("34.21"),

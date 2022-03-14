@@ -49,14 +49,14 @@ func (EmptyAppOptions) Get(o string) interface{} { return nil }
 func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
 	t.Helper()
 
-	betaApp, genesisState := setup(!isCheckTx, invCheckPeriod)
+	app, genesisState := setup(!isCheckTx, invCheckPeriod)
 	if !isCheckTx {
 		// InitChain must be called to stop deliverState from being nil
 		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 		require.NoError(t, err)
 
 		// Initialize the chain
-		betaApp.InitChain(
+		app.InitChain(
 			abci.RequestInitChain{
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: DefaultConsensusParams,
@@ -65,13 +65,13 @@ func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
 		)
 	}
 
-	return betaApp
+	return app
 }
 
 func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 	db := dbm.NewMemDB()
 	encCdc := MakeEncodingConfig()
-	betaApp := New(
+	app := New(
 		log.NewNopLogger(),
 		db,
 		nil,
@@ -83,10 +83,10 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		EmptyAppOptions{},
 	)
 	if withGenesis {
-		return betaApp, NewDefaultGenesisState(encCdc.Marshaler)
+		return app, NewDefaultGenesisState(encCdc.Marshaler)
 	}
 
-	return betaApp, GenesisState{}
+	return app, GenesisState{}
 }
 
 // IntegrationTestNetworkConfig returns a networking configuration used for

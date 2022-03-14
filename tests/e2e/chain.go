@@ -12,7 +12,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/app/params"
 )
 
@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	encodingConfig = umeeappbeta.MakeEncodingConfig()
+	encodingConfig = umeeapp.MakeEncodingConfig()
 
 	encodingConfig.InterfaceRegistry.RegisterImplementations(
 		(*sdk.Msg)(nil),
