@@ -7,12 +7,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 )
 
 func TestParseUpdateRegistryProposal(t *testing.T) {
-	encCfg := umeeappbeta.MakeEncodingConfig()
+	encCfg := umeeapp.MakeEncodingConfig()
 	tmpDir := t.TempDir()
 
 	// create a bogus proposal file and ensure parsing fails

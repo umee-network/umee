@@ -20,7 +20,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 	umeeparams "github.com/umee-network/umee/app/params"
 	"github.com/umee-network/umee/price-feeder/telemetry"
 )
@@ -82,7 +82,7 @@ func NewOracleClient(
 		OracleAddrString:    oracleAddrString,
 		ValidatorAddr:       sdk.ValAddress(validatorAddrString),
 		ValidatorAddrString: validatorAddrString,
-		Encoding:            umeeappbeta.MakeEncodingConfig(),
+		Encoding:            umeeapp.MakeEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
 		GRPCEndpoint:        grpcEndpoint,
 	}, nil

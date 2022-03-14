@@ -15,12 +15,13 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+
+	umeeapp "github.com/umee-network/umee/app"
 )
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	app         *umeeappbeta.UmeeApp
+	app         *umeeapp.UmeeApp
 	anteHandler sdk.AnteHandler
 	ctx         sdk.Context
 	clientCtx   client.Context
@@ -28,7 +29,7 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	app := umeeappbeta.Setup(s.T(), false, 1)
+	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,

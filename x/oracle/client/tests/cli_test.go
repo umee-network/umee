@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/suite"
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {
-	cfg := umeeappbeta.IntegrationTestNetworkConfig()
+	cfg := umeeapp.IntegrationTestNetworkConfig()
 	cfg.NumValidators = 2
 	cfg.Mnemonics = []string{
 		"empower ridge mystery shrimp predict alarm swear brick across funny vendor essay antique vote place lava proof gaze crush head east arch twin lady",

@@ -123,34 +123,3 @@ jobs:
           sleep 2m
           ./contrib/scripts/test_localnet_liveness.sh 100 5 50 localhost
         if: env.GIT_DIFF
-
-  beta-liveness-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
-      - uses: technote-space/get-diff-action@v6.0.1
-        id: git_diff
-        with:
-          PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-      - name: Install Starport
-        run: |
-          curl https://get.starport.network/starport@v0.19.4! | bash
-        if: env.GIT_DIFF
-      - name: Start Local Beta Network via Starport
-        run: |
-          starport chain serve --reset-once -v -c ./starport.ci.beta.yml > starport.beta.out 2>&1 &
-        env:
-          UMEE_ENABLE_BETA: true
-        if: env.GIT_DIFF
-      - name: Test Local Beta Network Liveness
-        run: |
-          sleep 2m
-          ./contrib/scripts/test_localnet_liveness.sh 100 5 50 localhost
-        if: env.GIT_DIFF
