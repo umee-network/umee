@@ -25,6 +25,8 @@ import (
 var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
+	// TODO: Ensure x/leverage implements simulator and then uncomment.
+	// _ module.AppModuleSimulation = AppModule{}
 )
 
 // AppModuleBasic implements the AppModuleBasic interface for the x/leverage
