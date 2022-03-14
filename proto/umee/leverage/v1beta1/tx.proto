@@ -31,14 +31,15 @@ service Msg {
 }
 
 // MsgLendAsset represents a lender's request to lend a base asset type to the
-// module
+// module.
 message MsgLendAsset {
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
-// base asset type from the module
+// base asset type from the module. Amount can either be exact uTokens to withdraw
+// or equivalent base assets.
 message MsgWithdrawAsset {
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];

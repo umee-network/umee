@@ -30,7 +30,7 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgLendAsset represents a lender's request to lend a base asset type to the
-// module
+// module.
 type MsgLendAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -84,7 +84,8 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 }
 
 // MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
-// base asset type from the module
+// base asset type from the module. Amount can either be exact uTokens to withdraw
+// or equivalent base assets.
 type MsgWithdrawAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
