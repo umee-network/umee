@@ -14,7 +14,7 @@ RUN apt-get update \
   && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # Install go 
-RUN curl -sL https://go.dev/dl/go1.17.5.linux-amd64.tar.gz | tar --strip-components=1 -C /usr/local -xz
+RUN curl -sL https://go.dev/dl/go1.17.8.linux-amd64.tar.gz | tar --strip-components=1 -C /usr/local -xz
 
 # Copy Umee source in
 WORKDIR /tmp/build/umee
@@ -26,17 +26,6 @@ COPY tests/ tests/
 COPY x/ x/
 
 # Build umeed
-RUN make build
-
-# Clone/Build price-feeder
-WORKDIR /tmp/build/price-feeder
-RUN git clone https://github.com/umee-network/umee.git --branch price-feeder/v0.1.2 --single-branch --depth 1 .
-WORKDIR /tmp/build/price-feeder/price-feeder
-RUN make build
-
-# Clone/Build Peggo
-WORKDIR /tmp/build/peggo
-RUN git clone https://github.com/umee-network/peggo.git --branch v0.2.6 --single-branch --depth 1 .
 RUN make build
 
 WORKDIR /root
