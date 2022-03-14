@@ -18,7 +18,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/app/params"
 )
 
@@ -75,7 +75,7 @@ func (ac appCreator) newApp(
 		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
 	}
 
-	return app.New(
+	return umeeapp.New(
 		logger,
 		db,
 		traceStore,
@@ -110,7 +110,7 @@ func (ac appCreator) appExport(
 		loadLatest = true
 	}
 
-	umeeApp := app.New(
+	app := umeeapp.New(
 		logger,
 		db,
 		traceStore,
@@ -123,10 +123,10 @@ func (ac appCreator) appExport(
 	)
 
 	if height != -1 {
-		if err := umeeApp.LoadHeight(height); err != nil {
+		if err := app.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	}
 
-	return umeeApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+	return app.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
 }

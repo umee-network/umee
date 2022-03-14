@@ -15,7 +15,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -177,13 +177,13 @@ func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collatera
 			fmt.Sprintf("update collateral weight and liquidation threshold to %s", collateralWeight.String()),
 			newTokens,
 		),
-		sdk.NewCoins(sdk.NewCoin(app.BondDenom, govtypes.DefaultMinDepositTokens)),
+		sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, govtypes.DefaultMinDepositTokens)),
 		[]string{
 			fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
 			fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(10))).String()),
+			fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10))).String()),
 		}...,
 	)
 }
