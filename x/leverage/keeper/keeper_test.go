@@ -13,7 +13,6 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage"
 	"github.com/umee-network/umee/x/leverage/keeper"
 	"github.com/umee-network/umee/x/leverage/types"
@@ -35,14 +34,14 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	app         *umeeappbeta.UmeeApp
+	app         *umeeapp.UmeeApp
 	tk          keeper.TestKeeper
 	queryClient types.QueryClient
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	betaApp := umeeappbeta.Setup(s.T(), false, 1)
-	ctx := betaApp.BaseApp.NewContext(false, tmproto.Header{
+	app := umeeapp.Setup(s.T(), false, 1)
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 		Time:    time.Unix(0, 0),
@@ -73,24 +72,25 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
-		betaApp.AppCodec(),
-		betaApp.GetKey(types.ModuleName),
-		betaApp.GetSubspace(types.ModuleName),
-		betaApp.BankKeeper,
+		app.AppCodec(),
+		app.GetKey(types.ModuleName),
+		app.GetSubspace(types.ModuleName),
+		app.BankKeeper,
 		newMockOracleKeeper(),
 	)
+
 	s.tk = tk
-	betaApp.LeverageKeeper = k
-	betaApp.LeverageKeeper = *betaApp.LeverageKeeper.SetHooks(types.NewMultiHooks())
+	app.LeverageKeeper = k
+	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(types.NewMultiHooks())
 
-	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
-	betaApp.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
-	betaApp.LeverageKeeper.SetRegisteredToken(ctx, atomIBCToken)
+	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
+	app.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
+	app.LeverageKeeper.SetRegisteredToken(ctx, atomIBCToken)
 
-	queryHelper := baseapp.NewQueryServerTestHelper(ctx, betaApp.InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(betaApp.LeverageKeeper))
+	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
+	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.LeverageKeeper))
 
-	s.app = betaApp
+	s.app = app
 	s.ctx = ctx
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
@@ -98,7 +98,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 // setupAccount executes some common boilerplate before a test, where a lender account is given tokens of a given denom,
 // may also lend them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.
 func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, lendAmount, borrowAmount int64, collateral bool) sdk.AccAddress {
-
 	// create a unique address
 	setupAccountCounter = setupAccountCounter.Add(sdk.OneInt())
 	addr := sdk.AccAddress([]byte("addr" + setupAccountCounter.String()))

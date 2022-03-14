@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -11,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingcli "github.com/cosmos/cosmos-sdk/x/auth/vesting/client/cli"
@@ -23,52 +20,14 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	bridgecmd "github.com/umee-network/Gravity-Bridge/module/cmd/gravity/cmd"
 
-	"github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/app/params"
 )
 
-// EnableBeta defines an ldflag that enables the beta version of the application
-// to be built.
-var EnableBeta string
-
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	var beta bool
-
-	switch {
-	case len(EnableBeta) > 0:
-		// Handle the case where a build flag is provided, which used when building
-		// the binary.
-		v, err := strconv.ParseBool(EnableBeta)
-		if err != nil {
-			panic(fmt.Sprintf("failed to parse EnableBeta build flag: %s", err))
-		}
-
-		beta = v
-
-	case len(os.Getenv("UMEE_ENABLE_BETA")) > 0:
-		// Handle the case where an env var is provided, which is used when running
-		// with Starport where we cannot control build flags/inputs.
-		v, err := strconv.ParseBool(os.Getenv("UMEE_ENABLE_BETA"))
-		if err != nil {
-			panic(fmt.Sprintf("failed to parse env var 'UMEE_ENABLE_BETA': %s", err))
-		}
-
-		beta = v
-	}
-
-	var (
-		encodingConfig params.EncodingConfig
-		moduleManager  module.BasicManager
-	)
-	if beta {
-		encodingConfig = umeeappbeta.MakeEncodingConfig()
-		moduleManager = umeeappbeta.ModuleBasics
-	} else {
-		encodingConfig = app.MakeEncodingConfig()
-		moduleManager = app.ModuleBasics
-	}
+	encodingConfig := umeeapp.MakeEncodingConfig()
+	moduleManager := umeeapp.ModuleBasics
 
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
@@ -78,10 +37,10 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
-		WithHomeDir(app.DefaultNodeHome)
+		WithHomeDir(umeeapp.DefaultNodeHome)
 
 	rootCmd := &cobra.Command{
-		Use:   app.Name + "d",
+		Use:   umeeapp.Name + "d",
 		Short: "Umee application network daemon and client",
 		Long: `A daemon and client for interacting with the Umee network. Umee is a
 Universal Capital Facility that can collateralize assets on one blockchain
@@ -98,7 +57,6 @@ towards borrowing assets on another blockchain.`,
 	ac := appCreator{
 		encCfg:        encodingConfig,
 		moduleManager: moduleManager,
-		beta:          beta,
 	}
 
 	initRootCmd(rootCmd, ac)
@@ -117,35 +75,35 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 		ac.moduleManager,
 		ac.encCfg.TxConfig,
 		banktypes.GenesisBalancesIterator{},
-		app.DefaultNodeHome,
+		umeeapp.DefaultNodeHome,
 	)
 	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
 
 	rootCmd.AddCommand(
-		addGenesisAccountCmd(app.DefaultNodeHome),
-		genutilcli.InitCmd(ac.moduleManager, app.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
+		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
+		genutilcli.InitCmd(ac.moduleManager, umeeapp.DefaultNodeHome),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.ValidateGenesisCmd(ac.moduleManager),
 		genutilcli.GenTxCmd(
 			ac.moduleManager,
 			ac.encCfg.TxConfig,
 			banktypes.GenesisBalancesIterator{},
-			app.DefaultNodeHome,
+			umeeapp.DefaultNodeHome,
 		),
 		bridgeGenTxCmd,
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
 	)
 
-	server.AddCommands(rootCmd, app.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
 		queryCommand(ac),
 		txCommand(ac),
-		keys.Commands(app.DefaultNodeHome),
+		keys.Commands(umeeapp.DefaultNodeHome),
 	)
 }
 

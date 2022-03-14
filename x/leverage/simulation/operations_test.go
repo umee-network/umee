@@ -12,7 +12,6 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/leverage"
 	"github.com/umee-network/umee/x/leverage/simulation"
 	"github.com/umee-network/umee/x/leverage/types"
@@ -22,15 +21,15 @@ import (
 type SimTestSuite struct {
 	suite.Suite
 
-	app *umeeappbeta.UmeeApp
+	app *umeeapp.UmeeApp
 	ctx sdk.Context
 }
 
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	betaApp := umeeappbeta.Setup(s.T(), checkTx, 1)
-	ctx := betaApp.NewContext(checkTx, tmproto.Header{})
+	app := umeeapp.Setup(s.T(), checkTx, 1)
+	ctx := app.NewContext(checkTx, tmproto.Header{})
 
 	umeeToken := types.Token{
 		BaseDenom:            umeeapp.BondDenom,
@@ -74,14 +73,14 @@ func (s *SimTestSuite) SetupTest() {
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
 
-	leverage.InitGenesis(ctx, betaApp.LeverageKeeper, *types.DefaultGenesis())
+	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		betaApp.LeverageKeeper.SetRegisteredToken(ctx, token)
-		betaApp.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
+		app.LeverageKeeper.SetRegisteredToken(ctx, token)
+		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 
-	s.app = betaApp
+	s.app = app
 	s.ctx = ctx
 }
 

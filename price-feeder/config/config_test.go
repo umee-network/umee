@@ -170,7 +170,7 @@ enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
 type = "prometheus"
-global_labels = [["chain-id", "umee-local-beta-testnet"]]
+global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
