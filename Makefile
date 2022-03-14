@@ -60,7 +60,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
