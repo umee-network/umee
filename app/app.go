@@ -92,9 +92,17 @@ import (
 	gravitykeeper "github.com/umee-network/Gravity-Bridge/module/x/gravity/keeper"
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
+	customante "github.com/umee-network/umee/ante"
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
+	"github.com/umee-network/umee/x/leverage"
+	leverageclient "github.com/umee-network/umee/x/leverage/client"
+	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
 const (
@@ -144,6 +152,8 @@ var (
 		ibctransfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		gravity.AppModuleBasic{},
+		leverage.AppModuleBasic{},
+		oracle.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -156,6 +166,8 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName:         nil,
 	}
 )
 
@@ -208,6 +220,8 @@ type UmeeApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	GravityKeeper    gravitykeeper.Keeper
+	LeverageKeeper   leveragekeeper.Keeper
+	OracleKeeper     oraclekeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -247,6 +261,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, gravitytypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -359,6 +374,28 @@ func New(
 		homePath,
 		app.BaseApp,
 	)
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec,
+		keys[oracletypes.ModuleName],
+		app.GetSubspace(oracletypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.DistrKeeper,
+		&stakingKeeper,
+		distrtypes.ModuleName,
+	)
+	app.LeverageKeeper = leveragekeeper.NewKeeper(
+		appCodec,
+		keys[leveragetypes.ModuleName],
+		app.GetSubspace(leveragetypes.ModuleName),
+		app.BankKeeper,
+		app.OracleKeeper,
+	)
+	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
+		leveragetypes.NewMultiHooks(
+			app.OracleKeeper.Hooks(),
+		),
+	)
 
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
@@ -421,6 +458,7 @@ func New(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
+		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper)).
 		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
@@ -428,7 +466,7 @@ func New(
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
 		keys[evidencetypes.StoreKey],
-		&stakingKeeper,
+		&app.StakingKeeper,
 		app.SlashingKeeper,
 	)
 
@@ -450,7 +488,7 @@ func New(
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper,
-			&stakingKeeper,
+			app.StakingKeeper,
 			app.BaseApp.DeliverTx,
 			encodingConfig.TxConfig,
 		),
@@ -472,6 +510,8 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
+		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -498,6 +538,8 @@ func New(
 		evidencetypes.ModuleName,
 		stakingtypes.ModuleName,
 		ibchost.ModuleName,
+		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
 
@@ -517,6 +559,8 @@ func New(
 		minttypes.ModuleName,
 		slashingtypes.ModuleName,
 		govtypes.ModuleName,
+		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
 		feegrant.ModuleName,
 		authz.ModuleName,
 		stakingtypes.ModuleName,
@@ -548,6 +592,8 @@ func New(
 		ibctransfertypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
+		oracletypes.ModuleName,
+		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 	)
 
@@ -572,6 +618,9 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		// TODO: Ensure x/leverage implements simulator and then uncomment.
+		// leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()
@@ -581,13 +630,14 @@ func New(
 	app.MountTransientStores(transientKeys)
 	app.MountMemoryStores(memKeys)
 
-	anteHandler, err := ante.NewAnteHandler(
-		ante.HandlerOptions{
+	anteHandler, err := customante.NewAnteHandler(
+		customante.HandlerOptions{
 			AccountKeeper:   app.AccountKeeper,
 			BankKeeper:      app.BankKeeper,
-			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 			FeegrantKeeper:  app.FeeGrantKeeper,
+			OracleKeeper:    app.OracleKeeper,
 			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 		},
 	)
 	if err != nil {
@@ -792,6 +842,8 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
+	paramsKeeper.Subspace(leveragetypes.ModuleName)
+	paramsKeeper.Subspace(oracletypes.ModuleName)
 
 	return paramsKeeper
 }
@@ -802,6 +854,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
+		leverageclient.ProposalHandler,
 	}
 }
 

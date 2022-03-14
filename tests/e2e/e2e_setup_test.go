@@ -33,7 +33,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -49,7 +49,7 @@ const (
 
 var (
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(app.BondDenom, stakeAmount)
+	stakeAmountCoin = sdk.NewCoin(umeeapp.BondDenom, stakeAmount)
 )
 
 type IntegrationTestSuite struct {
@@ -225,8 +225,8 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:            app.BondDenom,
-		SymbolDenom:          app.DisplayDenom,
+		BaseDenom:            umeeapp.BondDenom,
+		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),

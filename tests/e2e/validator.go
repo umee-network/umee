@@ -25,7 +25,7 @@ import (
 	"github.com/tendermint/tendermint/privval"
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 )
 
 type validator struct {
@@ -69,7 +69,7 @@ func (v *validator) init() error {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(umeeappbeta.ModuleBasics.DefaultGenesis(cdc), "", " ")
+	appState, err := json.MarshalIndent(umeeapp.ModuleBasics.DefaultGenesis(cdc), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}

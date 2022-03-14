@@ -9,16 +9,26 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 )
 
 func SetupTestingApp() (ibctesting.TestingApp, map[string]json.RawMessage) {
 	db := dbm.NewMemDB()
-	encConfig := app.MakeEncodingConfig()
-	umeeApp := app.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, app.DefaultNodeHome, 5, encConfig, app.EmptyAppOptions{})
-	genesisState := app.NewDefaultGenesisState(encConfig.Marshaler)
+	encConfig := umeeapp.MakeEncodingConfig()
+	app := umeeapp.New(
+		log.NewNopLogger(),
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		umeeapp.DefaultNodeHome,
+		5,
+		encConfig,
+		umeeapp.EmptyAppOptions{},
+	)
+	genesisState := umeeapp.NewDefaultGenesisState(encConfig.Marshaler)
 
-	return umeeApp, genesisState
+	return app, genesisState
 }
 
 func NewTransferPath(chainA, chainB *ibctesting.TestChain) *ibctesting.Path {
