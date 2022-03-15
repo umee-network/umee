@@ -356,42 +356,22 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger, providerPairs ...types.CurrencyPair) (provider.Provider, error) {
 	switch providerName {
 	case config.ProviderBinance:
-		binanceProvider, err := provider.NewBinanceProvider(ctx, logger, providerPairs...)
-		if err != nil {
-			return nil, err
-		}
-		return binanceProvider, nil
+		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderKraken:
-		krakenProvider, err := provider.NewKrakenProvider(ctx, logger, providerPairs...)
-		if err != nil {
-			return nil, err
-		}
-		return krakenProvider, nil
+		return provider.NewKrakenProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderOsmosis:
 		return provider.NewOsmosisProvider(), nil
 
 	case config.ProviderHuobi:
-		huobiProvider, err := provider.NewHuobiProvider(ctx, logger, providerPairs...)
-		if err != nil {
-			return nil, err
-		}
-		return huobiProvider, nil
+		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderOkx:
-		okxProvider, err := provider.NewOkxProvider(ctx, logger, providerPairs...)
-		if err != nil {
-			return nil, err
-		}
-		return okxProvider, nil
+		return provider.NewOkxProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderGate:
-		gateProvider, err := provider.NewGateProvider(ctx, logger, providerPairs...)
-		if err != nil {
-			return nil, err
-		}
-		return gateProvider, nil
+		return provider.NewGateProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderMock:
 		return provider.NewMockProvider(), nil
