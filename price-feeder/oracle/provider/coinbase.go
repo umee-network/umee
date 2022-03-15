@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -18,6 +21,7 @@ const (
 	coinbaseHost      = "ws-feed.exchange.coinbase.com"
 	coinbasePingCheck = time.Second * 28 // should be < 30
 	timeLayout        = "2006-01-02T15:04:05.000000Z"
+	unixMinute        = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -124,8 +128,72 @@ func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[str
 }
 
 // GetCandlePrices returns candles based off of the saved trades map.
+// Candles need to be cut up into one-minute intervals.
 func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	return nil, nil
+	tradeMap := make(map[string][]CoinbaseTrade, len(pairs))
+
+	for _, cp := range pairs {
+		key := currencyPairToCoinbasePair(cp)
+		tradeSet, err := p.getTradePrices(key)
+		if err != nil {
+			return nil, err
+		}
+		tradeMap[key] = tradeSet
+	}
+	if len(tradeMap) == 0 {
+		return nil, fmt.Errorf("no trades have been received")
+	}
+
+	candles := make(map[string][]CandlePrice)
+
+	for cp, trades := range tradeMap {
+		// Sort by oldest -> newest
+		sort.Slice(trades, func(i, j int) bool {
+			return time.Unix(trades[i].Time, 0).Before(time.Unix(trades[j].Time, 0))
+		})
+
+		candleSlice := []CandlePrice{
+			{
+				Price:  sdk.ZeroDec(),
+				Volume: sdk.ZeroDec(),
+			},
+		}
+		startTime := trades[0].Time
+		index := 0
+
+		// Divide into chunks by minute
+		for _, trade := range trades {
+			// if one minute has passed, reset the time period
+			if trade.Time-startTime > unixMinute {
+				index++
+				startTime = trade.Time
+				candleSlice = append(candleSlice, CandlePrice{
+					Price:  sdk.ZeroDec(),
+					Volume: sdk.ZeroDec(),
+				})
+			}
+
+			size, err := sdk.NewDecFromStr(trade.Size)
+			if err != nil {
+				return nil, err
+			}
+			price, err := sdk.NewDecFromStr(trade.Price)
+			if err != nil {
+				return nil, err
+			}
+
+			volume := candleSlice[index].Volume.Add(size)
+			candleSlice[index] = CandlePrice{
+				Volume:    volume,     // aggregate size
+				Price:     price,      // most recent price
+				TimeStamp: trade.Time, // most recent timestamp
+			}
+		}
+
+		candles[coinbasePairToCurrencyPair(cp)] = candleSlice
+	}
+
+	return candles, nil
 }
 
 // SubscribeCurrencyPairs subscribe to ticker and match messages for all currency pairs.
@@ -170,6 +238,18 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 	} else {
 		return TickerPrice{}, fmt.Errorf("coinbase provider failed to get ticker price for %s", gp)
 	}
+}
+
+func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+
+	trades, ok := p.trades[key]
+	if !ok {
+		return []CoinbaseTrade{}, fmt.Errorf("failed to get trades for %s", key)
+	}
+
+	return trades, nil
 }
 
 func (p *CoinbaseProvider) handleReceivedTickers(ctx context.Context) {
@@ -330,13 +410,24 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 }
 
 func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Coinbase", ticker.ProductID, ticker.Price, ticker.Volume)
+	return newTickerPrice(
+		"Coinbase",
+		coinbasePairToCurrencyPair(ticker.ProductID),
+		ticker.Price,
+		ticker.Volume,
+	)
 }
 
 // currencyPairToCoinbasePair returns the expected pair for Coinbase
 // ex.: "ATOM-USDT".
 func currencyPairToCoinbasePair(pair types.CurrencyPair) string {
 	return pair.Base + "-" + pair.Quote
+}
+
+// coinbasePairToCurrencyPair returns the currency pair string
+// ex.: "ATOMUSDT".
+func coinbasePairToCurrencyPair(coinbasePair string) string {
+	return strings.Replace(coinbasePair, "-", "", -1)
 }
 
 // newCoinbaseSubscription returns a new subscription topic for matches/tickers.
