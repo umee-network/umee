@@ -91,18 +91,21 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 	), nil
 }
 
-// FundOracle transfers coins to the oracle module account, as long as the
-// leverage module account has sufficient unreserved assets.
-func (k Keeper) FundOracle(ctx sdk.Context, rewards sdk.Coins) error {
-	// Reduce rewards if they exceed unresered module balance
-	for i, coin := range rewards {
+// FundOracle transfers requested coins to the oracle module account, as
+// long as the leverage module account has sufficient unreserved assets.
+func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
+	rewards := sdk.Coins{}
+
+	// reduce rewards if they exceed unreserved module balance
+	for _, coin := range requested {
 		reserved := k.GetReserveAmount(ctx, coin.Denom)
 		balance := k.ModuleBalance(ctx, coin.Denom)
 
 		amountToTransfer := sdk.MinInt(coin.Amount, balance.Sub(reserved))
-		amountToTransfer = sdk.MaxInt(amountToTransfer, sdk.ZeroInt())
 
-		rewards[i].Amount = amountToTransfer
+		if amountToTransfer.IsPositive() {
+			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
+		}
 	}
 
 	// Because this action is not caused by a message, logging and
