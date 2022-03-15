@@ -88,8 +88,8 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// iterate over all accepted token denominations
 	for _, token := range tokens {
-		// interest is accrued by multiplying each denom's Interest Scalar by the
-		// quantity (borrowAPY * yearsElapsed) + 1
+		// Interest is accrued by multiplying each denom's Interest Scalar by the
+		// quantity (borrowAPY * yearsElapsed) + 1.
 		scalar := k.getInterestScalar(ctx, token.BaseDenom)
 		increase := k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed)
 		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(increase.Add(sdk.OneDec()))); err != nil {
@@ -100,22 +100,19 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx, token.BaseDenom).Mul(scalar)
 
 		// calculate total interest accrued for this denom
-		totalInterest = totalInterest.Add(sdk.NewCoin(
-			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).TruncateInt(),
-		))
+		if x := prevTotalBorrowed.Mul(increase).TruncateInt(); !x.IsZero() {
+			totalInterest = totalInterest.Add(sdk.NewCoin(token.BaseDenom, x))
+		}
 
 		// calculate new reserves accrued for this denom
-		newReserves = newReserves.Add(sdk.NewCoin(
-			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).Mul(token.ReserveFactor).TruncateInt(),
-		))
+		if x := prevTotalBorrowed.Mul(increase).Mul(token.ReserveFactor).TruncateInt(); !x.IsZero() {
+			newReserves = newReserves.Add(sdk.NewCoin(token.BaseDenom, x))
+		}
 
 		// calculate oracle rewards accrued for this denom
-		oracleRewards = oracleRewards.Add(sdk.NewCoin(
-			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).Mul(oracleRewardFactor).TruncateInt(),
-		))
+		if x := prevTotalBorrowed.Mul(increase).Mul(oracleRewardFactor).TruncateInt(); !x.IsZero() {
+			oracleRewards = oracleRewards.Add(sdk.NewCoin(token.BaseDenom, x))
+		}
 	}
 
 	// apply all reserve increases accumulated when iterating over denoms
