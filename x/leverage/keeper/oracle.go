@@ -103,7 +103,6 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 
 		amountToTransfer := sdk.MinInt(coin.Amount, balance.Sub(reserved))
 
-		// Bypass cases where no unreserved assets are available
 		if amountToTransfer.IsPositive() {
 			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
 		}
