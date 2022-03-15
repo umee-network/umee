@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -495,9 +497,31 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	return map[string]struct{}{
-		"UMEEUSDT": {},
-	}, nil
+	resp, err := http.Get("https://api.gateio.ws/api/v4/spot/currency_pairs")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []struct {
+		Base  string `json:"base"`
+		Quote string `json:"quote"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pair := range pairsSummary {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
