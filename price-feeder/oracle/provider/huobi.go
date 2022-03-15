@@ -184,7 +184,7 @@ func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {

@@ -102,8 +102,8 @@ func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
 
-// mapPairsToSlice returns the map of currency pairs as slice.
-func mapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
+// MapPairsToSlice returns the map of currency pairs as slice.
+func MapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
 	currencyPairs := make([]types.CurrencyPair, len(mapPairs))
 
 	iterator := 0
