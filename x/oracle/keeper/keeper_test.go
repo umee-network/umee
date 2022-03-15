@@ -19,7 +19,6 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/x/oracle/keeper"
 	"github.com/umee-network/umee/x/oracle/types"
 )
@@ -32,7 +31,7 @@ type IntegrationTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	app         *umeeappbeta.UmeeApp
+	app         *umeeapp.UmeeApp
 	queryClient types.QueryClient
 	msgServer   types.MsgServer
 }
@@ -42,7 +41,7 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
-	app := umeeappbeta.Setup(s.T(), false, 1)
+	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,

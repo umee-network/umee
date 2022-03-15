@@ -1,7 +1,7 @@
 package keeper_test
 
 import (
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	leveragetypes "github.com/umee-network/umee/x/leverage/types"
 )
 
@@ -11,8 +11,8 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 
 	// require that an existing token does not change the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
-		BaseDenom:   app.BondDenom,
-		SymbolDenom: app.DisplayDenom,
+		BaseDenom:   umeeapp.BondDenom,
+		SymbolDenom: umeeapp.DisplayDenom,
 		Exponent:    6,
 	})
 	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 1)

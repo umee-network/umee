@@ -23,7 +23,6 @@ import (
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	umeeapp "github.com/umee-network/umee/app"
-	umeeappbeta "github.com/umee-network/umee/app/beta"
 	"github.com/umee-network/umee/tests/util"
 )
 
@@ -191,7 +190,7 @@ func appStateRandomizedFn(
 	appParams simtypes.AppParams,
 ) (json.RawMessage, []simtypes.Account) {
 	numAccs := int64(len(accs))
-	genesisState := umeeappbeta.NewDefaultGenesisState(cdc)
+	genesisState := umeeapp.NewDefaultGenesisState(cdc)
 
 	// Generate a random amount of initial stake coins and a random initial
 	// number of bonded accounts.

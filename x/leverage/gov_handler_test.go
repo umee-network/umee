@@ -10,13 +10,13 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeappbeta "github.com/umee-network/umee/app/beta"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage"
 	"github.com/umee-network/umee/x/leverage/types"
 )
 
 func TestUpdateRegistryProposalHandler(t *testing.T) {
-	app := umeeappbeta.Setup(t, false, 1)
+	app := umeeapp.Setup(t, false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,

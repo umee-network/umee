@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/x/leverage/client/cli"
 	"github.com/umee-network/umee/x/leverage/types"
 )
@@ -131,9 +131,9 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 			&types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					{
-						// must match app/beta/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:            app.BondDenom,
-						SymbolDenom:          app.DisplayDenom,
+						// must match app/test_helpers.go/IntegrationTestNetworkConfig
+						BaseDenom:            umeeapp.BondDenom,
+						SymbolDenom:          umeeapp.DisplayDenom,
 						Exponent:             6,
 						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
@@ -225,7 +225,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 51),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
 				),
 			},
 		},
@@ -251,7 +251,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowed() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 51),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
 				),
 			},
 		},
@@ -363,7 +363,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			false,
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
 				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
@@ -378,7 +378,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowedValue() {
 			false,
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				BorrowedValue: sdk.MustNewDecFromStr("0.0017105"),
 				// (50 / 1000000) umee * 34.21 = 0.0017105
 			},
@@ -458,7 +458,7 @@ func (s *IntegrationTestSuite) TestQueryLoaned() {
 			&types.QueryLoanedResponse{},
 			&types.QueryLoanedResponse{
 				Loaned: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 1000),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 			},
 		},
@@ -484,7 +484,7 @@ func (s *IntegrationTestSuite) TestQueryLoaned() {
 			&types.QueryLoanedResponse{},
 			&types.QueryLoanedResponse{
 				Loaned: sdk.NewCoins(
-					sdk.NewInt64Coin(app.BondDenom, 1000),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 			},
 		},
@@ -567,7 +567,7 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			false,
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
 				// amount loaned, times its initial oracle exchange rate.
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
@@ -584,7 +584,7 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			false,
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
@@ -615,7 +615,7 @@ func (s *IntegrationTestSuite) TestQueryReserveAmount() {
 			"query reserve amount",
 			cli.GetCmdQueryReserveAmount(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryReserveAmountResponse{},
@@ -831,7 +831,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 			"query exchange rate",
 			cli.GetCmdQueryExchangeRate(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryExchangeRateResponse{},
@@ -904,7 +904,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 			false,
 			&types.QueryBorrowLimitResponse{},
 			&types.QueryBorrowLimitResponse{
-				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's collateral weight times the collateral
 				// amount loaned, times its initial oracle exchange rate.
 				BorrowLimit: sdk.MustNewDecFromStr("34.21"),
@@ -967,7 +967,7 @@ func (s *IntegrationTestSuite) TestQueryLendAPY() {
 			"valid asset",
 			cli.GetCmdQueryLendAPY(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryLendAPYResponse{},
@@ -1005,7 +1005,7 @@ func (s *IntegrationTestSuite) TestQueryBorrowAPY() {
 			"valid asset",
 			cli.GetCmdQueryBorrowAPY(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryBorrowAPYResponse{},
@@ -1044,7 +1044,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 			"valid asset",
 			cli.GetCmdQueryMarketSize(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
@@ -1070,7 +1070,7 @@ func (s *IntegrationTestSuite) TestQueryMarketSize() {
 			"valid asset",
 			cli.GetCmdQueryMarketSize(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
@@ -1122,7 +1122,7 @@ func (s *IntegrationTestSuite) TestQueryTokenMarketSize() {
 			"valid asset",
 			cli.GetCmdQueryTokenMarketSize(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryTokenMarketSizeResponse{},
@@ -1148,7 +1148,7 @@ func (s *IntegrationTestSuite) TestQueryTokenMarketSize() {
 			"valid asset",
 			cli.GetCmdQueryTokenMarketSize(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryTokenMarketSizeResponse{},
@@ -1408,7 +1408,7 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 			"valid asset",
 			cli.GetCmdQueryAvailableBorrow(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryAvailableBorrowResponse{},
@@ -1435,7 +1435,7 @@ func (s *IntegrationTestSuite) TestCmdAvailableBorrow() {
 			"valid asset",
 			cli.GetCmdQueryAvailableBorrow(),
 			[]string{
-				app.BondDenom,
+				umeeapp.BondDenom,
 			},
 			false,
 			&types.QueryAvailableBorrowResponse{},
