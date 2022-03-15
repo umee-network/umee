@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -543,6 +544,41 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 	for _, tickerSymbol := range tickerSymbols {
 		delete(p.subscribedPairs, tickerSymbol)
 	}
+}
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get("https://api.kraken.com/0/public/AssetPairs")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary struct {
+		Data map[string]struct {
+			WsName string `json:"wsname"`
+		} `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		splitedPair := strings.Split(pair.WsName, "/")
+		if len(splitedPair) != 2 {
+			continue
+		}
+
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(splitedPair[0]),
+			Quote: strings.ToUpper(splitedPair[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // toTickerPrice return a TickerPrice based on the KrakenTicker.

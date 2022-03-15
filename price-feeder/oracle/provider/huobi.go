@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -382,6 +383,32 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
+}
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get("https://api.huobi.pro/market/tickers")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary struct {
+		Data []struct {
+			Symbol string `json:"symbol"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // decompressGzip uncompress gzip compressed messages. All data returned from the

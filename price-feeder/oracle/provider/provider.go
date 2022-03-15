@@ -24,6 +24,7 @@ var ping = []byte("ping")
 type Provider interface {
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
 	GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+	GetAvailablePairs() (map[string]struct{}, error)
 	SubscribeCurrencyPairs(...types.CurrencyPair) error
 }
 

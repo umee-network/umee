@@ -167,6 +167,37 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 	return candles, nil
 }
 
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get("https://api-osmosis.imperator.co/pairs/v1/summary")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary struct {
+		Data []struct {
+			BaseSymbol  string `json:"base_symbol"`
+			QuoteSymbol string `json:"quote_symbol"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.BaseSymbol),
+			Quote: strings.ToUpper(pair.QuoteSymbol),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}
+
 // SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
 func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil

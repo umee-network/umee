@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -39,17 +41,22 @@ type (
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
+	// OkxInstId defines the id Symbol of an pair.
+	OkxInstId struct {
+		InstID string `json:"instId"` // Instrument ID ex.: BTC-USDT
+	}
+
 	// OkxTickerPair defines a ticker pair of Okx.
 	OkxTickerPair struct {
-		InstId string `json:"instId"` // Instrument ID ex.: BTC-USDT
+		OkxInstId
 		Last   string `json:"last"`   // Last traded price ex.: 43508.9
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
 	}
 
 	// OkxInst defines the structure containing ID information for the OkxResponses.
 	OkxID struct {
+		OkxInstId
 		Channel string `json:"channel"`
-		InstID  string `json:"instId"`
 	}
 
 	// OkxTickerResponse defines the response structure of a Okx ticker request.
@@ -299,7 +306,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.tickers[tickerPair.InstId] = tickerPair
+	p.tickers[tickerPair.InstID] = tickerPair
 }
 
 // subscribePairs write the subscription msg to the provider.
@@ -384,8 +391,40 @@ func (p *OkxProvider) pongHandler(appData string) error {
 	return nil
 }
 
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get("https://www.okx.com/api/v5/market/tickers?instType=SPOT")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary struct {
+		Data []OkxInstId `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		splitedInstID := strings.Split(pair.InstID, "-")
+		if len(splitedInstID) != 2 {
+			continue
+		}
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(splitedInstID[0]),
+			Quote: strings.ToUpper(splitedInstID[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}
+
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
+	return newTickerPrice("Okx", ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
 func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {

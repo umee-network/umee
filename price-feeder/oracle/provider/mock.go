@@ -118,3 +118,12 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
 }
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	return map[string]struct{}{
+		"UMEEUSDT": {},
+		"ATOMUSDC": {},
+		"ATOMUSDT": {},
+	}, nil
+}

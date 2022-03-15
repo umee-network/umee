@@ -20,7 +20,9 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 		syncMap := map[string]OkxTickerPair{}
 		syncMap["ATOM-USDT"] = OkxTickerPair{
-			InstId: "ATOM-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "ATOM-USDT",
+			},
 			Last:   lastPrice,
 			Vol24h: volume,
 		}
@@ -41,13 +43,17 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 		syncMap := map[string]OkxTickerPair{}
 		syncMap["ATOM-USDT"] = OkxTickerPair{
-			InstId: "ATOM-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "ATOM-USDT",
+			},
 			Last:   lastPriceAtom,
 			Vol24h: volume,
 		}
 
 		syncMap["LUNA-USDT"] = OkxTickerPair{
-			InstId: "LUNA-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "LUNA-USDT",
+			},
 			Last:   lastPriceLuna,
 			Vol24h: volume,
 		}

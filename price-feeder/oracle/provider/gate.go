@@ -493,6 +493,13 @@ func (p *GateProvider) pongHandler(appData string) error {
 	return nil
 }
 
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	return map[string]struct{}{
+		"UMEEUSDT": {},
+	}, nil
+}
+
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice("Gate", ticker.Symbol, ticker.Last, ticker.Vol)
 }

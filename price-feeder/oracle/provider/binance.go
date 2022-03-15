@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -356,6 +357,30 @@ func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 	subsMsg := newBinanceSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get("https://api1.binance.com/api/v3/ticker/price")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []struct {
+		Symbol string `json:"symbol"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pair := range pairsSummary {
+		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // currencyPairToBinanceTickerPair receives a currency pair and return binance
