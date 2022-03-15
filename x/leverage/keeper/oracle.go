@@ -96,7 +96,7 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 	rewards := sdk.Coins{}
 
-	// Reduce rewards if they exceed unreserved module balance
+	// reduce rewards if they exceed unreserved module balance
 	for _, coin := range requested {
 		reserved := k.GetReserveAmount(ctx, coin.Denom)
 		balance := k.ModuleBalance(ctx, coin.Denom)
