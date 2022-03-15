@@ -236,7 +236,7 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
 	} else {
-		return TickerPrice{}, fmt.Errorf("coinbase provider failed to get ticker price for %s", gp)
+		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", gp)
 	}
 }
 
