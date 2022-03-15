@@ -34,11 +34,9 @@ const (
 	tickerTimeout = 1000 * time.Millisecond
 )
 
-var (
-	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-	// without being considered faulty.
-	deviationThreshold = sdk.MustNewDecFromStr("2")
-)
+// deviationThreshold defines how many 𝜎 a provider can be away from the mean
+// without being considered faulty.
+var deviationThreshold = sdk.MustNewDecFromStr("2")
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -378,6 +376,13 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 				return nil, err
 			}
 			priceProvider = gateProvider
+
+		case config.ProviderCoinbase:
+			coinbaseProvider, err := provider.NewCoinbaseProvider(ctx, o.logger, o.providerPairs[config.ProviderCoinbase]...)
+			if err != nil {
+				return nil, err
+			}
+			priceProvider = coinbaseProvider
 
 		case config.ProviderMock:
 			priceProvider = provider.NewMockProvider()
