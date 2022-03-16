@@ -17,11 +17,11 @@ import (
 // Default simulation operation weights for leverage messages
 const (
 	DefaultWeightMsgLendAsset       int = 100
-	DefaultWeightMsgWithdrawAsset   int = 85
-	DefaultWeightMsgBorrowAsset     int = 80
-	DefaultWeightMsgSetCollateral   int = 60
+	DefaultWeightMsgWithdrawAsset   int = 100
+	DefaultWeightMsgBorrowAsset     int = 70
+	DefaultWeightMsgSetCollateral   int = 30
 	DefaultWeightMsgRepayAsset      int = 70
-	DefaultWeightMsgLiquidate       int = 75
+	DefaultWeightMsgLiquidate       int = 30
 	OperationWeightMsgLendAsset         = "op_weight_msg_lend_asset"
 	OperationWeightMsgWithdrawAsset     = "op_weight_msg_withdraw_asset"
 	OperationWeightMsgBorrowAsset       = "op_weight_msg_borrow_asset"
@@ -78,7 +78,7 @@ func WeightedOperations(
 	return simulation.WeightedOperations{
 		simulation.NewWeightedOperation(
 			weightMsgLend,
-			SimulateMsgLendAsset(ak, bk),
+			SimulateMsgLendAsset(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgWithdraw,
@@ -105,16 +105,15 @@ func WeightedOperations(
 
 // SimulateMsgLendAsset tests and runs a single msg lend where
 // an account lends some available assets.
-func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simtypes.Operation {
+func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coin, skip := randomSpendableFields(r, ctx, accs, bk)
+		from, coin, skip := randomLendableCoin(r, ctx, accs, bk, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "skip all transfers"), nil, nil
 		}
-
 		msg := types.NewMsgLendAsset(from.Address, coin)
 
 		txCtx := simulation.OperationInput{
@@ -302,7 +301,7 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 	}
 }
 
-// randomCoin get random coin from coins
+// randomCoin selects a random coin from coins
 func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 	if coins.Empty() {
 		return sdk.Coin{}
@@ -310,21 +309,43 @@ func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 	return coins[r.Int31n(int32(coins.Len()))]
 }
 
-// randomSpendableFields returns a random account and an sdk.Coin from its spendable
-// coins. It returns skip=true if the account has zero spendable coins.
-func randomSpendableFields(
-	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
-) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
-	acc, _ = simtypes.RandomAcc(r, accs)
+// acceptedTokens return all nonzero accepted base tokens from the input sdk.Coins
+func acceptedTokens(ctx sdk.Context, lk keeper.Keeper, coins sdk.Coins) sdk.Coins {
+	acceptedCoins := sdk.Coins{}
+	for _, coin := range coins {
+		if lk.IsAcceptedToken(ctx, coin.Denom) {
+			acceptedCoins = acceptedCoins.Add(coin)
+		}
+	}
+	return acceptedCoins
+}
 
-	spendableBalances := bk.SpendableCoins(ctx, acc.Address)
+// acceptedUTokens return all nonzero accepted uTokens from the input sdk.Coins
+func acceptedUTokens(ctx sdk.Context, lk keeper.Keeper, coins sdk.Coins) sdk.Coins {
+	acceptedCoins := sdk.Coins{}
+	for _, coin := range coins {
+		if lk.IsAcceptedUToken(ctx, coin.Denom) {
+			acceptedCoins = acceptedCoins.Add(coin)
+		}
+	}
+	return acceptedCoins
+}
 
-	spendableTokens := simtypes.RandSubsetCoins(r, spendableBalances)
-	if spendableTokens.Empty() {
+// randomLendableCoin returns a random account and an sdk.Coin from its spendable
+// accepted base assets. It returns skip=true if the account has zero such coins.
+func randomLendableCoin(
+	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper, lk keeper.Keeper,
+) (simtypes.Account, sdk.Coin, bool) {
+	acc, _ := simtypes.RandomAcc(r, accs)
+
+	available := acceptedTokens(ctx, lk, bk.SpendableCoins(ctx, acc.Address))
+	subset := simtypes.RandSubsetCoins(r, available)
+
+	if subset.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, spendableTokens), false
+	return acc, randomCoin(r, subset), false
 }
 
 // randomTokenFields returns a random account and an sdk.Coin from all
@@ -347,15 +368,15 @@ func randomTokenFields(
 }
 
 // randomWithdrawFields returns a random account and an sdk.Coin from its uTokens
-// (including both collateral and spendable uTokens). It returns skip=true
-// if no uTokens were found.
+// (including both collateral and spendable uTokens). It returns skip=true if no
+// uTokens were found.
 func randomWithdrawFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account,
 	bk types.BankKeeper, lk keeper.Keeper,
-) (acc simtypes.Account, withdrawal sdk.Coin, skip bool) {
-	acc, _ = simtypes.RandomAcc(r, accs)
+) (simtypes.Account, sdk.Coin, bool) {
+	acc, _ := simtypes.RandomAcc(r, accs)
 
-	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
+	uTokens := acceptedUTokens(ctx, lk, bk.SpendableCoins(ctx, acc.Address))
 	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
 
@@ -364,21 +385,6 @@ func randomWithdrawFields(
 	}
 
 	return acc, randomCoin(r, uTokens), false
-}
-
-// getSpendableUTokens returns all uTokens from an account's spendable coins.
-func getSpendableUTokens(
-	ctx sdk.Context, addr sdk.AccAddress,
-	bk types.BankKeeper, lk keeper.Keeper,
-) sdk.Coins {
-	uTokens := sdk.NewCoins()
-	for _, coin := range bk.SpendableCoins(ctx, addr) {
-		if lk.IsAcceptedUToken(ctx, coin.Denom) {
-			uTokens = uTokens.Add(coin)
-		}
-	}
-
-	return uTokens
 }
 
 // randomBorrowedFields returns a random account and an sdk.Coin from an open borrow position.
@@ -399,7 +405,7 @@ func randomBorrowedFields(
 // randomLiquidateFields returns two random accounts to be used as a liquidator
 // and a borrower in a MsgLiquidate transaction, as well as a random sdk.Coin
 // from the borrower's borrows and a random sdk.Coin from the borrower's collateral.
-// It returns skip=true if no collateral is found.
+// It returns skip=true on either no borrows or no collateral.
 func randomLiquidateFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (
