@@ -60,12 +60,13 @@ type (
 
 	// CoinbaseTrade defines the trade info we'd like to save.
 	CoinbaseTrade struct {
-		Symbol string // ex.: ATOMUSDT
-		Time   int64  // Time in unix epoch ex.: 164732388700
-		Size   string // Size of the trade ex.: 10.41
-		Price  string // ex.: 14.02
+		ProductID string // ex.: ATOM-USDT
+		Time      int64  // Time in unix epoch ex.: 164732388700
+		Size      string // Size of the trade ex.: 10.41
+		Price     string // ex.: 14.02
 	}
 
+	// CoinbaseTicker defines the ticker info we'd like to save.
 	CoinbaseTicker struct {
 		ProductID string `json:"product_id"` // ex.: ATOM-USDT
 		Price     string `json:"price"`      // ex.: 523.0
@@ -106,7 +107,7 @@ func NewCoinbaseProvider(ctx context.Context, logger zerolog.Logger, pairs ...ty
 		return nil, err
 	}
 
-	go provider.handleReceivedTickers(ctx)
+	go provider.handleReceivedMessages(ctx)
 
 	return provider, nil
 }
@@ -147,7 +148,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 	candles := make(map[string][]CandlePrice)
 
 	for cp, trades := range tradeMap {
-		// Sort by oldest -> newest
+		// sort oldest -> newest
 		sort.Slice(trades, func(i, j int) bool {
 			return time.Unix(trades[i].Time, 0).Before(time.Unix(trades[j].Time, 0))
 		})
@@ -161,9 +162,9 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 		startTime := trades[0].Time
 		index := 0
 
-		// Divide into chunks by minute
+		// divide into chunks by minute
 		for _, trade := range trades {
-			// if one minute has passed, reset the time period
+			// every minute, reset the time period
 			if trade.Time-startTime > unixMinute {
 				index++
 				startTime = trade.Time
@@ -196,7 +197,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 	return candles, nil
 }
 
-// SubscribeCurrencyPairs subscribe to ticker and match messages for all currency pairs.
+// SubscribeCurrencyPairs subscribes to websockets for all currency pairs.
 func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if err := p.subscribe(cps...); err != nil {
 		return err
@@ -205,7 +206,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 	return nil
 }
 
-// subscribeTrades subscribes to the trades websocket from coinbase.
+// subscribe subscribes to the coinbase "ticker" and "match" websockets.
 func (p *CoinbaseProvider) subscribe(cps ...types.CurrencyPair) error {
 	topics := []string{}
 
@@ -221,6 +222,7 @@ func (p *CoinbaseProvider) subscribe(cps ...types.CurrencyPair) error {
 	return nil
 }
 
+// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
 func (p *CoinbaseProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
@@ -252,7 +254,7 @@ func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
 	return trades, nil
 }
 
-func (p *CoinbaseProvider) handleReceivedTickers(ctx context.Context) {
+func (p *CoinbaseProvider) handleReceivedMessages(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -295,10 +297,10 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		if coinbaseTrade.Type == "error" {
 			var coinbaseErr CoinbaseErrResponse
 			if err := json.Unmarshal(bz, &coinbaseErr); err != nil {
-				p.logger.Debug().Msg("unable to unmarshal err response")
+				p.logger.Debug().Msg("unable to unmarshal error response")
 			}
 			p.logger.Debug().Msg(coinbaseErr.Reason)
-		} else if coinbaseTrade.Type == "subscriptions" {
+		} else if coinbaseTrade.Type == "subscriptions" { // successful subscription message
 			return
 		} else if coinbaseTrade.Type == "ticker" {
 			var coinbaseTicker CoinbaseTicker
@@ -324,16 +326,17 @@ func (tr CoinbaseTradeResponse) timeToUnix() int64 {
 
 func (tr CoinbaseTradeResponse) toTrade() CoinbaseTrade {
 	return CoinbaseTrade{
-		Time:   tr.timeToUnix(),
-		Price:  tr.Price,
-		Symbol: tr.ProductID,
-		Size:   tr.Size,
+		Time:      tr.timeToUnix(),
+		Price:     tr.Price,
+		ProductID: tr.ProductID,
+		Size:      tr.Size,
 	}
 }
 
 func (p *CoinbaseProvider) setTickerPair(ticker CoinbaseTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
+
 	p.tickers[ticker.ProductID] = ticker
 }
 
@@ -345,8 +348,8 @@ func (p *CoinbaseProvider) setTradePair(tradeResponse CoinbaseTradeResponse) {
 	defer p.mtx.Unlock()
 	staleTime := PastUnixTime(providerCandlePeriod)
 	tradeList := []CoinbaseTrade{}
-
 	tradeList = append(tradeList, tradeResponse.toTrade())
+
 	for _, t := range p.trades[tradeResponse.ProductID] {
 		if staleTime < t.Time {
 			tradeList = append(tradeList, t)
