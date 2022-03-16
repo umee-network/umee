@@ -619,8 +619,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
-		// TODO: Ensure x/leverage implements simulator and then uncomment.
-		// leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
+		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	app.sm.RegisterStoreDecoders()

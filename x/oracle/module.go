@@ -183,7 +183,7 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 	return []abci.ValidatorUpdate{}
 }
 
-// GenerateGenesisState creates a randomized GenState of the distribution module.
+// GenerateGenesisState creates a randomized GenState of the oracle module.
 func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 	simulation.RandomizedGenState(simState)
 }
