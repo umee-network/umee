@@ -567,15 +567,9 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			false,
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
-<<<<<<< HEAD
 				// From app/beta/test_helpers.go/IntegrationTestNetworkConfig
-				// This result is umee's collateral weight times the collateral
-				// amount loaned, times its initial oracle exchange rate.
-=======
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's oracle exchange rate times the
 				// amount loaned.
->>>>>>> 8b9ec35 (feat: CollateralValue and LiquidationLimit queries (#658))
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
