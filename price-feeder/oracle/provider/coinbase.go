@@ -208,10 +208,12 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 
 // subscribe subscribes to the coinbase "ticker" and "match" websockets.
 func (p *CoinbaseProvider) subscribe(cps ...types.CurrencyPair) error {
-	topics := []string{}
+	topics := make([]string, len(cps))
+	index := 0
 
 	for _, cp := range cps {
-		topics = append(topics, currencyPairToCoinbasePair(cp))
+		topics[index] = currencyPairToCoinbasePair(cp)
+		index++
 	}
 
 	tickerMsg := newCoinbaseSubscription(topics...)
@@ -347,8 +349,9 @@ func (p *CoinbaseProvider) setTradePair(tradeResponse CoinbaseTradeResponse) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	staleTime := PastUnixTime(providerCandlePeriod)
-	tradeList := []CoinbaseTrade{}
-	tradeList = append(tradeList, tradeResponse.toTrade())
+	tradeList := []CoinbaseTrade{
+		tradeResponse.toTrade(),
+	}
 
 	for _, t := range p.trades[tradeResponse.ProductID] {
 		if staleTime < t.Time {
