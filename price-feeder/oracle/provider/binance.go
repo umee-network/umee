@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	binanceHost = "stream.binance.com:9443"
-	binancePath = "/ws/umeestream"
+	binanceHost           = "stream.binance.com:9443"
+	binancePath           = "/ws/umeestream"
+	binanceAvailablePairs = "https://api1.binance.com/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -68,6 +69,12 @@ type (
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
 		ID     uint16   `json:"id"`     // identify messages going back and forth
+	}
+
+	// BinancePairSummary defines the response structure for an Binance pair
+	// summary.
+	BinancePairSummary struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -361,16 +368,13 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://api1.binance.com/api/v3/ticker/price")
+	resp, err := http.Get(binanceAvailablePairs)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var pairsSummary []struct {
-		Symbol string `json:"symbol"`
-	}
-
+	var pairsSummary []BinancePairSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}
