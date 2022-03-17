@@ -95,6 +95,12 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1beta1/collateral";
   }
 
+  // CollateralValue queries for the total USD value of a user's collateral, or
+  // the USD value held as a given base asset's associated uToken denomination.
+  rpc CollateralValue(QueryCollateralValueRequest) returns (QueryCollateralValueResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_value";
+  }
+
   // ExchangeRate queries the uToken exchange rate of a given uToken denomination.
   rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/exchange_rate";
@@ -103,6 +109,11 @@ service Query {
   // BorrowLimit queries the borrow limit in USD of a given borrower.
   rpc BorrowLimit(QueryBorrowLimitRequest) returns (QueryBorrowLimitResponse) {
     option (google.api.http).get = "/umee/leverage/v1beta1/borrow_limit";
+  }
+
+  // LiquidationLimit queries the limit in USD above which a given borrower is eligible for liquidation.
+  rpc LiquidationLimit(QueryLiquidationLimitRequest) returns (QueryLiquidationLimitResponse) {
+    option (google.api.http).get = "/umee/leverage/v1beta1/liquidation_limit";
   }
 
   // LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
@@ -116,13 +127,13 @@ service Query {
 message QueryRegisteredTokens {}
 
 // QueryAvailableBorrowRequest defines the request structure for the
-// available amount for borrow gRPC service handler.
+// AvailableBorrow gRPC service handler.
 message QueryAvailableBorrowRequest {
   string denom = 1;
 }
 
 // QueryAvailableBorrowResponse defines the response structure for the
-// available amount for borrow gRPC service handler.
+// AvailableBorrow gRPC service handler.
 message QueryAvailableBorrowResponse {
   string amount = 1
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
@@ -222,6 +233,18 @@ message QueryBorrowedValueResponse {
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
+// QueryCollateralValueRequest defines the request structure for the CollateralValue gRPC service handler.
+message QueryCollateralValueRequest {
+  string address = 1;
+  string denom   = 2;
+}
+
+// QueryCollateralValueResponse defines the response structure for the CollateralValue gRPC service handler.
+message QueryCollateralValueResponse {
+  string collateral_value = 1
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
 // QueryLoanedRequest defines the request structure for the Loaned gRPC service handler.
 message QueryLoanedRequest {
   string address = 1;
@@ -304,18 +327,31 @@ message QueryBorrowLimitRequest {
   string address = 1;
 }
 
-// QueryBorrowLimitResponse defines the response structure for the ExchangeRate
+// QueryBorrowLimitResponse defines the response structure for the BorrowLimit
 // gRPC service handler.
 message QueryBorrowLimitResponse {
   string borrow_limit = 1
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
-// QueryLiquidationTargetsRequest defines the request structure for the BorrowLimit
+// QueryLiquidationLimitRequest defines the request structure for the LiquidationLimit
+// gRPC service handler.
+message QueryLiquidationLimitRequest {
+  string address = 1;
+}
+
+// QueryLiquidationLimitResponse defines the response structure for the LiquidationLimit
+// gRPC service handler.
+message QueryLiquidationLimitResponse {
+  string liquidation_limit = 1
+      [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
+// QueryLiquidationTargetsRequest defines the request structure for the LiquidationTargets
 // gRPC service handler.
 message QueryLiquidationTargetsRequest {}
 
-// QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
+// QueryLiquidationTargetsResponse defines the response structure for the LiquidationTargets
 // gRPC service handler.
 message QueryLiquidationTargetsResponse {
   repeated string targets = 1;

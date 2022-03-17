@@ -415,6 +415,51 @@ func (q Querier) Collateral(
 	return &types.QueryCollateralResponse{Collateral: sdk.NewCoins(token)}, nil
 }
 
+func (q Querier) CollateralValue(
+	goCtx context.Context,
+	req *types.QueryCollateralValueRequest,
+) (*types.QueryCollateralValueResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	lender, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	var uTokens sdk.Coins
+
+	if len(req.Denom) == 0 {
+		uTokens = q.Keeper.GetBorrowerCollateral(ctx, lender)
+	} else {
+		if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
+			return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
+		}
+
+		collateral := q.Keeper.GetCollateralAmount(ctx, lender, req.Denom)
+
+		uTokens = sdk.NewCoins(collateral)
+	}
+
+	tokens, err := q.Keeper.ExchangeUTokens(ctx, uTokens)
+	if err != nil {
+		return nil, err
+	}
+
+	value, err := q.Keeper.TotalTokenValue(ctx, tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryCollateralValueResponse{CollateralValue: value}, nil
+}
+
 func (q Querier) ExchangeRate(
 	goCtx context.Context,
 	req *types.QueryExchangeRateRequest,
@@ -463,6 +508,34 @@ func (q Querier) BorrowLimit(
 	}
 
 	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
+}
+
+func (q Querier) LiquidationLimit(
+	goCtx context.Context,
+	req *types.QueryLiquidationLimitRequest,
+) (*types.QueryLiquidationLimitResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+
+	limit, err := q.Keeper.CalculateLiquidationLimit(ctx, collateral)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryLiquidationLimitResponse{LiquidationLimit: limit}, nil
 }
 
 func (q Querier) LiquidationTargets(
