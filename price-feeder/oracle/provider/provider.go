@@ -22,9 +22,16 @@ var ping = []byte("ping")
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
+	// GetTickerPrices returns the tickerPrices based on the provided pairs.
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
+
+	// GetCandlePrices returns the candlePrices based on the provided pairs.
 	GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+
+	// GetAvailablePairs return all available pairs symbol to susbscribe.
 	GetAvailablePairs() (map[string]struct{}, error)
+
+	// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 	SubscribeCurrencyPairs(...types.CurrencyPair) error
 }
 
