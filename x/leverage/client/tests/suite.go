@@ -568,8 +568,8 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 			&types.QueryLoanedValueResponse{},
 			&types.QueryLoanedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				// This result is umee's collateral weight times the collateral
-				// amount loaned, times its initial oracle exchange rate.
+				// This result is umee's oracle exchange rate times the
+				// amount loaned.
 				LoanedValue: sdk.MustNewDecFromStr("34.21"),
 				// 1 umee * 34.21 = 34.21
 			},
@@ -592,6 +592,128 @@ func (s *IntegrationTestSuite) TestQueryLoanedValue() {
 	}
 
 	cleanupCommands := []testTransaction{
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, testCases)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestQueryCollateralValue() {
+	val := s.network.Validators[0]
+
+	simpleCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryCollateralValue(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query zero collateral value",
+			cli.GetCmdQueryCollateralValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryCollateralValueResponse{},
+			&types.QueryCollateralValueResponse{
+				CollateralValue: sdk.ZeroDec(),
+			},
+		},
+	}
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"1000000uumee",
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+	}
+
+	testCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryCollateralValue(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query all collateral value",
+			cli.GetCmdQueryCollateralValue(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryCollateralValueResponse{},
+			&types.QueryCollateralValueResponse{
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				// This result is umee's oracle exchange rate times the
+				// amount set as collateral.
+				CollateralValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+		{
+			"query denom collateral value",
+			cli.GetCmdQueryCollateralValue(),
+			[]string{
+				val.Address.String(),
+				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+			},
+			false,
+			&types.QueryCollateralValueResponse{},
+			&types.QueryCollateralValueResponse{
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				CollateralValue: sdk.MustNewDecFromStr("34.21"),
+				// 1 umee * 34.21 = 34.21
+			},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
 		{
 			"withdraw",
 			cli.GetCmdWithdrawAsset(),
@@ -908,6 +1030,103 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 				// This result is umee's collateral weight times the collateral
 				// amount loaned, times its initial oracle exchange rate.
 				BorrowLimit: sdk.MustNewDecFromStr("34.21"),
+				// 0.05 * 20 * 34.21 = 34.21
+			},
+		},
+	}
+
+	cleanupCommands := []testTransaction{
+		{
+			"unset collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"false",
+			},
+			nil,
+		},
+		{
+			"withdraw",
+			cli.GetCmdWithdrawAsset(),
+			[]string{
+				val.Address.String(),
+				"20000000u/uumee",
+			},
+			nil,
+		},
+	}
+
+	runTestQueries(s, simpleCases)
+	runTestTransactions(s, setupCommands)
+	runTestQueries(s, nonzeroCase)
+	runTestTransactions(s, cleanupCommands)
+}
+
+func (s *IntegrationTestSuite) TestQueryLiquidationLimit() {
+	val := s.network.Validators[0]
+
+	simpleCases := []testQuery{
+		{
+			"invalid address",
+			cli.GetCmdQueryLiquidationLimit(),
+			[]string{
+				"xyz",
+			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query zero liquidation limit",
+			cli.GetCmdQueryLiquidationLimit(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryLiquidationLimitResponse{},
+			&types.QueryLiquidationLimitResponse{
+				LiquidationLimit: sdk.ZeroDec(),
+			},
+		},
+	}
+
+	setupCommands := []testTransaction{
+		{
+			"lend",
+			cli.GetCmdLendAsset(),
+			[]string{
+				val.Address.String(),
+				"20000000uumee", // 20 umee
+			},
+			nil,
+		},
+		{
+			"set collateral",
+			cli.GetCmdSetCollateral(),
+			[]string{
+				val.Address.String(),
+				"u/uumee",
+				"true",
+			},
+			nil,
+		},
+	}
+
+	nonzeroCase := []testQuery{
+		{
+			"query nonzero liquidation limit",
+			cli.GetCmdQueryLiquidationLimit(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryLiquidationLimitResponse{},
+			&types.QueryLiquidationLimitResponse{
+				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				// This result is umee's liquidation threshold times the collateral
+				// amount loaned, times its initial oracle exchange rate.
+				LiquidationLimit: sdk.MustNewDecFromStr("34.21"),
 				// 0.05 * 20 * 34.21 = 34.21
 			},
 		},

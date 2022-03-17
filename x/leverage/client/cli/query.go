@@ -34,6 +34,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryLoanedValue(),
 		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
+		GetCmdQueryCollateralValue(),
 		GetCmdQueryCollateralSetting(),
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryLendAPY(),
@@ -41,6 +42,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryMarketSize(),
 		GetCmdQueryTokenMarketSize(),
 		GetCmdQueryBorrowLimit(),
+		GetCmdQueryLiquidationLimit(),
 		GetCmdQueryLiquidationTargets(),
 	)
 
@@ -357,6 +359,43 @@ func GetCmdQueryCollateral() *cobra.Command {
 	return cmd
 }
 
+// GetCmdQueryCollateralValue returns a CLI command handler to query for the USD
+// value of total collateral tokens for a given address.
+func GetCmdQueryCollateralValue() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "collateral-value [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total USD value of collateral tokens for an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryCollateralValueRequest{
+				Address: args[0],
+			}
+			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
+				req.Denom = d
+			}
+
+			resp, err := queryClient.CollateralValue(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // GetCmdQueryExchangeRate returns a CLI command handler to query for the
 // exchange rate of a specific uToken.
 func GetCmdQueryExchangeRate() *cobra.Command {
@@ -575,6 +614,39 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 			}
 
 			resp, err := queryClient.BorrowLimit(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryLiquidationLimit returns a CLI command handler to query for the
+// liquidation limit of a specific borrower.
+func GetCmdQueryLiquidationLimit() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "liquidation-limit [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the liquidation limit of a specified borrower",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryLiquidationLimitRequest{
+				Address: args[0],
+			}
+
+			resp, err := queryClient.LiquidationLimit(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
