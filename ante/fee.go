@@ -37,7 +37,7 @@ func (mfd MempoolFeeDecorator) AnteHandle(
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
 
-	// if this is a CheckTx. This is only for local mempool purposes, and thus
+	// If this is a CheckTx. This is only for local mempool purposes, and thus
 	// is only ran on check tx.
 	if ctx.IsCheckTx() && !simulate &&
 		!(isOracleTx(msgs) && gas <= uint64(len(msgs))*MaxOracleMsgGasUsage) {
