@@ -17,9 +17,10 @@ import (
 )
 
 const (
-	gateHost      = "ws.gate.io"
-	gatePath      = "/v3"
-	gatePingCheck = time.Second * 28 // should be < 30
+	gateHost           = "ws.gate.io"
+	gatePath           = "/v3"
+	gatePingCheck      = time.Second * 28 // should be < 30
+	gateAvailablePairs = "https://api.gateio.ws/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -90,6 +91,12 @@ type (
 	// GateEventResult defines the Result body for the GateEvent response.
 	GateEventResult struct {
 		Status string `json:"status"` // ex. "successful"
+	}
+
+	// GatePairSummary defines the response structure for an Gate pair summary.
+	GatePairSummary struct {
+		Base  string `json:"base"`
+		Quote string `json:"quote"`
 	}
 )
 
@@ -497,17 +504,13 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://api.gateio.ws/api/v4/spot/currency_pairs")
+	resp, err := http.Get(gateAvailablePairs)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var pairsSummary []struct {
-		Base  string `json:"base"`
-		Quote string `json:"quote"`
-	}
-
+	var pairsSummary []GatePairSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}
