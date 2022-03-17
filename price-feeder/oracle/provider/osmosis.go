@@ -17,6 +17,7 @@ const (
 	osmosisBaseURL        = "https://api-osmosis.imperator.co"
 	osmosisTokenEndpoint  = "/tokens/v1"
 	osmosisCandleEndpoint = "/tokens/v2/historical"
+	osmosisAvailablePairs = "/pairs/v1/summary"
 )
 
 var _ Provider = (*OsmosisProvider)(nil)
@@ -45,6 +46,18 @@ type (
 		Time   int64   `json:"time"`
 		Close  float64 `json:"close"`
 		Volume float64 `json:"volume"`
+	}
+
+	// OsmosisPairsSummary defines the response structure for an Osmosis pairs
+	// summary.
+	OsmosisPairsSummary struct {
+		Data []OsmosisPairData `json:"data"`
+	}
+
+	// OsmosisPairData defines the data response structure for an Osmosis pair.
+	OsmosisPairData struct {
+		BaseSymbol  string `json:"base_symbol"`
+		QuoteSymbol string `json:"quote_symbol"`
 	}
 )
 
@@ -169,19 +182,15 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://api-osmosis.imperator.co/pairs/v1/summary")
+	path := fmt.Sprintf("%s%s", p.baseURL, osmosisAvailablePairs)
+
+	resp, err := p.client.Get(path)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var pairsSummary struct {
-		Data []struct {
-			BaseSymbol  string `json:"base_symbol"`
-			QuoteSymbol string `json:"quote_symbol"`
-		} `json:"data"`
-	}
-
+	var pairsSummary OsmosisPairsSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}
