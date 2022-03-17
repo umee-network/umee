@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	huobiHost          = "api-aws.huobi.pro"
-	huobiPath          = "/ws"
-	huobiReconnectTime = time.Minute * 2
+	huobiHost           = "api-aws.huobi.pro"
+	huobiPath           = "/ws"
+	huobiReconnectTime  = time.Minute * 2
+	huobiAvailablePairs = "https://api.huobi.pro/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -74,6 +75,17 @@ type (
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time.
 	HuobiSubscriptionMsg struct {
 		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
+	}
+
+	// HuobiPairsSummary defines the response structure for an Huobi pairs
+	// summary.
+	HuobiPairsSummary struct {
+		Data []HuobiPairData `json:"data"`
+	}
+
+	// HuobiPairData defines the data response structure for an Huobi pair.
+	HuobiPairData struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -387,18 +399,13 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://api.huobi.pro/market/tickers")
+	resp, err := http.Get(huobiAvailablePairs)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var pairsSummary struct {
-		Data []struct {
-			Symbol string `json:"symbol"`
-		} `json:"data"`
-	}
-
+	var pairsSummary HuobiPairsSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}

@@ -87,7 +87,7 @@ type (
 
 	// KrakenPairsSummary defines the response structure for an Kraken pairs summary.
 	KrakenPairsSummary struct {
-		Data map[string]KrakenPairData `json:"result"`
+		Result map[string]KrakenPairData `json:"result"`
 	}
 
 	// KrakenPairData defines the data response structure for an Kraken pair.
@@ -570,8 +570,8 @@ func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
 		return nil, err
 	}
 
-	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
-	for _, pair := range pairsSummary.Data {
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Result))
+	for _, pair := range pairsSummary.Result {
 		splitedPair := strings.Split(pair.WsName, "/")
 		if len(splitedPair) != 2 {
 			continue
