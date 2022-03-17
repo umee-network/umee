@@ -70,7 +70,7 @@ func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
 var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
 
 // QueryAvailableBorrowRequest defines the request structure for the
-// available amount for borrow gRPC service handler.
+// AvailableBorrow gRPC service handler.
 type QueryAvailableBorrowRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -116,7 +116,7 @@ func (m *QueryAvailableBorrowRequest) GetDenom() string {
 }
 
 // QueryAvailableBorrowResponse defines the response structure for the
-// available amount for borrow gRPC service handler.
+// AvailableBorrow gRPC service handler.
 type QueryAvailableBorrowResponse struct {
 	Amount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
 }
@@ -815,6 +815,97 @@ func (m *QueryBorrowedValueResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowedValueResponse proto.InternalMessageInfo
 
+// QueryCollateralValueRequest defines the request structure for the CollateralValue gRPC service handler.
+type QueryCollateralValueRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryCollateralValueRequest) Reset()         { *m = QueryCollateralValueRequest{} }
+func (m *QueryCollateralValueRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralValueRequest) ProtoMessage()    {}
+func (*QueryCollateralValueRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{18}
+}
+func (m *QueryCollateralValueRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralValueRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralValueRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralValueRequest.Merge(m, src)
+}
+func (m *QueryCollateralValueRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralValueRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralValueRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralValueRequest proto.InternalMessageInfo
+
+func (m *QueryCollateralValueRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *QueryCollateralValueRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryCollateralValueResponse defines the response structure for the CollateralValue gRPC service handler.
+type QueryCollateralValueResponse struct {
+	CollateralValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=collateral_value,json=collateralValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_value"`
+}
+
+func (m *QueryCollateralValueResponse) Reset()         { *m = QueryCollateralValueResponse{} }
+func (m *QueryCollateralValueResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralValueResponse) ProtoMessage()    {}
+func (*QueryCollateralValueResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{19}
+}
+func (m *QueryCollateralValueResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCollateralValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCollateralValueResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCollateralValueResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralValueResponse.Merge(m, src)
+}
+func (m *QueryCollateralValueResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCollateralValueResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralValueResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCollateralValueResponse proto.InternalMessageInfo
+
 // QueryLoanedRequest defines the request structure for the Loaned gRPC service handler.
 type QueryLoanedRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -825,7 +916,7 @@ func (m *QueryLoanedRequest) Reset()         { *m = QueryLoanedRequest{} }
 func (m *QueryLoanedRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryLoanedRequest) ProtoMessage()    {}
 func (*QueryLoanedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{18}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{20}
 }
 func (m *QueryLoanedRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -877,7 +968,7 @@ func (m *QueryLoanedResponse) Reset()         { *m = QueryLoanedResponse{} }
 func (m *QueryLoanedResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryLoanedResponse) ProtoMessage()    {}
 func (*QueryLoanedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{19}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{21}
 }
 func (m *QueryLoanedResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -923,7 +1014,7 @@ func (m *QueryLoanedValueRequest) Reset()         { *m = QueryLoanedValueRequest
 func (m *QueryLoanedValueRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryLoanedValueRequest) ProtoMessage()    {}
 func (*QueryLoanedValueRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{20}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{22}
 }
 func (m *QueryLoanedValueRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -975,7 +1066,7 @@ func (m *QueryLoanedValueResponse) Reset()         { *m = QueryLoanedValueRespon
 func (m *QueryLoanedValueResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryLoanedValueResponse) ProtoMessage()    {}
 func (*QueryLoanedValueResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{21}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{23}
 }
 func (m *QueryLoanedValueResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1014,7 +1105,7 @@ func (m *QueryReserveAmountRequest) Reset()         { *m = QueryReserveAmountReq
 func (m *QueryReserveAmountRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryReserveAmountRequest) ProtoMessage()    {}
 func (*QueryReserveAmountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{22}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{24}
 }
 func (m *QueryReserveAmountRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1060,7 +1151,7 @@ func (m *QueryReserveAmountResponse) Reset()         { *m = QueryReserveAmountRe
 func (m *QueryReserveAmountResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryReserveAmountResponse) ProtoMessage()    {}
 func (*QueryReserveAmountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{23}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{25}
 }
 func (m *QueryReserveAmountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1100,7 +1191,7 @@ func (m *QueryCollateralSettingRequest) Reset()         { *m = QueryCollateralSe
 func (m *QueryCollateralSettingRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralSettingRequest) ProtoMessage()    {}
 func (*QueryCollateralSettingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{24}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{26}
 }
 func (m *QueryCollateralSettingRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1153,7 +1244,7 @@ func (m *QueryCollateralSettingResponse) Reset()         { *m = QueryCollateralS
 func (m *QueryCollateralSettingResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralSettingResponse) ProtoMessage()    {}
 func (*QueryCollateralSettingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{25}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{27}
 }
 func (m *QueryCollateralSettingResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1200,7 +1291,7 @@ func (m *QueryCollateralRequest) Reset()         { *m = QueryCollateralRequest{}
 func (m *QueryCollateralRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralRequest) ProtoMessage()    {}
 func (*QueryCollateralRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{26}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{28}
 }
 func (m *QueryCollateralRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1253,7 +1344,7 @@ func (m *QueryCollateralResponse) Reset()         { *m = QueryCollateralResponse
 func (m *QueryCollateralResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryCollateralResponse) ProtoMessage()    {}
 func (*QueryCollateralResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{27}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{29}
 }
 func (m *QueryCollateralResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1299,7 +1390,7 @@ func (m *QueryExchangeRateRequest) Reset()         { *m = QueryExchangeRateReque
 func (m *QueryExchangeRateRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryExchangeRateRequest) ProtoMessage()    {}
 func (*QueryExchangeRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{28}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{30}
 }
 func (m *QueryExchangeRateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1345,7 +1436,7 @@ func (m *QueryExchangeRateResponse) Reset()         { *m = QueryExchangeRateResp
 func (m *QueryExchangeRateResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryExchangeRateResponse) ProtoMessage()    {}
 func (*QueryExchangeRateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{29}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{31}
 }
 func (m *QueryExchangeRateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1384,7 +1475,7 @@ func (m *QueryBorrowLimitRequest) Reset()         { *m = QueryBorrowLimitRequest
 func (m *QueryBorrowLimitRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowLimitRequest) ProtoMessage()    {}
 func (*QueryBorrowLimitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{30}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{32}
 }
 func (m *QueryBorrowLimitRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1420,7 +1511,7 @@ func (m *QueryBorrowLimitRequest) GetAddress() string {
 	return ""
 }
 
-// QueryBorrowLimitResponse defines the response structure for the ExchangeRate
+// QueryBorrowLimitResponse defines the response structure for the BorrowLimit
 // gRPC service handler.
 type QueryBorrowLimitResponse struct {
 	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
@@ -1430,7 +1521,7 @@ func (m *QueryBorrowLimitResponse) Reset()         { *m = QueryBorrowLimitRespon
 func (m *QueryBorrowLimitResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryBorrowLimitResponse) ProtoMessage()    {}
 func (*QueryBorrowLimitResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{31}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{33}
 }
 func (m *QueryBorrowLimitResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1459,7 +1550,92 @@ func (m *QueryBorrowLimitResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowLimitResponse proto.InternalMessageInfo
 
-// QueryLiquidationTargetsRequest defines the request structure for the BorrowLimit
+// QueryLiquidationLimitRequest defines the request structure for the LiquidationLimit
+// gRPC service handler.
+type QueryLiquidationLimitRequest struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *QueryLiquidationLimitRequest) Reset()         { *m = QueryLiquidationLimitRequest{} }
+func (m *QueryLiquidationLimitRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationLimitRequest) ProtoMessage()    {}
+func (*QueryLiquidationLimitRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{34}
+}
+func (m *QueryLiquidationLimitRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationLimitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationLimitRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationLimitRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationLimitRequest.Merge(m, src)
+}
+func (m *QueryLiquidationLimitRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationLimitRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationLimitRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationLimitRequest proto.InternalMessageInfo
+
+func (m *QueryLiquidationLimitRequest) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+// QueryLiquidationLimitResponse defines the response structure for the LiquidationLimit
+// gRPC service handler.
+type QueryLiquidationLimitResponse struct {
+	LiquidationLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=liquidation_limit,json=liquidationLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_limit"`
+}
+
+func (m *QueryLiquidationLimitResponse) Reset()         { *m = QueryLiquidationLimitResponse{} }
+func (m *QueryLiquidationLimitResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationLimitResponse) ProtoMessage()    {}
+func (*QueryLiquidationLimitResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_32bddfd5abbfa4dc, []int{35}
+}
+func (m *QueryLiquidationLimitResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationLimitResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationLimitResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationLimitResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationLimitResponse.Merge(m, src)
+}
+func (m *QueryLiquidationLimitResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationLimitResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationLimitResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationLimitResponse proto.InternalMessageInfo
+
+// QueryLiquidationTargetsRequest defines the request structure for the LiquidationTargets
 // gRPC service handler.
 type QueryLiquidationTargetsRequest struct {
 }
@@ -1468,7 +1644,7 @@ func (m *QueryLiquidationTargetsRequest) Reset()         { *m = QueryLiquidation
 func (m *QueryLiquidationTargetsRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryLiquidationTargetsRequest) ProtoMessage()    {}
 func (*QueryLiquidationTargetsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{32}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{36}
 }
 func (m *QueryLiquidationTargetsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1497,7 +1673,7 @@ func (m *QueryLiquidationTargetsRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryLiquidationTargetsRequest proto.InternalMessageInfo
 
-// QueryLiquidationTargetsResponse defines the response structure for the ExchangeRate
+// QueryLiquidationTargetsResponse defines the response structure for the LiquidationTargets
 // gRPC service handler.
 type QueryLiquidationTargetsResponse struct {
 	Targets []string `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets,omitempty"`
@@ -1507,7 +1683,7 @@ func (m *QueryLiquidationTargetsResponse) Reset()         { *m = QueryLiquidatio
 func (m *QueryLiquidationTargetsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryLiquidationTargetsResponse) ProtoMessage()    {}
 func (*QueryLiquidationTargetsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_32bddfd5abbfa4dc, []int{33}
+	return fileDescriptor_32bddfd5abbfa4dc, []int{37}
 }
 func (m *QueryLiquidationTargetsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1562,6 +1738,8 @@ func init() {
 	proto.RegisterType((*QueryBorrowedResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedResponse")
 	proto.RegisterType((*QueryBorrowedValueRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedValueRequest")
 	proto.RegisterType((*QueryBorrowedValueResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowedValueResponse")
+	proto.RegisterType((*QueryCollateralValueRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralValueRequest")
+	proto.RegisterType((*QueryCollateralValueResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryCollateralValueResponse")
 	proto.RegisterType((*QueryLoanedRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLoanedRequest")
 	proto.RegisterType((*QueryLoanedResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLoanedResponse")
 	proto.RegisterType((*QueryLoanedValueRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLoanedValueRequest")
@@ -1576,6 +1754,8 @@ func init() {
 	proto.RegisterType((*QueryExchangeRateResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryExchangeRateResponse")
 	proto.RegisterType((*QueryBorrowLimitRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowLimitRequest")
 	proto.RegisterType((*QueryBorrowLimitResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryBorrowLimitResponse")
+	proto.RegisterType((*QueryLiquidationLimitRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationLimitRequest")
+	proto.RegisterType((*QueryLiquidationLimitResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationLimitResponse")
 	proto.RegisterType((*QueryLiquidationTargetsRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationTargetsRequest")
 	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryLiquidationTargetsResponse")
 }
@@ -1583,94 +1763,100 @@ func init() {
 func init() { proto.RegisterFile("umee/leverage/v1beta1/query.proto", fileDescriptor_32bddfd5abbfa4dc) }
 
 var fileDescriptor_32bddfd5abbfa4dc = []byte{
-	// 1380 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xcd, 0x73, 0x14, 0x45,
-	0x14, 0xcf, 0x80, 0x84, 0xf0, 0x02, 0xa2, 0x6d, 0x94, 0x65, 0x84, 0x5d, 0x18, 0xbe, 0xf2, 0x41,
-	0x66, 0xf3, 0x51, 0x0a, 0x06, 0x54, 0xb2, 0x20, 0x88, 0xc6, 0x22, 0x6c, 0x80, 0x12, 0x0e, 0x4e,
-	0xcd, 0xee, 0xb4, 0xcb, 0xd4, 0xce, 0xce, 0x6c, 0x66, 0x66, 0x03, 0xc9, 0xc9, 0xf2, 0xe0, 0xd9,
-	0x2a, 0xef, 0x5e, 0xac, 0xf2, 0xa0, 0x55, 0x7a, 0xf0, 0xe0, 0x81, 0x8b, 0x55, 0x7a, 0xa0, 0xca,
-	0x83, 0x54, 0x79, 0xb1, 0x3c, 0xa0, 0x95, 0xf8, 0x87, 0x58, 0xd3, 0xfd, 0xe6, 0x6b, 0x77, 0x26,
-	0x3b, 0x3b, 0x81, 0x53, 0x76, 0x7b, 0xfb, 0xf7, 0xde, 0xef, 0x75, 0xff, 0xfa, 0x7d, 0x04, 0x8e,
-	0x77, 0x5a, 0x94, 0x96, 0x0d, 0xba, 0x46, 0x6d, 0xb5, 0x41, 0xcb, 0x6b, 0xb3, 0x35, 0xea, 0xaa,
-	0xb3, 0xe5, 0xd5, 0x0e, 0xb5, 0xd7, 0xe5, 0xb6, 0x6d, 0xb9, 0x16, 0x61, 0x5b, 0x4c, 0xea, 0x3e,
-	0xb0, 0xec, 0xa6, 0xec, 0x7d, 0x96, 0xfd, 0xed, 0x32, 0x6e, 0x17, 0x8f, 0x34, 0x2c, 0xab, 0x61,
-	0xd0, 0xb2, 0xda, 0xd6, 0xcb, 0xaa, 0x69, 0x5a, 0xae, 0xea, 0xea, 0x96, 0xe9, 0x70, 0x03, 0xe2,
-	0xc9, 0x64, 0x1f, 0x81, 0x15, 0xbe, 0x6b, 0xac, 0x61, 0x35, 0x2c, 0xf6, 0xb1, 0xec, 0x7d, 0xc2,
-	0xd5, 0x62, 0xdd, 0x72, 0x5a, 0x96, 0x53, 0xae, 0xa9, 0x4e, 0x88, 0xac, 0x5b, 0xba, 0xc9, 0x7f,
-	0x97, 0x0e, 0xc1, 0xab, 0x37, 0x3d, 0xae, 0x55, 0xda, 0xd0, 0x1d, 0x97, 0xda, 0x54, 0xbb, 0x65,
-	0x35, 0xa9, 0xe9, 0x48, 0xf3, 0xf0, 0x3a, 0xfb, 0x61, 0x71, 0x4d, 0xd5, 0x0d, 0xb5, 0x66, 0xd0,
-	0x8a, 0x65, 0xdb, 0xd6, 0x83, 0x2a, 0x5d, 0xed, 0x50, 0xc7, 0x25, 0x63, 0xb0, 0x47, 0xa3, 0xa6,
-	0xd5, 0x2a, 0x08, 0xc7, 0x84, 0xf1, 0x7d, 0x55, 0xfe, 0x45, 0xfa, 0x14, 0x8e, 0x24, 0x83, 0x9c,
-	0xb6, 0x65, 0x3a, 0x94, 0x5c, 0x85, 0x61, 0xb5, 0x65, 0x75, 0x4c, 0x97, 0xc3, 0x2a, 0xf2, 0xe3,
-	0xa7, 0xa5, 0xa1, 0xbf, 0x9f, 0x96, 0x4e, 0x37, 0x74, 0xf7, 0x7e, 0xa7, 0x26, 0xd7, 0xad, 0x56,
-	0x19, 0x09, 0xf3, 0x3f, 0xd3, 0x8e, 0xd6, 0x2c, 0xbb, 0xeb, 0x6d, 0xea, 0xc8, 0xd7, 0x4d, 0xb7,
-	0x8a, 0x68, 0x69, 0x1a, 0x59, 0x73, 0xf3, 0x8b, 0xcb, 0x77, 0xb7, 0xa7, 0x75, 0x0f, 0x5e, 0xeb,
-	0xde, 0x8e, 0x84, 0x2e, 0xc1, 0xee, 0xc5, 0xe5, 0xbb, 0x39, 0xd8, 0x5c, 0xa1, 0xf5, 0xaa, 0x07,
-	0x95, 0xa6, 0xe0, 0x15, 0x66, 0x7b, 0x89, 0x9a, 0x5a, 0x5f, 0x22, 0x1f, 0xc3, 0x58, 0x7c, 0xf3,
-	0x33, 0xa3, 0x21, 0x63, 0x88, 0x1f, 0xa9, 0x76, 0x93, 0xba, 0x2b, 0xfa, 0x06, 0xdd, 0x9e, 0xc9,
-	0x2a, 0x1c, 0xea, 0xd9, 0x8f, 0x64, 0xee, 0xc0, 0xc1, 0x16, 0x5b, 0x55, 0x1c, 0x7d, 0x83, 0x2a,
-	0x1d, 0x47, 0xcb, 0x49, 0xec, 0x40, 0x2b, 0x30, 0x7e, 0xdb, 0xd1, 0x02, 0x45, 0x31, 0x81, 0x65,
-	0xe5, 0x69, 0xa1, 0xa2, 0x7a, 0x40, 0x48, 0xf6, 0x06, 0x8c, 0x46, 0xc8, 0xe6, 0x94, 0x15, 0x84,
-	0x44, 0xa5, 0x26, 0x1c, 0x4d, 0x7c, 0x10, 0x81, 0xc7, 0x0f, 0x60, 0xc4, 0x66, 0xbf, 0xd9, 0xeb,
-	0x05, 0xe1, 0xd8, 0xee, 0xf1, 0xd1, 0xb9, 0x71, 0xb9, 0xef, 0x0b, 0x97, 0x99, 0x91, 0xca, 0x0b,
-	0x1e, 0xb1, 0x6a, 0x80, 0x97, 0xc6, 0x80, 0x30, 0x67, 0xcb, 0xaa, 0xad, 0xb6, 0x1c, 0x3c, 0x09,
-	0xe9, 0x13, 0x94, 0x94, 0xbf, 0x8a, 0x8e, 0xaf, 0xc1, 0x70, 0x9b, 0xad, 0xb0, 0x28, 0x47, 0xe7,
-	0x26, 0x32, 0xb8, 0xe5, 0x26, 0xd0, 0x2f, 0xc2, 0xa5, 0xab, 0xa8, 0x42, 0xfe, 0x1c, 0xa8, 0xe6,
-	0xdf, 0x40, 0x01, 0xf6, 0xaa, 0x9a, 0x66, 0x53, 0xc7, 0xc1, 0x3b, 0xf0, 0xbf, 0x86, 0x77, 0xb3,
-	0x2b, 0x7a, 0x37, 0x9f, 0x09, 0xb1, 0x67, 0xe8, 0x19, 0x42, 0xaa, 0x0d, 0x18, 0xa9, 0xe1, 0x1a,
-	0x9e, 0xd1, 0x61, 0x99, 0x9f, 0xbc, 0xec, 0x25, 0xa2, 0x80, 0xde, 0x65, 0x4b, 0x37, 0x2b, 0x33,
-	0x1e, 0xb9, 0xef, 0xfe, 0x29, 0x8d, 0x67, 0xb8, 0x2d, 0x0f, 0xe0, 0x54, 0x03, 0xe3, 0xd2, 0x87,
-	0x70, 0x38, 0xc6, 0xe0, 0x8e, 0x6a, 0x74, 0x68, 0xde, 0x78, 0x1c, 0x10, 0x93, 0x8c, 0x61, 0x4c,
-	0xb7, 0xe1, 0x45, 0xdf, 0xad, 0xb2, 0xe6, 0xfd, 0x92, 0xf7, 0x55, 0xd4, 0xa2, 0xe6, 0xa5, 0x2b,
-	0x28, 0x81, 0x25, 0x4b, 0x35, 0xf3, 0x5f, 0xc5, 0x86, 0x9f, 0x85, 0xd0, 0x0a, 0x72, 0xae, 0xc3,
-	0xb0, 0xc1, 0x56, 0x9e, 0xc7, 0x2d, 0xa0, 0x69, 0xe9, 0x3a, 0xa6, 0x12, 0xee, 0x7b, 0x47, 0x37,
-	0xd0, 0x82, 0x42, 0xaf, 0x29, 0x8c, 0xe5, 0x26, 0xec, 0xe7, 0x0e, 0x77, 0x74, 0xfa, 0xa3, 0x46,
-	0x68, 0x5a, 0x9a, 0x45, 0xf5, 0x54, 0xa9, 0x43, 0xed, 0x35, 0xba, 0xc8, 0x8a, 0xcb, 0xf6, 0xf9,
-	0x48, 0x43, 0x8d, 0x74, 0x41, 0x9e, 0x71, 0x7d, 0xbb, 0x81, 0x49, 0xe8, 0xb2, 0x65, 0x18, 0xaa,
-	0x4b, 0x6d, 0xd5, 0x58, 0xa1, 0xae, 0xab, 0x9b, 0x8d, 0xbc, 0x07, 0xbb, 0x00, 0xc5, 0x34, 0x83,
-	0x48, 0xbd, 0x00, 0x7b, 0xa9, 0xe9, 0x95, 0x6c, 0x9e, 0xed, 0x47, 0xaa, 0xfe, 0x57, 0xe9, 0x7d,
-	0x2c, 0x2d, 0x21, 0x36, 0x2f, 0x8b, 0x2f, 0x04, 0x94, 0x4a, 0xd4, 0x14, 0xfa, 0x6f, 0x02, 0xd4,
-	0x83, 0xd5, 0xe7, 0x21, 0xd7, 0x88, 0x79, 0x69, 0x06, 0x75, 0xf6, 0xde, 0xc3, 0xfa, 0x7d, 0xd5,
-	0x6c, 0xd0, 0xaa, 0xea, 0xf6, 0xa9, 0x43, 0x6d, 0x94, 0x4a, 0x1c, 0x81, 0xdc, 0x57, 0xe0, 0x00,
-	0xc5, 0x75, 0xc5, 0x56, 0xdd, 0xbc, 0xda, 0xdc, 0x4f, 0x23, 0xc6, 0xa5, 0x79, 0x3c, 0x2b, 0x9e,
-	0x8d, 0x96, 0xf4, 0x96, 0xee, 0xf6, 0x3d, 0xf7, 0xe0, 0x01, 0xc5, 0x40, 0xe1, 0x03, 0xe2, 0xa9,
-	0x47, 0x31, 0xbc, 0xf5, 0xbc, 0x0f, 0xa8, 0x16, 0x9a, 0x96, 0x8e, 0xa1, 0xac, 0x96, 0xf4, 0xd5,
-	0x8e, 0xae, 0xb1, 0xa6, 0xf5, 0x96, 0x6a, 0x37, 0xa8, 0x1b, 0xd4, 0xb2, 0x0b, 0x50, 0x4a, 0xdd,
-	0x11, 0x2a, 0xcf, 0xe5, 0x4b, 0xec, 0xda, 0xf7, 0x55, 0xfd, 0xaf, 0x73, 0x8f, 0x0a, 0xb0, 0x87,
-	0xa1, 0xc9, 0x2f, 0x02, 0xbc, 0xd4, 0x5d, 0x91, 0xc9, 0xf9, 0x0c, 0x05, 0x30, 0xb1, 0x96, 0x8b,
-	0x97, 0xf2, 0x22, 0x7d, 0xd2, 0xd2, 0xcc, 0xe7, 0x7f, 0xfe, 0xf7, 0xd5, 0xae, 0x49, 0x32, 0x5e,
-	0x4e, 0x6e, 0xce, 0xed, 0x00, 0xa8, 0xb8, 0x9c, 0xed, 0xd7, 0x02, 0x0c, 0xf3, 0x72, 0x4c, 0xde,
-	0xc8, 0xea, 0x3e, 0xd6, 0x17, 0x88, 0x6f, 0x0e, 0x0a, 0x43, 0xae, 0xa7, 0x18, 0xd7, 0x12, 0x39,
-	0x9a, 0xc2, 0x95, 0xb7, 0x05, 0xe4, 0x5b, 0x01, 0x46, 0xfc, 0xd2, 0x47, 0xce, 0x65, 0xf5, 0xd5,
-	0xd5, 0x44, 0x88, 0xe7, 0x07, 0x07, 0x22, 0xcd, 0x33, 0x8c, 0xe6, 0x71, 0x52, 0x4a, 0xa1, 0xe9,
-	0xd7, 0x4d, 0xf2, 0x48, 0x80, 0x03, 0xb1, 0x1a, 0x4d, 0x2e, 0x0e, 0xea, 0x34, 0x5a, 0xa5, 0xc4,
-	0xb7, 0x73, 0xa2, 0x91, 0xf7, 0x34, 0xe3, 0x7d, 0x86, 0x9c, 0xea, 0xc3, 0x9b, 0xd7, 0x2d, 0xa6,
-	0x03, 0x5e, 0xdf, 0xb2, 0xeb, 0x20, 0xd6, 0x1c, 0x64, 0xd7, 0x41, 0xbc, 0x1b, 0xe8, 0xab, 0x03,
-	0x5e, 0x1a, 0xc9, 0x4f, 0x02, 0x8c, 0x46, 0x0a, 0x30, 0x59, 0x18, 0xcc, 0x5d, 0xec, 0x68, 0x2f,
-	0xe4, 0xc2, 0x22, 0xdf, 0x29, 0xc6, 0xf7, 0x14, 0x39, 0xb1, 0x2d, 0x5f, 0x3c, 0xd6, 0x5f, 0x05,
-	0x38, 0xd8, 0x35, 0x76, 0x92, 0x77, 0xb2, 0x7a, 0x4f, 0x1e, 0x72, 0xc5, 0x77, 0x73, 0xe3, 0x31,
-	0x82, 0x32, 0x8b, 0x60, 0x82, 0x9c, 0x49, 0x89, 0x40, 0xf5, 0x71, 0x0a, 0x17, 0x09, 0xf9, 0x5e,
-	0x80, 0x7d, 0xc1, 0x94, 0x4a, 0x06, 0x7c, 0x4b, 0xe1, 0xf8, 0x29, 0xbe, 0x95, 0x03, 0x89, 0x9c,
-	0x27, 0x18, 0xe7, 0x13, 0xe4, 0xf8, 0xb6, 0x72, 0x56, 0xd4, 0xf6, 0x3a, 0xf9, 0x46, 0x80, 0xbd,
-	0x38, 0xca, 0x92, 0xec, 0xa2, 0x8c, 0x0d, 0xca, 0xe2, 0xb9, 0x81, 0x71, 0x19, 0xd3, 0x85, 0x41,
-	0x4d, 0x8d, 0xb1, 0xfc, 0x51, 0x00, 0x08, 0x27, 0x47, 0x92, 0xf9, 0x68, 0x7a, 0x46, 0x54, 0x71,
-	0x21, 0x0f, 0x14, 0xe9, 0x4e, 0x32, 0xba, 0x27, 0x89, 0x94, 0x42, 0x37, 0x32, 0xc5, 0x92, 0xdf,
-	0x04, 0x38, 0xd8, 0x35, 0xf0, 0x66, 0xd7, 0x72, 0xf2, 0x78, 0x9d, 0x5d, 0xcb, 0x29, 0x93, 0x76,
-	0xdf, 0x8a, 0xc7, 0xca, 0x9c, 0x12, 0x0d, 0xc3, 0xcb, 0xd3, 0xb1, 0x3e, 0x39, 0x7b, 0x9e, 0x4e,
-	0xea, 0xc8, 0xb3, 0xe7, 0xe9, 0xc4, 0xe6, 0xbc, 0x6f, 0x9e, 0xb6, 0x39, 0x4a, 0xe1, 0x3d, 0x38,
-	0xf9, 0x5d, 0x80, 0x97, 0x7b, 0xda, 0x65, 0x92, 0xb9, 0x73, 0x48, 0x6b, 0xdd, 0xc5, 0xc5, 0x1d,
-	0x58, 0xc0, 0x48, 0x66, 0x59, 0x24, 0x53, 0x64, 0x22, 0x25, 0x92, 0xb0, 0xd3, 0x55, 0x1c, 0xe4,
-	0xfd, 0x83, 0x00, 0x10, 0x1a, 0xcc, 0xfe, 0x08, 0x7a, 0x9a, 0xfe, 0xec, 0x8f, 0xa0, 0xb7, 0xc9,
-	0xef, 0x9b, 0x5b, 0x42, 0xe2, 0xe4, 0x67, 0x01, 0xf6, 0x47, 0x9b, 0x6d, 0x92, 0xb9, 0x94, 0x24,
-	0x34, 0xf5, 0xe2, 0xc5, 0x7c, 0x60, 0xa4, 0x7d, 0x96, 0xd1, 0x3e, 0x4d, 0x4e, 0xa6, 0xd0, 0x8e,
-	0x35, 0xff, 0xac, 0x7e, 0x46, 0xfa, 0xef, 0xec, 0xf5, 0xb3, 0xb7, 0xd3, 0xcf, 0x5e, 0x3f, 0x13,
-	0x1a, 0xfe, 0xbe, 0xf5, 0x33, 0x3a, 0x0d, 0x90, 0x3f, 0x04, 0x20, 0xbd, 0x4d, 0x3a, 0xc9, 0xac,
-	0xd6, 0xd4, 0x11, 0x40, 0xac, 0xec, 0xc4, 0x04, 0x86, 0x32, 0xc7, 0x42, 0x39, 0x4b, 0x26, 0xd3,
-	0x92, 0x7d, 0x08, 0x55, 0x70, 0x7a, 0xa8, 0x5c, 0x7b, 0xbc, 0x59, 0x14, 0x9e, 0x6c, 0x16, 0x85,
-	0x7f, 0x37, 0x8b, 0xc2, 0x97, 0x5b, 0xc5, 0xa1, 0x27, 0x5b, 0xc5, 0xa1, 0xbf, 0xb6, 0x8a, 0x43,
-	0xf7, 0xa6, 0x23, 0xb3, 0x8e, 0x67, 0x6f, 0x1a, 0xc9, 0x71, 0xe3, 0x0f, 0x43, 0xf3, 0x6c, 0xec,
-	0xa9, 0x0d, 0xb3, 0x7f, 0x95, 0xcf, 0xff, 0x1f, 0x00, 0x00, 0xff, 0xff, 0xc1, 0x71, 0xdf, 0x41,
-	0xec, 0x17, 0x00, 0x00,
+	// 1487 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0xcf, 0x6f, 0xd4, 0xd6,
+	0x13, 0x8f, 0xe1, 0x4b, 0x08, 0x13, 0xf8, 0x26, 0xbc, 0xa6, 0x25, 0x18, 0xd8, 0x80, 0xf9, 0x95,
+	0x00, 0xf1, 0x92, 0xa0, 0x16, 0x0a, 0xb4, 0x25, 0x81, 0x42, 0x69, 0x83, 0x80, 0xe5, 0x87, 0x0a,
+	0x95, 0xba, 0xf2, 0xae, 0x5f, 0x17, 0x2b, 0x5e, 0x7b, 0x63, 0x7b, 0x03, 0x41, 0x3d, 0x54, 0x3d,
+	0xf4, 0x5c, 0xa9, 0xf7, 0x5e, 0x2a, 0xf5, 0xd0, 0x4a, 0xed, 0xa1, 0x87, 0x1e, 0x7a, 0xa9, 0xd4,
+	0x4a, 0x45, 0xe2, 0x50, 0xa4, 0x5e, 0xaa, 0x1e, 0x68, 0x45, 0xfa, 0x87, 0x54, 0x7e, 0x6f, 0xfc,
+	0x6b, 0x6d, 0xc7, 0x2f, 0x5e, 0x38, 0x65, 0xfd, 0xfc, 0x3e, 0x33, 0x9f, 0x79, 0x9e, 0x99, 0x37,
+	0x33, 0x81, 0x7d, 0xdd, 0x36, 0xa5, 0x55, 0x93, 0x2e, 0x53, 0x47, 0x6b, 0xd1, 0xea, 0xf2, 0x4c,
+	0x83, 0x7a, 0xda, 0x4c, 0x75, 0xa9, 0x4b, 0x9d, 0x15, 0xb5, 0xe3, 0xd8, 0x9e, 0x4d, 0xd8, 0x16,
+	0x8b, 0x7a, 0xf7, 0x6d, 0x67, 0x51, 0xf5, 0x7f, 0xab, 0xc1, 0x76, 0x15, 0xb7, 0xcb, 0xbb, 0x5b,
+	0xb6, 0xdd, 0x32, 0x69, 0x55, 0xeb, 0x18, 0x55, 0xcd, 0xb2, 0x6c, 0x4f, 0xf3, 0x0c, 0xdb, 0x72,
+	0xb9, 0x00, 0xf9, 0x40, 0xb6, 0x8e, 0x50, 0x0a, 0xdf, 0x35, 0xd6, 0xb2, 0x5b, 0x36, 0xfb, 0x59,
+	0xf5, 0x7f, 0xe1, 0x6a, 0xa5, 0x69, 0xbb, 0x6d, 0xdb, 0xad, 0x36, 0x34, 0x37, 0x42, 0x36, 0x6d,
+	0xc3, 0xe2, 0xef, 0x95, 0x1d, 0xf0, 0xf2, 0x75, 0x9f, 0x6b, 0x8d, 0xb6, 0x0c, 0xd7, 0xa3, 0x0e,
+	0xd5, 0x6f, 0xda, 0x8b, 0xd4, 0x72, 0x95, 0x13, 0xb0, 0x8b, 0xbd, 0x98, 0x5b, 0xd6, 0x0c, 0x53,
+	0x6b, 0x98, 0x74, 0xde, 0x76, 0x1c, 0xfb, 0x7e, 0x8d, 0x2e, 0x75, 0xa9, 0xeb, 0x91, 0x31, 0xd8,
+	0xa4, 0x53, 0xcb, 0x6e, 0x8f, 0x4b, 0x7b, 0xa5, 0xc9, 0x2d, 0x35, 0xfe, 0xa0, 0x7c, 0x04, 0xbb,
+	0xb3, 0x41, 0x6e, 0xc7, 0xb6, 0x5c, 0x4a, 0x2e, 0xc2, 0xa0, 0xd6, 0xb6, 0xbb, 0x96, 0xc7, 0x61,
+	0xf3, 0xea, 0xa3, 0xa7, 0x13, 0x03, 0x7f, 0x3d, 0x9d, 0x38, 0xd4, 0x32, 0xbc, 0x7b, 0xdd, 0x86,
+	0xda, 0xb4, 0xdb, 0x55, 0x24, 0xcc, 0xff, 0x4c, 0xbb, 0xfa, 0x62, 0xd5, 0x5b, 0xe9, 0x50, 0x57,
+	0xbd, 0x6c, 0x79, 0x35, 0x44, 0x2b, 0xd3, 0xc8, 0x9a, 0x8b, 0x9f, 0xbb, 0x76, 0x67, 0x6d, 0x5a,
+	0x77, 0xe1, 0x95, 0xde, 0xed, 0x48, 0xe8, 0x1c, 0x6c, 0x9c, 0xbb, 0x76, 0xa7, 0x04, 0x9b, 0x0b,
+	0xb4, 0x59, 0xf3, 0xa1, 0xca, 0x51, 0x78, 0x89, 0xc9, 0x5e, 0xa0, 0x96, 0x5e, 0x48, 0xe4, 0x7d,
+	0x18, 0x4b, 0x6e, 0x7e, 0x6e, 0x34, 0x54, 0x34, 0xf1, 0x8a, 0xe6, 0x2c, 0x52, 0xef, 0x86, 0xf1,
+	0x90, 0xae, 0xcd, 0x64, 0x09, 0x76, 0xa4, 0xf6, 0x23, 0x99, 0xdb, 0x30, 0xd2, 0x66, 0xab, 0x75,
+	0xd7, 0x78, 0x48, 0xeb, 0x5d, 0x57, 0x2f, 0x49, 0x6c, 0x5b, 0x3b, 0x14, 0x7e, 0xcb, 0xd5, 0x43,
+	0x8f, 0x62, 0x0e, 0x26, 0xca, 0xd3, 0x46, 0x8f, 0x4a, 0x81, 0x90, 0xec, 0x55, 0x18, 0x8e, 0x91,
+	0x2d, 0xe9, 0x56, 0x10, 0x11, 0x55, 0x16, 0x61, 0x4f, 0x66, 0x40, 0x84, 0x1a, 0xdf, 0x85, 0x21,
+	0x87, 0xbd, 0x73, 0x56, 0xc6, 0xa5, 0xbd, 0x1b, 0x27, 0x87, 0x67, 0x27, 0xd5, 0xc2, 0x08, 0x57,
+	0x99, 0x90, 0xf9, 0xff, 0xf9, 0xc4, 0x6a, 0x21, 0x5e, 0x19, 0x03, 0xc2, 0x94, 0x5d, 0xd3, 0x1c,
+	0xad, 0xed, 0xe2, 0x49, 0x28, 0x1f, 0xa2, 0x4b, 0x05, 0xab, 0xa8, 0xf8, 0x12, 0x0c, 0x76, 0xd8,
+	0x0a, 0xb3, 0x72, 0x78, 0x76, 0x4a, 0x40, 0x2d, 0x17, 0x81, 0x7a, 0x11, 0xae, 0x5c, 0x44, 0x2f,
+	0xe4, 0xe1, 0x40, 0xf5, 0xe0, 0x0b, 0x8c, 0xc3, 0x66, 0x4d, 0xd7, 0x1d, 0xea, 0xba, 0xf8, 0x0d,
+	0x82, 0xc7, 0xe8, 0xdb, 0x6c, 0x88, 0x7f, 0x9b, 0x4f, 0xa4, 0x44, 0x18, 0xfa, 0x82, 0x90, 0x6a,
+	0x0b, 0x86, 0x1a, 0xb8, 0x86, 0x67, 0xb4, 0x53, 0xe5, 0x27, 0xaf, 0xfa, 0x89, 0x28, 0xa4, 0x77,
+	0xde, 0x36, 0xac, 0xf9, 0xe3, 0x3e, 0xb9, 0x6f, 0xfe, 0x9e, 0x98, 0x14, 0xf8, 0x5a, 0x3e, 0xc0,
+	0xad, 0x85, 0xc2, 0x95, 0xf7, 0x60, 0x67, 0x82, 0xc1, 0x6d, 0xcd, 0xec, 0xd2, 0xb2, 0xf6, 0xb8,
+	0x20, 0x67, 0x09, 0x43, 0x9b, 0x6e, 0xc1, 0xff, 0x03, 0xb5, 0xf5, 0x65, 0xff, 0x4d, 0xd9, 0xa8,
+	0x68, 0xc4, 0xc5, 0x2b, 0x57, 0x30, 0x2a, 0xce, 0xdb, 0xa6, 0xa9, 0x79, 0xd4, 0xd1, 0xcc, 0xbe,
+	0x6c, 0x58, 0xc1, 0x78, 0x49, 0x89, 0x43, 0x2b, 0xee, 0xc0, 0x68, 0x33, 0x7c, 0xd5, 0x97, 0x1d,
+	0x23, 0xcd, 0xa4, 0x0a, 0xe5, 0x02, 0x3a, 0xf3, 0x82, 0xad, 0x59, 0xe5, 0x9d, 0xea, 0x61, 0x90,
+	0x4f, 0x51, 0x0a, 0xf2, 0x6e, 0xc2, 0xa0, 0xc9, 0x56, 0x5e, 0x84, 0x3f, 0xa1, 0x68, 0xe5, 0x32,
+	0x26, 0x45, 0xae, 0xbb, 0xaf, 0xef, 0xd0, 0x86, 0xf1, 0xb4, 0x28, 0xb4, 0xe5, 0x3a, 0x6c, 0xe5,
+	0x0a, 0xfb, 0x3a, 0xff, 0x61, 0x33, 0x12, 0xad, 0xcc, 0x60, 0x1c, 0xd4, 0xa8, 0x4b, 0x9d, 0x65,
+	0x3a, 0xc7, 0xae, 0xc9, 0xb5, 0x33, 0xab, 0x8e, 0xde, 0xde, 0x03, 0x79, 0xce, 0x37, 0xf5, 0x55,
+	0x4c, 0xa7, 0x91, 0x3f, 0xde, 0xa0, 0x9e, 0x67, 0x58, 0xad, 0xb2, 0x07, 0x7b, 0x1a, 0x2a, 0x79,
+	0x02, 0x91, 0xfa, 0x38, 0x6c, 0xa6, 0x96, 0x5f, 0x7c, 0xf0, 0x7b, 0x6b, 0xa8, 0x16, 0x3c, 0x2a,
+	0xef, 0xe0, 0x25, 0x19, 0x61, 0xcb, 0xb2, 0xf8, 0x4c, 0x42, 0x57, 0x89, 0x8b, 0x42, 0xfd, 0x8b,
+	0x00, 0x51, 0x68, 0xbc, 0x08, 0x77, 0x8d, 0x89, 0x57, 0x8e, 0xa3, 0x9f, 0xbd, 0xfd, 0xa0, 0x79,
+	0x4f, 0xb3, 0x5a, 0xb4, 0xa6, 0x79, 0x05, 0x37, 0x6a, 0x07, 0x5d, 0x25, 0x89, 0x40, 0xee, 0x37,
+	0x60, 0x1b, 0xc5, 0xf5, 0xba, 0xa3, 0x79, 0x65, 0x7d, 0x73, 0x2b, 0x8d, 0x09, 0x57, 0x4e, 0xe0,
+	0x59, 0xf1, 0xbc, 0xba, 0x60, 0xb4, 0x0d, 0xaf, 0xf0, 0xdc, 0xc3, 0x00, 0x4a, 0x80, 0xa2, 0x00,
+	0xe2, 0x49, 0xb4, 0x6e, 0xfa, 0xeb, 0x65, 0x03, 0xa8, 0x11, 0x89, 0x56, 0x4e, 0x61, 0xde, 0x5c,
+	0x30, 0x96, 0xba, 0x86, 0xce, 0xca, 0x6f, 0x41, 0xa2, 0x1f, 0xa3, 0x87, 0xa7, 0x91, 0xc8, 0xf6,
+	0x03, 0xd8, 0x6e, 0x46, 0xef, 0xfa, 0xa2, 0x3c, 0x6a, 0xf6, 0x28, 0x51, 0xf6, 0x62, 0x38, 0xc4,
+	0xb4, 0xdf, 0xd4, 0x9c, 0x16, 0xf5, 0xc2, 0x6a, 0xe2, 0x0c, 0x4c, 0xe4, 0xee, 0x88, 0x22, 0xc6,
+	0xe3, 0x4b, 0xcc, 0x5d, 0xb7, 0xd4, 0x82, 0xc7, 0xd9, 0xc7, 0xbb, 0x60, 0x13, 0x43, 0x93, 0x9f,
+	0x25, 0x18, 0xed, 0xad, 0x89, 0xc8, 0x29, 0x81, 0x12, 0x24, 0xb3, 0x9a, 0x92, 0xcf, 0x95, 0x45,
+	0x06, 0xa4, 0x95, 0xe3, 0x9f, 0xfe, 0xf1, 0xef, 0x17, 0x1b, 0x8e, 0x90, 0xc9, 0x6a, 0x76, 0x7b,
+	0xe4, 0x84, 0xc0, 0xba, 0xc7, 0xd9, 0x7e, 0x29, 0xc1, 0x20, 0x2f, 0x88, 0xc8, 0xab, 0xa2, 0xea,
+	0x13, 0x95, 0x99, 0xfc, 0xda, 0x7a, 0x61, 0xc8, 0xf5, 0x20, 0xe3, 0x3a, 0x41, 0xf6, 0xe4, 0x70,
+	0xe5, 0x85, 0x19, 0xf9, 0x5a, 0x82, 0xa1, 0xa0, 0xf8, 0x20, 0x27, 0x45, 0x75, 0xf5, 0x94, 0x71,
+	0xf2, 0xa9, 0xf5, 0x03, 0x91, 0xe6, 0x61, 0x46, 0x73, 0x1f, 0x99, 0xc8, 0xa1, 0x19, 0x54, 0x2e,
+	0xe4, 0x27, 0x09, 0xb6, 0x25, 0xaa, 0x24, 0x72, 0x76, 0xbd, 0x4a, 0xe3, 0xb7, 0xab, 0xfc, 0x46,
+	0x49, 0x34, 0xf2, 0x9e, 0x66, 0xbc, 0x0f, 0x93, 0x83, 0x05, 0xbc, 0xf9, 0x7d, 0xcb, 0xfc, 0x80,
+	0xdf, 0xcb, 0xe2, 0x7e, 0x90, 0x28, 0x6a, 0xc4, 0xfd, 0x20, 0x59, 0xc5, 0x14, 0xfa, 0x01, 0xbf,
+	0xd2, 0xc9, 0x0f, 0x12, 0x0c, 0xc7, 0x0a, 0x07, 0x72, 0x7a, 0x7d, 0xea, 0x12, 0x47, 0x7b, 0xa6,
+	0x14, 0x16, 0xf9, 0x1e, 0x65, 0x7c, 0x0f, 0x92, 0xfd, 0x6b, 0xf2, 0xc5, 0x63, 0xfd, 0x45, 0x82,
+	0x91, 0x9e, 0xc6, 0x9f, 0xbc, 0x29, 0xaa, 0x3d, 0x7b, 0xcc, 0x20, 0xbf, 0x55, 0x1a, 0x8f, 0x16,
+	0x54, 0x99, 0x05, 0x53, 0xe4, 0x70, 0x8e, 0x05, 0x5a, 0x80, 0xab, 0x73, 0x27, 0x21, 0xdf, 0x4a,
+	0xb0, 0x25, 0x9c, 0x13, 0x90, 0x75, 0xc6, 0x52, 0x34, 0x00, 0x90, 0x5f, 0x2f, 0x81, 0x44, 0xce,
+	0x53, 0x8c, 0xf3, 0x7e, 0xb2, 0x6f, 0x4d, 0x77, 0xae, 0x6b, 0x9d, 0x15, 0xf2, 0x95, 0x04, 0x9b,
+	0x71, 0x98, 0x40, 0xc4, 0x9d, 0x32, 0x31, 0xaa, 0x90, 0x4f, 0xae, 0x1b, 0x27, 0x98, 0x2e, 0x4c,
+	0x6a, 0xe9, 0x8c, 0xe5, 0xf7, 0x12, 0x40, 0xd4, 0xbb, 0x13, 0xe1, 0xa3, 0x49, 0x0d, 0x09, 0xe4,
+	0xd3, 0x65, 0xa0, 0x48, 0xf7, 0x08, 0xa3, 0x7b, 0x80, 0x28, 0x39, 0x74, 0x63, 0x73, 0x04, 0xf2,
+	0xab, 0x04, 0x23, 0x3d, 0x23, 0x07, 0x71, 0x5f, 0xce, 0x1e, 0x70, 0x88, 0xfb, 0x72, 0xce, 0xac,
+	0xa3, 0xf0, 0xc6, 0x63, 0xd7, 0x5c, 0x3d, 0x6e, 0x86, 0x9f, 0xa7, 0x13, 0xf5, 0xbd, 0x78, 0x9e,
+	0xce, 0xea, 0x24, 0xc4, 0xf3, 0x74, 0x66, 0x53, 0x51, 0x98, 0xa7, 0x1d, 0x8e, 0xaa, 0xf3, 0xde,
+	0x81, 0x3c, 0x96, 0x60, 0x7b, 0xaa, 0xcc, 0x27, 0xc2, 0x95, 0x43, 0x5e, 0xcb, 0x21, 0xcf, 0xf5,
+	0x21, 0x01, 0x2d, 0x99, 0x61, 0x96, 0x1c, 0x25, 0x53, 0x39, 0x96, 0xc4, 0x7a, 0x6c, 0x17, 0x79,
+	0x7f, 0x27, 0x01, 0x44, 0x02, 0xc5, 0x83, 0x20, 0xd5, 0xac, 0x88, 0x07, 0x41, 0xba, 0x39, 0x29,
+	0xcc, 0x2d, 0x11, 0x71, 0x96, 0xcf, 0x7b, 0xc6, 0x08, 0xe2, 0x31, 0x90, 0x3d, 0xce, 0x10, 0x8f,
+	0x81, 0x9c, 0xf9, 0x45, 0x61, 0x3e, 0xef, 0x1d, 0x6e, 0x90, 0x1f, 0x25, 0xd8, 0x1a, 0x6f, 0x75,
+	0x88, 0xf0, 0x85, 0x98, 0xd1, 0x52, 0xc9, 0x67, 0xcb, 0x81, 0x91, 0xfc, 0x31, 0x46, 0xfe, 0x10,
+	0x39, 0x90, 0x43, 0x3e, 0xd1, 0x7a, 0xb1, 0x2a, 0x20, 0xd6, 0xfd, 0x88, 0x57, 0x01, 0xe9, 0x3e,
+	0x4b, 0xbc, 0x0a, 0xc8, 0x68, 0xb7, 0x0a, 0xab, 0x80, 0x78, 0x2f, 0x46, 0x7e, 0x93, 0x60, 0xb4,
+	0xb7, 0x15, 0x22, 0xc2, 0x9f, 0x3d, 0xa7, 0xfd, 0x12, 0x6f, 0x17, 0xf2, 0xba, 0xb0, 0xc2, 0xe4,
+	0x99, 0x6a, 0xd1, 0xc8, 0xef, 0x12, 0x90, 0x74, 0xd3, 0x44, 0xe6, 0x4a, 0x50, 0x49, 0xb6, 0x64,
+	0xf2, 0x7c, 0x3f, 0x22, 0xd0, 0x9e, 0x59, 0x66, 0xcf, 0x31, 0x72, 0x44, 0xc0, 0x1e, 0xec, 0xe6,
+	0xe6, 0x2f, 0x3d, 0x7a, 0x56, 0x91, 0x9e, 0x3c, 0xab, 0x48, 0xff, 0x3c, 0xab, 0x48, 0x9f, 0xaf,
+	0x56, 0x06, 0x9e, 0xac, 0x56, 0x06, 0xfe, 0x5c, 0xad, 0x0c, 0xdc, 0x9d, 0x8e, 0x35, 0xa0, 0xbe,
+	0xbc, 0x69, 0x24, 0xc7, 0x85, 0x3f, 0x88, 0xc4, 0xb3, 0x5e, 0xb4, 0x31, 0xc8, 0xfe, 0x79, 0x74,
+	0xe2, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x9d, 0x42, 0xf3, 0xf6, 0xfe, 0x1a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1728,10 +1914,15 @@ type QueryClient interface {
 	// If the denomination is not supplied, all of the user's collateral tokens
 	// are returned.
 	Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
+	// CollateralValue queries for the total USD value of a user's collateral, or
+	// the USD value held as a given base asset's associated uToken denomination.
+	CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error)
 	// ExchangeRate queries the uToken exchange rate of a given uToken denomination.
 	ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error)
 	// BorrowLimit queries the borrow limit in USD of a given borrower.
 	BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error)
+	// LiquidationLimit queries the limit in USD above which a given borrower is eligible for liquidation.
+	LiquidationLimit(ctx context.Context, in *QueryLiquidationLimitRequest, opts ...grpc.CallOption) (*QueryLiquidationLimitResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
 	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
 }
@@ -1870,6 +2061,15 @@ func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest
 	return out, nil
 }
 
+func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error) {
+	out := new(QueryCollateralValueResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/CollateralValue", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
 	out := new(QueryExchangeRateResponse)
 	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/ExchangeRate", in, out, opts...)
@@ -1882,6 +2082,15 @@ func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateReq
 func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
 	out := new(QueryBorrowLimitResponse)
 	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/BorrowLimit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) LiquidationLimit(ctx context.Context, in *QueryLiquidationLimitRequest, opts ...grpc.CallOption) (*QueryLiquidationLimitResponse, error) {
+	out := new(QueryLiquidationLimitResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1beta1.Query/LiquidationLimit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1942,10 +2151,15 @@ type QueryServer interface {
 	// If the denomination is not supplied, all of the user's collateral tokens
 	// are returned.
 	Collateral(context.Context, *QueryCollateralRequest) (*QueryCollateralResponse, error)
+	// CollateralValue queries for the total USD value of a user's collateral, or
+	// the USD value held as a given base asset's associated uToken denomination.
+	CollateralValue(context.Context, *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error)
 	// ExchangeRate queries the uToken exchange rate of a given uToken denomination.
 	ExchangeRate(context.Context, *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error)
 	// BorrowLimit queries the borrow limit in USD of a given borrower.
 	BorrowLimit(context.Context, *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error)
+	// LiquidationLimit queries the limit in USD above which a given borrower is eligible for liquidation.
+	LiquidationLimit(context.Context, *QueryLiquidationLimitRequest) (*QueryLiquidationLimitResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
 	LiquidationTargets(context.Context, *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error)
 }
@@ -1996,11 +2210,17 @@ func (*UnimplementedQueryServer) CollateralSetting(ctx context.Context, req *Que
 func (*UnimplementedQueryServer) Collateral(ctx context.Context, req *QueryCollateralRequest) (*QueryCollateralResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Collateral not implemented")
 }
+func (*UnimplementedQueryServer) CollateralValue(ctx context.Context, req *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CollateralValue not implemented")
+}
 func (*UnimplementedQueryServer) ExchangeRate(ctx context.Context, req *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRate not implemented")
 }
 func (*UnimplementedQueryServer) BorrowLimit(ctx context.Context, req *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowLimit not implemented")
+}
+func (*UnimplementedQueryServer) LiquidationLimit(ctx context.Context, req *QueryLiquidationLimitRequest) (*QueryLiquidationLimitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LiquidationLimit not implemented")
 }
 func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LiquidationTargets not implemented")
@@ -2262,6 +2482,24 @@ func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_CollateralValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryCollateralValueRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CollateralValue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/CollateralValue",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CollateralValue(ctx, req.(*QueryCollateralValueRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryExchangeRateRequest)
 	if err := dec(in); err != nil {
@@ -2294,6 +2532,24 @@ func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_LiquidationLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryLiquidationLimitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).LiquidationLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1beta1.Query/LiquidationLimit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).LiquidationLimit(ctx, req.(*QueryLiquidationLimitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2377,12 +2633,20 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Collateral_Handler,
 		},
 		{
+			MethodName: "CollateralValue",
+			Handler:    _Query_CollateralValue_Handler,
+		},
+		{
 			MethodName: "ExchangeRate",
 			Handler:    _Query_ExchangeRate_Handler,
 		},
 		{
 			MethodName: "BorrowLimit",
 			Handler:    _Query_BorrowLimit_Handler,
+		},
+		{
+			MethodName: "LiquidationLimit",
+			Handler:    _Query_LiquidationLimit_Handler,
 		},
 		{
 			MethodName: "LiquidationTargets",
@@ -2968,6 +3232,76 @@ func (m *QueryBorrowedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryCollateralValueRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralValueRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCollateralValueResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCollateralValueResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCollateralValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.CollateralValue.Size()
+		i -= size
+		if _, err := m.CollateralValue.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func (m *QueryLoanedRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3445,6 +3779,69 @@ func (m *QueryBorrowLimitResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryLiquidationLimitRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationLimitRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationLimitRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLiquidationLimitResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationLimitResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationLimitResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.LiquidationLimit.Size()
+		i -= size
+		if _, err := m.LiquidationLimit.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func (m *QueryLiquidationTargetsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3735,6 +4132,34 @@ func (m *QueryBorrowedValueResponse) Size() (n int) {
 	return n
 }
 
+func (m *QueryCollateralValueRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryCollateralValueResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.CollateralValue.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
 func (m *QueryLoanedRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -3924,6 +4349,30 @@ func (m *QueryBorrowLimitResponse) Size() (n int) {
 	var l int
 	_ = l
 	l = m.BorrowLimit.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryLiquidationLimitRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryLiquidationLimitResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.LiquidationLimit.Size()
 	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
@@ -5451,6 +5900,204 @@ func (m *QueryBorrowedValueResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *QueryCollateralValueRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralValueRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCollateralValueResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCollateralValueResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCollateralValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CollateralValue", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.CollateralValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *QueryLoanedRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -6703,6 +7350,172 @@ func (m *QueryBorrowLimitResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.BorrowLimit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationLimitRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationLimitRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationLimitRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationLimitResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationLimitResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationLimitResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationLimit", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.LiquidationLimit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
