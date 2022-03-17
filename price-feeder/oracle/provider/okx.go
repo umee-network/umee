@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	okxHost      = "ws.okx.com:8443"
-	okxPath      = "/ws/v5/public"
-	okxPingCheck = time.Second * 28 // should be < 30
+	okxHost           = "ws.okx.com:8443"
+	okxPath           = "/ws/v5/public"
+	okxPingCheck      = time.Second * 28 // should be < 30
+	okxAvailablePairs = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -89,6 +90,11 @@ type (
 	OkxSubscriptionMsg struct {
 		Op   string                 `json:"op"` // Operation ex.: subscribe
 		Args []OkxSubscriptionTopic `json:"args"`
+	}
+
+	// OkxPairsSummary defines the response structure for an Okx pairs summary.
+	OkxPairsSummary struct {
+		Data []OkxInstId `json:"data"`
 	}
 )
 
@@ -393,7 +399,7 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://www.okx.com/api/v5/market/tickers?instType=SPOT")
+	resp, err := http.Get(okxAvailablePairs)
 	if err != nil {
 		return nil, err
 	}
@@ -413,6 +419,7 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 		if len(splitedInstID) != 2 {
 			continue
 		}
+
 		cp := types.CurrencyPair{
 			Base:  strings.ToUpper(splitedInstID[0]),
 			Quote: strings.ToUpper(splitedInstID[1]),
