@@ -691,7 +691,7 @@ func (s *IntegrationTestSuite) TestQueryCollateralValue() {
 			cli.GetCmdQueryCollateralValue(),
 			[]string{
 				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
+				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
 			},
 			false,
 			&types.QueryCollateralValueResponse{},
