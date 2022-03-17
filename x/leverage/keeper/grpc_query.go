@@ -438,11 +438,11 @@ func (q Querier) CollateralValue(
 	if len(req.Denom) == 0 {
 		tokens = q.Keeper.GetBorrowerCollateral(ctx, lender)
 	} else {
-		if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+		if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
+			return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
 		}
 
-		collateral := q.Keeper.GetCollateralAmount(ctx, lender, q.Keeper.FromTokenToUTokenDenom(ctx, req.Denom))
+		collateral := q.Keeper.GetCollateralAmount(ctx, lender, req.Denom)
 
 		tokens = sdk.NewCoins(collateral)
 	}
