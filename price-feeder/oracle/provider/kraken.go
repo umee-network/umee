@@ -18,6 +18,7 @@ import (
 
 const (
 	krakenHost                    = "ws.kraken.com"
+	KrakenAvailablePairs          = "https://api.kraken.com/0/public/AssetPairs"
 	krakenEventSystemStatus       = "systemStatus"
 	krakenEventSubscriptionStatus = "subscriptionStatus"
 )
@@ -82,6 +83,16 @@ type (
 		Status       string `json:"status"`       // subscribed|unsubscribed|error
 		Pair         string `json:"pair"`         // Pair symbol base/quote ex.: "XBT/USD"
 		ErrorMessage string `json:"errorMessage"` // error description
+	}
+
+	// KrakenPairsSummary defines the response structure for an Kraken pairs summary.
+	KrakenPairsSummary struct {
+		Data map[string]KrakenPairData `json:"result"`
+	}
+
+	// KrakenPairData defines the data response structure for an Kraken pair.
+	KrakenPairData struct {
+		WsName string `json:"wsname"`
 	}
 )
 
@@ -548,18 +559,13 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get("https://api.kraken.com/0/public/AssetPairs")
+	resp, err := http.Get(KrakenAvailablePairs)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var pairsSummary struct {
-		Data map[string]struct {
-			WsName string `json:"wsname"`
-		} `json:"result"`
-	}
-
+	var pairsSummary KrakenPairsSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}
