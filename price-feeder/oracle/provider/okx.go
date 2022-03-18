@@ -415,7 +415,7 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
 	for _, pair := range pairsSummary.Data {
-		splitedInstID := strings.Split(pair.InstID, "-")
+		splitInstID := strings.Split(pair.InstID, "-")
 		if len(splitedInstID) != 2 {
 			continue
 		}

@@ -572,7 +572,7 @@ func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Result))
 	for _, pair := range pairsSummary.Result {
-		splitedPair := strings.Split(pair.WsName, "/")
+		splitPair := strings.Split(pair.WsName, "/")
 		if len(splitedPair) != 2 {
 			continue
 		}

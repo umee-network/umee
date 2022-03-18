@@ -93,7 +93,7 @@ type (
 		Status string `json:"status"` // ex. "successful"
 	}
 
-	// GatePairSummary defines the response structure for an Gate pair summary.
+	// GatePairSummary defines the response structure for a Gate pair summary.
 	GatePairSummary struct {
 		Base  string `json:"base"`
 		Quote string `json:"quote"`
@@ -502,7 +502,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 	return nil
 }
 
-// GetAvailablePairs return all available pairs symbol to susbscribe.
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(gateAvailablePairs)
 	if err != nil {

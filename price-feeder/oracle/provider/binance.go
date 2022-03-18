@@ -71,7 +71,7 @@ type (
 		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 
-	// BinancePairSummary defines the response structure for an Binance pair
+	// BinancePairSummary defines the response structure for a Binance pair
 	// summary.
 	BinancePairSummary struct {
 		Symbol string `json:"symbol"`
@@ -366,7 +366,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 	return p.wsClient.WriteJSON(subsMsg)
 }
 
-// GetAvailablePairs return all available pairs symbol to susbscribe.
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(binanceAvailablePairs)
 	if err != nil {
