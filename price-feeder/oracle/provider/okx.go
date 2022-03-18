@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	okxHost           = "ws.okx.com:8443"
-	okxPath           = "/ws/v5/public"
-	okxPingCheck      = time.Second * 28 // should be < 30
-	okxAvailablePairs = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
+	okxHost          = "ws.okx.com:8443"
+	okxPath          = "/ws/v5/public"
+	okxPingCheck     = time.Second * 28 // should be < 30
+	okxPairsEndpoint = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -399,7 +399,7 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(okxAvailablePairs)
+	resp, err := http.Get(okxPairsEndpoint)
 	if err != nil {
 		return nil, err
 	}

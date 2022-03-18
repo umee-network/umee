@@ -17,7 +17,7 @@ const (
 	osmosisBaseURL        = "https://api-osmosis.imperator.co"
 	osmosisTokenEndpoint  = "/tokens/v1"
 	osmosisCandleEndpoint = "/tokens/v2/historical"
-	osmosisAvailablePairs = "/pairs/v1/summary"
+	osmosisPairsEndpoint  = "/pairs/v1/summary"
 )
 
 var _ Provider = (*OsmosisProvider)(nil)
@@ -182,7 +182,7 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	path := fmt.Sprintf("%s%s", p.baseURL, osmosisAvailablePairs)
+	path := fmt.Sprintf("%s%s", p.baseURL, osmosisPairsEndpoint)
 
 	resp, err := p.client.Get(path)
 	if err != nil {

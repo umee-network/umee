@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	gateHost           = "ws.gate.io"
-	gatePath           = "/v3"
-	gatePingCheck      = time.Second * 28 // should be < 30
-	gateAvailablePairs = "https://api.gateio.ws/api/v4/spot/currency_pairs"
+	gateHost          = "ws.gate.io"
+	gatePath          = "/v3"
+	gatePingCheck     = time.Second * 28 // should be < 30
+	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -504,7 +504,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(gateAvailablePairs)
+	resp, err := http.Get(gatePairsEndpoint)
 	if err != nil {
 		return nil, err
 	}

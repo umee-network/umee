@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	binanceHost           = "stream.binance.com:9443"
-	binancePath           = "/ws/umeestream"
-	binanceAvailablePairs = "https://api1.binance.com/api/v3/ticker/price"
+	binanceHost          = "stream.binance.com:9443"
+	binancePath          = "/ws/umeestream"
+	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -368,7 +368,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(binanceAvailablePairs)
+	resp, err := http.Get(binancePairsEndpoint)
 	if err != nil {
 		return nil, err
 	}

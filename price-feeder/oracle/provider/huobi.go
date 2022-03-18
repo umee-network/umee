@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	huobiHost           = "api-aws.huobi.pro"
-	huobiPath           = "/ws"
-	huobiReconnectTime  = time.Minute * 2
-	huobiAvailablePairs = "https://api.huobi.pro/market/tickers"
+	huobiHost          = "api-aws.huobi.pro"
+	huobiPath          = "/ws"
+	huobiReconnectTime = time.Minute * 2
+	huobiPairsEndpoint = "https://api.huobi.pro/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -399,7 +399,7 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(huobiAvailablePairs)
+	resp, err := http.Get(huobiPairsEndpoint)
 	if err != nil {
 		return nil, err
 	}
