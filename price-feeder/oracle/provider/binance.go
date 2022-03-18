@@ -367,6 +367,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
+// ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(binancePairsEndpoint)
 	if err != nil {
