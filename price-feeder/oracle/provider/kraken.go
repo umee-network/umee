@@ -191,7 +191,7 @@ func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return MapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
@@ -573,13 +573,13 @@ func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Result))
 	for _, pair := range pairsSummary.Result {
 		splitPair := strings.Split(pair.WsName, "/")
-		if len(splitedPair) != 2 {
+		if len(splitPair) != 2 {
 			continue
 		}
 
 		cp := types.CurrencyPair{
-			Base:  strings.ToUpper(splitedPair[0]),
-			Quote: strings.ToUpper(splitedPair[1]),
+			Base:  strings.ToUpper(splitPair[0]),
+			Quote: strings.ToUpper(splitPair[1]),
 		}
 		availablePairs[cp.String()] = struct{}{}
 	}

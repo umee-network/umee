@@ -243,7 +243,7 @@ func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return MapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {

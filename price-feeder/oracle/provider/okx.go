@@ -209,7 +209,7 @@ func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return MapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -416,13 +416,13 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
 	for _, pair := range pairsSummary.Data {
 		splitInstID := strings.Split(pair.InstID, "-")
-		if len(splitedInstID) != 2 {
+		if len(splitInstID) != 2 {
 			continue
 		}
 
 		cp := types.CurrencyPair{
-			Base:  strings.ToUpper(splitedInstID[0]),
-			Quote: strings.ToUpper(splitedInstID[1]),
+			Base:  strings.ToUpper(splitInstID[0]),
+			Quote: strings.ToUpper(splitInstID[1]),
 		}
 		availablePairs[cp.String()] = struct{}{}
 	}
