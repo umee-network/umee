@@ -133,6 +133,8 @@ func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
 		return nil, err
 	}
 
+	// Records are of the form [base, quote, price, volume] and we skip the first
+	// record as that contains the header.
 	availablePairs := make(map[string]struct{}, len(records[1:]))
 	for _, r := range records[1:] {
 		if len(r) < 2 {
