@@ -381,8 +381,8 @@ func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	}
 
 	availablePairs := make(map[string]struct{}, len(pairsSummary))
-	for _, pair := range pairsSummary {
-		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+	for _, pairName := range pairsSummary {
+		availablePairs[strings.ToUpper(pairName.Symbol)] = struct{}{}
 	}
 
 	return availablePairs, nil
