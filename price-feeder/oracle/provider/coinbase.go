@@ -295,25 +295,28 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 	var coinbaseTrade CoinbaseTradeResponse
 	if err := json.Unmarshal(bz, &coinbaseTrade); err != nil {
 		p.logger.Debug().Msg("unable to unmarshal response")
-	} else {
-		if coinbaseTrade.Type == "error" {
-			var coinbaseErr CoinbaseErrResponse
-			if err := json.Unmarshal(bz, &coinbaseErr); err != nil {
-				p.logger.Debug().Msg("unable to unmarshal error response")
-			}
-			p.logger.Debug().Msg(coinbaseErr.Reason)
-		} else if coinbaseTrade.Type == "subscriptions" { // successful subscription message
-			return
-		} else if coinbaseTrade.Type == "ticker" {
-			var coinbaseTicker CoinbaseTicker
-			if err := json.Unmarshal(bz, &coinbaseTicker); err != nil {
-				p.logger.Debug().Msg("unable to unmarshal response")
-			}
-			p.setTickerPair(coinbaseTicker)
-		} else {
-			p.setTradePair(coinbaseTrade)
-		}
+		return
 	}
+	if coinbaseTrade.Type == "error" {
+		var coinbaseErr CoinbaseErrResponse
+		if err := json.Unmarshal(bz, &coinbaseErr); err != nil {
+			p.logger.Debug().Msg("unable to unmarshal error response")
+		}
+		p.logger.Debug().Msg(coinbaseErr.Reason)
+		return
+	}
+	if coinbaseTrade.Type == "subscriptions" { // successful subscription message
+		return
+	}
+	if coinbaseTrade.Type == "ticker" {
+		var coinbaseTicker CoinbaseTicker
+		if err := json.Unmarshal(bz, &coinbaseTicker); err != nil {
+			p.logger.Debug().Msg("unable to unmarshal response")
+		}
+		p.setTickerPair(coinbaseTicker)
+		return
+	}
+	p.setTradePair(coinbaseTrade)
 }
 
 // timeToUnix converts a Time in format "2006-01-02T15:04:05.000000Z" to unix
