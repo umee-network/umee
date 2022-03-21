@@ -198,8 +198,8 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
 	for _, pair := range pairsSummary.Data {
 		cp := types.CurrencyPair{
-			Base:  strings.ToUpper(pair.BaseSymbol),
-			Quote: strings.ToUpper(pair.QuoteSymbol),
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
 		}
 		availablePairs[cp.String()] = struct{}{}
 	}
