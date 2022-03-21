@@ -154,3 +154,40 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 		require.Nil(t, prices)
 	})
 }
+
+func TestOsmosisProvider_GetAvailablePairs(t *testing.T) {
+	p := NewOsmosisProvider()
+	p.GetAvailablePairs()
+
+	t.Run("valid_available_pair", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, "/pairs/v1/summary", req.URL.String())
+			resp := `{
+				"data": [
+					{
+						"base_symbol": "ATOM",
+						"quote_symbol": "OSMO"
+					},
+					{
+						"base_symbol": "ION",
+						"quote_symbol": "OSMO"
+					}
+				]
+			}`
+			rw.Write([]byte(resp))
+		}))
+		defer server.Close()
+
+		p.client = server.Client()
+		p.baseURL = server.URL
+
+		availablePairs, err := p.GetAvailablePairs()
+		require.Nil(t, err)
+
+		_, exist := availablePairs["ATOMOSMO"]
+		require.True(t, exist)
+
+		_, exist = availablePairs["IONOSMO"]
+		require.True(t, exist)
+	})
+}
