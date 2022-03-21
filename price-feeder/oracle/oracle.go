@@ -364,12 +364,8 @@ func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger
 	case config.ProviderHuobi:
 		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
 
-  case config.ProviderCoinbase:
-    coinbaseProvider, err := provider.NewCoinbaseProvider(ctx, o.logger, o.providerPairs[config.ProviderCoinbase]...)
-    if err != nil {
-      return nil, err
-    }
-    priceProvider = coinbaseProvider
+	case config.ProviderCoinbase:
+		return provider.NewCoinbaseProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderOkx:
 		return provider.NewOkxProvider(ctx, logger, providerPairs...)

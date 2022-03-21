@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -18,10 +19,11 @@ import (
 )
 
 const (
-	coinbaseHost      = "ws-feed.exchange.coinbase.com"
-	coinbasePingCheck = time.Second * 28 // should be < 30
-	timeLayout        = "2006-01-02T15:04:05.000000Z"
-	unixMinute        = 60000
+	coinbaseHost          = "ws-feed.exchange.coinbase.com"
+	coinbasePingCheck     = time.Second * 28 // should be < 30
+	coinbasePairsEndpoint = "https://api.exchange.coinbase.com/products"
+	timeLayout            = "2006-01-02T15:04:05.000000Z"
+	unixMinute            = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -77,6 +79,12 @@ type (
 	CoinbaseErrResponse struct {
 		Type   string `json:"type"`   // should be "error"
 		Reason string `json:"reason"` // ex.: "tickers" is not a valid channel
+	}
+
+	// CoinbasePairSummary defines the response structure for a Coinbase pair summary.
+	CoinbasePairSummary struct {
+		Base  string `json:"base_currency"`
+		Quote string `json:"quote_currency"`
 	}
 )
 
@@ -206,6 +214,31 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 	return nil
 }
 
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(coinbasePairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []CoinbasePairSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pair := range pairsSummary {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}
+
 // subscribe subscribes to the coinbase "ticker" and "match" websockets.
 func (p *CoinbaseProvider) subscribe(cps ...types.CurrencyPair) error {
 	topics := make([]string, len(cps))
@@ -229,7 +262,7 @@ func (p *CoinbaseProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
