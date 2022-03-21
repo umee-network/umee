@@ -397,7 +397,7 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	}
 }
 
-// GetAvailablePairs return all available pairs symbol to susbscribe.
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(huobiPairsEndpoint)
 	if err != nil {

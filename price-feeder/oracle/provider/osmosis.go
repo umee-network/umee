@@ -56,8 +56,8 @@ type (
 
 	// OsmosisPairData defines the data response structure for an Osmosis pair.
 	OsmosisPairData struct {
-		BaseSymbol  string `json:"base_symbol"`
-		QuoteSymbol string `json:"quote_symbol"`
+		Base  string `json:"base_symbol"`
+		Quote string `json:"quote_symbol"`
 	}
 )
 

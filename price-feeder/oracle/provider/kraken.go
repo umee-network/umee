@@ -557,7 +557,7 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 	}
 }
 
-// GetAvailablePairs return all available pairs symbol to susbscribe.
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(KrakenPairsEndpoint)
 	if err != nil {

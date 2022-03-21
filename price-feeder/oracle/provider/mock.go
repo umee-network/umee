@@ -140,6 +140,7 @@ func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
 		if len(r) < 2 {
 			continue
 		}
+		
 		cp := types.CurrencyPair{
 			Base:  strings.ToUpper(r[0]),
 			Quote: strings.ToUpper(r[1]),
