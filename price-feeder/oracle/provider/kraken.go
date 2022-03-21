@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ import (
 
 const (
 	krakenHost                    = "ws.kraken.com"
+	KrakenPairsEndpoint           = "https://api.kraken.com/0/public/AssetPairs"
 	krakenEventSystemStatus       = "systemStatus"
 	krakenEventSubscriptionStatus = "subscriptionStatus"
 )
@@ -81,6 +83,16 @@ type (
 		Status       string `json:"status"`       // subscribed|unsubscribed|error
 		Pair         string `json:"pair"`         // Pair symbol base/quote ex.: "XBT/USD"
 		ErrorMessage string `json:"errorMessage"` // error description
+	}
+
+	// KrakenPairsSummary defines the response structure for an Kraken pairs summary.
+	KrakenPairsSummary struct {
+		Result map[string]KrakenPairData `json:"result"`
+	}
+
+	// KrakenPairData defines the data response structure for an Kraken pair.
+	KrakenPairData struct {
+		WsName string `json:"wsname"`
 	}
 )
 
@@ -179,7 +191,7 @@ func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
@@ -543,6 +555,36 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 	for _, tickerSymbol := range tickerSymbols {
 		delete(p.subscribedPairs, tickerSymbol)
 	}
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(KrakenPairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary KrakenPairsSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Result))
+	for _, pair := range pairsSummary.Result {
+		splitPair := strings.Split(pair.WsName, "/")
+		if len(splitPair) != 2 {
+			continue
+		}
+
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(splitPair[0]),
+			Quote: strings.ToUpper(splitPair[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // toTickerPrice return a TickerPrice based on the KrakenTicker.
