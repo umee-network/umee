@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -22,6 +23,7 @@ const (
 	huobiHost          = "api-aws.huobi.pro"
 	huobiPath          = "/ws"
 	huobiReconnectTime = time.Minute * 2
+	huobiPairsEndpoint = "https://api.huobi.pro/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -73,6 +75,17 @@ type (
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time.
 	HuobiSubscriptionMsg struct {
 		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
+	}
+
+	// HuobiPairsSummary defines the response structure for an Huobi pairs
+	// summary.
+	HuobiPairsSummary struct {
+		Data []HuobiPairData `json:"data"`
+	}
+
+	// HuobiPairData defines the data response structure for an Huobi pair.
+	HuobiPairData struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -183,7 +196,7 @@ func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
@@ -382,6 +395,27 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(huobiPairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary HuobiPairsSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // decompressGzip uncompress gzip compressed messages. All data returned from the

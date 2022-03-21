@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -15,8 +16,9 @@ import (
 )
 
 const (
-	binanceHost = "stream.binance.com:9443"
-	binancePath = "/ws/umeestream"
+	binanceHost          = "stream.binance.com:9443"
+	binancePath          = "/ws/umeestream"
+	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -67,6 +69,12 @@ type (
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
 		ID     uint16   `json:"id"`     // identify messages going back and forth
+	}
+
+	// BinancePairSummary defines the response structure for a Binance pair
+	// summary.
+	BinancePairSummary struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -178,7 +186,7 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
@@ -356,6 +364,28 @@ func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 	subsMsg := newBinanceSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+// ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
+func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(binancePairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []BinancePairSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pairName := range pairsSummary {
+		availablePairs[strings.ToUpper(pairName.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // currencyPairToBinanceTickerPair receives a currency pair and return binance

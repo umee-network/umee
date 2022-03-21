@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,9 +17,10 @@ import (
 )
 
 const (
-	gateHost      = "ws.gate.io"
-	gatePath      = "/v3"
-	gatePingCheck = time.Second * 28 // should be < 30
+	gateHost          = "ws.gate.io"
+	gatePath          = "/v3"
+	gatePingCheck     = time.Second * 28 // should be < 30
+	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -88,6 +91,12 @@ type (
 	// GateEventResult defines the Result body for the GateEvent response.
 	GateEventResult struct {
 		Status string `json:"status"` // ex. "successful"
+	}
+
+	// GatePairSummary defines the response structure for a Gate pair summary.
+	GatePairSummary struct {
+		Base  string `json:"base"`
+		Quote string `json:"quote"`
 	}
 )
 
@@ -234,7 +243,7 @@ func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -491,6 +500,31 @@ func (p *GateProvider) ping() error {
 func (p *GateProvider) pongHandler(appData string) error {
 	p.resetReconnectTimer()
 	return nil
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(gatePairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []GatePairSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pair := range pairsSummary {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
