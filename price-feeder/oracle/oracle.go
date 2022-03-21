@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -377,7 +376,7 @@ func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger
 		return provider.NewMockProvider(), nil
 	}
 
-	return nil, errors.New("provider not found")
+	return nil, fmt.Errorf("provider %s not found", providerName)
 }
 
 // filterTickerDeviations finds the standard deviations of the prices of
