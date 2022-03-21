@@ -58,6 +58,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#601](https://github.com/umee-network/umee/pull/601) Use TVWAP formula for determining prices when available.
 - [#609](https://github.com/umee-network/umee/pull/609) TVWAP faulty provider detection.
 - [#649](https://github.com/umee-network/umee/pull/649) Add "GetAvailablePairs" function to providers.
+- [#648](https://github.com/umee-network/umee/pull/648) Add Coinbase as a provider.
 
 ### Bug Fixes
 

@@ -34,11 +34,9 @@ const (
 	tickerTimeout = 1000 * time.Millisecond
 )
 
-var (
-	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-	// without being considered faulty.
-	deviationThreshold = sdk.MustNewDecFromStr("2")
-)
+// deviationThreshold defines how many 𝜎 a provider can be away from the mean
+// without being considered faulty.
+var deviationThreshold = sdk.MustNewDecFromStr("2")
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -365,6 +363,9 @@ func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger
 
 	case config.ProviderHuobi:
 		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderCoinbase:
+		return provider.NewCoinbaseProvider(ctx, logger, providerPairs...)
 
 	case config.ProviderOkx:
 		return provider.NewOkxProvider(ctx, logger, providerPairs...)
