@@ -13,7 +13,7 @@
 - https://snapshots.stake2.me/umee
 - https://polkachu.com/tendermint_snapshots/umee
 - https://snapshots.weakhand.xyz/umee
-- http://singularity-services.xyz/umee/
+- http://singularity-services.xyz/umee
 
 ## Umee Archival Nodes
 
