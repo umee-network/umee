@@ -118,3 +118,35 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
 }
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(p.baseURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	csvReader := csv.NewReader(resp.Body)
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	// Records are of the form [base, quote, price, volume] and we skip the first
+	// record as that contains the header.
+	availablePairs := make(map[string]struct{}, len(records[1:]))
+	for _, r := range records[1:] {
+		if len(r) < 2 {
+			continue
+		}
+
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(r[0]),
+			Quote: strings.ToUpper(r[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}

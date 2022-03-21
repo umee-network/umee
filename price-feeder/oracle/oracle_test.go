@@ -45,6 +45,10 @@ func (m mockProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
 	return nil
 }
 
+func (m mockProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	return map[string]struct{}{}, nil
+}
+
 type failingProvider struct {
 	prices map[string]provider.TickerPrice
 }
@@ -59,6 +63,10 @@ func (m failingProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]
 
 func (m failingProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
 	return nil
+}
+
+func (m failingProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	return map[string]struct{}{}, nil
 }
 
 type OracleTestSuite struct {

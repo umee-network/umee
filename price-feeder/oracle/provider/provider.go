@@ -22,8 +22,16 @@ var ping = []byte("ping")
 
 // Provider defines an interface an exchange price provider must implement.
 type Provider interface {
+	// GetTickerPrices returns the tickerPrices based on the provided pairs.
 	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
+
+	// GetCandlePrices returns the candlePrices based on the provided pairs.
 	GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+
+	// GetAvailablePairs return all available pairs symbol to susbscribe.
+	GetAvailablePairs() (map[string]struct{}, error)
+
+	// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 	SubscribeCurrencyPairs(...types.CurrencyPair) error
 }
 
@@ -99,17 +107,4 @@ func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64)
 // minus t.
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
-}
-
-// mapPairsToSlice returns the map of currency pairs as slice.
-func mapPairsToSlice(mapPairs map[string]types.CurrencyPair) []types.CurrencyPair {
-	currencyPairs := make([]types.CurrencyPair, len(mapPairs))
-
-	iterator := 0
-	for _, cp := range mapPairs {
-		currencyPairs[iterator] = cp
-		iterator++
-	}
-
-	return currencyPairs
 }

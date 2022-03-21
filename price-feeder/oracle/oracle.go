@@ -340,53 +340,43 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 
 	priceProvider, ok = o.priceProviders[providerName]
 	if !ok {
-		switch providerName {
-		case config.ProviderBinance:
-			binanceProvider, err := provider.NewBinanceProvider(ctx, o.logger, o.providerPairs[config.ProviderBinance]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = binanceProvider
-
-		case config.ProviderKraken:
-			krakenProvider, err := provider.NewKrakenProvider(ctx, o.logger, o.providerPairs[config.ProviderKraken]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = krakenProvider
-
-		case config.ProviderOsmosis:
-			priceProvider = provider.NewOsmosisProvider()
-
-		case config.ProviderHuobi:
-			huobiProvider, err := provider.NewHuobiProvider(ctx, o.logger, o.providerPairs[config.ProviderHuobi]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = huobiProvider
-
-		case config.ProviderOkx:
-			okxProvider, err := provider.NewOkxProvider(ctx, o.logger, o.providerPairs[config.ProviderOkx]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = okxProvider
-
-		case config.ProviderGate:
-			gateProvider, err := provider.NewGateProvider(ctx, o.logger, o.providerPairs[config.ProviderGate]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = gateProvider
-
-		case config.ProviderMock:
-			priceProvider = provider.NewMockProvider()
+		newProvider, err := NewProvider(ctx, providerName, o.logger, o.providerPairs[providerName]...)
+		if err != nil {
+			return nil, err
 		}
+		priceProvider = newProvider
 
 		o.priceProviders[providerName] = priceProvider
 	}
 
 	return priceProvider, nil
+}
+
+func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger, providerPairs ...types.CurrencyPair) (provider.Provider, error) {
+	switch providerName {
+	case config.ProviderBinance:
+		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderKraken:
+		return provider.NewKrakenProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderOsmosis:
+		return provider.NewOsmosisProvider(), nil
+
+	case config.ProviderHuobi:
+		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderOkx:
+		return provider.NewOkxProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderGate:
+		return provider.NewGateProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderMock:
+		return provider.NewMockProvider(), nil
+	}
+
+	return nil, fmt.Errorf("provider %s not found", providerName)
 }
 
 // filterTickerDeviations finds the standard deviations of the prices of
