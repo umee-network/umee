@@ -37,7 +37,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		trades          map[string][]CoinbaseTrade    // Symbol => CoinbaseTrade
+		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
@@ -322,8 +322,7 @@ func (tr CoinbaseTradeResponse) timeToUnix() int64 {
 	if err != nil {
 		return 0
 	}
-	// convert coinbase timestamp seconds -> milliseconds
-	return t.Unix() * int64(time.Second/time.Millisecond)
+	return t.UnixMilli()
 }
 
 func (tr CoinbaseTradeResponse) toTrade() CoinbaseTrade {
