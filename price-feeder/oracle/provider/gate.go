@@ -199,6 +199,14 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		return err
 	}
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderBinance,
+	)
 	return nil
 }
 

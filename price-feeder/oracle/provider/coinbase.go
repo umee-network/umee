@@ -213,6 +213,14 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		return err
 	}
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderBinance,
+	)
 	return nil
 }
 

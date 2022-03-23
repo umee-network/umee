@@ -159,6 +159,14 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderBinance,
+	)
 	return nil
 }
 
