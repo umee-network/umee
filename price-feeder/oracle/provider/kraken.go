@@ -176,7 +176,7 @@ func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderBinance,
+		config.ProviderKraken,
 	)
 	return nil
 }

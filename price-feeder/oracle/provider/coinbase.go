@@ -219,7 +219,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderBinance,
+		config.ProviderCoinbase,
 	)
 	return nil
 }
