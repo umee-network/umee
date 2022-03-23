@@ -207,9 +207,14 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 
 // SubscribeCurrencyPairs subscribes to websockets for all currency pairs.
 func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribe(cps...); err != nil {
 		return err
 	}
+
 	p.setSubscribedPairs(cps...)
 	return nil
 }

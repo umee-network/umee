@@ -142,6 +142,10 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}

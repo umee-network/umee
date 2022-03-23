@@ -165,6 +165,10 @@ func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}

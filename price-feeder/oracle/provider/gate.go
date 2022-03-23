@@ -190,6 +190,10 @@ func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 // SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeTickers(cps...); err != nil {
 		return err
 	}
