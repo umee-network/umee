@@ -66,6 +66,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [#607](https://github.com/umee-network/umee/pull/607) Fix kraken provider timestamp unit.
+- [#675](https://github.com/umee-network/umee/pull/675) Add verification for subscribe currency pairs with empty parameter.
 
 ### Refactor
 
