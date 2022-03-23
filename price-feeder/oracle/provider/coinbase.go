@@ -15,7 +15,9 @@ import (
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -211,6 +213,14 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		return err
 	}
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderCoinbase,
+	)
 	return nil
 }
 
@@ -347,8 +357,26 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 			p.logger.Debug().Msg("unable to unmarshal response")
 		}
 		p.setTickerPair(coinbaseTicker)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"ticker",
+			"provider",
+			config.ProviderCoinbase,
+		)
 		return
 	}
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"trade",
+		"provider",
+		config.ProviderCoinbase,
+	)
 	p.setTradePair(coinbaseTrade)
 }
 
@@ -437,6 +465,14 @@ func (p *CoinbaseProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderCoinbase,
+	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 

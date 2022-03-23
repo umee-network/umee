@@ -556,6 +556,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 			Float64("previous_vote_period", o.previousVotePeriod).
 			Float64("current_vote_period", currentVotePeriod).
 			Msg("missing vote during voting period")
+		telemetry.IncrCounter(1, "vote", "failure", "missed")
 
 		o.previousVotePeriod = 0
 		o.previousPrevote = nil
