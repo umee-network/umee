@@ -79,6 +79,16 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
+	})
+}
+
 func TestOkxCurrencyPairToOkxPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	okxSymbol := currencyPairToOkxPair(cp)
