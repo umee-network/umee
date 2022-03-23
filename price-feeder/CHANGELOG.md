@@ -49,6 +49,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#648](https://github.com/umee-network/umee/pull/648) Add Coinbase as a provider.
 
+### Bug Fixes
+
+- [#675](https://github.com/umee-network/umee/pull/675) Add necessary input validation to SubscribePairs in the price feeder.
+
 ## [v0.1.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.3) - 2022-03-21
 
 ### Features

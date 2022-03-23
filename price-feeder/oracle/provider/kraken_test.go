@@ -70,6 +70,16 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestKrakenProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewKrakenProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
+	})
+}
+
 func TestKrakenPairToCurrencyPairSymbol(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	currencyPairSymbol := krakenPairToCurrencyPairSymbol("ATOM/USDT")

@@ -80,6 +80,16 @@ func TestHuobiProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestHuobiProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewHuobiProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
+	})
+}
+
 func TestHuobiCurrencyPairToHuobiPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	binanceSymbol := currencyPairToHuobiTickerPair(cp)
