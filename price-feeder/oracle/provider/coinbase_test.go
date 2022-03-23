@@ -70,6 +70,16 @@ func TestCoinbaseProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestCoinbaseProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewCoinbaseProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
+	})
+}
+
 func TestCoinbasePairToCurrencyPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	currencyPairSymbol := coinbasePairToCurrencyPair("ATOM-USDT")
