@@ -205,7 +205,7 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderBinance,
+		config.ProviderGate,
 	)
 	return nil
 }
