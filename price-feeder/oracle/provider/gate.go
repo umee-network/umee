@@ -12,7 +12,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -197,6 +199,14 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		return err
 	}
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -352,6 +362,15 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"ticker",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -417,6 +436,15 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"candle",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -489,6 +517,14 @@ func (p *GateProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderGate,
+	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
