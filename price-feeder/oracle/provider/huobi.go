@@ -165,7 +165,7 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderBinance,
+		config.ProviderHuobi,
 	)
 	return nil
 }
