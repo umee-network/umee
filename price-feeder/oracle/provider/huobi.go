@@ -16,7 +16,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -161,6 +163,14 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderHuobi,
+	)
 	return nil
 }
 
@@ -268,6 +278,15 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	}
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"ticker",
+			"provider",
+			config.ProviderHuobi,
+		)
 		return
 	}
 
@@ -277,6 +296,15 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	}
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"candle",
+			"provider",
+			config.ProviderHuobi,
+		)
 	}
 }
 
@@ -344,6 +372,14 @@ func (p *HuobiProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderHuobi,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 

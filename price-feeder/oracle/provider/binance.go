@@ -12,7 +12,9 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -241,6 +243,15 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	}
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"ticker",
+			"provider",
+			config.ProviderBinance,
+		)
 		return
 	}
 
@@ -250,6 +261,15 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	}
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"candle",
+			"provider",
+			config.ProviderBinance,
+		)
 	}
 }
 
@@ -331,6 +351,14 @@ func (p *BinanceProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderBinance,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 
