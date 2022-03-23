@@ -11,9 +11,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -294,6 +296,15 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if tickerResp.ID.Channel == "tickers" {
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
+			telemetry.IncrCounter(
+				1,
+				"websocket",
+				"message",
+				"type",
+				"ticker",
+				"provider",
+				config.ProviderOkx,
+			)
 		}
 		return
 	}
@@ -305,6 +316,15 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
+			telemetry.IncrCounter(
+				1,
+				"websocket",
+				"message",
+				"type",
+				"candle",
+				"provider",
+				config.ProviderOkx,
+			)
 		}
 	}
 }
@@ -384,6 +404,14 @@ func (p *OkxProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderOkx,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 

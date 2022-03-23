@@ -11,8 +11,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -345,6 +347,15 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	}
 
 	p.setTickerPair(currencyPairSymbol, tickerPrice)
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"ticker",
+		"provider",
+		config.ProviderKraken,
+	)
 	return nil
 }
 
@@ -420,6 +431,15 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	currencyPairSymbol := krakenPairToCurrencyPairSymbol(krakenPair)
 	krakenCandle.Symbol = currencyPairSymbol
 
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"candle",
+		"provider",
+		config.ProviderKraken,
+	)
 	p.setCandlePair(krakenCandle)
 	return nil
 }
@@ -436,6 +456,14 @@ func (p *KrakenProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderKraken,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 
