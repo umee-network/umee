@@ -9,6 +9,7 @@ touch /root/.price-feeder/config.toml
 # setup price-feeder configuration
 tee /root/.price-feeder/config.toml <<EOF
 gas_adjustment = 1.5
+provider_timeout = "5000ms"
 
 [server]
 listen_addr = "0.0.0.0:7171"
