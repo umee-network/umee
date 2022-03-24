@@ -319,18 +319,12 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if tickerErr != nil {
-		p.logger.Error().Err(tickerErr).Msg("unable to unmarshal ticker")
-		return
-	}
-
-	if candleErr != nil {
-		p.logger.Error().Err(candleErr).Msg("unable to unmarshal candle")
-		return
-	}
-
-	if krakenErr != nil {
-		p.logger.Error().Err(krakenErr).Msg("received a message that is not an event")
+	if tickerErr != nil || candleErr != nil || krakenErr != nil {
+		p.logger.Error().
+			AnErr("ticker", tickerErr).
+			AnErr("candle", candleErr).
+			AnErr("event", krakenErr).
+			Msg("Error on receive message")
 	}
 }
 

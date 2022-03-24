@@ -340,18 +340,12 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if tickerErr != nil {
-		p.logger.Error().Err(tickerErr).Msg("unable to receive ticker")
-		return
-	}
-
-	if candleErr != nil {
-		p.logger.Error().Err(candleErr).Msg("unable to receive candle")
-		return
-	}
-
-	if gateErr != nil {
-		p.logger.Error().Err(gateErr).Msg("received a message that is not an event")
+	if tickerErr != nil || candleErr != nil || gateErr != nil {
+		p.logger.Error().
+			AnErr("ticker", tickerErr).
+			AnErr("candle", candleErr).
+			AnErr("event", gateErr).
+			Msg("Error on receive message")
 	}
 }
 

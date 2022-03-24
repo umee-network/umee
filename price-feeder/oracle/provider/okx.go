@@ -300,6 +300,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		tickerResp OkxTickerResponse
 		tickerErr  error
 		candleResp OkxCandleResponse
+		candleErr  error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
@@ -321,10 +322,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Error().Err(err).Msg("could not unmarshal candle resp")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
@@ -341,8 +339,11 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if tickerErr != nil {
-		p.logger.Error().Err(tickerErr).Msg("could not unmarshal ticker resp")
+	if tickerErr != nil || candleErr != nil {
+		p.logger.Error().
+			AnErr("ticker", tickerErr).
+			AnErr("candle", candleErr).
+			Msg("Error on receive message")
 	}
 }
 

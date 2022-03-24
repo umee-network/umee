@@ -290,10 +290,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if candleErr = json.Unmarshal(bz, &candleResp); candleErr != nil {
-		p.logger.Error().Err(candleErr).Msg("failed to unmarshal message")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
 		telemetry.IncrCounter(
@@ -308,8 +305,11 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if tickerErr != nil {
-		p.logger.Error().Err(err).Msg("failed to unmarshal message")
+	if tickerErr != nil || candleErr != nil {
+		p.logger.Error().
+			AnErr("ticker", tickerErr).
+			AnErr("candle", candleErr).
+			Msg("Error on receive message")
 	}
 }
 
