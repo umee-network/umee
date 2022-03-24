@@ -312,21 +312,22 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		gateEvent GateEvent
 		gateErr   error
 		tickerErr error
+		candleErr error
 	)
 
 	gateErr = json.Unmarshal(bz, &gateEvent)
-	if gateErr == nil { // received gate event
+	if gateErr == nil {
 		switch gateEvent.Result.Status {
 		case "success":
 			return
 		case "":
+			// msg was not an event, it will try to marshal to ticker message.
 			break
 		default:
 			p.reconnect()
+			return
 		}
-		return
 	}
-	// msg is not an event, it will try to marshal to ticker message.
 
 	tickerErr = p.messageReceivedTickerPrice(bz)
 	if tickerErr == nil { // succeded to unmarshal ticker price
@@ -334,13 +335,18 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 	}
 	// msg is not a ticker, it will try to marshal to candle message.
 
-	if err := p.messageReceivedCandle(bz); err != nil {
-		p.logger.Error().Err(err).Msg("unable to unmarshal candle")
+	candleErr = p.messageReceivedCandle(bz)
+	if candleErr == nil {
 		return
 	}
 
 	if tickerErr != nil {
-		p.logger.Error().Err(tickerErr).Msg("unable to unmarshal ticker")
+		p.logger.Error().Err(tickerErr).Msg("unable to receive ticker")
+		return
+	}
+
+	if candleErr != nil {
+		p.logger.Error().Err(candleErr).Msg("unable to receive candle")
 		return
 	}
 
