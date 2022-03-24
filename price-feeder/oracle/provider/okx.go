@@ -298,14 +298,14 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 
 	var (
 		tickerResp OkxTickerResponse
+		tickerErr  error
 		candleResp OkxCandleResponse
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal ticker resp")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.ID.Channel == "tickers" {
+		// succeeds to unmarshal ticker
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
 			telemetry.IncrCounter(
@@ -322,7 +322,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal candle resp")
+		p.logger.Error().Err(err).Msg("could not unmarshal candle resp")
 		return
 	}
 	if candleResp.ID.Channel == "candle1m" {
@@ -338,6 +338,11 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				config.ProviderOkx,
 			)
 		}
+		return
+	}
+
+	if tickerErr != nil {
+		p.logger.Error().Err(tickerErr).Msg("could not unmarshal ticker resp")
 	}
 }
 

@@ -269,13 +269,13 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 
 	var (
 		tickerResp HuobiTicker
+		tickerErr  error
 		candleResp HuobiCandle
+		candleErr  error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
 		telemetry.IncrCounter(
@@ -290,8 +290,8 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
+	if candleErr = json.Unmarshal(bz, &candleResp); candleErr != nil {
+		p.logger.Error().Err(candleErr).Msg("failed to unmarshal message")
 		return
 	}
 	if candleResp.Tick.Close != 0 {
@@ -305,6 +305,11 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"provider",
 			config.ProviderHuobi,
 		)
+		return
+	}
+
+	if tickerErr != nil {
+		p.logger.Error().Err(err).Msg("failed to unmarshal message")
 	}
 }
 

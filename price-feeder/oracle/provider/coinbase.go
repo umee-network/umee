@@ -342,25 +342,30 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 
 	var coinbaseTrade CoinbaseTradeResponse
 	if err := json.Unmarshal(bz, &coinbaseTrade); err != nil {
-		p.logger.Debug().Msg("unable to unmarshal response")
+		p.logger.Error().Err(err).Msg("unable to unmarshal response")
 		return
 	}
+
 	if coinbaseTrade.Type == "error" {
 		var coinbaseErr CoinbaseErrResponse
 		if err := json.Unmarshal(bz, &coinbaseErr); err != nil {
-			p.logger.Debug().Msg("unable to unmarshal error response")
+			p.logger.Error().Err(err).Msg("unable to unmarshal error response")
 		}
-		p.logger.Debug().Msg(coinbaseErr.Reason)
+		p.logger.Error().Msg(coinbaseErr.Reason)
 		return
 	}
+
 	if coinbaseTrade.Type == "subscriptions" { // successful subscription message
 		return
 	}
+
 	if coinbaseTrade.Type == "ticker" {
 		var coinbaseTicker CoinbaseTicker
 		if err := json.Unmarshal(bz, &coinbaseTicker); err != nil {
-			p.logger.Debug().Msg("unable to unmarshal response")
+			p.logger.Error().Err(err).Msg("unable to unmarshal response")
+			return
 		}
+
 		p.setTickerPair(coinbaseTicker)
 		telemetry.IncrCounter(
 			1,
@@ -373,6 +378,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		)
 		return
 	}
+
 	telemetry.IncrCounter(
 		1,
 		"websocket",
