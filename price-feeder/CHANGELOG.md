@@ -45,6 +45,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
+
 ### Features
 
 - [#648](https://github.com/umee-network/umee/pull/648) Add Coinbase as a provider.
