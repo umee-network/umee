@@ -291,6 +291,7 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 		krakenEvent KrakenEvent
 		krakenErr   error
 		tickerErr   error
+		candleErr   error
 	)
 
 	krakenErr = json.Unmarshal(bz, &krakenEvent)
@@ -313,13 +314,18 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 	}
 	// msg is not a ticker, it will try to marshal to candle message.
 
-	if err := p.messageReceivedCandle(bz); err != nil {
-		p.logger.Error().Err(err).Msg("unable to unmarshal candle")
+	candleErr = p.messageReceivedCandle(bz)
+	if candleErr == nil {
 		return
 	}
 
 	if tickerErr != nil {
 		p.logger.Error().Err(tickerErr).Msg("unable to unmarshal ticker")
+		return
+	}
+
+	if candleErr != nil {
+		p.logger.Error().Err(candleErr).Msg("unable to unmarshal candle")
 		return
 	}
 
