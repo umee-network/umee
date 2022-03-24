@@ -17,6 +17,7 @@ const (
 	defaultListenAddr      = "0.0.0.0:7171"
 	defaultSrvWriteTimeout = 15 * time.Second
 	defaultSrvReadTimeout  = 15 * time.Second
+	defaultProviderTimeout = 100 * time.Millisecond
 
 	ProviderKraken   = "kraken"
 	ProviderBinance  = "binance"
@@ -51,13 +52,14 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server        Server         `toml:"server"`
-		CurrencyPairs []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Account       Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring       Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC           RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry     Telemetry      `toml:"telemetry"`
-		GasAdjustment float64        `toml:"gas_adjustment" validate:"required"`
+		Server          Server         `toml:"server"`
+		CurrencyPairs   []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Account         Account        `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring         Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
+		RPC             RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry       Telemetry      `toml:"telemetry"`
+		GasAdjustment   float64        `toml:"gas_adjustment" validate:"required"`
+		ProviderTimeout string         `toml:"provider_timeout"`
 	}
 
 	// Server defines the API server configuration.
@@ -176,6 +178,9 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 	if len(cfg.Server.ReadTimeout) == 0 {
 		cfg.Server.ReadTimeout = defaultSrvReadTimeout.String()
+	}
+	if len(cfg.ProviderTimeout) == 0 {
+		cfg.ProviderTimeout = defaultProviderTimeout.String()
 	}
 
 	pairs := make(map[string]map[string]struct{})

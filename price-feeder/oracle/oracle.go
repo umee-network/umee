@@ -26,16 +26,12 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
+// We define tickerSleep as the minimum timeout between each oracle loop. We
+// define this value empirically based on enough time to collect exchange rates,
+// and broadcast pre-vote and vote transactions such that they're committed in
+// at least one block during each voting period.
 const (
-	// We define tickerSleep as the minimum timeout between each oracle loop. We
-	// define this value empirically based on enough time to collect exchange rates,
-	// and broadcast pre-vote and vote transactions such that they're committed in
-	// at least one block during each voting period.
 	tickerSleep = 1000 * time.Millisecond
-	// We define providerTimeout as the maximum amount of time we will allow
-	// a provider to take when requesting tickers & candles. This is necessary
-	// for non-websocket providers such as osmosis.
-	providerTimeout = 100 * time.Millisecond
 )
 
 // deviationThreshold defines how many 𝜎 a provider can be away from the mean
@@ -65,6 +61,7 @@ type Oracle struct {
 	logger zerolog.Logger
 	closer *pfsync.Closer
 
+	providerTimeout    time.Duration
 	providerPairs      map[string][]types.CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
@@ -76,7 +73,12 @@ type Oracle struct {
 	prices          map[string]sdk.Dec
 }
 
-func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
+func New(
+	logger zerolog.Logger,
+	oc client.OracleClient,
+	currencyPairs []config.CurrencyPair,
+	providerTimeout time.Duration,
+) *Oracle {
 	providerPairs := make(map[string][]types.CurrencyPair)
 
 	for _, pair := range currencyPairs {
@@ -95,6 +97,7 @@ func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.C
 		providerPairs:   providerPairs,
 		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
+		providerTimeout: providerTimeout,
 	}
 }
 
@@ -215,7 +218,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				break
 			case err := <-errCh:
 				return err
-			case <-time.After(providerTimeout):
+			case <-time.After(o.providerTimeout):
 				telemetry.IncrCounter(1, "failure", "provider", "type", "timeout")
 				return fmt.Errorf("provider timed out")
 			}

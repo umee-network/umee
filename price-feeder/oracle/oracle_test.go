@@ -97,6 +97,7 @@ func (ots *OracleTestSuite) SetupSuite() {
 				Providers: []string{config.ProviderOsmosis},
 			},
 		},
+		time.Millisecond*100,
 	)
 }
 
