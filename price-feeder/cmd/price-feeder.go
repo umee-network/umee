@@ -112,7 +112,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	// listen for and trap any OS signal to gracefully shutdown and exit
 	trapSignal(cancel, logger)
 
-	timeout, err := time.ParseDuration(cfg.RPC.RPCTimeout)
+	rpcTimeout, err := time.ParseDuration(cfg.RPC.RPCTimeout)
 	if err != nil {
 		return fmt.Errorf("failed to parse RPC timeout: %w", err)
 	}
@@ -130,7 +130,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		cfg.Keyring.Dir,
 		keyringPass,
 		cfg.RPC.TMRPCEndpoint,
-		timeout,
+		rpcTimeout,
 		cfg.Account.Address,
 		cfg.Account.Validator,
 		cfg.RPC.GRPCEndpoint,
@@ -140,7 +140,12 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs)
+	providerTimeout, err := time.ParseDuration(cfg.ProviderTimeout)
+	if err != nil {
+		return fmt.Errorf("failed to parse provider timeout: %w", err)
+	}
+
+	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs, providerTimeout)
 
 	metrics, err := telemetry.New(cfg.Telemetry)
 	if err != nil {
