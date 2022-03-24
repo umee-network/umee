@@ -26,12 +26,16 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// We define tickerTimeout as the minimum timeout between each oracle loop. We
-// define this value empirically based on enough time to collect exchange rates,
-// and broadcast pre-vote and vote transactions such that they're committed in a
-// block during each voting period.
 const (
-	tickerTimeout = 1000 * time.Millisecond
+	// We define tickerSleep as the minimum timeout between each oracle loop. We
+	// define this value empirically based on enough time to collect exchange rates,
+	// and broadcast pre-vote and vote transactions such that they're committed in
+	// at least one block during each voting period.
+	tickerSleep = 1000 * time.Millisecond
+	// We define providerTimeout as the maximum amount of time we will allow
+	// a provider to take when requesting tickers & candles. This is necessary
+	// for non-websocket providers such as osmosis.
+	providerTimeout = 100 * time.Millisecond
 )
 
 // deviationThreshold defines how many 𝜎 a provider can be away from the mean
@@ -116,7 +120,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 			telemetry.MeasureSince(startTime, "runtime", "tick")
 			telemetry.IncrCounter(1, "new", "tick")
 
-			time.Sleep(tickerTimeout)
+			time.Sleep(tickerSleep)
 		}
 	}
 }
@@ -186,16 +190,34 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 
 		g.Go(func() error {
-			prices, err := priceProvider.GetTickerPrices(acceptedPairs...)
-			if err != nil {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
-				return err
-			}
+			prices := make(map[string]provider.TickerPrice, 0)
+			candles := make(map[string][]provider.CandlePrice, 0)
+			ch := make(chan struct{})
+			errCh := make(chan error, 1)
 
-			candles, err := priceProvider.GetCandlePrices(acceptedPairs...)
-			if err != nil {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+			go func() {
+				defer close(ch)
+				prices, err = priceProvider.GetTickerPrices(acceptedPairs...)
+				if err != nil {
+					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+					errCh <- err
+				}
+
+				candles, err = priceProvider.GetCandlePrices(acceptedPairs...)
+				if err != nil {
+					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+					errCh <- err
+				}
+			}()
+
+			select {
+			case <-ch:
+				break
+			case err := <-errCh:
 				return err
+			case <-time.After(providerTimeout):
+				telemetry.IncrCounter(1, "failure", "provider", "type", "timeout")
+				return fmt.Errorf("provider timed out")
 			}
 
 			// flatten and collect prices based on the base currency per provider
