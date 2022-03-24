@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [#648](https://github.com/umee-network/umee/pull/648) Add Coinbase as a provider.
-- [#679](https://github.com/umee-network/umee/pull/679) Time out providers after 100ms.
+- [#679](https://github.com/umee-network/umee/pull/679) Add a configurable provider timeout, which defaults to 100ms.
 
 ### Bug Fixes
 
