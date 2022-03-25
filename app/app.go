@@ -1,7 +1,5 @@
 package app
 
-// hax 2
-
 import (
 	"fmt"
 	"io"

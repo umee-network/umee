@@ -1,7 +1,5 @@
 package e2e
 
-// hax
-
 import (
 	"bytes"
 	"context"
