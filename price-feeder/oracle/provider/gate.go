@@ -340,13 +340,11 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if tickerErr != nil || candleErr != nil || gateErr != nil {
-		p.logger.Error().
-			AnErr("ticker", tickerErr).
-			AnErr("candle", candleErr).
-			AnErr("event", gateErr).
-			Msg("Error on receive message")
-	}
+	p.logger.Error().
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		AnErr("event", gateErr).
+		Msg("Error on receive message")
 }
 
 // messageReceivedTickerPrice handles the ticker price msg.
