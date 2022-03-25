@@ -305,12 +305,10 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if tickerErr != nil || candleErr != nil {
-		p.logger.Error().
-			AnErr("ticker", tickerErr).
-			AnErr("candle", candleErr).
-			Msg("Error on receive message")
-	}
+	p.logger.Error().
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 // pong return a heartbeat message when a "ping" is received and reset the

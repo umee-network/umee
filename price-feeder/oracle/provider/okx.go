@@ -339,12 +339,10 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if tickerErr != nil || candleErr != nil {
-		p.logger.Error().
-			AnErr("ticker", tickerErr).
-			AnErr("candle", candleErr).
-			Msg("Error on receive message")
-	}
+	p.logger.Error().
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
