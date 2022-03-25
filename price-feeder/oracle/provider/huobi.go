@@ -307,7 +307,8 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 
 	if tickerErr != nil || candleErr != nil {
 		p.logger.Error().
-			Str("bz", string(bz)).
+			Int("bz_length", len(bz)).
+			Str("bz", string(bz[:maxSizeMessageInLog])).
 			AnErr("ticker", tickerErr).
 			AnErr("candle", candleErr).
 			Msg("Error on receive message")

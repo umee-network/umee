@@ -271,7 +271,8 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 
 	if tickerErr != nil || candleErr != nil {
 		p.logger.Error().
-			Str("bz", string(bz)).
+			Int("bz_length", len(bz)).
+			Str("bz", string(bz[:maxSizeMessageInLog])).
 			AnErr("ticker", tickerErr).
 			AnErr("candle", candleErr).
 			Msg("Error on receive message")
