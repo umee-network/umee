@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TEST BRANCH - DO NOT MERGE
+
 set -ex
 
 gaiad init val01 --chain-id=$UMEE_E2E_GAIA_CHAIN_ID
