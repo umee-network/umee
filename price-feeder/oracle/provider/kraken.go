@@ -306,13 +306,11 @@ func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
 		}
 		return
 	}
-	// msg is not an event, it will try to marshal to ticker message.
 
 	tickerErr = p.messageReceivedTickerPrice(bz)
-	if tickerErr == nil { // succeded to receive ticker price
+	if tickerErr == nil {
 		return
 	}
-	// msg is not a ticker, it will try to marshal to candle message.
 
 	candleErr = p.messageReceivedCandle(bz)
 	if candleErr == nil {

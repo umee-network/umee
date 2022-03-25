@@ -378,7 +378,6 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		)
 		return
 	}
-
 	telemetry.IncrCounter(
 		1,
 		"websocket",

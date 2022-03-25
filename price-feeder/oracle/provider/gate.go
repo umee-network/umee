@@ -321,7 +321,6 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "success":
 			return
 		case "":
-			// msg was not an event, it will try to marshal to ticker message.
 			break
 		default:
 			p.reconnect()
@@ -330,10 +329,9 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	tickerErr = p.messageReceivedTickerPrice(bz)
-	if tickerErr == nil { // succeded to unmarshal ticker price
+	if tickerErr == nil {
 		return
 	}
-	// msg is not a ticker, it will try to marshal to candle message.
 
 	candleErr = p.messageReceivedCandle(bz)
 	if candleErr == nil {

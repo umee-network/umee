@@ -306,7 +306,6 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	// sometimes the message received is not a ticker or a candle response.
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.ID.Channel == "tickers" {
-		// succeeds to unmarshal ticker
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
 			telemetry.IncrCounter(
