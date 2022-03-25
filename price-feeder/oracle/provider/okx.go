@@ -340,6 +340,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	p.logger.Error().
+		Str("bz", string(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
 		Msg("Error on receive message")

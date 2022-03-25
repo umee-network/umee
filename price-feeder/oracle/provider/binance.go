@@ -269,10 +269,13 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	p.logger.Error().
-		AnErr("ticker", tickerErr).
-		AnErr("candle", candleErr).
-		Msg("Error on receive message")
+	if tickerErr != nil || candleErr != nil {
+		p.logger.Error().
+			Str("bz", string(bz)).
+			AnErr("ticker", tickerErr).
+			AnErr("candle", candleErr).
+			Msg("Error on receive message")
+	}
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {

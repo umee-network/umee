@@ -341,6 +341,7 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	p.logger.Error().
+		Str("bz", string(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
 		AnErr("event", gateErr).
