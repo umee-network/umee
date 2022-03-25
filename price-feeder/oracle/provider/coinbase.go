@@ -349,7 +349,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 	if coinbaseTrade.Type == "error" {
 		var coinbaseErr CoinbaseErrResponse
 		if err := json.Unmarshal(bz, &coinbaseErr); err != nil {
-			p.logger.Error().Err(err).Msg("unable to unmarshal error response")
+			p.logger.Debug().Err(err).Msg("unable to unmarshal error response")
 		}
 		p.logger.Error().Msg(coinbaseErr.Reason)
 		return
