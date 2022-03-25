@@ -15,13 +15,8 @@ require (
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.26.1
 	github.com/sirkon/goproxy v1.4.8
-<<<<<<< HEAD
-	github.com/spf13/cobra v1.3.0
-	github.com/stretchr/testify v1.7.1
-=======
 	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.0
->>>>>>> 5e86813 (build(deps): Bump github.com/spf13/cobra from 1.3.0 to 1.4.0 in /price-feeder (#639))
+	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.14
 	github.com/umee-network/umee v1.0.3
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
