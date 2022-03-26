@@ -269,13 +269,13 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 
 	var (
 		tickerResp HuobiTicker
+		tickerErr  error
 		candleResp HuobiCandle
+		candleErr  error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
 		telemetry.IncrCounter(
@@ -290,10 +290,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
 		telemetry.IncrCounter(
@@ -305,7 +302,14 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"provider",
 			config.ProviderHuobi,
 		)
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 // pong return a heartbeat message when a "ping" is received and reset the
