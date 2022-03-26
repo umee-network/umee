@@ -16,7 +16,6 @@ const (
 	defaultReconnectTime     = time.Minute * 20
 	maxReconnectionTries     = 3
 	providerCandlePeriod     = 10 * time.Minute
-	maxSizeMessageInLog      = 30
 )
 
 var ping = []byte("ping")

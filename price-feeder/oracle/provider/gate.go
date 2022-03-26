@@ -339,8 +339,7 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	p.logger.Error().
-		Int("bz_length", len(bz)).
-		Str("bz", string(bz[:maxSizeMessageInLog])).
+		Int("length", len(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
 		AnErr("event", gateErr).
