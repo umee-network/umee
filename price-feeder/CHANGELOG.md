@@ -45,6 +45,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [#684](https://github.com/umee-network/umee/pull/684) Log errors when providers are unable to unmarshal candles and tickers, instead of either one.
+
 ## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
 
 ### Features

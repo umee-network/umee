@@ -234,13 +234,12 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 
 	var (
 		tickerResp BinanceTicker
+		tickerErr  error
 		candleResp BinanceCandle
+		candleErr  error
 	)
 
-	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal ticker response")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
 		telemetry.IncrCounter(
@@ -255,10 +254,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal candle response")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
 		telemetry.IncrCounter(
@@ -270,7 +266,14 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"provider",
 			config.ProviderBinance,
 		)
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
