@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v2.0.0](https://github.com/umee-network/umee/releases/tag/v2.0.0) - 2022-03-25
+
+### Features
+
+- Convexity upgrade!!!
+
 ## [v1.0.3](https://github.com/umee-network/umee/releases/tag/v1.0.3) - 2022-02-17
 
 ### State Machine Breaking
