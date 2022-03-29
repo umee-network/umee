@@ -44,7 +44,8 @@ Umee will allow a multitude of decentralized debt products.
 
 ### Private
 
-- [umee-alpha-mainnet-2](networks/umee-alpha-mainnet-2)
+- [umee-betanet-1](networks/umee-betanet-1)
+- [umee-betanet-2](networks/umee-betanet-2)
 
 ## Install
 
