@@ -7,9 +7,9 @@ core differences are as follows:
 
 - All exchange rates must be quoted in USD or USD stablecoins.
 - No need or use of reference exchange rates (e.g. Luna).
-- No need or use of ToBin tax.
+- No need or use of Tobin tax.
 - The `price-feeder` combines both `feeder` and `price-server` into a single
-  Golang-based application for better UX, testability and integration.
+  Golang-based application for better UX, testability, and integration.
 
 ## Background
 
@@ -19,7 +19,7 @@ The `price-feeder` tool is responsible for performing the following:
    Binance and Osmosis, based on operator configuration. These exchange rates
    are exposed via an API and are used to feed into the main oracle process.
 2. Taking aggregated exchange rate price data and submitting those exchange rates
-   on-chain to Umee's `x/oracle` module following Terra's [Oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html)
+   on-chain to Umee's `x/oracle` module following Umee's [Oracle](https://github.com/umee-network/umee/tree/main/x/oracle/spec)
    specification.
 
 ## Providers
@@ -27,8 +27,11 @@ The `price-feeder` tool is responsible for performing the following:
 The list of current supported providers:
 
 - [Binance](https://www.binance.com/en)
+- [Coinbase](https://www.coinbase.com/)
+- [Gate](https://www.gate.io/)
 - [Huobi](https://www.huobi.com/en-us/)
 - [Kraken](https://www.kraken.com/en-us/)
+- [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
 
 ## Usage
@@ -79,7 +82,7 @@ quote = "USD"
 
 Providing multiple providers is beneficial in case any provider fails to return
 market data. Prices per exchange rate are submitted on-chain via pre-vote and
-vote messages using a volume-weighted average price (VWAP).
+vote messages using a time-weighted average price (TVWAP).
 
 ### `account`
 
@@ -106,7 +109,7 @@ Additional info on the different keyring modes is available [here](https://docs.
 
 ### Setup
 
-The keyring `dir` and `backend` are defined in config file.
+The keyring `dir` and `backend` are defined in the config file.
 You may use the `PRICE_FEEDER_PASS` environment variable to set up the keyring password.
 
 Ex :
