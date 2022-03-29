@@ -48,6 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- [723](https://github.com/umee-network/umee/pull/723) Add leverage parameter SmallLiquidationSize
 - [711](https://github.com/umee-network/umee/pull/711) Clarify error message for negative elapsed time case.
 
 ## [v2.0.0](https://github.com/umee-network/umee/releases/tag/v2.0.0) - 2022-03-25
