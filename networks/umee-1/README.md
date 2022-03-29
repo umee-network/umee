@@ -6,7 +6,6 @@
 
 - https://www.theamsolutions.info/umee-state-sync
 - https://stakeangle.com/state-sync/umee
-- https://umee-state-sync.cyphercore.io
 - https://book.testnet.run/umee/state-sync
 
 ## Snapshot Providers (Quick Sync)
