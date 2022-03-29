@@ -28,4 +28,4 @@ the `x/oracle` reward pool.
 ## SmallLiquidationSize
 
 SmallLiquidationSize is the borrow value in USD below which [Close Factor](01_concepts.md#Close-Factor)
-is always 1.0 once the borrow is eligible for liquidation.
+is always 1.
