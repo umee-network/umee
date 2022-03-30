@@ -585,6 +585,13 @@ func (k Keeper) LiquidationParams(
 	}
 
 	params := k.GetParams(ctx)
+
+	// special case: If borrowed value is less than small liquidation size,
+	// close factor is always 1
+	if borrowed.LTE(params.SmallLiquidationSize) {
+		return liquidationIncentive, sdk.OneDec(), nil
+	}
+
 	// special case: If complete liquidation threshold is zero, close factor is always 1
 	if params.CompleteLiquidationThreshold.IsZero() {
 		return liquidationIncentive, sdk.OneDec(), nil

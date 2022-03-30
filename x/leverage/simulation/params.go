@@ -29,5 +29,10 @@ func ParamChanges(r *rand.Rand) []simtypes.ParamChange {
 				return fmt.Sprintf("\"%s\"", GenOracleRewardFactor(r))
 			},
 		),
+		simulation.NewSimParamChange(types.ModuleName, string(types.KeySmallLiquidationSize),
+			func(r *rand.Rand) string {
+				return fmt.Sprintf("\"%s\"", GenSmallLiquidationSize(r))
+			},
+		),
 	}
 }
