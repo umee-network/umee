@@ -14,12 +14,14 @@ var (
 	KeyCompleteLiquidationThreshold = []byte("CompleteLiquidationThreshold")
 	KeyMinimumCloseFactor           = []byte("MinimumCloseFactor")
 	KeyOracleRewardFactor           = []byte("OracleRewardFactor")
+	KeySmallLiquidationSize         = []byte("SmallLiquidationSize")
 )
 
 var (
 	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
 	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
 	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
+	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("100.00")
 )
 
 func NewParams() Params {
@@ -45,6 +47,11 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			&p.OracleRewardFactor,
 			validateOracleRewardFactor,
 		),
+		paramtypes.NewParamSetPair(
+			KeySmallLiquidationSize,
+			&p.SmallLiquidationSize,
+			validateSmallLiquidationSize,
+		),
 	}
 }
 
@@ -66,6 +73,7 @@ func DefaultParams() Params {
 		CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
 		MinimumCloseFactor:           defaultMinimumCloseFactor,
 		OracleRewardFactor:           defaultOracleRewardFactor,
+		SmallLiquidationSize:         defaultSmallLiquidationSize,
 	}
 }
 
@@ -78,6 +86,9 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateOracleRewardFactor(p.OracleRewardFactor); err != nil {
+		return err
+	}
+	if err := validateSmallLiquidationSize(p.SmallLiquidationSize); err != nil {
 		return err
 	}
 	return nil
@@ -123,6 +134,19 @@ func validateOracleRewardFactor(i interface{}) error {
 	}
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("oracle reward factor cannot exceed 1: %d", v)
+	}
+
+	return nil
+}
+
+func validateSmallLiquidationSize(i interface{}) error {
+	v, ok := i.(sdk.Dec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNegative() {
+		return fmt.Errorf("small liquidation size cannot be negative: %d", v)
 	}
 
 	return nil
