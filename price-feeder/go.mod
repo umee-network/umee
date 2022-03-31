@@ -25,6 +25,11 @@ require (
 )
 
 require (
+	github.com/gin-gonic/gin v1.7.0 // indirect
+	github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220217130213-b3cdbcaa3b93 // indirect
+)
+
+require (
 	filippo.io/edwards25519 v1.0.0-beta.2 // indirect
 	github.com/99designs/keyring v1.1.6 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
@@ -36,11 +41,11 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.0 // indirect
-	github.com/confio/ics23/go v0.6.6 // indirect
+	github.com/confio/ics23/go v0.7.0 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/iavl v0.17.3 // indirect
-	github.com/cosmos/ibc-go/v2 v2.0.3 // indirect
+	github.com/cosmos/ibc-go/v2 v2.1.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
@@ -114,7 +119,6 @@ require (
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15 // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tendermint/tm-db v0.6.6 // indirect
-	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220317234142-1c674cbc83ff
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
