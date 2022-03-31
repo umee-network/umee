@@ -402,18 +402,6 @@ func New(
 		),
 	)
 
-	// register the staking hooks
-	//
-	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
-	// these hooks.
-	app.StakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
-		),
-	)
-
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibchost.StoreKey],
@@ -457,6 +445,18 @@ func New(
 		&app.AccountKeeper,
 		&app.TransferKeeper.Keeper,
 		&bech32IbcKeeper,
+	)
+
+	// register the staking hooks
+	//
+	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
+	// these hooks.
+	app.StakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
+		),
 	)
 
 	// create static IBC router, add transfer route, then set and seal it
