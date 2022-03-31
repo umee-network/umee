@@ -339,6 +339,8 @@ func New(
 		app.BankKeeper,
 		app.GetSubspace(stakingtypes.ModuleName),
 	)
+	app.StakingKeeper = stakingKeeper
+
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
 		keys[minttypes.StoreKey],
@@ -400,13 +402,34 @@ func New(
 		),
 	)
 
+	// register the staking hooks
+	//
+	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
+	// these hooks.
+	app.StakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
+		),
+	)
+
+	app.IBCKeeper = ibckeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey],
+		app.GetSubspace(ibchost.ModuleName),
+		app.StakingKeeper,
+		app.UpgradeKeeper,
+		app.ScopedIBCKeeper,
+	)
+
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
@@ -434,27 +457,6 @@ func New(
 		&app.AccountKeeper,
 		&app.TransferKeeper.Keeper,
 		&bech32IbcKeeper,
-	)
-
-	// register the staking hooks
-	//
-	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
-	// these hooks.
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
-		),
-	)
-
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
 	)
 
 	// create static IBC router, add transfer route, then set and seal it
