@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
+	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -88,10 +91,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
-	gravity "github.com/umee-network/Gravity-Bridge/module/x/gravity"
-	gravitykeeper "github.com/umee-network/Gravity-Bridge/module/x/gravity/keeper"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
+	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	customante "github.com/umee-network/umee/ante"
 	appparams "github.com/umee-network/umee/app/params"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
@@ -222,6 +224,7 @@ type UmeeApp struct {
 	GravityKeeper    gravitykeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
+	bech32IbcKeeper  *bech32ibckeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -261,7 +264,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -397,18 +400,6 @@ func New(
 		),
 	)
 
-	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
-	app.GravityKeeper = gravitykeeper.NewKeeper(
-		keys[gravitytypes.StoreKey],
-		app.GetSubspace(gravitytypes.ModuleName),
-		appCodec,
-		&baseBankKeeper,
-		&stakingKeeper,
-		&app.SlashingKeeper,
-		&app.DistrKeeper,
-		&app.AccountKeeper,
-	)
-
 	// register the staking hooks
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
@@ -479,6 +470,27 @@ func New(
 		app.BankKeeper,
 		&stakingKeeper,
 		govRouter,
+	)
+
+	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
+
+	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		ibcTransferKeeper,
+	)
+	app.bech32IbcKeeper = &bech32IbcKeeper
+
+	app.GravityKeeper = gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		&baseBankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+		&app.TransferKeeper.Keeper,
+		&bech32IbcKeeper,
 	)
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))

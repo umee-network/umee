@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,7 +19,6 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
