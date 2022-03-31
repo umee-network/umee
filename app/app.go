@@ -428,11 +428,10 @@ func New(
 
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 
-	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+	app.bech32IbcKeeper = bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		ibcTransferKeeper,
+		app.TransferKeeper,
 	)
-	app.bech32IbcKeeper = &bech32IbcKeeper
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -444,7 +443,7 @@ func New(
 		&app.DistrKeeper,
 		&app.AccountKeeper,
 		&app.TransferKeeper.Keeper,
-		&bech32IbcKeeper,
+		app.bech32IbcKeeper,
 	)
 
 	// register the staking hooks
