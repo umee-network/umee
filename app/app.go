@@ -400,6 +400,42 @@ func New(
 		),
 	)
 
+	// Create an original ICS-20 transfer keeper and AppModule and then use it to
+	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
+	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
+		appCodec,
+		keys[ibctransfertypes.StoreKey],
+		app.GetSubspace(ibctransfertypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.ScopedTransferKeeper,
+	)
+	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
+	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
+
+	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
+
+	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		ibcTransferKeeper,
+	)
+	app.bech32IbcKeeper = &bech32IbcKeeper
+
+	app.GravityKeeper = gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		&baseBankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+		&app.TransferKeeper.Keeper,
+		&bech32IbcKeeper,
+	)
+
 	// register the staking hooks
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
@@ -420,21 +456,6 @@ func New(
 		app.UpgradeKeeper,
 		app.ScopedIBCKeeper,
 	)
-
-	// Create an original ICS-20 transfer keeper and AppModule and then use it to
-	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
-	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
-		appCodec,
-		keys[ibctransfertypes.StoreKey],
-		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.ScopedTransferKeeper,
-	)
-	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
 
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
@@ -470,27 +491,6 @@ func New(
 		app.BankKeeper,
 		&stakingKeeper,
 		govRouter,
-	)
-
-	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
-
-	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
-		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		ibcTransferKeeper,
-	)
-	app.bech32IbcKeeper = &bech32IbcKeeper
-
-	app.GravityKeeper = gravitykeeper.NewKeeper(
-		keys[gravitytypes.StoreKey],
-		app.GetSubspace(gravitytypes.ModuleName),
-		appCodec,
-		&baseBankKeeper,
-		&stakingKeeper,
-		&app.SlashingKeeper,
-		&app.DistrKeeper,
-		&app.AccountKeeper,
-		&app.TransferKeeper.Keeper,
-		&bech32IbcKeeper,
 	)
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
