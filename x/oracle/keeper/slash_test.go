@@ -20,7 +20,7 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	// Case 1, no slash
 	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	staking.EndBlocker(s.ctx, s.app.StakingKeeper)
+	staking.EndBlocker(s.ctx, *s.app.StakingKeeper)
 
 	validator, _ := s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt, validator.GetBondedTokens())
