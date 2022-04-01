@@ -361,3 +361,42 @@ func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
 
 	require.False(t, success, "It should failed to set the prices, prices and candle are empty")
 }
+
+func TestSuccessGetComputedPrices(t *testing.T) {
+	providerName := "providerTestName"
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
+	providerCandles := make(provider.AggregatedProviderCandles, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USDT",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	tickerPrices := make(map[string]provider.TickerPrice, 1)
+	tickerPrices[pair.String()] = provider.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+	providerPrices[providerName] = tickerPrices
+
+	candles := make(map[string][]provider.CandlePrice, 1)
+	candles[pair.String()] = []provider.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[providerName] = candles
+
+	prices, err := GetComputedPrices(
+		zerolog.Nop(),
+		providerCandles,
+		providerPrices,
+	)
+
+	require.NoError(t, err, "It should successfully get computed prices")
+	require.Equal(t, prices[pair.String()], atomPrice)
+}
