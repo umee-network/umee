@@ -92,6 +92,7 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	customante "github.com/umee-network/umee/ante"
@@ -156,6 +157,7 @@ var (
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		bech32ibc.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -224,7 +226,7 @@ type UmeeApp struct {
 	GravityKeeper    gravitykeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
-	bech32IbcKeeper  *bech32ibckeeper.Keeper
+	bech32IbcKeeper  bech32ibckeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -428,9 +430,9 @@ func New(
 
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 
-	app.bech32IbcKeeper = bech32ibckeeper.NewKeeper(
-		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.TransferKeeper,
+	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
+		&app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		&app.TransferKeeper,
 	)
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
@@ -443,7 +445,7 @@ func New(
 		&app.DistrKeeper,
 		&app.AccountKeeper,
 		&app.TransferKeeper.Keeper,
-		app.bech32IbcKeeper,
+		&app.bech32IbcKeeper,
 	)
 
 	// register the staking hooks
@@ -472,7 +474,8 @@ func New(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper)).
-		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper))
+		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper)).
+		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -525,6 +528,10 @@ func New(
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		bech32ibc.NewAppModule(
+			appCodec,
+			app.bech32IbcKeeper,
+		),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -554,6 +561,7 @@ func New(
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -578,6 +586,7 @@ func New(
 		authz.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -608,6 +617,7 @@ func New(
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)

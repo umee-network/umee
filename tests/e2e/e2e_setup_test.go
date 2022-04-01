@@ -27,6 +27,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tmconfig "github.com/tendermint/tendermint/config"
@@ -89,6 +90,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
+	var useGanache bool
+	if str := os.Getenv("UMEE_E2E_USE_GANACHE"); len(str) > 0 {
+		useGanache, err = strconv.ParseBool(str)
+		s.Require().NoError(err)
+	}
+
 	// The boostrapping phase is as follows:
 	//
 	// 1. Initialize Umee validator nodes.
@@ -101,12 +108,16 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 8. Deploy the Gravity Bridge contract.
 	// 9. Create and start Peggo (orchestrator) containers.
 	s.initNodes()
-	s.initEthereum()
-	s.runEthContainer()
+	if useGanache {
+		s.runGanacheContainer()
+	} else {
+		s.initEthereum()
+		s.runEthContainer()
+	}
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	s.runPriceFeeder()
+	// s.runPriceFeeder()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
 	s.runContractDeployment()
@@ -220,6 +231,15 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err := cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
 	appGenState[gravitytypes.ModuleName] = bz
+
+	var bech32GenState bech32ibctypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
+
+	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
+
+	bz, err = cdc.MarshalJSON(&bech32GenState)
+	s.Require().NoError(err)
+	appGenState[bech32ibctypes.ModuleName] = bz
 
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
@@ -347,6 +367,88 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
+}
+
+func (s *IntegrationTestSuite) runGanacheContainer() {
+	s.T().Log("starting Ganache container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "ganache.Dockerfile"),
+		filepath.Join(tmpDir, "ganache.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	entrypoint := []string{
+		"ganache-cli",
+		"-h",
+		"0.0.0.0",
+		"--networkId",
+		"15",
+	}
+
+	entrypoint = append(entrypoint, "--account", "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7,0x3635C9ADC5DEA00000")
+	for _, orch := range s.chain.orchestrators {
+		s.Require().NoError(orch.generateEthereumKey())
+		entrypoint = append(entrypoint, "--account", orch.ethereumKey.privateKey+",0x3635C9ADC5DEA00000")
+	}
+
+	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "ganache.Dockerfile",
+			ContextDir: tmpDir,
+		},
+		&dockertest.RunOptions{
+			Name:         "ganache",
+			NetworkID:    s.dkrNet.Network.ID,
+			ExposedPorts: []string{"8545"},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
+			},
+			Env:        []string{},
+			Entrypoint: entrypoint,
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.Require().NoError(err)
+
+	match := "Listening on 0.0.0.0:8545"
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	// Wait for Ganache to start running.
+	s.Require().Eventually(
+		func() bool {
+
+			err := s.dkrPool.Client.Logs(
+				docker.LogsOptions{
+					Container:    s.ethResource.Container.ID,
+					OutputStream: &outBuf,
+					ErrorStream:  &errBuf,
+					Stdout:       true,
+					Stderr:       true,
+				},
+			)
+			if err != nil {
+				return false
+			}
+
+			return strings.Contains(outBuf.String(), match)
+		},
+		1*time.Minute,
+		5*time.Second,
+		"ganache node failed to start",
+	)
+	s.T().Logf("started Ganache container: %s", s.ethResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runEthContainer() {
