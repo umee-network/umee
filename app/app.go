@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -97,6 +98,8 @@ import (
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	customante "github.com/umee-network/umee/ante"
 	appparams "github.com/umee-network/umee/app/params"
+	"github.com/umee-network/umee/app/upgrades"
+	"github.com/umee-network/umee/app/upgrades/calypso"
 	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/x/leverage"
@@ -237,6 +240,9 @@ type UmeeApp struct {
 
 	// simulation manager
 	sm *module.SimulationManager
+
+	// configurator
+	configurator *module.Configurator
 }
 
 func New(
@@ -499,6 +505,8 @@ func New(
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
+	app.registerStoreLoaders()
+
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 	app.mm = module.NewManager(
@@ -622,7 +630,9 @@ func New(
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-	app.mm.RegisterServices(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	configurator := module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	app.configurator = &configurator
+	app.mm.RegisterServices(*app.configurator)
 
 	// Create the simulation manager and define the order of the modules for
 	// deterministic simulations.
@@ -672,6 +682,11 @@ func New(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
+	upgrades.RegisterUpgradeHandlers(
+		app.mm, app.configurator, &app.AccountKeeper, &baseBankKeeper, &app.bech32IbcKeeper, &app.DistrKeeper,
+		&app.MintKeeper, app.StakingKeeper, &app.UpgradeKeeper, &app.LeverageKeeper, &app.OracleKeeper,
+	)
+
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
@@ -679,6 +694,30 @@ func New(
 	}
 
 	return app
+}
+
+// Sets up the StoreLoader for new, deleted, or renamed modules
+func (app *UmeeApp) registerStoreLoaders() {
+	// Read the upgrade height and name from previous execution
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	}
+
+	// v1->Calypso STORE LOADER SETUP
+	// Register the new Calypso modules and the special StoreLoader to add them
+	if upgradeInfo.Name == calypso.PlanName {
+		if !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) { // Recognized the plan, need to skip this one though
+			storeUpgrades := storetypes.StoreUpgrades{
+				Added:   []string{bech32ibctypes.ModuleName, oracletypes.ModuleName, leveragetypes.ModuleName}, // We are adding these modules
+				Renamed: nil,
+				Deleted: nil,
+			}
+
+			// configure store loader that checks if version == upgradeHeight and applies store upgrades
+			app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+		}
+	}
 }
 
 // Name returns the name of the Umee network.
