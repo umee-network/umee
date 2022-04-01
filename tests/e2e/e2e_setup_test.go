@@ -117,7 +117,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	// s.runPriceFeeder()
+	s.runPriceFeeder()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
 	s.runContractDeployment()
