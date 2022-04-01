@@ -709,7 +709,11 @@ func (app *UmeeApp) registerStoreLoaders() {
 	if upgradeInfo.Name == calypso.PlanName {
 		if !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) { // Recognized the plan, need to skip this one though
 			storeUpgrades := storetypes.StoreUpgrades{
-				Added:   []string{bech32ibctypes.ModuleName, oracletypes.ModuleName, leveragetypes.ModuleName}, // We are adding these modules
+				Added: []string{
+					bech32ibctypes.ModuleName,
+					oracletypes.ModuleName,
+					leveragetypes.ModuleName,
+				}, // We are adding these modules
 				Renamed: nil,
 				Deleted: nil,
 			}
