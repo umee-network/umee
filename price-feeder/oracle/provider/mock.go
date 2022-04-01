@@ -14,7 +14,7 @@ import (
 const (
 	// Google Sheets document containing mock exchange rates.
 	//
-	// Ref: https://docs.google.com/spreadsheets/d/1DfVh2Xwxfehcwo08h2sBgaqL-2Jem1ri_prsQ3ayFeE/edit#gid=0
+	// Ref: https://docs.google.com/spreadsheets/d/1DfVh2Xwxfehcwo08h2sBgaqL-2Jem1ri_prsQ3ayFeE/edit?usp=sharing
 	mockBaseURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRVD0IMn8ZdRgmE2XeNkwjpSGglwelx1z0-hNV2ejfstVeuL2xF8i3EISBZfrGTjVTI0EXW9Wwq4F-/pub?output=csv"
 )
 
