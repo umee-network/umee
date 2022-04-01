@@ -44,7 +44,8 @@ func GetV2UpgradeHandler(
 			fromVM[moduleName] = module.ConsensusVersion()
 		}
 
-		ctx.Logger().Info("Calypso upgrade: Overwriting Gravity module version", "old", fromVM[gravitytypes.StoreKey], "new", 1)
+		ctx.Logger().
+			Info("Calypso upgrade: Overwriting Gravity module version", "old", fromVM[gravitytypes.StoreKey], "new", 1)
 		// Lower the gravity module version because we want to run that upgrade
 		fromVM[gravitytypes.StoreKey] = 1
 
