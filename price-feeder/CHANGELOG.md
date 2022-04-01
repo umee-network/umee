@@ -45,6 +45,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [#730](https://github.com/umee-network/umee/pull/730) Update the mock provider to use a new spreadsheet which uses randomness.
+
 ### Improvements
 
 - [#684](https://github.com/umee-network/umee/pull/684) Log errors when providers are unable to unmarshal candles and tickers, instead of either one.
