@@ -33,6 +33,9 @@ func RegisterUpgradeHandlers(
 	// Calypso aka v1->v2 UPGRADE HANDLER SETUP
 	upgradeKeeper.SetUpgradeHandler(
 		calypso.PlanName, // Codename Calypso
-		calypso.GetV2UpgradeHandler(mm, configurator, accountKeeper, bankKeeper, bech32IbcKeeper, distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, oracleKeeper),
+		calypso.GetV2UpgradeHandler(
+			mm, configurator, accountKeeper, bankKeeper, bech32IbcKeeper,
+			distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, oracleKeeper,
+		),
 	)
 }
