@@ -304,3 +304,60 @@ func TestGenerateExchangeRatesString(t *testing.T) {
 		})
 	}
 }
+
+func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
+	providerName := "providerTestName"
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
+	providerCandles := make(provider.AggregatedProviderCandles, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USDT",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	prices := make(map[string]provider.TickerPrice, 1)
+	prices[pair.String()] = provider.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+
+	candles := make(map[string][]provider.CandlePrice, 1)
+	candles[pair.String()] = []provider.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+
+	success := SetProviderTickerPricesAndCandles(
+		providerName,
+		providerPrices,
+		providerCandles,
+		prices,
+		candles,
+		pair,
+	)
+
+	require.True(t, success, "It should successfully set the prices")
+	require.Equal(t, providerPrices[providerName][pair.Base].Price, atomPrice)
+	require.Equal(t, providerCandles[providerName][pair.Base][0].Price, atomPrice)
+}
+
+func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
+	success := SetProviderTickerPricesAndCandles(
+		"providerTestName",
+		make(provider.AggregatedProviderPrices, 1),
+		make(provider.AggregatedProviderCandles, 1),
+		make(map[string]provider.TickerPrice, 1),
+		make(map[string][]provider.CandlePrice, 1),
+		types.CurrencyPair{
+			Base:  "ATOM",
+			Quote: "USDT",
+		},
+	)
+
+	require.False(t, success, "It should failed to set the prices, prices and candle are empty")
+}
