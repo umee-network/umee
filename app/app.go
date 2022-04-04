@@ -340,7 +340,7 @@ func New(
 		app.GetSubspace(banktypes.ModuleName),
 		app.ModuleAccountAddrs(),
 	)
-	app.StakingKeeper = stakingkeeper.NewKeeper(
+	stakingKeeper := stakingkeeper.NewKeeper(
 		appCodec,
 		keys[stakingtypes.StoreKey],
 		app.AccountKeeper,
@@ -352,7 +352,7 @@ func New(
 		appCodec,
 		keys[minttypes.StoreKey],
 		app.GetSubspace(minttypes.ModuleName),
-		app.StakingKeeper,
+		&stakingKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
@@ -363,14 +363,14 @@ func New(
 		app.GetSubspace(distrtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		app.StakingKeeper,
+		&stakingKeeper,
 		authtypes.FeeCollectorName,
 		app.ModuleAccountAddrs(),
 	)
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		keys[slashingtypes.StoreKey],
-		app.StakingKeeper,
+		&stakingKeeper,
 		app.GetSubspace(slashingtypes.ModuleName),
 	)
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
@@ -393,7 +393,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.DistrKeeper,
-		app.StakingKeeper,
+		&stakingKeeper,
 		distrtypes.ModuleName,
 	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
@@ -445,7 +445,7 @@ func New(
 		app.GetSubspace(gravitytypes.ModuleName),
 		appCodec,
 		&baseBankKeeper,
-		&app.StakingKeeper,
+		&stakingKeeper,
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
 		&app.AccountKeeper,
@@ -457,7 +457,7 @@ func New(
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
 	// these hooks.
-	app.StakingKeeper = *app.StakingKeeper.SetHooks(
+	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
@@ -498,7 +498,7 @@ func New(
 		app.GetSubspace(govtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		app.StakingKeeper,
+		&stakingKeeper,
 		govRouter,
 	)
 
