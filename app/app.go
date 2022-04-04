@@ -347,6 +347,7 @@ func New(
 		app.BankKeeper,
 		app.GetSubspace(stakingtypes.ModuleName),
 	)
+	app.StakingKeeper = stakingKeeper
 
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
@@ -436,8 +437,8 @@ func New(
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
-		&app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		&app.TransferKeeper,
+		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		app.TransferKeeper,
 	)
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
@@ -457,7 +458,7 @@ func New(
 	//
 	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
 	// these hooks.
-	app.StakingKeeper = *stakingKeeper.SetHooks(
+	app.StakingKeeper = *app.StakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
