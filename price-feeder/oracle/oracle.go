@@ -504,6 +504,12 @@ func FilterCandleDeviations(
 	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
+			fmt.Printf("\n\ndeviationThreshold: %+v", deviationThreshold)
+			fmt.Printf("\nmeans[base]: %+v", means[base])
+			fmt.Printf("\ndeviations[base]: %+v", deviations[base])
+			fmt.Printf("\nmeans[base].Sub(deviations[base].Mul(deviationThreshold)): %+v", means[base].Sub(deviations[base].Mul(deviationThreshold)))
+			fmt.Printf("\nmeans[base].Add(deviations[base].Mul(deviationThreshold)): %+v", means[base].Add(deviations[base].Mul(deviationThreshold)))
+			fmt.Printf("\nprice: %+v", price)
 			if _, ok := deviations[base]; !ok ||
 				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
 					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {

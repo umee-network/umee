@@ -306,7 +306,6 @@ func TestGenerateExchangeRatesString(t *testing.T) {
 }
 
 func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
-	providerName := "providerTestName"
 	providerPrices := make(provider.AggregatedProviderPrices, 1)
 	providerCandles := make(provider.AggregatedProviderCandles, 1)
 	pair := types.CurrencyPair{
@@ -333,7 +332,7 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	}
 
 	success := SetProviderTickerPricesAndCandles(
-		providerName,
+		config.ProviderGate,
 		providerPrices,
 		providerCandles,
 		prices,
@@ -342,13 +341,13 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	)
 
 	require.True(t, success, "It should successfully set the prices")
-	require.Equal(t, providerPrices[providerName][pair.Base].Price, atomPrice)
-	require.Equal(t, providerCandles[providerName][pair.Base][0].Price, atomPrice)
+	require.Equal(t, providerPrices[config.ProviderGate][pair.Base].Price, atomPrice)
+	require.Equal(t, providerCandles[config.ProviderGate][pair.Base][0].Price, atomPrice)
 }
 
 func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
 	success := SetProviderTickerPricesAndCandles(
-		"providerTestName",
+		config.ProviderCoinbase,
 		make(provider.AggregatedProviderPrices, 1),
 		make(provider.AggregatedProviderCandles, 1),
 		make(map[string]provider.TickerPrice, 1),
@@ -363,7 +362,6 @@ func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
 }
 
 func TestSuccessGetComputedPrices(t *testing.T) {
-	providerName := "providerTestName"
 	providerPrices := make(provider.AggregatedProviderPrices, 1)
 	providerCandles := make(provider.AggregatedProviderCandles, 1)
 	pair := types.CurrencyPair{
@@ -379,7 +377,7 @@ func TestSuccessGetComputedPrices(t *testing.T) {
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
-	providerPrices[providerName] = tickerPrices
+	providerPrices[config.ProviderBinance] = tickerPrices
 
 	candles := make(map[string][]provider.CandlePrice, 1)
 	candles[pair.String()] = []provider.CandlePrice{
@@ -389,7 +387,7 @@ func TestSuccessGetComputedPrices(t *testing.T) {
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
 		},
 	}
-	providerCandles[providerName] = candles
+	providerCandles[config.ProviderBinance] = candles
 
 	prices, err := GetComputedPrices(
 		zerolog.Nop(),
@@ -399,4 +397,52 @@ func TestSuccessGetComputedPrices(t *testing.T) {
 
 	require.NoError(t, err, "It should successfully get computed prices")
 	require.Equal(t, prices[pair.String()], atomPrice)
+}
+
+func TestSuccessFilterCandleDeviations(t *testing.T) {
+	providerCandles := make(provider.AggregatedProviderCandles, 4)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USDT",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("1994674.34000000")
+
+	atomCandlePrice := []provider.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+
+	providerCandles[config.ProviderBinance] = map[string][]provider.CandlePrice{
+		pair.String(): atomCandlePrice,
+	}
+	providerCandles[config.ProviderHuobi] = map[string][]provider.CandlePrice{
+		pair.String(): atomCandlePrice,
+	}
+	providerCandles[config.ProviderKraken] = map[string][]provider.CandlePrice{
+		pair.String(): atomCandlePrice,
+	}
+	providerCandles[config.ProviderCoinbase] = map[string][]provider.CandlePrice{
+		pair.String(): {
+			{
+				Price:     sdk.MustNewDecFromStr("1.2"),
+				Volume:    sdk.MustNewDecFromStr("150"),
+				TimeStamp: provider.PastUnixTime(2 * time.Minute),
+			},
+		},
+	}
+
+	pricesFiltered, err := FilterCandleDeviations(
+		zerolog.Nop(),
+		providerCandles,
+	)
+
+	agregatedPrices, ok := pricesFiltered[config.ProviderCoinbase]
+	fmt.Printf("\nagregatedPrices: %+v", agregatedPrices)
+	require.NoError(t, err, "It should successfully filter the provider")
+	require.False(t, ok, "The filtered candle deviation prices at coinbase should be empty")
 }
