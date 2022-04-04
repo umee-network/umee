@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	bridgecmd "github.com/Gravity-Bridge/Gravity-Bridge/module/cmd/gravity/cmd"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
@@ -18,7 +19,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
-	bridgecmd "github.com/umee-network/Gravity-Bridge/module/cmd/gravity/cmd"
 
 	umeeapp "github.com/umee-network/umee/app"
 	"github.com/umee-network/umee/app/params"
