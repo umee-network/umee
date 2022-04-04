@@ -1,8 +1,6 @@
 package calypso
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -54,7 +52,7 @@ func GetV2UpgradeHandler(
 }
 
 // Sets up bech32ibc module by setting the native account prefix to "umee".
-// Failing to set the native prefix will cause a chain halt on init genesis or 
+// Failing to set the native prefix will cause a chain halt on init genesis or
 // in the firstBeginBlocker assertions.
 func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
 	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
