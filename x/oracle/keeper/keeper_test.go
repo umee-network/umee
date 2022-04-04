@@ -50,7 +50,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
-	sh := staking.NewHandler(*app.StakingKeeper)
+	sh := staking.NewHandler(app.StakingKeeper)
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	_, err = sh(ctx, NewTestMsgCreateValidator(valAddr2, valPubKey2, amt))
 	s.Require().NoError(err)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	s.app = app
 	s.ctx = ctx
