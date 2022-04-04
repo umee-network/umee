@@ -30,7 +30,6 @@ func GetV2UpgradeHandler(
 ) func(
 	ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap,
 ) (module.VersionMap, error) {
-	fmt.Println("Enter GetV2UpgradeHandler")
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil {
 		panic("Nil argument to GetV2UpgradeHandler")
