@@ -361,9 +361,38 @@ func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
 	require.False(t, success, "It should failed to set the prices, prices and candle are empty")
 }
 
-func TestSuccessGetComputedPrices(t *testing.T) {
-	providerPrices := make(provider.AggregatedProviderPrices, 1)
+func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 1)
+	pair := types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USDT",
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	candles := make(map[string][]provider.CandlePrice, 1)
+	candles[pair.String()] = []provider.CandlePrice{
+		{
+			Price:     atomPrice,
+			Volume:    atomVolume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderBinance] = candles
+
+	prices, err := GetComputedPrices(
+		zerolog.Nop(),
+		providerCandles,
+		make(provider.AggregatedProviderPrices, 1),
+	)
+
+	require.NoError(t, err, "It should successfully get computed candle prices")
+	require.Equal(t, prices[pair.String()], atomPrice)
+}
+
+func TestSuccessGetComputedPricesTickers(t *testing.T) {
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
 	pair := types.CurrencyPair{
 		Base:  "ATOM",
 		Quote: "USDT",
@@ -379,23 +408,13 @@ func TestSuccessGetComputedPrices(t *testing.T) {
 	}
 	providerPrices[config.ProviderBinance] = tickerPrices
 
-	candles := make(map[string][]provider.CandlePrice, 1)
-	candles[pair.String()] = []provider.CandlePrice{
-		{
-			Price:     atomPrice,
-			Volume:    atomVolume,
-			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
-	}
-	providerCandles[config.ProviderBinance] = candles
-
 	prices, err := GetComputedPrices(
 		zerolog.Nop(),
-		providerCandles,
+		make(provider.AggregatedProviderCandles, 1),
 		providerPrices,
 	)
 
-	require.NoError(t, err, "It should successfully get computed prices")
+	require.NoError(t, err, "It should successfully get computed ticker prices")
 	require.Equal(t, prices[pair.String()], atomPrice)
 }
 
