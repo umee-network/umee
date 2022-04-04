@@ -1,8 +1,6 @@
 package upgrades
 
 import (
-	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
@@ -32,7 +30,7 @@ func RegisterUpgradeHandlers(
 	// Calypso aka v1->v2 UPGRADE HANDLER SETUP
 	upgradeKeeper.SetUpgradeHandler(
 		calypso.PlanName, // Codename Calypso
-		calypso.GetV2UpgradeHandler(
+		calypso.GetCalypsoUpgradeHandler(
 			mm, configurator, accountKeeper, bankKeeper, bech32IbcKeeper,
 			distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, oracleKeeper,
 		),

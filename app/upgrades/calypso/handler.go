@@ -19,7 +19,9 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-func GetV2UpgradeHandler(
+// GetCalypsoUpgradeHandler contains the handler for the Calypso upgrade. It setups the Bech32IBC, Leverage and Oracle
+// modules.
+func GetCalypsoUpgradeHandler(
 	mm *module.Manager, configurator *module.Configurator, accountKeeper *authkeeper.AccountKeeper,
 	bankKeeper *bankkeeper.BaseKeeper, bech32IbcKeeper *bech32ibckeeper.Keeper, distrKeeper *distrkeeper.Keeper,
 	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, leverageKeeper *leveragekeeper.Keeper,
@@ -29,7 +31,7 @@ func GetV2UpgradeHandler(
 ) (module.VersionMap, error) {
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil {
-		panic("Nil argument to GetV2UpgradeHandler")
+		panic("Nil argument to GetCalypsoUpgradeHandler")
 	}
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("Calypso upgrade: Enter handler")
