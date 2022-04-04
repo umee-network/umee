@@ -160,7 +160,7 @@ func StandardDeviation(
 			means[base] = sdk.ZeroDec()
 		}
 
-		numPrices := int64(len(priceSlice))
+		numPrices := int64(len(priceSlice[base]))
 		means[base] = sum.QuoInt64(numPrices)
 		varianceSum := sdk.ZeroDec()
 
