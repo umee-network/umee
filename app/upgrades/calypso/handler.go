@@ -29,7 +29,6 @@ func GetV2UpgradeHandler(
 ) func(
 	ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap,
 ) (module.VersionMap, error) {
-	fmt.Println("Enter GetV2UpgradeHandler")
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil {
 		panic("Nil argument to GetV2UpgradeHandler")
@@ -54,8 +53,9 @@ func GetV2UpgradeHandler(
 	}
 }
 
-// Sets up bech32ibc module by setting the native account prefix to "gravity"
-// Failing to set the native prefix will cause a chain halt on init genesis or in the firstBeginBlocker assertions
+// Sets up bech32ibc module by setting the native account prefix to "umee".
+// Failing to set the native prefix will cause a chain halt on init genesis or 
+// in the firstBeginBlocker assertions.
 func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
 	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
 }
