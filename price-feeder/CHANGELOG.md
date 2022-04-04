@@ -54,6 +54,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#684](https://github.com/umee-network/umee/pull/684) Log errors when providers are unable to unmarshal candles and tickers, instead of either one.
 - [#732](https://github.com/umee-network/umee/pull/732) Set oracle functions to public to facilitate usage in other repositories.
 
+### Bugs
+
+- [#732](https://github.com/umee-network/umee/pull/732) Misleading in get the number of entries for base prices in Standard Deviation calculation.
+
 ## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
 
 ### Features
