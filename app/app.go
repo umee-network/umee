@@ -340,20 +340,19 @@ func New(
 		app.GetSubspace(banktypes.ModuleName),
 		app.ModuleAccountAddrs(),
 	)
-	stakingKeeper := stakingkeeper.NewKeeper(
+	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		keys[stakingtypes.StoreKey],
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.GetSubspace(stakingtypes.ModuleName),
 	)
-	app.StakingKeeper = stakingKeeper
 
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
 		keys[minttypes.StoreKey],
 		app.GetSubspace(minttypes.ModuleName),
-		&stakingKeeper,
+		&app.StakingKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
@@ -364,14 +363,14 @@ func New(
 		app.GetSubspace(distrtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		authtypes.FeeCollectorName,
 		app.ModuleAccountAddrs(),
 	)
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		keys[slashingtypes.StoreKey],
-		&stakingKeeper,
+		&app.StakingKeeper,
 		app.GetSubspace(slashingtypes.ModuleName),
 	)
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
@@ -394,7 +393,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.DistrKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
@@ -446,7 +445,7 @@ func New(
 		app.GetSubspace(gravitytypes.ModuleName),
 		appCodec,
 		&baseBankKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
 		&app.AccountKeeper,
@@ -499,7 +498,7 @@ func New(
 		app.GetSubspace(govtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		govRouter,
 	)
 
