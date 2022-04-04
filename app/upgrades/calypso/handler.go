@@ -3,7 +3,6 @@ package calypso
 import (
 	"fmt"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -37,17 +36,6 @@ func GetV2UpgradeHandler(
 	}
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("Calypso upgrade: Enter handler")
-		// We previously upgraded via genesis, thus we don't want to run upgrades for all the modules
-		fromVM := make(map[string]uint64)
-		ctx.Logger().Info("Calypso upgrade: Creating version map")
-		for moduleName, module := range mm.Modules {
-			fromVM[moduleName] = module.ConsensusVersion()
-		}
-
-		ctx.Logger().
-			Info("Calypso upgrade: Overwriting Gravity module version", "old", fromVM[gravitytypes.StoreKey], "new", 1)
-		// Lower the gravity module version because we want to run that upgrade
-		fromVM[gravitytypes.StoreKey] = 1
 
 		ctx.Logger().Info("Calypso Upgrade: Setting up bech32ibc module's native prefix")
 		err := setupBech32ibcKeeper(bech32IbcKeeper, ctx)
@@ -55,14 +43,14 @@ func GetV2UpgradeHandler(
 			panic(sdkerrors.Wrap(err, "Calypso Upgrade: Unable to upgrade, bech32ibc module not initialized"))
 		}
 
-		fromVM[leveragetypes.ModuleName] = leverage.AppModule{}.ConsensusVersion()
+		vmap[leveragetypes.ModuleName] = leverage.AppModule{}.ConsensusVersion()
 		leverage.InitGenesis(ctx, *leverageKeeper, *leveragetypes.DefaultGenesis())
 
-		fromVM[oracletypes.ModuleName] = oracle.AppModule{}.ConsensusVersion()
+		vmap[oracletypes.ModuleName] = oracle.AppModule{}.ConsensusVersion()
 		oracle.InitGenesis(ctx, *oracleKeeper, *oracletypes.DefaultGenesisState())
 
 		ctx.Logger().Info("Calypso Upgrade: Running all configured module migrations (Should only see Gravity run)")
-		return mm.RunMigrations(ctx, *configurator, fromVM)
+		return mm.RunMigrations(ctx, *configurator, vmap)
 	}
 }
 
