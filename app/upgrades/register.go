@@ -25,7 +25,6 @@ func RegisterUpgradeHandlers(
 	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, upgradeKeeper *upgradekeeper.Keeper,
 	leverageKeeper *leveragekeeper.Keeper, oracleKeeper *oraclekeeper.Keeper,
 ) {
-	fmt.Println("Enter RegisterUpgradeHandlers")
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil || upgradeKeeper == nil {
 		panic("Nil argument to RegisterUpgradeHandlers()!")
