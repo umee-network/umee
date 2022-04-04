@@ -429,9 +429,9 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 	providerCandles[config.ProviderCoinbase] = map[string][]provider.CandlePrice{
 		pair.String(): {
 			{
-				Price:     sdk.MustNewDecFromStr("1.2"),
-				Volume:    sdk.MustNewDecFromStr("150"),
-				TimeStamp: provider.PastUnixTime(2 * time.Minute),
+				Price:     sdk.MustNewDecFromStr("27.1"),
+				Volume:    atomVolume,
+				TimeStamp: provider.PastUnixTime(1 * time.Minute),
 			},
 		},
 	}
@@ -441,8 +441,7 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 		providerCandles,
 	)
 
-	agregatedPrices, ok := pricesFiltered[config.ProviderCoinbase]
-	fmt.Printf("\nagregatedPrices: %+v", agregatedPrices)
+	_, ok := pricesFiltered[config.ProviderCoinbase]
 	require.NoError(t, err, "It should successfully filter the provider")
 	require.False(t, ok, "The filtered candle deviation prices at coinbase should be empty")
 }
