@@ -14,7 +14,7 @@ RUN apt-get update \
   && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 # Install go 
-RUN curl -sL https://go.dev/dl/go1.17.8.linux-amd64.tar.gz | tar --strip-components=1 -C /usr/local -xz
+RUN curl -sL https://go.dev/dl/go1.18.linux-amd64.tar.gz | tar --strip-components=1 -C /usr/local -xz
 
 # Copy Umee source in
 WORKDIR /tmp/build/umee
