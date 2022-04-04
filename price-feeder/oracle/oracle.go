@@ -295,17 +295,15 @@ func GetComputedPrices(
 			return nil, err
 		}
 
-		logger.Debug().Msg("get computed prices from tickers")
 		return vwapPrices, nil
 	}
 
-	logger.Debug().Msg("get computed prices from candles")
 	return tvwapPrices, nil
 }
 
 // SetProviderTickerPricesAndCandles flatten and collect prices for
-// candle and tickers based on the base currency per provider
-// returns true if at least one of price or candle exists.
+// candle and tickers based on the base currency per provider.
+// Returns true if at least one of price or candle exists.
 func SetProviderTickerPricesAndCandles(
 	providerName string,
 	providerPrices provider.AggregatedProviderPrices,
