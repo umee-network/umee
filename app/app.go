@@ -257,7 +257,6 @@ func New(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *UmeeApp {
-
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -535,10 +534,7 @@ func New(
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
-		bech32ibc.NewAppModule(
-			appCodec,
-			app.bech32IbcKeeper,
-		),
+		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -717,8 +713,11 @@ func (app *UmeeApp) registerStoreLoaders() {
 				Deleted: nil,
 			}
 
-			// configure store loader that checks if version == upgradeHeight and applies store upgrades
-			app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+			// configure store loader that checks if version == upgradeHeight and applies
+			// store upgrades
+			app.SetStoreLoader(
+				upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades),
+			)
 		}
 	}
 }
@@ -893,7 +892,6 @@ func initParamsKeeper(
 	legacyAmino *codec.LegacyAmino,
 	key, tkey sdk.StoreKey,
 ) paramskeeper.Keeper {
-
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)
