@@ -262,10 +262,10 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	return nil
 }
 
-// GetComputedPrices gets the candle and ticker prices and compute it.
-// it returns candles TVWAP if possible, if not possible (not available
+// GetComputedPrices gets the candle and ticker prices and computes it.
+// It returns candles' TVWAP if possible, if not possible (not available
 // or due to some staleness) it will use the most recent ticker prices
-// e VWAP instead.
+// and the VWAP formula instead.
 func GetComputedPrices(
 	logger zerolog.Logger,
 	providerCandles provider.AggregatedProviderCandles,
@@ -301,8 +301,8 @@ func GetComputedPrices(
 	return tvwapPrices, nil
 }
 
-// SetProviderTickerPricesAndCandles flatten and collect prices for
-// candle and tickers based on the base currency per provider.
+// SetProviderTickerPricesAndCandles flattens and collects prices for
+// candles and tickers based on the base currency per provider.
 // Returns true if at least one of price or candle exists.
 func SetProviderTickerPricesAndCandles(
 	providerName string,
