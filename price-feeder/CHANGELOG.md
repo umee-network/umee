@@ -45,6 +45,24 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+<<<<<<< HEAD
+=======
+## [v0.2.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.0) - 2022-04-04
+
+### Features
+
+- [#730](https://github.com/umee-network/umee/pull/730) Update the mock provider to use a new spreadsheet which uses randomness.
+
+### Improvements
+
+- [#684](https://github.com/umee-network/umee/pull/684) Log errors when providers are unable to unmarshal candles and tickers, instead of either one.
+- [#732](https://github.com/umee-network/umee/pull/732) Set oracle functions to public to facilitate usage in other repositories.
+
+### Bugs
+
+- [#732](https://github.com/umee-network/umee/pull/732) Fixes an issue where filtering out erroneous providers' candles wasn't working.
+
+>>>>>>> ab7813b (chore: versioning maintenance (#738))
 ## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
 
 ### Features
