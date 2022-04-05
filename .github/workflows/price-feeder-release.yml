@@ -36,7 +36,7 @@ jobs:
           #
           # Ref: https://github.com/goreleaser/goreleaser/pull/2503
           version: v0.179.0
-          args: release --rm-dist --skip-validate --release-notes ./RELEASE_NOTES.md
+          args: release --rm-dist --skip-validate
           workdir: price-feeder
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
