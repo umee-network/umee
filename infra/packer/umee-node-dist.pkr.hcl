@@ -63,7 +63,7 @@ build {
       , "chmod a+x /usr/local/bin/osmosisd"
       , "curl -sLf https://github.com/CosmosContracts/juno/releases/download/v2.1.0/junod -o /usr/local/bin/junod"
       , "chmod a+x /usr/local/bin/junod"
-      , "cd /tmp && curl -sLqf https://github.com/umee-network/umee/releases/download/price-feeder/v0.1.4/price-feeder-v0.1.4-linux-amd64.tar.gz | tar --strip-components 1 -xz"
+      , "cd /tmp && curl -sLqf https://github.com/umee-network/umee/releases/download/price-feeder/v0.2.0/price-feeder-v0.2.0-linux-amd64.tar.gz | tar --strip-components 1 -xz"
       , "cp /tmp/price-feeder /usr/local/bin/"
       , "cd /tmp && curl -sLqf https://github.com/umee-network/peggo/releases/download/v0.2.7/peggo-v0.2.7-linux-amd64.tar.gz | tar --strip-components 1 -xz"
       , "cp /tmp/peggo /usr/local/bin/"
