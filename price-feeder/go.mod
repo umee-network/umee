@@ -18,7 +18,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.14
-	github.com/umee-network/umee v0.8.1-0.20220330155329-d9903f72d511
+	github.com/umee-network/umee/v2 v2.0.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.44.0
 	gopkg.in/yaml.v2 v2.4.0

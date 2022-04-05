@@ -9,7 +9,7 @@ import (
 	"github.com/armon/go-metrics"
 	"github.com/prometheus/common/expfmt"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v2/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/config"
 )
 
 func TestMetrics_Disabled(t *testing.T) {
