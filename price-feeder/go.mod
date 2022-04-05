@@ -3,7 +3,7 @@ module github.com/umee-network/umee/price-feeder
 go 1.17
 
 require (
-	github.com/BurntSushi/toml v1.0.0
+	github.com/BurntSushi/toml v1.1.0
 	github.com/armon/go-metrics v0.3.10
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/go-playground/validator/v10 v10.10.1
