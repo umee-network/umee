@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/x/leverage/keeper"
+	"github.com/umee-network/umee/v2/x/leverage/keeper"
 )
 
 // EndBlocker implements EndBlock for the x/leverage module.

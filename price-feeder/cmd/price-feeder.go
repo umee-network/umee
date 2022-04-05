@@ -19,11 +19,11 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/umee-network/umee/price-feeder/config"
-	"github.com/umee-network/umee/price-feeder/oracle"
-	"github.com/umee-network/umee/price-feeder/oracle/client"
-	v1 "github.com/umee-network/umee/price-feeder/router/v1"
-	"github.com/umee-network/umee/price-feeder/telemetry"
+	"github.com/umee-network/umee/v2/price-feeder/config"
+	"github.com/umee-network/umee/v2/price-feeder/oracle"
+	"github.com/umee-network/umee/v2/price-feeder/oracle/client"
+	v1 "github.com/umee-network/umee/v2/price-feeder/router/v1"
+	"github.com/umee-network/umee/v2/price-feeder/telemetry"
 )
 
 const (

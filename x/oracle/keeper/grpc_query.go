@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 var _ types.QueryServer = querier{}

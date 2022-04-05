@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/oracle module.
