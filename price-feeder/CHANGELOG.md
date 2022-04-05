@@ -45,8 +45,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
 ## [v0.2.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.0) - 2022-04-04
 
 ### Features
@@ -62,7 +60,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#732](https://github.com/umee-network/umee/pull/732) Fixes an issue where filtering out erroneous providers' candles wasn't working.
 
->>>>>>> ab7813b (chore: versioning maintenance (#738))
 ## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
 
 ### Features
