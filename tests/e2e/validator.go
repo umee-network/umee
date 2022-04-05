@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -23,7 +24,6 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	umeeapp "github.com/umee-network/umee/app"
 )
