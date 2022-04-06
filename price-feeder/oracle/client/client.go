@@ -20,9 +20,9 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 
+	"github.com/umee-network/umee/price-feeder/telemetry"
 	umeeapp "github.com/umee-network/umee/v2/app"
 	umeeparams "github.com/umee-network/umee/v2/app/params"
-	"github.com/umee-network/umee/v2/price-feeder/telemetry"
 )
 
 type (

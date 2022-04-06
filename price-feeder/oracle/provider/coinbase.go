@@ -15,9 +15,9 @@ import (
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v2/price-feeder/config"
-	"github.com/umee-network/umee/v2/price-feeder/oracle/types"
-	"github.com/umee-network/umee/v2/price-feeder/telemetry"
+	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (

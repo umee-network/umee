@@ -1,4 +1,4 @@
-module github.com/umee-network/umee/v2/price-feeder
+module github.com/umee-network/umee/price-feeder
 
 go 1.17
 

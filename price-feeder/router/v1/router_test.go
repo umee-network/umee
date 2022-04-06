@@ -12,9 +12,9 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/umee-network/umee/v2/price-feeder/config"
-	v1 "github.com/umee-network/umee/v2/price-feeder/router/v1"
-	"github.com/umee-network/umee/v2/price-feeder/telemetry"
+	"github.com/umee-network/umee/price-feeder/config"
+	v1 "github.com/umee-network/umee/price-feeder/router/v1"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 var (

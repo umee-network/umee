@@ -10,7 +10,7 @@ import (
 	metricsprom "github.com/armon/go-metrics/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
-	"github.com/umee-network/umee/v2/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/config"
 )
 
 // globalLabels defines the set of global labels that will be applied to all
