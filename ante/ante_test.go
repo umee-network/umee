@@ -16,7 +16,7 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 type IntegrationTestSuite struct {

@@ -9,7 +9,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 func SetupTestingApp() (ibctesting.TestingApp, map[string]json.RawMessage) {

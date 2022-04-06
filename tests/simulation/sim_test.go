@@ -19,7 +19,7 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 func init() {

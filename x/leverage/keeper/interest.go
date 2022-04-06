@@ -7,7 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom

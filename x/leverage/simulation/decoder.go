@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/kv"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // NewDecodeStore returns a decoder function closure that unmarshals the KVPair's

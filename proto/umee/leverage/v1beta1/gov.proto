@@ -4,7 +4,7 @@ package umeenetwork.umee.leverage.v1beta1;
 import "gogoproto/gogo.proto";
 import "umee/leverage/v1beta1/leverage.proto";
 
-option go_package = "github.com/umee-network/umee/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
 // UpdateRegistryProposal defines a governance proposal type where the token
 // registry can be updated in the Umee capital facility. Note, the registry

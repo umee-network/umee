@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"context"
 
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {

@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/pflag"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/app/params"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.

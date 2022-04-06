@@ -12,9 +12,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/x/oracle/client/cli"
-	"github.com/umee-network/umee/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/x/oracle/client/cli"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 type IntegrationTestSuite struct {
