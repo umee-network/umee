@@ -4,21 +4,26 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	okxHost      = "ws.okx.com:8443"
-	okxPath      = "/ws/v5/public"
-	okxPingCheck = time.Second * 28 // should be < 30
+	okxHost          = "ws.okx.com:8443"
+	okxPath          = "/ws/v5/public"
+	okxPingCheck     = time.Second * 28 // should be < 30
+	okxPairsEndpoint = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -39,17 +44,22 @@ type (
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
+	// OkxInstId defines the id Symbol of an pair.
+	OkxInstId struct {
+		InstID string `json:"instId"` // Instrument ID ex.: BTC-USDT
+	}
+
 	// OkxTickerPair defines a ticker pair of Okx.
 	OkxTickerPair struct {
-		InstId string `json:"instId"` // Instrument ID ex.: BTC-USDT
+		OkxInstId
 		Last   string `json:"last"`   // Last traded price ex.: 43508.9
 		Vol24h string `json:"vol24h"` // 24h trading volume ex.: 11159.87127845
 	}
 
 	// OkxInst defines the structure containing ID information for the OkxResponses.
 	OkxID struct {
+		OkxInstId
 		Channel string `json:"channel"`
-		InstID  string `json:"instId"`
 	}
 
 	// OkxTickerResponse defines the response structure of a Okx ticker request.
@@ -82,6 +92,11 @@ type (
 	OkxSubscriptionMsg struct {
 		Op   string                 `json:"op"` // Operation ex.: subscribe
 		Args []OkxSubscriptionTopic `json:"args"`
+	}
+
+	// OkxPairsSummary defines the response structure for an Okx pairs summary.
+	OkxPairsSummary struct {
+		Data []OkxInstId `json:"data"`
 	}
 )
 
@@ -152,11 +167,23 @@ func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderOkx,
+	)
 	return nil
 }
 
@@ -196,7 +223,7 @@ func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -271,35 +298,57 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 
 	var (
 		tickerResp OkxTickerResponse
+		tickerErr  error
 		candleResp OkxCandleResponse
+		candleErr  error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal ticker resp")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.ID.Channel == "tickers" {
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
+			telemetry.IncrCounter(
+				1,
+				"websocket",
+				"message",
+				"type",
+				"ticker",
+				"provider",
+				config.ProviderOkx,
+			)
 		}
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal candle resp")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
+			telemetry.IncrCounter(
+				1,
+				"websocket",
+				"message",
+				"type",
+				"candle",
+				"provider",
+				config.ProviderOkx,
+			)
 		}
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 func (p *OkxProvider) setTickerPair(tickerPair OkxTickerPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.tickers[tickerPair.InstId] = tickerPair
+	p.tickers[tickerPair.InstID] = tickerPair
 }
 
 // subscribePairs write the subscription msg to the provider.
@@ -371,6 +420,14 @@ func (p *OkxProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderOkx,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -384,8 +441,41 @@ func (p *OkxProvider) pongHandler(appData string) error {
 	return nil
 }
 
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(okxPairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary struct {
+		Data []OkxInstId `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		splitInstID := strings.Split(pair.InstID, "-")
+		if len(splitInstID) != 2 {
+			continue
+		}
+
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(splitInstID[0]),
+			Quote: strings.ToUpper(splitInstID[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}
+
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Okx", ticker.InstId, ticker.Last, ticker.Vol24h)
+	return newTickerPrice("Okx", ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
 func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {

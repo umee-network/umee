@@ -17,10 +17,10 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/umee-network/umee/x/oracle/client/cli"
-	"github.com/umee-network/umee/x/oracle/keeper"
-	simulation "github.com/umee-network/umee/x/oracle/simulations"
-	"github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/oracle/client/cli"
+	"github.com/umee-network/umee/v2/x/oracle/keeper"
+	simulation "github.com/umee-network/umee/v2/x/oracle/simulations"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 var (

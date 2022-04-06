@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -15,13 +16,16 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
 	huobiHost          = "api-aws.huobi.pro"
 	huobiPath          = "/ws"
 	huobiReconnectTime = time.Minute * 2
+	huobiPairsEndpoint = "https://api.huobi.pro/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -73,6 +77,17 @@ type (
 	// HuobiSubscriptionMsg Msg to subscribe to one ticker channel at time.
 	HuobiSubscriptionMsg struct {
 		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
+	}
+
+	// HuobiPairsSummary defines the response structure for an Huobi pairs
+	// summary.
+	HuobiPairsSummary struct {
+		Data []HuobiPairData `json:"data"`
+	}
+
+	// HuobiPairData defines the data response structure for an Huobi pair.
+	HuobiPairData struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -139,11 +154,23 @@ func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderHuobi,
+	)
 	return nil
 }
 
@@ -183,7 +210,7 @@ func (p *HuobiProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
@@ -242,25 +269,47 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 
 	var (
 		tickerResp HuobiTicker
+		tickerErr  error
 		candleResp HuobiCandle
+		candleErr  error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"ticker",
+			"provider",
+			config.ProviderHuobi,
+		)
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("failed to unmarshal message")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"candle",
+			"provider",
+			config.ProviderHuobi,
+		)
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 // pong return a heartbeat message when a "ping" is received and reset the
@@ -327,6 +376,14 @@ func (p *HuobiProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderHuobi,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -382,6 +439,27 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(huobiPairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary HuobiPairsSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
+	for _, pair := range pairsSummary.Data {
+		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // decompressGzip uncompress gzip compressed messages. All data returned from the

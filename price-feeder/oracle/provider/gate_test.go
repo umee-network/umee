@@ -73,6 +73,16 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestGateProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewGateProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
+	})
+}
+
 func TestGateCurrencyPairToGatePair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	GateSymbol := currencyPairToGatePair(cp)

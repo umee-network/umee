@@ -22,4 +22,6 @@ Queries on account addresses:
 - **LoanedValue** queries for the USD value of the amount  of a given token denomination loaned by a user. If a denomination is not supplied, the total across all of that user's loaned tokens is returned.
 - **Collateral Setting** queries a borrower's collateral setting (enabled or disabled) of a specified uToken denomination.
 - **Collateral** queries a user's collateral amount by token denomination. If a denomination is not supplied, the total for each collateral token is returned.
+- **CollateralValue** queries a user's collateral value in USD by token denomination. If a denomination is not supplied, the sum over all collateral tokens is returned.
 - **Borrow Limit** queries the [Borrow Limit](01_concepts.md#Borrow-Limit) in USD of a given user.
+- **Liquidation Limit** queries the [Borrow Limit](01_concepts.md#Liquidation-Limit) in USD of a given user.

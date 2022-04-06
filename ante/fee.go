@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
@@ -37,8 +37,10 @@ func (mfd MempoolFeeDecorator) AnteHandle(
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
 
-	// if this is a CheckTx. This is only for local mempool purposes, and thus
-	// is only ran on check tx.
+	// Only check for minimum fees if the execution mode is CheckTx and the tx does
+	// not contain oracle messages. If the tx does contain oracle messages, it's
+	// total gas must be less than or equal to a constant, otherwise minimum fees
+	// are checked.
 	if ctx.IsCheckTx() && !simulate &&
 		!(isOracleTx(msgs) && gas <= uint64(len(msgs))*MaxOracleMsgGasUsage) {
 		minGasPrices := ctx.MinGasPrices()

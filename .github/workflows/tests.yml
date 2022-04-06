@@ -26,7 +26,7 @@ jobs:
       - name: Install tparse
         run: |
           export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.8.3
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-tparse-binary
@@ -48,7 +48,7 @@ jobs:
         run: |
           make test-unit-cover
         if: env.GIT_DIFF
-      - uses: codecov/codecov-action@v2.1.0
+      - uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
           fail_ci_if_error: true
@@ -112,7 +112,7 @@ jobs:
             go.sum
       - name: Install Starport
         run: |
-          curl https://get.starport.network/starport@v0.19.4! | bash
+          curl https://get.starport.network/starport@v0.19.5! | bash
         if: env.GIT_DIFF
       - name: Start Local Network via Starport
         run: |

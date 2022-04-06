@@ -46,6 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v2.0.0](https://github.com/umee-network/umee/releases/tag/v2.0.0) - 2022-04-05
+
+### Improvements
+
+- [723](https://github.com/umee-network/umee/pull/723) Add leverage parameter SmallLiquidationSize, which determines the USD value at which a borrow is considered small enough to be liquidated in a single transaction.
+- [711](https://github.com/umee-network/umee/pull/711) Clarify error message for negative elapsed time case.
+
+### Features
+
+- Convexity upgrade!!!
+
 ## [v1.0.3](https://github.com/umee-network/umee/releases/tag/v1.0.3) - 2022-02-17
 
 ### State Machine Breaking

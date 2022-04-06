@@ -10,8 +10,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/umee-network/umee/x/leverage/keeper"
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/keeper"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // Default simulation operation weights for leverage messages

@@ -4,20 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	gateHost      = "ws.gate.io"
-	gatePath      = "/v3"
-	gatePingCheck = time.Second * 28 // should be < 30
+	gateHost          = "ws.gate.io"
+	gatePath          = "/v3"
+	gatePingCheck     = time.Second * 28 // should be < 30
+	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -88,6 +93,12 @@ type (
 	// GateEventResult defines the Result body for the GateEvent response.
 	GateEventResult struct {
 		Status string `json:"status"` // ex. "successful"
+	}
+
+	// GatePairSummary defines the response structure for a Gate pair summary.
+	GatePairSummary struct {
+		Base  string `json:"base"`
+		Quote string `json:"quote"`
 	}
 )
 
@@ -181,6 +192,10 @@ func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 // SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeTickers(cps...); err != nil {
 		return err
 	}
@@ -188,6 +203,14 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		return err
 	}
 	p.setSubscribedPairs(cps...)
+	telemetry.IncrCounter(
+		float32(len(cps)),
+		"websocket",
+		"subscribe",
+		"currency_pairs",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -234,7 +257,7 @@ func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
@@ -285,10 +308,15 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	var gateEvent GateEvent
-	if err := json.Unmarshal(bz, &gateEvent); err != nil {
-		p.logger.Debug().Msg("received a message that is not an event")
-	} else {
+	var (
+		gateEvent GateEvent
+		gateErr   error
+		tickerErr error
+		candleErr error
+	)
+
+	gateErr = json.Unmarshal(bz, &gateEvent)
+	if gateErr == nil {
 		switch gateEvent.Result.Status {
 		case "success":
 			return
@@ -296,18 +324,26 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 			break
 		default:
 			p.reconnect()
+			return
 		}
 	}
 
-	if err := p.messageReceivedTickerPrice(bz); err != nil {
-		// msg is not a ticker, it will try to marshal to candle message.
-		p.logger.Debug().Err(err).Msg("unable to unmarshal ticker")
-	} else {
+	tickerErr = p.messageReceivedTickerPrice(bz)
+	if tickerErr == nil {
 		return
 	}
-	if err := p.messageReceivedCandle(bz); err != nil {
-		p.logger.Debug().Err(err).Msg("unable to unmarshal candle")
+
+	candleErr = p.messageReceivedCandle(bz)
+	if candleErr == nil {
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		AnErr("event", gateErr).
+		Msg("Error on receive message")
 }
 
 // messageReceivedTickerPrice handles the ticker price msg.
@@ -343,6 +379,15 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"ticker",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -408,6 +453,15 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"message",
+		"type",
+		"candle",
+		"provider",
+		config.ProviderGate,
+	)
 	return nil
 }
 
@@ -480,6 +534,14 @@ func (p *GateProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderGate,
+	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
@@ -491,6 +553,31 @@ func (p *GateProvider) ping() error {
 func (p *GateProvider) pongHandler(appData string) error {
 	p.resetReconnectTimer()
 	return nil
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(gatePairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []GatePairSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pair := range pairsSummary {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {

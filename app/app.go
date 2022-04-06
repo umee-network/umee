@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
+	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -15,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -88,21 +92,23 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
-	gravity "github.com/umee-network/Gravity-Bridge/module/x/gravity"
-	gravitykeeper "github.com/umee-network/Gravity-Bridge/module/x/gravity/keeper"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
-	customante "github.com/umee-network/umee/ante"
-	appparams "github.com/umee-network/umee/app/params"
-	uibctransfer "github.com/umee-network/umee/x/ibctransfer"
-	uibctransferkeeper "github.com/umee-network/umee/x/ibctransfer/keeper"
-	"github.com/umee-network/umee/x/leverage"
-	leverageclient "github.com/umee-network/umee/x/leverage/client"
-	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	"github.com/umee-network/umee/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
+	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	customante "github.com/umee-network/umee/v2/ante"
+	appparams "github.com/umee-network/umee/v2/app/params"
+	"github.com/umee-network/umee/v2/app/upgrades"
+	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
+	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
+	"github.com/umee-network/umee/v2/x/leverage"
+	leverageclient "github.com/umee-network/umee/v2/x/leverage/client"
+	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 const (
@@ -154,6 +160,7 @@ var (
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		bech32ibc.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -222,6 +229,7 @@ type UmeeApp struct {
 	GravityKeeper    gravitykeeper.Keeper
 	LeverageKeeper   leveragekeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
+	bech32IbcKeeper  bech32ibckeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -232,6 +240,9 @@ type UmeeApp struct {
 
 	// simulation manager
 	sm *module.SimulationManager
+
+	// configurator
+	configurator *module.Configurator
 }
 
 func New(
@@ -246,7 +257,6 @@ func New(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *UmeeApp {
-
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -261,7 +271,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey, gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
 	)
 	transientKeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -329,18 +339,19 @@ func New(
 		app.GetSubspace(banktypes.ModuleName),
 		app.ModuleAccountAddrs(),
 	)
-	stakingKeeper := stakingkeeper.NewKeeper(
+	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		keys[stakingtypes.StoreKey],
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.GetSubspace(stakingtypes.ModuleName),
 	)
+
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
 		keys[minttypes.StoreKey],
 		app.GetSubspace(minttypes.ModuleName),
-		&stakingKeeper,
+		&app.StakingKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
@@ -351,14 +362,14 @@ func New(
 		app.GetSubspace(distrtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		authtypes.FeeCollectorName,
 		app.ModuleAccountAddrs(),
 	)
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		keys[slashingtypes.StoreKey],
-		&stakingKeeper,
+		&app.StakingKeeper,
 		app.GetSubspace(slashingtypes.ModuleName),
 	)
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
@@ -381,7 +392,7 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.DistrKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
@@ -394,30 +405,6 @@ func New(
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(
 			app.OracleKeeper.Hooks(),
-		),
-	)
-
-	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
-	app.GravityKeeper = gravitykeeper.NewKeeper(
-		keys[gravitytypes.StoreKey],
-		app.GetSubspace(gravitytypes.ModuleName),
-		appCodec,
-		&baseBankKeeper,
-		&stakingKeeper,
-		&app.SlashingKeeper,
-		&app.DistrKeeper,
-		&app.AccountKeeper,
-	)
-
-	// register the staking hooks
-	//
-	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
-	// these hooks.
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
 		),
 	)
 
@@ -445,6 +432,38 @@ func New(
 	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
 	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
 
+	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
+
+	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
+		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		app.TransferKeeper,
+	)
+
+	app.GravityKeeper = gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		&baseBankKeeper,
+		&app.StakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+		&app.TransferKeeper.Keeper,
+		&app.bech32IbcKeeper,
+	)
+
+	// register the staking hooks
+	//
+	// NOTE: The stakingKeeper above is passed by reference, so that it will contain
+	// these hooks.
+	app.StakingKeeper = *app.StakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.DistrKeeper.Hooks(),
+			app.SlashingKeeper.Hooks(),
+			app.GravityKeeper.Hooks(),
+		),
+	)
+
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
@@ -459,7 +478,8 @@ func New(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper)).
-		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper))
+		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper)).
+		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// Create evidence Keeper so we can register the IBC light client misbehavior
 	// evidence route.
@@ -477,11 +497,13 @@ func New(
 		app.GetSubspace(govtypes.ModuleName),
 		app.AccountKeeper,
 		app.BankKeeper,
-		&stakingKeeper,
+		&app.StakingKeeper,
 		govRouter,
 	)
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+
+	app.registerStoreLoaders()
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
@@ -512,6 +534,7 @@ func New(
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that there
@@ -541,6 +564,7 @@ func New(
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -565,6 +589,7 @@ func New(
 		authz.ModuleName,
 		stakingtypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -595,11 +620,14 @@ func New(
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-	app.mm.RegisterServices(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	configurator := module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	app.configurator = &configurator
+	app.mm.RegisterServices(*app.configurator)
 
 	// Create the simulation manager and define the order of the modules for
 	// deterministic simulations.
@@ -648,6 +676,11 @@ func New(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
+	upgrades.RegisterUpgradeHandlers(
+		app.mm, app.configurator, &app.AccountKeeper, &baseBankKeeper, &app.bech32IbcKeeper, &app.DistrKeeper,
+		&app.MintKeeper, &app.StakingKeeper, &app.UpgradeKeeper, &app.LeverageKeeper, &app.OracleKeeper,
+	)
+
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
@@ -655,6 +688,37 @@ func New(
 	}
 
 	return app
+}
+
+// Sets up the StoreLoader for new, deleted, or renamed modules
+func (app *UmeeApp) registerStoreLoaders() {
+	// Read the upgrade height and name from previous execution
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	}
+
+	// v1->Calypso STORE LOADER SETUP
+	// Register the new Calypso modules and the special StoreLoader to add them
+	if upgradeInfo.Name == calypso.PlanName {
+		if !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) { // Recognized the plan, need to skip this one though
+			storeUpgrades := storetypes.StoreUpgrades{
+				Added: []string{
+					bech32ibctypes.ModuleName,
+					oracletypes.ModuleName,
+					leveragetypes.ModuleName,
+				}, // We are adding these modules
+				Renamed: nil,
+				Deleted: nil,
+			}
+
+			// configure store loader that checks if version == upgradeHeight and applies
+			// store upgrades
+			app.SetStoreLoader(
+				upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades),
+			)
+		}
+	}
 }
 
 // Name returns the name of the Umee network.
@@ -827,7 +891,6 @@ func initParamsKeeper(
 	legacyAmino *codec.LegacyAmino,
 	key, tkey sdk.StoreKey,
 ) paramskeeper.Keeper {
-
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)

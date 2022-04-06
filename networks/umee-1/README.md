@@ -6,13 +6,14 @@
 
 - https://www.theamsolutions.info/umee-state-sync
 - https://stakeangle.com/state-sync/umee
-- https://umee-state-sync.cyphercore.io
+- https://book.testnet.run/umee/state-sync
 
 ## Snapshot Providers (Quick Sync)
 
 - https://snapshots.stake2.me/umee
 - https://polkachu.com/tendermint_snapshots/umee
 - https://snapshots.weakhand.xyz/umee
+- http://singularity-services.xyz/umee
 
 ## Umee Archival Nodes
 

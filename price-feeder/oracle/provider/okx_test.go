@@ -20,7 +20,9 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 		syncMap := map[string]OkxTickerPair{}
 		syncMap["ATOM-USDT"] = OkxTickerPair{
-			InstId: "ATOM-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "ATOM-USDT",
+			},
 			Last:   lastPrice,
 			Vol24h: volume,
 		}
@@ -41,13 +43,17 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 		syncMap := map[string]OkxTickerPair{}
 		syncMap["ATOM-USDT"] = OkxTickerPair{
-			InstId: "ATOM-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "ATOM-USDT",
+			},
 			Last:   lastPriceAtom,
 			Vol24h: volume,
 		}
 
 		syncMap["LUNA-USDT"] = OkxTickerPair{
-			InstId: "LUNA-USDT",
+			OkxInstId: OkxInstId{
+				InstID: "LUNA-USDT",
+			},
 			Last:   lastPriceLuna,
 			Vol24h: volume,
 		}
@@ -70,6 +76,16 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, "okx provider failed to get ticker price for FOO-BAR", err.Error())
 		require.Nil(t, prices)
+	})
+}
+
+func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
+	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	require.NoError(t, err)
+
+	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
+		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
+		require.ErrorContains(t, err, "currency pairs is empty")
 	})
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
@@ -11,12 +12,15 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
-	binanceHost = "stream.binance.com:9443"
-	binancePath = "/ws/umeestream"
+	binanceHost          = "stream.binance.com:9443"
+	binancePath          = "/ws/umeestream"
+	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -67,6 +71,12 @@ type (
 		Method string   `json:"method"` // SUBSCRIBE/UNSUBSCRIBE
 		Params []string `json:"params"` // streams to subscribe ex.: usdtatom@ticker
 		ID     uint16   `json:"id"`     // identify messages going back and forth
+	}
+
+	// BinancePairSummary defines the response structure for a Binance pair
+	// summary.
+	BinancePairSummary struct {
+		Symbol string `json:"symbol"`
 	}
 )
 
@@ -134,6 +144,10 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	if len(cps) == 0 {
+		return fmt.Errorf("currency pairs is empty")
+	}
+
 	if err := p.subscribeChannels(cps...); err != nil {
 		return err
 	}
@@ -178,7 +192,7 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	return mapPairsToSlice(p.subscribedPairs)
+	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
@@ -220,25 +234,46 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 
 	var (
 		tickerResp BinanceTicker
+		tickerErr  error
 		candleResp BinanceCandle
+		candleErr  error
 	)
 
-	// sometimes the message received is not a ticker or a candle response.
-	if err := json.Unmarshal(bz, &tickerResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal ticker response")
-	}
+	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"ticker",
+			"provider",
+			config.ProviderBinance,
+		)
 		return
 	}
 
-	if err := json.Unmarshal(bz, &candleResp); err != nil {
-		p.logger.Debug().Err(err).Msg("could not unmarshal candle response")
-		return
-	}
+	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
+		telemetry.IncrCounter(
+			1,
+			"websocket",
+			"message",
+			"type",
+			"candle",
+			"provider",
+			config.ProviderBinance,
+		)
+		return
 	}
+
+	p.logger.Error().
+		Int("length", len(bz)).
+		AnErr("ticker", tickerErr).
+		AnErr("candle", candleErr).
+		Msg("Error on receive message")
 }
 
 func (p *BinanceProvider) setTickerPair(ticker BinanceTicker) {
@@ -319,6 +354,14 @@ func (p *BinanceProvider) reconnect() error {
 	p.wsClient = wsConn
 
 	currencyPairs := p.subscribedPairsToSlice()
+
+	telemetry.IncrCounter(
+		1,
+		"websocket",
+		"reconnect",
+		"provider",
+		config.ProviderBinance,
+	)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -356,6 +399,28 @@ func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 	subsMsg := newBinanceSubscriptionMsg(pairs...)
 	return p.wsClient.WriteJSON(subsMsg)
+}
+
+// GetAvailablePairs returns all pairs to which the provider can subscribe.
+// ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
+func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(binancePairsEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary []BinancePairSummary
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return nil, err
+	}
+
+	availablePairs := make(map[string]struct{}, len(pairsSummary))
+	for _, pairName := range pairsSummary {
+		availablePairs[strings.ToUpper(pairName.Symbol)] = struct{}{}
+	}
+
+	return availablePairs, nil
 }
 
 // currencyPairToBinanceTickerPair receives a currency pair and return binance

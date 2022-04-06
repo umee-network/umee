@@ -10,7 +10,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 type Keeper struct {
@@ -585,6 +585,13 @@ func (k Keeper) LiquidationParams(
 	}
 
 	params := k.GetParams(ctx)
+
+	// special case: If borrowed value is less than small liquidation size,
+	// close factor is always 1
+	if borrowed.LTE(params.SmallLiquidationSize) {
+		return liquidationIncentive, sdk.OneDec(), nil
+	}
+
 	// special case: If complete liquidation threshold is zero, close factor is always 1
 	if params.CompleteLiquidationThreshold.IsZero() {
 		return liquidationIncentive, sdk.OneDec(), nil

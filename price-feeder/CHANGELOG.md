@@ -45,30 +45,75 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v0.2.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.0) - 2022-04-04
+
 ### Features
 
-- [#540](https://github.com/umee-network/umee/pull/536) Use environment vars / standard input for the keyring password instead of the config file.
-- [#522](https://github.com/umee-network/umee/pull/522) Add Okx as a provider.
-- [#536](https://github.com/umee-network/umee/pull/536) Force a minimum of three providers per asset.
-- [#502](https://github.com/umee-network/umee/pull/502) Faulty provider detection: discard prices that are not within 2𝜎 of others.
-- [#551](https://github.com/umee-network/umee/pull/551) Update Binance provider to use WebSocket.
-- [#569](https://github.com/umee-network/umee/pull/569) Update Huobi provider to use WebSocket.
-- [#580](https://github.com/umee-network/umee/pull/580) Update Kraken provider to use WebSocket.
+- [#730](https://github.com/umee-network/umee/pull/730) Update the mock provider to use a new spreadsheet which uses randomness.
+
+### Improvements
+
+- [#684](https://github.com/umee-network/umee/pull/684) Log errors when providers are unable to unmarshal candles and tickers, instead of either one.
+- [#732](https://github.com/umee-network/umee/pull/732) Set oracle functions to public to facilitate usage in other repositories.
+
+### Bugs
+
+- [#732](https://github.com/umee-network/umee/pull/732) Fixes an issue where filtering out erroneous providers' candles wasn't working.
+
+## [v0.1.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.4) - 2022-03-24
+
+### Features
+
+- [#648](https://github.com/umee-network/umee/pull/648) Add Coinbase as a provider.
+- [#679](https://github.com/umee-network/umee/pull/679) Add a configurable provider timeout, which defaults to 100ms.
+
+### Bug Fixes
+
+- [#675](https://github.com/umee-network/umee/pull/675) Add necessary input validation to SubscribePairs in the price feeder.
+
+## [v0.1.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.3) - 2022-03-21
+
+### Features
+
+- [#649](https://github.com/umee-network/umee/pull/649) Add "GetAvailablePairs" function to providers.
+
+## [v0.1.2](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.2) - 2022-03-08
+
+### Features
+
 - [#592](https://github.com/umee-network/umee/pull/592) Add subscribe ticker function to the following providers: Binance, Huobi, Kraken, and Okx.
 - [#601](https://github.com/umee-network/umee/pull/601) Use TVWAP formula for determining prices when available.
 - [#609](https://github.com/umee-network/umee/pull/609) TVWAP faulty provider detection.
 
 ### Bug Fixes
 
-- [#552](https://github.com/umee-network/umee/pull/552) Stop requiring telemetry during config validation.
-- [#574](https://github.com/umee-network/umee/pull/574) Stop registering metrics endpoint if telemetry is disabled.
-- [#573](https://github.com/umee-network/umee/pull/573) Strengthen CORS settings.
 - [#607](https://github.com/umee-network/umee/pull/607) Fix kraken provider timestamp unit.
 
 ### Refactor
 
+- [#610](https://github.com/umee-network/umee/pull/610) Split subscription of ticker and candle channels.
+
+## [v0.1.1](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.1) - 2022-03-01
+
+### Features
+
+- [#502](https://github.com/umee-network/umee/pull/502) Faulty provider detection: discard prices that are not within 2𝜎 of others.
+- [#536](https://github.com/umee-network/umee/pull/536) Force a minimum of three providers per asset.
+- [#522](https://github.com/umee-network/umee/pull/522) Add Okx as a provider.
+- [#551](https://github.com/umee-network/umee/pull/551) Update Binance provider to use WebSocket.
+- [#569](https://github.com/umee-network/umee/pull/569) Update Huobi provider to use WebSocket.
+- [#540](https://github.com/umee-network/umee/pull/536) Use environment vars / standard input for the keyring password instead of the config file.
+- [#580](https://github.com/umee-network/umee/pull/580) Update Kraken provider to use WebSocket.
+
+### Bug Fixes
+
+- [#552](https://github.com/umee-network/umee/pull/552) Stop requiring telemetry during config validation.
+- [#573](https://github.com/umee-network/umee/pull/573) Strengthen CORS settings.
+- [#574](https://github.com/umee-network/umee/pull/574) Stop registering metrics endpoint if telemetry is disabled.
+
+### Refactor
+
 - [#587](https://github.com/umee-network/umee/pull/587) Clean up logs from price feeder providers.
-- [#610](https://github.com/umee-network/umee/pull/610) Split subscribtion of ticker and candle channels.
 
 ## [v0.1.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.1.0) - 2022-02-07
 

@@ -11,10 +11,10 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/x/leverage"
-	"github.com/umee-network/umee/x/leverage/simulation"
-	"github.com/umee-network/umee/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/x/leverage"
+	"github.com/umee-network/umee/v2/x/leverage/simulation"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // SimTestSuite wraps the test suite for running the simulations

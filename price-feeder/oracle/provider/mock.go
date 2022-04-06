@@ -14,8 +14,8 @@ import (
 const (
 	// Google Sheets document containing mock exchange rates.
 	//
-	// Ref: https://docs.google.com/spreadsheets/d/1wdaXPwlTqWnwhco4KQGEK5M0tXjCRQ1X4D-dIEiI1Xc/edit#gid=0
-	mockBaseURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSuFLjDFs5ajCoVZ8wFXaJ4DV8MkAKBcX2BJzWkLjx9i-jN-IDclePrBByXm1It8jgaZJGvsglUQuZ6/pub?output=csv&gid=0"
+	// Ref: https://docs.google.com/spreadsheets/d/1DfVh2Xwxfehcwo08h2sBgaqL-2Jem1ri_prsQ3ayFeE/edit?usp=sharing
+	mockBaseURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRVD0IMn8ZdRgmE2XeNkwjpSGglwelx1z0-hNV2ejfstVeuL2xF8i3EISBZfrGTjVTI0EXW9Wwq4F-/pub?output=csv"
 )
 
 var _ Provider = (*MockProvider)(nil)
@@ -117,4 +117,36 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 // SubscribeCurrencyPairs performs a no-op since mock does not use websockets
 func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
+}
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	resp, err := http.Get(p.baseURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	csvReader := csv.NewReader(resp.Body)
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	// Records are of the form [base, quote, price, volume] and we skip the first
+	// record as that contains the header.
+	availablePairs := make(map[string]struct{}, len(records[1:]))
+	for _, r := range records[1:] {
+		if len(r) < 2 {
+			continue
+		}
+
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(r[0]),
+			Quote: strings.ToUpper(r[1]),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
 }

@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,7 +19,6 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
@@ -33,14 +33,13 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 		AttachStderr: true,
 		Container:    s.orchResources[0].Container.ID,
 		User:         "root",
+		Env:          []string{"PEGGO_ETH_PK=" + ethMinerPK},
 		Cmd: []string{
 			"peggo",
 			"bridge",
 			"deploy-erc20",
 			s.gravityContractAddr,
 			baseDenom,
-			"--eth-pk",
-			ethMinerPK[2:], // remove 0x prefix
 			"--eth-rpc",
 			fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 			"--cosmos-chain-id",
@@ -258,6 +257,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		AttachStderr: true,
 		Container:    s.orchResources[valIdx].Container.ID,
 		User:         "root",
+		Env:          []string{"PEGGO_ETH_PK=" + s.chain.orchestrators[valIdx].ethereumKey.privateKey},
 		Cmd: []string{
 			"peggo",
 			"bridge",
@@ -266,8 +266,6 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			tokenAddr,
 			toUmeeAddr,
 			amount,
-			"--eth-pk",
-			s.chain.orchestrators[valIdx].ethereumKey.privateKey[2:], // remove 0x prefix
 			"--eth-rpc",
 			fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 			"--cosmos-chain-id",

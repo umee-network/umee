@@ -34,6 +34,7 @@ Umee will allow a multitude of decentralized debt products.
 |:-------:|:-------:|:------------:|:-----------:|:-----------:|:-------------:|:--------------------:|
 |  v0.8.x |    ✗    |      ✓       |   v0.45.x   |    v2.0.x   |     v0.2.x    |        v0.1.x        |
 |  v1.x.x |    ✓    |      ✗       |   v0.45.x   |    v2.0.x   |     v0.2.x    |         N/A          |
+|  v2.x.x |    ✗    |      ✓       |   v0.45.x   |    v2.2.x   |     v0.2.x    |        v0.2.x        |
 
 ## Active Networks
 
@@ -43,7 +44,8 @@ Umee will allow a multitude of decentralized debt products.
 
 ### Private
 
-- [umee-alpha-mainnet-2](networks/umee-alpha-mainnet-2)
+- [umee-betanet-1](networks/umee-betanet-1)
+- [umee-betanet-2](networks/umee-betanet-2)
 
 ## Install
 

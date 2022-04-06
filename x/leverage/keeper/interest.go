@@ -7,7 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom
@@ -72,10 +72,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
-	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
-	if yearsElapsed.IsNegative() {
-		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, yearsElapsed.String()+" years")
+	secondsElapsed := currentTime - prevInterestTime
+	if secondsElapsed < 0 {
+		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, fmt.Sprintf("%d seconds", secondsElapsed))
 	}
+	yearsElapsed := sdk.NewDec(secondsElapsed).QuoInt64(types.SecondsPerYear)
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)

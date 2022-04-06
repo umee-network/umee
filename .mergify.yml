@@ -36,6 +36,15 @@ pull_request_rules:
         branches:
           - release/v1.x.x
 
+  - name: Backport patches to the release/v2.x.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v2.x.x
+    actions:
+      backport:
+        branches:
+          - release/v2.x.x
+
   - name: Backport patches to the release/price-feeder/v0.1.x branch
     conditions:
       - base=main
@@ -44,3 +53,12 @@ pull_request_rules:
       backport:
         branches:
           - release/price-feeder/v0.1.x
+
+  - name: Backport patches to the release/price-feeder/v0.2.x branch
+    conditions:
+      - base=main
+      - label=S:backport/price-feeder/v0.2.x
+    actions:
+      backport:
+        branches:
+          - release/price-feeder/v0.2.x

@@ -26,19 +26,17 @@ import (
 	oracletypes "github.com/umee-network/umee/x/oracle/types"
 )
 
-// We define tickerTimeout as the minimum timeout between each oracle loop. We
+// We define tickerSleep as the minimum timeout between each oracle loop. We
 // define this value empirically based on enough time to collect exchange rates,
-// and broadcast pre-vote and vote transactions such that they're committed in a
-// block during each voting period.
+// and broadcast pre-vote and vote transactions such that they're committed in
+// at least one block during each voting period.
 const (
-	tickerTimeout = 1000 * time.Millisecond
+	tickerSleep = 1000 * time.Millisecond
 )
 
-var (
-	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-	// without being considered faulty.
-	deviationThreshold = sdk.MustNewDecFromStr("2")
-)
+// deviationThreshold defines how many 𝜎 a provider can be away from the mean
+// without being considered faulty.
+var deviationThreshold = sdk.MustNewDecFromStr("1.0")
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -63,6 +61,7 @@ type Oracle struct {
 	logger zerolog.Logger
 	closer *pfsync.Closer
 
+	providerTimeout    time.Duration
 	providerPairs      map[string][]types.CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
@@ -74,7 +73,12 @@ type Oracle struct {
 	prices          map[string]sdk.Dec
 }
 
-func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.CurrencyPair) *Oracle {
+func New(
+	logger zerolog.Logger,
+	oc client.OracleClient,
+	currencyPairs []config.CurrencyPair,
+	providerTimeout time.Duration,
+) *Oracle {
 	providerPairs := make(map[string][]types.CurrencyPair)
 
 	for _, pair := range currencyPairs {
@@ -93,6 +97,7 @@ func New(logger zerolog.Logger, oc client.OracleClient, currencyPairs []config.C
 		providerPairs:   providerPairs,
 		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
+		providerTimeout: providerTimeout,
 	}
 }
 
@@ -118,7 +123,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 			telemetry.MeasureSince(startTime, "runtime", "tick")
 			telemetry.IncrCounter(1, "new", "tick")
 
-			time.Sleep(tickerTimeout)
+			time.Sleep(tickerSleep)
 		}
 	}
 }
@@ -188,16 +193,34 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 
 		g.Go(func() error {
-			prices, err := priceProvider.GetTickerPrices(acceptedPairs...)
-			if err != nil {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
-				return err
-			}
+			prices := make(map[string]provider.TickerPrice, 0)
+			candles := make(map[string][]provider.CandlePrice, 0)
+			ch := make(chan struct{})
+			errCh := make(chan error, 1)
 
-			candles, err := priceProvider.GetCandlePrices(acceptedPairs...)
-			if err != nil {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+			go func() {
+				defer close(ch)
+				prices, err = priceProvider.GetTickerPrices(acceptedPairs...)
+				if err != nil {
+					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+					errCh <- err
+				}
+
+				candles, err = priceProvider.GetCandlePrices(acceptedPairs...)
+				if err != nil {
+					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+					errCh <- err
+				}
+			}()
+
+			select {
+			case <-ch:
+				break
+			case err := <-errCh:
 				return err
+			case <-time.After(o.providerTimeout):
+				telemetry.IncrCounter(1, "failure", "provider", "type", "timeout")
+				return fmt.Errorf("provider timed out")
 			}
 
 			// flatten and collect prices based on the base currency per provider
@@ -205,23 +228,8 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
 			for _, pair := range acceptedPairs {
-				if _, ok := providerPrices[providerName]; !ok {
-					providerPrices[providerName] = make(map[string]provider.TickerPrice)
-				}
-				if _, ok := providerCandles[providerName]; !ok {
-					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
-				}
-
-				tp, pricesOk := prices[pair.String()]
-				cp, candlesOk := candles[pair.String()]
-				if pricesOk {
-					providerPrices[providerName][pair.Base] = tp
-				}
-				if candlesOk {
-					providerCandles[providerName][pair.Base] = cp
-				}
-
-				if !pricesOk && !candlesOk {
+				success := SetProviderTickerPricesAndCandles(providerName, providerPrices, providerCandles, prices, candles, pair)
+				if !success {
 					mtx.Unlock()
 					return fmt.Errorf("failed to find any exchange rates in provider responses")
 				}
@@ -236,74 +244,92 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	filteredCandles, err := o.filterCandleDeviations(providerCandles)
+	computedPrices, err := GetComputedPrices(o.logger, providerCandles, providerPrices)
 	if err != nil {
 		return err
+	}
+
+	if len(computedPrices) != len(requiredRates) {
+		return fmt.Errorf("unable to get prices for all exchange candles")
+	}
+	for base := range requiredRates {
+		if _, ok := computedPrices[base]; !ok {
+			return fmt.Errorf("reported prices were not equal to required rates, missed: %s", base)
+		}
+	}
+
+	o.prices = computedPrices
+	return nil
+}
+
+// GetComputedPrices gets the candle and ticker prices and computes it.
+// It returns candles' TVWAP if possible, if not possible (not available
+// or due to some staleness) it will use the most recent ticker prices
+// and the VWAP formula instead.
+func GetComputedPrices(
+	logger zerolog.Logger,
+	providerCandles provider.AggregatedProviderCandles,
+	providerPrices provider.AggregatedProviderPrices,
+) (prices map[string]sdk.Dec, err error) {
+	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
+	if err != nil {
+		return nil, err
 	}
 
 	// attempt to use candles for TVWAP calculations
 	tvwapPrices, err := ComputeTVWAP(filteredCandles)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		filteredProviderPrices, err := o.filterTickerDeviations(providerPrices)
+		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		// warn the user of any missing prices
-		reportedPrices := make(map[string]struct{})
-		for _, providers := range filteredProviderPrices {
-			for base := range providers {
-				if _, ok := reportedPrices[base]; !ok {
-					reportedPrices[base] = struct{}{}
-				}
-			}
-		}
-
-		if len(reportedPrices) != len(requiredRates) {
-			return fmt.Errorf("unable to get prices for all exchange prices")
-		}
-		for base := range requiredRates {
-			if _, ok := reportedPrices[base]; !ok {
-				return fmt.Errorf("reported prices were not equal to required rates")
-			}
-		}
-
-		o.prices = vwapPrices
-	} else {
-		// warn the user of any missing candles
-		reportedCandles := make(map[string]struct{})
-		for _, providers := range filteredCandles {
-			for base := range providers {
-				if _, ok := reportedCandles[base]; !ok {
-					reportedCandles[base] = struct{}{}
-				}
-			}
-		}
-
-		if len(reportedCandles) != len(requiredRates) {
-			return fmt.Errorf("unable to get prices for all exchange candles")
-		}
-		for base := range requiredRates {
-			if _, ok := reportedCandles[base]; !ok {
-				return fmt.Errorf("reported candles were not equal to required rates")
-			}
-		}
-
-		o.prices = tvwapPrices
+		return vwapPrices, nil
 	}
 
-	return nil
+	return tvwapPrices, nil
+}
+
+// SetProviderTickerPricesAndCandles flattens and collects prices for
+// candles and tickers based on the base currency per provider.
+// Returns true if at least one of price or candle exists.
+func SetProviderTickerPricesAndCandles(
+	providerName string,
+	providerPrices provider.AggregatedProviderPrices,
+	providerCandles provider.AggregatedProviderCandles,
+	prices map[string]provider.TickerPrice,
+	candles map[string][]provider.CandlePrice,
+	pair types.CurrencyPair,
+) (success bool) {
+	if _, ok := providerPrices[providerName]; !ok {
+		providerPrices[providerName] = make(map[string]provider.TickerPrice)
+	}
+	if _, ok := providerCandles[providerName]; !ok {
+		providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+	}
+
+	tp, pricesOk := prices[pair.String()]
+	cp, candlesOk := candles[pair.String()]
+
+	if pricesOk {
+		providerPrices[providerName][pair.Base] = tp
+	}
+	if candlesOk {
+		providerCandles[providerName][pair.Base] = cp
+	}
+
+	return pricesOk || candlesOk
 }
 
 // GetParams returns the current on-chain parameters of the x/oracle module.
@@ -340,48 +366,11 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 
 	priceProvider, ok = o.priceProviders[providerName]
 	if !ok {
-		switch providerName {
-		case config.ProviderBinance:
-			binanceProvider, err := provider.NewBinanceProvider(ctx, o.logger, o.providerPairs[config.ProviderBinance]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = binanceProvider
-
-		case config.ProviderKraken:
-			krakenProvider, err := provider.NewKrakenProvider(ctx, o.logger, o.providerPairs[config.ProviderKraken]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = krakenProvider
-
-		case config.ProviderOsmosis:
-			priceProvider = provider.NewOsmosisProvider()
-
-		case config.ProviderHuobi:
-			huobiProvider, err := provider.NewHuobiProvider(ctx, o.logger, o.providerPairs[config.ProviderHuobi]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = huobiProvider
-
-		case config.ProviderOkx:
-			okxProvider, err := provider.NewOkxProvider(ctx, o.logger, o.providerPairs[config.ProviderOkx]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = okxProvider
-
-		case config.ProviderGate:
-			gateProvider, err := provider.NewGateProvider(ctx, o.logger, o.providerPairs[config.ProviderGate]...)
-			if err != nil {
-				return nil, err
-			}
-			priceProvider = gateProvider
-
-		case config.ProviderMock:
-			priceProvider = provider.NewMockProvider()
+		newProvider, err := NewProvider(ctx, providerName, o.logger, o.providerPairs[providerName]...)
+		if err != nil {
+			return nil, err
 		}
+		priceProvider = newProvider
 
 		o.priceProviders[providerName] = priceProvider
 	}
@@ -389,9 +378,40 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 	return priceProvider, nil
 }
 
-// filterTickerDeviations finds the standard deviations of the prices of
+func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger, providerPairs ...types.CurrencyPair) (provider.Provider, error) {
+	switch providerName {
+	case config.ProviderBinance:
+		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderKraken:
+		return provider.NewKrakenProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderOsmosis:
+		return provider.NewOsmosisProvider(), nil
+
+	case config.ProviderHuobi:
+		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderCoinbase:
+		return provider.NewCoinbaseProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderOkx:
+		return provider.NewOkxProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderGate:
+		return provider.NewGateProvider(ctx, logger, providerPairs...)
+
+	case config.ProviderMock:
+		return provider.NewMockProvider(), nil
+	}
+
+	return nil, fmt.Errorf("provider %s not found", providerName)
+}
+
+// FilterTickerDeviations finds the standard deviations of the prices of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
-func (o *Oracle) filterTickerDeviations(
+func FilterTickerDeviations(
+	logger zerolog.Logger,
 	prices provider.AggregatedProviderPrices,
 ) (provider.AggregatedProviderPrices, error) {
 	var (
@@ -426,7 +446,7 @@ func (o *Oracle) filterTickerDeviations(
 				filteredPrices[providerName][base] = tp
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
-				o.logger.Warn().
+				logger.Warn().
 					Str("base", base).
 					Str("provider", providerName).
 					Str("price", tp.Price.String()).
@@ -438,9 +458,10 @@ func (o *Oracle) filterTickerDeviations(
 	return filteredPrices, nil
 }
 
-// filterCandleDeviations finds the standard deviations of the tvwaps of
+// FilterCandleDeviations finds the standard deviations of the tvwaps of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
-func (o *Oracle) filterCandleDeviations(
+func FilterCandleDeviations(
+	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
 ) (provider.AggregatedProviderCandles, error) {
 	var (
@@ -491,7 +512,7 @@ func (o *Oracle) filterCandleDeviations(
 				filteredCandles[providerName][base] = candles[providerName][base]
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
-				o.logger.Warn().
+				logger.Warn().
 					Str("base", base).
 					Str("provider", providerName).
 					Str("price", price.String()).
@@ -565,6 +586,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 			Float64("previous_vote_period", o.previousVotePeriod).
 			Float64("current_vote_period", currentVotePeriod).
 			Msg("missing vote during voting period")
+		telemetry.IncrCounter(1, "vote", "failure", "missed")
 
 		o.previousVotePeriod = 0
 		o.previousPrevote = nil
