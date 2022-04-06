@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/cosmos/cosmos-sdk/std"
 
-	"github.com/umee-network/umee/app/params"
+	"github.com/umee-network/umee/v2/app/params"
 )
 
 // MakeEncodingConfig returns the application's encoding configuration with all
