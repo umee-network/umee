@@ -50,7 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [754](https://github.com/umee-network/umee/pull/754) Update go.mod to use `/v2` import path syntax .
+- [754](https://github.com/umee-network/umee/pull/754) Update go.mod to use `/v2` import path.
 - [723](https://github.com/umee-network/umee/pull/723) Add leverage parameter SmallLiquidationSize, which determines the USD value at which a borrow is considered small enough to be liquidated in a single transaction.
 - [711](https://github.com/umee-network/umee/pull/711) Clarify error message for negative elapsed time case.
 
