@@ -45,6 +45,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [#766](https://github.com/umee-network/umee/pull/766) Update deps to use umee v2.0.0.
+
 ## [v0.2.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.0) - 2022-04-04
 
 ### Features
