@@ -14,8 +14,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/umee-network/umee/x/oracle/keeper"
-	"github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/oracle/keeper"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // Simulation operation weights constants

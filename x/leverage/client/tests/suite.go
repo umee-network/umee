@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/x/leverage/client/cli"
-	"github.com/umee-network/umee/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/x/leverage/client/cli"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 type IntegrationTestSuite struct {

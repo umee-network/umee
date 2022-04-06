@@ -4,8 +4,8 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/ante"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/ante"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 func (suite *IntegrationTestSuite) TestMempoolFee() {

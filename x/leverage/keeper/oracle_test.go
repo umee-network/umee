@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 type mockOracleKeeper struct {
