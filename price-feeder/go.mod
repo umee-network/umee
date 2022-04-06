@@ -1,4 +1,4 @@
-module github.com/umee-network/umee/price-feeder
+module github.com/umee-network/umee/v2/price-feeder
 
 go 1.17
 
@@ -18,15 +18,10 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.16
-	github.com/umee-network/umee v0.8.1-0.20220330155329-d9903f72d511
+	github.com/umee-network/umee/v2 v2.0.0-20220406102959-e44f8afc8d11
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.44.0
 	gopkg.in/yaml.v2 v2.4.0
-)
-
-require (
-	github.com/gin-gonic/gin v1.7.0 // indirect
-	github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220217130213-b3cdbcaa3b93 // indirect
 )
 
 require (
@@ -34,6 +29,7 @@ require (
 	github.com/99designs/keyring v1.1.6 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220317234142-1c674cbc83ff // indirect
 	github.com/Workiva/go-datastructures v1.0.53 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
@@ -98,6 +94,8 @@ require (
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
+	github.com/onsi/gomega v1.18.1 // indirect
+	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
