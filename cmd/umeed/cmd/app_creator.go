@@ -18,8 +18,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/app/params"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/app/params"
 )
 
 type appCreator struct {

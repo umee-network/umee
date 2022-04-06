@@ -3,8 +3,8 @@ package oracle
 import (
 	"time"
 
-	"github.com/umee-network/umee/x/oracle/keeper"
-	"github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/oracle/keeper"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"

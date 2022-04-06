@@ -3,8 +3,8 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	"github.com/umee-network/umee/x/oracle/types"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // Hooks defines a structure around the x/oracle Keeper that implements various
