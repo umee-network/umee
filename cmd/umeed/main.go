@@ -5,8 +5,8 @@ import (
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/cmd/umeed/cmd"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/cmd/umeed/cmd"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.

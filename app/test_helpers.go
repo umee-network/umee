@@ -19,8 +19,8 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // DefaultConsensusParams defines the default Tendermint consensus params used
