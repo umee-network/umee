@@ -11,12 +11,12 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
-	"github.com/umee-network/umee/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/x/leverage/types"
-	"github.com/umee-network/umee/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	"github.com/umee-network/umee/v2/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // GetCalypsoUpgradeHandler contains the handler for the Calypso upgrade. It setups the Bech32IBC, Leverage and Oracle

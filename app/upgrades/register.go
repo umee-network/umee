@@ -9,9 +9,9 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
-	"github.com/umee-network/umee/app/upgrades/calypso"
-	leveragekeeper "github.com/umee-network/umee/x/leverage/keeper"
-	oraclekeeper "github.com/umee-network/umee/x/oracle/keeper"
+	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 )
 
 // RegisterUpgradeHandlers registers handlers for all upgrades

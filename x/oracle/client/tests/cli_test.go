@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	umeeapp "github.com/umee-network/umee/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {

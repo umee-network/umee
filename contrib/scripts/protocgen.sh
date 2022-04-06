@@ -30,5 +30,5 @@ for dir in $proto_dirs; do
     $(find "${dir}" -maxdepth 1 -name '*.proto')
 done
 
-cp -r ./github.com/umee-network/umee/* ./
+cp -r ./github.com/umee-network/umee/v*/x/* x/
 rm -rf ./github.com

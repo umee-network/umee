@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	umeeapp "github.com/umee-network/umee/app"
-	"github.com/umee-network/umee/x/leverage/client/cli"
+	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/x/leverage/client/cli"
 )
 
 func TestParseUpdateRegistryProposal(t *testing.T) {
