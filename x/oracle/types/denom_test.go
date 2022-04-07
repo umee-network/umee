@@ -4,26 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/x/oracle/types"
-)
-
-var (
-	umeeDenom = types.Denom{
-		BaseDenom:   app.BondDenom,
-		SymbolDenom: app.DisplayDenom,
-		Exponent:    6,
-	}
-	lunaDenom = types.Denom{
-		BaseDenom:   denomLunaIBC,
-		SymbolDenom: "LUNA",
-		Exponent:    6,
-	}
-	atomDenom = types.Denom{
-		BaseDenom:   denomAtomIBC,
-		SymbolDenom: "ATOM",
-		Exponent:    6,
-	}
 )
 
 func TestDenomString(t *testing.T) {
@@ -32,15 +13,15 @@ func TestDenomString(t *testing.T) {
 		expectedStr string
 	}{
 		{
-			denom:       umeeDenom,
+			denom:       types.DenomUmee,
 			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6\n",
 		},
 		{
-			denom:       lunaDenom,
+			denom:       types.DenomLuna,
 			expectedStr: "base_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: ULUNA\nexponent: 6\n",
 		},
 		{
-			denom:       atomDenom,
+			denom:       types.DenomAtom,
 			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: UATOM\nexponent: 6\n",
 		},
 	}
@@ -57,28 +38,28 @@ func TestDenomEqual(t *testing.T) {
 		equal         bool
 	}{
 		{
-			denom:         umeeDenom,
-			denomCompared: umeeDenom,
+			denom:         types.DenomUmee,
+			denomCompared: types.DenomUmee,
 			equal:         true,
 		},
 		{
-			denom:         umeeDenom,
-			denomCompared: lunaDenom,
+			denom:         types.DenomUmee,
+			denomCompared: types.DenomLuna,
 			equal:         false,
 		},
 		{
-			denom:         lunaDenom,
-			denomCompared: lunaDenom,
+			denom:         types.DenomLuna,
+			denomCompared: types.DenomLuna,
 			equal:         true,
 		},
 		{
-			denom:         atomDenom,
-			denomCompared: atomDenom,
+			denom:         types.DenomAtom,
+			denomCompared: types.DenomAtom,
 			equal:         true,
 		},
 		{
-			denom:         atomDenom,
-			denomCompared: lunaDenom,
+			denom:         types.DenomAtom,
+			denomCompared: types.DenomLuna,
 			equal:         false,
 		},
 	}
@@ -94,11 +75,11 @@ func TestDenomListString(t *testing.T) {
 		expectedStr string
 	}{
 		{
-			denomList:   types.DenomList{umeeDenom},
+			denomList:   types.DenomList{types.DenomUmee},
 			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6",
 		},
 		{
-			denomList:   types.DenomList{atomDenom, lunaDenom},
+			denomList:   types.DenomList{types.DenomAtom, types.DenomLuna},
 			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: UATOM\nexponent: 6\n\nbase_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: ULUNA\nexponent: 6",
 		},
 	}
@@ -115,28 +96,28 @@ func TestDenomListContains(t *testing.T) {
 		symbolInList bool
 	}{
 		{
-			denomList:    types.DenomList{umeeDenom},
-			denomSymbol:  umeeDenom.SymbolDenom,
+			denomList:    types.DenomList{types.DenomUmee},
+			denomSymbol:  types.DenomUmee.SymbolDenom,
 			symbolInList: true,
 		},
 		{
-			denomList:    types.DenomList{umeeDenom},
-			denomSymbol:  lunaDenom.SymbolDenom,
+			denomList:    types.DenomList{types.DenomUmee},
+			denomSymbol:  types.DenomLuna.SymbolDenom,
 			symbolInList: false,
 		},
 		{
-			denomList:    types.DenomList{umeeDenom, atomDenom},
-			denomSymbol:  lunaDenom.SymbolDenom,
+			denomList:    types.DenomList{types.DenomUmee, types.DenomAtom},
+			denomSymbol:  types.DenomLuna.SymbolDenom,
 			symbolInList: false,
 		},
 		{
-			denomList:    types.DenomList{umeeDenom, atomDenom},
-			denomSymbol:  atomDenom.SymbolDenom,
+			denomList:    types.DenomList{types.DenomUmee, types.DenomAtom},
+			denomSymbol:  types.DenomAtom.SymbolDenom,
 			symbolInList: true,
 		},
 		{
-			denomList:    types.DenomList{umeeDenom, atomDenom, lunaDenom},
-			denomSymbol:  lunaDenom.SymbolDenom,
+			denomList:    types.DenomList{types.DenomUmee, types.DenomAtom, types.DenomLuna},
+			denomSymbol:  types.DenomLuna.SymbolDenom,
 			symbolInList: true,
 		},
 	}

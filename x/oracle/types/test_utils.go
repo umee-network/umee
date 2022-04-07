@@ -11,9 +11,30 @@ import (
 	tmprotocrypto "github.com/tendermint/tendermint/proto/tendermint/crypto"
 )
 
+const (
+	IbcDenomLuna = "ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0"
+	IbcDenomAtom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+)
+
 var (
 	_ StakingKeeper           = MockStakingKeeper{}
 	_ stakingtypes.ValidatorI = MockValidator{}
+
+	DenomUmee = Denom{
+		BaseDenom:   UmeeDenom,
+		SymbolDenom: UmeeSymbol,
+		Exponent:    6,
+	}
+	DenomLuna = Denom{
+		BaseDenom:   IbcDenomLuna,
+		SymbolDenom: "LUNA",
+		Exponent:    6,
+	}
+	DenomAtom = Denom{
+		BaseDenom:   IbcDenomAtom,
+		SymbolDenom: "ATOM",
+		Exponent:    6,
+	}
 )
 
 // GenerateRandomTestCase
