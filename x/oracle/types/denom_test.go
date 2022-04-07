@@ -14,15 +14,15 @@ func TestDenomString(t *testing.T) {
 	}{
 		{
 			denom:       types.DenomUmee,
-			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6\n",
+			expectedStr: "base_denom: uumee\nsymbol_denom: umee\nexponent: 6\n",
 		},
 		{
 			denom:       types.DenomLuna,
-			expectedStr: "base_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: ULUNA\nexponent: 6\n",
+			expectedStr: "base_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: LUNA\nexponent: 6\n",
 		},
 		{
 			denom:       types.DenomAtom,
-			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: UATOM\nexponent: 6\n",
+			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: ATOM\nexponent: 6\n",
 		},
 	}
 
@@ -76,11 +76,11 @@ func TestDenomListString(t *testing.T) {
 	}{
 		{
 			denomList:   types.DenomList{types.DenomUmee},
-			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6",
+			expectedStr: "base_denom: uumee\nsymbol_denom: umee\nexponent: 6",
 		},
 		{
 			denomList:   types.DenomList{types.DenomAtom, types.DenomLuna},
-			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: UATOM\nexponent: 6\n\nbase_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: ULUNA\nexponent: 6",
+			expectedStr: "base_denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\nsymbol_denom: ATOM\nexponent: 6\n\nbase_denom: ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0\nsymbol_denom: LUNA\nexponent: 6",
 		},
 	}
 
