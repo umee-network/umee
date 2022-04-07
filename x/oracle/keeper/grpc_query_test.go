@@ -3,11 +3,14 @@ package keeper_test
 import (
 	"context"
 	"math/rand"
+	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/x/oracle/keeper"
 	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
@@ -141,4 +144,41 @@ func (s *IntegrationTestSuite) TestQuerier_Params() {
 	res, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
 	s.Require().Equal(types.DefaultGenesisState().Params, res.Params)
+}
+
+func TestEmptyRequest(t *testing.T) {
+	q := keeper.NewQuerier(keeper.Keeper{})
+	emptyRequestErrorMsg := "empty request"
+
+	resParams, err := q.Params(context.Background(), nil)
+	require.Nil(t, resParams)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resExchangeRate, err := q.ExchangeRates(context.Background(), nil)
+	require.Nil(t, resExchangeRate)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resActiveExchangeRates, err := q.ActiveExchangeRates(context.Background(), nil)
+	require.Nil(t, resActiveExchangeRates)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resFeederDelegation, err := q.FeederDelegation(context.Background(), nil)
+	require.Nil(t, resFeederDelegation)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resMissCounter, err := q.MissCounter(context.Background(), nil)
+	require.Nil(t, resMissCounter)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resAggregatePrevote, err := q.AggregatePrevote(context.Background(), nil)
+	require.Nil(t, resAggregatePrevote)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resAggregateVote, err := q.AggregateVote(context.Background(), nil)
+	require.Nil(t, resAggregateVote)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
+	resAggregateVotes, err := q.AggregateVotes(context.Background(), nil)
+	require.Nil(t, resAggregateVotes)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
 }
