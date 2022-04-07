@@ -11,7 +11,8 @@ import (
 
 func TestGetExchangeRateKey(t *testing.T) {
 	testCases := []struct {
-		denom       string
+		denom string
+		// KeyPrefixExchangeRate | []byte(denom) | 0
 		expectedKey []byte
 	}{
 		{
@@ -36,7 +37,8 @@ func TestGetExchangeRateKey(t *testing.T) {
 
 func TestGetFeederDelegationKey(t *testing.T) {
 	testCases := []struct {
-		val         sdk.ValAddress
+		val sdk.ValAddress
+		// KeyPrefixFeederDelegation | lengthPrefixed(addr)
 		expectedKey []byte
 	}{
 		{
@@ -53,7 +55,8 @@ func TestGetFeederDelegationKey(t *testing.T) {
 
 func TestGetMissCounterKey(t *testing.T) {
 	testCases := []struct {
-		val         sdk.ValAddress
+		val sdk.ValAddress
+		// KeyPrefixMissCounter | lengthPrefixed(addr)
 		expectedKey []byte
 	}{
 		{
@@ -70,7 +73,8 @@ func TestGetMissCounterKey(t *testing.T) {
 
 func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
 	testCases := []struct {
-		val         sdk.ValAddress
+		val sdk.ValAddress
+		// KeyPrefixAggregateExchangeRatePrevote | lengthPrefixed(addr)
 		expectedKey []byte
 	}{
 		{
@@ -87,7 +91,8 @@ func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
 
 func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
 	testCases := []struct {
-		val         sdk.ValAddress
+		val sdk.ValAddress
+		// KeyPrefixAggregateExchangeRateVote | lengthPrefixed(addr)
 		expectedKey []byte
 	}{
 		{
