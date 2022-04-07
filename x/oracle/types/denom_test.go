@@ -16,12 +16,12 @@ var (
 	}
 	lunaDenom = types.Denom{
 		BaseDenom:   denomLunaIBC,
-		SymbolDenom: "ULUNA",
+		SymbolDenom: "LUNA",
 		Exponent:    6,
 	}
 	atomDenom = types.Denom{
 		BaseDenom:   denomAtomIBC,
-		SymbolDenom: "UATOM",
+		SymbolDenom: "ATOM",
 		Exponent:    6,
 	}
 )
