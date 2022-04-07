@@ -2,7 +2,6 @@
 package types
 
 import (
-	"math"
 	"math/rand"
 	"time"
 
@@ -13,22 +12,14 @@ import (
 	tmprotocrypto "github.com/tendermint/tendermint/proto/tendermint/crypto"
 )
 
-// OracleDecPrecision nolint
-const OracleDecPrecision = 8
-
-// GenerateRandomTestCase nolint
-func GenerateRandomTestCase() (rates []float64, valValAddrs []sdk.ValAddress, stakingKeeper DummyStakingKeeper) {
+// GenerateRandomTestCase
+func GenerateRandomTestCase() (valValAddrs []sdk.ValAddress, stakingKeeper DummyStakingKeeper) {
 	valValAddrs = []sdk.ValAddress{}
 	mockValidators := []MockValidator{}
-
-	base := math.Pow10(OracleDecPrecision)
 
 	rand.Seed(int64(time.Now().Nanosecond()))
 	numInputs := 10 + (rand.Int() % 100)
 	for i := 0; i < numInputs; i++ {
-		rate := float64(int64(rand.Float64()*base)) / base
-		rates = append(rates, rate)
-
 		pubKey := secp256k1.GenPrivKey().PubKey()
 		valValAddr := sdk.ValAddress(pubKey.Address())
 		valValAddrs = append(valValAddrs, valValAddr)
