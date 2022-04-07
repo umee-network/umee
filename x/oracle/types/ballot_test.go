@@ -17,7 +17,6 @@ func TestToMap(t *testing.T) {
 		votes   []VoteForTally
 		isValid []bool
 	}{
-
 		[]VoteForTally{
 			{
 				Voter:        sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address()),
@@ -187,42 +186,57 @@ func TestPBWeightedMedian(t *testing.T) {
 
 func TestPBStandardDeviation(t *testing.T) {
 	tests := []struct {
-		inputs            []float64
+		inputs            []sdk.Dec
 		weights           []int64
 		isValidator       []bool
 		standardDeviation sdk.Dec
 	}{
 		{
 			// Supermajority one number
-			[]float64{1.0, 2.0, 10.0, 100000.0},
+			[]sdk.Dec{
+				sdk.MustNewDecFromStr("1.0"),
+				sdk.MustNewDecFromStr("2.0"),
+				sdk.MustNewDecFromStr("10.0"),
+				sdk.MustNewDecFromStr("100000.00"),
+			},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.MustNewDecFromStr("49995.000362536252310906"),
 		},
 		{
 			// Adding fake validator doesn't change outcome
-			[]float64{1.0, 2.0, 10.0, 100000.0, 10000000000},
+			[]sdk.Dec{
+				sdk.MustNewDecFromStr("1.0"),
+				sdk.MustNewDecFromStr("2.0"),
+				sdk.MustNewDecFromStr("10.0"),
+				sdk.MustNewDecFromStr("100000.00"),
+				sdk.MustNewDecFromStr("10000000000"),
+			},
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.MustNewDecFromStr("4472135950.751005519905537611"),
 		},
 		{
 			// Tie votes
-			[]float64{1.0, 2.0, 3.0, 4.0},
+			[]sdk.Dec{
+				sdk.MustNewDecFromStr("1.0"),
+				sdk.MustNewDecFromStr("2.0"),
+				sdk.MustNewDecFromStr("3.0"),
+				sdk.MustNewDecFromStr("4.00"),
+			},
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.MustNewDecFromStr("1.224744871391589049"),
 		},
 		{
 			// No votes
-			[]float64{},
+			[]sdk.Dec{},
 			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDecWithPrec(0, 0),
 		},
 	}
 
-	base := math.Pow10(OracleDecPrecision)
 	for _, tc := range tests {
 		pb := ExchangeRateBallot{}
 		for i, input := range tc.inputs {
@@ -234,7 +248,7 @@ func TestPBStandardDeviation(t *testing.T) {
 			}
 
 			vote := NewVoteForTally(
-				sdk.NewDecWithPrec(int64(input*base), int64(OracleDecPrecision)),
+				input,
 				UmeeDenom,
 				valAddr,
 				power,
