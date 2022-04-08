@@ -146,6 +146,43 @@ func (s *IntegrationTestSuite) TestQuerier_Params() {
 	s.Require().Equal(types.DefaultGenesisState().Params, res.Params)
 }
 
+func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesInvalidExchangeRate() {
+	resExchangeRate, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{
+		Denom: " ",
+	})
+	s.Require().Nil(resExchangeRate)
+	s.Require().ErrorContains(err, "unknown denom")
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidValAddr() {
+	resExchangeRate, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
+		ValidatorAddr: "valaddrInvalid",
+	})
+	s.Require().Nil(resExchangeRate)
+	s.Require().ErrorContains(err, "decoding bech32 failed")
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
+	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(s.ctx, valAddr, types.NewAggregateExchangeRatePrevote(
+		types.AggregateVoteHash{},
+		valAddr,
+		uint64(s.ctx.BlockHeight()),
+	))
+
+	_, err := s.queryClient.AggregatePrevotes(s.ctx.Context(), &types.QueryAggregatePrevotesRequest{})
+	s.Require().Nil(err)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
+	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
+		types.DefaultGenesisState().ExchangeRates,
+		valAddr,
+	))
+
+	_, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotesRequest{})
+	s.Require().Nil(err)
+}
+
 func TestEmptyRequest(t *testing.T) {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	emptyRequestErrorMsg := "empty request"
@@ -174,6 +211,10 @@ func TestEmptyRequest(t *testing.T) {
 	require.Nil(t, resAggregatePrevote)
 	require.ErrorContains(t, err, emptyRequestErrorMsg)
 
+	resAggregatePrevotes, err := q.AggregatePrevotes(context.Background(), nil)
+	require.Nil(t, resAggregatePrevotes)
+	require.ErrorContains(t, err, emptyRequestErrorMsg)
+
 	resAggregateVote, err := q.AggregateVote(context.Background(), nil)
 	require.Nil(t, resAggregateVote)
 	require.ErrorContains(t, err, emptyRequestErrorMsg)
@@ -181,4 +222,25 @@ func TestEmptyRequest(t *testing.T) {
 	resAggregateVotes, err := q.AggregateVotes(context.Background(), nil)
 	require.Nil(t, resAggregateVotes)
 	require.ErrorContains(t, err, emptyRequestErrorMsg)
+}
+
+func TestInvalidBechAddress(t *testing.T) {
+	q := keeper.NewQuerier(keeper.Keeper{})
+	invalidAddressMsg := "empty address string is not allowed"
+
+	resFeederDelegation, err := q.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{})
+	require.Nil(t, resFeederDelegation)
+	require.ErrorContains(t, err, invalidAddressMsg)
+
+	resMissCounter, err := q.MissCounter(context.Background(), &types.QueryMissCounterRequest{})
+	require.Nil(t, resMissCounter)
+	require.ErrorContains(t, err, invalidAddressMsg)
+
+	resAggregatePrevote, err := q.AggregatePrevote(context.Background(), &types.QueryAggregatePrevoteRequest{})
+	require.Nil(t, resAggregatePrevote)
+	require.ErrorContains(t, err, invalidAddressMsg)
+
+	resAggregateVote, err := q.AggregateVote(context.Background(), &types.QueryAggregateVoteRequest{})
+	require.Nil(t, resAggregateVote)
+	require.ErrorContains(t, err, invalidAddressMsg)
 }
