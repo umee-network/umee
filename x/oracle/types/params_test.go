@@ -8,6 +8,69 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+func TestParamKeyTable(t *testing.T) {
+	require.NotNil(t, ParamKeyTable())
+}
+
+func TestValidateVotePeriod(t *testing.T) {
+	require.ErrorContains(t, validateVotePeriod("invalidUint64"), "invalid parameter type: string")
+	require.ErrorContains(t, validateVotePeriod(uint64(0)), "vote period must be positive: 0")
+	require.Nil(t, validateVotePeriod(uint64(10)))
+}
+
+func TestValidateVoteThreshold(t *testing.T) {
+	require.ErrorContains(t, validateVoteThreshold("invalidSdkType"), "invalid parameter type: string")
+	require.ErrorContains(t, validateVoteThreshold(sdk.NewDecWithPrec(31, 2)), "vote threshold must be bigger than 33%: 0.310000000000000000")
+	require.ErrorContains(t, validateVoteThreshold(sdk.NewDecWithPrec(4000, 2)), "vote threshold too large: 40.000000000000000000")
+	require.Nil(t, validateVoteThreshold(sdk.NewDecWithPrec(35, 2)))
+}
+
+func TestValidateRewardBand(t *testing.T) {
+	require.ErrorContains(t, validateRewardBand("invalidSdkType"), "invalid parameter type: string")
+	require.ErrorContains(t, validateRewardBand(sdk.NewDecWithPrec(-31, 2)), "reward band must be positive: -0.310000000000000000")
+	require.ErrorContains(t, validateRewardBand(sdk.NewDecWithPrec(4000, 2)), "reward band is too large: 40.000000000000000000")
+	require.Nil(t, validateRewardBand(sdk.OneDec()))
+}
+
+func TestValidateRewardDistributionWindow(t *testing.T) {
+	require.ErrorContains(t, validateRewardDistributionWindow("invalidUint64"), "invalid parameter type: string")
+	require.ErrorContains(t, validateRewardDistributionWindow(uint64(0)), "reward distribution window must be positive: 0")
+	require.Nil(t, validateRewardDistributionWindow(uint64(10)))
+}
+
+func TestValidateAcceptList(t *testing.T) {
+	require.ErrorContains(t, validateAcceptList("invalidUint64"), "invalid parameter type: string")
+	require.ErrorContains(t, validateAcceptList(DenomList{
+		{BaseDenom: ""},
+	}), "oracle parameter AcceptList Denom must have BaseDenom")
+	require.ErrorContains(t, validateAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: ""},
+	}), "oracle parameter AcceptList Denom must have SymbolDenom")
+	require.Nil(t, validateAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: DenomUmee.SymbolDenom},
+	}))
+}
+
+func TestValidateSlashFraction(t *testing.T) {
+	require.ErrorContains(t, validateSlashFraction("invalidSdkType"), "invalid parameter type: string")
+	require.ErrorContains(t, validateSlashFraction(sdk.NewDecWithPrec(-31, 2)), "slash fraction must be positive: -0.310000000000000000")
+	require.ErrorContains(t, validateSlashFraction(sdk.NewDecWithPrec(4000, 2)), "slash fraction is too large: 40.000000000000000000")
+	require.Nil(t, validateSlashFraction(sdk.OneDec()))
+}
+
+func TestValidateSlashWindow(t *testing.T) {
+	require.ErrorContains(t, validateSlashWindow("invalidUint64"), "invalid parameter type: string")
+	require.ErrorContains(t, validateSlashWindow(uint64(0)), "slash window must be positive: 0")
+	require.Nil(t, validateSlashWindow(uint64(10)))
+}
+
+func TestValidateMinValidPerWindow(t *testing.T) {
+	require.ErrorContains(t, validateMinValidPerWindow("invalidSdkType"), "invalid parameter type: string")
+	require.ErrorContains(t, validateMinValidPerWindow(sdk.NewDecWithPrec(-31, 2)), "min valid per window must be positive: -0.310000000000000000")
+	require.ErrorContains(t, validateMinValidPerWindow(sdk.NewDecWithPrec(4000, 2)), "min valid per window is too large: 40.000000000000000000")
+	require.Nil(t, validateMinValidPerWindow(sdk.OneDec()))
+}
+
 func TestParamsEqual(t *testing.T) {
 	p1 := DefaultParams()
 	err := p1.Validate()
