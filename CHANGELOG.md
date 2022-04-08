@@ -50,6 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [781](https://github.com/umee-network/umee/pull/781) Oracle module unit test cleanup.
 - [782](https://github.com/umee-network/umee/pull/782) Add unit test to `x/oracle/types/denom.go` and `x/oracle/types/keys.go`.
+- [789](https://github.com/umee-network/umee/pull/789) Add unit test to `x/oracle/types/params_test.go`.
 
 ## [v2.0.0](https://github.com/umee-network/umee/releases/tag/v2.0.0) - 2022-04-06
 
