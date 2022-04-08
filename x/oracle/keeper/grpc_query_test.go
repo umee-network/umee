@@ -140,6 +140,22 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotes() {
 	s.Require().Equal([]types.AggregateExchangeRateVote(nil), res.AggregateVotes)
 }
 
+func (s *IntegrationTestSuite) TestQuerier_AggregateVoteInvalidExchangeRate() {
+	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVoteRequest{
+		ValidatorAddr: valAddr.String(),
+	})
+	s.Require().Nil(res)
+	s.Require().ErrorContains(err, "no aggregate vote")
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidExchangeRate() {
+	res, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
+		ValidatorAddr: valAddr.String(),
+	})
+	s.Require().Nil(res)
+	s.Require().ErrorContains(err, "no aggregate prevote")
+}
+
 func (s *IntegrationTestSuite) TestQuerier_Params() {
 	res, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
