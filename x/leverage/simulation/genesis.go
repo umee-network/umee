@@ -25,7 +25,7 @@ func GenCompleteLiquidationThreshold(r *rand.Rand) sdk.Dec {
 
 // GenMinimumCloseFactor produces a randomized MinimumCloseFactor in the range of [0.001, 0.047]
 func GenMinimumCloseFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(1, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(0o46)), 3))
+	return sdk.NewDecWithPrec(1, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(46)), 3))
 }
 
 // GenOracleRewardFactor produces a randomized OracleRewardFactor in the range of [0.005, 0.100]
