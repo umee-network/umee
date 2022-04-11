@@ -26,7 +26,7 @@ jobs:
           cd cmd/umeed
           go build .
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
           path: cmd/umeed/umeed
