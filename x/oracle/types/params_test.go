@@ -15,63 +15,110 @@ func TestParamKeyTable(t *testing.T) {
 func TestValidateVotePeriod(t *testing.T) {
 	err := validateVotePeriod("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")
+
 	err = validateVotePeriod(uint64(0))
 	require.ErrorContains(t, err, "vote period must be positive: 0")
+
 	err = validateVotePeriod(uint64(10))
 	require.Nil(t, err)
 }
 
 func TestValidateVoteThreshold(t *testing.T) {
-	require.ErrorContains(t, validateVoteThreshold("invalidSdkType"), "invalid parameter type: string")
-	require.ErrorContains(t, validateVoteThreshold(sdk.NewDecWithPrec(31, 2)), "vote threshold must be bigger than 33%: 0.310000000000000000")
-	require.ErrorContains(t, validateVoteThreshold(sdk.NewDecWithPrec(4000, 2)), "vote threshold too large: 40.000000000000000000")
-	require.Nil(t, validateVoteThreshold(sdk.NewDecWithPrec(35, 2)))
+	err := validateVoteThreshold("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.31"))
+	require.ErrorContains(t, err, "vote threshold must be bigger than 33%: 0.310000000000000000")
+
+	err = validateVoteThreshold(sdk.MustNewDecFromStr("40.0"))
+	require.ErrorContains(t, err, "vote threshold too large: 40.000000000000000000")
+
+	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.35"))
+	require.Nil(t, err)
 }
 
 func TestValidateRewardBand(t *testing.T) {
-	require.ErrorContains(t, validateRewardBand("invalidSdkType"), "invalid parameter type: string")
-	require.ErrorContains(t, validateRewardBand(sdk.NewDecWithPrec(-31, 2)), "reward band must be positive: -0.310000000000000000")
-	require.ErrorContains(t, validateRewardBand(sdk.MustNewDecFromStr("40.0")), "reward band is too large: 40.000000000000000000")
-	require.Nil(t, validateRewardBand(sdk.OneDec()))
+	err := validateRewardBand("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateRewardBand(sdk.MustNewDecFromStr("-0.31"))
+	require.ErrorContains(t, err, "reward band must be positive: -0.310000000000000000")
+
+	err = validateRewardBand(sdk.MustNewDecFromStr("40.0"))
+	require.ErrorContains(t, err, "reward band is too large: 40.000000000000000000")
+
+	err = validateRewardBand(sdk.OneDec())
+	require.Nil(t, err)
 }
 
 func TestValidateRewardDistributionWindow(t *testing.T) {
-	require.ErrorContains(t, validateRewardDistributionWindow("invalidUint64"), "invalid parameter type: string")
-	require.ErrorContains(t, validateRewardDistributionWindow(uint64(0)), "reward distribution window must be positive: 0")
-	require.Nil(t, validateRewardDistributionWindow(uint64(10)))
+	err := validateRewardDistributionWindow("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateRewardDistributionWindow(uint64(0))
+	require.ErrorContains(t, err, "reward distribution window must be positive: 0")
+
+	err = validateRewardDistributionWindow(uint64(10))
+	require.Nil(t, err)
 }
 
 func TestValidateAcceptList(t *testing.T) {
-	require.ErrorContains(t, validateAcceptList("invalidUint64"), "invalid parameter type: string")
-	require.ErrorContains(t, validateAcceptList(DenomList{
+	err := validateAcceptList("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateAcceptList(DenomList{
 		{BaseDenom: ""},
-	}), "oracle parameter AcceptList Denom must have BaseDenom")
-	require.ErrorContains(t, validateAcceptList(DenomList{
+	})
+	require.ErrorContains(t, err, "oracle parameter AcceptList Denom must have BaseDenom")
+
+	err = validateAcceptList(DenomList{
 		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: ""},
-	}), "oracle parameter AcceptList Denom must have SymbolDenom")
-	require.Nil(t, validateAcceptList(DenomList{
+	})
+	require.ErrorContains(t, err, "oracle parameter AcceptList Denom must have SymbolDenom")
+
+	err = validateAcceptList(DenomList{
 		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: DenomUmee.SymbolDenom},
-	}))
+	})
+	require.Nil(t, err)
 }
 
 func TestValidateSlashFraction(t *testing.T) {
-	require.ErrorContains(t, validateSlashFraction("invalidSdkType"), "invalid parameter type: string")
-	require.ErrorContains(t, validateSlashFraction(sdk.NewDecWithPrec(-31, 2)), "slash fraction must be positive: -0.310000000000000000")
-	require.ErrorContains(t, validateSlashFraction(sdk.NewDecWithPrec(4000, 2)), "slash fraction is too large: 40.000000000000000000")
-	require.Nil(t, validateSlashFraction(sdk.OneDec()))
+	err := validateSlashFraction("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateSlashFraction(sdk.MustNewDecFromStr("-0.31"))
+	require.ErrorContains(t, err, "slash fraction must be positive: -0.310000000000000000")
+
+	err = validateSlashFraction(sdk.MustNewDecFromStr("40.0"))
+	require.ErrorContains(t, err, "slash fraction is too large: 40.000000000000000000")
+
+	err = validateSlashFraction(sdk.OneDec())
+	require.Nil(t, err)
 }
 
 func TestValidateSlashWindow(t *testing.T) {
-	require.ErrorContains(t, validateSlashWindow("invalidUint64"), "invalid parameter type: string")
-	require.ErrorContains(t, validateSlashWindow(uint64(0)), "slash window must be positive: 0")
-	require.Nil(t, validateSlashWindow(uint64(10)))
+	err := validateSlashWindow("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateSlashWindow(uint64(0))
+	require.ErrorContains(t, err, "slash window must be positive: 0")
+
+	err = validateSlashWindow(uint64(10))
+	require.Nil(t, err)
 }
 
 func TestValidateMinValidPerWindow(t *testing.T) {
-	require.ErrorContains(t, validateMinValidPerWindow("invalidSdkType"), "invalid parameter type: string")
-	require.ErrorContains(t, validateMinValidPerWindow(sdk.NewDecWithPrec(-31, 2)), "min valid per window must be positive: -0.310000000000000000")
-	require.ErrorContains(t, validateMinValidPerWindow(sdk.NewDecWithPrec(4000, 2)), "min valid per window is too large: 40.000000000000000000")
-	require.Nil(t, validateMinValidPerWindow(sdk.OneDec()))
+	err := validateMinValidPerWindow("invalidSdkType")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("-0.31"))
+	require.ErrorContains(t, err, "min valid per window must be positive: -0.310000000000000000")
+
+	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("40.0"))
+	require.ErrorContains(t, err, "min valid per window is too large: 40.000000000000000000")
+
+	err = validateMinValidPerWindow(sdk.OneDec())
+	require.Nil(t, err)
 }
 
 func TestParamsEqual(t *testing.T) {
