@@ -395,7 +395,7 @@ func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 // Because partial liquidation is possible and exchange rates vary, LiquidateBorrow returns the actual
 // amount of tokens repaid and uTokens rewarded (in that order).
 func (k Keeper) LiquidateBorrow(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepayment sdk.Coin, desiredReward sdk.Coin,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepayment, desiredReward sdk.Coin,
 ) (sdk.Int, sdk.Int, error) {
 	if !desiredRepayment.IsValid() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredRepayment.String())
