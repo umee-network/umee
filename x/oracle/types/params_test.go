@@ -13,9 +13,12 @@ func TestParamKeyTable(t *testing.T) {
 }
 
 func TestValidateVotePeriod(t *testing.T) {
-	require.ErrorContains(t, validateVotePeriod("invalidUint64"), "invalid parameter type: string")
-	require.ErrorContains(t, validateVotePeriod(uint64(0)), "vote period must be positive: 0")
-	require.Nil(t, validateVotePeriod(uint64(10)))
+	err := validateVotePeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+	err = validateVotePeriod(uint64(0))
+	require.ErrorContains(t, err, "vote period must be positive: 0")
+	err = validateVotePeriod(uint64(10))
+	require.Nil(t, err)
 }
 
 func TestValidateVoteThreshold(t *testing.T) {
@@ -28,7 +31,7 @@ func TestValidateVoteThreshold(t *testing.T) {
 func TestValidateRewardBand(t *testing.T) {
 	require.ErrorContains(t, validateRewardBand("invalidSdkType"), "invalid parameter type: string")
 	require.ErrorContains(t, validateRewardBand(sdk.NewDecWithPrec(-31, 2)), "reward band must be positive: -0.310000000000000000")
-	require.ErrorContains(t, validateRewardBand(sdk.NewDecWithPrec(4000, 2)), "reward band is too large: 40.000000000000000000")
+	require.ErrorContains(t, validateRewardBand(sdk.MustNewDecFromStr("40.0")), "reward band is too large: 40.000000000000000000")
 	require.Nil(t, validateRewardBand(sdk.OneDec()))
 }
 

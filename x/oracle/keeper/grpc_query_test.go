@@ -157,7 +157,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidExchangeRate()
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	res, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+	res, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
 	s.Require().Equal(types.DefaultGenesisState().Params, res.Params)
 }
@@ -172,7 +172,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesInvalidExchangeRate() {
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidValAddr() {
 	resExchangeRate, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
-		ValidatorAddr: "valaddrInvalid",
+		ValidatorAddr: "valAddrInvalid",
 	})
 	s.Require().Nil(resExchangeRate)
 	s.Require().ErrorContains(err, "decoding bech32 failed")
@@ -199,11 +199,11 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 	s.Require().Nil(err)
 }
 
-func TestEmptyRequest(t *testing.T) {
+func (s *IntegrationTestSuite) TestEmptyRequest() {
 	q := keeper.NewQuerier(keeper.Keeper{})
-	emptyRequestErrorMsg := "empty request"
+	const emptyRequestErrorMsg = "empty request"
 
-	resParams, err := q.Params(context.Background(), nil)
+	resParams, err := q.Params(s.ctx.Context(), nil)
 	require.Nil(t, resParams)
 	require.ErrorContains(t, err, emptyRequestErrorMsg)
 
@@ -240,7 +240,7 @@ func TestEmptyRequest(t *testing.T) {
 	require.ErrorContains(t, err, emptyRequestErrorMsg)
 }
 
-func TestInvalidBechAddress(t *testing.T) {
+func (s *IntegrationTestSuite) TestInvalidBechAddress() {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	invalidAddressMsg := "empty address string is not allowed"
 
