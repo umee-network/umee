@@ -20,17 +20,17 @@ const (
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
 func GenCompleteLiquidationThreshold(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(050, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(950)), 3))
+	return sdk.NewDecWithPrec(50, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(950)), 3))
 }
 
 // GenMinimumCloseFactor produces a randomized MinimumCloseFactor in the range of [0.001, 0.047]
 func GenMinimumCloseFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(001, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(046)), 3))
+	return sdk.NewDecWithPrec(1, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(0o46)), 3))
 }
 
 // GenOracleRewardFactor produces a randomized OracleRewardFactor in the range of [0.005, 0.100]
 func GenOracleRewardFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(005, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(995)), 3))
+	return sdk.NewDecWithPrec(5, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(995)), 3))
 }
 
 // GenSmallLiquidationSize produces a randomized SmallLiquidationSize in the range of [0, 1000]

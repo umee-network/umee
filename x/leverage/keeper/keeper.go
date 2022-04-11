@@ -29,7 +29,6 @@ func NewKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 ) Keeper {
-
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())

@@ -9,9 +9,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
-var (
-	minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
-)
+var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
 
 const (
 	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
