@@ -335,15 +335,14 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 			1,
 		),
 	}
-	
 
 	pb := ExchangeRateBallot{voteTallies[0], voteTallies[1]}
 
-	require.Equal(t, pb[0], voteTallyVal0)
-	require.Equal(t, pb[1], voteTallyVal1)
+	require.Equal(t, pb[0], voteTallies[0])
+	require.Equal(t, pb[1], voteTallies[1])
 	pb.Swap(1, 0)
-	require.Equal(t, pb[1], voteTallyVal0)
-	require.Equal(t, pb[0], voteTallyVal1)
+	require.Equal(t, pb[1], voteTallies[0])
+	require.Equal(t, pb[0], voteTallies[1])
 }
 
 func TestStandardDeviationUnsorted(t *testing.T) {
