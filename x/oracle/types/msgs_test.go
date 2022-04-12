@@ -14,14 +14,15 @@ func TestMsgFeederDelegation(t *testing.T) {
 	}
 
 	tests := []struct {
-		delegator  sdk.ValAddress
-		delegate   sdk.AccAddress
-		expectPass bool
+		delegator        sdk.ValAddress
+		delegate         sdk.AccAddress
+		expectPass       bool
+		expectedErrorMsg string
 	}{
-		{sdk.ValAddress(addrs[0]), addrs[1], true},
-		{sdk.ValAddress{}, addrs[1], false},
-		{sdk.ValAddress(addrs[0]), sdk.AccAddress{}, false},
-		{nil, nil, false},
+		{sdk.ValAddress(addrs[0]), addrs[1], true, "test should pass"},
+		{sdk.ValAddress{}, addrs[1], false, "invalid operator address (empty address string is not allowed): invalid address"},
+		{sdk.ValAddress(addrs[0]), sdk.AccAddress{}, false, "invalid delegate address (empty address string is not allowed): invalid address"},
+		{nil, nil, false, "invalid operator address (empty address string is not allowed): invalid address"},
 	}
 
 	for i, tc := range tests {
@@ -29,7 +30,7 @@ func TestMsgFeederDelegation(t *testing.T) {
 		if tc.expectPass {
 			require.Nil(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.NotNil(t, msg.ValidateBasic(), "test: %v", i)
+			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
 		}
 	}
 }
@@ -43,18 +44,19 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(addrs[0]))
 
 	tests := []struct {
-		hash          AggregateVoteHash
-		exchangeRates sdk.DecCoins
-		feeder        sdk.AccAddress
-		validator     sdk.AccAddress
-		expectPass    bool
+		hash             AggregateVoteHash
+		exchangeRates    sdk.DecCoins
+		feeder           sdk.AccAddress
+		validator        sdk.AccAddress
+		expectPass       bool
+		expectedErrorMsg string
 	}{
-		{bz, exchangeRates, addrs[0], addrs[0], true},
-		{[]byte("0\x01"), exchangeRates, addrs[0], addrs[0], false},
-		{bz[1:], exchangeRates, addrs[0], addrs[0], false},
-		{bz, exchangeRates, sdk.AccAddress{}, addrs[0], false},
-		{AggregateVoteHash{}, exchangeRates, addrs[0], addrs[0], false},
-		{bz, exchangeRates, addrs[0], sdk.AccAddress{}, false},
+		{bz, exchangeRates, addrs[0], addrs[0], true, "test should pass"},
+		{bz[1:], exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
+		{[]byte("0\x01"), exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
+		{AggregateVoteHash{}, exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
+		{bz, exchangeRates, sdk.AccAddress{}, addrs[0], false, "invalid feeder address (empty address string is not allowed): invalid address"},
+		{bz, exchangeRates, addrs[0], sdk.AccAddress{}, false, "invalid operator address (empty address string is not allowed): invalid addres"},
 	}
 
 	for i, tc := range tests {
@@ -62,7 +64,7 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 		if tc.expectPass {
 			require.NoError(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.Error(t, msg.ValidateBasic(), "test: %v", i)
+			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
 		}
 	}
 }
@@ -81,23 +83,24 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	validSalt := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025f"
 	saltWithColon := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025:"
 	tests := []struct {
-		feeder        sdk.AccAddress
-		validator     sdk.AccAddress
-		salt          string
-		exchangeRates string
-		expectPass    bool
+		feeder           sdk.AccAddress
+		validator        sdk.AccAddress
+		salt             string
+		exchangeRates    string
+		expectPass       bool
+		expectedErrorMsg string
 	}{
-		{addrs[0], addrs[0], validSalt, exchangeRates, true},
-		{addrs[0], addrs[0], validSalt, invalidExchangeRates, false},
-		{addrs[0], addrs[0], validSalt, zeroExchangeRates, false},
-		{addrs[0], addrs[0], validSalt, negativeExchangeRates, false},
-		{addrs[0], addrs[0], validSalt, overFlowMsgExchangeRates, false},
-		{addrs[0], addrs[0], validSalt, overFlowExchangeRates, false},
-		{sdk.AccAddress{}, sdk.AccAddress{}, validSalt, exchangeRates, false},
-		{addrs[0], sdk.AccAddress{}, validSalt, exchangeRates, false},
-		{addrs[0], addrs[0], "", exchangeRates, false},
-		{addrs[0], addrs[0], validSalt, "", false},
-		{addrs[0], addrs[0], saltWithColon, exchangeRates, false},
+		{addrs[0], addrs[0], validSalt, exchangeRates, true, "test should pass"},
+		{addrs[0], addrs[0], validSalt, invalidExchangeRates, false, "failed to parse exchange rates string cause: invalid exchange rate a: invalid coins"},
+		{addrs[0], addrs[0], validSalt, zeroExchangeRates, false, "failed to parse exchange rates string cause: invalid oracle price: invalid coins"},
+		{addrs[0], addrs[0], validSalt, negativeExchangeRates, false, "failed to parse exchange rates string cause: invalid oracle price: invalid coins"},
+		{addrs[0], addrs[0], validSalt, overFlowMsgExchangeRates, false, "exchange rates string can not exceed 4096 characters: invalid request"},
+		{addrs[0], addrs[0], validSalt, overFlowExchangeRates, false, "overflow: invalid exchange rate"},
+		{sdk.AccAddress{}, sdk.AccAddress{}, validSalt, exchangeRates, false, "invalid feeder address (empty address string is not allowed): invalid address"},
+		{addrs[0], sdk.AccAddress{}, validSalt, exchangeRates, false, "invalid operator address (empty address string is not allowed): invalid address"},
+		{addrs[0], addrs[0], "", exchangeRates, false, "invalid salt length; must be 64"},
+		{addrs[0], addrs[0], validSalt, "", false, "must provide at least one oracle exchange rate: unknown request"},
+		{addrs[0], addrs[0], saltWithColon, exchangeRates, false, "salt must be a valid hex string: invalid salt format"},
 	}
 
 	for i, tc := range tests {
@@ -105,7 +108,7 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 		if tc.expectPass {
 			require.Nil(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.NotNil(t, msg.ValidateBasic(), "test: %v", i)
+			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
 		}
 	}
 }
