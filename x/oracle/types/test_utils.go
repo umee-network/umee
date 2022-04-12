@@ -37,6 +37,37 @@ var (
 	}
 )
 
+func StringWithCharset(length int, charset string) string {
+	b := make([]byte, length)
+
+	if len(charset) == 0 {
+		charset = "abcd"
+	}
+
+	for i := 0; i < length; i++ {
+		for j := 0; j < len(charset); j++ {
+			b[i] = charset[j]
+			i++
+			if len(b) == length {
+				return string(b)
+			}
+		}
+	}
+
+	return string(b)
+}
+
+// GenerateRandomValAddr returns N validators
+func GenerateRandomValAddr(quantity int) (validatorAddrs []sdk.ValAddress) {
+	for i := 0; i < quantity; i++ {
+		pubKey := secp256k1.GenPrivKey().PubKey()
+		valAddr := sdk.ValAddress(pubKey.Address())
+		validatorAddrs = append(validatorAddrs, valAddr)
+	}
+
+	return validatorAddrs
+}
+
 // GenerateRandomTestCase
 func GenerateRandomTestCase() (valValAddrs []sdk.ValAddress, stakingKeeper MockStakingKeeper) {
 	valValAddrs = []sdk.ValAddress{}

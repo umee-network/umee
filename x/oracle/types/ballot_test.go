@@ -292,3 +292,85 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 	expectedDevation := sdk.MustNewDecFromStr("871.862661203013097586")
 	require.Equal(t, expectedDevation, deviation)
 }
+
+func TestBallotMapToSlice(t *testing.T) {
+	valAddress := GenerateRandomValAddr(1)
+
+	pb := ExchangeRateBallot{
+		NewVoteForTally(
+			sdk.NewDec(1234),
+			UmeeSymbol,
+			valAddress[0],
+			2,
+		),
+		NewVoteForTally(
+			sdk.NewDec(12345),
+			UmeeSymbol,
+			valAddress[0],
+			1,
+		),
+	}
+
+	ballotSlice := BallotMapToSlice(map[string]ExchangeRateBallot{
+		UmeeDenom:    pb,
+		IbcDenomAtom: pb,
+	})
+	require.Equal(t, []BallotDenom{{Ballot: pb, Denom: IbcDenomAtom}, {Ballot: pb, Denom: UmeeDenom}}, ballotSlice)
+}
+
+func TestExchangeRateBallotSwap(t *testing.T) {
+	valAddress := GenerateRandomValAddr(2)
+
+	voteTallyVal0 := NewVoteForTally(
+		sdk.NewDec(1234),
+		UmeeSymbol,
+		valAddress[0],
+		2,
+	)
+	voteTallyVal1 := NewVoteForTally(
+		sdk.NewDec(12345),
+		UmeeSymbol,
+		valAddress[1],
+		1,
+	)
+
+	pb := ExchangeRateBallot{voteTallyVal0, voteTallyVal1}
+
+	require.Equal(t, pb[0], voteTallyVal0)
+	require.Equal(t, pb[1], voteTallyVal1)
+	pb.Swap(1, 0)
+	require.Equal(t, pb[1], voteTallyVal0)
+	require.Equal(t, pb[0], voteTallyVal1)
+}
+
+func TestStandardDeviation_WeightedMedian(t *testing.T) {
+	valAddress := GenerateRandomValAddr(1)
+	pb := ExchangeRateBallot{
+		NewVoteForTally(
+			sdk.NewDec(1234),
+			UmeeSymbol,
+			valAddress[0],
+			2,
+		),
+		NewVoteForTally(
+			sdk.NewDec(12),
+			UmeeSymbol,
+			valAddress[0],
+			1,
+		),
+	}
+
+	deviation, err := pb.StandardDeviation()
+	require.ErrorIs(t, err, ErrBallotNotSorted)
+	require.Equal(t, "0.000000000000000000", deviation.String())
+}
+
+func TestClaimMapToSlice(t *testing.T) {
+	valAddress := GenerateRandomValAddr(1)
+	claim := NewClaim(10, 1, 4, valAddress[0])
+	claimSlice := ClaimMapToSlice(map[string]Claim{
+		"testClaim":    claim,
+		"anotherClaim": claim,
+	})
+	require.Equal(t, []Claim{claim, claim}, claimSlice)
+}

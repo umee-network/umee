@@ -22,11 +22,9 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 	s.Require().NoError(err)
 
 	var voteTargets []string
-	var voteTargetDenoms []string
 	params := s.app.OracleKeeper.GetParams(s.ctx)
 	for _, v := range params.AcceptList {
 		voteTargets = append(voteTargets, v.SymbolDenom)
-		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 	}
 
 	votePeriodsPerWindow := sdk.NewDec((int64)(s.app.OracleKeeper.RewardDistributionWindow(s.ctx))).
@@ -37,4 +35,10 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 	outstandingRewards, _ := outstandingRewardsDec.TruncateDecimal()
 	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.UmeeDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(3).TruncateInt(),
 		outstandingRewards.AmountOf(types.UmeeDenom))
+}
+
+func (s *IntegrationTestSuite) TestRewardBallotWinnersPowerSum0() {
+	s.app.OracleKeeper.RewardBallotWinners(s.ctx, 0, 0, []string{}, map[string]types.Claim{valAddr.String(): {}})
+	outstandingRewardsDec := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
+	s.Require().Equal("", outstandingRewardsDec.String())
 }
