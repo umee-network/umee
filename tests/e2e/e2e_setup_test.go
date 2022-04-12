@@ -428,7 +428,6 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 	// Wait for Ganache to start running.
 	s.Require().Eventually(
 		func() bool {
-
 			err := s.dkrPool.Client.Logs(
 				docker.LogsOptions{
 					Container:    s.ethResource.Container.ID,
@@ -585,7 +584,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	gaiaVal := s.chain.gaiaValidators[0]
 
 	gaiaCfgPath := path.Join(tmpDir, "cfg")
-	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0755))
+	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0o755))
 
 	_, err = copyFile(
 		filepath.Join("./scripts/", "gaia_bootstrap.sh"),
@@ -662,7 +661,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	umeeVal := s.chain.validators[0]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
-	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0755))
+	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
 	_, err = copyFile(
 		filepath.Join("./scripts/", "hermes_bootstrap.sh"),
 		filepath.Join(hermesCfgPath, "hermes_bootstrap.sh"),
@@ -922,7 +921,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 	priceFeederCfgPath := path.Join(tmpDir, "price-feeder")
 
-	s.Require().NoError(os.MkdirAll(priceFeederCfgPath, 0755))
+	s.Require().NoError(os.MkdirAll(priceFeederCfgPath, 0o755))
 	_, err = copyFile(
 		filepath.Join("./scripts/", "price_feeder_bootstrap.sh"),
 		filepath.Join(priceFeederCfgPath, "price_feeder_bootstrap.sh"),

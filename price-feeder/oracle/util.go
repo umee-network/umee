@@ -9,9 +9,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
-var (
-	minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
-)
+var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
 
 const (
 	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
@@ -19,7 +17,7 @@ const (
 )
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
-func vwap(weightedPrices map[string]sdk.Dec, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
+func vwap(weightedPrices, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
 	vwap := make(map[string]sdk.Dec)
 
 	for base, p := range weightedPrices {
