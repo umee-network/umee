@@ -118,11 +118,11 @@ PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulat
 PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
+TEST_COVERAGE_PROFILE=coverage.txt
 
 test-unit: ARGS=-timeout=10m -tags='norace'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-# After generate coverage file use `go tool cover -html=coverage.txt` to look for low coverage paths
-test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=coverage.txt -covermode=atomic
+test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
@@ -144,6 +144,11 @@ endif
 lint:
 	@echo "--> Running linter"
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
+
+cover-html: test-unit-cover
+	@echo "--> Opening in the browser"
+	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
+
 
 .PHONY: lint
 
