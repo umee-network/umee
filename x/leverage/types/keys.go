@@ -170,20 +170,20 @@ func CreateUTokenSupplyKey(uTokenDenom string) []byte {
 
 // AddressFromKey extracts address from a key with the form
 // prefix | lengthPrefixed(addr) | ...
-func AddressFromKey(key []byte, prefix []byte) sdk.AccAddress {
+func AddressFromKey(key, prefix []byte) sdk.AccAddress {
 	addrLength := int(key[len(prefix)])
 	return key[len(prefix)+1 : len(prefix)+1+addrLength]
 }
 
 // DenomFromKeyWithAddress extracts denom from a key with the form
 // prefix | lengthPrefixed(addr) | denom | 0x00
-func DenomFromKeyWithAddress(key []byte, prefix []byte) string {
+func DenomFromKeyWithAddress(key, prefix []byte) string {
 	addrLength := int(key[len(prefix)])
 	return string(key[len(prefix)+addrLength+1 : len(key)-1])
 }
 
 // DenomFromKey extracts denom from a key with the form
 // prefix | denom | 0x00
-func DenomFromKey(key []byte, prefix []byte) string {
+func DenomFromKey(key, prefix []byte) string {
 	return string(key[len(prefix) : len(key)-1])
 }
