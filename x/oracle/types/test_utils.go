@@ -37,6 +37,8 @@ var (
 	}
 )
 
+// StringWithCharset generates a new string with the size of "length" param
+// repeating every character of charset, if charset is empty uses "abcd"
 func StringWithCharset(length int, charset string) string {
 	b := make([]byte, length)
 
