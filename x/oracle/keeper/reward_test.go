@@ -37,7 +37,7 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 		outstandingRewards.AmountOf(types.UmeeDenom))
 }
 
-func (s *IntegrationTestSuite) TestRewardBallotWinnersPowerSum0() {
+func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroPower() {
 	s.app.OracleKeeper.RewardBallotWinners(s.ctx, 0, 0, []string{}, map[string]types.Claim{valAddr.String(): {}})
 	outstandingRewardsDec := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
 	s.Require().Equal("", outstandingRewardsDec.String())

@@ -57,7 +57,7 @@ func StringWithCharset(length int, charset string) string {
 	return string(b)
 }
 
-// GenerateRandomValAddr returns N validators
+// GenerateRandomValAddr returns N random validator addresses.
 func GenerateRandomValAddr(quantity int) (validatorAddrs []sdk.ValAddress) {
 	for i := 0; i < quantity; i++ {
 		pubKey := secp256k1.GenPrivKey().PubKey()

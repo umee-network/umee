@@ -321,20 +321,23 @@ func TestBallotMapToSlice(t *testing.T) {
 func TestExchangeRateBallotSwap(t *testing.T) {
 	valAddress := GenerateRandomValAddr(2)
 
-	voteTallyVal0 := NewVoteForTally(
-		sdk.NewDec(1234),
-		UmeeSymbol,
-		valAddress[0],
-		2,
-	)
-	voteTallyVal1 := NewVoteForTally(
-		sdk.NewDec(12345),
-		UmeeSymbol,
-		valAddress[1],
-		1,
-	)
+	voteTallies := []VoteForTally{
+		NewVoteForTally(
+			sdk.NewDec(1234),
+			UmeeSymbol,
+			valAddress[0],
+			2,
+		),
+		NewVoteForTally(
+			sdk.NewDec(12345),
+			UmeeSymbol,
+			valAddress[1],
+			1,
+		),
+	}
+	
 
-	pb := ExchangeRateBallot{voteTallyVal0, voteTallyVal1}
+	pb := ExchangeRateBallot{voteTallies[0], voteTallies[1]}
 
 	require.Equal(t, pb[0], voteTallyVal0)
 	require.Equal(t, pb[1], voteTallyVal1)
@@ -343,7 +346,7 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 	require.Equal(t, pb[0], voteTallyVal1)
 }
 
-func TestStandardDeviation_WeightedMedian(t *testing.T) {
+func TestStandardDeviationUnsorted(t *testing.T) {
 	valAddress := GenerateRandomValAddr(1)
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
