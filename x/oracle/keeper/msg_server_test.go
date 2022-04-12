@@ -120,6 +120,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
 	s.Require().NoError(err)
 	vote, err := s.app.OracleKeeper.GetAggregateExchangeRateVote(ctx, valAddr)
+	s.Require().Nil(err)
 	for _, v := range vote.ExchangeRateTuples {
 		s.Require().Contains(acceptListFlat, strings.ToLower(v.Denom))
 	}

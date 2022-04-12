@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,7 +10,7 @@ import (
 
 func TestGenesisValidation(t *testing.T) {
 	// Valid state
-	genState := DefaultGenesisState()
+	genState := NewGenesisState(DefaultParams(), []ExchangeRateTuple{}, []FeederDelegation{}, []MissCounter{}, []AggregateExchangeRatePrevote{}, []AggregateExchangeRateVote{})
 	require.NoError(t, ValidateGenesis(genState))
 
 	// Invalid Vote Period
@@ -56,4 +57,23 @@ func TestGenesisValidation(t *testing.T) {
 	genState = DefaultGenesisState()
 	genState.Params.AcceptList = DenomList{Denom{}}
 	require.Error(t, ValidateGenesis(genState))
+}
+
+func TestGetGenesisStateFromAppState(t *testing.T) {
+	emptyGenesis := GenesisState{
+		Params:                        Params{},
+		ExchangeRates:                 []ExchangeRateTuple{},
+		FeederDelegations:             []FeederDelegation{},
+		MissCounters:                  []MissCounter{},
+		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
+		AggregateExchangeRateVotes:    []AggregateExchangeRateVote{},
+	}
+
+	bz, err := json.Marshal(emptyGenesis)
+	require.Nil(t, err)
+
+	require.NotNil(t, GetGenesisStateFromAppState(ModuleCdc, map[string]json.RawMessage{
+		ModuleName: bz,
+	}))
+	require.NotNil(t, GetGenesisStateFromAppState(ModuleCdc, map[string]json.RawMessage{}))
 }
