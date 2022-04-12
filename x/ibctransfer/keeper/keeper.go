@@ -42,7 +42,6 @@ func (k Keeper) SendTransfer(
 	timeoutHeight clienttypes.Height,
 	timeoutTimestamp uint64,
 ) error {
-
 	// first, relay the SendTransfer to the real (embedded) ICS-20 transfer keeper
 	if err := k.Keeper.SendTransfer(
 		ctx,
@@ -86,7 +85,6 @@ func (k Keeper) OnRecvPacket(
 	packet channeltypes.Packet,
 	data ibctransfertypes.FungibleTokenPacketData,
 ) error {
-
 	if err := k.Keeper.OnRecvPacket(ctx, packet, data); err != nil {
 		return err
 	}
@@ -105,7 +103,6 @@ func (k Keeper) PostOnRecvPacket(
 	packet channeltypes.Packet,
 	data ibctransfertypes.FungibleTokenPacketData,
 ) {
-
 	var denomTrace ibctransfertypes.DenomTrace
 
 	if ibctransfertypes.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) {

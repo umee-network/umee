@@ -89,7 +89,6 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through the reserve amount %+v\n", err)
 		}
@@ -134,7 +133,6 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through the collateral amount %+v\n", err)
 		}
@@ -179,7 +177,6 @@ func BorrowAmountInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through adjusted borrow amounts %+v\n", err)
 		}
@@ -216,7 +213,6 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through the borrow APY %+v\n", err)
 		}
@@ -253,7 +249,6 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through the lend APY %+v\n", err)
 		}
@@ -290,7 +285,6 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 			}
 			return nil
 		})
-
 		if err != nil {
 			msg += fmt.Sprintf("\tSome error occurred while iterating through the interest scalars %+v\n", err)
 		}
