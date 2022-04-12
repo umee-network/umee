@@ -20,7 +20,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 	bz := []byte(`
 		foo
 	`)
-	os.WriteFile(filePath, bz, 0644)
+	os.WriteFile(filePath, bz, 0o644)
 
 	_, err := cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
 	require.Error(t, err)
@@ -44,7 +44,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 		}
 	]
 }`)
-	os.WriteFile(filePath, bz, 0644)
+	os.WriteFile(filePath, bz, 0o644)
 
 	_, err = cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
 	require.NoError(t, err)

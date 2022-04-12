@@ -25,7 +25,6 @@ func (s msgServer) LendAsset(
 	goCtx context.Context,
 	msg *types.MsgLendAsset,
 ) (*types.MsgLendAssetResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
@@ -63,7 +62,6 @@ func (s msgServer) WithdrawAsset(
 	goCtx context.Context,
 	msg *types.MsgWithdrawAsset,
 ) (*types.MsgWithdrawAssetResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
@@ -101,7 +99,6 @@ func (s msgServer) SetCollateral(
 	goCtx context.Context,
 	msg *types.MsgSetCollateral,
 ) (*types.MsgSetCollateralResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -141,7 +138,6 @@ func (s msgServer) BorrowAsset(
 	goCtx context.Context,
 	msg *types.MsgBorrowAsset,
 ) (*types.MsgBorrowAssetResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -179,7 +175,6 @@ func (s msgServer) RepayAsset(
 	goCtx context.Context,
 	msg *types.MsgRepayAsset,
 ) (*types.MsgRepayAssetResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -224,7 +219,6 @@ func (s msgServer) Liquidate(
 	goCtx context.Context,
 	msg *types.MsgLiquidate,
 ) (*types.MsgLiquidateResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	liquidatorAddr, err := sdk.AccAddressFromBech32(msg.Liquidator)

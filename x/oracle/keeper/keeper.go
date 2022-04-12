@@ -42,7 +42,6 @@ func NewKeeper(
 	stakingKeeper types.StakingKeeper,
 	distrName string,
 ) Keeper {
-
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
@@ -266,7 +265,6 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 	ctx sdk.Context,
 	voter sdk.ValAddress,
 ) (types.AggregateExchangeRatePrevote, error) {
-
 	store := ctx.KVStore(k.storeKey)
 
 	bz := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))

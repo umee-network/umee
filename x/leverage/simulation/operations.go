@@ -35,7 +35,6 @@ func WeightedOperations(
 	appParams simtypes.AppParams, cdc codec.JSONCodec, ak types.AccountKeeper, bk types.BankKeeper,
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
-
 	var (
 		weightMsgLend          int
 		weightMsgWithdraw      int

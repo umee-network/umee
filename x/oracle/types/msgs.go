@@ -25,7 +25,6 @@ func NewMsgAggregateExchangeRatePrevote(
 	feeder sdk.AccAddress,
 	validator sdk.ValAddress,
 ) *MsgAggregateExchangeRatePrevote {
-
 	return &MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    feeder.String(),
@@ -81,7 +80,6 @@ func NewMsgAggregateExchangeRateVote(
 	feeder sdk.AccAddress,
 	validator sdk.ValAddress,
 ) *MsgAggregateExchangeRateVote {
-
 	return &MsgAggregateExchangeRateVote{
 		Salt:          salt,
 		ExchangeRates: exchangeRates,
