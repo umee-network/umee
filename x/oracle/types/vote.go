@@ -15,7 +15,6 @@ func NewAggregateExchangeRatePrevote(
 	voter sdk.ValAddress,
 	submitBlock uint64,
 ) AggregateExchangeRatePrevote {
-
 	return AggregateExchangeRatePrevote{
 		Hash:        hash.String(),
 		Voter:       voter.String(),
@@ -33,7 +32,6 @@ func NewAggregateExchangeRateVote(
 	exchangeRateTuples ExchangeRateTuples,
 	voter sdk.ValAddress,
 ) AggregateExchangeRateVote {
-
 	return AggregateExchangeRateVote{
 		ExchangeRateTuples: exchangeRateTuples,
 		Voter:              voter.String(),

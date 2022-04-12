@@ -33,7 +33,6 @@ func (am AppModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-
 	ack := am.AppModule.OnRecvPacket(ctx, packet, relayer)
 	if ack.Success() {
 		var data ibctransfertypes.FungibleTokenPacketData
