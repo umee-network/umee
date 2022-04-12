@@ -60,5 +60,20 @@ func TestGenesisValidation(t *testing.T) {
 }
 
 func TestGetGenesisStateFromAppState(t *testing.T) {
+	emptyGenesis := GenesisState{
+		Params:                        Params{},
+		ExchangeRates:                 []ExchangeRateTuple{},
+		FeederDelegations:             []FeederDelegation{},
+		MissCounters:                  []MissCounter{},
+		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
+		AggregateExchangeRateVotes:    []AggregateExchangeRateVote{},
+	}
+
+	bz, err := json.Marshal(emptyGenesis)
+	require.Nil(t, err)
+
+	require.NotNil(t, GetGenesisStateFromAppState(ModuleCdc, map[string]json.RawMessage{
+		ModuleName: bz,
+	}))
 	require.NotNil(t, GetGenesisStateFromAppState(ModuleCdc, map[string]json.RawMessage{}))
 }
