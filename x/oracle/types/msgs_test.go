@@ -13,6 +13,9 @@ func TestMsgFeederDelegation(t *testing.T) {
 		sdk.AccAddress([]byte("addr2_______________")),
 	}
 
+	msgInvalidOperatorAddr := "invalid operator address (empty address string is not allowed): invalid address"
+	msgInvalidDelegatorAddr := "invalid delegate address (empty address string is not allowed): invalid address"
+
 	tests := []struct {
 		delegator        sdk.ValAddress
 		delegate         sdk.AccAddress
@@ -20,9 +23,9 @@ func TestMsgFeederDelegation(t *testing.T) {
 		expectedErrorMsg string
 	}{
 		{sdk.ValAddress(addrs[0]), addrs[1], true, "test should pass"},
-		{sdk.ValAddress{}, addrs[1], false, "invalid operator address (empty address string is not allowed): invalid address"},
-		{sdk.ValAddress(addrs[0]), sdk.AccAddress{}, false, "invalid delegate address (empty address string is not allowed): invalid address"},
-		{nil, nil, false, "invalid operator address (empty address string is not allowed): invalid address"},
+		{sdk.ValAddress{}, addrs[1], false, msgInvalidOperatorAddr},
+		{sdk.ValAddress(addrs[0]), sdk.AccAddress{}, false, msgInvalidDelegatorAddr},
+		{nil, nil, false, msgInvalidOperatorAddr},
 	}
 
 	for i, tc := range tests {
@@ -42,6 +45,9 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 
 	exchangeRates := sdk.DecCoins{sdk.NewDecCoinFromDec(UmeeDenom, sdk.OneDec()), sdk.NewDecCoinFromDec(UmeeDenom, sdk.NewDecWithPrec(32121, 1))}
 	bz := GetAggregateVoteHash("1", exchangeRates.String(), sdk.ValAddress(addrs[0]))
+	msgInvalidHashLength := "invalid hash length; should equal 20"
+	msgInvalidFeederAddr := "invalid feeder address (empty address string is not allowed): invalid address"
+	msgInvalidOperatorAddr := "invalid operator address (empty address string is not allowed): invalid address"
 
 	tests := []struct {
 		hash             AggregateVoteHash
@@ -52,11 +58,11 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 		expectedErrorMsg string
 	}{
 		{bz, exchangeRates, addrs[0], addrs[0], true, "test should pass"},
-		{bz[1:], exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
-		{[]byte("0\x01"), exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
-		{AggregateVoteHash{}, exchangeRates, addrs[0], addrs[0], false, "invalid hash length; should equal 20"},
-		{bz, exchangeRates, sdk.AccAddress{}, addrs[0], false, "invalid feeder address (empty address string is not allowed): invalid address"},
-		{bz, exchangeRates, addrs[0], sdk.AccAddress{}, false, "invalid operator address (empty address string is not allowed): invalid addres"},
+		{bz[1:], exchangeRates, addrs[0], addrs[0], false, msgInvalidHashLength},
+		{[]byte("0\x01"), exchangeRates, addrs[0], addrs[0], false, msgInvalidHashLength},
+		{AggregateVoteHash{}, exchangeRates, addrs[0], addrs[0], false, msgInvalidHashLength},
+		{bz, exchangeRates, sdk.AccAddress{}, addrs[0], false, msgInvalidFeederAddr},
+		{bz, exchangeRates, addrs[0], sdk.AccAddress{}, false, msgInvalidOperatorAddr},
 	}
 
 	for i, tc := range tests {
@@ -82,6 +88,16 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	overFlowExchangeRates := "foo:100000000000000000000000000000000000000000000000000000000000000000000000000000.01,bar:1232.132"
 	validSalt := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025f"
 	saltWithColon := "0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025:"
+	msgInvalidSalt := "invalid salt length; must be 64"
+	msgInvalidOverflowValue := "overflow: invalid exchange rate"
+	msgInvalidHexString := "salt must be a valid hex string: invalid salt format"
+	msgInvalidUnknownRequest := "must provide at least one oracle exchange rate: unknown request"
+	msgInvalidFeederAddr := "invalid feeder address (empty address string is not allowed): invalid address"
+	msgInvalidOperatorAddr := "invalid operator address (empty address string is not allowed): invalid address"
+	msgInvalidOraclePrice := "failed to parse exchange rates string cause: invalid oracle price: invalid coins"
+	msgInvalidOverflowExceedCharacter := "exchange rates string can not exceed 4096 characters: invalid request"
+	msgInvalidExchangeRates := "failed to parse exchange rates string cause: invalid exchange rate a: invalid coins"
+
 	tests := []struct {
 		feeder           sdk.AccAddress
 		validator        sdk.AccAddress
@@ -91,16 +107,16 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 		expectedErrorMsg string
 	}{
 		{addrs[0], addrs[0], validSalt, exchangeRates, true, "test should pass"},
-		{addrs[0], addrs[0], validSalt, invalidExchangeRates, false, "failed to parse exchange rates string cause: invalid exchange rate a: invalid coins"},
-		{addrs[0], addrs[0], validSalt, zeroExchangeRates, false, "failed to parse exchange rates string cause: invalid oracle price: invalid coins"},
-		{addrs[0], addrs[0], validSalt, negativeExchangeRates, false, "failed to parse exchange rates string cause: invalid oracle price: invalid coins"},
-		{addrs[0], addrs[0], validSalt, overFlowMsgExchangeRates, false, "exchange rates string can not exceed 4096 characters: invalid request"},
-		{addrs[0], addrs[0], validSalt, overFlowExchangeRates, false, "overflow: invalid exchange rate"},
-		{sdk.AccAddress{}, sdk.AccAddress{}, validSalt, exchangeRates, false, "invalid feeder address (empty address string is not allowed): invalid address"},
-		{addrs[0], sdk.AccAddress{}, validSalt, exchangeRates, false, "invalid operator address (empty address string is not allowed): invalid address"},
-		{addrs[0], addrs[0], "", exchangeRates, false, "invalid salt length; must be 64"},
-		{addrs[0], addrs[0], validSalt, "", false, "must provide at least one oracle exchange rate: unknown request"},
-		{addrs[0], addrs[0], saltWithColon, exchangeRates, false, "salt must be a valid hex string: invalid salt format"},
+		{addrs[0], addrs[0], validSalt, invalidExchangeRates, false, msgInvalidExchangeRates},
+		{addrs[0], addrs[0], validSalt, zeroExchangeRates, false, msgInvalidOraclePrice},
+		{addrs[0], addrs[0], validSalt, negativeExchangeRates, false, msgInvalidOraclePrice},
+		{addrs[0], addrs[0], validSalt, overFlowMsgExchangeRates, false, msgInvalidOverflowExceedCharacter},
+		{addrs[0], addrs[0], validSalt, overFlowExchangeRates, false, msgInvalidOverflowValue},
+		{sdk.AccAddress{}, sdk.AccAddress{}, validSalt, exchangeRates, false, msgInvalidFeederAddr},
+		{addrs[0], sdk.AccAddress{}, validSalt, exchangeRates, false, msgInvalidOperatorAddr},
+		{addrs[0], addrs[0], "", exchangeRates, false, msgInvalidSalt},
+		{addrs[0], addrs[0], validSalt, "", false, msgInvalidUnknownRequest},
+		{addrs[0], addrs[0], saltWithColon, exchangeRates, false, msgInvalidHexString},
 	}
 
 	for i, tc := range tests {
