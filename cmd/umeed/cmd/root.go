@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/CosmWasm/wasmd/x/wasm"
 	bridgecmd "github.com/Gravity-Bridge/Gravity-Bridge/module/cmd/gravity/cmd"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -94,6 +95,7 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 		bridgeGenTxCmd,
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
+		GetGenesisWasmMsgCmd(umeeapp.DefaultNodeHome),
 	)
 
 	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
@@ -109,6 +111,7 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 
 func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
+	wasm.AddModuleInitFlags(startCmd)
 }
 
 func queryCommand(ac appCreator) *cobra.Command {
