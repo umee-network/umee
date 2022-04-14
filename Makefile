@@ -50,6 +50,7 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
+build_tags += $(BUILD_TAGS)
 whitespace :=
 whitespace += $(whitespace)
 comma := ,
@@ -63,6 +64,9 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
 
 ldflags += $(LDFLAGS)
+ifeq ($(LINK_STATICALLY),true)
+  ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
 ldflags := $(strip $(ldflags))
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
