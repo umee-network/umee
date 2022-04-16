@@ -146,7 +146,6 @@ func (GenutilModule) ValidateGenesis(
 	encCfg client.TxEncodingConfig,
 	bz json.RawMessage,
 ) error {
-
 	var genState genutiltypes.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", genutiltypes.ModuleName, err)

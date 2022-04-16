@@ -171,7 +171,7 @@ func (msg *MsgRepayAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, reward sdk.Coin) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment, reward sdk.Coin) *MsgLiquidate {
 	return &MsgLiquidate{
 		Liquidator: borrower.String(),
 		Borrower:   borrower.String(),

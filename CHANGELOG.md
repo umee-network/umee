@@ -50,6 +50,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [781](https://github.com/umee-network/umee/pull/781) Oracle module unit test cleanup.
 - [782](https://github.com/umee-network/umee/pull/782) Add unit test to `x/oracle/types/denom.go` and `x/oracle/types/keys.go`.
+- [786](https://github.com/umee-network/umee/pull/786) Add unit test to `x/oracle/...`.
+- [798](https://github.com/umee-network/umee/pull/798) Increase `x/oracle` unit test coverage.
+- [803](https://github.com/umee-network/umee/pull/803) Add `cover-html` command to makefile.
 
 ## [v2.0.0](https://github.com/umee-network/umee/releases/tag/v2.0.0) - 2022-04-06
 
