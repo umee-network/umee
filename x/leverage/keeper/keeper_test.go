@@ -57,6 +57,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:            atomIBCDenom,
@@ -68,6 +70,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "ATOM",
+		Exponent:             6,
 	}
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
@@ -533,7 +537,6 @@ func (s *IntegrationTestSuite) TestRepayAsset_Valid() {
 	// verify lender's uToken collateral remains at 1000 u/umee from initial conditions
 	collateralBalance = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, lenderAddr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
-
 }
 
 func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {

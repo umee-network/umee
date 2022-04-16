@@ -24,6 +24,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/tests/util"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // appStateFn returns the initial application state using a genesis file or
@@ -83,6 +84,26 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 			panic(err)
 		}
 
+		bankStateBz, ok := rawState[banktypes.ModuleName]
+		if !ok {
+			panic("bank genesis state is missing")
+		}
+
+		bankState := new(banktypes.GenesisState)
+		if err := cdc.UnmarshalJSON(bankStateBz, bankState); err != nil {
+			panic(err)
+		}
+
+		leverageStateBz, ok := rawState[leveragetypes.ModuleName]
+		if !ok {
+			panic("leverage genesis state is missing")
+		}
+
+		leverageState := new(leveragetypes.GenesisState)
+		if err := cdc.UnmarshalJSON(leverageStateBz, leverageState); err != nil {
+			panic(err)
+		}
+
 		stakingStateBz, ok := rawState[stakingtypes.ModuleName]
 		if !ok {
 			panic("staking genesis state is missing")
@@ -91,6 +112,17 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		stakingState := new(stakingtypes.GenesisState)
 		if err := cdc.UnmarshalJSON(stakingStateBz, stakingState); err != nil {
 			panic(err)
+		}
+
+		// add some leverage supported assets to accounts that already have nonzero balances
+		for i, balance := range bankState.Balances {
+			fundedBalance := balance
+			for _, t := range leverageState.Registry {
+				fund := sdk.NewInt64Coin(t.BaseDenom, 100)
+				fundedBalance.Coins = fundedBalance.Coins.Add(fund)
+				bankState.Supply = bankState.Supply.Add(fund)
+			}
+			bankState.Balances[i] = fundedBalance
 		}
 
 		// compute not bonded balance
@@ -106,15 +138,6 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		notBondedCoins := sdk.NewCoin(stakingState.Params.BondDenom, notBondedTokens)
 
 		// edit bank state to make it have the not bonded pool tokens
-		bankStateBz, ok := rawState[banktypes.ModuleName]
-		if !ok {
-			panic("bank genesis state is missing")
-		}
-
-		bankState := new(banktypes.GenesisState)
-		if err := cdc.UnmarshalJSON(bankStateBz, bankState); err != nil {
-			panic(err)
-		}
 
 		stakingAddr := authtypes.NewModuleAddress(stakingtypes.NotBondedPoolName).String()
 

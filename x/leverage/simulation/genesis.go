@@ -10,6 +10,8 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
+const atomIBCDenom = "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D"
+
 // Simulation parameter constants
 const (
 	completeLiquidationThresholdKey = "complete_liquidation_threshold"
@@ -20,17 +22,17 @@ const (
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
 func GenCompleteLiquidationThreshold(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(050, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(950)), 3))
+	return sdk.NewDecWithPrec(0o50, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(950)), 3))
 }
 
 // GenMinimumCloseFactor produces a randomized MinimumCloseFactor in the range of [0.001, 0.047]
 func GenMinimumCloseFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(001, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(046)), 3))
+	return sdk.NewDecWithPrec(0o01, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(0o46)), 3))
 }
 
 // GenOracleRewardFactor produces a randomized OracleRewardFactor in the range of [0.005, 0.100]
 func GenOracleRewardFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(005, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(995)), 3))
+	return sdk.NewDecWithPrec(0o05, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(995)), 3))
 }
 
 // GenSmallLiquidationSize produces a randomized SmallLiquidationSize in the range of [0, 1000]
@@ -38,7 +40,7 @@ func GenSmallLiquidationSize(r *rand.Rand) sdk.Dec {
 	return sdk.NewDec(int64(r.Intn(1000)))
 }
 
-// RandomizedGenState generates a random GenesisState for oracle
+// RandomizedGenState generates a random GenesisState for leverage
 func RandomizedGenState(simState *module.SimulationState) {
 	var completeLiquidationThreshold sdk.Dec
 	simState.AppParams.GetOrGenerate(
@@ -71,7 +73,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 			OracleRewardFactor:           oracleRewardFactor,
 			SmallLiquidationSize:         smallLiquidationSize,
 		},
-		[]types.Token{},
+		simTokenRegistry(),
 		[]types.AdjustedBorrow{},
 		[]types.CollateralSetting{},
 		[]types.Collateral{},
@@ -88,4 +90,48 @@ func RandomizedGenState(simState *module.SimulationState) {
 	}
 	fmt.Printf("Selected randomly generated leverage parameters:\n%s\n", bz)
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(leverageGenesis)
+}
+
+func simTokenRegistry() []types.Token {
+	return []types.Token{
+		{
+			BaseDenom:            "uumee",
+			ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+			SymbolDenom:          "UMEE",
+			Exponent:             6,
+		},
+		{
+			BaseDenom:            atomIBCDenom,
+			ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.5"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+			SymbolDenom:          "ATOM",
+			Exponent:             6,
+		},
+		{
+			BaseDenom:            "uabcd",
+			ReserveFactor:        sdk.MustNewDecFromStr("0.10"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.2"),
+			SymbolDenom:          "ABCD",
+			Exponent:             6,
+		},
+	}
 }

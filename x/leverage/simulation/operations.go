@@ -21,7 +21,7 @@ const (
 	DefaultWeightMsgBorrowAsset     int = 70
 	DefaultWeightMsgSetCollateral   int = 30
 	DefaultWeightMsgRepayAsset      int = 70
-	DefaultWeightMsgLiquidate       int = 30
+	DefaultWeightMsgLiquidate       int = 0 // todo: compose better txs so they won't fail
 	OperationWeightMsgLendAsset         = "op_weight_msg_lend_asset"
 	OperationWeightMsgWithdrawAsset     = "op_weight_msg_withdraw_asset"
 	OperationWeightMsgBorrowAsset       = "op_weight_msg_borrow_asset"
@@ -35,7 +35,6 @@ func WeightedOperations(
 	appParams simtypes.AppParams, cdc codec.JSONCodec, ak types.AccountKeeper, bk types.BankKeeper,
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
-
 	var (
 		weightMsgLend          int
 		weightMsgWithdraw      int
@@ -174,7 +173,7 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, token, skip := randomTokenFields(r, ctx, accs, lk)
+		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrowAsset, "skip all transfers"), nil, nil
 		}
@@ -210,7 +209,7 @@ func SimulateMsgSetCollateralSetting(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, token, skip := randomTokenFields(r, ctx, accs, lk)
+		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSetCollateralSetting, "skip all transfers"), nil, nil
 		}
@@ -348,10 +347,10 @@ func randomLendableCoin(
 	return acc, randomCoin(r, subset), false
 }
 
-// randomTokenFields returns a random account and an sdk.Coin from all
-// the registered tokens with an random amount [0, 150].
-// It returns skip=true if no registered token was found.
-func randomTokenFields(
+// randomBorrowFields returns a zero coin.
+//		TODO: borrow an amount that the account can afford to borrow
+// It returns skip=true if no valid options was found.
+func randomBorrowFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, token sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
@@ -362,7 +361,7 @@ func randomTokenFields(
 	}
 
 	registeredToken := allTokens[r.Int31n(int32(len(allTokens)))]
-	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(150)))
+	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(0))) // zero
 
 	return acc, token, false
 }
