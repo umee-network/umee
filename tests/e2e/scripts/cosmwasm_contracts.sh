@@ -44,3 +44,5 @@ RESP=$(umeed query wasm contract-state all "$CONTRACT" -o json --chain-id $CHAIN
 # umeevaloper1zypqa76je7pxsdwkfah6mu9a583sju6xjettez
 # umee1zypqa76je7pxsdwkfah6mu9a583sju6xjavygg
 # terra1rz5chzn0g07hp5jx63srpkhv8hd7x8pss20w2e
+
+# umeed tx wasm execute umee1nc5tatafv6eyq7llkr2gv50ff9e22mnf70qgjlv737ktmt4eswrq59gzzq "{"transfer": {"recipient": "umeevaloper159yrfahn6n6xnrzqvz7c6dngctsvc5wfua9vsc", "amount": "123"}}" --from alice --keyring-backend test
