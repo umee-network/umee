@@ -4,7 +4,7 @@ echo "-----------------------"
 echo "## Add new CosmWasm CW20 contract"
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-ARTIFACTS_PATH=$SCRIPTPATH/../artifacts/
+ARTIFACTS_PATH=$SCRIPTPATH/../../artifacts/
 CHAIN_ID="umee-local-beta-testnet"
 
 RESP=$(umeed tx wasm store $ARTIFACTS_PATH/cw20_base.wasm --chain-id $CHAIN_ID --from alice --keyring-backend test --gas 100000000 -y)
