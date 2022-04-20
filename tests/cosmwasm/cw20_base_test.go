@@ -195,7 +195,8 @@ func (s *IntegrationTestSuite) TestCw20ListContractByCode() {
 	msgIntantiateResponse, err := s.cw20InitiateCode(sender)
 	s.Require().NoError(err)
 
-	s.app.WasmKeeper.GetContractInfo(s.ctx, sdk.AccAddress(msgIntantiateResponse.Address))
+	cw20ContractInfo := s.app.WasmKeeper.GetContractInfo(s.ctx, sdk.AccAddress(msgIntantiateResponse.Address))
+	s.Require().NotNil(cw20ContractInfo)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
