@@ -58,3 +58,11 @@ echo $BOBS_BALANCE_DATA | jq
 
 BOB_BALANCE=$(echo $BOBS_BALANCE_DATA | jq -r '.data.balance')
 echo "Bob balance $BOB_BALANCE"
+
+echo "-----------------------"
+
+if [ "$AMOUNT_TO_TRANSFER" != "$BOB_BALANCE" ]; then
+  echo "Amounts are not equal $AMOUNT_TO_TRANSFER != $BOB_BALANCE"
+  exit 1
+fi
+echo "Amounts are equal! =D $AMOUNT_TO_TRANSFER == $BOB_BALANCE"
