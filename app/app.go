@@ -124,10 +124,13 @@ const (
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UMEE"
 
-	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
+	// AddrLen is the size allowed length (in bytes) for an address.
 	//
 	// NOTE: In the SDK, the default value is 255.
-	MaxAddrLen = 20
+	AddrLen = 20
+
+	// ContractAddrLen is the size allowed length (in bytes) for an contract address.
+	ContractAddrLen = 32
 )
 
 var (
@@ -979,14 +982,16 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 }
 
 func VerifyAddressFormat(bz []byte) error {
-	if len(bz) == 0 {
+	bzLen := len(bz)
+	if bzLen == 0 {
 		return sdkerrors.Wrap(sdkerrors.ErrUnknownAddress, "invalid address; cannot be empty")
 	}
 
-	if len(bz) != MaxAddrLen {
+	if bzLen != AddrLen && bzLen != ContractAddrLen {
 		return sdkerrors.Wrapf(
 			sdkerrors.ErrUnknownAddress,
-			"invalid address length; got: %d, max: %d", len(bz), MaxAddrLen,
+			"invalid address length; got: %d, should be: %d or %d for cosmwasm contract addr",
+			bzLen, AddrLen, ContractAddrLen,
 		)
 	}
 
