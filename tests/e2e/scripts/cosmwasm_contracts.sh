@@ -9,6 +9,8 @@ CHAIN_ID="umee-local-beta-testnet"
 
 RESP=$(umeed tx wasm store $ARTIFACTS_PATH/cw20_base.wasm --chain-id $CHAIN_ID --from alice --keyring-backend test --gas 100000000 -y)
 CODE_ID=$(echo "$RESP" | jq -r '.logs[0].events[1].attributes[-1].value')
+ALICE_ADDR="$(umeed keys show alice --keyring-backend=test -a)"
+BOB_ADDR="$(umeed keys show bob --keyring-backend=test -a)"
 
 echo "* Code id: $CODE_ID"
 echo "* Download code"
@@ -18,31 +20,41 @@ echo "-----------------------"
 echo "## List code"
 umeed query wasm list-code --chain-id $CHAIN_ID
 
+
 echo "-----------------------"
 echo "## Create new contract instance"
-INIT="{\"decimals\": 2, \"name\":\"CashName\", \"symbol\": \"CAShING\", \"initial_balances\":[{\"address\": \"$(umeed keys show alice --keyring-backend=test -a)\", \"amount\": \"64534\"}]}"
+INIT="{\"decimals\": 2, \"name\":\"CashName\", \"symbol\": \"SYMBOL\", \"initial_balances\":[{\"address\": \"$ALICE_ADDR\", \"amount\": \"64534\"}]}"
 echo "----------INIT: $INIT"
 (umeed tx wasm instantiate "$CODE_ID" "$INIT" --admin="$(umeed keys show alice -a --keyring-backend=test)" \
   --from alice --keyring-backend test --amount="100uumee" --label "test-cw20-rafilx" \
-  --gas 1000000 -y --chain-id $CHAIN_ID) > $SCRIPTPATH/contract_definition.json
+  --gas 1000000 -y --chain-id $CHAIN_ID)
 
 
 echo "Contract Information"
 
-CONTRACT=$(umeed query wasm list-contract-by-code "$CODE_ID" -o json --chain-id $CHAIN_ID  | jq -r '.contracts[-1]')
-echo "* Contract address: $CONTRACT"
+CONTRACT_ADDR=$(umeed query wasm list-contract-by-code "$CODE_ID" -o json --chain-id $CHAIN_ID  | jq -r '.contracts[-1]')
+echo "* Contract address: $CONTRACT_ADDR"
 echo "### Query all"
-RESP=$(umeed query wasm contract-state all "$CONTRACT" -o json --chain-id $CHAIN_ID )
-# echo "$RESP" | jq
-# echo "### Query smart"
-# umeed query wasm contract-state smart "$CONTRACT" '{"verifier":{}}' -o json --chain-id $CHAIN_ID  | jq
-# echo "### Query raw"
-# KEY=$(echo "$RESP" | jq -r ".models[0].key")
-# umeed query wasm contract-state raw "$CONTRACT" "$KEY" -o json --chain-id $CHAIN_ID  | jq
+RESP=$(umeed query wasm contract-state all "$CONTRACT_ADDR" -o json --chain-id $CHAIN_ID )
+echo "$RESP" | jq
+echo "### Query smart - check balance"
+umeed query wasm contract-state smart "$CONTRACT_ADDR" "{\"balance\":{\"address\": \"$ALICE_ADDR\"}}" -o json --chain-id $CHAIN_ID  | jq
+echo "### Query raw"
+KEY=$(echo "$RESP" | jq -r ".models[0].key")
+umeed query wasm contract-state raw "$CONTRACT_ADDR" "$KEY" -o json --chain-id $CHAIN_ID  | jq
 
-# umee1a8vuh2wk0ugmdcnfsev8szfkcnrkcswgk6qxravwe0x77ee7g6cqw2pzkk
-# umeevaloper1zypqa76je7pxsdwkfah6mu9a583sju6xjettez
-# umee1zypqa76je7pxsdwkfah6mu9a583sju6xjavygg
-# terra1rz5chzn0g07hp5jx63srpkhv8hd7x8pss20w2e
+echo "-----------------------"
+echo "## Execute contract $CONTRACT_ADDR"
+AMOUNT_TO_TRANSFER=123
+MSG_TRANSFER="{\"transfer\": {\"recipient\": \"$BOB_ADDR\", \"amount\": \"$AMOUNT_TO_TRANSFER\"}}"
+echo "## Sending $AMOUNT_TO_TRANSFER from $ALICE_ADDR to $BOB_ADDR"
+umeed tx wasm execute "$CONTRACT_ADDR" "$MSG_TRANSFER" --from alice --keyring-backend test -o json --chain-id $CHAIN_ID -y | jq
 
-# umeed tx wasm execute umee1nc5tatafv6eyq7llkr2gv50ff9e22mnf70qgjlv737ktmt4eswrq59gzzq "{"transfer": {"recipient": "umeevaloper159yrfahn6n6xnrzqvz7c6dngctsvc5wfua9vsc", "amount": "123"}}" --from alice --keyring-backend test
+
+echo "-----------------------"
+echo "## Check balance of bob $BOB_ADDR in the contract $CONTRACT_ADDR"
+BOBS_BALANCE_DATA="$(umeed query wasm contract-state smart "$CONTRACT_ADDR" "{\"balance\":{\"address\": \"$BOB_ADDR\"}}" -o json --chain-id $CHAIN_ID)"
+echo $BOBS_BALANCE_DATA | jq
+
+BOB_BALANCE=$(echo $BOBS_BALANCE_DATA | jq -r '.data.balance')
+echo "Bob balance $BOB_BALANCE"
