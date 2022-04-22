@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"testing"
 	"time"
 
@@ -55,19 +56,43 @@ type cw20InitMsg struct {
 	Name            string    `json:"name"`
 	Symbol          string    `json:"symbol"`
 	Decimals        uint8     `json:"decimals"`
-	InitialBalances []balance `json:"initial_balances"`
+	InitialBalances []Balance `json:"initial_balances"`
 }
 
-type balance struct {
+type Address struct {
 	Address string `json:"address"`
-	Amount  uint64 `json:"amount,string"`
+}
+
+type Balance struct {
+	Address
+	Amount uint64 `json:"amount,string"`
+}
+
+type cw20QueryBalance struct {
+	Balance struct {
+		Address
+	} `json:"balance"`
+}
+
+type cw20QueryBalanceResp struct {
+	Balance string `json:"balance"`
+}
+
+type cw20ExecMsg struct {
+	Transfer *transferMsg `json:"transfer,omitempty"`
+}
+
+type transferMsg struct {
+	Recipient string `json:"recipient"`
+	Amount    uint64 `json:"amount,string"`
 }
 
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	ctx             sdk.Context
-	app             *umeeapp.UmeeApp
+	ctx sdk.Context
+	app *umeeapp.UmeeApp
+
 	wasmMsgServer   wasmtypes.MsgServer
 	wasmQueryClient wasmtypes.QueryClient
 }
@@ -120,7 +145,47 @@ func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress) (*wasmtypes.
 	return s.wasmMsgServer.StoreCode(sdk.WrapSDKContext(s.ctx), &storeMsg)
 }
 
-func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress) (*wasmtypes.MsgInstantiateContractResponse, error) {
+func (s *IntegrationTestSuite) transfer(contracAddr string, amount uint64, from, to sdk.AccAddress) {
+	transfer := cw20ExecMsg{Transfer: &transferMsg{
+		Recipient: to.String(),
+		Amount:    amount,
+	}}
+	transferBz, err := json.Marshal(transfer)
+	s.Require().NoError(err)
+
+	execContractResp, err := s.wasmMsgServer.ExecuteContract(sdk.WrapSDKContext(s.ctx), &wasmtypes.MsgExecuteContract{
+		Sender:   from.String(),
+		Contract: contracAddr,
+		Msg:      transferBz,
+	})
+	s.Require().NoError(err)
+	s.Require().NotNil(execContractResp)
+}
+
+func (s *IntegrationTestSuite) queryBalance(contracAddr string, address sdk.AccAddress) uint64 {
+	queryBobBalance := cw20QueryBalance{
+		Balance: struct{ Address }{
+			Address: Address{
+				Address: address.String(),
+			},
+		},
+	}
+	queryBobBalanceBz, err := json.Marshal(queryBobBalance)
+	s.Require().NoError(err)
+
+	queryBobBalanceResp, err := s.wasmQueryClient.SmartContractState(sdk.WrapSDKContext(s.ctx), &wasmtypes.QuerySmartContractStateRequest{Address: contracAddr, QueryData: queryBobBalanceBz})
+	s.Require().NoError(err)
+
+	var bobBalanceResp cw20QueryBalanceResp
+	err = json.Unmarshal(queryBobBalanceResp.Data, &bobBalanceResp)
+	s.Require().NoError(err)
+
+	bobBalanceUint, err := strconv.ParseUint(bobBalanceResp.Balance, 10, 64)
+	s.Require().NoError(err)
+	return bobBalanceUint
+}
+
+func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amount uint64) (*wasmtypes.MsgInstantiateContractResponse, error) {
 	msgStoreResponse, err := s.cw20StoreCode(addr)
 	s.Require().NoError(err)
 	s.Require().Equal(msgStoreResponse.CodeID, uint64(1))
@@ -129,14 +194,18 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress) (*wasmtyp
 		Name:     "Cw20TestToken",
 		Symbol:   "CashSymbol",
 		Decimals: 4,
-		InitialBalances: []balance{
+		InitialBalances: []Balance{
 			{
-				Address: addr.String(),
-				Amount:  1003,
+				Address: Address{
+					Address: addr.String(),
+				},
+				Amount: 1003,
 			},
 			{
-				Address: addr2.String(),
-				Amount:  2002,
+				Address: Address{
+					Address: addr2.String(),
+				},
+				Amount: addr2Amount,
 			},
 		},
 	}
@@ -162,14 +231,14 @@ func (s *IntegrationTestSuite) TestCw20Store() {
 }
 
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
-	msgIntantiateResponse, err := s.cw20InitiateCode(addr)
+	msgIntantiateResponse, err := s.cw20InitiateCode(addr, 200)
 	s.Require().NoError(err)
 	s.Require().Equal("umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", msgIntantiateResponse.Address)
 }
 
 func (s *IntegrationTestSuite) TestCw20ContractInfo() {
 	sender := addr
-	msgIntantiateResponse, err := s.cw20InitiateCode(sender)
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, 200)
 	s.Require().NoError(err)
 
 	cw20ContractInfo, err := s.wasmQueryClient.ContractInfo(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryContractInfoRequest{Address: msgIntantiateResponse.Address})
@@ -178,6 +247,31 @@ func (s *IntegrationTestSuite) TestCw20ContractInfo() {
 	s.Require().Equal(sender.String(), cw20ContractInfo.Admin)
 	s.Require().Equal(cw20Label, cw20ContractInfo.Label)
 	s.Require().Equal("umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", cw20ContractInfo.Address)
+}
+
+func (s *IntegrationTestSuite) TestCw20CheckBalance() {
+	sender, bobAddr, bobAmount := addr, addr2, uint64(2500)
+
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, bobAmount)
+	s.Require().NoError(err)
+
+	bobBalanceUint := s.queryBalance(msgIntantiateResponse.Address, bobAddr)
+	s.Require().Equal(bobAmount, bobBalanceUint)
+}
+
+func (s *IntegrationTestSuite) TestCw20Transfer() {
+	sender, bobAddr, bobAmount := addr, addr2, uint64(2500)
+
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, bobAmount)
+	s.Require().NoError(err)
+
+	contracAddr := msgIntantiateResponse.Address
+	amountToTransfer := uint64(100)
+
+	s.transfer(contracAddr, amountToTransfer, addr, bobAddr)
+
+	bobBalanceUint := s.queryBalance(contracAddr, bobAddr)
+	s.Require().Equal(bobAmount+amountToTransfer, bobBalanceUint)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
