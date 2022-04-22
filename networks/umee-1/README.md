@@ -7,6 +7,7 @@
 - https://www.theamsolutions.info/umee-state-sync
 - https://stakeangle.com/state-sync/umee
 - https://book.testnet.run/umee/state-sync
+- https://bitszn.com/snapshots.html
 
 ## Snapshot Providers (Quick Sync)
 
@@ -14,6 +15,7 @@
 - https://polkachu.com/tendermint_snapshots/umee
 - https://snapshots.weakhand.xyz/umee
 - http://singularity-services.xyz/umee
+- https://bitszn.com/snapshots.html
 
 ## Umee Archival Nodes
 
