@@ -173,7 +173,7 @@ func (msg *MsgRepayAsset) GetSignBytes() []byte {
 
 func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment, reward sdk.Coin) *MsgLiquidate {
 	return &MsgLiquidate{
-		Liquidator: borrower.String(),
+		Liquidator: liquidator.String(),
 		Borrower:   borrower.String(),
 		Repayment:  repayment,
 		Reward:     reward,
