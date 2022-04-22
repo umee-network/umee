@@ -291,7 +291,7 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 			Msg:           msg,
 			MsgType:       types.EventTypeLiquidate,
 			Context:       ctx,
-			SimAccount:    borrower,
+			SimAccount:    liquidator,
 			AccountKeeper: ak,
 			Bankkeeper:    bk,
 			ModuleName:    types.ModuleName,
