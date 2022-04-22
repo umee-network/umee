@@ -9,26 +9,28 @@ import (
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
+	"github.com/stretchr/testify/suite"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+
 	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
 	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 const (
 	initialPower = int64(10000000000)
 	cw20Artifact = "../artifacts/cw20_base.wasm"
+	cw20Label    = "cw20InstanceTest"
 )
 
 // Test addresses
@@ -61,23 +63,13 @@ type balance struct {
 	Amount  uint64 `json:"amount,string"`
 }
 
-type cw20ExecMsg struct {
-	Transfer *transferMsg `json:"transfer,omitempty"`
-}
-
-type transferMsg struct {
-	Recipient string `json:"recipient"`
-	Amount    uint64 `json:"amount,string"`
-}
-
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	ctx           sdk.Context
-	app           *umeeapp.UmeeApp
-	queryClient   types.QueryClient
-	msgServer     types.MsgServer
-	wasmMsgServer wasmtypes.MsgServer
+	ctx             sdk.Context
+	app             *umeeapp.UmeeApp
+	wasmMsgServer   wasmtypes.MsgServer
+	wasmQueryClient wasmtypes.QueryClient
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
@@ -88,37 +80,22 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Date(2022, 4, 20, 10, 20, 15, 1, time.UTC),
 	})
 
-	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
-
-	sh := staking.NewHandler(app.StakingKeeper)
-	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
-
-	// mint and send coins to validators
+	// mint and send coins to addrs
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
-	_, err := sh(ctx, NewTestMsgCreateValidator(valAddr, valPubKey, amt))
-	s.Require().NoError(err)
-	_, err = sh(ctx, NewTestMsgCreateValidator(valAddr2, valPubKey2, amt))
-	s.Require().NoError(err)
-
-	staking.EndBlocker(ctx, app.StakingKeeper)
-	// msgRouter := baseapp.NewMsgServiceRouter()
-
-	wasmMsgServer := wasmkeeper.NewMsgServerImpl(wasmkeeper.NewDefaultPermissionKeeper(app.WasmKeeper))
-	// msgRouter := baseapp.NewMsgServiceRouter()
-	// wasmtypes.RegisterMsgServer(msgRouter, wasmMsgServer)
-
 	s.app = app
 	s.ctx = ctx
-	s.queryClient = types.NewQueryClient(queryHelper)
-	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
-	s.wasmMsgServer = wasmMsgServer
-	// wasmkeeper.NewMsgServerImpl()
-	// sdkCtx, keepers := wasmkeeper.CreateDefaultTestInput(s.T())
+	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(wasmkeeper.NewDefaultPermissionKeeper(app.WasmKeeper))
+	querier := app.GRPCQueryRouter()
+	wasmtypes.RegisterMsgServer(querier, s.wasmMsgServer)
+
+	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
+	grpc := wasmkeeper.Querier(&app.WasmKeeper)
+	wasmtypes.RegisterQueryServer(queryHelper, grpc)
+	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
 }
 
 // NewTestMsgCreateValidator test msg creator
@@ -170,7 +147,7 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress) (*wasmtyp
 	initMsg := wasmtypes.MsgInstantiateContract{
 		Sender: sender.String(),
 		CodeID: msgStoreResponse.CodeID,
-		Label:  "cw20InstanceTest",
+		Label:  cw20Label,
 		Funds:  sdk.Coins{sdk.NewCoin(umeeapp.BondDenom, sdk.NewIntFromUint64(10))},
 		Msg:    initBz,
 		Admin:  sender.String(),
@@ -187,16 +164,20 @@ func (s *IntegrationTestSuite) TestCw20Store() {
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
 	msgIntantiateResponse, err := s.cw20InitiateCode(addr)
 	s.Require().NoError(err)
-	s.Require().Equal(msgIntantiateResponse.Address, "umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx")
+	s.Require().Equal("umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", msgIntantiateResponse.Address)
 }
 
-func (s *IntegrationTestSuite) TestCw20ListContractByCode() {
+func (s *IntegrationTestSuite) TestCw20ContractInfo() {
 	sender := addr
 	msgIntantiateResponse, err := s.cw20InitiateCode(sender)
 	s.Require().NoError(err)
 
-	cw20ContractInfo := s.app.WasmKeeper.GetContractInfo(s.ctx, sdk.AccAddress(msgIntantiateResponse.Address))
-	s.Require().NotNil(cw20ContractInfo)
+	cw20ContractInfo, err := s.wasmQueryClient.ContractInfo(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryContractInfoRequest{Address: msgIntantiateResponse.Address})
+	s.Require().NoError(err)
+	s.Require().Equal(uint64(1), cw20ContractInfo.CodeID)
+	s.Require().Equal(sender.String(), cw20ContractInfo.Admin)
+	s.Require().Equal(cw20Label, cw20ContractInfo.Label)
+	s.Require().Equal("umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", cw20ContractInfo.Address)
 }
 
 func TestKeeperTestSuite(t *testing.T) {
