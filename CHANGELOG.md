@@ -46,6 +46,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug Fixes
+- [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args
+
 ### Improvements
 
 - [781](https://github.com/umee-network/umee/pull/781) Oracle module unit test cleanup.
