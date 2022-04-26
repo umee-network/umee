@@ -30,6 +30,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRates(),
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryFeederDelegation(),
+		GetCmdQueryMissCounter(),
 	)
 
 	return cmd
@@ -250,6 +251,39 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 			}
 
 			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
+				ValidatorAddr: args[0],
+			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryMissCounter implements the miss counter query command.
+func GetCmdQueryMissCounter() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "miss-counter [validator]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query the current miss counter for a given validator address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			_, err = sdk.ValAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounterRequest{
 				ValidatorAddr: args[0],
 			})
 			if err != nil {
