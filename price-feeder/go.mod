@@ -4,8 +4,13 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v1.1.0
+<<<<<<< HEAD
 	github.com/armon/go-metrics v0.3.10
 	github.com/cosmos/cosmos-sdk v0.45.3
+=======
+	github.com/armon/go-metrics v0.3.11
+	github.com/cosmos/cosmos-sdk v0.45.4
+>>>>>>> 3188b14 (build(deps): Bump github.com/armon/go-metrics from 0.3.10 to 0.3.11 in /price-feeder (#848))
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
