@@ -46,6 +46,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v2.0.1](https://github.com/umee-network/umee/releases/tag/v2.0.1) - 2022-04-25
+
+### Features
+- [835](https://github.com/umee-network/umee/pull/835) Add miss counter query to oracle cli.
+
 ### Bug Fixes
 - [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args
 
