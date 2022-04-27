@@ -527,7 +527,7 @@ func New(
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// register wasm gov proposal types
-	enabledProposals := GetEnabledProposals()
+	enabledProposals := GetWasmEnabledProposals()
 	if len(enabledProposals) != 0 {
 		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, enabledProposals))
 	}

@@ -5,32 +5,34 @@ import (
 
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 )
 
 const (
-	// DefaultUmeeInstanceCost is initially set the same as in wasmd
-	DefaultUmeeInstanceCost uint64 = 60_000
-	// DefaultUmeeCompileCost set to a large number for testing
-	DefaultUmeeCompileCost uint64 = 100
+	// DefaultUmeeWasmInstanceCost is initially set the same as in wasmd
+	DefaultUmeeWasmInstanceCost uint64 = 60_000
+	// DefaultUmeeWasmCompileCost set to a large number for testing
+	DefaultUmeeWasmCompileCost uint64 = 100
 )
 
 var (
-	// ProposalsEnabled together with EnableSpecificProposals defines the wasm proposals.
+	// WasmProposalsEnabled together with EnableSpecificProposals defines the wasm proposals.
 	// If EnabledSpecificProposals is "", and this is "true", then enable all x/wasm proposals.
 	// If EnabledSpecificProposals is "", and this is not "true", then disable all x/wasm proposals.
-	ProposalsEnabled = "true"
-	// EnableSpecificProposals If set to non-empty string it must be comma-separated
+	WasmProposalsEnabled = "true"
+	// WasmEnableSpecificProposals If set to non-empty string it must be comma-separated
 	// list of values that are all a subset of "EnableAllProposals" (takes precedence over ProposalsEnabled)
 	// https://github.com/CosmWasm/wasmd/blob/02a54d33ff2c064f3539ae12d75d027d9c665f05/x/wasm/internal/types/proposal.go#L28-L34
-	EnableSpecificProposals = ""
+	WasmEnableSpecificProposals = ""
 )
 
 // UmeeGasRegisterConfig is defaults plus a custom compile amount
 func UmeeGasRegisterConfig() wasmkeeper.WasmGasRegisterConfig {
 	gasConfig := wasmkeeper.DefaultGasRegisterConfig()
-	gasConfig.InstanceCost = DefaultUmeeInstanceCost
-	gasConfig.CompileCost = DefaultUmeeCompileCost
+	gasConfig.InstanceCost = DefaultUmeeWasmInstanceCost
+	gasConfig.CompileCost = DefaultUmeeWasmCompileCost
 
 	return gasConfig
 }
@@ -40,16 +42,16 @@ func NewUmeeWasmGasRegister() wasmkeeper.WasmGasRegister {
 	return wasmkeeper.NewWasmGasRegister(UmeeGasRegisterConfig())
 }
 
-// GetEnabledProposals parses the ProposalsEnabled / EnableSpecificProposals values to
+// GetWasmEnabledProposals parses the ProposalsEnabled / EnableSpecificProposals values to
 // produce a list of enabled proposals to pass into wasmd app.
-func GetEnabledProposals() []wasm.ProposalType {
-	if EnableSpecificProposals == "" {
-		if ProposalsEnabled == "true" {
+func GetWasmEnabledProposals() []wasm.ProposalType {
+	if WasmEnableSpecificProposals == "" {
+		if WasmProposalsEnabled == "true" {
 			return wasm.EnableAllProposals
 		}
 		return wasm.DisableAllProposals
 	}
-	chunks := strings.Split(EnableSpecificProposals, ",")
+	chunks := strings.Split(WasmEnableSpecificProposals, ",")
 	proposals, err := wasm.ConvertToProposals(chunks)
 	if err != nil {
 		panic(err)
@@ -64,4 +66,18 @@ func GetWasmOpts(appOpts servertypes.AppOptions) []wasm.Option {
 	wasmOpts = append(wasmOpts, wasmkeeper.WithGasRegister(NewUmeeWasmGasRegister()))
 
 	return wasmOpts
+}
+
+func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
+	// here we override wasm config to make it permissioned by default
+	wasmGen := wasm.GenesisState{
+		Params: wasmtypes.Params{
+			CodeUploadAccess:             wasmtypes.AllowNobody,
+			InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
+			// DefaultMaxWasmCodeSize limit max bytes read to prevent gzip bombs
+			// It is 1200 KB in x/wasm, update it later via governance if really needed
+			MaxWasmCodeSize: wasmtypes.DefaultMaxWasmCodeSize,
+		},
+	}
+	genState[wasm.ModuleName] = cdc.MustMarshalJSON(&wasmGen)
 }

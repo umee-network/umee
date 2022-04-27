@@ -95,7 +95,7 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 		bridgeGenTxCmd,
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
-		GetGenesisWasmMsgCmd(umeeapp.DefaultNodeHome),
+		GetWasmGenesisMsgCmd(umeeapp.DefaultNodeHome),
 	)
 
 	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
