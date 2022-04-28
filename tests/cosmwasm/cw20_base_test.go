@@ -239,6 +239,18 @@ func (s *IntegrationTestSuite) TestCw20Store() {
 	s.Require().Equal(uint64(1), codeID)
 }
 
+func (s *IntegrationTestSuite) TestCw20ErrorStoreWithoutGovProposal() {
+	cw20Code, err := ioutil.ReadFile(cw20Artifact)
+	s.Require().NoError(err)
+
+	msgStoreCodeResp, err := s.wasmMsgServer.StoreCode(sdk.WrapSDKContext(s.ctx), &wasmtypes.MsgStoreCode{
+		Sender:       addr.String(),
+		WASMByteCode: cw20Code,
+	})
+	s.Require().ErrorContains(err, "can not create code: unauthorized")
+	s.Require().Nil(msgStoreCodeResp)
+}
+
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
 	msgIntantiateResponse, err := s.cw20InitiateCode(addr, 200)
 	s.Require().NoError(err)
