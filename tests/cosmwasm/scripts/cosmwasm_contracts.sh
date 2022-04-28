@@ -8,6 +8,7 @@ ARTIFACTS_PATH=$SCRIPTPATH/../../artifacts/
 CHAIN_ID="umee-local-beta-testnet"
 
 RESP=$(umeed tx wasm store $ARTIFACTS_PATH/cw20_base.wasm --chain-id $CHAIN_ID --from alice --keyring-backend test --gas 100000000 -y)
+echo "* Code id: $RESP"
 CODE_ID=$(echo "$RESP" | jq -r '.logs[0].events[1].attributes[-1].value')
 ALICE_ADDR="$(umeed keys show alice --keyring-backend=test -a)"
 BOB_ADDR="$(umeed keys show bob --keyring-backend=test -a)"
