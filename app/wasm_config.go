@@ -13,7 +13,7 @@ import (
 const (
 	// DefaultUmeeWasmInstanceCost is initially set the same as in wasmd
 	DefaultUmeeWasmInstanceCost uint64 = 60_000
-	// DefaultUmeeWasmCompileCost set to a large number for testing
+	// DefaultUmeeWasmCompileCost cost per byte compiled
 	DefaultUmeeWasmCompileCost uint64 = 100
 )
 

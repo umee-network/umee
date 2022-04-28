@@ -15,6 +15,7 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -93,8 +94,9 @@ type IntegrationTestSuite struct {
 	ctx sdk.Context
 	app *umeeapp.UmeeApp
 
-	wasmMsgServer   wasmtypes.MsgServer
-	wasmQueryClient wasmtypes.QueryClient
+	wasmMsgServer       wasmtypes.MsgServer
+	wasmQueryClient     wasmtypes.QueryClient
+	wasmProposalHandler govtypes.Handler
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
@@ -121,6 +123,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	grpc := wasmkeeper.Querier(&app.WasmKeeper)
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
+	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, umeeapp.GetWasmEnabledProposals())
 }
 
 // NewTestMsgCreateValidator test msg creator
@@ -134,15 +137,24 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 	return msg
 }
 
-func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress) (*wasmtypes.MsgStoreCodeResponse, error) {
+func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress) (codeId uint64) {
 	cw20Code, err := ioutil.ReadFile(cw20Artifact)
 	s.Require().NoError(err)
-
-	storeMsg := wasmtypes.MsgStoreCode{
-		Sender:       sender.String(),
-		WASMByteCode: cw20Code,
+	storeCodeProposal := wasmtypes.StoreCodeProposal{
+		Title:                 "Store cw20",
+		Description:           "Store brand new contract",
+		RunAs:                 sender.String(),
+		WASMByteCode:          cw20Code,
+		InstantiatePermission: &wasmtypes.AllowEverybody,
 	}
-	return s.wasmMsgServer.StoreCode(sdk.WrapSDKContext(s.ctx), &storeMsg)
+
+	s.wasmProposalHandler(s.ctx, &storeCodeProposal)
+
+	codes, err := s.wasmQueryClient.PinnedCodes(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryPinnedCodesRequest{})
+	s.Require().NoError(err)
+	s.Require().True(len(codes.CodeIDs) > 0)
+
+	return codes.CodeIDs[len(codes.CodeIDs)-1]
 }
 
 func (s *IntegrationTestSuite) transfer(contracAddr string, amount uint64, from, to sdk.AccAddress) {
@@ -186,9 +198,7 @@ func (s *IntegrationTestSuite) queryBalance(contracAddr string, address sdk.AccA
 }
 
 func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amount uint64) (*wasmtypes.MsgInstantiateContractResponse, error) {
-	msgStoreResponse, err := s.cw20StoreCode(addr)
-	s.Require().NoError(err)
-	s.Require().Equal(msgStoreResponse.CodeID, uint64(1))
+	codeID := s.cw20StoreCode(addr)
 
 	init := cw20InitMsg{
 		Name:     "Cw20TestToken",
@@ -215,7 +225,7 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amou
 
 	initMsg := wasmtypes.MsgInstantiateContract{
 		Sender: sender.String(),
-		CodeID: msgStoreResponse.CodeID,
+		CodeID: codeID,
 		Label:  cw20Label,
 		Funds:  sdk.Coins{sdk.NewCoin(umeeapp.BondDenom, sdk.NewIntFromUint64(10))},
 		Msg:    initBz,
@@ -225,9 +235,8 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amou
 }
 
 func (s *IntegrationTestSuite) TestCw20Store() {
-	msgStoreResponse, err := s.cw20StoreCode(addr)
-	s.Require().NoError(err)
-	s.Require().Equal(msgStoreResponse.CodeID, uint64(1))
+	codeID := s.cw20StoreCode(addr)
+	s.Require().Equal(uint64(1), codeID)
 }
 
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
