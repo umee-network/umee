@@ -7,5 +7,6 @@ docker build --platform linux/x86_64 -t $TAG -f Dockerfile.build ../../
 CONTAINER=`docker create $TAG`
 
 docker cp "$CONTAINER:/tmp/build/umee/build/umeed" dist/x86_64/
+docker cp "$CONTAINER:/tmp/build/terra/build/terrad" dist/x86_64/
 
 docker rm -v "$CONTAINER"
