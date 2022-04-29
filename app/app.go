@@ -737,6 +737,7 @@ func New(
 	upgrades.RegisterUpgradeHandlers(
 		app.mm, app.configurator, &app.AccountKeeper, &baseBankKeeper, &app.bech32IbcKeeper, &app.DistrKeeper,
 		&app.MintKeeper, &app.StakingKeeper, &app.UpgradeKeeper, &app.LeverageKeeper, &app.OracleKeeper,
+		&app.WasmKeeper,
 	)
 
 	if loadLatest {

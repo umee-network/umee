@@ -68,6 +68,19 @@ func GetWasmOpts(appOpts servertypes.AppOptions) []wasm.Option {
 	return wasmOpts
 }
 
+// GetWasmDefaultGenesisStateParams returns umee cosmwasm default params.
+func GetWasmDefaultGenesisStateParams() wasmtypes.Params {
+	return wasmtypes.Params{
+		CodeUploadAccess:             wasmtypes.AllowNobody,
+		InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
+		// DefaultMaxWasmCodeSize limit max bytes read to prevent gzip bombs
+		// It is 1200 KB in x/wasm, update it later via governance if really needed
+		MaxWasmCodeSize: wasmtypes.DefaultMaxWasmCodeSize,
+	}
+}
+
+// SetWasmDefaultGenesisState sets the default genesis state if the access is
+// bigger than AccessTypeNobody.
 func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
 	var wasmGenesisState wasm.GenesisState
 	cdc.MustUnmarshalJSON(genState[wasm.ModuleName], &wasmGenesisState)
@@ -78,13 +91,7 @@ func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
 
 	// here we override wasm config to make it permissioned by default
 	wasmGen := wasm.GenesisState{
-		Params: wasmtypes.Params{
-			CodeUploadAccess:             wasmtypes.AllowNobody,
-			InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
-			// DefaultMaxWasmCodeSize limit max bytes read to prevent gzip bombs
-			// It is 1200 KB in x/wasm, update it later via governance if really needed
-			MaxWasmCodeSize: wasmtypes.DefaultMaxWasmCodeSize,
-		},
+		Params:    GetWasmDefaultGenesisStateParams(),
 		Codes:     wasmGenesisState.Codes,
 		Contracts: wasmGenesisState.Contracts,
 		Sequences: wasmGenesisState.Sequences,

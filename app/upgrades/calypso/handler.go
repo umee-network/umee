@@ -26,9 +26,7 @@ func GetCalypsoUpgradeHandler(
 	bankKeeper *bankkeeper.BaseKeeper, bech32IbcKeeper *bech32ibckeeper.Keeper, distrKeeper *distrkeeper.Keeper,
 	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, leverageKeeper *leveragekeeper.Keeper,
 	oracleKeeper *oraclekeeper.Keeper,
-) func(
-	ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap,
-) (module.VersionMap, error) {
+) upgradetypes.UpgradeHandler {
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil {
 		panic("Nil argument to GetCalypsoUpgradeHandler")
