@@ -807,6 +807,7 @@ func (app *UmeeApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 	}
 
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+	SetWasmDefaultGenesisState(app.appCodec, genesisState)
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }

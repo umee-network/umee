@@ -69,6 +69,13 @@ func GetWasmOpts(appOpts servertypes.AppOptions) []wasm.Option {
 }
 
 func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
+	var wasmGenesisState wasm.GenesisState
+	cdc.MustUnmarshalJSON(genState[wasm.ModuleName], &wasmGenesisState)
+
+	if wasmGenesisState.Params.CodeUploadAccess.Permission <= wasmtypes.AccessTypeNobody {
+		return
+	}
+
 	// here we override wasm config to make it permissioned by default
 	wasmGen := wasm.GenesisState{
 		Params: wasmtypes.Params{
@@ -78,6 +85,10 @@ func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
 			// It is 1200 KB in x/wasm, update it later via governance if really needed
 			MaxWasmCodeSize: wasmtypes.DefaultMaxWasmCodeSize,
 		},
+		Codes:     wasmGenesisState.Codes,
+		Contracts: wasmGenesisState.Contracts,
+		Sequences: wasmGenesisState.Sequences,
+		GenMsgs:   wasmGenesisState.GenMsgs,
 	}
 	genState[wasm.ModuleName] = cdc.MustMarshalJSON(&wasmGen)
 }
