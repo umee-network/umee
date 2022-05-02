@@ -35,7 +35,16 @@ func GetCosmwasmUpgradeHandler(
 			},
 		}
 
-		wasm.InitGenesis(ctx, wasmKeeper, gn, stakingKeeper, wasm.NewHandler(wasmkeeper.NewGovPermissionKeeper(wasmKeeper)))
+		_, err := wasm.InitGenesis(
+			ctx,
+			wasmKeeper,
+			gn,
+			stakingKeeper,
+			wasm.NewHandler(wasmkeeper.NewGovPermissionKeeper(wasmKeeper)),
+		)
+		if err != nil {
+			return nil, err
+		}
 
 		ctx.Logger().Info("GetCosmwasm Upgrade: Running all configured module migrations (Should only see Gravity run)")
 		return mm.RunMigrations(ctx, *configurator, vmap)
