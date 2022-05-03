@@ -1,0 +1,91 @@
+# ADR 009: Liquidity Mining
+
+## Changelog
+
+- May 1 2022: Initial Draft (@toteki)
+
+## Status
+
+Proposed
+
+## Context
+
+Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` lending APY for supplying base assets.
+
+The following is a record of preferences and/or requirements collected during initial exploration:
+
+| Q | A |
+| - | - |
+| Where do the reward tokens come from? | The community pool (which can be funded) but at a fixed initial amount. |
+| Are rewards liquid? | Yes. |
+| How do users participate? | Lockup uTokens from lending. |
+| What are the lockup periods? | Tiers: 24h/14d/30d. Three tiers typically provide a clean UX. Periods would be difficult to change post-launch |
+| Are users required to participate in liquidity mining? | No. (Regular lending and usage as collateral are possible without locking) |
+| When are rewards distributed? | Every epoch, e.g. 24h. |
+| How are interest rates calculated? | Fixed total rewards: A flat total amount of incentive is to be divided proportionately across lenders of a given token type (e.g. Atom) weighted by lock duration. Effective interest rate depends on (flat reward amount / TVL). |
+| Can you use locked uTokens as collateral to borrow? | Yes. As a consequence, locked tokens must be able to be liquidated. |
+| Are external incentives enabled and matched? | Funds are first distributed/supplied to the community pool (both native and IBC-based assets) and then they’re distributed to the incentive module via the governance proposal. Incentive token denomination will not affect implementation. |
+| Will mining exist over a fixed period of time or not? | 1 Gov Proposal => Flat Total Reward Amount over Fixed Duration (Simple implementation but higher gov burden): Individual votes periodically refresh it (e.g. vote Y/N add +4M umee to be distributed proportionally to Atom lenders from StartDate to EndDate - must vote again to continue after EndDate). |
+
+## Decision
+
+The general approach will be to create an `x/incentive` module with a small surface of interaction with `x/leverage`.
+
+The incentive module will support message types which allow users to lock and begin unbonding uTokens, similar to staking. 
+
+Locked funds must be collateral-enabled uTokens. Locked funds will not leave their original place in the leverage module account. Locking will prevent withdrawal and collateral-disabling (but not liquidation) of the locked uTokens until they are successfully unbonded.
+
+There will be three tiers of locking, differing in their unbonding durations, which may receive differing incentives. The tiers will be of fixed durations (`1 | 7 | 14 days`) and will exist independent of active incentive programs.
+
+The intended structure of what is described as a single incentive program is as follows:
+- A fixed sum of a single token denomination
+- To be distributed evenly over time between a start date and an end date
+- To all addresses which have locked a specified uToken denomination
+- Proportional to their total value locked but not currently unbonding
+- Then weighted by locking tier
+- As calculated at the moment of distribution, either continuously of epoched
+
+All parameters mentioned above (dates, amounts, and denominations) must be set using a governance proposal, which creates the incentive program unless impossible under our chosen implementation.
+
+No message types to alter or halt incentive programs once voted on are planned, and any number of incentive programs should be capable of being active simultaneously regardless of parameters, including overlapping dates and denominations.
+
+Incentives funding will be stored in the `x/liquidity` module account.
+
+Implementation details will determine the exact method of funding incentive programs and distributing rewards, with a priotiry being the avoidance of iteration over lenders, especially passively.
+
+## Detailed Design
+
+- TODO: Locking tier durations and governance
+- TODO: Minimum theoretical storage size, and actual storage
+- TODO: Implementation of lock/begin-unbond/finish-unbond
+- TODO: leverage interactions, including liquidation
+- TODO: `IncentiveProgram` structure and gov proposal
+- TODO: Funding process, including returning funds for rejected proposals, multi-token funding, and funding in-progress programs
+- TODO: Reward distribution math and iteration considerations, with references
+
+## Alternative Approaches
+
+> This section contains information around alternative options that are considered
+> before making a decision. It should contain a explanation on why the alternative
+> approach(es) were not chosen.
+
+- TODO: Epoch vs continuous, liquid vs exchanged rewards, automatic vs claimed distribution
+- TODO: Funding before or after gov proposal, permissioned be permissionless
+
+## Consequences
+
+> This section describes the consequences, after applying the decision. All
+> consequences should be summarized here, not just the "positive" ones.
+
+### Positive
+
+### Negative
+
+### Neutral
+
+## References
+
+> Are there any relevant PR comments, issues that led up to this, or articles
+> referenced for why we made the given design choice? If so link them here!
+
+- {reference link}
