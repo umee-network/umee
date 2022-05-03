@@ -50,6 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 - [835](https://github.com/umee-network/umee/pull/835) Add miss counter query to oracle cli.
+- [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals
 
 ### Bug Fixes
 - [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args
