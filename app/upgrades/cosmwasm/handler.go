@@ -2,7 +2,6 @@ package cosmwasm
 
 import (
 	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,29 +23,27 @@ func GetCosmwasmUpgradeHandler(
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("GetCosmwasm upgrade: Enter handler")
 
-		vmap[wasm.ModuleName] = wasm.AppModule{}.ConsensusVersion()
-		gn := wasm.GenesisState{
-			Params: wasmtypes.Params{
-				CodeUploadAccess:             wasmtypes.AllowNobody,
-				InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
-				// DefaultMaxWasmCodeSize limit max bytes read to prevent gzip bombs
-				// It is 1200 KB in x/wasm, update it later via governance if really needed
-				MaxWasmCodeSize: wasmtypes.DefaultMaxWasmCodeSize,
-			},
-		}
-
-		_, err := wasm.InitGenesis(
-			ctx,
-			wasmKeeper,
-			gn,
-			stakingKeeper,
-			wasm.NewHandler(wasmkeeper.NewGovPermissionKeeper(wasmKeeper)),
-		)
+		// Set wasm old version to 1 if we want to call wasm's InitGenesis ourselves
+		// in this upgrade logic ourselves.
+		//
+		// vm[wasm.ModuleName] = wasm.ConsensusVersion
+		//
+		// Otherwise we run this, which will run wasm.InitGenesis(wasm.DefaultGenesis())
+		// and then override it after.
+		newVM, err := mm.RunMigrations(ctx, *configurator, vmap)
 		if err != nil {
-			return nil, err
+			return newVM, err
 		}
+		ctx.Logger().Info("GetCosmwasm upgrade: Run the migration")
 
-		ctx.Logger().Info("GetCosmwasm Upgrade: Running all configured module migrations (Should only see Gravity run)")
-		return mm.RunMigrations(ctx, *configurator, vmap)
+		// Since we provide custom DefaultGenesis (privileges StoreCode) in
+		// app/genesis.go rather than the wasm module, we need to set the params
+		// here when migrating (is it is not customized).
+		params := wasmKeeper.GetParams(ctx)
+		params.CodeUploadAccess = wasmtypes.AllowNobody
+		wasmKeeper.SetParams(ctx, params)
+		ctx.Logger().Info("GetCosmwasm upgrade: Set params")
+
+		return newVM, err
 	}
 }
