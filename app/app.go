@@ -103,6 +103,7 @@ import (
 	appparams "github.com/umee-network/umee/v2/app/params"
 	"github.com/umee-network/umee/v2/app/upgrades"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	"github.com/umee-network/umee/v2/app/upgrades/cosmwasm"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
@@ -766,6 +767,26 @@ func (app *UmeeApp) registerStoreLoaders() {
 					bech32ibctypes.ModuleName,
 					oracletypes.ModuleName,
 					leveragetypes.ModuleName,
+				}, // We are adding these modules
+				Renamed: nil,
+				Deleted: nil,
+			}
+
+			// configure store loader that checks if version == upgradeHeight and applies
+			// store upgrades
+			app.SetStoreLoader(
+				upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades),
+			)
+		}
+	}
+
+	// Calypso->Cosmwasm STORE LOADER SETUP
+	// Register the new Calypso modules and the special StoreLoader to add them
+	if upgradeInfo.Name == cosmwasm.PlanName {
+		if !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) { // Recognized the plan, need to skip this one though
+			storeUpgrades := storetypes.StoreUpgrades{
+				Added: []string{
+					wasm.ModuleName,
 				}, // We are adding these modules
 				Renamed: nil,
 				Deleted: nil,
