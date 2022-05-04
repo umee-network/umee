@@ -54,10 +54,9 @@ echo "-----------------------"
 echo "## Create new contract instance"
 INIT="{\"decimals\": 2, \"name\":\"CashName\", \"symbol\": \"SYMBOL\", \"initial_balances\":[{\"address\": \"$NODE_ADDR_1\", \"amount\": \"64534\"}]}"
 echo "----------INIT: $INIT"
-(umeed tx wasm instantiate $CODE_ID "$INIT" --admin="$(umeed keys show $NODE_NAME_1 -a --keyring-backend=test)" \
+(umeed tx wasm instantiate $CODE_ID "$INIT" --admin $NODE_ADDR_1 \
   --from $NODE_NAME_1 --keyring-backend test --amount="100uumee" --label "test-cw20-rafilx" \
   --gas 1000000 -y --chain-id $CHAIN_ID --home $CHAIN_DIR)
-
 
 echo "Contract Information"
 
@@ -78,7 +77,6 @@ AMOUNT_TO_TRANSFER=123
 MSG_TRANSFER="{\"transfer\": {\"recipient\": \"$BOB_ADDR\", \"amount\": \"$AMOUNT_TO_TRANSFER\"}}"
 echo "## Sending $AMOUNT_TO_TRANSFER from $NODE_ADDR_1 to $BOB_ADDR"
 umeed tx wasm execute "$CONTRACT_ADDR" "$MSG_TRANSFER" --from $NODE_NAME_1 --keyring-backend test -o json --chain-id $CHAIN_ID --home $CHAIN_DIR -y | jq
-
 
 echo "-----------------------"
 echo "## Check balance of bob $BOB_ADDR in the contract $CONTRACT_ADDR"
