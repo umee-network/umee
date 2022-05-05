@@ -250,17 +250,17 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 		}
 	}
 
-	powerReduction := sdk.MustNewDecFromStr("10").Power(exponent)
+	power := sdk.MustNewDecFromStr("10").Power(exponent)
 
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
 	rate, err := s.app.OracleKeeper.GetExchangeRateBase(s.ctx, exchangeRateDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate.Mul(powerReduction), sdk.OneDec())
+	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(exchangeRate), sdk.OneDec())
 	rate, err = s.app.OracleKeeper.GetExchangeRateBase(s.ctx, exchangeRateDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate.Mul(powerReduction), sdk.OneDec())
+	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
