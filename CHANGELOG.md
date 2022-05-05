@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [866](https://github.com/umee-network/umee/pull/866) Make the x/oracle keeper's GetExchangeRateBase method more efficient.
+
 ## [v2.0.1](https://github.com/umee-network/umee/releases/tag/v2.0.1) - 2022-04-25
 
 ### Features
