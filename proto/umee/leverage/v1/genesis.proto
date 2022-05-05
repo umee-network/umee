@@ -1,9 +1,9 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1beta1;
+package umeenetwork.umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
-import "umee/leverage/v1beta1/leverage.proto";
+import "umee/leverage/v1/leverage.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
