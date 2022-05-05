@@ -51,7 +51,7 @@ No message types to alter or halt incentive programs once voted on are planned, 
 
 Incentives funding will be stored in the `x/liquidity` module account.
 
-Implementation details will determine the exact method of funding incentive programs and distributing rewards, with a priotiry being the avoidance of iteration over lenders, especially passively.
+Implementation details will determine the exact method of funding incentive programs and distributing rewards, with a priority being the avoidance of iteration over lenders, especially passively.
 
 ## Detailed Design
 
