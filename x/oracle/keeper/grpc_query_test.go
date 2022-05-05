@@ -12,26 +12,26 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRatesRequest{})
 	s.Require().NoError(err)
-	s.Require().Equal([]string{exchangeRate}, res.ActiveRates)
+	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, exchangeRate, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(exchangeRate, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
 	}, res.ExchangeRates)
 
 	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{
-		Denom: exchangeRate,
+		Denom: displayDenom,
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(exchangeRate, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
 	}, res.ExchangeRates)
 }
 
