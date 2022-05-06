@@ -1,8 +1,8 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1beta1;
+package umeenetwork.umee.leverage.v1;
 
 import "google/api/annotations.proto";
-import "umee/leverage/v1beta1/leverage.proto";
+import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
@@ -12,113 +12,113 @@ option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 service Query {
   // RegisteredTokens queries for all the registered tokens.
   rpc RegisteredTokens(QueryRegisteredTokens) returns (QueryRegisteredTokensResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/registered_tokens";
+    option (google.api.http).get = "/umee/leverage/v1/registered_tokens";
   }
 
   // Params queries the parameters of the x/leverage module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/params";
+    option (google.api.http).get = "/umee/leverage/v1/params";
   }
 
   // Borrowed queries for the borrowed amount of a user by token denomination.
   // If the denomination is not supplied, the total for each borrowed token is
   // returned.
   rpc Borrowed(QueryBorrowedRequest) returns (QueryBorrowedResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/borrowed";
+    option (google.api.http).get = "/umee/leverage/v1/borrowed";
   }
 
   // BorrowedValue queries for the usd value of the borrowed amount of a user
   // by token denomination.  If the denomination is not supplied, the sum across
   // all borrowed tokens is returned.
   rpc BorrowedValue(QueryBorrowedValueRequest) returns (QueryBorrowedValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/borrowed_value";
+    option (google.api.http).get = "/umee/leverage/v1/borrowed_value";
   }
 
   // Loaned queries for the amount of tokens loaned by a user by denomination.
   // If the denomination is not supplied, the total for each loaned token is
   // returned.
   rpc Loaned(QueryLoanedRequest) returns (QueryLoanedResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/loaned";
+    option (google.api.http).get = "/umee/leverage/v1/loaned";
   }
 
   // LoanedValue queries for the USD value loaned by a user by token
   // denomination. If the denomination is not supplied, the sum across all
   // loaned tokens is returned.
   rpc LoanedValue(QueryLoanedValueRequest) returns (QueryLoanedValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/loaned_value";
+    option (google.api.http).get = "/umee/leverage/v1/loaned_value";
   }
 
   // AvailableBorrow queries for the available amount to borrow of a specified denomination.
   rpc AvailableBorrow(QueryAvailableBorrowRequest) returns (QueryAvailableBorrowResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/available_borrow";
+    option (google.api.http).get = "/umee/leverage/v1/available_borrow";
   }
 
   // BorrowAPY queries for the borrow APY of a specified denomination.
   rpc BorrowAPY(QueryBorrowAPYRequest) returns (QueryBorrowAPYResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/borrow_apy";
+    option (google.api.http).get = "/umee/leverage/v1/borrow_apy";
   }
 
   // LendAPY queries for the lend APY of a specified denomination.
   rpc LendAPY(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/lend_apy";
+    option (google.api.http).get = "/umee/leverage/v1/lend_apy";
   }
 
   // MarketSize queries for the Market Size in USD of a specified denomination, which
   // is the USD value of total tokens loaned by all users plus borrow interest owed
   // by all users.
   rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/market_size";
+    option (google.api.http).get = "/umee/leverage/v1/market_size";
   }
 
   // TokenMarketSize queries for the Market Size in base tokens of a specified denomination,
   // which is the total tokens loaned by all users plus borrow interest owed by all users.
   rpc TokenMarketSize(QueryTokenMarketSizeRequest) returns (QueryTokenMarketSizeResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/token_market_size";
+    option (google.api.http).get = "/umee/leverage/v1/token_market_size";
   }
 
   // ReserveAmount queries for the amount reserved of a specified denomination.
   // If the token is not valid, the reserved amount is zero.
   rpc ReserveAmount(QueryReserveAmountRequest) returns (QueryReserveAmountResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/reserve_amount";
+    option (google.api.http).get = "/umee/leverage/v1/reserve_amount";
   }
 
   // CollateralSetting queries a borrower's collateral setting (enabled or disabled)
   // for a specified uToken denomination.
   rpc CollateralSetting(QueryCollateralSettingRequest) returns (QueryCollateralSettingResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_setting";
+    option (google.api.http).get = "/umee/leverage/v1/collateral_setting";
   }
 
   // Collateral queries the collateral amount of a user by token denomination.
   // If the denomination is not supplied, all of the user's collateral tokens
   // are returned.
   rpc Collateral(QueryCollateralRequest) returns (QueryCollateralResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/collateral";
+    option (google.api.http).get = "/umee/leverage/v1/collateral";
   }
 
   // CollateralValue queries for the total USD value of a user's collateral, or
   // the USD value held as a given base asset's associated uToken denomination.
   rpc CollateralValue(QueryCollateralValueRequest) returns (QueryCollateralValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/collateral_value";
+    option (google.api.http).get = "/umee/leverage/v1/collateral_value";
   }
 
   // ExchangeRate queries the uToken exchange rate of a given uToken denomination.
   rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/exchange_rate";
+    option (google.api.http).get = "/umee/leverage/v1/exchange_rate";
   }
 
   // BorrowLimit queries the borrow limit in USD of a given borrower.
   rpc BorrowLimit(QueryBorrowLimitRequest) returns (QueryBorrowLimitResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/borrow_limit";
+    option (google.api.http).get = "/umee/leverage/v1/borrow_limit";
   }
 
   // LiquidationLimit queries the limit in USD above which a given borrower is eligible for liquidation.
   rpc LiquidationLimit(QueryLiquidationLimitRequest) returns (QueryLiquidationLimitResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/liquidation_limit";
+    option (google.api.http).get = "/umee/leverage/v1/liquidation_limit";
   }
 
   // LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
   rpc LiquidationTargets(QueryLiquidationTargetsRequest) returns (QueryLiquidationTargetsResponse) {
-    option (google.api.http).get = "/umee/leverage/v1beta1/liquidation_targets";
+    option (google.api.http).get = "/umee/leverage/v1/liquidation_targets";
   }
 }
 

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1beta1;
+package umeenetwork.umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
 
