@@ -4,7 +4,7 @@
 
 ## State Sync Providers
 
-- https://www.theamsolutions.info/umee-state-sync
+- https://theamsolutions.info/umee-services
 - https://stakeangle.com/state-sync/umee
 - https://book.testnet.run/umee/state-sync
 - https://bitszn.com/snapshots.html
