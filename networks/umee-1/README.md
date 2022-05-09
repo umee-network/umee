@@ -16,7 +16,7 @@
 - https://snapshots.weakhand.xyz/umee
 - http://singularity-services.xyz/umee
 - https://bitszn.com/snapshots.html
-- https://theamsolutions.info/umee-services
+-
 
 ## Umee Archival Nodes
 
