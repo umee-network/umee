@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals
+- [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals.
 
 ### Improvements
 
@@ -66,7 +66,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
-- [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args
+- [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args.
 
 ### Improvements
 
