@@ -46,13 +46,23 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [866](https://github.com/umee-network/umee/pull/866) Make the x/oracle keeper's GetExchangeRateBase method more efficient.
+
+### API Breaking
+
+- [870](https://github.com/umee-network/umee/pull/870) chore: Move proto v1beta1 to v1.
+
 ## [v2.0.1](https://github.com/umee-network/umee/releases/tag/v2.0.1) - 2022-04-25
 - [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals
 
 ### Features
+
 - [835](https://github.com/umee-network/umee/pull/835) Add miss counter query to oracle cli.
 
 ### Bug Fixes
+
 - [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args
 
 ### Improvements
