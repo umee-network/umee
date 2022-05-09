@@ -935,6 +935,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 			Name:       "umee-price-feeder",
 			NetworkID:  s.dkrNet.Network.ID,
 			Repository: "umeenet/umeed-e2e",
+			Tag:        "dddf533499e73c131aa980e456e277259c12cc11",
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
