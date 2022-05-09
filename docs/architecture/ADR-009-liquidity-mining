@@ -55,13 +55,98 @@ Implementation details will determine the exact method of funding incentive prog
 
 ## Detailed Design
 
-- TODO: Locking tier durations and governance
-- TODO: Minimum theoretical storage size, and actual storage
-- TODO: Implementation of lock/begin-unbond/finish-unbond
-- TODO: leverage interactions, including liquidation
-- TODO: `IncentiveProgram` structure and gov proposal
-- TODO: Funding process, including returning funds for rejected proposals, multi-token funding, and funding in-progress programs
+The `x/incentive` module will have a fixed number (3) of lock tiers, which will be the same for all asset classes at any given time.  Typical tiers might be 1,7, and 14 days.
+
+The module will govern the lock durations of the tiers (in seconds) using parameters:
+```
+    LockDurationShort uint64
+    LockDurationMedium uint64
+    LockDurationLong uint64
+```
+
+### Locking and Unlocking
+
+Users must be able to lock `uTokens` they have enabled as collateral in `x/leverage` by sumbitting new `x/incentive` message types.
+
+Locking of funds is independent of active incentive programs, and can even be done in their absence.
+
+```go
+type MsgLockAssets struct {
+  Lender sdk.AccAddress
+  Amount sdk.Coin
+  Tier   uint32
+}
+
+type MsgUnlockAssets struct {
+  Lender sdk.AccAddress
+  Amount sdk.Coin
+  Tier   uint32
+}
+```
+
+Amounts are `uToken` balances, exact integers which will not experience rounding errors.
+
+On receiving a `MsgLock`, the module must perform the following steps:
+
+- Validate tier and uToken amount
+- Verify lender has sufficient unlocked uTokens
+- Distribute the lender's current `x/incentive` rewards for the selected denom and tier, if any
+- Record the new locked utoken amount for the selected denom and tier
+
+See later sections for reward mechanics - it is mathematically necessary to claim rewards when updating amount.
+
+On receiving a `MsgUnlock`, the module must perform the following steps:
+
+- Validate tier and uToken amount
+- Verify lender has sufficient locked uTokens of the selected tier that are not currently unbonding
+- Distribute the lender's current `x/incentive` rewards for the selected denom and tier, if any
+- Start an unbonding for the lender in question
+
+### Incentive Programs
+
+The `x/incentive` module exists to incentivize users to lock collateral assets at the various tiers.
+
+The basic unit of incentivization is the `IncentiveProgram`, which, continuously between a start time and end time, distributes a fixed amount of a given asset type across all holders of a given denom of locked `uToken` collateral, weighted by amount held and locking tier.
+
+```go
+type IncentiveProgram struct {
+  LockedDenom      string
+  RewardDenom      string
+  TotalRewards     sdk.Int
+  StartTime        uint64
+  EndTime          uint64
+  MiddleTierWeight sdk.Dec
+  ShortTierWeight  sdk.Dec
+}
+```
+
+Start and end times are unix times measured in seconds.
+
+TotalIncentive is the total amount of rewards to be distributed as a result of the incentive program. It can contain any reward denomination, allowing for external incentive programs.
+
+Valid tier weights range from 0 to 1, and `LongTierWeight` is defined as always `1.0`.
+
+For example, a `MiddleTierWeight` of `0.8` means that collateral locked at the middle duration tier accrues 80% of the rewards that the same amount would accrue at the longest tier.
+
+### TODO
+
+- TODO: Incentive program gov proposal and permissionless funding process, including funding in-progress programs. Avoids "returning of funds for rejected proposals" problem.
 - TODO: Reward distribution math and iteration considerations, with references
+- TODO: Unbonding mechanics including liquidation interruption
+- TODO: leverage interactions
+
+### State
+
+Locked `uToken` amounts for individual users will be stored in state:
+
+```
+lockedAssetPrefix | lenderAddr | lengthPrefixed(denom) | tier => sdk.Int
+```
+
+TODO: Claimed reward storage
+TODO: Unbonding struct, and queues too.
+TODO: Incentive programs active
+TODO: Module rewards tracking (exchange rates)
 
 ## Alternative Approaches
 
