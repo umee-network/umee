@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	exchangeRate string = umeeapp.DisplayDenom
+	displayDenom string = umeeapp.DisplayDenom
+	bondDenom    string = umeeapp.BondDenom
 )
 
 type IntegrationTestSuite struct {
@@ -177,7 +178,7 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVote() {
 
 	var tuples types.ExchangeRateTuples
 	tuples = append(tuples, types.ExchangeRateTuple{
-		Denom:        exchangeRate,
+		Denom:        displayDenom,
 		ExchangeRate: sdk.ZeroDec(),
 	})
 
@@ -205,8 +206,8 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
-	app.OracleKeeper.SetExchangeRateWithEvent(ctx, exchangeRate, sdk.OneDec())
-	rate, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
 }
@@ -221,30 +222,53 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
 func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 	app, ctx := s.app, s.ctx
 
-	_, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
-	rate, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
 
-	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(exchangeRate), sdk.OneDec())
-	rate, err = app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	rate, err = app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
+}
+
+func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
+	oracleParams := s.app.OracleKeeper.GetParams(s.ctx)
+
+	var exponent uint64
+	for _, denom := range oracleParams.AcceptList {
+		if denom.BaseDenom == bondDenom {
+			exponent = uint64(denom.Exponent)
+		}
+	}
+
+	power := sdk.MustNewDecFromStr("10").Power(exponent)
+
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	rate, err := s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(rate.Mul(power), sdk.OneDec())
+
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	rate, err = s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 }
 
 func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, exchangeRate, sdk.OneDec())
-	app.OracleKeeper.DeleteExchangeRate(ctx, exchangeRate)
-	_, err := app.OracleKeeper.GetExchangeRate(ctx, exchangeRate)
+	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
+	app.OracleKeeper.DeleteExchangeRate(ctx, displayDenom)
+	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)
 }
 
