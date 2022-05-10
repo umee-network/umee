@@ -16,7 +16,7 @@ For example, a user might "lock" for 14 days some of their `u/uatom` collateral 
 
 Locked tokens will be unavailable for `x/leverage` withdrawal until unbonded, but still able to be liquidated. There will be 3 locking tiers, differing in unbonding duration.
 
-Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to lenders of based on the lenders' locked value. APY will vary as fixed reward amounts are divided amongst all participating lenders.
+Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to lenders of based on the lenders' locked value and lock tier. APY will vary as fixed reward amounts are divided amongst all participating lenders.
 
 ## Context
 
