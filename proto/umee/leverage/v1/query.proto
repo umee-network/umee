@@ -120,6 +120,11 @@ service Query {
   rpc LiquidationTargets(QueryLiquidationTargetsRequest) returns (QueryLiquidationTargetsResponse) {
     option (google.api.http).get = "/umee/leverage/v1/liquidation_targets";
   }
+
+  // MarketSummary queries a base asset's current borrowing and lending conditions.
+  rpc MarketSummary(QueryMarketSummaryRequest) returns (QueryMarketSummaryResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/market_summary";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -355,4 +360,26 @@ message QueryLiquidationTargetsRequest {}
 // gRPC service handler.
 message QueryLiquidationTargetsResponse {
   repeated string targets = 1;
+}
+
+// QueryMarketSummaryRequest defines the request structure for the
+// MarketSummary gRPC service handler.
+message QueryMarketSummaryRequest {
+  string denom = 1;
+}
+
+// QueryMarketSummaryResponse defines the response structure for the
+// MarketSummary gRPC service handler.
+message QueryMarketSummaryResponse {
+  string symbol_denom = 1;
+  string uToken_exchange_rate = 2
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string lend_APY = 3
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string borrow_APY = 4
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string market_size = 5
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string available_borrow = 6
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }

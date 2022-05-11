@@ -558,3 +558,39 @@ func (q Querier) LiquidationTargets(
 
 	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
 }
+
+func (q Querier) MarketSummary(
+	goCtx context.Context,
+	req *types.QueryMarketSummaryRequest,
+) (*types.QueryMarketSummaryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	token, err := q.Keeper.GetRegisteredToken(ctx, req.Denom)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
+	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
+	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
+	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
+	if err != nil {
+		return nil, err
+	}
+	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
+
+	return &types.QueryMarketSummaryResponse{
+		SymbolDenom:        token.SymbolDenom,
+		UTokenExchangeRate: rate,
+		Lend_APY:           lendAPY,
+		Borrow_APY:         borrowAPY,
+		MarketSize:         marketSizeCoin.Amount,
+		AvailableBorrow:    availableBorrow,
+	}, nil
+}
