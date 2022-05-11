@@ -583,6 +583,11 @@ func (q Querier) MarketSummary(
 	if err != nil {
 		return nil, err
 	}
+	marketSizeUSD, err := q.Keeper.TokenValue(ctx, marketSizeCoin)
+	if err != nil {
+		return nil, err
+	}
+
 	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
 
 	return &types.QueryMarketSummaryResponse{
@@ -591,6 +596,7 @@ func (q Querier) MarketSummary(
 		Lend_APY:           lendAPY,
 		Borrow_APY:         borrowAPY,
 		MarketSize:         marketSizeCoin.Amount,
+		MarketSize_USD:     marketSizeUSD,
 		AvailableBorrow:    availableBorrow,
 	}, nil
 }
