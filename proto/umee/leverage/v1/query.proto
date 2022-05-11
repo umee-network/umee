@@ -372,16 +372,19 @@ message QueryMarketSummaryRequest {
 // MarketSummary gRPC service handler.
 message QueryMarketSummaryResponse {
   string symbol_denom = 1;
-  string uToken_exchange_rate = 2
+  uint32 exponent = 2;
+  string oracle_price = 3
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = true];
+  string uToken_exchange_rate = 4
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string lend_APY = 3
+  string lend_APY = 5
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string borrow_APY = 4
+  string borrow_APY = 6
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string market_size = 5
+  string market_size = 7
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
-  string market_size_USD = 6
-  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string available_borrow = 7
+  string available_borrow = 8
+  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string reserved = 9
   [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }

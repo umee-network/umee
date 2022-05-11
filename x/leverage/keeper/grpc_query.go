@@ -579,24 +579,24 @@ func (q Querier) MarketSummary(
 	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
 	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
 	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
-	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
-	if err != nil {
-		return nil, err
-	}
-	marketSizeUSD, err := q.Keeper.TokenValue(ctx, marketSizeCoin)
-	if err != nil {
-		return nil, err
-	}
-
+	marketSizeCoin, _ := q.Keeper.GetTotalLoaned(ctx, req.Denom)
 	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
+	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 
-	return &types.QueryMarketSummaryResponse{
+	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:        token.SymbolDenom,
+		Exponent:           token.Exponent,
 		UTokenExchangeRate: rate,
 		Lend_APY:           lendAPY,
 		Borrow_APY:         borrowAPY,
 		MarketSize:         marketSizeCoin.Amount,
-		MarketSize_USD:     marketSizeUSD,
 		AvailableBorrow:    availableBorrow,
-	}, nil
+		Reserved:           reserved,
+	}
+
+	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
+		resp.OraclePrice = &oraclePrice
+	}
+
+	return &resp, nil
 }
