@@ -12,7 +12,7 @@ Proposed
 
 Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` lending APY for supplying base assets.
 
-For example, a user might "lock" for 14 days some of their `u/uatom` collateral held in the leverage module, earning an additional 12% APY of the collateral's value, received as `uumee` tokens.
+For example, a user might "lock" for 14 days some of their `u/ATOM` collateral held in the leverage module, earning an additional 12% APY of the collateral's value, received as `UMEE` tokens.
 
 Locked tokens will be unavailable for `x/leverage` withdrawal until unbonded, but still able to be liquidated. There will be 3 locking tiers, differing in unbonding duration.
 
@@ -113,13 +113,13 @@ type IncentiveProgram struct {
   RewardDenom      string
   TotalRewards     sdk.Int
   StartTime        uint64
-  EndTime          uint64
+  Duration         uint64
   MiddleTierWeight sdk.Dec
   ShortTierWeight  sdk.Dec
 }
 ```
 
-Start and end times are unix times measured in seconds.
+Start time is unix time, and duration is measured in seconds.
 
 TotalIncentive is the total amount of rewards to be distributed as a result of the incentive program. It can contain any reward denomination, allowing for external incentive programs.
 
@@ -127,49 +127,77 @@ Valid tier weights range from 0 to 1, and `LongTierWeight` is defined as always 
 
 For example, a `MiddleTierWeight` of `0.8` means that collateral locked at the middle duration tier accrues 80% of the rewards that the same amount would accrue at the longest tier.
 
+### Reward Math
+
+Our main requirement is to continuously distribute rewards without iterating over addresses.
+
+The following approach is proposed:
+
+- For every user, each nonzero `Locked(address,LockedDenom,tier) = Amount` is stored in state.
+- Additionally, each nonzero `TotalLocked(LockedDenom,tier) = Amount` is kept up to date in state.
+- For each `(LockedDenom,tier,RewardDenom)` that has ever been incentivized, any nonzero `RewardFactor(LockedDenom,tier,RewardDenom)` is stored in state. This `sdk.Dec` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
+- At any given `EndBlock`, each active incentive program performs some computations:
+  - Calculates the total `RewardDenom` rewards that will be given by the program in the current block `X = program.TotalRewards * (secondsElapsed / program.Duration)`
+  - Each lock tier receives a `weightedValue(program,LockedDenom,tier) = TotalLocked(LockedDenom,tier) * tierWeight(program,tier)`.
+  - The amount `X` for each program is then split between the tiers by `weightedValue` into three `X(tier)` values (X1,X2,X3)
+  - For each tier, the value `RewardsToDate(LockedDenom,tier,RewardDenom)` is increased by `X(tier) / TotalLocked(LockedDenom,tier)` and stored in state
+- For every nonzero `Locked(address,LockedDenom,tier) = Amount` stored in state, each nonzero `RewardBasis(address,LockedDenom,tier,RewardDenom)` is stored in state as `sdk.Dec`. When a user's `Locked(address,LockedDenom,tier) = Amount` is updated, they automatically claim any current rewards accumulated on that tier. 
+- When a user claims rewards, they receive `Y = Locked(address,LockedDenom,tier) * ( RewardFactor(LockedDenom,tier,RewardDenom) - RewardBasis(address,LockedDenom,tier,RewardDenom) )` then set `RewardBasis(address,LockedDenom,tier,RewardDenom)` to `RewardFactor(LockedDenom,tier,RewardDenom)` (or clear it if locked amount is being set to zero).
+
+The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, RewardFactor) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
+
+This math only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims). Our implementation is less complex than F1 because there is no equivalent to slashing  in `x/incentive`.
+
+There is no iteration over accounts ever, but storage per locked `(address,LockedDenom,tier)` is a bit large, with an `sdk.Int` for the amount itself and one `sdk.Dec` for each `RewardDenom` that has ever been associated with the `LockedDenom` in question.
+
+### Claiming Rewards
+
+Aside from the automatic reward claiming covered above, which can happen at `MsgLock`, `MsgUnlock`, or `x/leverage/MsgLiquidate` (if locked collateral is lost to liquidation), there will also be a message type which manually claims rewards of a given denom.
+
+```go
+type MsgClaim struct {
+  Lender      sdk.AccAddress
+}
+```
+
+This message type would claim rewards for all locked tiers and denominations, in all reward denominations.
+
 ### TODO
 
+- TODO: Full proto definitions?
 - TODO: Incentive program gov proposal and permissionless funding process, including funding in-progress programs. Avoids "returning of funds for rejected proposals" problem.
 - TODO: Reward distribution math and iteration considerations, with references
 - TODO: Unbonding mechanics including liquidation interruption
 - TODO: leverage interactions
-
-### State
-
-Locked `uToken` amounts for individual users will be stored in state:
-
-```
-lockedAssetPrefix | lenderAddr | lengthPrefixed(denom) | tier => sdk.Int
-```
-
-TODO: Claimed reward storage
-TODO: Unbonding struct, and queues too.
-TODO: Incentive programs active
-TODO: Module rewards tracking (exchange rates)
+- TODO: Unbonding struct, and queues too.
 
 ## Alternative Approaches
 
-> This section contains information around alternative options that are considered
-> before making a decision. It should contain a explanation on why the alternative
-> approach(es) were not chosen.
-
 - TODO: Epoch vs continuous, liquid vs exchanged rewards, automatic vs claimed distribution
 - TODO: Funding before or after gov proposal, permissioned be permissionless
+- TODO: Lock token amounts instead of uToken amounts
+- TODO: Do we need unboding / lock durations at all, now that epoch is gone? Still valuable against bank runs.
 
 ## Consequences
 
-> This section describes the consequences, after applying the decision. All
-> consequences should be summarized here, not just the "positive" ones.
+The proposed algorithm avoids iteration, at the cost of a moderate amount of complexity and the requirement of a claim transaction.
+
+It allows for external and overlapping incentive programs, but does not provide a means to alter or cancel programs already in progress.
 
 ### Positive
+- No iteration
+- Allows external (non-`uumee`-denominated) incentive programs
 
 ### Negative
+- Changing lock tier durations after launch would blindside existing users
+- Rewards must be claimed via claim transaction (or automatically on other action)
+- Fairly complex
 
 ### Neutral
+- Lock tiers are not adjustable per program
+- Rewards are liquid (not locked)
+- Allows overlapping incentive programs in the same denom
 
 ## References
 
-> Are there any relevant PR comments, issues that led up to this, or articles
-> referenced for why we made the given design choice? If so link them here!
-
-- {reference link}
+- [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/)
