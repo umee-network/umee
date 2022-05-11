@@ -34,7 +34,7 @@ The incentive module will support message types which allow users to lock and be
 
 Locked funds must be collateral-enabled uTokens. Locked funds will not leave their original place in the leverage module account. Locking will prevent withdrawal and collateral-disabling (but not liquidation) of the locked uTokens until they are successfully unbonded.
 
-There will be three tiers of locking, differing in their unbonding durations, which may receive differing incentives. The tiers will be of fixed durations (`1 | 7 | 14 days`) and will exist independent of active incentive programs.
+There will be three tiers of locking, differing in their unbonding durations, which may receive differing incentives. The tiers will be of fixed durations and will exist independent of active incentive programs.
 
 The intended structure of what is described as a single incentive program is as follows:
 - A fixed sum of a single token denomination
