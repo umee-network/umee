@@ -135,16 +135,16 @@ The following approach is proposed:
 
 - For every user, each nonzero `Locked(address,LockedDenom,tier) = Amount` is stored in state.
 - Additionally, each nonzero `TotalLocked(LockedDenom,tier) = Amount` is kept up to date in state.
-- For each `(LockedDenom,tier,RewardDenom)` that has ever been incentivized, any nonzero `RewardFactor(LockedDenom,tier,RewardDenom)` is stored in state. This `sdk.Dec` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
+- For each `(LockedDenom,tier)` that has ever been incentivized, any nonzero `HistoricalReward(LockedDenom,tier)` is stored in state. This `sdk.Coins` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
 - At any given `EndBlock`, each active incentive program performs some computations:
   - Calculates the total `RewardDenom` rewards that will be given by the program in the current block `X = program.TotalRewards * (secondsElapsed / program.Duration)`
   - Each lock tier receives a `weightedValue(program,LockedDenom,tier) = TotalLocked(LockedDenom,tier) * tierWeight(program,tier)`.
   - The amount `X` for each program is then split between the tiers by `weightedValue` into three `X(tier)` values (X1,X2,X3)
   - For each tier, the value `RewardsToDate(LockedDenom,tier,RewardDenom)` is increased by `X(tier) / TotalLocked(LockedDenom,tier)` and stored in state
-- For every nonzero `Locked(address,LockedDenom,tier) = Amount` stored in state, each nonzero `RewardBasis(address,LockedDenom,tier,RewardDenom)` is stored in state as `sdk.Dec`. When a user's `Locked(address,LockedDenom,tier) = Amount` is updated, they automatically claim any current rewards accumulated on that tier. 
-- When a user claims rewards, they receive `Y = Locked(address,LockedDenom,tier) * ( RewardFactor(LockedDenom,tier,RewardDenom) - RewardBasis(address,LockedDenom,tier,RewardDenom) )` then set `RewardBasis(address,LockedDenom,tier,RewardDenom)` to `RewardFactor(LockedDenom,tier,RewardDenom)` (or clear it if locked amount is being set to zero).
+- For every nonzero `Locked(address,LockedDenom,tier) = Amount` stored in state, each nonzero `RewardBasis(address,LockedDenom,tier)` is stored in state as `sdk.Coins`. When a user's `Locked(address,LockedDenom,tier) = Amount` is updated, they automatically claim any current rewards accumulated on that tier. 
+- When a user claims rewards, they receive `Y = Locked(address,LockedDenom,tier) * ( HistoricalReward(LockedDenom,tier) - RewardBasis(address,LockedDenom,tier) )` then set `RewardBasis(address,LockedDenom,tier)` to `HistoricalReward(LockedDenom,tier)` (or clear it if locked amount is being set to zero).
 
-The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, RewardFactor) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
+The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, HistoricalReward) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
 
 This math only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims). Our implementation is less complex than F1 because there is no equivalent to slashing  in `x/incentive`.
 
