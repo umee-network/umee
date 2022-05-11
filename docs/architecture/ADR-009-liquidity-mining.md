@@ -140,7 +140,7 @@ The following approach is proposed:
   - Calculates the total `RewardDenom` rewards that will be given by the program in the current block `X = program.TotalRewards * (secondsElapsed / program.Duration)`
   - Each lock tier receives a `weightedValue(program,LockedDenom,tier) = TotalLocked(LockedDenom,tier) * tierWeight(program,tier)`.
   - The amount `X` for each program is then split between the tiers by `weightedValue` into three `X(tier)` values (X1,X2,X3)
-  - For each tier, the value `RewardsToDate(LockedDenom,tier,RewardDenom)` is increased by `X(tier) / TotalLocked(LockedDenom,tier)` and stored in state
+  - For each tier, `HistoricalReward(LockedDenom,tier)` is increased by `X(tier) / TotalLocked(LockedDenom,tier)` and stored in state
 - For every nonzero `Locked(address,LockedDenom,tier) = Amount` stored in state, each nonzero `RewardBasis(address,LockedDenom,tier)` is stored in state as `sdk.Coins`. When a user's `Locked(address,LockedDenom,tier) = Amount` is updated, they automatically claim any current rewards accumulated on that tier. 
 - When a user claims rewards, they receive `Y = Locked(address,LockedDenom,tier) * ( HistoricalReward(LockedDenom,tier) - RewardBasis(address,LockedDenom,tier) )` then set `RewardBasis(address,LockedDenom,tier)` to `HistoricalReward(LockedDenom,tier)` (or clear it if locked amount is being set to zero).
 
@@ -161,6 +161,26 @@ type MsgClaim struct {
 ```
 
 This message type would claim rewards for all locked tiers and denominations, in all reward denominations.
+
+### Funding Programs
+
+Incentive programs are passed via governance, but the funding itself mustbe placed in the `x/incentive` module account so it can be distributed.
+
+One way to fund incentive programs would be to first require them to pass governance (setting denoms, dates, and tier weights) then assign them an ID, allowing permissionless funding. 
+
+```go
+type MsgFundProgram struct {
+  Source    sdk.AccAddress
+  ProgramID uint32
+  Amount    sdk.Coin
+}
+```
+
+This would allow external incentive programs, once passed, to be funded permissionlessly by the contributing bodies.
+
+However, any programs created this way could not have their total reward amount known at the time of governance - the `TotalRewards` field would still be zero when voted on. It could be omitted from the `IncentiveProgram` struct in that case.
+
+This also avoids the edge case of refunding rejected incentive proposals, which would be possible if programs needed to be funded before voting.
 
 ### TODO
 
