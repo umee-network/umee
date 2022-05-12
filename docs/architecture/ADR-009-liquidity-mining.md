@@ -42,7 +42,7 @@ The intended structure of what is described as a single incentive program is as 
 - To all addresses which have locked a specified uToken denomination
 - Proportional to their total value locked but not currently unbonding
 - Then weighted by locking tier
-- As calculated at the moment of distribution, either continuously of epoched
+- As calculated at the moment of distribution (each block)
 
 All parameters mentioned above (dates, amounts, and denominations) must be set using a governance proposal, which creates the incentive program unless impossible under our chosen implementation.
 
@@ -135,7 +135,7 @@ The following approach is proposed:
 
 - For every user, each nonzero `Locked(address,LockedDenom,tier) = Amount` is stored in state.
 - Additionally, each nonzero `TotalLocked(LockedDenom,tier) = Amount` is kept up to date in state.
-- For each `(LockedDenom,tier)` that has ever been incentivized, any nonzero `HistoricalReward(LockedDenom,tier)` is stored in state. This `sdk.Coins` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
+- For each `(LockedDenom,tier)` that has ever been incentivized, any nonzero `HistoricalReward(LockedDenom,tier)` is stored in state. This `sdk.DecCoins` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
 - At any given `EndBlock`, each active incentive program performs some computations:
   - Calculates the total `RewardDenom` rewards that will be given by the program in the current block `X = program.TotalRewards * (secondsElapsed / program.Duration)`
   - Each lock tier receives a `weightedValue(program,LockedDenom,tier) = TotalLocked(LockedDenom,tier) * tierWeight(program,tier)`.
@@ -148,7 +148,7 @@ The algorithm above uses an approach similar to [F1 Fee Distribution](https://dr
 
 This math only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims). Our implementation is less complex than F1 because there is no equivalent to slashing  in `x/incentive`.
 
-There is no iteration over accounts ever, but storage per locked `(address,LockedDenom,tier)` is a bit large, with an `sdk.Int` for the amount itself and one `sdk.Dec` for each `RewardDenom` that has ever been associated with the `LockedDenom` in question.
+There is no iteration over accounts ever, but storage per locked `(address,LockedDenom,tier)` is a bit large, with an `sdk.Int` for the amount itself and one `sdk.DecCoin` for each `RewardDenom` that has ever been associated with the `LockedDenom` in question.
 
 ### Claiming Rewards
 
@@ -184,18 +184,15 @@ This also avoids the edge case of refunding rejected incentive proposals, which 
 
 ### TODO
 
+- TODO: Governance
 - TODO: Full proto definitions?
-- TODO: Incentive program gov proposal and permissionless funding process, including funding in-progress programs. Avoids "returning of funds for rejected proposals" problem.
-- TODO: Reward distribution math and iteration considerations, with references
 - TODO: Unbonding mechanics including liquidation interruption
 - TODO: leverage interactions
 - TODO: Unbonding struct, and queues too.
 
 ## Alternative Approaches
 
-- TODO: Epoch vs continuous, liquid vs exchanged rewards, automatic vs claimed distribution
-- TODO: Funding before or after gov proposal, permissioned be permissionless
-- TODO: Lock token amounts instead of uToken amounts
+- TODO: Funding before or after gov proposal, permissioned or permissionless
 - TODO: Do we need unboding / lock durations at all, now that epoch is gone? Still valuable against bank runs.
 
 ## Consequences
