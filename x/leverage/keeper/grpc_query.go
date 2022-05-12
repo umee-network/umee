@@ -37,9 +37,7 @@ func (q Querier) RegisteredTokens(
 		Registry: make([]types.Token, len(tokens)),
 	}
 
-	for i, t := range tokens {
-		resp.Registry[i] = t
-	}
+	copy(resp.Registry, tokens)
 
 	return resp, nil
 }
