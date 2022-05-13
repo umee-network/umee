@@ -1719,7 +1719,115 @@ func (m *QueryLiquidationTargetsResponse) GetTargets() []string {
 	return nil
 }
 
+// QueryMarketSummaryRequest defines the request structure for the
+// MarketSummary gRPC service handler.
+type QueryMarketSummaryRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryMarketSummaryRequest) Reset()         { *m = QueryMarketSummaryRequest{} }
+func (m *QueryMarketSummaryRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryMarketSummaryRequest) ProtoMessage()    {}
+func (*QueryMarketSummaryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{38}
+}
+func (m *QueryMarketSummaryRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMarketSummaryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMarketSummaryRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMarketSummaryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMarketSummaryRequest.Merge(m, src)
+}
+func (m *QueryMarketSummaryRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMarketSummaryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMarketSummaryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMarketSummaryRequest proto.InternalMessageInfo
+
+func (m *QueryMarketSummaryRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryMarketSummaryResponse defines the response structure for the
+// MarketSummary gRPC service handler.
+type QueryMarketSummaryResponse struct {
+	SymbolDenom        string                                  `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`
+	Exponent           uint32                                  `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
+	OraclePrice        *github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
+	UTokenExchangeRate github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"uToken_exchange_rate"`
+	Lend_APY           github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,5,opt,name=lend_APY,json=lendAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"lend_APY"`
+	Borrow_APY         github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,6,opt,name=borrow_APY,json=borrowAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_APY"`
+	MarketSize         github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,7,opt,name=market_size,json=marketSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"market_size"`
+	AvailableBorrow    github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,8,opt,name=available_borrow,json=availableBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_borrow"`
+	Reserved           github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,9,opt,name=reserved,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"reserved"`
+}
+
+func (m *QueryMarketSummaryResponse) Reset()         { *m = QueryMarketSummaryResponse{} }
+func (m *QueryMarketSummaryResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryMarketSummaryResponse) ProtoMessage()    {}
+func (*QueryMarketSummaryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{39}
+}
+func (m *QueryMarketSummaryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMarketSummaryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMarketSummaryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMarketSummaryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMarketSummaryResponse.Merge(m, src)
+}
+func (m *QueryMarketSummaryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMarketSummaryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMarketSummaryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMarketSummaryResponse proto.InternalMessageInfo
+
+func (m *QueryMarketSummaryResponse) GetSymbolDenom() string {
+	if m != nil {
+		return m.SymbolDenom
+	}
+	return ""
+}
+
+func (m *QueryMarketSummaryResponse) GetExponent() uint32 {
+	if m != nil {
+		return m.Exponent
+	}
+	return 0
+}
+
 func init() {
+<<<<<<< HEAD
 	proto.RegisterType((*QueryRegisteredTokens)(nil), "umeenetwork.umee.leverage.v1beta1.QueryRegisteredTokens")
 	proto.RegisterType((*QueryAvailableBorrowRequest)(nil), "umeenetwork.umee.leverage.v1beta1.QueryAvailableBorrowRequest")
 	proto.RegisterType((*QueryAvailableBorrowResponse)(nil), "umeenetwork.umee.leverage.v1beta1.QueryAvailableBorrowResponse")
@@ -1858,6 +1966,159 @@ var fileDescriptor_32bddfd5abbfa4dc = []byte{
 	0x79, 0xd3, 0x48, 0x8e, 0x0b, 0x5f, 0x99, 0x53, 0xef, 0x47, 0x1a, 0x58, 0x3b, 0xda, 0x18, 0x64,
 	0xff, 0x3f, 0x3a, 0xfe, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x89, 0xe9, 0x8f, 0x3b, 0x01, 0x1b,
 	0x00, 0x00,
+=======
+	proto.RegisterType((*QueryRegisteredTokens)(nil), "umeenetwork.umee.leverage.v1.QueryRegisteredTokens")
+	proto.RegisterType((*QueryAvailableBorrowRequest)(nil), "umeenetwork.umee.leverage.v1.QueryAvailableBorrowRequest")
+	proto.RegisterType((*QueryAvailableBorrowResponse)(nil), "umeenetwork.umee.leverage.v1.QueryAvailableBorrowResponse")
+	proto.RegisterType((*QueryBorrowAPYRequest)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowAPYRequest")
+	proto.RegisterType((*QueryBorrowAPYResponse)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowAPYResponse")
+	proto.RegisterType((*QueryLendAPYRequest)(nil), "umeenetwork.umee.leverage.v1.QueryLendAPYRequest")
+	proto.RegisterType((*QueryLendAPYResponse)(nil), "umeenetwork.umee.leverage.v1.QueryLendAPYResponse")
+	proto.RegisterType((*QueryMarketSizeRequest)(nil), "umeenetwork.umee.leverage.v1.QueryMarketSizeRequest")
+	proto.RegisterType((*QueryMarketSizeResponse)(nil), "umeenetwork.umee.leverage.v1.QueryMarketSizeResponse")
+	proto.RegisterType((*QueryTokenMarketSizeRequest)(nil), "umeenetwork.umee.leverage.v1.QueryTokenMarketSizeRequest")
+	proto.RegisterType((*QueryTokenMarketSizeResponse)(nil), "umeenetwork.umee.leverage.v1.QueryTokenMarketSizeResponse")
+	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umeenetwork.umee.leverage.v1.QueryRegisteredTokensResponse")
+	proto.RegisterType((*QueryParamsRequest)(nil), "umeenetwork.umee.leverage.v1.QueryParamsRequest")
+	proto.RegisterType((*QueryParamsResponse)(nil), "umeenetwork.umee.leverage.v1.QueryParamsResponse")
+	proto.RegisterType((*QueryBorrowedRequest)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowedRequest")
+	proto.RegisterType((*QueryBorrowedResponse)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowedResponse")
+	proto.RegisterType((*QueryBorrowedValueRequest)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowedValueRequest")
+	proto.RegisterType((*QueryBorrowedValueResponse)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowedValueResponse")
+	proto.RegisterType((*QueryCollateralValueRequest)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralValueRequest")
+	proto.RegisterType((*QueryCollateralValueResponse)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralValueResponse")
+	proto.RegisterType((*QueryLoanedRequest)(nil), "umeenetwork.umee.leverage.v1.QueryLoanedRequest")
+	proto.RegisterType((*QueryLoanedResponse)(nil), "umeenetwork.umee.leverage.v1.QueryLoanedResponse")
+	proto.RegisterType((*QueryLoanedValueRequest)(nil), "umeenetwork.umee.leverage.v1.QueryLoanedValueRequest")
+	proto.RegisterType((*QueryLoanedValueResponse)(nil), "umeenetwork.umee.leverage.v1.QueryLoanedValueResponse")
+	proto.RegisterType((*QueryReserveAmountRequest)(nil), "umeenetwork.umee.leverage.v1.QueryReserveAmountRequest")
+	proto.RegisterType((*QueryReserveAmountResponse)(nil), "umeenetwork.umee.leverage.v1.QueryReserveAmountResponse")
+	proto.RegisterType((*QueryCollateralSettingRequest)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralSettingRequest")
+	proto.RegisterType((*QueryCollateralSettingResponse)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralSettingResponse")
+	proto.RegisterType((*QueryCollateralRequest)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralRequest")
+	proto.RegisterType((*QueryCollateralResponse)(nil), "umeenetwork.umee.leverage.v1.QueryCollateralResponse")
+	proto.RegisterType((*QueryExchangeRateRequest)(nil), "umeenetwork.umee.leverage.v1.QueryExchangeRateRequest")
+	proto.RegisterType((*QueryExchangeRateResponse)(nil), "umeenetwork.umee.leverage.v1.QueryExchangeRateResponse")
+	proto.RegisterType((*QueryBorrowLimitRequest)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowLimitRequest")
+	proto.RegisterType((*QueryBorrowLimitResponse)(nil), "umeenetwork.umee.leverage.v1.QueryBorrowLimitResponse")
+	proto.RegisterType((*QueryLiquidationLimitRequest)(nil), "umeenetwork.umee.leverage.v1.QueryLiquidationLimitRequest")
+	proto.RegisterType((*QueryLiquidationLimitResponse)(nil), "umeenetwork.umee.leverage.v1.QueryLiquidationLimitResponse")
+	proto.RegisterType((*QueryLiquidationTargetsRequest)(nil), "umeenetwork.umee.leverage.v1.QueryLiquidationTargetsRequest")
+	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umeenetwork.umee.leverage.v1.QueryLiquidationTargetsResponse")
+	proto.RegisterType((*QueryMarketSummaryRequest)(nil), "umeenetwork.umee.leverage.v1.QueryMarketSummaryRequest")
+	proto.RegisterType((*QueryMarketSummaryResponse)(nil), "umeenetwork.umee.leverage.v1.QueryMarketSummaryResponse")
+}
+
+func init() { proto.RegisterFile("umee/leverage/v1/query.proto", fileDescriptor_1e8137dcabb0ccc7) }
+
+var fileDescriptor_1e8137dcabb0ccc7 = []byte{
+	// 1668 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0xcb, 0x6f, 0xdc, 0x54,
+	0x17, 0x8f, 0xdb, 0xe6, 0x75, 0x92, 0x7c, 0x49, 0xef, 0x97, 0xef, 0xeb, 0xd4, 0xa4, 0x93, 0xd4,
+	0x4d, 0xdb, 0x88, 0x92, 0x99, 0x3c, 0x28, 0x2d, 0x6d, 0x91, 0x48, 0xfa, 0x10, 0x2d, 0xa9, 0x9a,
+	0x4e, 0x1f, 0x22, 0x65, 0x61, 0x3c, 0x33, 0xb7, 0x53, 0x2b, 0x1e, 0x7b, 0x62, 0x7b, 0xa6, 0x4d,
+	0xc5, 0x02, 0xb1, 0x60, 0x0b, 0x12, 0x48, 0x6c, 0x90, 0x40, 0x88, 0x05, 0x42, 0x6c, 0x90, 0x40,
+	0x62, 0xc1, 0x82, 0x65, 0x97, 0x95, 0xd8, 0x20, 0x24, 0x0a, 0x6a, 0xf9, 0x43, 0x90, 0xef, 0x3d,
+	0x7e, 0x8d, 0x67, 0x9c, 0x3b, 0x4e, 0xbb, 0xca, 0xf8, 0xda, 0xbf, 0x73, 0x7e, 0xf7, 0xde, 0x73,
+	0xce, 0x3d, 0xbf, 0x1b, 0x98, 0x6a, 0xd6, 0x29, 0x2d, 0x1a, 0xb4, 0x45, 0x6d, 0xad, 0x46, 0x8b,
+	0xad, 0xc5, 0xe2, 0x56, 0x93, 0xda, 0xdb, 0x85, 0x86, 0x6d, 0xb9, 0x16, 0x61, 0x6f, 0x4d, 0xea,
+	0xde, 0xb7, 0xec, 0xcd, 0x82, 0xf7, 0xbb, 0xe0, 0x7f, 0x59, 0x68, 0x2d, 0xca, 0x53, 0x35, 0xcb,
+	0xaa, 0x19, 0xb4, 0xa8, 0x35, 0xf4, 0xa2, 0x66, 0x9a, 0x96, 0xab, 0xb9, 0xba, 0x65, 0x3a, 0x1c,
+	0x2b, 0x4f, 0x27, 0x2c, 0x07, 0x58, 0xfe, 0xc1, 0x64, 0xcd, 0xaa, 0x59, 0xec, 0x67, 0xd1, 0xfb,
+	0x85, 0xa3, 0xf9, 0x8a, 0xe5, 0xd4, 0x2d, 0xa7, 0x58, 0xd6, 0x1c, 0x0f, 0x54, 0xa6, 0xae, 0xb6,
+	0x58, 0xac, 0x58, 0xba, 0xc9, 0xdf, 0x2b, 0x07, 0xe0, 0x7f, 0xd7, 0x3d, 0x86, 0x25, 0x5a, 0xd3,
+	0x1d, 0x97, 0xda, 0xb4, 0x7a, 0xd3, 0xda, 0xa4, 0xa6, 0xa3, 0x2c, 0xc3, 0x4b, 0xec, 0xc5, 0x4a,
+	0x4b, 0xd3, 0x0d, 0xad, 0x6c, 0xd0, 0x55, 0xcb, 0xb6, 0xad, 0xfb, 0x25, 0xba, 0xd5, 0xa4, 0x8e,
+	0x4b, 0x26, 0xa1, 0xbf, 0x4a, 0x4d, 0xab, 0x9e, 0x93, 0x66, 0xa4, 0xb9, 0xe1, 0x12, 0x7f, 0x50,
+	0xee, 0xc2, 0x54, 0x67, 0x90, 0xd3, 0xb0, 0x4c, 0x87, 0x92, 0x4b, 0x30, 0xa0, 0xd5, 0xad, 0xa6,
+	0xe9, 0x72, 0xd8, 0x6a, 0xe1, 0xd1, 0x93, 0xe9, 0xbe, 0x3f, 0x9e, 0x4c, 0x1f, 0xab, 0xe9, 0xee,
+	0xbd, 0x66, 0xb9, 0x50, 0xb1, 0xea, 0x45, 0x24, 0xcc, 0xff, 0xcc, 0x3b, 0xd5, 0xcd, 0xa2, 0xbb,
+	0xdd, 0xa0, 0x4e, 0xe1, 0xb2, 0xe9, 0x96, 0x10, 0xad, 0xcc, 0x23, 0x6b, 0x6e, 0x7e, 0x65, 0x7d,
+	0x23, 0x9d, 0xd6, 0x1d, 0xf8, 0x7f, 0xfb, 0xe7, 0x48, 0xe8, 0x4d, 0xd8, 0xbb, 0xb2, 0xbe, 0x91,
+	0x81, 0xcd, 0x05, 0x5a, 0x29, 0x79, 0x50, 0xe5, 0x04, 0xfc, 0x97, 0xd9, 0x5e, 0xa3, 0x66, 0x75,
+	0x47, 0x22, 0xef, 0xc0, 0x64, 0xfc, 0xe3, 0xe7, 0x46, 0xa3, 0x80, 0x53, 0xbc, 0xaa, 0xd9, 0x9b,
+	0xd4, 0xbd, 0xa1, 0x3f, 0xa4, 0xe9, 0x4c, 0xb6, 0xe0, 0x40, 0xe2, 0x7b, 0x24, 0x73, 0x1b, 0xc6,
+	0xeb, 0x6c, 0x54, 0x75, 0xf4, 0x87, 0x54, 0x6d, 0x3a, 0xd5, 0x8c, 0xc4, 0xc6, 0xea, 0x81, 0xf1,
+	0x5b, 0x4e, 0x35, 0x88, 0x28, 0x16, 0x60, 0xa2, 0x3c, 0x2d, 0x8c, 0xa8, 0x04, 0x08, 0xc9, 0x5e,
+	0x83, 0x91, 0x08, 0xd9, 0x8c, 0x61, 0x05, 0x21, 0x51, 0xe5, 0x2e, 0x1c, 0xea, 0x98, 0x10, 0x81,
+	0xc7, 0x8b, 0x30, 0x64, 0xb3, 0x77, 0xf6, 0x76, 0x4e, 0x9a, 0xd9, 0x3b, 0x37, 0xb2, 0x74, 0xa4,
+	0x90, 0x96, 0xd7, 0x05, 0x86, 0x5f, 0xdd, 0xe7, 0x71, 0x2a, 0x05, 0x50, 0x65, 0x12, 0x08, 0xf3,
+	0xb3, 0xae, 0xd9, 0x5a, 0xdd, 0xc1, 0x45, 0x50, 0x36, 0x30, 0x9a, 0xfc, 0x51, 0xf4, 0xb9, 0x0a,
+	0x03, 0x0d, 0x36, 0xc2, 0x26, 0x38, 0xb2, 0x34, 0x9b, 0xee, 0x91, 0xa3, 0xd1, 0x25, 0x22, 0x95,
+	0x4b, 0x18, 0x7b, 0x3c, 0x09, 0x68, 0xd5, 0x5f, 0xf7, 0x1c, 0x0c, 0x6a, 0xd5, 0xaa, 0x4d, 0x1d,
+	0x07, 0x57, 0xde, 0x7f, 0x0c, 0x77, 0x64, 0x4f, 0x74, 0x47, 0x3e, 0x90, 0x62, 0xc9, 0xe7, 0x19,
+	0x42, 0x96, 0x35, 0x18, 0x2a, 0xe3, 0x18, 0xae, 0xcc, 0xc1, 0x02, 0x5f, 0xef, 0x82, 0x57, 0x7e,
+	0x0a, 0x58, 0x7e, 0x0a, 0xe7, 0x2d, 0xdd, 0x5c, 0x5d, 0xf0, 0xc8, 0x7d, 0xf7, 0xd7, 0xf4, 0x9c,
+	0xc0, 0x1e, 0x79, 0x00, 0xa7, 0x14, 0x18, 0x57, 0xde, 0x86, 0x83, 0x31, 0x06, 0xb7, 0x35, 0xa3,
+	0x49, 0xb3, 0xce, 0xc7, 0x01, 0xb9, 0x93, 0x31, 0x9c, 0xd3, 0x2d, 0xf8, 0x8f, 0xef, 0x56, 0x6d,
+	0x79, 0x6f, 0xb2, 0xe6, 0x42, 0x39, 0x6a, 0x5e, 0xb9, 0x8a, 0xb9, 0x70, 0xde, 0x32, 0x0c, 0xcd,
+	0xa5, 0xb6, 0x66, 0xec, 0x6a, 0x0e, 0xdb, 0x98, 0x25, 0x09, 0x73, 0x38, 0x8b, 0x0d, 0x98, 0xa8,
+	0x04, 0xaf, 0x76, 0x35, 0x8f, 0xf1, 0x4a, 0xdc, 0x85, 0x72, 0x01, 0xe3, 0x78, 0xcd, 0xd2, 0xcc,
+	0xec, 0x41, 0xf5, 0xd0, 0xaf, 0xa2, 0x68, 0x05, 0x79, 0x57, 0x60, 0xc0, 0x60, 0x23, 0x2f, 0x22,
+	0x9e, 0xd0, 0xb4, 0x72, 0x19, 0x4b, 0x21, 0xf7, 0xbd, 0xab, 0x7d, 0xa8, 0x43, 0x2e, 0x69, 0x0a,
+	0xe7, 0x72, 0x1d, 0x46, 0xb9, 0xc3, 0x5d, 0xad, 0xff, 0x88, 0x11, 0x9a, 0x56, 0x16, 0x31, 0x0f,
+	0x4a, 0xd4, 0xa1, 0x76, 0x8b, 0xae, 0xb0, 0xc3, 0x31, 0xbd, 0x9e, 0x56, 0x31, 0xda, 0xdb, 0x20,
+	0xcf, 0xf9, 0x7c, 0xbe, 0x86, 0x45, 0x34, 0x8c, 0xc7, 0x1b, 0xd4, 0x75, 0x75, 0xb3, 0x96, 0x75,
+	0x61, 0xcf, 0x40, 0xbe, 0x9b, 0x41, 0xa4, 0x9e, 0x83, 0x41, 0x6a, 0x7a, 0x2d, 0x07, 0x3f, 0xad,
+	0x86, 0x4a, 0xfe, 0xa3, 0xf2, 0x16, 0x1e, 0x8d, 0x21, 0x36, 0x2b, 0x8b, 0x8f, 0x24, 0x0c, 0x95,
+	0xa8, 0x29, 0xf4, 0xbf, 0x09, 0x10, 0xa6, 0xc6, 0x8b, 0x08, 0xd7, 0x88, 0x79, 0x65, 0x01, 0xe3,
+	0xec, 0xe2, 0x83, 0xca, 0x3d, 0xcd, 0xac, 0xd1, 0x92, 0xe6, 0xee, 0x70, 0x8e, 0x36, 0x30, 0x54,
+	0xe2, 0x08, 0xe4, 0x7e, 0x03, 0xc6, 0x28, 0x8e, 0xab, 0xb6, 0xe6, 0x66, 0x8d, 0xcd, 0x51, 0x1a,
+	0x31, 0xae, 0x2c, 0xe3, 0x5a, 0xf1, 0xba, 0xba, 0xa6, 0xd7, 0x75, 0x77, 0xc7, 0x75, 0x0f, 0x12,
+	0x28, 0x06, 0x0a, 0x13, 0x88, 0x17, 0x51, 0xd5, 0xf0, 0xc6, 0xb3, 0x26, 0x50, 0x39, 0x34, 0xad,
+	0x9c, 0xc6, 0xba, 0xb9, 0xa6, 0x6f, 0x35, 0xf5, 0x2a, 0xeb, 0xb7, 0x05, 0x89, 0xbe, 0x8f, 0x11,
+	0x9e, 0x44, 0x22, 0xdb, 0x77, 0x61, 0xbf, 0x11, 0xbe, 0xdb, 0x15, 0xe5, 0x09, 0xa3, 0xcd, 0x89,
+	0x32, 0x83, 0xe9, 0x10, 0xf1, 0x7e, 0x53, 0xb3, 0x6b, 0xd4, 0x0d, 0x1a, 0x89, 0xb3, 0x30, 0xdd,
+	0xf5, 0x8b, 0x30, 0x63, 0x5c, 0x3e, 0xc4, 0xc2, 0x75, 0xb8, 0xe4, 0x3f, 0x06, 0x75, 0x05, 0xfb,
+	0xad, 0x66, 0xbd, 0xae, 0x79, 0x15, 0x23, 0x2d, 0xbe, 0xbe, 0xee, 0xc7, 0xc2, 0xd2, 0x86, 0x41,
+	0x5f, 0x87, 0x61, 0xd4, 0xd9, 0xae, 0x97, 0x2d, 0x43, 0x8d, 0x62, 0x47, 0xf8, 0xd8, 0x05, 0x6f,
+	0x88, 0xc8, 0x30, 0x44, 0x1f, 0x34, 0x2c, 0x93, 0x9a, 0x2e, 0xcb, 0xba, 0xb1, 0x52, 0xf0, 0xec,
+	0x6d, 0xbd, 0x65, 0x6b, 0x15, 0x83, 0xaa, 0x0d, 0x5b, 0xaf, 0xd0, 0xdc, 0xde, 0x60, 0x1d, 0xa5,
+	0x5e, 0xb6, 0x9e, 0xdb, 0x58, 0xf7, 0x4c, 0x90, 0xf7, 0x60, 0xb2, 0xc9, 0x3a, 0x33, 0x35, 0x1e,
+	0xfa, 0xfb, 0x32, 0x6d, 0x11, 0xe1, 0xb6, 0xa2, 0xd9, 0x45, 0x2e, 0xc3, 0x90, 0x41, 0xcd, 0xaa,
+	0xea, 0x75, 0xf6, 0xfd, 0x99, 0xac, 0x0e, 0x1a, 0x5c, 0x27, 0x90, 0xab, 0x00, 0x18, 0xfa, 0x9e,
+	0xb1, 0x81, 0x4c, 0xc6, 0x86, 0xcb, 0xbe, 0xfa, 0x69, 0x6f, 0x9a, 0x07, 0x77, 0xdb, 0x34, 0x7b,
+	0xfd, 0x85, 0xe6, 0x4b, 0x3e, 0x95, 0xfb, 0xc9, 0x0d, 0x65, 0xb2, 0x3a, 0xae, 0xc5, 0xa5, 0x23,
+	0xb9, 0xe2, 0xb5, 0xdb, 0xec, 0xac, 0xaa, 0xe6, 0x86, 0x33, 0x99, 0x0c, 0xf0, 0x4b, 0x7f, 0xca,
+	0xd0, 0xcf, 0x82, 0x94, 0xfc, 0x20, 0xc1, 0x44, 0x7b, 0x87, 0x4f, 0x96, 0xd3, 0xbb, 0xea, 0x8e,
+	0xb2, 0x40, 0x3e, 0x9b, 0x01, 0xe4, 0xa7, 0x85, 0x72, 0xe2, 0xc3, 0xdf, 0xfe, 0xf9, 0x74, 0xcf,
+	0x51, 0x72, 0xa4, 0x98, 0x50, 0xf7, 0x76, 0x80, 0x51, 0x5d, 0x4e, 0xef, 0x63, 0x09, 0x06, 0x78,
+	0x67, 0x4f, 0x16, 0x04, 0x9c, 0xc6, 0x84, 0x85, 0xbc, 0xd8, 0x03, 0x02, 0xc9, 0xcd, 0x30, 0x72,
+	0x32, 0xc9, 0x25, 0xc9, 0x71, 0x49, 0x41, 0x3e, 0x97, 0x60, 0xc8, 0x6f, 0x9b, 0xc9, 0x92, 0x80,
+	0x87, 0x36, 0xed, 0x21, 0x2f, 0xf7, 0x84, 0x41, 0x5e, 0x0a, 0xe3, 0x35, 0x45, 0xe4, 0x24, 0x2f,
+	0xbf, 0xc9, 0x26, 0xdf, 0x4b, 0x30, 0x16, 0x6b, 0xe8, 0xc9, 0xa9, 0x1e, 0x5c, 0x45, 0x7b, 0x40,
+	0xf9, 0x74, 0xef, 0x40, 0x24, 0x3a, 0xc7, 0x88, 0x2a, 0x64, 0xa6, 0x3b, 0x51, 0xde, 0x0b, 0xb2,
+	0xad, 0xe5, 0x3d, 0xa3, 0xd0, 0xd6, 0xc6, 0x7a, 0x6d, 0xa1, 0xad, 0x8d, 0xf7, 0xd5, 0x69, 0x5b,
+	0xcb, 0xfb, 0x4b, 0xf2, 0x8d, 0x04, 0x23, 0x91, 0x2e, 0x96, 0x9c, 0x14, 0x76, 0x12, 0x5b, 0xbc,
+	0xd7, 0x7a, 0x85, 0x21, 0xc1, 0x63, 0x8c, 0xe0, 0x0c, 0xc9, 0x77, 0x23, 0x88, 0x0b, 0xf7, 0xa3,
+	0x04, 0xe3, 0x6d, 0x97, 0x4d, 0xe4, 0x75, 0x01, 0x9f, 0x9d, 0x6f, 0xb5, 0xe4, 0x33, 0x59, 0xa0,
+	0x48, 0xf9, 0x65, 0x46, 0x79, 0x96, 0x28, 0x49, 0xca, 0xed, 0xb5, 0x91, 0x7c, 0x21, 0xc1, 0x70,
+	0x70, 0x19, 0x45, 0xc4, 0xb3, 0x20, 0xbc, 0x60, 0x92, 0x5f, 0xed, 0x0d, 0x84, 0x24, 0x67, 0x19,
+	0xc9, 0x3c, 0x99, 0xea, 0x16, 0x92, 0xaa, 0xd6, 0xd8, 0x26, 0x9f, 0x49, 0x30, 0x88, 0x57, 0x54,
+	0x44, 0x28, 0xba, 0x62, 0x77, 0x5f, 0xf2, 0x52, 0x2f, 0x90, 0x9d, 0x93, 0x9a, 0x1d, 0xa2, 0x1e,
+	0xad, 0xaf, 0x24, 0x80, 0xf0, 0x0a, 0x88, 0x88, 0xac, 0x40, 0xe2, 0x9a, 0x49, 0x3e, 0xd9, 0x23,
+	0x0a, 0xf9, 0x1d, 0x65, 0xfc, 0xa6, 0xc9, 0xa1, 0x24, 0xbf, 0xc8, 0x51, 0x4a, 0x7e, 0x92, 0x60,
+	0xbc, 0xed, 0xaa, 0x4a, 0x28, 0x1e, 0x3b, 0xdf, 0x89, 0x09, 0xc5, 0x63, 0x97, 0x9b, 0xb1, 0xb4,
+	0xb3, 0x85, 0x1d, 0x28, 0x6a, 0x94, 0xb7, 0x57, 0x2f, 0x63, 0x92, 0x50, 0xa8, 0x5e, 0x76, 0xd2,
+	0x9d, 0x42, 0xf5, 0xb2, 0xa3, 0xfa, 0x4c, 0xab, 0x97, 0x78, 0x84, 0xab, 0x5c, 0x5f, 0x92, 0x5f,
+	0x24, 0xd8, 0x9f, 0x90, 0x82, 0x44, 0xe4, 0x28, 0xee, 0xa6, 0x48, 0xe5, 0x73, 0xd9, 0xc0, 0x48,
+	0xfd, 0x15, 0x46, 0xfd, 0x18, 0x99, 0x4d, 0x52, 0x8f, 0x5c, 0xbc, 0x38, 0x48, 0xf4, 0x4b, 0x09,
+	0x20, 0xb4, 0x25, 0x14, 0xc8, 0x09, 0xf1, 0x2a, 0x14, 0xc8, 0x49, 0x9d, 0x9a, 0x56, 0x01, 0x42,
+	0xa6, 0xac, 0xae, 0xb6, 0x5d, 0x26, 0x09, 0xc5, 0x71, 0xe7, 0xfb, 0x2c, 0xa1, 0x38, 0xee, 0x72,
+	0x77, 0x95, 0x56, 0x57, 0xdb, 0xef, 0xb4, 0xc8, 0xb7, 0x12, 0x8c, 0xc6, 0x7a, 0x70, 0x91, 0xf3,
+	0xa7, 0x83, 0x88, 0x96, 0x4f, 0xf5, 0x8c, 0x43, 0xb6, 0xc7, 0x19, 0xdb, 0xc3, 0x64, 0x3a, 0xc9,
+	0x36, 0xa6, 0x33, 0xd8, 0x01, 0x1b, 0x51, 0xb9, 0x42, 0x07, 0x6c, 0x52, 0x4a, 0x0b, 0x1d, 0xb0,
+	0x1d, 0xc4, 0x74, 0xda, 0x01, 0x1b, 0x15, 0xd9, 0xe4, 0x67, 0x09, 0x26, 0xda, 0x35, 0x2e, 0x11,
+	0xd9, 0xce, 0x2e, 0x92, 0x5a, 0xa8, 0x5f, 0xee, 0x26, 0xaa, 0xd3, 0x6a, 0x5a, 0x42, 0x6c, 0x93,
+	0x5f, 0x25, 0x20, 0x49, 0xf9, 0x4b, 0xce, 0xf5, 0x46, 0x20, 0xae, 0xab, 0xe5, 0x37, 0x32, 0xa2,
+	0x71, 0x02, 0xf3, 0x6c, 0x02, 0xc7, 0xc9, 0xd1, 0xf4, 0x09, 0xa0, 0x10, 0x67, 0x65, 0x39, 0x26,
+	0xa8, 0x85, 0xca, 0x72, 0x27, 0xd9, 0x2e, 0x54, 0x96, 0x3b, 0x6a, 0xf7, 0xb4, 0xb2, 0xec, 0x1f,
+	0x21, 0x1c, 0xb1, 0x7a, 0xe5, 0xd1, 0xd3, 0xbc, 0xf4, 0xf8, 0x69, 0x5e, 0xfa, 0xfb, 0x69, 0x5e,
+	0xfa, 0xe4, 0x59, 0xbe, 0xef, 0xf1, 0xb3, 0x7c, 0xdf, 0xef, 0xcf, 0xf2, 0x7d, 0x77, 0x16, 0x22,
+	0x5a, 0xcd, 0xb3, 0x32, 0x8f, 0x44, 0xb8, 0xc9, 0xd6, 0x52, 0xf1, 0x41, 0x68, 0x97, 0x29, 0xb7,
+	0xf2, 0x00, 0xfb, 0xff, 0xe4, 0xf2, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xe4, 0x2f, 0x8e, 0xd3,
+	0x52, 0x1d, 0x00, 0x00,
+>>>>>>> 0ecf33c (feat: add MarketSummary query (#894))
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1926,6 +2187,8 @@ type QueryClient interface {
 	LiquidationLimit(ctx context.Context, in *QueryLiquidationLimitRequest, opts ...grpc.CallOption) (*QueryLiquidationLimitResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
 	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
+	// MarketSummary queries a base asset's current borrowing and lending conditions.
+	MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
 }
 
 type queryClient struct {
@@ -2107,6 +2370,15 @@ func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidati
 	return out, nil
 }
 
+func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
+	out := new(QueryMarketSummaryResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/MarketSummary", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// RegisteredTokens queries for all the registered tokens.
@@ -2163,6 +2435,8 @@ type QueryServer interface {
 	LiquidationLimit(context.Context, *QueryLiquidationLimitRequest) (*QueryLiquidationLimitResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for liquidation.
 	LiquidationTargets(context.Context, *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error)
+	// MarketSummary queries a base asset's current borrowing and lending conditions.
+	MarketSummary(context.Context, *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -2225,6 +2499,9 @@ func (*UnimplementedQueryServer) LiquidationLimit(ctx context.Context, req *Quer
 }
 func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LiquidationTargets not implemented")
+}
+func (*UnimplementedQueryServer) MarketSummary(ctx context.Context, req *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarketSummary not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -2573,6 +2850,24 @@ func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMarketSummaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).MarketSummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umeenetwork.umee.leverage.v1.Query/MarketSummary",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umeenetwork.umee.leverage.v1beta1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -2652,6 +2947,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LiquidationTargets",
 			Handler:    _Query_LiquidationTargets_Handler,
+		},
+		{
+			MethodName: "MarketSummary",
+			Handler:    _Query_MarketSummary_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3898,6 +4197,143 @@ func (m *QueryLiquidationTargetsResponse) MarshalToSizedBuffer(dAtA []byte) (int
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryMarketSummaryRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMarketSummaryRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMarketSummaryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMarketSummaryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMarketSummaryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.Reserved.Size()
+		i -= size
+		if _, err := m.Reserved.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x4a
+	{
+		size := m.AvailableBorrow.Size()
+		i -= size
+		if _, err := m.AvailableBorrow.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x42
+	{
+		size := m.MarketSize.Size()
+		i -= size
+		if _, err := m.MarketSize.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x3a
+	{
+		size := m.Borrow_APY.Size()
+		i -= size
+		if _, err := m.Borrow_APY.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x32
+	{
+		size := m.Lend_APY.Size()
+		i -= size
+		if _, err := m.Lend_APY.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
+	{
+		size := m.UTokenExchangeRate.Size()
+		i -= size
+		if _, err := m.UTokenExchangeRate.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x22
+	if m.OraclePrice != nil {
+		{
+			size := m.OraclePrice.Size()
+			i -= size
+			if _, err := m.OraclePrice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Exponent != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.Exponent))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.SymbolDenom) > 0 {
+		i -= len(m.SymbolDenom)
+		copy(dAtA[i:], m.SymbolDenom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.SymbolDenom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -4399,6 +4835,51 @@ func (m *QueryLiquidationTargetsResponse) Size() (n int) {
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
+	return n
+}
+
+func (m *QueryMarketSummaryRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryMarketSummaryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.SymbolDenom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Exponent != 0 {
+		n += 1 + sovQuery(uint64(m.Exponent))
+	}
+	if m.OraclePrice != nil {
+		l = m.OraclePrice.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = m.UTokenExchangeRate.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.Lend_APY.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.Borrow_APY.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.MarketSize.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.AvailableBorrow.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.Reserved.Size()
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -7651,6 +8132,429 @@ func (m *QueryLiquidationTargetsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Targets = append(m.Targets, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMarketSummaryRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMarketSummaryRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMarketSummaryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMarketSummaryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMarketSummaryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SymbolDenom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SymbolDenom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Exponent", wireType)
+			}
+			m.Exponent = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Exponent |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OraclePrice", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			var v github_com_cosmos_cosmos_sdk_types.Dec
+			m.OraclePrice = &v
+			if err := m.OraclePrice.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UTokenExchangeRate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.UTokenExchangeRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Lend_APY", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Lend_APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Borrow_APY", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Borrow_APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MarketSize", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MarketSize.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AvailableBorrow", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.AvailableBorrow.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reserved", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Reserved.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
