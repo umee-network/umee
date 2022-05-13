@@ -22,11 +22,13 @@ Additional parameters will be required which define the liquidation incentive an
 
 Liquidation will require one message type `MsgLiquidate`, one per-token parameter `LiquidationIncentive`, and two global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold`.
 
-There is no event type for when a borrower becomes a valid liquidation target, nor a list of valid targets stored in the module. Liquidators will have to use an off-chain tool to query their nodes periodically.
+The blockchain doesn't issue any event to signal that a borrow position can be liquidated, nor provide a list of valid targets. Liquidators will have to use an off-chain tools to query their nodes periodically.
 
 ## Detailed Design
 
-A function `IsLiquidationEligible(borrowerAddr)` can be created to determine if a borrower is currently exceeding their borrow limit. Any liquidation attempt against a borrower not over their limit will fail.
+We don't provide a function that checks if a given borrower can be liquidated to avoid spamming an app with periodical queries. Any liquidation attempt against a borrower not eligible for liquidation will fail.
+
+A borrow position is represented by a pair `(borrower_address, coin)`, where borrower address is an entity requesting a loan.
 
 A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
 
@@ -42,8 +44,8 @@ To implement the liquidation functionality of the Asset Facility, one message ty
 type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
-  Repayment     sdk.Coin // denom + amount
-  RewardDenom   string
+  Repayment     sdk.Coin // borrow denom + amount
+  RewardDenom   string   // collateral denom
 }
 ```
 
@@ -52,7 +54,7 @@ Its amount is the maximum amount of asset the liquidator is willing to repay. Th
 
 RewardDenom is the collateral type which the liquidator will receive in exchange for repaying the borrower's loan. It is always a uToken denomination.
 
-It is necessary that messages be signed by the liquidator's account. Thus the method `GetSigners` should return the `Liquidator` address for the message type above.
+`Liquidator` is the signer of the message and the account which will do repayment and receive reward.
 
 ### Partial Liquidation
 
@@ -68,7 +70,7 @@ In the above scenarios, the `MsgLiquidate` should succeed with the maximum amoun
 
 ### Token Parameters
 
-In order to incentivize liquidators to target certain collateral types for liquidation first, the token parameter `LiquidationIncentive` is used.
+In order to incentivize liquidators to target certain collateral types for liquidation first, we introduce a `LiquidationIncentive` parameter - defined for each supported borrowed denom.
 
 When a `MsgLiquidate` causes liquidation to occur, the liquidator receives collateral equal to (100% + `RewardDenom.LiquidationIncentive`) of the repaid value worth of collateral.
 
@@ -76,21 +78,18 @@ For example, if the liquidation incentive for `uatom` is `0.15`, then the liquid
 
 ### Calculating Liquidation Amounts
 
-When a `MsgLiquidate` is received, the `x/leverage` module must determine if the targeted borrow address is eligible for liquidation.
+When a `MsgLiquidate` is received, the `x/leverage` module must determine if the targeted borrow position is eligible for liquidation.
 
 ```go
     // from MsgLiquidate (liquidatorAddr, borrowerAddr, repayDenom, repayAmount, rewardDenom)
 
     borrowed := GetTotalBorrows(borrowerAddr)
-    // sum over the value of every sdk.Coin in the total borrowed sdk.Coins
     borrowValue := TotalValue(borrowed) // price oracle
 
     collateral := GetCollateralBalance(borrowerAddr)
-    collateral = MultiplyByCollateralWeight(collateral)
-    // sum over the value of every sdk.Coin in the total collateral sdk.Coins
-    collateralValue := TotalValue(collateral) // price oracle
+    maxBorrowValue := CalculateLiquidationLimit(collateral)
 
-    if borrowValue > collateralValue {
+    if borrowValue > maxBorrowValue {
       // borrower is over borrow limit, and therefore eligible for liquidation
     }
 ```
@@ -149,10 +148,11 @@ Then the borrow can be repaid and the collateral rewarded using the liquidator's
 > the existing liquidation designs well incentivize liquidators but sell excessive amounts of discounted collateral at the borrowers’ expenses.
 
 Examining one existing liquidation scheme ([Compound](https://zengo.com/understanding-compounds-liquidation/)), two main parameters define maximum borrower losses due to liquidation:
+
 - Liquidation Incentive (10%)
 - Close Factor (50%)
-When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% of their borrowed value in a single liquidation event.
-That is, the liquidator pays off 50% of their borrow and receives collateral worth 55% of its value.
+  When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% of their borrowed value in a single liquidation event.
+  That is, the liquidator pays off 50% of their borrow and receives collateral worth 55% of its value.
 
 It should be possible to improve upon this aspect of the system by scaling one of the two parameters shown above, based on how far a borrower is over their borrow limit.
 
@@ -160,13 +160,13 @@ It should be possible to improve upon this aspect of the system by scaling one o
 >
 > Close factor ranges from `0.0 = MinimumCloseFactor` to 1.0 when the borrower is between 0% and `20% = CompleteLiquidationThreshold` over borrow limit, then stays at 1.0
 >
-> | Borrow Limit (BL) |Borrowed Value (BV) | BV / BL | Close Factor |
-> | - | - | - | - |
-> | 100 | 100.1 | 1.001 | 0.005 |
-> | 100 | 102 | 1.02 | 0.1 |
-> | 100 | 110 | 1.1 | 0.5 |
-> | 100 | 130 | 1.2 | 1.0 |
-> | 100 | 140 | 1.4 | 1.0 |
+> | Borrow Limit (BL) | Borrowed Value (BV) | BV / BL | Close Factor |
+> | ----------------- | ------------------- | ------- | ------------ |
+> | 100               | 100.1               | 1.001   | 0.005        |
+> | 100               | 102                 | 1.02    | 0.1          |
+> | 100               | 110                 | 1.1     | 0.5          |
+> | 100               | 130                 | 1.2     | 1.0          |
+> | 100               | 140                 | 1.4     | 1.0          |
 
 The Dynamic Close Factor takes advantage of market forces to reduce excessive collateral selloffs, by reducing the portion of collateral initially eligible for liquidation.
 Liquidators would have the chance to liquidate smaller portions of the borrow if profitable and bring the position back into health.
@@ -189,12 +189,15 @@ In addition to the above, the liquidation tool should be able to read any global
 ## Consequences
 
 ### Positive
+
 - Dynamic close factors reduce excessive risk to collateral
 
 ### Negative
+
 - Offchain tool required to effectively scan for liquidation opportunities
 
 ### Neutral
+
 - New message type `MsgLiquidate` is created
 - New per-token parameter `LiquidationIncentive` will be created to determine liquidation incentives
 - New global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold` will be created for close factors

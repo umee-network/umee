@@ -217,18 +217,18 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdr
 // or module balance is insufficient, we return an error.
 func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
 	if !borrow.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
+		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
 
 	if !k.IsAcceptedToken(ctx, borrow.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
+		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
 	reservedAmount := k.GetReserveAmount(ctx, borrow.Denom)
 	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), borrow.Denom).Amount
 	if borrow.Amount.GT(availableAmount.Sub(reservedAmount)) {
-		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, borrow.String())
+		return types.ErrLendingPoolInsufficient.Wrap(borrow.String())
 	}
 
 	// Determine amount of all tokens currently borrowed
@@ -249,7 +249,8 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Return error if borrowed value would exceed borrow limit
 	if newBorrowedValue.GT(borrowLimit) {
-		return sdkerrors.Wrap(types.ErrBorrowLimitLow, borrowLimit.String())
+		return types.ErrBorrowLimitLow.Wrapf("limit: %s, already borrowed: %s",
+			borrowLimit, borrowed)
 	}
 
 	loanTokens := sdk.NewCoins(borrow)
@@ -265,32 +266,29 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 	return nil
 }
 
-// RepayAsset attempts to repay an open borrow position with base assets. If asset type is invalid,
-// account balance is insufficient, or no open borrow position exists, we return an error.
+// RepayAsset attempts to repay an open borrow position. Payment denom must be one of the
+// borrowed asset. If asset type is invalid, account balance is insufficient, or no open
+// borrow position exists, we return an error.
 // Additionally, if the amount provided is greater than the full repayment amount, only the
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // RepayAsset returns the actual amount repaid.
 func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
 	if !payment.IsValid() {
-		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
-	}
-
-	if !k.IsAcceptedToken(ctx, payment.Denom) {
-		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
+		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())
 	}
 
 	// Determine amount of selected denom currently owed
 	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
 	if owed.IsZero() {
 		// Borrower has no open borrows in the denom presented as payment
-		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+		return sdk.ZeroInt(), types.ErrInvalidRepayment.Wrap(
+			"Borrower doesn't have active position in " + payment.Denom)
 	}
 
 	// Prevent overpaying
 	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
-	if !payment.IsValid() {
-		// Catch invalid payments (e.g. from payment.Amount < 0)
-		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidRepayment, payment.String())
+	if err := payment.Validate(); err != nil {
+		return sdk.ZeroInt(), types.ErrInvalidRepayment.Wrap(err.Error())
 	}
 
 	// send payment to leverage module account
@@ -302,10 +300,8 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 		return sdk.ZeroInt(), err
 	}
 
-	// Subtract repaid amount from borrowed amount
+	// Update the owed amount
 	owed.Amount = owed.Amount.Sub(payment.Amount)
-
-	// Store the remaining borrowed amount in keeper
 	if err := k.setBorrow(ctx, borrowerAddr, owed); err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -406,30 +402,26 @@ func (k Keeper) LiquidateBorrow(
 
 	// get total borrowed by borrower (all denoms)
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-
-	// get borrower uToken balances, for all uToken denoms enabled as collateral
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-
-	// use oracle helper functions to find total borrowed value in USD
-	borrowValue, err := k.TotalTokenValue(ctx, borrowed)
+	borrowValue, err := k.TotalTokenValue(ctx, borrowed) // total borrowed value in USD
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// compute liquidation limit from enabled collateral
-	liquidationLimit, err := k.CalculateLiquidationLimit(ctx, collateral)
+	maxBorrowValue, err := k.CalculateLiquidationLimit(ctx, collateral)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// confirm borrower's eligibility for liquidation
-	if liquidationLimit.GTE(borrowValue) {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrLiquidationIneligible, borrowerAddr.String())
+	if maxBorrowValue.GTE(borrowValue) {
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrLiquidationIneligible.Wrapf(
+			"%s borrowed value is below the liquidation threshold %s", borrowerAddr, maxBorrowValue)
 	}
 
 	// get reward-specific incentive and dynamic close factor
 	baseRewardDenom := desiredReward.Denom
-	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, liquidationLimit)
+	liquidationIncentive, closeFactor, err := k.LiquidationParams(ctx, baseRewardDenom, borrowValue, maxBorrowValue)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
