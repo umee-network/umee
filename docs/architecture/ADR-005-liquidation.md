@@ -3,10 +3,11 @@
 ## Changelog
 
 - November 19, 2021: Initial Draft (@toteki)
+- May 2022: documentation updates (@robert-zaremba)
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
