@@ -190,6 +190,8 @@ This also avoids the edge case of refunding rejected incentive proposals, which 
 - TODO: leverage interactions
 - TODO: Unbonding struct, and queues too.
 
+Note: Since unbonded funds aren't release to balance (they're still collateral on `x/leverage`), we do not need to build a queue to release funds at the end of their unbonding. Rather, the next `MsgWithdrawAsset` or similar action which requires the locked funds will succeed, and clear any completed unbondings from state.
+
 ## Alternative Approaches
 
 - TODO: Funding before or after gov proposal, permissioned or permissionless
@@ -203,7 +205,7 @@ It allows for external and overlapping incentive programs, but does not provide 
 
 ### Positive
 - No iteration
-- Allows external (non-`uumee`-denominated) incentive programs
+- Allows external (non-`UMEE`-denominated) incentive programs
 
 ### Negative
 - Changing lock tier durations after launch would blindside existing users
