@@ -74,7 +74,7 @@ In order to incentivize liquidators to target certain collateral types for liqui
 
 When a `MsgLiquidate` causes liquidation to occur, the liquidator receives collateral equal to (100% + `RewardDenom.LiquidationIncentive`) of the repaid value worth of collateral.
 
-For example, if the liquidation incentive for `uatom` is `0.15`, then the liquidator receives `u/uatom` collateral worth 115% of the borrowed base assets they repaid. The denom of the base assets does not affect this calculation.
+For example, if the liquidation incentive for `atom` is `0.15`, then the liquidator receives `u/atom` collateral worth 115% of the borrowed base assets they repaid. The denom of the base assets does not affect this calculation.
 
 ### Calculating Liquidation Amounts
 
@@ -102,10 +102,10 @@ After eligibility is confirmed, parameters governing liquidation can be fetched:
     liquidationIncentive, closeFactor := GetLiquidationParameters(rewardDenom, borrowValue, collateralValue)
 ```
 
-The liquidation incentive is the bonus collateral received when a liquidator repays a borrowed position
-(e.g. incentive=`0.2` means liquidator receives 120% the value of their repayment back in collateral).
+The liquidation incentive is a collateral bonus received when a liquidator repays a borrowed position
+(e.g. incentive=`0.2` means liquidator receives 20% extra of the liquidated collateral).
 
-The close factor is the portion of a borrow position eligible for liquidation in this single liquidation event.
+The close factor is the maximum portion of a borrow position eligible for liquidation in a single liquidation event.
 
 See _Dynamic Liquidation Parameters_ section at the bottom of this document.
 
@@ -152,7 +152,7 @@ Examining one existing liquidation scheme ([Compound](https://zengo.com/understa
 - Liquidation Incentive (10%)
 - Close Factor (50%)
   When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% of their borrowed value in a single liquidation event.
-  That is, the liquidator pays off 50% of their borrow and receives collateral worth 55% of its value.
+  That is, the liquidator liquidates 50% of the borrowed value and receives 5% extra in collateral.
 
 It should be possible to improve upon this aspect of the system by scaling one of the two parameters shown above, based on how far a borrower is over their borrow limit.
 

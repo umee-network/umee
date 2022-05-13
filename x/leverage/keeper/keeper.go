@@ -394,15 +394,20 @@ func (k Keeper) LiquidateBorrow(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepayment, desiredReward sdk.Coin,
 ) (sdk.Int, sdk.Int, error) {
 	if !desiredRepayment.IsValid() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredRepayment.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredRepayment.String())
 	}
 	if !k.IsAcceptedToken(ctx, desiredReward.Denom) {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredReward.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredReward.String())
 	}
 
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	maxCollateral := collateral.AmountOf(desiredReward.Denom)
+	if maxCollateral.IsZero() {
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrapf(
+			"borrower doesn't have %s as a collateral", desiredReward.Denom)
+	}
 	// get total borrowed by borrower (all denoms)
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	borrowValue, err := k.TotalTokenValue(ctx, borrowed) // total borrowed value in USD
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
@@ -450,8 +455,7 @@ func (k Keeper) LiquidateBorrow(
 		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
 	}
 
-	// Given repay denom and amount, use oracle to find equivalent amount of
-	// rewardDenom's base asset.
+	// Given repay denom and amount, use oracle to find equivalent amount of rewardDenom.
 	baseReward, err := k.EquivalentTokenValue(ctx, repayment, baseRewardDenom)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
@@ -467,20 +471,19 @@ func (k Keeper) LiquidateBorrow(
 	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
 	// reward amount cannot exceed available collateral
-	if reward.Amount.GT(collateral.AmountOf(reward.Denom)) {
+	if reward.Amount.GT(maxCollateral) {
 		// reduce repayment.Amount to the maximum value permitted by the available collateral reward
-		repayment.Amount = repayment.Amount.Mul(collateral.AmountOf(reward.Denom)).Quo(reward.Amount)
-		// use all collateral of reward denom
-		reward.Amount = collateral.AmountOf(reward.Denom)
+		repayment.Amount = repayment.Amount.Mul(maxCollateral).Quo(reward.Amount)
+		reward.Amount = maxCollateral
 	}
 
 	// final check for invalid liquidation (negative/zero value after reductions above)
 	if !repayment.Amount.IsPositive() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, repayment.String())
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(repayment.String())
 	}
 
 	if desiredReward.Amount.IsPositive() {
-		// user-controlled minimum ratio of reward to repayment, expressed in base:base assets (not uTokens)
+		// user-controlled minimum ratio of reward to repayment, expressed in collateral base assets (not uTokens)
 		rewardTokenEquivalent, err := k.ExchangeUToken(ctx, reward)
 		if err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
@@ -502,28 +505,26 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// store the remaining borrowed amount in keeper
+	// update the remaining borrowed amount
 	owed := borrowed.AmountOf(repayment.Denom).Sub(repayment.Amount)
 	if err = k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(repayment.Denom, owed)); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
 	// Reduce borrower collateral by reward amount
-	newBorrowerCollateral := sdk.NewCoin(reward.Denom, collateral.AmountOf(reward.Denom).Sub(reward.Amount))
+	newBorrowerCollateral := sdk.NewCoin(reward.Denom, maxCollateral.Sub(reward.Amount))
 	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	// Transfer uToken collateral reward from module account to liquidator
+	// If liquidator enabled the liquidated denom (uTokens) as his collateral, then we will automatically
+	// stake the reward. Otherwise we will send them to his account.
 	if k.GetCollateralSetting(ctx, liquidatorAddr, reward.Denom) {
-		// For uToken denoms enabled as collateral by liquidator, the uTokens remain in the
-		// module account and the keeper tracks the amount
 		liquidatorCollateral := k.GetCollateralAmount(ctx, liquidatorAddr, reward.Denom)
 		if err = k.setCollateralAmount(ctx, liquidatorAddr, liquidatorCollateral.Add(reward)); err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
 		}
 	} else {
-		// For uToken denoms not enabled as collateral by liquidator, the uTokens are sent to their address
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(reward))
 		if err != nil {
 			return sdk.ZeroInt(), sdk.ZeroInt(), err
