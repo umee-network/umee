@@ -87,7 +87,7 @@ When a `MsgLiquidate` is received, the `x/leverage` module must determine if the
     borrowValue := TotalValue(borrowed) // price oracle
 
     collateral := GetCollateralBalance(borrowerAddr)
-    maxBorrowValue := CalculateLiquidationLimit(collateral)
+    maxBorrowValue := CalculateMaxBorrow(collateral)
 
     if borrowValue > maxBorrowValue {
       // borrower is over borrow limit, and therefore eligible for liquidation

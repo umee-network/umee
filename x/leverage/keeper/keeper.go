@@ -408,7 +408,7 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 
-	maxBorrowValue, err := k.CalculateLiquidationLimit(ctx, collateral)
+	maxBorrowValue, err := k.CalculateMaxBorrow(ctx, collateral)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}

@@ -528,7 +528,7 @@ func (q Querier) LiquidationLimit(
 
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
 
-	limit, err := q.Keeper.CalculateLiquidationLimit(ctx, collateral)
+	limit, err := q.Keeper.CalculateMaxBorrow(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}

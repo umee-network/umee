@@ -197,7 +197,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 
 		// compute liquidation limit from enabled collateral
-		liquidationLimit, err := k.CalculateLiquidationLimit(ctx, collateral)
+		liquidationLimit, err := k.CalculateMaxBorrow(ctx, collateral)
 		if err != nil {
 			return err
 		}
