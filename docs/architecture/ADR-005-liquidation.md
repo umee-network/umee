@@ -13,7 +13,7 @@ Accepted
 
 When borrowers on Umee exceed their borrow limit due to interest accrual or asset price fluctuations, their positions become eligible for liquidation.
 
-Third party liquidators pay off part of all of the borrower's loan, in exchange for a value of collateral equal to the amount paid off plus an additional percentage (the liquidation incentive).
+Third party liquidators pay off part of all of the borrower's loan, in exchange for a value of collateral equal to the amount paid off plus an additional bonus (the liquidation incentive).
 
 We must build the features necessary for liquidators to continuously look out for liquidation opportunities, then carry out chosen liquidations.
 
@@ -29,11 +29,11 @@ The blockchain doesn't issue any event to signal that a borrow position can be l
 
 We don't provide a function that checks if a given borrower can be liquidated to avoid spamming an app with periodical queries. Any liquidation attempt against a borrower not eligible for liquidation will fail.
 
-A borrow position is represented by a pair `(borrower_address, coin)`, where borrower address is an entity requesting a loan.
+A borrow position is represented by a pair `(borrower_address, coin)`, where borrower address is an entity requesting a loan. A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
 
-A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
+Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights. Liquidation happens when a sum of borrower loans is bigger than the `CalculateMaxBorrow(borrower_collateral)`.
 
-Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights.
+During liquidation any of the borrower's collateral token can be liquidated to pay off any borrower's loan denom.
 
 ### Message Types
 
