@@ -232,12 +232,8 @@ require (
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-<<<<<<< HEAD
-	github.com/magiconair/properties v1.8.5 // indirect
-=======
 	github.com/lufeee/execinquery v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
->>>>>>> 37d254b (build(deps): Bump github.com/golangci/golangci-lint from 1.46.0 to 1.46.1 (#899))
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/maratori/testpackage v1.0.1 // indirect
 	github.com/matoous/godox v0.0.0-20210227103229-6504466cf951 // indirect
