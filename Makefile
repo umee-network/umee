@@ -86,6 +86,9 @@ go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
 	@go mod verify
 
+go-mod-tidy:
+	@contrib/scripts/go-mod-tidy-all.sh
+
 clean:
 	@echo "--> Cleaning..."
 	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
