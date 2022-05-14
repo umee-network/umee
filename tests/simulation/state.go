@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/cosmos/cosmos-sdk/simapp"
@@ -21,6 +20,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/types"
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/tests/util"
