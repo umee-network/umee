@@ -46,9 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
+
 ### Features
 
 - [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals.
+- [894](https://github.com/umee-network/umee/pull/894) Add MarketSummary query
 
 ### Improvements
 

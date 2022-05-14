@@ -14,6 +14,7 @@ Queries on accepted asset types:
 - **Exchange Rate** queries the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) of a given uToken denomination.
 - **Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination.
 - **Token Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination, but denominated in base tokens instead of USD. This amounts to _total loaned by all lenders + interest accrued._
+- **Market Summary** combines several asset-specifying queries for more efficient frontend access.
 
 Queries on account addresses:
 - **Borrowed** queries for the amount of a given token denomination borrowed by a user. If a denomination is not supplied, the total for each borrowed token is returned.
