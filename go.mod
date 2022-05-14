@@ -10,11 +10,7 @@ require (
 	github.com/ethereum/go-ethereum v1.10.16
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
-<<<<<<< HEAD
-	github.com/golangci/golangci-lint v1.45.2
-=======
 	github.com/golangci/golangci-lint v1.46.1
->>>>>>> 37d254b (build(deps): Bump github.com/golangci/golangci-lint from 1.46.0 to 1.46.1 (#899))
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ory/dockertest/v3 v3.8.1
