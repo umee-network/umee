@@ -10,7 +10,11 @@ require (
 	github.com/ethereum/go-ethereum v1.10.16
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
+<<<<<<< HEAD
 	github.com/golangci/golangci-lint v1.45.2
+=======
+	github.com/golangci/golangci-lint v1.46.1
+>>>>>>> 37d254b (build(deps): Bump github.com/golangci/golangci-lint from 1.46.0 to 1.46.1 (#899))
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ory/dockertest/v3 v3.8.1
@@ -232,7 +236,12 @@ require (
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+<<<<<<< HEAD
 	github.com/magiconair/properties v1.8.5 // indirect
+=======
+	github.com/lufeee/execinquery v1.2.0 // indirect
+	github.com/magiconair/properties v1.8.6 // indirect
+>>>>>>> 37d254b (build(deps): Bump github.com/golangci/golangci-lint from 1.46.0 to 1.46.1 (#899))
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/maratori/testpackage v1.0.1 // indirect
 	github.com/matoous/godox v0.0.0-20210227103229-6504466cf951 // indirect
