@@ -6,9 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
-	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -92,6 +89,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
+	gravity "github.com/umee-network/Gravity-Bridge/module/x/gravity"
+	gravitykeeper "github.com/umee-network/Gravity-Bridge/module/x/gravity/keeper"
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"

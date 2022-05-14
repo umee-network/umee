@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -18,6 +17,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/tests/util"
