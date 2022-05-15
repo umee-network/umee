@@ -30,29 +30,92 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 	})
 
 	t.Run("valid proposal", func(t *testing.T) {
-		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uosmo"})
-		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.05")})
+		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{
+			BaseDenom:            "uosmo",
+			SymbolDenom:          "OSMO",
+			Exponent:             6,
+			ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+			EnableLend:           true,
+			EnableBorrow:         true,
+			Blacklist:            false,
+		}))
+		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{
+			BaseDenom:            "uatom",
+			SymbolDenom:          "ATOM",
+			Exponent:             6,
+			ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+			EnableLend:           true,
+			EnableBorrow:         true,
+			Blacklist:            false,
+		}))
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				{BaseDenom: "uumee"},
-				{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.02")},
+				{
+					BaseDenom:            umeeapp.BondDenom,
+					SymbolDenom:          "UMEE",
+					Exponent:             6,
+					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+					EnableLend:           true,
+					EnableBorrow:         true,
+					Blacklist:            false,
+				},
+				{
+					BaseDenom:            "uosmo",
+					SymbolDenom:          "OSMO",
+					Exponent:             6,
+					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+					EnableLend:           true,
+					EnableBorrow:         true,
+					Blacklist:            false,
+				},
 			},
 		}
 		require.NoError(t, h(ctx, p))
 
 		tokens := k.GetAllRegisteredTokens(ctx)
-		require.Len(t, tokens, 2)
+		require.Len(t, tokens, 3)
 
-		_, err := k.GetRegisteredToken(ctx, "uosmo")
-		require.Error(t, err)
-
-		_, err = k.GetRegisteredToken(ctx, "uumee")
+		// ensure that new tokens was added
+		_, err := k.GetRegisteredToken(ctx, "uumee")
 		require.NoError(t, err)
 
+		// ensure that unaffected token was not deleted by the gov proposal
 		token, err := k.GetRegisteredToken(ctx, "uatom")
+		require.NoError(t, err)
+
+		// ensure that the existing token was updated by the gov proposal
+		token, err = k.GetRegisteredToken(ctx, "uosmo")
 		require.NoError(t, err)
 		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
 	})
