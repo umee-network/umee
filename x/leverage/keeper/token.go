@@ -49,9 +49,9 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 }
 
 // SetRegisteredToken stores a Token into the x/leverage module's KVStore.
-func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
-	if token.BaseDenom == "" {
-		panic("empty base denom")
+func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
+	if err := token.Validate(); err != nil {
+		return err
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -64,26 +64,7 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 
 	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
-}
-
-// DeleteRegisteredTokens deletes all registered tokens from the x/leverage
-// module's KVStore.
-func (k Keeper) DeleteRegisteredTokens(ctx sdk.Context) error {
-	tokens := k.GetAllRegisteredTokens(ctx)
-
-	for _, t := range tokens {
-		k.DeleteRegisteredToken(ctx, t.BaseDenom)
-		k.hooks.AfterRegisteredTokenRemoved(ctx, t)
-	}
-
 	return nil
-}
-
-// DeleteRegisteredToken deletes a registered Token by base denomination from
-// the x/leverage KVStore.
-func (k Keeper) DeleteRegisteredToken(ctx sdk.Context, denom string) {
-	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.CreateRegisteredTokenKey(denom))
 }
 
 // GetRegisteredToken gets a token from the x/leverage module's KVStore.

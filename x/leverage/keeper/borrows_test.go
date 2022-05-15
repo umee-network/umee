@@ -162,6 +162,9 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0"),
 		SymbolDenom:          "UMEE",
 		Exponent:             6,
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 

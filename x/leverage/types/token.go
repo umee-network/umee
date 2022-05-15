@@ -72,5 +72,15 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
 	}
 
+	// Blacklisted assets cannot have borrow or lend enabled
+	if t.Blacklist {
+		if t.EnableBorrow {
+			return fmt.Errorf("blacklisted assets cannot have borrowing enabled")
+		}
+		if t.EnableLend {
+			return fmt.Errorf("blacklisted assets cannot have lending enabled")
+		}
+	}
+
 	return nil
 }

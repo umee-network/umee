@@ -57,6 +57,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:            atomIBCDenom,
@@ -68,6 +71,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
@@ -248,6 +254,9 @@ func (s *IntegrationTestSuite) TestGetToken() {
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.4"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0.5"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.6"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, uabc)
 
@@ -469,6 +478,9 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -618,6 +630,9 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -796,6 +811,9 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -932,6 +950,9 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -983,6 +1004,9 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -997,6 +1021,9 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
 
@@ -1044,6 +1071,9 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
 
@@ -1058,6 +1088,9 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
 	}
 	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
 
