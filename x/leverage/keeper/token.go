@@ -11,25 +11,21 @@ import (
 )
 
 // FromUTokenToTokenDenom strips the uToken prefix ("u/") from an input denom.
-// An empty string is returned if the prefix is not present or if the resulting
-// token denom is not an accepted asset type.
+// An empty string is returned if the prefix is not present.
 func (k Keeper) FromUTokenToTokenDenom(ctx sdk.Context, uTokenDenom string) string {
 	if strings.HasPrefix(uTokenDenom, types.UTokenPrefix) {
-		tokenDenom := strings.TrimPrefix(uTokenDenom, types.UTokenPrefix)
-		if k.IsAcceptedToken(ctx, tokenDenom) {
-			return tokenDenom
-		}
+		return strings.TrimPrefix(uTokenDenom, types.UTokenPrefix)
 	}
 	return ""
 }
 
 // FromTokenToUTokenDenom adds the uToken prefix ("u/") to an input denom.
-// An empty string is returned if the input token denom is not an accepted asset type.
+// An empty string is returned if the input token denom already has the prefix.
 func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) string {
-	if k.IsAcceptedToken(ctx, tokenDenom) {
-		return types.UTokenPrefix + tokenDenom
+	if strings.HasPrefix(tokenDenom, types.UTokenPrefix) {
+		return ""
 	}
-	return ""
+	return types.UTokenPrefix + tokenDenom
 }
 
 // IsAcceptedToken returns true if a given (non-UToken) token denom is an
