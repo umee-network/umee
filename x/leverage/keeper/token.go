@@ -33,12 +33,13 @@ func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) strin
 }
 
 // IsAcceptedToken returns true if a given (non-UToken) token denom is an
-// accepted asset type.
+// existing, non-blacklisted asset type.
 func (k Keeper) IsAcceptedToken(ctx sdk.Context, tokenDenom string) bool {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateRegisteredTokenKey(tokenDenom)
-
-	return store.Has(key)
+	t, err := k.GetRegisteredToken(ctx, tokenDenom)
+	if err == nil && !t.Blacklist {
+		return true
+	}
+	return false
 }
 
 // IsAcceptedUToken returns true if a given uToken denom is associated with
