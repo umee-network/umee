@@ -14,8 +14,8 @@ import (
 // the base and display/symbol denominations for each exchange pair. E.g. it must
 // know about the UMEE/USD exchange rate along with the uumee base denomination
 // and the exponent.
-// This function will not return non-positive exchange rates unless a token is
-// blacklisted, in which case it will return zero.
+// This function will only return positive exchange rates or errors, unless a
+// token is blacklisted, in which case it will return zero.
 func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	t, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
