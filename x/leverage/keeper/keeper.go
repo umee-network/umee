@@ -175,7 +175,8 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdr
 
 			// Return error if borrow limit would drop below borrowed value
 			if borrowedValue.GT(newBorrowLimit) {
-				return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
+				return types.ErrUndercollaterized.Wrapf(
+					"withdraw updates the borrow limit to %s and causes liquidation", newBorrowLimit)
 			}
 
 			// reduce the lender's collateral by amountFromCollateral
@@ -249,7 +250,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Return error if borrowed value would exceed borrow limit
 	if newBorrowedValue.GT(borrowLimit) {
-		return types.ErrBorrowLimitLow.Wrapf("limit: %s, already borrowed: %s",
+		return types.ErrUndercollaterized.Wrapf("borrow limit: %s, already borrowed: %s",
 			borrowLimit, borrowed)
 	}
 
@@ -348,7 +349,7 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 		// Return error if borrow limit would drop below borrowed value
 		if newBorrowLimit.LT(borrowedValue) {
-			return sdkerrors.Wrap(types.ErrBorrowLimitLow, newBorrowLimit.String())
+			return types.ErrUndercollaterized.Wrap("new borrow limit: " + newBorrowLimit.String())
 		}
 
 		// Disabling uTokens as collateral withdraws any stored collateral of the denom in question

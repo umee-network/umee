@@ -1551,7 +1551,7 @@ func (s *IntegrationTestSuite) TestCmdBorrow() {
 				val.Address.String(),
 				"70uumee",
 			},
-			types.ErrBorrowLimitLow,
+			types.ErrUndercollaterized,
 		},
 		{
 			"borrow",
