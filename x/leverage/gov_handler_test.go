@@ -113,7 +113,6 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		token, err := k.GetRegisteredToken(ctx, "uatom")
 		require.NoError(t, err)
 
-		// ensure that the existing token was updated by the gov proposal
 		token, err = k.GetRegisteredToken(ctx, "uosmo")
 		require.NoError(t, err)
 		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
