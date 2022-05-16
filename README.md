@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD013 -->
+
 ![Logo!](assets/umee-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
@@ -11,7 +12,7 @@
 [![GitHub Super-Linter](https://img.shields.io/github/workflow/status/umee-network/umee/Lint?style=flat-square&label=Lint)](https://github.com/marketplace/actions/super-linter)
 
 > A Golang implementation of the Umee network, a decentralized universal capital
-facility in the Cosmos ecosystem.
+> facility in the Cosmos ecosystem.
 
 Umee is a Universal Capital Facility that can collateralize assets on one blockchain
 towards borrowing assets on another blockchain. The platform specializes in
@@ -22,19 +23,24 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Table of Contents
 
-- [Compatibility Matrix](#compatibility-matrix)
+- [Releases](#releases)
 - [Active Networks](#active-networks)
   - [Public](#public)
   - [Private](#private)
 - [Install](#install)
+- [Contributing](CONTRIBUTING.md)
 
-## Compatibility Matrix
+## Releases
+
+See [Release procedure](CONTRIBUTING.md#release-procedure) for more information about the release model.
+
+### Release Compatibility Matrix
 
 | Version | Mainnet | Experimental | SDK Version | IBC Version | Peggo Version | Price Feeder Version |
-|:-------:|:-------:|:------------:|:-----------:|:-----------:|:-------------:|:--------------------:|
-|  v0.8.x |    ✗    |      ✓       |   v0.45.x   |    v2.0.x   |     v0.2.x    |        v0.1.x        |
-|  v1.x.x |    ✓    |      ✗       |   v0.45.x   |    v2.0.x   |     v0.2.x    |         N/A          |
-|  v2.x.x |    ✗    |      ✓       |   v0.45.x   |    v2.2.x   |     v0.2.x    |        v0.2.x        |
+| :-----: | :-----: | :----------: | :---------: | :---------: | :-----------: | :------------------: |
+| v0.8.x  |    ✗    |      ✓       |   v0.45.x   |   v2.0.x    |    v0.2.x     |        v0.1.x        |
+| v1.x.x  |    ✓    |      ✗       |   v0.45.x   |   v2.0.x    |    v0.2.x     |         N/A          |
+| v2.x.x  |    ✗    |      ✓       |   v0.45.x   |   v2.2.x    |    v0.2.x     |        v0.2.x        |
 
 ## Active Networks
 
