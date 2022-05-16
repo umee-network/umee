@@ -103,17 +103,14 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		}
 		require.NoError(t, h(ctx, p))
 
+		// no tokens should have been deleted
 		tokens := k.GetAllRegisteredTokens(ctx)
 		require.Len(t, tokens, 3)
 
 		_, err := k.GetRegisteredToken(ctx, "uumee")
 		require.NoError(t, err)
 
-		// ensure that unaffected token was not deleted by the gov proposal
-		token, err := k.GetRegisteredToken(ctx, "uatom")
-		require.NoError(t, err)
-
-		token, err = k.GetRegisteredToken(ctx, "uosmo")
+		token, err := k.GetRegisteredToken(ctx, "uosmo")
 		require.NoError(t, err)
 		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
 	})
