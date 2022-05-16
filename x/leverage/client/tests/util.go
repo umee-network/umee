@@ -32,6 +32,10 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 	deposit sdk.Coins,
 	extraArgs ...string,
 ) {
+	if s.stop {
+		return
+	}
+
 	// create proposal file
 	dir := s.T().TempDir()
 	path := path.Join(dir, "proposal.json")
@@ -143,6 +147,10 @@ func (s *IntegrationTestSuite) UpdateRegistry(
 // updateCollateralWeight modifies the collateral weight and liquidation threshold of a registered
 // token identified by baseDenom.
 func updateCollateralWeight(s *IntegrationTestSuite, baseDenom string, collateralWeight sdk.Dec) {
+	if s.stop {
+		return
+	}
+
 	val := s.network.Validators[0]
 	clientCtx := s.network.Validators[0].ClientCtx
 
