@@ -38,7 +38,7 @@ contributing has been established:
    6. When the code is complete it can be marked `Ready for Review` and follow
       the PR readiness checklist.
 
-### Coding Guidelines
+## Coding Guidelines
 
 We follow the Cosmos SDK [Coding Guidelines](https://github.com/cosmos/cosmos-sdk/blob/main/CODING_GUIDELINES.md). Specifically:
 
@@ -92,4 +92,4 @@ We follow semver:
 
 ### Major Release Procedure
 
-All major changes related to major version update are firstly released for testnet. We use `-betaX` (eg `2.0.0-beta1`, `2.0.0-beta2` ...) releases for testnet. Once the code is stabilized we create a release candidate (eg `2.0.0-rc1`). If no issues are found the latest release candidate become the major release.
+All major changes related to major version update are first released for testnet. We use `-betaX` (eg `2.0.0-beta1`, `2.0.0-beta2` ...) releases for testnet. Once the code is stabilized we create a release candidate (eg `2.0.0-rc1`). If no issues are found the latest release candidate become the major release.
