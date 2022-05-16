@@ -31,7 +31,7 @@ We don't provide a function that checks if a given borrower can be liquidated to
 
 A borrow position is represented by a pair `(borrower_address, coin)`, where borrower address is an entity requesting a loan. A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
 
-Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights. Liquidation happens when a sum of borrower loans is bigger than the `CalculateMaxBorrow(borrower_collateral)`.
+Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights. Liquidation happens when a sum of borrower loans is bigger than the `CalculateLiquidationThreshold(borrower_collateral)`.
 
 During liquidation any of the borrower's collateral token can be liquidated to pay off any borrower's loan denom.
 
@@ -88,7 +88,7 @@ When a `MsgLiquidate` is received, the `x/leverage` module must determine if the
     borrowValue := TotalValue(borrowed) // price oracle
 
     collateral := GetCollateralBalance(borrowerAddr)
-    maxBorrowValue := CalculateMaxBorrow(collateral)
+    maxBorrowValue := CalculateLiquidationThreshold(collateral)
 
     if borrowValue > maxBorrowValue {
       // borrower is over borrow limit, and therefore eligible for liquidation
