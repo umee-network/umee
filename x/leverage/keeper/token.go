@@ -160,3 +160,42 @@ func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec,
 
 	return token.LiquidationIncentive, nil
 }
+
+// RequireLendEnabled returns an error if a token does not exist or cannot be lent.
+func (k Keeper) RequireLendEnabled(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if !token.EnableLend {
+		return sdkerrors.Wrap(types.ErrLendNotAllowed, denom)
+	}
+
+	return nil
+}
+
+// RequireBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+func (k Keeper) RequireBorrowEnabled(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if !token.EnableBorrow {
+		return sdkerrors.Wrap(types.ErrBorrowNotAllowed, denom)
+	}
+
+	return nil
+}
+
+// RequireNotBlacklisted returns an error if a token does not exist or is blacklisted.
+func (k Keeper) RequireNotBlacklisted(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if token.Blacklist {
+		return sdkerrors.Wrap(types.ErrBlacklisted, denom)
+	}
+
+	return nil
+}

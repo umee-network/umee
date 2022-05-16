@@ -1719,22 +1719,22 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 
 	testCases := []testTransaction{
 		{
-			"invalid asset",
+			"nothing to repay",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
 				"10xyz",
 			},
-			types.ErrInvalidAsset,
+			types.ErrInvalidRepayment,
 		},
 		{
-			"invalid asset (uToken)",
+			"nothing to repay (uToken)",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
 				"10u/umee",
 			},
-			types.ErrInvalidAsset,
+			types.ErrInvalidRepayment,
 		},
 		{
 			"repay",

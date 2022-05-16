@@ -67,8 +67,8 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if !k.IsAcceptedToken(ctx, loan.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
+	if err := k.RequireLendEnabled(ctx, loan.Denom); err != nil {
+		return err
 	}
 
 	// determine uToken amount to mint
@@ -220,8 +220,8 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
 	}
 
-	if !k.IsAcceptedToken(ctx, borrow.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, borrow.String())
+	if err := k.RequireBorrowEnabled(ctx, borrow.Denom); err != nil {
+		return err
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
@@ -272,10 +272,6 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 // RepayAsset returns the actual amount repaid.
 func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
 	if !payment.IsValid() {
-		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
-	}
-
-	if !k.IsAcceptedToken(ctx, payment.Denom) {
 		return sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, payment.String())
 	}
 
@@ -375,9 +371,6 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 // GetCollateralSetting checks if a uToken denom is enabled for use as collateral by a single borrower.
 func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) bool {
-	if !k.IsAcceptedUToken(ctx, denom) {
-		return false
-	}
 	store := ctx.KVStore(k.storeKey)
 	// Any value (expected = 0x01) found at key will be interpreted as true.
 	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
@@ -399,6 +392,9 @@ func (k Keeper) LiquidateBorrow(
 ) (sdk.Int, sdk.Int, error) {
 	if !desiredRepayment.IsValid() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredRepayment.String())
+	}
+	if err := k.RequireNotBlacklisted(ctx, desiredRepayment.Denom); err != nil {
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 	if !k.IsAcceptedToken(ctx, desiredReward.Denom) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdkerrors.Wrap(types.ErrInvalidAsset, desiredReward.String())
