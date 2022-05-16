@@ -9,12 +9,6 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 	h := s.app.OracleKeeper.Hooks()
 	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 1)
 
-	// TODO: These hooks need to respond to the Token.Blacklist field
-	// (as well as update symbol denom and exponent if they ever change).
-	// Blacklisting in particular should actually eliminate the base
-	// denom from the oracle (and un-blacklisting, for whatever reason,
-	// should do the opposite.)
-
 	// require that an existing token does not change the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
 		BaseDenom:   umeeapp.BondDenom,
