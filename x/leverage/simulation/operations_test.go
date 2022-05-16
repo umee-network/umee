@@ -297,7 +297,7 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().EqualError(err,
-		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea: borrower not eligible for liquidation",
+		"failed to execute message; message index: 0: borrower doesn't have uumee as a collateral: invalid asset",
 	)
 
 	var msg types.MsgLiquidate
