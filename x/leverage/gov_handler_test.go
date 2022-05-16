@@ -106,7 +106,6 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		tokens := k.GetAllRegisteredTokens(ctx)
 		require.Len(t, tokens, 3)
 
-		// ensure that new tokens was added
 		_, err := k.GetRegisteredToken(ctx, "uumee")
 		require.NoError(t, err)
 
