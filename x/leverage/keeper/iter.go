@@ -196,7 +196,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 			return err
 		}
 
-		// compute liquidation limit from enabled collateral
+		// compute liquidation threshold from enabled collateral
 		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
 		if err != nil {
 			return err
