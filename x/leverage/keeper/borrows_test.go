@@ -166,7 +166,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// lender borrows 600 uumee, reducing module account to 0 uumee
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))

@@ -39,6 +39,10 @@ type IntegrationTestSuite struct {
 	queryClient types.QueryClient
 }
 
+func TestKeeperTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationTestSuite))
+}
+
 func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
@@ -57,6 +61,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
@@ -71,6 +77,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "ATOM",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
@@ -90,8 +98,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(types.NewMultiHooks())
 
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	app.LeverageKeeper.SetRegisteredToken(ctx, umeeToken)
-	app.LeverageKeeper.SetRegisteredToken(ctx, atomIBCToken)
+	s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, umeeToken))
+	s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, atomIBCToken))
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.LeverageKeeper))
@@ -254,11 +262,14 @@ func (s *IntegrationTestSuite) TestGetToken() {
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.4"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0.5"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.6"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "ABC",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, uabc)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, uabc))
 
 	reserveFactor, err := s.app.LeverageKeeper.GetReserveFactor(s.ctx, "uabc")
 	s.Require().NoError(err)
@@ -478,11 +489,13 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Lender tries to borrow 1000 umee, insufficient balance because 200 of the
 	// module's 1000 umee are reserved.
@@ -630,11 +643,13 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// liquidator attempts to liquidate lender, but specifies too high of a minimum reward
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000)        // 10 umee
@@ -811,11 +826,13 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Base interest rate (0% utilization)
 	rate := s.app.LeverageKeeper.DeriveBorrowAPY(s.ctx, umeeapp.BondDenom)
@@ -950,11 +967,13 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
@@ -1004,11 +1023,13 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Note: Setting atom collateral weight to 0.01 to the lender be eligible to liquidation in a second token
 	atomIBCToken := types.Token{
@@ -1021,11 +1042,13 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
@@ -1071,11 +1094,13 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Note: Setting atom collateral weight to 0.01 to the anotherLender also be eligible to liquidation
 	atomIBCToken := types.Token{
@@ -1088,11 +1113,13 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:          "UMEE",
+		Exponent:             6,
 		EnableLend:           true,
 		EnableBorrow:         true,
 		Blacklist:            false,
 	}
-	s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken)
+	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
@@ -1152,10 +1179,6 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 	// check invariant
 	_, broken = keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
-}
-
-func TestKeeperTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
 }
 
 func (s *IntegrationTestSuite) TestWithdrawAsset_InsufficientCollateral() {

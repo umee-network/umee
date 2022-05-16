@@ -53,8 +53,8 @@ registry:
       liquidation_incentive: "88.000000000000000000"
       symbol_denom: umee
       exponent: 6
-      enable_lend: true
-      enable_borrow: true
+      enablelend: true
+      enableborrow: true
       blacklist: false
 `
 	require.Equal(t, expected, p.String())
