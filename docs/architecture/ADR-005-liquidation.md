@@ -33,7 +33,7 @@ A borrow position is represented by a pair `(borrower_address, coin)`, where bor
 
 Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights. Liquidation happens when a sum of borrower loans is bigger than the `CalculateLiquidationThreshold(borrower_collateral)`.
 
-During liquidation any of the borrower's collateral token can be liquidated to pay off any borrower's loan denom.
+During liquidation any of the borrower's collateral tokens can be liquidated to pay off any of their loans.
 
 ### Message Types
 
