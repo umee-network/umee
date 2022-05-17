@@ -75,7 +75,7 @@ func runTestTransactions(s *IntegrationTestSuite, tcs []testTransaction) {
 			s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp), out.String())
 
 			if tc.expectedErr == nil {
-				s.Require().Equal(0, int(resp.Code))
+				s.Require().Equal(0, int(resp.Code), "events %v", resp.Events)
 			} else {
 				s.Require().Equal(int(tc.expectedErr.ABCICode()), int(resp.Code))
 			}
@@ -1722,7 +1722,7 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 				val.Address.String(),
 				"10xyz",
 			},
-			types.ErrInvalidAsset,
+			types.ErrInvalidRepayment,
 		},
 		{
 			"invalid asset (uToken)",
@@ -1731,7 +1731,7 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 				val.Address.String(),
 				"10u/umee",
 			},
-			types.ErrInvalidAsset,
+			types.ErrInvalidRepayment,
 		},
 		{
 			"repay",

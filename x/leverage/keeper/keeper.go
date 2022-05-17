@@ -301,7 +301,6 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 		return sdk.ZeroInt(), err
 	}
 
-	// Update the owed amount
 	owed.Amount = owed.Amount.Sub(payment.Amount)
 	if err := k.setBorrow(ctx, borrowerAddr, owed); err != nil {
 		return sdk.ZeroInt(), err
@@ -402,11 +401,6 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	maxCollateral := collateral.AmountOf(desiredReward.Denom)
-	if maxCollateral.IsZero() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrapf(
-			"borrower doesn't have %s as a collateral", desiredReward.Denom)
-	}
 	// get total borrowed by borrower (all denoms)
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	borrowValue, err := k.TotalTokenValue(ctx, borrowed) // total borrowed value in USD
@@ -471,11 +465,17 @@ func (k Keeper) LiquidateBorrow(
 	// apply liquidation incentive
 	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
+	maxReward := collateral.AmountOf(reward.Denom)
+	if maxReward.IsZero() {
+		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrapf(
+			"borrower doesn't have %s as a collateral", desiredReward.Denom)
+	}
+
 	// reward amount cannot exceed available collateral
-	if reward.Amount.GT(maxCollateral) {
+	if reward.Amount.GT(maxReward) {
 		// reduce repayment.Amount to the maximum value permitted by the available collateral reward
-		repayment.Amount = repayment.Amount.Mul(maxCollateral).Quo(reward.Amount)
-		reward.Amount = maxCollateral
+		repayment.Amount = repayment.Amount.Mul(maxReward).Quo(reward.Amount)
+		reward.Amount = maxReward
 	}
 
 	// final check for invalid liquidation (negative/zero value after reductions above)
@@ -513,7 +513,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Reduce borrower collateral by reward amount
-	newBorrowerCollateral := sdk.NewCoin(reward.Denom, maxCollateral.Sub(reward.Amount))
+	newBorrowerCollateral := sdk.NewCoin(reward.Denom, maxReward.Sub(reward.Amount))
 	if err = k.setCollateralAmount(ctx, borrowerAddr, newBorrowerCollateral); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
