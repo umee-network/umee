@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+
+	uwasm "github.com/umee-network/umee/v2/app/wasm"
 )
 
 // The genesis state of the blockchain is represented here as a map of raw json
@@ -20,7 +22,7 @@ type GenesisState map[string]json.RawMessage
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState(cdc codec.JSONCodec) GenesisState {
 	gen := ModuleBasics.DefaultGenesis(cdc)
-	SetWasmDefaultGenesisState(cdc, gen)
+	uwasm.SetWasmDefaultGenesisState(cdc, gen)
 
 	return gen
 }

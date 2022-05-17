@@ -1,6 +1,7 @@
-package app
+package wasm
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
@@ -81,9 +82,9 @@ func GetWasmDefaultGenesisStateParams() wasmtypes.Params {
 
 // SetWasmDefaultGenesisState sets the default genesis state if the access is
 // bigger than AccessTypeNobody.
-func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
+func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genesisState map[string]json.RawMessage) {
 	var wasmGenesisState wasm.GenesisState
-	cdc.MustUnmarshalJSON(genState[wasm.ModuleName], &wasmGenesisState)
+	cdc.MustUnmarshalJSON(genesisState[wasm.ModuleName], &wasmGenesisState)
 
 	if wasmGenesisState.Params.CodeUploadAccess.Permission <= wasmtypes.AccessTypeNobody {
 		return
@@ -97,5 +98,5 @@ func SetWasmDefaultGenesisState(cdc codec.JSONCodec, genState GenesisState) {
 		Sequences: wasmGenesisState.Sequences,
 		GenMsgs:   wasmGenesisState.GenMsgs,
 	}
-	genState[wasm.ModuleName] = cdc.MustMarshalJSON(&wasmGen)
+	genesisState[wasm.ModuleName] = cdc.MustMarshalJSON(&wasmGen)
 }

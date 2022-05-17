@@ -105,6 +105,7 @@ import (
 	"github.com/umee-network/umee/v2/app/upgrades"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
 	"github.com/umee-network/umee/v2/app/upgrades/cosmwasm"
+	uwasm "github.com/umee-network/umee/v2/app/wasm"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
@@ -495,7 +496,7 @@ func New(
 		wasmDir,
 		wasmConfig,
 		supportedFeatures,
-		GetWasmOpts(appOpts)...,
+		uwasm.GetWasmOpts(appOpts)...,
 	)
 
 	// register the staking hooks
@@ -529,7 +530,7 @@ func New(
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// register wasm gov proposal types
-	enabledProposals := GetWasmEnabledProposals()
+	enabledProposals := uwasm.GetWasmEnabledProposals()
 	if len(enabledProposals) != 0 {
 		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, enabledProposals))
 	}
@@ -830,7 +831,7 @@ func (app *UmeeApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 	}
 
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
-	SetWasmDefaultGenesisState(app.appCodec, genesisState)
+	uwasm.SetWasmDefaultGenesisState(app.appCodec, genesisState)
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
