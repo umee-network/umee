@@ -267,9 +267,8 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 	return nil
 }
 
-// RepayAsset attempts to repay an open borrow position. Payment denom must be one of the
-// borrowed asset. If asset type is invalid, account balance is insufficient, or no open
-// borrow position exists, we return an error.
+// RepayAsset attempts to repay a borrow position. If asset type is invalid, account balance
+// is insufficient, or borrower has no borrows in payment denom to repay, we return an error.
 // Additionally, if the amount provided is greater than the full repayment amount, only the
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // RepayAsset returns the actual amount repaid.
