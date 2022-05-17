@@ -26,6 +26,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
+	uwasm "github.com/umee-network/umee/v2/app/wasm"
 	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
@@ -123,7 +124,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	grpc := wasmkeeper.Querier(&app.WasmKeeper)
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
-	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, umeeapp.GetWasmEnabledProposals())
+	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, uwasm.GetWasmEnabledProposals())
 }
 
 // NewTestMsgCreateValidator test msg creator
