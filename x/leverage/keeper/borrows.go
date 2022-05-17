@@ -108,8 +108,9 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 	return limit, nil
 }
 
-// CalculateLiquidationThreshold uses the price oracle to determine the maximum borrow (in USD) before a
-// liquidation call, using each token's uToken exchange rate and liquidation threshold.
+// CalculateLiquidationThreshold determines the maximum borrowed value (in USD) that a
+// borrower with given collateral could reach before being eligible for liquidation, using
+// each token's oracle price, uToken exchange rate, and liquidation threshold.
 // An error is returned if any input coins are not uTokens or if value
 // calculation fails.
 func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
