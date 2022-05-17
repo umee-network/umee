@@ -250,8 +250,8 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Return error if borrowed value would exceed borrow limit
 	if newBorrowedValue.GT(borrowLimit) {
-		return types.ErrUndercollaterized.Wrapf("borrow limit: %s, already borrowed: %s",
-			borrowLimit, borrowed)
+		return types.ErrUndercollaterized.Wrapf("new borrowed value would be %s with borrow limit %s",
+			newBorrowedValue, borrowLimit)
 	}
 
 	loanTokens := sdk.NewCoins(borrow)
