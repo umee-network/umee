@@ -176,7 +176,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, withdr
 			// Return error if borrow limit would drop below borrowed value
 			if borrowedValue.GT(newBorrowLimit) {
 				return types.ErrUndercollaterized.Wrapf(
-					"withdraw updates the borrow limit to %s and causes liquidation", newBorrowLimit)
+					"withdraw would update borrow limit to %s with borrowed value %s", newBorrowLimit, borrowedValue)
 			}
 
 			// reduce the lender's collateral by amountFromCollateral
