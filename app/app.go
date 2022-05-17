@@ -496,7 +496,7 @@ func New(
 		wasmDir,
 		wasmConfig,
 		supportedFeatures,
-		uwasm.GetWasmOpts(appOpts)...,
+		uwasm.GetWasmOpts(app.LeverageKeeper, app.OracleKeeper)...,
 	)
 
 	// register the staking hooks

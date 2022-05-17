@@ -8,7 +8,8 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 )
 
 const (
@@ -61,12 +62,14 @@ func GetWasmEnabledProposals() []wasm.ProposalType {
 }
 
 // GetWasmOpts returns the wasm options
-func GetWasmOpts(appOpts servertypes.AppOptions) []wasm.Option {
-	var wasmOpts []wasm.Option
-
-	wasmOpts = append(wasmOpts, wasmkeeper.WithGasRegister(NewUmeeWasmGasRegister()))
-
-	return wasmOpts
+func GetWasmOpts(
+	leverageKeeper leveragekeeper.Keeper,
+	oracleKeeper oraclekeeper.Keeper,
+) []wasm.Option {
+	return append(
+		registerCustomPlugins(leverageKeeper, oracleKeeper),
+		wasmkeeper.WithGasRegister(NewUmeeWasmGasRegister()),
+	)
 }
 
 // GetWasmDefaultGenesisStateParams returns umee cosmwasm default params.
