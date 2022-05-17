@@ -121,7 +121,7 @@ type Token struct {
 	// calculations such as collateral value and borrow limit. Can still be repaid
 	// or withdrawn, but not liquidated. A blacklisted token must have enable_lend
 	// and enable_borrow set to false. Such tokens can be safely removed from the
-	// by the oracle and price feeder as well.
+	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
 }
 
