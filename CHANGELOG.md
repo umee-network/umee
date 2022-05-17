@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
 ### Features
