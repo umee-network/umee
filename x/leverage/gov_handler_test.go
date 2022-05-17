@@ -15,6 +15,25 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
+func newTestToken(base, symbol, reserveFactor string) types.Token {
+	return types.Token{
+		BaseDenom:            base,
+		SymbolDenom:          symbol,
+		Exponent:             6,
+		ReserveFactor:        sdk.MustNewDecFromStr(reserveFactor),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
+	}
+}
+
 func TestUpdateRegistryProposalHandler(t *testing.T) {
 	app := umeeapp.Setup(t, false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
@@ -34,97 +53,26 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				{
-					BaseDenom:            "uosmo",
-					SymbolDenom:          "", // empty denom is invalid
-					Exponent:             6,
-					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-					EnableLend:           true,
-					EnableBorrow:         true,
-					Blacklist:            false,
-				},
+				newTestToken("uosmo", "", "0.2"), // empty denom is invalid
 			},
 		}
 		require.Error(t, h(ctx, p))
 	})
 
 	t.Run("valid proposal", func(t *testing.T) {
-		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{
-			BaseDenom:            "uosmo",
-			SymbolDenom:          "OSMO",
-			Exponent:             6,
-			ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-			CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-			EnableLend:           true,
-			EnableBorrow:         true,
-			Blacklist:            false,
-		}))
-		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{
-			BaseDenom:            "uatom",
-			SymbolDenom:          "ATOM",
-			Exponent:             6,
-			ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-			CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-			LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-			BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-			KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-			MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-			KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-			LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-			EnableLend:           true,
-			EnableBorrow:         true,
-			Blacklist:            false,
-		}))
+		require.NoError(t, k.SetRegisteredToken(ctx,
+			newTestToken("uosmo", "OSMO", "0.2"),
+		))
+		require.NoError(t, k.SetRegisteredToken(ctx,
+			newTestToken("uatom", "ATOM", "0.2"),
+		))
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				{
-					BaseDenom:            umeeapp.BondDenom,
-					SymbolDenom:          "UMEE",
-					Exponent:             6,
-					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-					EnableLend:           true,
-					EnableBorrow:         true,
-					Blacklist:            false,
-				},
-				{
-					BaseDenom:            "uosmo",
-					SymbolDenom:          "OSMO",
-					Exponent:             6,
-					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-					EnableLend:           true,
-					EnableBorrow:         true,
-					Blacklist:            false,
-				},
+				newTestToken("uumee", "UMEE", "0.2"),
+				newTestToken("uosmo", "OSMO", "0.3"),
 			},
 		}
 		require.NoError(t, h(ctx, p))
@@ -138,6 +86,6 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		token, err := k.GetRegisteredToken(ctx, "uosmo")
 		require.NoError(t, err)
-		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
+		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String())
 	})
 }
