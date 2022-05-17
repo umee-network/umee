@@ -2,8 +2,6 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestGetBorrow() {
@@ -150,22 +148,10 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	s.Require().Equal(sdk.MustNewDecFromStr("0.25"), utilization)
 
 	// Setting umee collateral weight to 1.0 to allow lender to borrow heavily
-	umeeToken := types.Token{
-		BaseDenom:            umeeDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0"),
-		CollateralWeight:     sdk.MustNewDecFromStr("1"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("1"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.5"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// lender borrows 600 uumee, reducing module account to 0 uumee
@@ -205,7 +191,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 
 	// Unregistered asset
 	invalidCoins := sdk.NewCoins(sdk.NewInt64Coin("abcd", 1000))
-	borrowLimit, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, invalidCoins)
+	_, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, invalidCoins)
 	s.Require().EqualError(err, "abcd: invalid asset")
 
 	// Create collateral uTokens (1k u/umee)
@@ -227,11 +213,11 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	atomCollatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, atomIBCDenom)
 	atomCollateral := sdk.NewCoins(sdk.NewInt64Coin(atomCollatDenom, 1000000000))
 
-	// Manually compute borrow limit using collateral weight of 0.5
+	// Manually compute borrow limit using collateral weight of 0.25
 	// and placeholder of 1 atom = $39.38
 	expectedAtomLimit := atomCollateral[0].Amount.ToDec().
 		Mul(sdk.MustNewDecFromStr("0.00003938")).
-		Mul(sdk.MustNewDecFromStr("0.5"))
+		Mul(sdk.MustNewDecFromStr("0.25"))
 
 	// Check borrow limit vs. manually computed value
 	borrowLimit, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, atomCollateral)

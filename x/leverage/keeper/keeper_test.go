@@ -30,6 +30,26 @@ var (
 	setupAccountCounter = sdk.ZeroInt()
 )
 
+// creates a test token with reasonable initial parameters
+func newToken(base, symbol string) types.Token {
+	return types.Token{
+		BaseDenom:            base,
+		SymbolDenom:          symbol,
+		Exponent:             6,
+		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableLend:           true,
+		EnableBorrow:         true,
+		Blacklist:            false,
+	}
+}
+
 type IntegrationTestSuite struct {
 	suite.Suite
 
@@ -51,38 +71,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Unix(0, 0),
 	})
 
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
-	atomIBCToken := types.Token{
-		BaseDenom:            atomIBCDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.5"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "ATOM",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	umeeToken := newToken(umeeapp.BondDenom, "UMEE")
+	atomIBCToken := newToken(atomIBCDenom, "ATOM")
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
@@ -253,51 +243,44 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 }
 
 func (s *IntegrationTestSuite) TestGetToken() {
-	uabc := types.Token{
-		BaseDenom:            "uabc",
-		ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.2"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.2"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.3"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.4"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("0.5"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.6"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "ABC",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	uabc := newToken("uabc", "ABC")
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, uabc))
 
 	reserveFactor, err := s.app.LeverageKeeper.GetReserveFactor(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(reserveFactor, sdk.MustNewDecFromStr("0.1"))
+	s.Require().Equal(reserveFactor, sdk.MustNewDecFromStr("0.2"))
 
 	collateralWeight, err := s.app.LeverageKeeper.GetCollateralWeight(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(collateralWeight, sdk.MustNewDecFromStr("0.2"))
+	s.Require().Equal(collateralWeight, sdk.MustNewDecFromStr("0.25"))
 
 	liquidationThreshold, err := s.app.LeverageKeeper.GetLiquidationThreshold(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(liquidationThreshold, sdk.MustNewDecFromStr("0.2"))
+	s.Require().Equal(liquidationThreshold, sdk.MustNewDecFromStr("0.25"))
 
 	baseBorrowRate, err := s.app.LeverageKeeper.GetInterestBase(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(baseBorrowRate, sdk.MustNewDecFromStr("0.3"))
+	s.Require().Equal(baseBorrowRate, sdk.MustNewDecFromStr("0.02"))
 
 	kinkBorrowRate, err := s.app.LeverageKeeper.GetInterestAtKink(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(kinkBorrowRate, sdk.MustNewDecFromStr("0.4"))
+	s.Require().Equal(kinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
 
 	maxBorrowRate, err := s.app.LeverageKeeper.GetInterestMax(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(maxBorrowRate, sdk.MustNewDecFromStr("0.5"))
+	s.Require().Equal(maxBorrowRate, sdk.MustNewDecFromStr("1.52"))
 
 	kinkUtilizationRate, err := s.app.LeverageKeeper.GetInterestKinkUtilization(s.ctx, "uabc")
 	s.Require().NoError(err)
-	s.Require().Equal(kinkUtilizationRate, sdk.MustNewDecFromStr("0.6"))
+	s.Require().Equal(kinkUtilizationRate, sdk.MustNewDecFromStr("0.8"))
+
+	liquidationIncentive, err := s.app.LeverageKeeper.GetLiquidationIncentive(s.ctx, "uabc")
+	s.Require().NoError(err)
+	s.Require().Equal(liquidationIncentive, sdk.MustNewDecFromStr("0.1"))
+
+	s.Require().NoError(s.app.LeverageKeeper.RequireBorrowEnabled(s.ctx, "uabc"))
+	s.Require().NoError(s.app.LeverageKeeper.RequireLendEnabled(s.ctx, "uabc"))
+	s.Require().NoError(s.app.LeverageKeeper.RequireNotBlacklisted(s.ctx, "uabc"))
 }
 
 // initialize the common starting scenario from which borrow and repay tests stem:
@@ -479,22 +462,10 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 	s.Require().NoError(err)
 
 	// Note: Setting umee collateral weight to 1.0 to allow lender to borrow heavily
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("1.0"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("1.0"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1.0")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Lender tries to borrow 1000 umee, insufficient balance because 200 of the
@@ -633,33 +604,21 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	s.Require().Error(err)
 
 	// Note: Setting umee collateral weight to 0.0 to allow liquidation
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.0"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.0"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// liquidator attempts to liquidate lender, but specifies too high of a minimum reward
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000)        // 10 umee
 	excessiveReward := sdk.NewInt64Coin(umeeapp.BondDenom, 20000000) // 20 umee (rewardDenom = u/umee)
-	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, excessiveReward)
+	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, excessiveReward)
 	s.Require().Error(err)
 
 	// liquidator partially liquidates lender, receiving some collateral
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
-	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, unrestrictedReward)
+	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, lenderAddr, repayment, unrestrictedReward)
 	s.Require().NoError(err)
 	s.Require().Equal(repayment.Amount, repaid)
 	s.Require().Equal(sdk.NewInt(11000000), reward)
@@ -816,22 +775,10 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	// already has 1000 umee.
 	lenderAddr, _ := s.initBorrowScenario()
 
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
-		CollateralWeight:     sdk.MustNewDecFromStr("1.0"), // to allow high utilization
-		LiquidationThreshold: sdk.MustNewDecFromStr("1.0"), // to allow high utilization
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")     // to allow high utilization
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1.0") // to allow high utilization
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	// Base interest rate (0% utilization)
@@ -956,23 +903,11 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 	s.Require().NoError(err)
 	s.Require().Equal([]sdk.AccAddress{}, zeroAddresses)
 
-	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	// Note: Setting umee liquidation threshold to 0.05 to make the lender eligible to liquidation
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
@@ -1012,42 +947,18 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, lenderAddr, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
 	s.Require().NoError(err)
 
-	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	// Note: Setting umee liquidation threshold to 0.05 to make the lender eligible for liquidation
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
-	// Note: Setting atom collateral weight to 0.01 to the lender be eligible to liquidation in a second token
-	atomIBCToken := types.Token{
-		BaseDenom:            atomIBCDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.01"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	// Note: Setting atom collateral weight to 0.01 to make the lender eligible for liquidation
+	atomIBCToken := newToken(atomIBCDenom, "ATOM")
+	atomIBCToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
+	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
@@ -1083,42 +994,18 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, anotherLender, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
 	s.Require().NoError(err)
 
-	// Note: Setting umee collateral weight to 0.05 to allow set the lender eligible to liquidation
-	umeeToken := types.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	// Note: Setting umee liquidation threshold to 0.05 to make the lender eligible for liquidation
+	umeeToken := newToken("uumee", "UMEE")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
 
-	// Note: Setting atom collateral weight to 0.01 to the anotherLender also be eligible to liquidation
-	atomIBCToken := types.Token{
-		BaseDenom:            atomIBCDenom,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.01"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.01"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		SymbolDenom:          "UMEE",
-		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
-		Blacklist:            false,
-	}
+	// Note: Setting atom collateral weight to 0.01 to make the lender eligible for liquidation
+	atomIBCToken := newToken(atomIBCDenom, "ATOM")
+	atomIBCToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
+	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
+
 	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, atomIBCToken))
 
 	lenderAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
