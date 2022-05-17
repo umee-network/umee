@@ -10,13 +10,13 @@ require (
 	github.com/ethereum/go-ethereum v1.10.16
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
-	github.com/golangci/golangci-lint v1.46.0
+	github.com/golangci/golangci-lint v1.46.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2
 	github.com/rs/zerolog v1.26.1
-	github.com/spf13/cast v1.4.1
+	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.11.0
@@ -234,7 +234,7 @@ require (
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/lufeee/execinquery v1.0.0 // indirect
+	github.com/lufeee/execinquery v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/maratori/testpackage v1.0.1 // indirect
