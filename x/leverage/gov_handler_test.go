@@ -29,6 +29,32 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		require.Error(t, h(ctx, &paramsproposal.ParameterChangeProposal{}))
 	})
 
+	t.Run("invalid token", func(t *testing.T) {
+		p := &types.UpdateRegistryProposal{
+			Title:       "test",
+			Description: "test",
+			Registry: []types.Token{
+				{
+					BaseDenom:            "uosmo",
+					SymbolDenom:          "", // empty denom is invalid
+					Exponent:             6,
+					ReserveFactor:        sdk.MustNewDecFromStr("0.20"),
+					CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+					LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+					BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+					KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+					MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+					KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+					LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+					EnableLend:           true,
+					EnableBorrow:         true,
+					Blacklist:            false,
+				},
+			},
+		}
+		require.Error(t, h(ctx, p))
+	})
+
 	t.Run("valid proposal", func(t *testing.T) {
 		require.NoError(t, k.SetRegisteredToken(ctx, types.Token{
 			BaseDenom:            "uosmo",
