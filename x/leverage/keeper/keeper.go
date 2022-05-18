@@ -274,7 +274,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 // RepayAsset returns the actual amount repaid.
 func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
 	if !payment.IsValid() {
-		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())\
+		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())
 	}
 
 	// Determine amount of selected denom currently owed
