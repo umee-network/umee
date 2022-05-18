@@ -508,10 +508,10 @@ func (q Querier) BorrowLimit(
 	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
 }
 
-func (q Querier) LiquidationLimit(
+func (q Querier) LiquidationThreshold(
 	goCtx context.Context,
-	req *types.QueryLiquidationLimitRequest,
-) (*types.QueryLiquidationLimitResponse, error) {
+	req *types.QueryLiquidationThresholdRequest,
+) (*types.QueryLiquidationThresholdResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -528,12 +528,12 @@ func (q Querier) LiquidationLimit(
 
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
 
-	limit, err := q.Keeper.CalculateLiquidationLimit(ctx, collateral)
+	t, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryLiquidationLimitResponse{LiquidationLimit: limit}, nil
+	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: t}, nil
 }
 
 func (q Querier) LiquidationTargets(

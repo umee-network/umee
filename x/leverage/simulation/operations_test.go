@@ -306,7 +306,7 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().EqualError(err,
-		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea: borrower not eligible for liquidation",
+		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea borrowed value is below the liquidation threshold 0.005000000000000000: borrower not eligible for liquidation",
 	)
 
 	var msg types.MsgLiquidate

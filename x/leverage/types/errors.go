@@ -9,7 +9,7 @@ import (
 var (
 	ErrInvalidAsset            = sdkerrors.Register(ModuleName, 1100, "invalid asset")
 	ErrInsufficientBalance     = sdkerrors.Register(ModuleName, 1101, "insufficient balance")
-	ErrBorrowLimitLow          = sdkerrors.Register(ModuleName, 1102, "borrow limit too low")
+	ErrUndercollaterized       = sdkerrors.Register(ModuleName, 1102, "Borrow positions are undercollaterized")
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 1103, "lending pool insufficient")
 	ErrInvalidRepayment        = sdkerrors.Register(ModuleName, 1104, "invalid repayment")
 	ErrInvalidAddress          = sdkerrors.Register(ModuleName, 1105, "invalid address")
