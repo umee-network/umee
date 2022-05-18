@@ -46,7 +46,7 @@ type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
   Repayment     sdk.Coin // borrow denom + amount
-  Reward        sdk.Coin   // collateral denom + minimum expected amount
+  Reward        sdk.Coin // collateral denom + minimum expected amount
 }
 ```
 
