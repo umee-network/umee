@@ -84,7 +84,7 @@ branch.
 
 ## Release procedure
 
-We follow semver:
+We follow semver (from v3.0.0):
 
 - major version update (eg 2.x.x -> 3.0.0) has API breaking changes or signals major feature update
 - minor version update (eg 2.1.x -> 2.2.0) has no API nor state machine breaking changes. It can provide new functionality or bug fixes.
