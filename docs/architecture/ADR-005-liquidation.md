@@ -21,7 +21,7 @@ Additional parameters will be required which define the liquidation incentive an
 
 ## Decision
 
-Liquidation will require one message type `MsgLiquidate`, one per-token parameter `LiquidationIncentive`, and two global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold`.
+Liquidation will require one message type `MsgLiquidate`, two per-token parameters `LiquidationThreshold` and `LiquidationIncentive`, and two global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold`.
 
 The blockchain doesn't issue any event to signal that a borrow position can be liquidated, nor provide a list of valid targets. Liquidators will have to use an off-chain tools to query their nodes periodically.
 
@@ -31,7 +31,7 @@ We don't provide a function that checks if a given borrower can be liquidated to
 
 A borrow position is represented by a pair `(borrower_address, coin)`, where borrower address is an entity requesting a loan. A borrower's total borrowed value (expressed in USD) can be computed from their total borrowed tokens and the `x/oracle` price oracle module.
 
-Their borrow limit is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token collateral weights. Liquidation happens when a sum of borrower loans is bigger than the `CalculateLiquidationThreshold(borrower_collateral)`.
+Their liquidation threshold is calculated similarly using the borrower's uToken balance, their collateral settings, current uToken exchange rates, and token liquidation thresholds. Liquidation happens when a sum of borrower loans is bigger than the `CalculateLiquidationThreshold(borrower_collateral)`.
 
 During liquidation any of the borrower's collateral tokens can be liquidated to pay off any of their loans.
 
@@ -46,14 +46,16 @@ type MsgLiquidate struct {
   Liquidator    sdk.AccAddress
   Borrower      sdk.AccAddress
   Repayment     sdk.Coin // borrow denom + amount
-  RewardDenom   string   // collateral denom
+  Reward        sdk.Coin   // collateral denom + minimum expected amount
 }
 ```
 
 Repayment's denom is the borrowed asset denom to be repaid (because the borrower may have multiple open borrows). It is always a base asset type (not a uToken).
 Its amount is the maximum amount of asset the liquidator is willing to repay. This field enables partial liquidation.
 
-RewardDenom is the collateral type which the liquidator will receive in exchange for repaying the borrower's loan. It is always a uToken denomination.
+Reward's denom is the collateral type which the liquidator will receive in exchange for repaying the borrower's loan. It is always a base asset type, thought the liquidator will actually receive uTokens.
+
+Additionally, the liquidator is allowed to set a minimum Reward.Amount of base tokens they would be willing to receive in exchange for the full Repayment.Amount. This acts as a failsafe and will cause any liquidation which would fall below a desired price ratio to fail instead.
 
 `Liquidator` is the signer of the message and the account which will do repayment and receive reward.
 
@@ -61,19 +63,20 @@ RewardDenom is the collateral type which the liquidator will receive in exchange
 
 It is possible for the amount repaid by a liquidator to be less than the borrower's total borrow position in the target denom. Such partial liquidations can succeed without issue, reducing the borrowed amount by `Repayment.Amount` and rewarding collateral proportional to the amount repaid.
 
-Additionally, the `Repayment.Amount` found in `MsgLiquidate` functions as a maximum the liquidator is willing to repay. There are multiple factors that may reduce the actual repayment below this amount:
+The `Repayment.Amount` found in `MsgLiquidate` functions as a maximum the liquidator is willing to repay. There are multiple factors that may reduce the actual repayment below this amount:
 
+- Insufficient liquidator balance of `Repayment.Denom`
 - Borrowed amount of `Repayment.Denom` is below `Repayment.Amount`
-- Insufficient `RewardDenom` collateral to match repaid value plus liquidation incentive
-- Parameter-based maximum, e.g. if a parameter `LiquidationCap = 0.50` caps liquidated value in a single transaction at 50% of the total borrowed value.
+- Insufficient `Reward.Denom` collateral on borrower to match repaid value plus liquidation incentive
+- Parameter-based maximum (see _Dynamic Liquidation Parameters_)
 
 In the above scenarios, the `MsgLiquidate` should succeed with the maximum amount allowed by the conditions, rather than fail outright.
 
-### Token Parameters
+### Liquidation Incentive
 
 In order to incentivize liquidators to target certain collateral types for liquidation first, we introduce a `LiquidationIncentive` parameter - defined for each supported borrowed denom.
 
-When a `MsgLiquidate` causes liquidation to occur, the liquidator receives collateral equal to (100% + `RewardDenom.LiquidationIncentive`) of the repaid value worth of collateral.
+When a `MsgLiquidate` causes liquidation to occur, the liquidator receives collateral equal to (100% + `Reward.Denom.LiquidationIncentive`) of the repaid value worth of collateral.
 
 For example, if the liquidation incentive for `atom` is `0.15`, then the liquidator receives `u/atom` collateral worth 115% of the borrowed base assets they repaid. The denom of the base assets does not affect this calculation.
 
@@ -82,7 +85,7 @@ For example, if the liquidation incentive for `atom` is `0.15`, then the liquida
 When a `MsgLiquidate` is received, the `x/leverage` module must determine if the targeted borrow position is eligible for liquidation.
 
 ```go
-    // from MsgLiquidate (liquidatorAddr, borrowerAddr, repayDenom, repayAmount, rewardDenom)
+    // from MsgLiquidate (liquidatorAddr, borrowerAddr, repay, reward)
 
     borrowed := GetTotalBorrows(borrowerAddr)
     borrowValue := TotalValue(borrowed) // price oracle
@@ -102,9 +105,6 @@ After eligibility is confirmed, parameters governing liquidation can be fetched:
     // collateral denomination, borrowed value, and collateral value
     liquidationIncentive, closeFactor := GetLiquidationParameters(rewardDenom, borrowValue, collateralValue)
 ```
-
-The liquidation incentive is a collateral bonus received when a liquidator repays a borrowed position
-(e.g. incentive=`0.2` means liquidator receives 20% extra of the liquidated collateral).
 
 The close factor is the maximum portion of a borrow position eligible for liquidation in a single liquidation event.
 
@@ -185,6 +185,8 @@ The offchain liquidation tool employed by liquidators will need several queries 
 - GetTotalBorrows(borrower): Returns an `sdk.Coins` containing all assets borrowed by a single borrower
 - GetTotalCollateral(borrower): Returns an `sdk.Coins` containing all uTokens in borrower's balance that are enabled as collateral
 
+The first query in particular requires iteration over all borrowers. This would be too performance-intensive for most nodes to run, so it needs to be emulated instead as part of the liquidator tool.
+
 In addition to the above, the liquidation tool should be able to read any global or per-token parameters in order to finish calculating borrow limits and potential liquidation rewards.
 
 ## Consequences
@@ -201,6 +203,7 @@ In addition to the above, the liquidation tool should be able to read any global
 
 - New message type `MsgLiquidate` is created
 - New per-token parameter `LiquidationIncentive` will be created to determine liquidation incentives
+- New per-token parameter `LiquidationThreshold` similar to `CollateralWeight` will be created
 - New global parameters `MinimumCloseFactor` and `CompleteLiquidationThreshold` will be created for close factors
 
 ## References
