@@ -528,12 +528,12 @@ func (q Querier) LiquidationThreshold(
 
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
 
-	limit, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
+	t, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: limit}, nil
+	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: t}, nil
 }
 
 func (q Querier) LiquidationTargets(

@@ -1078,7 +1078,7 @@ func (s *IntegrationTestSuite) TestQueryLiquidationThreshold() {
 			nil,
 		},
 		{
-			"query zero liquidation limit",
+			"query zero liquidation threshold",
 			cli.GetCmdQueryLiquidationThreshold(),
 			[]string{
 				val.Address.String(),
@@ -1115,7 +1115,7 @@ func (s *IntegrationTestSuite) TestQueryLiquidationThreshold() {
 
 	nonzeroCase := []testQuery{
 		{
-			"query nonzero liquidation limit",
+			"query nonzero liquidation threshold",
 			cli.GetCmdQueryLiquidationThreshold(),
 			[]string{
 				val.Address.String(),

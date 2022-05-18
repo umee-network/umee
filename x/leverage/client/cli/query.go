@@ -627,13 +627,13 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationThreshold returns a CLI command handler to query for the
-// liquidation limit of a specific borrower.
+// GetCmdQueryLiquidationThreshold returns a CLI command handler to query a
+// liquidation threshold of a specific borrower.
 func GetCmdQueryLiquidationThreshold() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "liquidation-limit [addr]",
+		Use:   "liquidation-threshold [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the liquidation limit of a specified borrower",
+		Short: "Query a liquidation threshold of a specified borrower",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
