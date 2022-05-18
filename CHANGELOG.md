@@ -64,6 +64,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### API Breaking
 
 - [870](https://github.com/umee-network/umee/pull/870) Move proto v1beta1 to v1.
+- [903](https://github.com/umee-network/umee/pull/903) (leverage) Renamed `Keeper.CalculateLiquidationLimit` to `CalculateLiquidationThreshold`.
 
 ## [v2.0.1](https://github.com/umee-network/umee/releases/tag/v2.0.1) - 2022-04-25
 
