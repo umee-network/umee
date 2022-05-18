@@ -42,7 +42,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryMarketSize(),
 		GetCmdQueryTokenMarketSize(),
 		GetCmdQueryBorrowLimit(),
-		GetCmdQueryLiquidationLimit(),
+		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
 	)
 
@@ -627,9 +627,9 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationLimit returns a CLI command handler to query for the
+// GetCmdQueryLiquidationThreshold returns a CLI command handler to query for the
 // liquidation limit of a specific borrower.
-func GetCmdQueryLiquidationLimit() *cobra.Command {
+func GetCmdQueryLiquidationThreshold() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidation-limit [addr]",
 		Args:  cobra.ExactArgs(1),
@@ -642,11 +642,11 @@ func GetCmdQueryLiquidationLimit() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLiquidationLimitRequest{
+			req := &types.QueryLiquidationThresholdRequest{
 				Address: args[0],
 			}
 
-			resp, err := queryClient.LiquidationLimit(cmd.Context(), req)
+			resp, err := queryClient.LiquidationThreshold(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

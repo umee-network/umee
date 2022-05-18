@@ -1063,13 +1063,13 @@ func (s *IntegrationTestSuite) TestQueryBorrowLimit() {
 	runTestTransactions(s, cleanupCommands)
 }
 
-func (s *IntegrationTestSuite) TestQueryLiquidationLimit() {
+func (s *IntegrationTestSuite) TestQueryLiquidationThreshold() {
 	val := s.network.Validators[0]
 
 	simpleCases := []testQuery{
 		{
 			"invalid address",
-			cli.GetCmdQueryLiquidationLimit(),
+			cli.GetCmdQueryLiquidationThreshold(),
 			[]string{
 				"xyz",
 			},
@@ -1079,14 +1079,14 @@ func (s *IntegrationTestSuite) TestQueryLiquidationLimit() {
 		},
 		{
 			"query zero liquidation limit",
-			cli.GetCmdQueryLiquidationLimit(),
+			cli.GetCmdQueryLiquidationThreshold(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLiquidationLimitResponse{},
-			&types.QueryLiquidationLimitResponse{
-				LiquidationLimit: sdk.ZeroDec(),
+			&types.QueryLiquidationThresholdResponse{},
+			&types.QueryLiquidationThresholdResponse{
+				LiquidationThreshold: sdk.ZeroDec(),
 			},
 		},
 	}
@@ -1116,17 +1116,17 @@ func (s *IntegrationTestSuite) TestQueryLiquidationLimit() {
 	nonzeroCase := []testQuery{
 		{
 			"query nonzero liquidation limit",
-			cli.GetCmdQueryLiquidationLimit(),
+			cli.GetCmdQueryLiquidationThreshold(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLiquidationLimitResponse{},
-			&types.QueryLiquidationLimitResponse{
+			&types.QueryLiquidationThresholdResponse{},
+			&types.QueryLiquidationThresholdResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's liquidation threshold times the collateral
 				// amount loaned, times its initial oracle exchange rate.
-				LiquidationLimit: sdk.MustNewDecFromStr("34.21"),
+				LiquidationThreshold: sdk.MustNewDecFromStr("34.21"),
 				// 0.05 * 20 * 34.21 = 34.21
 			},
 		},
