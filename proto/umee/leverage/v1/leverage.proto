@@ -118,8 +118,8 @@ message Token {
   string symbol_denom = 10 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
   uint32 exponent     = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
   
-  // Allows lending of this token. Note that withdrawing is always enabled.
-  // Disabling lending would be one step in phasing out an asset type.
+  // Allows lending and setting a collateral using this token. Note that withdrawing 
+  // is always enabled. Disabling lending would be one step in phasing out an asset type.
   bool enable_lend = 12;
 
   // Allows borrowing of this token. Note that repaying is always enabled.
