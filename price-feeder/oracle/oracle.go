@@ -238,7 +238,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	computedPrices, err := GetComputedPrices(o.logger, providerCandles, providerPrices)
+	computedPrices, err := GetComputedPrices(o.logger, providerCandles, providerPrices, o.providerPairs)
 	if err != nil {
 		return err
 	}
@@ -264,8 +264,13 @@ func GetComputedPrices(
 	logger zerolog.Logger,
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
+	providerPairs map[string][]types.CurrencyPair,
 ) (prices map[string]sdk.Dec, err error) {
-	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
+	// convert any non-USD denominated candles into USD.
+	convertedCandles, err := ConvertCandlesToUSD(providerCandles, providerPairs)
+
+	// filter out any erroneous candles
+	filteredCandles, err := FilterCandleDeviations(logger, convertedCandles)
 	if err != nil {
 		return nil, err
 	}
@@ -516,6 +521,95 @@ func FilterCandleDeviations(
 	}
 
 	return filteredCandles, nil
+}
+
+// ConvertCandlesToUSD converts any candles which are not quoted in USD
+// to USD by other price feeds.
+func ConvertCandlesToUSD(
+	candles provider.AggregatedProviderCandles,
+	providerPairs map[string][]types.CurrencyPair,
+) (provider.AggregatedProviderCandles, error) {
+	if len(candles) == 0 {
+		return nil, fmt.Errorf("candles are missing")
+	}
+
+	// Asset -> Price
+	conversionRates := make(map[string]sdk.Dec)
+	// Provider -> Asset & Quote
+	convertingCandles := make(map[string]types.CurrencyPair)
+	for pairProviderName, pairs := range providerPairs {
+		for _, pair := range pairs {
+			if strings.ToUpper(pair.Quote) != "USD" {
+				// get valid providers and use them to generate a USD-based price for this asset.
+				validProviders, err := getUSDBasedProviders(pair.Quote, providerPairs)
+				if err != nil {
+					return nil, err
+				}
+
+				// Find valid candles, and then let's re-compute the tvwap.
+				validCandleList := provider.AggregatedProviderCandles{}
+				for providerName, candleSet := range candles {
+					// Check if this provider has a valid quote, and find the associated asset.
+					// Add that asset to the list
+					if _, ok := validProviders[providerName]; ok {
+						for base, candle := range candleSet {
+							if base == pair.Quote {
+								if _, ok := validCandleList[providerName]; !ok {
+									validCandleList[providerName] = make(map[string][]provider.CandlePrice)
+								}
+
+								validCandleList[providerName][base] = candle
+							}
+						}
+					}
+				}
+
+				// Okay! Phew! Now we have the price of an asset based in USD.
+				// So, we just have to use this as a conversion rate.
+				tvwap, err := ComputeTVWAP(validCandleList)
+				if err != nil {
+					return nil, err
+				}
+
+				// Save this to the conversion rates we have on hand
+				conversionRates[pair.Quote] = tvwap[pair.Quote]
+				// Then save which conversions we're going to.. convert
+				convertingCandles[pairProviderName] = pair
+			}
+		}
+	}
+
+	for provider, assetMap := range candles {
+		for asset, candles := range assetMap {
+			// If this is the right asset, go through all the candles and convert
+			if convertingCandles[provider].Base == asset {
+				for _, candle := range candles {
+					candle.Price = candle.Price.Mul(conversionRates[convertingCandles[provider].Quote])
+				}
+			}
+		}
+	}
+
+	return candles, nil
+}
+
+// getUSDBasedProviders retrieves which providers for a given asset are denominated in USD.
+func getUSDBasedProviders(asset string, providerPairs map[string][]types.CurrencyPair) (map[string]struct{}, error) {
+	validProviders := make(map[string]struct{})
+
+	for provider, pairs := range providerPairs {
+		for _, pair := range pairs {
+			if strings.ToUpper(pair.Quote) == "USD" && strings.ToUpper(pair.Base) == asset {
+				validProviders[provider] = struct{}{}
+			}
+		}
+	}
+
+	if len(validProviders) < 0 {
+		return nil, fmt.Errorf("there are no valid usd assets for this asset")
+	}
+
+	return validProviders, nil
 }
 
 func (o *Oracle) checkAcceptList(params oracletypes.Params) {
