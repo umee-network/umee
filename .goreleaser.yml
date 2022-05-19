@@ -16,10 +16,10 @@ builds:
     flags:
       - -tags=badgerdb ledger netgo
       - -trimpath
-    ldflags:
-      - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     goos:
       - darwin
       - linux
