@@ -60,4 +60,3 @@ To install the `umeed` binary:
 ```shell
 $ make install
 ```
-
