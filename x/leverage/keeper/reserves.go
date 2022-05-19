@@ -2,7 +2,6 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
@@ -50,10 +49,6 @@ func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 // RepayBadDebt uses reserves to repay borrower's debts of a given denom.
 // It returns a boolean representing whether full repayment was achieved.
 func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
-	if !k.IsAcceptedToken(ctx, denom) {
-		return false, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
-	}
-
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
 	reserved := k.GetReserveAmount(ctx, denom)
 
