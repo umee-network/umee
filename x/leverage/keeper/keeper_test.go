@@ -278,9 +278,9 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	s.Require().NoError(err)
 	s.Require().Equal(liquidationIncentive, sdk.MustNewDecFromStr("0.1"))
 
-	s.Require().NoError(s.app.LeverageKeeper.RequireBorrowEnabled(s.ctx, "uabc"))
-	s.Require().NoError(s.app.LeverageKeeper.RequireLendEnabled(s.ctx, "uabc"))
-	s.Require().NoError(s.app.LeverageKeeper.RequireNotBlacklisted(s.ctx, "uabc"))
+	s.Require().NoError(s.app.LeverageKeeper.AssertBorrowEnabled(s.ctx, "uabc"))
+	s.Require().NoError(s.app.LeverageKeeper.AssertLendEnabled(s.ctx, "uabc"))
+	s.Require().NoError(s.app.LeverageKeeper.AssertNotBlacklisted(s.ctx, "uabc"))
 }
 
 // initialize the common starting scenario from which borrow and repay tests stem:

@@ -158,8 +158,8 @@ func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec,
 	return token.LiquidationIncentive, nil
 }
 
-// RequireLendEnabled returns an error if a token does not exist or cannot be lent.
-func (k Keeper) RequireLendEnabled(ctx sdk.Context, denom string) error {
+// AssertLendEnabled returns an error if a token does not exist or cannot be lent.
+func (k Keeper) AssertLendEnabled(ctx sdk.Context, denom string) error {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return err
@@ -171,8 +171,8 @@ func (k Keeper) RequireLendEnabled(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// RequireBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
-func (k Keeper) RequireBorrowEnabled(ctx sdk.Context, denom string) error {
+// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+func (k Keeper) AssertBorrowEnabled(ctx sdk.Context, denom string) error {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return err
@@ -184,8 +184,8 @@ func (k Keeper) RequireBorrowEnabled(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// RequireNotBlacklisted returns an error if a token does not exist or is blacklisted.
-func (k Keeper) RequireNotBlacklisted(ctx sdk.Context, denom string) error {
+// AssertNotBlacklisted returns an error if a token does not exist or is blacklisted.
+func (k Keeper) AssertNotBlacklisted(ctx sdk.Context, denom string) error {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
 		return err

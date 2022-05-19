@@ -19,6 +19,11 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
+	if token.Blacklist {
+		// Regardless of params, AccrueAllInterest skips blacklisted denoms
+		return sdk.ZeroDec()
+	}
+
 	utilization := k.DeriveBorrowUtilization(ctx, denom)
 
 	if utilization.GTE(token.KinkUtilizationRate) {

@@ -67,7 +67,7 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if err := k.RequireLendEnabled(ctx, loan.Denom); err != nil {
+	if err := k.AssertLendEnabled(ctx, loan.Denom); err != nil {
 		return err
 	}
 
@@ -221,7 +221,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
 
-	if err := k.RequireBorrowEnabled(ctx, borrow.Denom); err != nil {
+	if err := k.AssertBorrowEnabled(ctx, borrow.Denom); err != nil {
 		return err
 	}
 
@@ -392,7 +392,7 @@ func (k Keeper) LiquidateBorrow(
 	if !desiredRepayment.IsValid() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredRepayment.String())
 	}
-	if err := k.RequireNotBlacklisted(ctx, desiredRepayment.Denom); err != nil {
+	if err := k.AssertNotBlacklisted(ctx, desiredRepayment.Denom); err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 	if !k.IsAcceptedToken(ctx, desiredReward.Denom) {
