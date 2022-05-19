@@ -43,8 +43,8 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
 	atomIBCToken := types.Token{
@@ -59,8 +59,8 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
 		SymbolDenom:          "ATOM",
 		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
 	uabc := types.Token{
@@ -75,8 +75,8 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
 		Exponent:             6,
-		EnableLend:           true,
-		EnableBorrow:         true,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
 

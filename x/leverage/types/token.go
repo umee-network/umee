@@ -76,10 +76,10 @@ func (t Token) Validate() error {
 
 	// Blacklisted assets cannot have borrow or lend enabled
 	if t.Blacklist {
-		if t.EnableBorrow {
+		if t.EnableMsgBorrow {
 			return fmt.Errorf("blacklisted assets cannot have borrowing enabled")
 		}
-		if t.EnableLend {
+		if t.EnableMsgLend {
 			return fmt.Errorf("blacklisted assets cannot have lending enabled")
 		}
 	}

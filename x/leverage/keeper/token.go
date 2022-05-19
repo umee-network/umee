@@ -164,7 +164,7 @@ func (k Keeper) AssertLendEnabled(ctx sdk.Context, denom string) error {
 	if err != nil {
 		return err
 	}
-	if !token.EnableLend {
+	if !token.EnableMsgLend {
 		return sdkerrors.Wrap(types.ErrLendNotAllowed, denom)
 	}
 
@@ -177,7 +177,7 @@ func (k Keeper) AssertBorrowEnabled(ctx sdk.Context, denom string) error {
 	if err != nil {
 		return err
 	}
-	if !token.EnableBorrow {
+	if !token.EnableMsgBorrow {
 		return sdkerrors.Wrap(types.ErrBorrowNotAllowed, denom)
 	}
 
