@@ -180,15 +180,9 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			return err
 		}
 
-		var acceptedPairs []types.CurrencyPair
 		for _, pair := range currencyPairs {
-			if acceptList.Contains(pair.Base) {
-				acceptedPairs = append(acceptedPairs, pair)
-				if _, ok := requiredRates[pair.Base]; !ok {
-					requiredRates[pair.Base] = struct{}{}
-				}
-			} else {
-				o.logger.Warn().Str("denom", pair.Base).Msg("attempting to vote on unaccepted denom")
+			if _, ok := requiredRates[pair.Base]; !ok {
+				requiredRates[pair.Base] = struct{}{}
 			}
 		}
 
@@ -200,13 +194,13 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 
 			go func() {
 				defer close(ch)
-				prices, err = priceProvider.GetTickerPrices(acceptedPairs...)
+				prices, err = priceProvider.GetTickerPrices(currencyPairs...)
 				if err != nil {
 					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
 					errCh <- err
 				}
 
-				candles, err = priceProvider.GetCandlePrices(acceptedPairs...)
+				candles, err = priceProvider.GetCandlePrices(currencyPairs...)
 				if err != nil {
 					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
 					errCh <- err
@@ -227,7 +221,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			//
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, pair := range acceptedPairs {
+			for _, pair := range currencyPairs {
 				success := SetProviderTickerPricesAndCandles(providerName, providerPrices, providerCandles, prices, candles, pair)
 				if !success {
 					mtx.Unlock()
