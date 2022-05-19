@@ -17,22 +17,22 @@ const (
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts
 type UmeeQuery struct {
 	// Mandatory field to determine which query to call
-	AssignedQuery AssignedQuery `json:"assignedQuery"`
+	AssignedQuery AssignedQuery `json:"assigned_query"`
 	// Used to query an open borrow position of an address for specific denom
-	GetBorrow *GetBorrow `json:"getBorrow,omitempty"`
+	GetBorrow *GetBorrow `json:"get_borrow,omitempty"`
 	// Used to query an exchange rate of a denom
-	GetExchangeRateBase *GetExchangeRateBase `json:"getExchangeRateBase,omitempty"`
+	GetExchangeRateBase *GetExchangeRateBase `json:"get_exchange_rate_base,omitempty"`
 }
 
 // GetBorrow wraps the leverage GetBorrow query
 type GetBorrow struct {
-	BorrowerAddr sdk.AccAddress `json:"borrowerAddr"`
+	BorrowerAddr sdk.AccAddress `json:"borrower_addr"`
 	Denom        string         `json:"denom"`
 }
 
 // GetBorrowResponse wraps the response of GetBorrow query
 type GetBorrowResponse struct {
-	BorrowedAmount sdk.Coin `json:"borrowedAmount"`
+	BorrowedAmount sdk.Coin `json:"borrowed_amount"`
 }
 
 // GetExchangeRateBase wraps the oracle GetExchangeRateBase query
@@ -42,7 +42,7 @@ type GetExchangeRateBase struct {
 
 // GetExchangeRateBaseResponse wraps the response of GetExchangeRateBase query
 type GetExchangeRateBaseResponse struct {
-	ExchangeRateBase sdk.Dec `json:"exchangeRateBase"`
+	ExchangeRateBase sdk.Dec `json:"exchange_rate_base"`
 }
 
 // Keepers wraps the interface to encapsulate keepers
