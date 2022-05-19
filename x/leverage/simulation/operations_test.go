@@ -43,6 +43,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:            "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
@@ -56,6 +59,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
 		SymbolDenom:          "ATOM",
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 	uabc := types.Token{
 		BaseDenom:            "uabc",
@@ -69,6 +75,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
@@ -76,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		app.LeverageKeeper.SetRegisteredToken(ctx, token)
+		s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 

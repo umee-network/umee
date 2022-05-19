@@ -256,6 +256,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	})
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)

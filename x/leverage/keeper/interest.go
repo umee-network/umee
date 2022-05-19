@@ -19,6 +19,11 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
+	if token.Blacklist {
+		// Regardless of params, AccrueAllInterest skips blacklisted denoms
+		return sdk.ZeroDec()
+	}
+
 	utilization := k.DeriveBorrowUtilization(ctx, denom)
 
 	if utilization.GTE(token.KinkUtilizationRate) {
@@ -89,6 +94,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// iterate over all accepted token denominations
 	for _, token := range tokens {
+		if token.Blacklist {
+			// skip accruing interest on blacklisted assets
+			continue
+		}
+
 		// interest is accrued by multiplying each denom's Interest Scalar by the
 		// quantity (borrowAPY * yearsElapsed) + 1
 		scalar := k.getInterestScalar(ctx, token.BaseDenom)
