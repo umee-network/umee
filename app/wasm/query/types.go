@@ -14,6 +14,20 @@ const (
 	AssignedQueryGetExchangeRateBase
 )
 
+// QueryHandler query handler that an object must implement
+type QueryHandler interface {
+	Validate() error
+	QueryResponse(ctx sdk.Context, keepers Keepers) (interface{}, error)
+}
+
+// Keepers wraps the interface to encapsulate keepers
+type Keepers interface {
+	// GetBorrow executes the GetBorrow from leverage keeper
+	GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
+	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper
+	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
+}
+
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts
 type UmeeQuery struct {
 	// Mandatory field to determine which query to call
@@ -43,12 +57,4 @@ type GetExchangeRateBase struct {
 // GetExchangeRateBaseResponse wraps the response of GetExchangeRateBase query
 type GetExchangeRateBaseResponse struct {
 	ExchangeRateBase sdk.Dec `json:"exchange_rate_base"`
-}
-
-// Keepers wraps the interface to encapsulate keepers
-type Keepers interface {
-	// GetBorrow executes the GetBorrow from leverage keeper
-	GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
-	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper
-	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
 }
