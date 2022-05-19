@@ -267,7 +267,10 @@ func GetComputedPrices(
 	providerPairs map[string][]types.CurrencyPair,
 ) (prices map[string]sdk.Dec, err error) {
 	// convert any non-USD denominated candles into USD.
-	convertedCandles, err := ConvertCandlesToUSD(providerCandles, providerPairs)
+	convertedCandles, err := convertCandlesToUSD(providerCandles, providerPairs)
+	if err != nil {
+		return nil, err
+	}
 
 	// filter out any erroneous candles
 	filteredCandles, err := FilterCandleDeviations(logger, convertedCandles)
@@ -284,7 +287,12 @@ func GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
+		convertedTickers, err := convertTickersToUSD(providerPrices, providerPairs)
+		if err != nil {
+			return nil, err
+		}
+
+		filteredProviderPrices, err := FilterTickerDeviations(logger, convertedTickers)
 		if err != nil {
 			return nil, err
 		}
@@ -525,7 +533,7 @@ func FilterCandleDeviations(
 
 // ConvertCandlesToUSD converts any candles which are not quoted in USD
 // to USD by other price feeds.
-func ConvertCandlesToUSD(
+func convertCandlesToUSD(
 	candles provider.AggregatedProviderCandles,
 	providerPairs map[string][]types.CurrencyPair,
 ) (provider.AggregatedProviderCandles, error) {
@@ -591,6 +599,70 @@ func ConvertCandlesToUSD(
 	}
 
 	return candles, nil
+}
+
+// convertTickersToUSD converts any tickers which are not quoted in USD
+// to USD by other price feeds.
+func convertTickersToUSD(
+	tickers provider.AggregatedProviderPrices,
+	providerPairs map[string][]types.CurrencyPair,
+) (provider.AggregatedProviderPrices, error) {
+	if len(tickers) == 0 {
+		return nil, fmt.Errorf("tickers are missing")
+	}
+
+	// Asset -> Price
+	conversionRates := make(map[string]sdk.Dec)
+	// Provider -> Asset & Quote
+	convertingTickers := make(map[string]types.CurrencyPair)
+	for pairProviderName, pairs := range providerPairs {
+		for _, pair := range pairs {
+			if strings.ToUpper(pair.Quote) != "USD" {
+				// get valid providers and use them to generate a USD-based price for this asset.
+				validProviders, err := getUSDBasedProviders(pair.Quote, providerPairs)
+				if err != nil {
+					return nil, err
+				}
+
+				// Find valid candles, and then let's re-compute the tvwap.
+				validTickerList := provider.AggregatedProviderPrices{}
+				for providerName, candleSet := range tickers {
+					// Check if this provider has a valid quote, and find the associated asset.
+					// Add that asset to the list
+					if _, ok := validProviders[providerName]; ok {
+						for base, ticker := range candleSet {
+							if base == pair.Quote {
+								if _, ok := validTickerList[providerName]; !ok {
+									validTickerList[providerName] = make(map[string]provider.TickerPrice)
+								}
+
+								validTickerList[providerName][base] = ticker
+							}
+						}
+					}
+				}
+
+				vwap, err := ComputeVWAP(validTickerList)
+				if err != nil {
+					return nil, err
+				}
+
+				conversionRates[pair.Quote] = vwap[pair.Quote]
+				convertingTickers[pairProviderName] = pair
+			}
+		}
+	}
+
+	for provider, assetMap := range tickers {
+		for asset, tick := range assetMap {
+			// If this is the right asset, go through all the candles and convert
+			if convertingTickers[provider].Base == asset {
+				tick.Price = tick.Price.Mul(conversionRates[convertingTickers[provider].Quote])
+			}
+		}
+	}
+
+	return tickers, nil
 }
 
 // getUSDBasedProviders retrieves which providers for a given asset are denominated in USD.
