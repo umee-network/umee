@@ -120,7 +120,7 @@ message Token {
   
   // Allows lending and setting a collateral using this token. Note that withdrawing 
   // is always enabled. Disabling lending would be one step in phasing out an asset type.
-  bool enable_lend = 12;
+  bool enable_msg_lend = 12;
 
   // Allows borrowing of this token. Note that repaying is always enabled.
   // Disabling borrowing would be one step in phasing out an asset type, but
