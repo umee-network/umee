@@ -10,11 +10,11 @@ option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 // registry can be updated in the Umee capital facility. Note, the registry
 // defined in the proposal replaces the current registry in its entirety.
 message UpdateRegistryProposal {
-  option (gogoproto.equal)            = true;
-  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.equal) = true;
+  option (gogoproto.goproto_getters) = false;
   option (gogoproto.goproto_stringer) = false;
 
-  string         title       = 1;
-  string         description = 2;
-  repeated Token registry    = 3 [(gogoproto.nullable) = false];
+  string title = 1;
+  string description = 2;
+  repeated Token registry = 3 [ (gogoproto.nullable) = false ];
 }

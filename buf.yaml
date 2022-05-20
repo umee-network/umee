@@ -1,0 +1,26 @@
+version: v1beta1
+
+build:
+  roots:
+    - proto
+    - third_party/proto
+lint:
+  use:
+    - DEFAULT
+    - COMMENTS
+  except:
+    - COMMENT_FIELD
+    - PACKAGE_DIRECTORY_MATCH
+    - FIELD_LOWER_SNAKE_CASE
+    - RPC_REQUEST_STANDARD_NAME
+    - SERVICE_SUFFIX
+  ignore:
+    - gogoproto
+    - google
+    - cosmos
+
+breaking:
+  use:
+    - FILE
+  ignore:
+    - gogoproto

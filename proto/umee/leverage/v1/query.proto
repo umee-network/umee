@@ -4,7 +4,7 @@ package umeenetwork.umee.leverage.v1;
 import "google/api/annotations.proto";
 import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
