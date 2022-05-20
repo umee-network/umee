@@ -3,8 +3,13 @@ module github.com/umee-network/umee/v2
 go 1.17
 
 require (
+<<<<<<< HEAD
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220317234142-1c674cbc83ff
 	github.com/cosmos/cosmos-sdk v0.45.2
+=======
+	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07
+	github.com/cosmos/cosmos-sdk v0.45.4
+>>>>>>> 7f178e3 (chore: update upstream gravity module to fix halt bug (#932))
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v2 v2.2.0
 	github.com/ethereum/go-ethereum v1.10.16
