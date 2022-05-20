@@ -15,6 +15,25 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
+func newTestToken(base, symbol, reserveFactor string) types.Token {
+	return types.Token{
+		BaseDenom:            base,
+		SymbolDenom:          symbol,
+		Exponent:             6,
+		ReserveFactor:        sdk.MustNewDecFromStr(reserveFactor),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.25"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
+		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
+		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
+	}
+}
+
 func TestUpdateRegistryProposalHandler(t *testing.T) {
 	app := umeeapp.Setup(t, false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
@@ -29,31 +48,44 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		require.Error(t, h(ctx, &paramsproposal.ParameterChangeProposal{}))
 	})
 
+	t.Run("invalid token", func(t *testing.T) {
+		p := &types.UpdateRegistryProposal{
+			Title:       "test",
+			Description: "test",
+			Registry: []types.Token{
+				newTestToken("uosmo", "", "0.2"), // empty denom is invalid
+			},
+		}
+		require.Error(t, h(ctx, p))
+	})
+
 	t.Run("valid proposal", func(t *testing.T) {
-		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uosmo"})
-		k.SetRegisteredToken(ctx, types.Token{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.05")})
+		require.NoError(t, k.SetRegisteredToken(ctx,
+			newTestToken("uosmo", "OSMO", "0.2"),
+		))
+		require.NoError(t, k.SetRegisteredToken(ctx,
+			newTestToken("uatom", "ATOM", "0.2"),
+		))
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				{BaseDenom: "uumee"},
-				{BaseDenom: "uatom", BaseBorrowRate: sdk.MustNewDecFromStr("0.02")},
+				newTestToken("uumee", "UMEE", "0.2"),
+				newTestToken("uosmo", "OSMO", "0.3"),
 			},
 		}
 		require.NoError(t, h(ctx, p))
 
+		// no tokens should have been deleted
 		tokens := k.GetAllRegisteredTokens(ctx)
-		require.Len(t, tokens, 2)
+		require.Len(t, tokens, 3)
 
-		_, err := k.GetRegisteredToken(ctx, "uosmo")
-		require.Error(t, err)
-
-		_, err = k.GetRegisteredToken(ctx, "uumee")
+		_, err := k.GetRegisteredToken(ctx, "uumee")
 		require.NoError(t, err)
 
-		token, err := k.GetRegisteredToken(ctx, "uatom")
+		token, err := k.GetRegisteredToken(ctx, "uosmo")
 		require.NoError(t, err)
-		require.Equal(t, "0.020000000000000000", token.BaseBorrowRate.String())
+		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String())
 	})
 }

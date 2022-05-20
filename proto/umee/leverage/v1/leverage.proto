@@ -118,6 +118,24 @@ message Token {
 
   // The symbol_denom and exponent are solely used to update the oracle's accept
   // list of allowed tokens.
-  string symbol_denom = 10 [ (gogoproto.moretags) = "yaml:\"symbol_denom\"" ];
-  uint32 exponent = 11 [ (gogoproto.moretags) = "yaml:\"exponent\"" ];
+  string symbol_denom = 10 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
+  uint32 exponent     = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
+  
+  // Allows lending and setting a collateral using this token. Note that withdrawing 
+  // is always enabled. Disabling lending would be one step in phasing out an asset type.
+  bool enable_msg_lend = 12 [(gogoproto.moretags) = "yaml:\"enable_msg_lend\""];
+
+  // Allows borrowing of this token. Note that repaying is always enabled.
+  // Disabling borrowing would be one step in phasing out an asset type, but
+  // could also be used from the start for asset types meant to be collateral
+  // only, like meTokens.
+  bool enable_msg_borrow = 13 [(gogoproto.moretags) = "yaml:\"enable_msg_borrow\""];
+
+  // This should only be used to eliminate an asset completely. A blacklisted
+  // asset is treated as though its oracle price is zero, and thus ignored by
+  // calculations such as collateral value and borrow limit. Can still be repaid
+  // or withdrawn, but not liquidated. A blacklisted token must have enable_lend
+  // and enable_borrow set to false. Such tokens can be safely removed from the
+  // oracle and price feeder as well.
+  bool blacklist = 14;
 }

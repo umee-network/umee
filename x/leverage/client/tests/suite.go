@@ -143,6 +143,9 @@ func (s *IntegrationTestSuite) TestQueryAllRegisteredTokens() {
 						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
 						KinkUtilizationRate:  sdk.MustNewDecFromStr("0.2"),
 						LiquidationIncentive: sdk.MustNewDecFromStr("0.18"),
+						EnableMsgLend:        true,
+						EnableMsgBorrow:      true,
+						Blacklist:            false,
 					},
 				},
 			},
@@ -1716,7 +1719,7 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 
 	testCases := []testTransaction{
 		{
-			"invalid asset",
+			"nothing to repay",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
@@ -1725,7 +1728,7 @@ func (s *IntegrationTestSuite) TestCmdRepay() {
 			types.ErrInvalidRepayment,
 		},
 		{
-			"invalid asset (uToken)",
+			"nothing to repay (uToken)",
 			cli.GetCmdRepayAsset(),
 			[]string{
 				val.Address.String(),
