@@ -67,8 +67,8 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if !k.IsAcceptedToken(ctx, loan.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, loan.String())
+	if err := k.AssertLendEnabled(ctx, loan.Denom); err != nil {
+		return err
 	}
 
 	// determine uToken amount to mint
@@ -221,8 +221,8 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
 
-	if !k.IsAcceptedToken(ctx, borrow.Denom) {
-		return types.ErrInvalidAsset.Wrap(borrow.String())
+	if err := k.AssertBorrowEnabled(ctx, borrow.Denom); err != nil {
+		return err
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
@@ -370,9 +370,6 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 
 // GetCollateralSetting checks if a uToken denom is enabled for use as collateral by a single borrower.
 func (k Keeper) GetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) bool {
-	if !k.IsAcceptedUToken(ctx, denom) {
-		return false
-	}
 	store := ctx.KVStore(k.storeKey)
 	// Any value (expected = 0x01) found at key will be interpreted as true.
 	key := types.CreateCollateralSettingKey(borrowerAddr, denom)
@@ -394,6 +391,9 @@ func (k Keeper) LiquidateBorrow(
 ) (sdk.Int, sdk.Int, error) {
 	if !desiredRepayment.IsValid() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredRepayment.String())
+	}
+	if err := k.AssertNotBlacklisted(ctx, desiredRepayment.Denom); err != nil {
+		return sdk.ZeroInt(), sdk.ZeroInt(), err
 	}
 	if !k.IsAcceptedToken(ctx, desiredReward.Denom) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredReward.String())

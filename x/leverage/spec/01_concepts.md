@@ -6,7 +6,9 @@ This document covers basic concepts and math that determine the `leverage` modul
 
 At the foundation of the `leverage` module is the [Token Registry](02_state.md#Token-Registry), which contains a list of accepted types.
 
-This list is controlled by governance, and serves to limit the asset types available for transactions like borrowing and lending, and also any query services based on denomination.
+This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or lending.
+
+Once added to the token registry, assets cannot be removed. In the rare case where an asset would need to be phased out, it can have lending or borrowing disabled, or in extreme cases, be ignored by collateral and borrowed value calculations using a blacklist.
 
 ### uTokens
 
