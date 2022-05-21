@@ -9,6 +9,27 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   = $(shell git remote get-url origin | xargs basename -s .git)
 
+TM_URL                = https://raw.githubusercontent.com/tendermint/tendermint/v0.34.19/proto/tendermint
+GOGO_PROTO_URL        = https://raw.githubusercontent.com/regen-network/protobuf/cosmos
+GOOGLE_PROTOBUF_URL   = https://raw.githubusercontent.com/protocolbuffers/protobuf/main/src/google/protobuf
+GOOGLE_API_URL      = https://raw.githubusercontent.com/googleapis/googleapis/master/google/api
+COSMOS_PROTO_URL      = https://raw.githubusercontent.com/regen-network/cosmos-proto/master
+CONFIO_URL            = https://raw.githubusercontent.com/confio/ics23/v0.6.4
+
+TM_CRYPTO_TYPES       = third_party/proto/tendermint/crypto
+TM_ABCI_TYPES         = third_party/proto/tendermint/abci
+TM_TYPES              = third_party/proto/tendermint/types
+TM_VERSION            = third_party/proto/tendermint/version
+TM_LIBS               = third_party/proto/tendermint/libs/bits
+TM_P2P                = third_party/proto/tendermint/p2p
+
+GOGO_PROTO_TYPES      = third_party/proto/gogoproto
+GOOGLE_API_TYPES    = third_party/proto/google/api
+GOOGLE_PROTOBUF_TYPES = third_party/proto/google/protobuf
+COSMOS_PROTO_TYPES    = third_party/proto/cosmos_proto
+# For some reason ibc expects confio proto files to be in the main folder
+CONFIO_TYPES          = third_party/proto
+
 ###############################################################################
 ##                                  Version                                  ##
 ###############################################################################
@@ -193,22 +214,78 @@ containerProtoGenAny=$(PROJECT_NAME)-proto-gen-any-$(protoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(protoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(protoVer)
 
-proto-all: proto-format proto-lint proto-gen
+proto-all: proto-update-deps proto-format proto-lint proto-gen
 
-proto-format:
-	@echo "Formatting Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
-		find ./ -not -path "./third_party/*" -name "*.proto" -exec clang-format -i {} \; ; fi
+proto-update-deps:
+	@echo "Updating Protobuf deps"
+	@mkdir -p $(GOGO_PROTO_TYPES)
+	@curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo.proto
+
+	@mkdir -p $(GOOGLE_API_TYPES)
+	@curl -sSL $(GOOGLE_API_URL)/annotations.proto > $(GOOGLE_API_TYPES)/annotations.proto
+	@curl -sSL $(GOOGLE_API_URL)/http.proto > $(GOOGLE_API_TYPES)/http.proto
+
+	@mkdir -p $(GOOGLE_PROTOBUF_TYPES)
+	@curl -sSL $(GOOGLE_PROTOBUF_URL)/descriptor.proto > $(GOOGLE_PROTOBUF_TYPES)/descriptor.proto
+
+	@mkdir -p $(COSMOS_PROTO_TYPES)
+	@curl -sSL $(COSMOS_PROTO_URL)/cosmos.proto > $(COSMOS_PROTO_TYPES)/cosmos.proto
+
+
+## Importing of tendermint protobuf definitions currently requires the
+## use of `sed` in order to build properly with cosmos-sdk's proto file layout
+## (which is the standard Buf.build FILE_LAYOUT)
+## Issue link: https://github.com/tendermint/tendermint/issues/5021
+	@mkdir -p $(TM_ABCI_TYPES)
+	@curl -sSL $(TM_URL)/abci/types.proto > $(TM_ABCI_TYPES)/types.proto
+
+	@mkdir -p $(TM_VERSION)
+	@curl -sSL $(TM_URL)/version/types.proto > $(TM_VERSION)/types.proto
+
+	@mkdir -p $(TM_TYPES)
+	@curl -sSL $(TM_URL)/types/types.proto > $(TM_TYPES)/types.proto
+	@curl -sSL $(TM_URL)/types/evidence.proto > $(TM_TYPES)/evidence.proto
+
+	@curl -sSL $(TM_URL)/types/params.proto > $(TM_TYPES)/params.proto
+	@curl -sSL $(TM_URL)/types/validator.proto > $(TM_TYPES)/validator.proto
+
+	@curl -sSL $(TM_URL)/types/block.proto > $(TM_TYPES)/block.proto
+
+	@mkdir -p $(TM_CRYPTO_TYPES)
+	@curl -sSL $(TM_URL)/crypto/proof.proto > $(TM_CRYPTO_TYPES)/proof.proto
+	@curl -sSL $(TM_URL)/crypto/keys.proto > $(TM_CRYPTO_TYPES)/keys.proto
+
+	@mkdir -p $(TM_LIBS)
+	@curl -sSL $(TM_URL)/libs/bits/types.proto > $(TM_LIBS)/types.proto
+
+	@mkdir -p $(TM_P2P)
+	@curl -sSL $(TM_URL)/p2p/types.proto > $(TM_P2P)/types.proto
+
+	@mkdir -p $(CONFIO_TYPES)
+	@curl -sSL $(CONFIO_URL)/proofs.proto > $(CONFIO_TYPES)/proofs.proto
+## insert go package option into proofs.proto file
+## Issue link: https://github.com/confio/ics23/issues/32
+	@./contrib/scripts/sed.sh $(CONFIO_TYPES)/proofs.proto
+
+	@./contrib/scripts/proto-copy-cosmos-sdk.sh
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
-		sh ./contrib/scripts/protocgen.sh; fi
+	@DOCKER_BUILDKIT=1 docker build -t ${containerProtoGen} -f ./Dockerfile.protocgen .
+	@$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoGen) sh ./contrib/scripts/protocgen.sh
+
+
+proto-format:
+	@echo "Formatting Protobuf files"
+	@$(DOCKER) run --rm -v $(CURDIR):/workspace \
+	--workdir /workspace tendermintdev/docker-build-proto \
+	find ./ -not -path "./third_party/*" -name "*.proto" -exec clang-format -i {} \;
 
 proto-lint:
+	@echo "Linting Protobuf files"
 	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@$(DOCKER_BUF) breaking --against https://github.com/umee-network/umee.git#branch=main
 
-.PHONY: proto-all proto-gen proto-format proto-lint proto-check-breaking
+.PHONY: proto-all proto-gen proto-format proto-lint proto-check-breaking proto-update-deps

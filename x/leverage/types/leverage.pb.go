@@ -111,8 +111,9 @@ type Token struct {
 	// list of allowed tokens.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
 	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows lending and setting a collateral using this token. Note that withdrawing
-	// is always enabled. Disabling lending would be one step in phasing out an asset type.
+	// Allows lending and setting a collateral using this token. Note that
+	// withdrawing is always enabled. Disabling lending would be one step in
+	// phasing out an asset type.
 	EnableMsgLend bool `protobuf:"varint,12,opt,name=enable_msg_lend,json=enableMsgLend,proto3" json:"enable_msg_lend,omitempty" yaml:"enable_msg_lend"`
 	// Allows borrowing of this token. Note that repaying is always enabled.
 	// Disabling borrowing would be one step in phasing out an asset type, but

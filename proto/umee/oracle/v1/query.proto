@@ -4,7 +4,7 @@ package umeenetwork.umee.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "umee/oracle/v1/oracle.proto";
-import "cosmos/base/coin.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 
@@ -12,56 +12,42 @@ option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 service Query {
   // ExchangeRates returns exchange rates of all denoms,
   // or, if specified, returns a single denom
-  rpc ExchangeRates(QueryExchangeRatesRequest)
-      returns (QueryExchangeRatesResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/denoms/exchange_rates/{denom}";
+  rpc ExchangeRates(QueryExchangeRatesRequest) returns (QueryExchangeRatesResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/denoms/exchange_rates/{denom}";
   }
 
   // ActiveExchangeRates returns all active denoms
-  rpc ActiveExchangeRates(QueryActiveExchangeRatesRequest)
-      returns (QueryActiveExchangeRatesResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/denoms/active_exchange_rates";
+  rpc ActiveExchangeRates(QueryActiveExchangeRatesRequest) returns (QueryActiveExchangeRatesResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/denoms/active_exchange_rates";
   }
 
   // FeederDelegation returns feeder delegation of a validator
-  rpc FeederDelegation(QueryFeederDelegationRequest)
-      returns (QueryFeederDelegationResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/validators/{validator_addr}/feeder";
+  rpc FeederDelegation(QueryFeederDelegationRequest) returns (QueryFeederDelegationResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/validators/{validator_addr}/feeder";
   }
 
   // MissCounter returns oracle miss counter of a validator
   rpc MissCounter(QueryMissCounterRequest) returns (QueryMissCounterResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/validators/{validator_addr}/miss";
+    option (google.api.http).get = "/umee/oracle/v1/validators/{validator_addr}/miss";
   }
 
   // AggregatePrevote returns an aggregate prevote of a validator
-  rpc AggregatePrevote(QueryAggregatePrevoteRequest)
-      returns (QueryAggregatePrevoteResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/validators/{validator_addr}/aggregate_prevote";
+  rpc AggregatePrevote(QueryAggregatePrevoteRequest) returns (QueryAggregatePrevoteResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/validators/{validator_addr}/aggregate_prevote";
   }
 
   // AggregatePrevotes returns aggregate prevotes of all validators
-  rpc AggregatePrevotes(QueryAggregatePrevotesRequest)
-      returns (QueryAggregatePrevotesResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/validators/aggregate_prevotes";
+  rpc AggregatePrevotes(QueryAggregatePrevotesRequest) returns (QueryAggregatePrevotesResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/validators/aggregate_prevotes";
   }
 
   // AggregateVote returns an aggregate vote of a validator
-  rpc AggregateVote(QueryAggregateVoteRequest)
-      returns (QueryAggregateVoteResponse) {
-    option (google.api.http).get =
-        "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote";
+  rpc AggregateVote(QueryAggregateVoteRequest) returns (QueryAggregateVoteResponse) {
+    option (google.api.http).get = "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote";
   }
 
   // AggregateVotes returns aggregate votes of all validators
-  rpc AggregateVotes(QueryAggregateVotesRequest)
-      returns (QueryAggregateVotesResponse) {
+  rpc AggregateVotes(QueryAggregateVotesRequest) returns (QueryAggregateVotesResponse) {
     option (google.api.http).get = "/umee/oracle/v1/validators/aggregate_votes";
   }
 
@@ -74,26 +60,25 @@ service Query {
 // QueryExchangeRatesRequest is the request type for the Query/ExchangeRate RPC
 // method.
 message QueryExchangeRatesRequest {
-  option (gogoproto.equal) = false;
+  option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   // denom defines the denomination to query for.
   string denom = 1;
 }
 
+
 // QueryExchangeRatesResponse is response type for the
 // Query/ExchangeRates RPC method.
 message QueryExchangeRatesResponse {
   // exchange_rates defines a list of the exchange rate for all whitelisted
   // denoms.
-  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.DecCoin exchange_rates = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", (gogoproto.nullable) = false];
 }
 
-// QueryActiveExchangeRatesRequest is the request type for the
-// Query/ActiveExchangeRates RPC method.
+
+// QueryActiveExchangeRatesRequest is the request type for the Query/ActiveExchangeRates RPC method.
 message QueryActiveExchangeRatesRequest {}
 
 // QueryActiveExchangeRatesResponse is response type for the
@@ -104,10 +89,11 @@ message QueryActiveExchangeRatesResponse {
   repeated string active_rates = 1;
 }
 
+
 // QueryFeederDelegationRequest is the request type for the
 // Query/FeederDelegation RPC method.
 message QueryFeederDelegationRequest {
-  option (gogoproto.equal) = false;
+  option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   // validator defines the validator address to query for.
@@ -124,7 +110,7 @@ message QueryFeederDelegationResponse {
 // QueryMissCounterRequest is the request type for the Query/MissCounter RPC
 // method.
 message QueryMissCounterRequest {
-  option (gogoproto.equal) = false;
+  option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   // validator defines the validator address to query for.
@@ -141,7 +127,7 @@ message QueryMissCounterResponse {
 // QueryAggregatePrevoteRequest is the request type for the
 // Query/AggregatePrevote RPC method.
 message QueryAggregatePrevoteRequest {
-  option (gogoproto.equal) = false;
+  option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   // validator defines the validator address to query for.
@@ -153,8 +139,7 @@ message QueryAggregatePrevoteRequest {
 message QueryAggregatePrevoteResponse {
   // aggregate_prevote defines oracle aggregate prevote submitted by a validator
   // in the current vote period
-  AggregateExchangeRatePrevote aggregate_prevote = 1
-      [ (gogoproto.nullable) = false ];
+  AggregateExchangeRatePrevote aggregate_prevote = 1 [(gogoproto.nullable) = false];
   ;
 }
 
@@ -167,14 +152,13 @@ message QueryAggregatePrevotesRequest {}
 message QueryAggregatePrevotesResponse {
   // aggregate_prevotes defines all oracle aggregate prevotes submitted in the
   // current vote period
-  repeated AggregateExchangeRatePrevote aggregate_prevotes = 1
-      [ (gogoproto.nullable) = false ];
+  repeated AggregateExchangeRatePrevote aggregate_prevotes = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryAggregateVoteRequest is the request type for the Query/AggregateVote RPC
 // method.
 message QueryAggregateVoteRequest {
-  option (gogoproto.equal) = false;
+  option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   // validator defines the validator address to query for.
@@ -186,7 +170,7 @@ message QueryAggregateVoteRequest {
 message QueryAggregateVoteResponse {
   // aggregate_vote defines oracle aggregate vote submitted by a validator in
   // the current vote period
-  AggregateExchangeRateVote aggregate_vote = 1 [ (gogoproto.nullable) = false ];
+  AggregateExchangeRateVote aggregate_vote = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryAggregateVotesRequest is the request type for the Query/AggregateVotes
@@ -198,8 +182,7 @@ message QueryAggregateVotesRequest {}
 message QueryAggregateVotesResponse {
   // aggregate_votes defines all oracle aggregate votes submitted in the current
   // vote period
-  repeated AggregateExchangeRateVote aggregate_votes = 1
-      [ (gogoproto.nullable) = false ];
+  repeated AggregateExchangeRateVote aggregate_votes = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryParamsRequest is the request type for the Query/Params RPC method.
@@ -208,5 +191,5 @@ message QueryParamsRequest {}
 // QueryParamsResponse is the response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params defines the parameters of the module.
-  Params params = 1 [ (gogoproto.nullable) = false ];
+  Params params = 1 [(gogoproto.nullable) = false];
 }

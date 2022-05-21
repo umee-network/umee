@@ -1,26 +1,22 @@
 version: v1beta1
-
 build:
   roots:
-    - proto
-    - third_party/proto
+    - ./proto
+    - ./third_party/proto
 lint:
-  use:
-    - DEFAULT
-    - COMMENTS
+  ignore:
+    - tendermint
+    - confio
+    - cosmos_proto
+    - google
+    - gogoproto
+    - tofnd
+    - cosmos
+    - ibc
+    - proofs.proto
   except:
     - COMMENT_FIELD
     - PACKAGE_DIRECTORY_MATCH
     - FIELD_LOWER_SNAKE_CASE
     - RPC_REQUEST_STANDARD_NAME
     - SERVICE_SUFFIX
-  ignore:
-    - gogoproto
-    - google
-    - cosmos
-
-breaking:
-  use:
-    - FILE
-  ignore:
-    - gogoproto

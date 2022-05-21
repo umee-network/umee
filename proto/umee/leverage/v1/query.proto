@@ -4,7 +4,7 @@ package umeenetwork.umee.leverage.v1;
 import "google/api/annotations.proto";
 import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
-import "cosmos/base/coin.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
@@ -157,7 +157,7 @@ message QueryAvailableBorrowRequest { string denom = 1; }
 message QueryAvailableBorrowResponse {
   string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -170,7 +170,7 @@ message QueryBorrowAPYRequest { string denom = 1; }
 message QueryBorrowAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -183,7 +183,7 @@ message QueryLendAPYRequest { string denom = 1; }
 message QueryLendAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -196,7 +196,7 @@ message QueryMarketSizeRequest { string denom = 1; }
 message QueryMarketSizeResponse {
   string market_size_usd = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -209,7 +209,7 @@ message QueryTokenMarketSizeRequest { string denom = 1; }
 message QueryTokenMarketSizeResponse {
   string market_size = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -233,14 +233,14 @@ message QueryParamsResponse {
 // service handler.
 message QueryBorrowedRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryBorrowedResponse defines the response structure for the Borrowed gRPC
 // service handler.
 message QueryBorrowedResponse {
   repeated cosmos.base.v1beta1.Coin borrowed = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
@@ -249,7 +249,7 @@ message QueryBorrowedResponse {
 // gRPC service handler.
 message QueryBorrowedValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryBorrowedValueResponse defines the response structure for the
@@ -257,7 +257,7 @@ message QueryBorrowedValueRequest {
 message QueryBorrowedValueResponse {
   string borrowed_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -265,7 +265,7 @@ message QueryBorrowedValueResponse {
 // CollateralValue gRPC service handler.
 message QueryCollateralValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralValueResponse defines the response structure for the
@@ -273,7 +273,7 @@ message QueryCollateralValueRequest {
 message QueryCollateralValueResponse {
   string collateral_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -281,14 +281,14 @@ message QueryCollateralValueResponse {
 // handler.
 message QueryLoanedRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryLoanedResponse defines the response structure for the Loaned gRPC
 // service handler.
 message QueryLoanedResponse {
   repeated cosmos.base.v1beta1.Coin loaned = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
@@ -297,7 +297,7 @@ message QueryLoanedResponse {
 // gRPC service handler.
 message QueryLoanedValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryLoanedValueResponse defines the response structure for the LoanedValue
@@ -305,7 +305,7 @@ message QueryLoanedValueRequest {
 message QueryLoanedValueResponse {
   string loaned_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -318,7 +318,7 @@ message QueryReserveAmountRequest { string denom = 1; }
 message QueryReserveAmountResponse {
   string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -326,7 +326,7 @@ message QueryReserveAmountResponse {
 // CollateralSetting gRPC service handler.
 message QueryCollateralSettingRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralSettingsResponse defines the response structure for the
@@ -337,14 +337,14 @@ message QueryCollateralSettingResponse { bool enabled = 1; }
 // service handler.
 message QueryCollateralRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralResponse defines the response structure for the Collateral
 // gRPC service handler.
 message QueryCollateralResponse {
   repeated cosmos.base.v1beta1.Coin collateral = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
@@ -358,7 +358,7 @@ message QueryExchangeRateRequest { string denom = 1; }
 message QueryExchangeRateResponse {
   string exchange_rate = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -371,7 +371,7 @@ message QueryBorrowLimitRequest { string address = 1; }
 message QueryBorrowLimitResponse {
   string borrow_limit = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -384,7 +384,7 @@ message QueryLiquidationThresholdRequest { string address = 1; }
 message QueryLiquidationThresholdResponse {
   string liquidation_threshold = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -404,33 +404,33 @@ message QueryMarketSummaryRequest { string denom = 1; }
 // MarketSummary gRPC service handler.
 message QueryMarketSummaryResponse {
   string symbol_denom = 1;
-  uint32 exponent = 2;
+  uint32 exponent     = 2;
   string oracle_price = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = true
+    (gogoproto.nullable)   = true
   ];
   string uToken_exchange_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string lend_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string market_size = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string available_borrow = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string reserved = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
