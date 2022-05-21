@@ -7,7 +7,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -16,12 +16,11 @@ When interest accrues, the sum of all assets owed by all users increases for eac
 
 The mechanism by which interest is calculated, and then split between incentivizing lenders as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
 
-
 ## Decision
 
 Interest on all open borrow positions will be applied every X blocks during `EndBlock`, where X is a governance parameter called `BorrowInterestEpoch`.
 
-Reserves are implemented as a per-token value attached to the `x/leverage` module account.  The module account also holds the lending pool of base assets. As an example, if the module account contains 2000 `uatom` and its `uatom ReserveAmount` is 500, then only 1500 of its `uatom` are available for borrowing or withdrawal.
+Reserves are implemented as a per-token value attached to the `x/leverage` module account. The module account also holds the lending pool of base assets. As an example, if the module account contains 2000 `uatom` and its `uatom ReserveAmount` is 500, then only 1500 of its `uatom` are available for borrowing or withdrawal.
 
 A governance parameter `ReserveFactor` must be kept which specifies the portion of borrow interest that will be funnelled into reserves. This parameter is set _per token_, which allows it to be set differently for riskier assets vs stablecoins, for example.
 
@@ -188,11 +187,11 @@ Example scenario:
 >
 > The derived interest rate for `atom` is assumed to be 0.0001% (10^-6) per `BorrowInterestEpoch` blocks.
 >
-> Alice has borrowed 2000 `atom`, which is 2 * 10^9 `uatom` internally. (Note: These are not utokens, just the smallest units of the token. 1 atom = 10^6 uatom.)
+> Alice has borrowed 2000 `atom`, which is 2 \* 10^9 `uatom` internally. (Note: These are not utokens, just the smallest units of the token. 1 atom = 10^6 uatom.)
 >
-> On the next `EndBlock` where `BorrowInterestEpoch` has passed, interest is accrued on the borrow. Using the example interest rate in this example, Alice's amount owed goes from 2 * 10^9 `uatom` to 2.000002. In other words, it increases by 2000 `uatom`.
+> On the next `EndBlock` where `BorrowInterestEpoch` has passed, interest is accrued on the borrow. Using the example interest rate in this example, Alice's amount owed goes from 2 \* 10^9 `uatom` to 2.000002. In other words, it increases by 2000 `uatom`.
 >
-> Because of the `ReserveFactor` of 0.05, the `x/leverage` module's reserved amount of `uatom` increases by 100 (which is 2000 * 0.05) due to the interest accruing on Alice's loan.
+> Because of the `ReserveFactor` of 0.05, the `x/leverage` module's reserved amount of `uatom` increases by 100 (which is 2000 \* 0.05) due to the interest accruing on Alice's loan.
 >
 > The same math is applied to all open borrows, which may be from different users and in different asset types, during EndBlock.
 
