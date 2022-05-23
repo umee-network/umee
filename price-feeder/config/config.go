@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	denomUSD = "USD"
+	DenomUSD = "USD"
 
 	defaultListenAddr      = "0.0.0.0:7171"
 	defaultSrvWriteTimeout = 15 * time.Second
@@ -189,7 +189,7 @@ func ParseConfig(configPath string) (Config, error) {
 		if _, ok := pairs[cp.Base]; !ok {
 			pairs[cp.Base] = make(map[string]struct{})
 		}
-		if strings.ToUpper(cp.Quote) != denomUSD {
+		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
 		}
 
@@ -203,7 +203,7 @@ func ParseConfig(configPath string) (Config, error) {
 
 	for quote := range coinQuotes {
 		for index, pair := range cfg.CurrencyPairs {
-			if pair.Base == quote && pair.Quote == denomUSD {
+			if pair.Base == quote && pair.Quote == DenomUSD {
 				break
 			}
 			if index == len(cfg.CurrencyPairs)-1 {
