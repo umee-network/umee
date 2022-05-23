@@ -704,3 +704,51 @@ func TestConvertCandlesToUSD(t *testing.T) {
 		convertedCandles["binance"]["ATOM"][0].Price,
 	)
 }
+
+func TestConvertTickersToUSD(t *testing.T) {
+	providerPrices := make(provider.AggregatedProviderPrices, 2)
+	pairs := []types.CurrencyPair{
+		{
+			Base:  "ATOM",
+			Quote: "USDT",
+		},
+		{
+			Base:  "USDT",
+			Quote: "USD",
+		},
+	}
+
+	atomPrice := sdk.MustNewDecFromStr("29.93")
+	atomVolume := sdk.MustNewDecFromStr("894123.00")
+
+	usdtPrice := sdk.MustNewDecFromStr("0.98")
+	usdtVolume := sdk.MustNewDecFromStr("894123.00")
+
+	binanceTickers := make(map[string]provider.TickerPrice, 1)
+	binanceTickers["ATOM"] = provider.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+	providerPrices[config.ProviderBinance] = binanceTickers
+
+	krakenTicker := make(map[string]provider.TickerPrice, 1)
+	krakenTicker["USDT"] = provider.TickerPrice{
+		Price:  usdtPrice,
+		Volume: usdtVolume,
+	}
+	providerPrices[config.ProviderKraken] = krakenTicker
+
+	providerPairs := map[string][]types.CurrencyPair{
+		config.ProviderBinance: {pairs[0]},
+		config.ProviderKraken:  {pairs[1]},
+	}
+
+	convertedTickers, err := convertTickersToUSD(providerPrices, providerPairs)
+	require.NoError(t, err)
+
+	require.Equal(
+		t,
+		atomPrice.Mul(usdtPrice),
+		convertedTickers["binance"]["ATOM"].Price,
+	)
+}

@@ -655,12 +655,15 @@ func convertTickersToUSD(
 	}
 
 	// Convert assets to USD.
-	for provider, assetMap := range tickers {
-		for asset, ticker := range assetMap {
-			if requiredConversions[provider].Base == asset {
-				ticker.Price = ticker.Price.Mul(
-					conversionRates[requiredConversions[provider].Quote],
-				)
+	for providerName, assetMap := range tickers {
+		for asset := range assetMap {
+			if requiredConversions[providerName].Base == asset {
+				assetMap[asset] = provider.TickerPrice{
+					Price: assetMap[asset].Price.Mul(
+						conversionRates[requiredConversions[providerName].Quote],
+					),
+					Volume: assetMap[asset].Volume,
+				}
 			}
 		}
 	}
