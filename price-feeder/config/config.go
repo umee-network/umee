@@ -201,6 +201,7 @@ func ParseConfig(configPath string) (Config, error) {
 		}
 	}
 
+	// Use coinQuotes to ensure that any quotes can be converted to USD.
 	for quote := range coinQuotes {
 		for index, pair := range cfg.CurrencyPairs {
 			if pair.Base == quote && pair.Quote == DenomUSD {
