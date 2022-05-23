@@ -31,6 +31,20 @@ providers = [
 ]
 quote = "USDC"
 
+[[currency_pairs]]
+base = "USDC"
+providers = [
+  "mock",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "USDT"
+providers = [
+  "mock",
+]
+quote = "USD"
+
 [account]
 address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
 chain_id = "umee-local-testnet"
