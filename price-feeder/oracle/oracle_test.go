@@ -381,10 +381,15 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	}
 	providerCandles[config.ProviderBinance] = candles
 
+	providerPair := map[string][]types.CurrencyPair{
+		"mock": {pair},
+	}
+
 	prices, err := GetComputedPrices(
 		zerolog.Nop(),
 		providerCandles,
 		make(provider.AggregatedProviderPrices, 1),
+		providerPair,
 	)
 
 	require.NoError(t, err, "It should successfully get computed candle prices")
@@ -408,10 +413,15 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	}
 	providerPrices[config.ProviderBinance] = tickerPrices
 
+	providerPair := map[string][]types.CurrencyPair{
+		"mock": {pair},
+	}
+
 	prices, err := GetComputedPrices(
 		zerolog.Nop(),
 		make(provider.AggregatedProviderCandles, 1),
 		providerPrices,
+		providerPair,
 	)
 
 	require.NoError(t, err, "It should successfully get computed ticker prices")

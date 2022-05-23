@@ -538,7 +538,7 @@ func convertCandlesToUSD(
 	providerPairs map[string][]types.CurrencyPair,
 ) (provider.AggregatedProviderCandles, error) {
 	if len(candles) == 0 {
-		return nil, fmt.Errorf("candles are missing")
+		return candles, nil
 	}
 
 	// Asset -> Price
