@@ -541,24 +541,22 @@ func convertCandlesToUSD(
 		return candles, nil
 	}
 
-	// Asset -> Price
 	conversionRates := make(map[string]sdk.Dec)
-	// Provider -> Asset & Quote
-	convertingCandles := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[string]types.CurrencyPair)
+
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
-			if strings.ToUpper(pair.Quote) != "USD" {
-				// get valid providers and use them to generate a USD-based price for this asset.
+			if strings.ToUpper(pair.Quote) != config.DenomUSD {
+				// Get valid providers and use them to generate a USD-based price for this asset.
 				validProviders, err := getUSDBasedProviders(pair.Quote, providerPairs)
 				if err != nil {
 					return nil, err
 				}
 
-				// Find valid candles, and then let's re-compute the tvwap.
+				// Find candles which we can use for conversion, and calculate the tvwap
+				// to find the conversion rate.
 				validCandleList := provider.AggregatedProviderCandles{}
 				for providerName, candleSet := range candles {
-					// Check if this provider has a valid quote, and find the associated asset.
-					// Add that asset to the list
 					if _, ok := validProviders[providerName]; ok {
 						for base, candle := range candleSet {
 							if base == pair.Quote {
@@ -572,27 +570,28 @@ func convertCandlesToUSD(
 					}
 				}
 
-				// Okay! Phew! Now we have the price of an asset based in USD.
-				// So, we just have to use this as a conversion rate.
+				if len(validCandleList) == 0 {
+					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
+				}
 				tvwap, err := ComputeTVWAP(validCandleList)
 				if err != nil {
 					return nil, err
 				}
 
-				// Save this to the conversion rates we have on hand
 				conversionRates[pair.Quote] = tvwap[pair.Quote]
-				// Then save which conversions we're going to.. convert
-				convertingCandles[pairProviderName] = pair
+				requiredConversions[pairProviderName] = pair
 			}
 		}
 	}
 
+	// Convert assets to USD.
 	for provider, assetMap := range candles {
 		for asset, candles := range assetMap {
-			// If this is the right asset, go through all the candles and convert
-			if convertingCandles[provider].Base == asset {
+			if requiredConversions[provider].Base == asset {
 				for _, candle := range candles {
-					candle.Price = candle.Price.Mul(conversionRates[convertingCandles[provider].Quote])
+					candle.Price = candle.Price.Mul(
+						conversionRates[requiredConversions[provider].Quote],
+					)
 				}
 			}
 		}
@@ -601,8 +600,8 @@ func convertCandlesToUSD(
 	return candles, nil
 }
 
-// convertTickersToUSD converts any tickers which are not quoted in USD
-// to USD by other price feeds.
+// convertTickersToUSD converts any tickers which are not quoted in USD to USD,
+// using the conversion rates of other tickers.
 func convertTickersToUSD(
 	tickers provider.AggregatedProviderPrices,
 	providerPairs map[string][]types.CurrencyPair,
@@ -611,14 +610,13 @@ func convertTickersToUSD(
 		return nil, fmt.Errorf("tickers are missing")
 	}
 
-	// Asset -> Price
 	conversionRates := make(map[string]sdk.Dec)
-	// Provider -> Asset & Quote
-	convertingTickers := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[string]types.CurrencyPair)
+
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
-			if strings.ToUpper(pair.Quote) != "USD" {
-				// get valid providers and use them to generate a USD-based price for this asset.
+			if strings.ToUpper(pair.Quote) != config.DenomUSD {
+				// Get valid providers and use them to generate a USD-based price for this asset.
 				validProviders, err := getUSDBasedProviders(pair.Quote, providerPairs)
 				if err != nil {
 					return nil, err
@@ -627,8 +625,8 @@ func convertTickersToUSD(
 				// Find valid candles, and then let's re-compute the tvwap.
 				validTickerList := provider.AggregatedProviderPrices{}
 				for providerName, candleSet := range tickers {
-					// Check if this provider has a valid quote, and find the associated asset.
-					// Add that asset to the list
+					// Find tickers which we can use for conversion, and calculate the vwap
+					// to find the conversion rate.
 					if _, ok := validProviders[providerName]; ok {
 						for base, ticker := range candleSet {
 							if base == pair.Quote {
@@ -642,22 +640,27 @@ func convertTickersToUSD(
 					}
 				}
 
+				if len(validTickerList) == 0 {
+					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
+				}
 				vwap, err := ComputeVWAP(validTickerList)
 				if err != nil {
 					return nil, err
 				}
 
 				conversionRates[pair.Quote] = vwap[pair.Quote]
-				convertingTickers[pairProviderName] = pair
+				requiredConversions[pairProviderName] = pair
 			}
 		}
 	}
 
+	// Convert assets to USD.
 	for provider, assetMap := range tickers {
 		for asset, tick := range assetMap {
-			// If this is the right asset, go through all the candles and convert
-			if convertingTickers[provider].Base == asset {
-				tick.Price = tick.Price.Mul(conversionRates[convertingTickers[provider].Quote])
+			if requiredConversions[provider].Base == asset {
+				tick.Price = tick.Price.Mul(
+					conversionRates[requiredConversions[provider].Quote],
+				)
 			}
 		}
 	}
@@ -665,23 +668,23 @@ func convertTickersToUSD(
 	return tickers, nil
 }
 
-// getUSDBasedProviders retrieves which providers for a given asset are denominated in USD.
+// getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,
+// given the asset and the map of providers to currency pairs.
 func getUSDBasedProviders(asset string, providerPairs map[string][]types.CurrencyPair) (map[string]struct{}, error) {
-	validProviders := make(map[string]struct{})
+	conversionProviders := make(map[string]struct{})
 
 	for provider, pairs := range providerPairs {
 		for _, pair := range pairs {
-			if strings.ToUpper(pair.Quote) == "USD" && strings.ToUpper(pair.Base) == asset {
-				validProviders[provider] = struct{}{}
+			if strings.ToUpper(pair.Quote) == config.DenomUSD && strings.ToUpper(pair.Base) == asset {
+				conversionProviders[provider] = struct{}{}
 			}
 		}
 	}
-
-	if len(validProviders) < 0 {
-		return nil, fmt.Errorf("there are no valid usd assets for this asset")
+	if len(conversionProviders) == 0 {
+		return nil, fmt.Errorf("no providers have a usd conversion for this asset")
 	}
 
-	return validProviders, nil
+	return conversionProviders, nil
 }
 
 func (o *Oracle) checkAcceptList(params oracletypes.Params) {
