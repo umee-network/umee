@@ -266,20 +266,20 @@ func GetComputedPrices(
 	providerPrices provider.AggregatedProviderPrices,
 	providerPairs map[string][]types.CurrencyPair,
 ) (prices map[string]sdk.Dec, err error) {
-	// convert any non-USD denominated candles into USD.
-	convertedCandles, err := convertCandlesToUSD(providerCandles, providerPairs)
+	// filter out any erroneous candles
+	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
 	if err != nil {
 		return nil, err
 	}
 
-	// filter out any erroneous candles
-	filteredCandles, err := FilterCandleDeviations(logger, convertedCandles)
+	// convert any non-USD denominated candles into USD.
+	convertedCandles, err := convertCandlesToUSD(filteredCandles, providerPairs)
 	if err != nil {
 		return nil, err
 	}
 
 	// attempt to use candles for TVWAP calculations
-	tvwapPrices, err := ComputeTVWAP(filteredCandles)
+	tvwapPrices, err := ComputeTVWAP(convertedCandles)
 	if err != nil {
 		return nil, err
 	}
@@ -287,17 +287,17 @@ func GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		convertedTickers, err := convertTickersToUSD(providerPrices, providerPairs)
+		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
 		if err != nil {
 			return nil, err
 		}
 
-		filteredProviderPrices, err := FilterTickerDeviations(logger, convertedTickers)
+		convertedTickers, err := convertTickersToUSD(filteredProviderPrices, providerPairs)
 		if err != nil {
 			return nil, err
 		}
 
-		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
+		vwapPrices, err := ComputeVWAP(convertedTickers)
 		if err != nil {
 			return nil, err
 		}
