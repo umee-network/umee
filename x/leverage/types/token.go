@@ -68,8 +68,20 @@ func (t Token) Validate() error {
 	if t.MaxBorrowRate.IsNegative() {
 		return fmt.Errorf("invalid max borrow rate: %s", t.MaxBorrowRate)
 	}
+
+	// Liquidation incentive is non-negative
 	if t.LiquidationIncentive.IsNegative() {
 		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
+	}
+
+	// Blacklisted assets cannot have borrow or lend enabled
+	if t.Blacklist {
+		if t.EnableMsgBorrow {
+			return fmt.Errorf("blacklisted assets cannot have borrowing enabled")
+		}
+		if t.EnableMsgLend {
+			return fmt.Errorf("blacklisted assets cannot have lending enabled")
+		}
 	}
 
 	return nil

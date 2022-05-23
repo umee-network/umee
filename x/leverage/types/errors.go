@@ -9,7 +9,7 @@ import (
 var (
 	ErrInvalidAsset            = sdkerrors.Register(ModuleName, 1100, "invalid asset")
 	ErrInsufficientBalance     = sdkerrors.Register(ModuleName, 1101, "insufficient balance")
-	ErrBorrowLimitLow          = sdkerrors.Register(ModuleName, 1102, "borrow limit too low")
+	ErrUndercollaterized       = sdkerrors.Register(ModuleName, 1102, "Borrow positions are undercollaterized")
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 1103, "lending pool insufficient")
 	ErrInvalidRepayment        = sdkerrors.Register(ModuleName, 1104, "invalid repayment")
 	ErrInvalidAddress          = sdkerrors.Register(ModuleName, 1105, "invalid address")
@@ -26,4 +26,7 @@ var (
 	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 1116, "interest scalar less than one")
 	ErrEmptyAddress            = sdkerrors.Register(ModuleName, 1117, "empty address")
 	ErrLiquidationRewardRatio  = sdkerrors.Register(ModuleName, 1118, "requested liquidation reward not met")
+	ErrLendNotAllowed          = sdkerrors.Register(ModuleName, 1119, "lending of asset disabled")
+	ErrBorrowNotAllowed        = sdkerrors.Register(ModuleName, 1120, "borrowing of asset disabled")
+	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
 )
