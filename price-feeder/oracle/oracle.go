@@ -607,7 +607,7 @@ func convertTickersToUSD(
 	providerPairs map[string][]types.CurrencyPair,
 ) (provider.AggregatedProviderPrices, error) {
 	if len(tickers) == 0 {
-		return nil, fmt.Errorf("tickers are missing")
+		return tickers, nil
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
