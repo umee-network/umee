@@ -586,10 +586,10 @@ func convertCandlesToUSD(
 
 	// Convert assets to USD.
 	for provider, assetMap := range candles {
-		for asset, candles := range assetMap {
+		for asset, assetCandles := range assetMap {
 			if requiredConversions[provider].Base == asset {
-				for _, candle := range candles {
-					candle.Price = candle.Price.Mul(
+				for i := range assetCandles {
+					assetCandles[i].Price = assetCandles[i].Price.Mul(
 						conversionRates[requiredConversions[provider].Quote],
 					)
 				}
@@ -656,9 +656,9 @@ func convertTickersToUSD(
 
 	// Convert assets to USD.
 	for provider, assetMap := range tickers {
-		for asset, tick := range assetMap {
+		for asset, ticker := range assetMap {
 			if requiredConversions[provider].Base == asset {
-				tick.Price = tick.Price.Mul(
+				ticker.Price = ticker.Price.Mul(
 					conversionRates[requiredConversions[provider].Quote],
 				)
 			}
