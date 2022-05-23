@@ -10,6 +10,8 @@
 coverage.txt
 profile.out
 
+third_party
+
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 

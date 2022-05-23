@@ -279,7 +279,7 @@ proto-format:
 	@echo "Formatting Protobuf files"
 	@$(DOCKER) run --rm -v $(CURDIR):/workspace \
 	--workdir /workspace tendermintdev/docker-build-proto \
-	find ./ -not -path "./third_party/*" -name "*.proto" -exec clang-format -i {} \;
+	find ./ -not -path "./third_party/*" -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \;
 
 proto-lint:
 	@echo "Linting Protobuf files"
