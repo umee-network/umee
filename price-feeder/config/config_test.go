@@ -148,6 +148,15 @@ providers = [
 	"huobi"
 ]
 
+[[currency_pairs]]
+base = "USDT"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
 validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
@@ -182,7 +191,7 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 	require.Equal(t, "20s", cfg.Server.WriteTimeout)
 	require.Equal(t, "20s", cfg.Server.ReadTimeout)
 	require.True(t, cfg.Server.VerboseCORS)
-	require.Len(t, cfg.CurrencyPairs, 2)
+	require.Len(t, cfg.CurrencyPairs, 3)
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
@@ -222,6 +231,15 @@ providers = [
 	"huobi"
 ]
 
+[[currency_pairs]]
+base = "USDT"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
 validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
@@ -250,7 +268,7 @@ enabled = false
 	require.Equal(t, "20s", cfg.Server.WriteTimeout)
 	require.Equal(t, "20s", cfg.Server.ReadTimeout)
 	require.True(t, cfg.Server.VerboseCORS)
-	require.Len(t, cfg.CurrencyPairs, 2)
+	require.Len(t, cfg.CurrencyPairs, 3)
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
@@ -260,6 +278,37 @@ enabled = false
 }
 
 func TestParseConfig_InvalidProvider(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	content := []byte(`
+listen_addr = ""
+
+[[currency_pairs]]
+base = "ATOM"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance"
+]
+
+[[currency_pairs]]
+base = "UMEE"
+quote = "USD"
+providers = [
+	"kraken",
+	"foobar"
+]
+`)
+	_, err = tmpFile.Write(content)
+	require.NoError(t, err)
+
+	_, err = config.ParseConfig(tmpFile.Name())
+	require.Error(t, err)
+}
+
+func TestParseConfig_NonUSDQuote(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
@@ -280,7 +329,7 @@ base = "UMEE"
 quote = "USDT"
 providers = [
 	"kraken",
-	"foobar"
+	"binance"
 ]
 `)
 	_, err = tmpFile.Write(content)
