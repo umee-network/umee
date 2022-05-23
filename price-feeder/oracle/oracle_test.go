@@ -604,3 +604,49 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 	require.NoError(t, err, "It should successfully filter out the provider using tickers")
 	require.False(t, ok, "The filtered ticker deviation price at coinbase should be empty")
 }
+
+func TestGetUSDBasedProviders(t *testing.T) {
+	providerPairs := make(map[string][]types.CurrencyPair, 3)
+	providerPairs["coinbase"] = []types.CurrencyPair{
+		{
+			Base:  "FOO",
+			Quote: "USD",
+		},
+	}
+	providerPairs["huobi"] = []types.CurrencyPair{
+		{
+			Base:  "FOO",
+			Quote: "USD",
+		},
+	}
+	providerPairs["kraken"] = []types.CurrencyPair{
+		{
+			Base:  "FOO",
+			Quote: "USDT",
+		},
+	}
+	providerPairs["binance"] = []types.CurrencyPair{
+		{
+			Base:  "USDT",
+			Quote: "USD",
+		},
+	}
+
+	pairs, err := getUSDBasedProviders("FOO", providerPairs)
+	require.NoError(t, err)
+	expectedPairs := map[string]struct{}{
+		"coinbase": {},
+		"huobi":    {},
+	}
+	require.Equal(t, pairs, expectedPairs)
+
+	pairs, err = getUSDBasedProviders("USDT", providerPairs)
+	require.NoError(t, err)
+	expectedPairs = map[string]struct{}{
+		"binance": {},
+	}
+	require.Equal(t, pairs, expectedPairs)
+
+	pairs, err = getUSDBasedProviders("BAR", providerPairs)
+	require.Error(t, err)
+}
