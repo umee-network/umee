@@ -263,9 +263,6 @@ proto-update-deps:
 
 	@mkdir -p $(CONFIO_TYPES)
 	@curl -sSL $(CONFIO_URL)/proofs.proto > $(CONFIO_TYPES)/proofs.proto
-## insert go package option into proofs.proto file
-## Issue link: https://github.com/confio/ics23/issues/32
-	@./contrib/scripts/sed.sh $(CONFIO_TYPES)/proofs.proto
 
 	@./contrib/scripts/proto-copy-cosmos-sdk.sh
 
