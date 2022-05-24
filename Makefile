@@ -281,7 +281,7 @@ proto-format:
 	--workdir /workspace tendermintdev/docker-build-proto \
 	find ./ -not -path "./third_party/*" -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \;
 
-proto-lint:
+proto-lint: proto-update-deps
 	@echo "Linting Protobuf files"
 	@$(DOCKER_BUF) lint --error-format=json
 

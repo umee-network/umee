@@ -15,7 +15,10 @@ jobs:
           PATTERNS: |
             **/**.proto
       - name: lint
-        run: make proto-lint
+        run: |
+          go mod download github.com/cosmos/cosmos-sdk
+          go mod download github.com/cosmos/ibc-go/v2
+          make proto-lint
         if: env.GIT_DIFF
 
   breakage:
