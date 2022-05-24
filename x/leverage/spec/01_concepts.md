@@ -6,7 +6,9 @@ This document covers basic concepts and math that determine the `leverage` modul
 
 At the foundation of the `leverage` module is the [Token Registry](02_state.md#Token-Registry), which contains a list of accepted types.
 
-This list is controlled by governance, and serves to limit the asset types available for transactions like borrowing and lending, and also any query services based on denomination.
+This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or lending.
+
+Once added to the token registry, assets cannot be removed. In the rare case where an asset would need to be phased out, it can have lending or borrowing disabled, or in extreme cases, be ignored by collateral and borrowed value calculations using a blacklist.
 
 ### uTokens
 
@@ -46,7 +48,7 @@ Users have the following actions available to them:
 
   Repayments that exceed a borrower's amount owed in the selected denomination succeed at paying the reduced amount rather than failing outright.
 
-- [Liquidate](04_messages.md#MsgLiquidate) undercollateralized borrows a different user whose total borrowed value is greater than their [Borrow Limit](01_concepts.md#Borrow-Limit).
+- [Liquidate](04_messages.md#MsgLiquidate) undercollateralized borrows a different user whose total borrowed value is greater than their [Liquidation Threshold](01_concepts.md#Liquidation_Threshold).
 
   The liquidator must select a reward denomination present in the borrower's uToken collateral. Liquidation is limited by [Close Factor](01_concepts.md#Close-Factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
 
@@ -124,16 +126,16 @@ A user's borrow limit is the sum of the contributions from each denomination of 
   }
 ```
 
-### Liquidation Limit
+### Liquidation Threshold
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a user's liquidation limit, when the token is used as collateral.
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a _borrower's_ liquidation threshold, when the token is used as collateral.
 
-A user's liquidation limit is the sum of the contributions from each denomination of collateral they have deposited. Any user whose borrow value is above their liquidation limit is eligible to be liquidated.
+A user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited. Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
 
 ```go
   collateral := GetBorrowerCollateral(borrower) // sdk.Coins
   for _, coin := range collateral {
-     liquidationLimit += GetLiquidationThreshold(coin.Denom) * TokenValue(coin) // TokenValue is in usd
+     liquidationThreshold += GetLiquidationThreshold(coin.Denom) * TokenValue(coin) // TokenValue is in usd
   }
 ```
 

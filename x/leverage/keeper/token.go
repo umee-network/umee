@@ -11,34 +11,28 @@ import (
 )
 
 // FromUTokenToTokenDenom strips the uToken prefix ("u/") from an input denom.
-// An empty string is returned if the prefix is not present or if the resulting
-// token denom is not an accepted asset type.
+// An empty string is returned if the prefix is not present.
 func (k Keeper) FromUTokenToTokenDenom(ctx sdk.Context, uTokenDenom string) string {
 	if strings.HasPrefix(uTokenDenom, types.UTokenPrefix) {
-		tokenDenom := strings.TrimPrefix(uTokenDenom, types.UTokenPrefix)
-		if k.IsAcceptedToken(ctx, tokenDenom) {
-			return tokenDenom
-		}
+		return strings.TrimPrefix(uTokenDenom, types.UTokenPrefix)
 	}
 	return ""
 }
 
 // FromTokenToUTokenDenom adds the uToken prefix ("u/") to an input denom.
-// An empty string is returned if the input token denom is not an accepted asset type.
+// An empty string is returned if the input token denom already has the prefix.
 func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) string {
-	if k.IsAcceptedToken(ctx, tokenDenom) {
-		return types.UTokenPrefix + tokenDenom
+	if strings.HasPrefix(tokenDenom, types.UTokenPrefix) {
+		return ""
 	}
-	return ""
+	return types.UTokenPrefix + tokenDenom
 }
 
 // IsAcceptedToken returns true if a given (non-UToken) token denom is an
-// accepted asset type.
+// existing, non-blacklisted asset type.
 func (k Keeper) IsAcceptedToken(ctx sdk.Context, tokenDenom string) bool {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateRegisteredTokenKey(tokenDenom)
-
-	return store.Has(key)
+	t, err := k.GetRegisteredToken(ctx, tokenDenom)
+	return err == nil && !t.Blacklist
 }
 
 // IsAcceptedUToken returns true if a given uToken denom is associated with
@@ -49,9 +43,9 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 }
 
 // SetRegisteredToken stores a Token into the x/leverage module's KVStore.
-func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
-	if token.BaseDenom == "" {
-		panic("empty base denom")
+func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
+	if err := token.Validate(); err != nil {
+		return err
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -64,26 +58,7 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) {
 
 	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
-}
-
-// DeleteRegisteredTokens deletes all registered tokens from the x/leverage
-// module's KVStore.
-func (k Keeper) DeleteRegisteredTokens(ctx sdk.Context) error {
-	tokens := k.GetAllRegisteredTokens(ctx)
-
-	for _, t := range tokens {
-		k.DeleteRegisteredToken(ctx, t.BaseDenom)
-		k.hooks.AfterRegisteredTokenRemoved(ctx, t)
-	}
-
 	return nil
-}
-
-// DeleteRegisteredToken deletes a registered Token by base denomination from
-// the x/leverage KVStore.
-func (k Keeper) DeleteRegisteredToken(ctx sdk.Context, denom string) {
-	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.CreateRegisteredTokenKey(denom))
 }
 
 // GetRegisteredToken gets a token from the x/leverage module's KVStore.
@@ -181,4 +156,43 @@ func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec,
 	}
 
 	return token.LiquidationIncentive, nil
+}
+
+// AssertLendEnabled returns an error if a token does not exist or cannot be lent.
+func (k Keeper) AssertLendEnabled(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if !token.EnableMsgLend {
+		return sdkerrors.Wrap(types.ErrLendNotAllowed, denom)
+	}
+
+	return nil
+}
+
+// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+func (k Keeper) AssertBorrowEnabled(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if !token.EnableMsgBorrow {
+		return sdkerrors.Wrap(types.ErrBorrowNotAllowed, denom)
+	}
+
+	return nil
+}
+
+// AssertNotBlacklisted returns an error if a token does not exist or is blacklisted.
+func (k Keeper) AssertNotBlacklisted(ctx sdk.Context, denom string) error {
+	token, err := k.GetRegisteredToken(ctx, denom)
+	if err != nil {
+		return err
+	}
+	if token.Blacklist {
+		return sdkerrors.Wrap(types.ErrBlacklisted, denom)
+	}
+
+	return nil
 }

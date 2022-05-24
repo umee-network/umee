@@ -42,8 +42,9 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryMarketSize(),
 		GetCmdQueryTokenMarketSize(),
 		GetCmdQueryBorrowLimit(),
-		GetCmdQueryLiquidationLimit(),
+		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
+		GetCmdQueryMarketSummary(),
 	)
 
 	return cmd
@@ -627,13 +628,13 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationLimit returns a CLI command handler to query for the
-// liquidation limit of a specific borrower.
-func GetCmdQueryLiquidationLimit() *cobra.Command {
+// GetCmdQueryLiquidationThreshold returns a CLI command handler to query a
+// liquidation threshold of a specific borrower.
+func GetCmdQueryLiquidationThreshold() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "liquidation-limit [addr]",
+		Use:   "liquidation-threshold [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the liquidation limit of a specified borrower",
+		Short: "Query a liquidation threshold of a specified borrower",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -642,11 +643,44 @@ func GetCmdQueryLiquidationLimit() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLiquidationLimitRequest{
+			req := &types.QueryLiquidationThresholdRequest{
 				Address: args[0],
 			}
 
-			resp, err := queryClient.LiquidationLimit(cmd.Context(), req)
+			resp, err := queryClient.LiquidationThreshold(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMarketSummary returns a CLI command handler to query for the
+// Market Summary of a specific token.
+func GetCmdQueryMarketSummary() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "market-summary [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the market summary of a specified denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryMarketSummaryRequest{
+				Denom: args[0],
+			}
+
+			resp, err := queryClient.MarketSummary(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
