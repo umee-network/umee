@@ -197,7 +197,7 @@ The following approach is proposed:
 
 The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, HistoricalReward) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
 
-The F1 algoritm only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims). 
+The F1 algoritm only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims).
 Our implementation is less complex than F1 because there is no equivalent to slashing  in `x/incentive`, and we move rewards to the `PendingRewards` instead of claiming them directly.
 The same mathematical effect is achieved, where `Locked(addr,denom,tier)` remains constant in the time `RewardAccumulator(denom,tier)` has increased to its current value from `RewardBasis(denom,tier)`, allowing reward calculation on demand using only those three values.
 
@@ -244,7 +244,7 @@ The general purpose of this module is to incentivize liquidity over time and gua
 
 The proposed algorithm avoids iteration, at the cost of a moderate amount of complexity and the requirement of a claim transaction.
 
-It allows for external and overlapping incentive programs, but does not provide a means to alter or cancel programs already in progress. 
+It allows for external and overlapping incentive programs, but does not provide a means to alter or cancel programs already in progress.
 
 ### Positive
 - Locking funds encourages stability and provides our primary defense against bank runs.
