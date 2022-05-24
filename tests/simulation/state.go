@@ -118,7 +118,7 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		for i, balance := range bankState.Balances {
 			fundedBalance := balance
 			for _, t := range leverageState.Registry {
-				fund := sdk.NewInt64Coin(t.BaseDenom, 100)
+				fund := sdk.NewInt64Coin(t.BaseDenom, 100000000)
 				fundedBalance.Coins = fundedBalance.Coins.Add(fund)
 				bankState.Supply = bankState.Supply.Add(fund)
 			}
