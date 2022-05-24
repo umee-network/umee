@@ -1,7 +1,7 @@
 # Oracle Price Feeder
 
 The `price-feeder` tool is an extension of Umee's `x/oracle` module, both of
-which are based on Terra's [x/oracle](https://github.com/terra-money/core/tree/main/x/oracle)
+which are based on Terra's [x/oracle](https://github.com/terra-money/classic-core/tree/main/x/oracle)
 module and [oracle-feeder](https://github.com/terra-money/oracle-feeder). The
 core differences are as follows:
 
