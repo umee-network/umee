@@ -7,21 +7,20 @@ protoc_gen_go() {
     echo -e "\tPlease run this command from somewhere inside the umee-core folder."
     return 1
   fi
+
+  go get github.com/regen-network/cosmos-proto/protoc-gen-gocosmos 2>/dev/null
 }
 
-protoc_gen_go
-
-proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
+cd proto
+proto_dirs=$(find ./regen -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 for dir in $proto_dirs; do
-  # shellcheck disable=SC2046
-  buf protoc \
-  -I "proto" \
-  -I "third_party/proto" \
-  --gocosmos_out=plugins=interfacetype+grpc,\
-Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types,\
-Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:. \
-  --grpc-gateway_out=logtostderr=true:. \
-  $(find "${dir}" -maxdepth 1 -name '*.proto') # this needs to remain unquoted because we want word splitting
+  for file in $(find "${dir}" -maxdepth 1 -name '*.proto'); do
+    if grep go_package $file &> /dev/null ; then
+      buf generate --template buf.gen.gogo.yaml $file
+    fi
+  done
 done
 
-rm -rf github.com
+cd ..
+
+go mod tidy
