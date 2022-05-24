@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	denomUSD = "USD"
+	DenomUSD = "USD"
 
 	defaultListenAddr      = "0.0.0.0:7171"
 	defaultSrvWriteTimeout = 15 * time.Second
@@ -184,12 +184,13 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	pairs := make(map[string]map[string]struct{})
+	coinQuotes := make(map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
-		if !strings.Contains(strings.ToUpper(cp.Quote), denomUSD) {
-			return cfg, fmt.Errorf("unsupported pair quote: %s", cp.Quote)
-		}
 		if _, ok := pairs[cp.Base]; !ok {
 			pairs[cp.Base] = make(map[string]struct{})
+		}
+		if strings.ToUpper(cp.Quote) != DenomUSD {
+			coinQuotes[cp.Quote] = struct{}{}
 		}
 
 		for _, provider := range cp.Providers {
@@ -197,6 +198,18 @@ func ParseConfig(configPath string) (Config, error) {
 				return cfg, fmt.Errorf("unsupported provider: %s", provider)
 			}
 			pairs[cp.Base][provider] = struct{}{}
+		}
+	}
+
+	// Use coinQuotes to ensure that any quotes can be converted to USD.
+	for quote := range coinQuotes {
+		for index, pair := range cfg.CurrencyPairs {
+			if pair.Base == quote && pair.Quote == DenomUSD {
+				break
+			}
+			if index == len(cfg.CurrencyPairs)-1 {
+				return cfg, fmt.Errorf("all non-usd quotes require a conversion rate feed")
+			}
 		}
 	}
 
