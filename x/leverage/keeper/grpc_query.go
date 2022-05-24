@@ -37,9 +37,7 @@ func (q Querier) RegisteredTokens(
 		Registry: make([]types.Token, len(tokens)),
 	}
 
-	for i, t := range tokens {
-		resp.Registry[i] = t
-	}
+	copy(resp.Registry, tokens)
 
 	return resp, nil
 }
@@ -510,10 +508,10 @@ func (q Querier) BorrowLimit(
 	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
 }
 
-func (q Querier) LiquidationLimit(
+func (q Querier) LiquidationThreshold(
 	goCtx context.Context,
-	req *types.QueryLiquidationLimitRequest,
-) (*types.QueryLiquidationLimitResponse, error) {
+	req *types.QueryLiquidationThresholdRequest,
+) (*types.QueryLiquidationThresholdResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -530,12 +528,12 @@ func (q Querier) LiquidationLimit(
 
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
 
-	limit, err := q.Keeper.CalculateLiquidationLimit(ctx, collateral)
+	t, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryLiquidationLimitResponse{LiquidationLimit: limit}, nil
+	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: t}, nil
 }
 
 func (q Querier) LiquidationTargets(
@@ -559,4 +557,46 @@ func (q Querier) LiquidationTargets(
 	}
 
 	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
+}
+
+func (q Querier) MarketSummary(
+	goCtx context.Context,
+	req *types.QueryMarketSummaryRequest,
+) (*types.QueryMarketSummaryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	token, err := q.Keeper.GetRegisteredToken(ctx, req.Denom)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
+	}
+	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
+	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
+	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
+	marketSizeCoin, _ := q.Keeper.GetTotalLoaned(ctx, req.Denom)
+	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
+	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
+
+	resp := types.QueryMarketSummaryResponse{
+		SymbolDenom:        token.SymbolDenom,
+		Exponent:           token.Exponent,
+		UTokenExchangeRate: rate,
+		Lend_APY:           lendAPY,
+		Borrow_APY:         borrowAPY,
+		MarketSize:         marketSizeCoin.Amount,
+		AvailableBorrow:    availableBorrow,
+		Reserved:           reserved,
+	}
+
+	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
+		resp.OraclePrice = &oraclePrice
+	}
+
+	return &resp, nil
 }

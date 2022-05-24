@@ -256,6 +256,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
 		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	})
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)
@@ -964,6 +967,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 		func() bool {
 			resp, err := http.Get(endpoint)
 			if err != nil {
+				s.T().Log("Price feeder endpoint not available", err)
 				return false
 			}
 
@@ -971,16 +975,19 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 			bz, err := io.ReadAll(resp.Body)
 			if err != nil {
+				s.T().Log("Can't get price feeder response", err)
 				return false
 			}
 
 			var respBody map[string]interface{}
 			if err := json.Unmarshal(bz, &respBody); err != nil {
+				s.T().Log("Can't unmarshal price feed", err)
 				return false
 			}
 
 			prices, ok := respBody["prices"].(map[string]interface{})
 			if !ok {
+				s.T().Log("price feeder: no prices")
 				return false
 			}
 

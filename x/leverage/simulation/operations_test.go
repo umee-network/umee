@@ -43,6 +43,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:            "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
@@ -56,6 +59,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
 		SymbolDenom:          "ATOM",
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 	uabc := types.Token{
 		BaseDenom:            "uabc",
@@ -69,6 +75,9 @@ func (s *SimTestSuite) SetupTest() {
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
 		Exponent:             6,
+		EnableMsgLend:        true,
+		EnableMsgBorrow:      true,
+		Blacklist:            false,
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
@@ -76,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		app.LeverageKeeper.SetRegisteredToken(ctx, token)
+		s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 
@@ -297,7 +306,7 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().EqualError(err,
-		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea: borrower not eligible for liquidation",
+		"failed to execute message; message index: 0: umee1p8wcgrjr4pjju90xg6u9cgq55dxwq8j7wrm6ea borrowed value is below the liquidation threshold 0.005000000000000000: borrower not eligible for liquidation",
 	)
 
 	var msg types.MsgLiquidate

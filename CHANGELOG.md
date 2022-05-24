@@ -46,6 +46,38 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
+- [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
+- [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI
+
+## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
+
+### Features
+
+- [860](https://github.com/umee-network/umee/pull/860) Add IBC upgrade and upgrade-client gov proposals.
+- [894](https://github.com/umee-network/umee/pull/894) Add MarketSummary query
+
+### Improvements
+
+- [866](https://github.com/umee-network/umee/pull/866) Make the x/oracle keeper's GetExchangeRateBase method more efficient.
+
+### API Breaking
+
+- [870](https://github.com/umee-network/umee/pull/870) Move proto v1beta1 to v1.
+- [903](https://github.com/umee-network/umee/pull/903) (leverage) Renamed `Keeper.CalculateLiquidationLimit` to `CalculateLiquidationThreshold`.
+
+## [v2.0.1](https://github.com/umee-network/umee/releases/tag/v2.0.1) - 2022-04-25
+
+### Features
+
+- [835](https://github.com/umee-network/umee/pull/835) Add miss counter query to oracle cli.
+
+### Bug Fixes
+
+- [829](https://github.com/umee-network/umee/pull/829) Fix `umeed tx leverage liquidate` command args.
+
 ### Improvements
 
 - [781](https://github.com/umee-network/umee/pull/781) Oracle module unit test cleanup.

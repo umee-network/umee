@@ -89,12 +89,13 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
 // in the base denom (e.g. ATOM -> uatom)
 func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	var symbol string
-
+	var exponent uint64
 	// Translate the base denom -> symbol
 	params := k.GetParams(ctx)
 	for _, listDenom := range params.AcceptList {
 		if listDenom.BaseDenom == denom {
 			symbol = listDenom.SymbolDenom
+			exponent = uint64(listDenom.Exponent)
 			break
 		}
 	}
@@ -107,14 +108,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 		return sdk.ZeroDec(), err
 	}
 
-	for _, acceptedDenom := range params.AcceptList {
-		if denom == acceptedDenom.BaseDenom {
-			powerReduction := ten.Power(uint64(acceptedDenom.Exponent))
-			return exchangeRate.Quo(powerReduction), nil
-		}
-	}
-
-	return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+	powerReduction := ten.Power(exponent)
+	return exchangeRate.Quo(powerReduction), nil
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the

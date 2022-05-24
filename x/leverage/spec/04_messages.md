@@ -107,7 +107,7 @@ The message will fail under the following conditions:
 - `reward` is not a valid amount of an accepted base asset
 - `borrower` has not borrowed any of the specified asset to repay
 - `borrower` has no collateral of the requested reward denom
-- `borrower`'s total borrowed value does not exceed their `BorrowLimit`
+- `borrower`'s total borrowed value does not exceed their `LiquidationThreshold`
 - `liquidator` balance is insufficient
 - the message's ratio of `reward` to `repayment` is higher than the ratio that would result from liquidation at the current oracle prices and liquidation incentives
-- Borrowed value or `BorrowLimit` cannot be computed due to a missing `x/oracle` price
+- Borrowed value or `LiquidationThreshold` cannot be computed due to a missing `x/oracle` price
