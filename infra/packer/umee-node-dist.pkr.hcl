@@ -55,6 +55,7 @@ build {
       , "apt dist-upgrade -y"
       , "rm -rf /var/lib/{apt,dpkg,cache,log}/"
       , "curl -sLf https://github.com/informalsystems/ibc-rs/releases/download/v0.14.0/hermes-v0.14.0-x86_64-unknown-linux-gnu.tar.gz | tar -C /usr/local/bin -xz"
+      , "curl -sLf https://github.com/terra-money/core/releases/download/v2.0.0-rc.1/terra_2.0.0-rc.1_Linux_x86_64.tar.gz | tar -C /usr/local/bin -xz"
       , "curl -sLf https://github.com/cosmos/gaia/releases/download/v7.0.1/gaiad-v7.0.1-linux-amd64 -o /usr/local/bin/gaiad"
       , "chmod a+x /usr/local/bin/gaiad"
       , "curl -sLf https://github.com/CosmWasm/wasmvm/raw/v1.0.0-beta10/api/libwasmvm.so -o /usr/local/lib/libwasmvm.so"
