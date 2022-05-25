@@ -22,15 +22,15 @@ The Cosmos `x/bank` module and the existing `umee/x/leverage` deposit features a
 
 The flow of events is as follows:
 
-- Borrower already has uTokens in their account.
-- Borrower marks his uTokens as eligible for collateral using the `x/leverage` module account.
+- Borrower already has uTokens in their balance.
+- Borrower marks his uTokens as collateral, which transfers them to the `x/leverage` module account.
 - Borrower requests to borrow assets from `x/leverage` module. The module validates the request, disburses tokens if acceptable, and stores borrow position.
 - While the borrow position is open, transactions that would result the borrow position being higher than its calculated borrow limit are prevented (i.e. borrowing too much, withdrawing too many uTokens that are being used as collateral, disabling collateral).
 - Eventually, the borrower repays the borrowed position (in full or in part).
 
 Additionally, the following events occur at `EndBlock`:
 
-- Fess are added to the open borrow positions based on token-specific interest rate.
+- Fees are added to the open borrow positions based on token-specific interest rate.
 
 The `umee/x/leverage` module stores each open borrow position.
 If the same user account opens multiple borrow positions in the same token, the second position simply increases the amount of the first.
@@ -72,7 +72,7 @@ We propose to set a per token parameter: **max collateral utilization** using Co
 
 ## Detailed Design
 
-For the purposes of borrowing and repaying assets, as well as marking uTokens as collateral, the `umee/x/leverage` module does not mint or burn tokens. It stores borrower open positions and collateral settings, and the `x/bank` module to perform all necessary balance checks and token transfers. User collateral (uTokens) are deposited in `x/leverage` module and withdrawn back to the user `x/bank` account balance when the user disables uTokens as a collateral.
+For the purposes of borrowing and repaying assets, as well as marking uTokens as collateral, the `umee/x/leverage` module does not mint or burn tokens. It stores borrower open positions and collateral settings, and uses the `x/bank` module to perform all necessary balance checks and token transfers. User collateral (uTokens) are deposited in `x/leverage` module and withdrawn back to the user `x/bank` account balance when the user disables uTokens as a collateral.
 
 During every operation which involves borrow position or collateral we check that the _borrow limit_ invariant holds.
 
