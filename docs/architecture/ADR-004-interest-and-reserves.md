@@ -28,29 +28,6 @@ Both the reserved amount of a given token, and the token:uToken exchange rate, i
 
 This timing of reserve increases, matches the behavior of the [Compound cToken smart contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/CToken.sol) we are using as a reference - see around line 410 in function `accrueInterest`.
 
-### Max collateral utilization
-
-We define a _collateral utilization_ as ratio of lended collateral to total amount of collateral per token. Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
-
-High collateral utilization is dangerous for the system:
-
-- When collateral utilization is approaching to 1, lenders may not be able to withdraw their collateral.
-- Liquidators, when liquidating a borrower, they get into position their _uToken_. In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying Token). However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits. This will dramatically increase the risk of getting a profit by liquidators and could cause the system being insolvent.
-
-Let's draw the follwing scenario to picture the liquidators risk:
-
-1. Alice is providing \$1M USD for lending.
-2. Bob is providing \$1.5M in Luna as a collateral and borrows 1M USD from Alice.
-3. Charlie provides \$1.5M in BTC as a collateral and borrows $1M in Luna from Bob.
-4. Charlie predicts Luna collapse and sells the Luna.
-5. Luna is sinking and Bob position has to be liquidated. However:
-   - Lenders can liquidate Bob, but they can only redeem up to 33% of `u/Luna` because the rest is not available (Charlie borrowed it).
-   - Charlie will not pay off her borrow position - she will wait for the final collapse and buy Luna cheaply.
-   - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
-6. In case of the big crash, liquidators won't perform a liquidation, Bob will run away with 1M USD, system will end up with a bad debt and obligation to pay Alice.
-
-We propose to set a per token parameter: **max collateral utilization** using Cosmos SDK v0.46 gov messages. The system will forbid to make any collateral related operation if the operation would move token _collateral utilization_ above _max collateral utilization_.
-
 ## Detailed Design
 
 As noted in [ADR-003](./ADR-003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdk.Int`.
