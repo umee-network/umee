@@ -20,6 +20,14 @@ jobs:
             **/**.go
             go.mod
             go.sum
+      - name: Get Go Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
       - name: Run golangci-lint
         run: make lint
         if: env.GIT_DIFF
