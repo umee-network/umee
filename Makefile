@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
 
+
 BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT         := $(shell git log -1 --format='%H')
 BUILD_DIR      ?= $(CURDIR)/build
@@ -200,13 +201,12 @@ proto-all: proto-gen proto-lint proto-check-breaking proto-format
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./scripts/protocgen.sh; fi
+		sh ./contrib/scripts/protocgen.sh; fi
 
 proto-format:
 	@echo "Formatting Protobuf files"
-	@$(DOCKER) run --rm -v $(CURDIR):/workspace \
-	--workdir /workspace tendermintdev/docker-build-proto \
-	find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \;
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
+		find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \; ; fi
 
 proto-lint: 
 	@echo "Linting Protobuf files"
