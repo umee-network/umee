@@ -10,13 +10,6 @@ DOCKER         := $(shell which docker)
 PROJECT_NAME   = $(shell git remote get-url origin | xargs basename -s .git)
 HTTPS_GIT 		 := https://github.com/umee-network/umee.git
 
-TM_CRYPTO_TYPES       = third_party/proto/tendermint/crypto
-TM_ABCI_TYPES         = third_party/proto/tendermint/abci
-TM_TYPES              = third_party/proto/tendermint/types
-TM_VERSION            = third_party/proto/tendermint/version
-TM_LIBS               = third_party/proto/tendermint/libs/bits
-TM_P2P                = third_party/proto/tendermint/p2p
-
 ###############################################################################
 ##                                  Version                                  ##
 ###############################################################################
@@ -213,7 +206,7 @@ proto-format:
 	@echo "Formatting Protobuf files"
 	@$(DOCKER) run --rm -v $(CURDIR):/workspace \
 	--workdir /workspace tendermintdev/docker-build-proto \
-	find ./ -not -path "./third_party/*" -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \;
+	find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \;
 
 proto-lint: 
 	@echo "Linting Protobuf files"
