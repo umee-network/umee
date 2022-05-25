@@ -47,10 +47,10 @@ build {
 
   provisioner "shell" {
     inline = [ "sed -i 's/http:\\/\\/.\\+\\/ubuntu/http:\\/\\/mirrors.edge.kernel.org\\/ubuntu/g' /etc/apt/sources.list"
-      , "set -x; exitcode=0; command=\"apt-get update && apt install -y --no-install-recommends ack apt-transport-https bsdmainutils ca-certificates curl debian-keyring debian-archive-keyring iputils-ping jq less lsof nano ncat net-tools nmap supervisor sysstat telnet traceroute vim \"; for i in 1 2 3 4 5; do eval \"$command\"; exitcode=$?; bash -c \"exit $exitcode\" && break || sleep 5; done; bash -c \"exit $exitcode\""
-      , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | tee /etc/apt/trusted.gpg.d/caddy-stable.asc"
-      , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list"
-      , "apt-get update"
+      , "apt update && apt install -y --no-install-recommends ack apt-transport-https bsdmainutils ca-certificates curl debian-keyring debian-archive-keyring iputils-ping jq less lsof nano ncat net-tools nmap supervisor sysstat telnet traceroute vim"
+      , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg"
+      , "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list"
+      , "apt update"
       , "apt install -y --no-install-recommends caddy"
       , "apt dist-upgrade -y"
       , "rm -rf /var/lib/{apt,dpkg,cache,log}/"
