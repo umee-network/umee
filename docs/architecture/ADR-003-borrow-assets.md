@@ -130,7 +130,7 @@ Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pair
 borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 
 // borrower collateral settings for enabled denoms:
-collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = true/false
+collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = 0x01
 
 // and the amount of collateral deposited for each uToken:
 collateralAmountPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
