@@ -214,5 +214,5 @@ proto-lint:
 
 proto-check-breaking: 
 	@echo "Checking for breaking changes"
-	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=brianosaurus/fix-proto-linting
+	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
 
