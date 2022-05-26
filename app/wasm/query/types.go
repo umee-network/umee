@@ -14,8 +14,8 @@ const (
 	AssignedQueryGetExchangeRateBase
 )
 
-// QueryHandler query handler that an object must implement
-type QueryHandler interface {
+// Handler query handler that an object must implement
+type Handler interface {
 	Validate() error
 	QueryResponse(ctx sdk.Context, keepers Keepers) (interface{}, error)
 }

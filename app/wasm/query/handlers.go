@@ -9,7 +9,7 @@ import (
 )
 
 // Handler handles any query that implement the QueryHandler interface
-func (umeeQuery UmeeQuery) Handler(ctx sdk.Context, keepers Keepers, query QueryHandler) ([]byte, error) {
+func (umeeQuery UmeeQuery) Handler(ctx sdk.Context, keepers Keepers, query Handler) ([]byte, error) {
 	if err := query.Validate(); err != nil {
 		return nil, err
 	}
