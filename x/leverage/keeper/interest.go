@@ -99,11 +99,12 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			continue
 		}
 
-		// interest is accrued by multiplying each denom's Interest Scalar by the
-		// quantity (borrowAPY * yearsElapsed) + 1
+		// interest is accrued by continuous compound interest on each denom's Interest Scalar
 		scalar := k.getInterestScalar(ctx, token.BaseDenom)
-		increase := k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed)
-		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(increase.Add(sdk.OneDec()))); err != nil {
+		// calculate e^(APY*time)
+		exponential := ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
+		// multiply interest scalar by e^(APY*time)
+		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
 			return err
 		}
 

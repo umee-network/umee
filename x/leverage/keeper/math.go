@@ -14,3 +14,16 @@ func Interpolate(x, xMin, yMin, xMax, yMax sdk.Dec) sdk.Dec {
 	// y = y1 + m(x-x1)
 	return yMin.Add(x.Sub(xMin).Mul(slope))
 }
+
+// ApproxExponential is the taylor series expansion of e^x centered around x=0, truncated
+// to the cubic term. It can be used with great accuracy to determine e^x when x is very small.
+// Note that e^x = 1 + x/1! + x^2/2! + x^3 / 3! + ...
+func ApproxExponential(x sdk.Dec) sdk.Dec {
+	sum := sdk.OneDec()             // 1
+	sum = sum.Add(x)                // x / 1!
+	next := x.Mul(x)                // x^2
+	sum = sum.Add(next.QuoInt64(2)) // 2!
+	next = next.Mul(x)              // x^3
+	sum = sum.Add(next.QuoInt64(6)) // 3!
+	return sum                      // approximated e^x
+}
