@@ -55,7 +55,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [935](https://github.com/umee-network/umee/pull/935) Fix protobuf linting
-- [960](https://github.com/umee-network/umee/pull/960) Change Breaking Changes to check against the main branch
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
