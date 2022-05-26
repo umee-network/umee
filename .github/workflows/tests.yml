@@ -47,7 +47,7 @@ jobs:
             go.mod
             go.sum
       - name: Get Go Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
@@ -80,7 +80,7 @@ jobs:
             go.mod
             go.sum
       - name: Get Go Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
@@ -111,7 +111,7 @@ jobs:
             price-feeder/go.mod
             price-feeder/go.sum
       - name: Get Go Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
@@ -140,7 +140,7 @@ jobs:
             go.mod
             go.sum
       - name: Get Go Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
