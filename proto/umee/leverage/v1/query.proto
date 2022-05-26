@@ -150,73 +150,83 @@ message QueryRegisteredTokens {}
 
 // QueryAvailableBorrowRequest defines the request structure for the
 // AvailableBorrow gRPC service handler.
-message QueryAvailableBorrowRequest { string denom = 1; }
+message QueryAvailableBorrowRequest {
+  string denom = 1;
+}
 
 // QueryAvailableBorrowResponse defines the response structure for the
 // AvailableBorrow gRPC service handler.
 message QueryAvailableBorrowResponse {
   string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryBorrowAPYRequest defines the request structure for the BorrowAPY
 // gRPC service handler.
-message QueryBorrowAPYRequest { string denom = 1; }
+message QueryBorrowAPYRequest {
+  string denom = 1;
+}
 
 // QueryBorrowAPYResponse defines the response structure for the BorrowAPY
 // gRPC service handler.
 message QueryBorrowAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryLendAPYRequest defines the request structure for the LendAPY
 // gRPC service handler.
-message QueryLendAPYRequest { string denom = 1; }
+message QueryLendAPYRequest {
+  string denom = 1;
+}
 
 // QueryLendAPYResponse defines the response structure for the LendAPY
 // gRPC service handler.
 message QueryLendAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryMarketSizeRequest defines the request structure for the Market Size in
 // USD gRPC service handler.
-message QueryMarketSizeRequest { string denom = 1; }
+message QueryMarketSizeRequest {
+  string denom = 1;
+}
 
 // QueryMarketSizeResponse defines the response structure for the Market Size in
 // USD gRPC service handler.
 message QueryMarketSizeResponse {
   string market_size_usd = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryTokenMarketSizeRequest defines the request structure for the Token
 // Market Size gRPC service handler.
-message QueryTokenMarketSizeRequest { string denom = 1; }
+message QueryTokenMarketSizeRequest {
+  string denom = 1;
+}
 
 // QueryTokenMarketSizeResponse defines the response structure for the Token
 // Market Size gRPC service handler.
 message QueryTokenMarketSizeResponse {
   string market_size = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryRegisteredTokensResponse defines the response structure for the
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
-  repeated Token registry = 1 [ (gogoproto.nullable) = false ];
+  repeated Token registry = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryParamsRequest defines the request structure for the Params gRPC service
@@ -226,21 +236,21 @@ message QueryParamsRequest {}
 // QueryParamsResponse defines the response structure for the Params gRPC
 // service handler.
 message QueryParamsResponse {
-  Params params = 1 [ (gogoproto.nullable) = false ];
+  Params params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryBorrowedRequest defines the request structure for the Borrowed gRPC
 // service handler.
 message QueryBorrowedRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryBorrowedResponse defines the response structure for the Borrowed gRPC
 // service handler.
 message QueryBorrowedResponse {
   repeated cosmos.base.v1beta1.Coin borrowed = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
@@ -249,7 +259,7 @@ message QueryBorrowedResponse {
 // gRPC service handler.
 message QueryBorrowedValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryBorrowedValueResponse defines the response structure for the
@@ -257,7 +267,7 @@ message QueryBorrowedValueRequest {
 message QueryBorrowedValueResponse {
   string borrowed_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -265,7 +275,7 @@ message QueryBorrowedValueResponse {
 // CollateralValue gRPC service handler.
 message QueryCollateralValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralValueResponse defines the response structure for the
@@ -273,7 +283,7 @@ message QueryCollateralValueRequest {
 message QueryCollateralValueResponse {
   string collateral_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -281,14 +291,14 @@ message QueryCollateralValueResponse {
 // handler.
 message QueryLoanedRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryLoanedResponse defines the response structure for the Loaned gRPC
 // service handler.
 message QueryLoanedResponse {
   repeated cosmos.base.v1beta1.Coin loaned = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
@@ -297,7 +307,7 @@ message QueryLoanedResponse {
 // gRPC service handler.
 message QueryLoanedValueRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryLoanedValueResponse defines the response structure for the LoanedValue
@@ -305,20 +315,22 @@ message QueryLoanedValueRequest {
 message QueryLoanedValueResponse {
   string loaned_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryReserveAmountRequest defines the request structure for the ReserveAmount
 // gRPC service handler.
-message QueryReserveAmountRequest { string denom = 1; }
+message QueryReserveAmountRequest {
+  string denom = 1;
+}
 
 // QueryReserveAmountResponse defines the response structure for the
 // ReserveAmount gRPC service handler.
 message QueryReserveAmountResponse {
   string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -326,65 +338,73 @@ message QueryReserveAmountResponse {
 // CollateralSetting gRPC service handler.
 message QueryCollateralSettingRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralSettingsResponse defines the response structure for the
 // CollateralSetting gRPC service handler.
-message QueryCollateralSettingResponse { bool enabled = 1; }
+message QueryCollateralSettingResponse {
+  bool enabled = 1;
+}
 
 // QueryCollateralRequest defines the request structure for the Collateral gRPC
 // service handler.
 message QueryCollateralRequest {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryCollateralResponse defines the response structure for the Collateral
 // gRPC service handler.
 message QueryCollateralResponse {
   repeated cosmos.base.v1beta1.Coin collateral = 1 [
-    (gogoproto.nullable) = false,
+    (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
 
 // QueryExchangeRateRequest defines the request structure for the ExchangeRate
 // gRPC service handler.
-message QueryExchangeRateRequest { string denom = 1; }
+message QueryExchangeRateRequest {
+  string denom = 1;
+}
 
 // QueryExchangeRateResponse defines the response structure for the ExchangeRate
 // gRPC service handler.
 message QueryExchangeRateResponse {
   string exchange_rate = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryBorrowLimitRequest defines the request structure for the BorrowLimit
 // gRPC service handler.
-message QueryBorrowLimitRequest { string address = 1; }
+message QueryBorrowLimitRequest {
+  string address = 1;
+}
 
 // QueryBorrowLimitResponse defines the response structure for the BorrowLimit
 // gRPC service handler.
 message QueryBorrowLimitResponse {
   string borrow_limit = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
 // QueryLiquidationThresholdRequest defines the request structure for the
 // LiquidationThreshold gRPC service handler.
-message QueryLiquidationThresholdRequest { string address = 1; }
+message QueryLiquidationThresholdRequest {
+  string address = 1;
+}
 
 // QueryLiquidationThresholdResponse defines the response structure for the
 // LiquidationThreshold gRPC service handler.
 message QueryLiquidationThresholdResponse {
   string liquidation_threshold = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -394,43 +414,47 @@ message QueryLiquidationTargetsRequest {}
 
 // QueryLiquidationTargetsResponse defines the response structure for the
 // LiquidationTargets gRPC service handler.
-message QueryLiquidationTargetsResponse { repeated string targets = 1; }
+message QueryLiquidationTargetsResponse {
+  repeated string targets = 1;
+}
 
 // QueryMarketSummaryRequest defines the request structure for the
 // MarketSummary gRPC service handler.
-message QueryMarketSummaryRequest { string denom = 1; }
+message QueryMarketSummaryRequest {
+  string denom = 1;
+}
 
 // QueryMarketSummaryResponse defines the response structure for the
 // MarketSummary gRPC service handler.
 message QueryMarketSummaryResponse {
   string symbol_denom = 1;
-  uint32 exponent = 2;
+  uint32 exponent     = 2;
   string oracle_price = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = true
+    (gogoproto.nullable)   = true
   ];
   string uToken_exchange_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string lend_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string market_size = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string available_borrow = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
   string reserved = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)   = false
   ];
 }
