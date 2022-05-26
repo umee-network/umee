@@ -21,7 +21,7 @@ jobs:
           GOARCH: ${{ matrix.arch }}
 
       - name: Get Go Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
