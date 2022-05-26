@@ -111,21 +111,22 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx, token.BaseDenom).Mul(scalar)
 
 		// calculate total interest accrued for this denom
+		rawInterest := prevTotalBorrowed.Mul(increase)
 		totalInterest = totalInterest.Add(sdk.NewCoin(
 			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).TruncateInt(),
+			rawInterest.TruncateInt(),
 		))
 
 		// calculate new reserves accrued for this denom
 		newReserves = newReserves.Add(sdk.NewCoin(
 			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).Mul(token.ReserveFactor).TruncateInt(),
+			rawInterest.Mul(token.ReserveFactor).TruncateInt(),
 		))
 
 		// calculate oracle rewards accrued for this denom
 		oracleRewards = oracleRewards.Add(sdk.NewCoin(
 			token.BaseDenom,
-			prevTotalBorrowed.Mul(increase).Mul(oracleRewardFactor).TruncateInt(),
+			rawInterest.Mul(oracleRewardFactor).TruncateInt(),
 		))
 	}
 
