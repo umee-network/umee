@@ -44,6 +44,18 @@ jobs:
             **/**.go
             go.mod
             go.sum
+<<<<<<< HEAD
+=======
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
+>>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Test and Create Coverage Report
         run: |
           make test-unit-cover
@@ -68,6 +80,18 @@ jobs:
             **/**.go
             go.mod
             go.sum
+<<<<<<< HEAD
+=======
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
+>>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Build Docker Image
         run: |
           make docker-build-debug
@@ -90,6 +114,18 @@ jobs:
             **/**.go
             price-feeder/go.mod
             price-feeder/go.sum
+<<<<<<< HEAD
+=======
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
+>>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Test price-feeder
         run: |
           cd price-feeder && make test-unit
@@ -110,6 +146,18 @@ jobs:
             **/**.go
             go.mod
             go.sum
+<<<<<<< HEAD
+=======
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
+>>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Install Starport
         run: |
           curl https://get.starport.network/starport@v0.19.5! | bash
