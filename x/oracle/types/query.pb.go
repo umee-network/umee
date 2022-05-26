@@ -119,7 +119,8 @@ func (m *QueryExchangeRatesResponse) GetExchangeRates() github_com_cosmos_cosmos
 	return nil
 }
 
-// QueryActiveExchangeRatesRequest is the request type for the Query/ActiveExchangeRates RPC method.
+// QueryActiveExchangeRatesRequest is the request type for the
+// Query/ActiveExchangeRates RPC method.
 type QueryActiveExchangeRatesRequest struct {
 }
 
