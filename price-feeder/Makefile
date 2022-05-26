@@ -21,10 +21,18 @@ endif
 ##                              Build / Install                              ##
 ###############################################################################
 
+build_tags += $(BUILD_TAGS)
+
 ldflags = -X github.com/umee-network/umee/price-feeder/cmd.Version=$(VERSION) \
 		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT)
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+ldflags += $(LDFLAGS)
+ifeq ($(LINK_STATICALLY),true)
+  ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
+ldflags := $(strip $(ldflags))
+
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."

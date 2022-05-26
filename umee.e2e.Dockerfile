@@ -22,7 +22,7 @@ COPY --from=cosmwasm-lib /lib/libwasmvm_muslc.a /lib/libwasmvm_muslc.a
 ENV PACKAGES curl bash eudev-dev python3
 RUN apk add --no-cache $PACKAGES
 RUN BUILD_TAGS=muslc LINK_STATICALLY=true make install
-RUN cd price-feeder && make install
+RUN cd price-feeder && BUILD_TAGS=muslc LINK_STATICALLY=true make install
 
 # Fetch peggo (gravity bridge) binary
 FROM base-builder AS peggo-builder
