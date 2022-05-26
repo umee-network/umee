@@ -26,17 +26,20 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
 type Params struct {
-	// The complete_liquidation_threshold determines how far over their borrow limit a borrower
-	// must be in order for their positions to be liquidated fully in a single event.
+	// The complete_liquidation_threshold determines how far over their borrow
+	// limit a borrower must be in order for their positions to be liquidated
+	// fully in a single event.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
-	// The minimum_close_factor determines the portion of a borrower's position that can be
-	// liquidated in a single event, when the borrower is just barely over their borrow limit.
+	// The minimum_close_factor determines the portion of a borrower's position
+	// that can be liquidated in a single event, when the borrower is just barely
+	// over their borrow limit.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`
-	// The oracle_reward_factor determines the portion of interest accrued on borrows that is
-	// sent to the oracle module to fund its reward pool.
+	// The oracle_reward_factor determines the portion of interest accrued on
+	// borrows that is sent to the oracle module to fund its reward pool.
 	OracleRewardFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=oracle_reward_factor,json=oracleRewardFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_reward_factor" yaml:"oracle_reward_factor"`
-	// The small_liquidation_size determines the USD value at which a borrow is considered small
-	// enough to be liquidated in a single transaction, bypassing dynamic close factor.
+	// The small_liquidation_size determines the USD value at which a borrow is
+	// considered small enough to be liquidated in a single transaction, bypassing
+	// dynamic close factor.
 	SmallLiquidationSize github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=small_liquidation_size,json=smallLiquidationSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"small_liquidation_size" yaml:"small_liquidation_size"`
 }
 
@@ -77,16 +80,16 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 type Token struct {
 	// The base_denom defines the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
-	// The reserve factor defines what portion of accrued interest of the asset type
-	// goes to reserves.
+	// The reserve factor defines what portion of accrued interest of the asset
+	// type goes to reserves.
 	ReserveFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=reserve_factor,json=reserveFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reserve_factor" yaml:"reserve_factor"`
 	// The collateral_weight defines what amount of the total value of the asset
-	// can contribute to a users borrowing power. If the collateral_weight is zero,
-	// using this asset as collateral against borrowing will be disabled.
+	// can contribute to a users borrowing power. If the collateral_weight is
+	// zero, using this asset as collateral against borrowing will be disabled.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
-	// The liquidation_threshold defines what amount of the total value of the asset
-	// can contribute to a user's liquidation threshold (above which they become
-	// eligible for liquidation).
+	// The liquidation_threshold defines what amount of the total value of the
+	// asset can contribute to a user's liquidation threshold (above which they
+	// become eligible for liquidation).
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
 	// The base_borrow_rate defines the base interest rate for borrowing this
 	// asset.
@@ -108,8 +111,9 @@ type Token struct {
 	// list of allowed tokens.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
 	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows lending and setting a collateral using this token. Note that withdrawing
-	// is always enabled. Disabling lending would be one step in phasing out an asset type.
+	// Allows lending and setting a collateral using this token. Note that
+	// withdrawing is always enabled. Disabling lending would be one step in
+	// phasing out an asset type.
 	EnableMsgLend bool `protobuf:"varint,12,opt,name=enable_msg_lend,json=enableMsgLend,proto3" json:"enable_msg_lend,omitempty" yaml:"enable_msg_lend"`
 	// Allows borrowing of this token. Note that repaying is always enabled.
 	// Disabling borrowing would be one step in phasing out an asset type, but

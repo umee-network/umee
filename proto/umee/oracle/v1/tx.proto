@@ -9,14 +9,17 @@ option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 service Msg {
   // AggregateExchangeRatePrevote defines a method for submitting an aggregate
   // exchange rate prevote.
-  rpc AggregateExchangeRatePrevote(MsgAggregateExchangeRatePrevote) returns (MsgAggregateExchangeRatePrevoteResponse);
+  rpc AggregateExchangeRatePrevote(MsgAggregateExchangeRatePrevote)
+      returns (MsgAggregateExchangeRatePrevoteResponse);
 
   // AggregateExchangeRateVote defines a method for submitting an aggregate
   // exchange rate vote.
-  rpc AggregateExchangeRateVote(MsgAggregateExchangeRateVote) returns (MsgAggregateExchangeRateVoteResponse);
+  rpc AggregateExchangeRateVote(MsgAggregateExchangeRateVote)
+      returns (MsgAggregateExchangeRateVoteResponse);
 
   // DelegateFeedConsent defines a method for setting the feeder delegation.
-  rpc DelegateFeedConsent(MsgDelegateFeedConsent) returns (MsgDelegateFeedConsentResponse);
+  rpc DelegateFeedConsent(MsgDelegateFeedConsent)
+      returns (MsgDelegateFeedConsentResponse);
 }
 
 // MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
