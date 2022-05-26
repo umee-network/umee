@@ -20,8 +20,6 @@ jobs:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
 
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -31,7 +29,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
 
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Compile
         run: |
           go mod download

@@ -23,13 +23,15 @@ jobs:
           go-version: 1.17
       - name: Display Go Version
         run: go version
-      - name: Install tparse
-        run: |
-          export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.8.3
       - uses: actions/cache@v3
+        id: cache-go-tpares
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-tparse-binary
+      - name: Install tparse
+        if: steps.cache-go-tpares.outputs.cache-hit != 'true'
+        run: |
+          export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.9.0
 
   test-unit-cover:
     runs-on: ubuntu-latest
@@ -44,8 +46,6 @@ jobs:
             **/**.go
             go.mod
             go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -55,7 +55,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Test and Create Coverage Report
         run: |
           make test-unit-cover
@@ -80,8 +79,6 @@ jobs:
             **/**.go
             go.mod
             go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -91,7 +88,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Build Docker Image
         run: |
           make docker-build-debug
@@ -114,8 +110,6 @@ jobs:
             **/**.go
             price-feeder/go.mod
             price-feeder/go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -125,7 +119,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Test price-feeder
         run: |
           cd price-feeder && make test-unit
@@ -146,8 +139,6 @@ jobs:
             **/**.go
             go.mod
             go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -157,7 +148,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Install Starport
         run: |
           curl https://get.starport.network/starport@v0.19.5! | bash

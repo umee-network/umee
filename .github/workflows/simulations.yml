@@ -21,8 +21,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.17
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -32,7 +30,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
 
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Install runsim
         run: export GO111MODULE="on" && go install github.com/cosmos/tools/cmd/runsim@v1.0.0
       - uses: actions/cache@v3
@@ -53,8 +50,6 @@ jobs:
             **/**.go
             go.mod
             go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -64,7 +59,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - name: Test application non-determinism
         run: |
           make test-sim-non-determinism
@@ -84,8 +78,6 @@ jobs:
             **/**.go
             go.mod
             go.sum
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -95,7 +87,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
         if: env.GIT_DIFF
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - uses: actions/cache@v3
         with:
           path: ~/go/bin

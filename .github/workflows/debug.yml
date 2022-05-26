@@ -14,8 +14,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.17
-<<<<<<< HEAD
-=======
       - name: Get Go Cache
         uses: actions/cache@v3
         with:
@@ -25,7 +23,6 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
 
->>>>>>> 22f3c41 (build(deps): Bump actions/cache from 2 to 3 (#961))
       - uses: actions/checkout@v3
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
