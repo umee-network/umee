@@ -112,7 +112,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx, token.BaseDenom).Mul(scalar)
 
 		// calculate total interest accrued for this denom
-		interestAccrued := prevTotalBorrowed.Mul(increase)
+		interestAccrued := prevTotalBorrowed.Mul(exponential.Sub(sdk.OneDec()))
 		totalInterest = totalInterest.Add(sdk.NewCoin(
 			token.BaseDenom,
 			interestAccrued.TruncateInt(),
