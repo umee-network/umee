@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/v2
 
-go 1.17
+go 1.18
 
 require (
 	github.com/CosmWasm/wasmd v0.25.0

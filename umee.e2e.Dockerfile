@@ -8,7 +8,7 @@ RUN sha256sum /lib/libwasmvm_muslc.x86_64.a | grep 2f44efa9c6c1cda138bd1f46d8d53
 RUN cp /lib/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.a
 
 # Fetch base packages
-FROM golang:1.17-alpine AS base-builder
+FROM golang:1.18-alpine AS base-builder
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 
