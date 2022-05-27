@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/v2
 
-go 1.17
+go 1.18
 
 require (
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07
