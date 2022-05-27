@@ -57,6 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [935](https://github.com/umee-network/umee/pull/935) Fix protobuf linting
 - [959](https://github.com/umee-network/umee/pull/959) Improve ModuleBalance calculation
 - [962](https://github.com/umee-network/umee/pull/962) Streamline AccrueAllInterest
+- [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
