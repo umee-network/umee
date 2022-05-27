@@ -60,7 +60,7 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
 func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
-	return k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), denom).Amount
+	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
 // LendAsset attempts to deposit assets into the leverage module account in
@@ -227,7 +227,7 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 
 	// Ensure module account has sufficient unreserved tokens to loan out
 	reservedAmount := k.GetReserveAmount(ctx, borrow.Denom)
-	availableAmount := k.bankKeeper.GetBalance(ctx, authtypes.NewModuleAddress(types.ModuleName), borrow.Denom).Amount
+	availableAmount := k.ModuleBalance(ctx, borrow.Denom)
 	if borrow.Amount.GT(availableAmount.Sub(reservedAmount)) {
 		return types.ErrLendingPoolInsufficient.Wrap(borrow.String())
 	}
