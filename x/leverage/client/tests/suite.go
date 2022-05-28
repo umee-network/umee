@@ -72,7 +72,7 @@ type testQuery struct {
 	expectedResponse proto.Message
 }
 
-func (t *testTransaction) Run(s *IntegrationTestSuite) (abort bool) {
+func (t testTransaction) Run(s *IntegrationTestSuite) (abort bool) {
 	clientCtx := s.network.Validators[0].ClientCtx
 
 	txFlags := []string{
@@ -113,7 +113,7 @@ func (t *testTransaction) Run(s *IntegrationTestSuite) (abort bool) {
 	return abort
 }
 
-func (t *testQuery) Run(s *IntegrationTestSuite) (abort bool) {
+func (t testQuery) Run(s *IntegrationTestSuite) (abort bool) {
 	clientCtx := s.network.Validators[0].ClientCtx
 
 	queryFlags := []string{
