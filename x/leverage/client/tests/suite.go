@@ -17,6 +17,8 @@ import (
 type IntegrationTestSuite struct {
 	suite.Suite
 
+	abort bool // stop interdependent tests on the first error for clarity
+
 	cfg     network.Config
 	network *network.Network
 }
@@ -48,10 +50,9 @@ type TestCase interface {
 
 // runTestCases runs test transactions or queries, stopping early if an error occurs
 func (s *IntegrationTestSuite) runTestCases(tcs ...TestCase) {
-	abort := false
 	for _, t := range tcs {
-		if !abort {
-			abort = t.Run(s)
+		if !s.abort {
+			s.abort = t.Run(s)
 		}
 	}
 }
