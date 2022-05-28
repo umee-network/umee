@@ -23,7 +23,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 	"github.com/umee-network/umee/price-feeder/telemetry"
-	oracletypes "github.com/umee-network/umee/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // We define tickerSleep as the minimum timeout between each oracle loop. We
@@ -33,10 +33,6 @@ import (
 const (
 	tickerSleep = 1000 * time.Millisecond
 )
-
-// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-// without being considered faulty.
-var deviationThreshold = sdk.MustNewDecFromStr("2")
 
 // PreviousPrevote defines a structure for defining the previous prevote
 // submitted on-chain.
@@ -180,15 +176,9 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			return err
 		}
 
-		var acceptedPairs []types.CurrencyPair
 		for _, pair := range currencyPairs {
-			if acceptList.Contains(pair.Base) {
-				acceptedPairs = append(acceptedPairs, pair)
-				if _, ok := requiredRates[pair.Base]; !ok {
-					requiredRates[pair.Base] = struct{}{}
-				}
-			} else {
-				o.logger.Warn().Str("denom", pair.Base).Msg("attempting to vote on unaccepted denom")
+			if _, ok := requiredRates[pair.Base]; !ok {
+				requiredRates[pair.Base] = struct{}{}
 			}
 		}
 
@@ -200,13 +190,13 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 
 			go func() {
 				defer close(ch)
-				prices, err = priceProvider.GetTickerPrices(acceptedPairs...)
+				prices, err = priceProvider.GetTickerPrices(currencyPairs...)
 				if err != nil {
 					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
 					errCh <- err
 				}
 
-				candles, err = priceProvider.GetCandlePrices(acceptedPairs...)
+				candles, err = priceProvider.GetCandlePrices(currencyPairs...)
 				if err != nil {
 					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
 					errCh <- err
@@ -227,24 +217,9 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 			//
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
-			for _, pair := range acceptedPairs {
-				if _, ok := providerPrices[providerName]; !ok {
-					providerPrices[providerName] = make(map[string]provider.TickerPrice)
-				}
-				if _, ok := providerCandles[providerName]; !ok {
-					providerCandles[providerName] = make(map[string][]provider.CandlePrice)
-				}
-
-				tp, pricesOk := prices[pair.String()]
-				cp, candlesOk := candles[pair.String()]
-				if pricesOk {
-					providerPrices[providerName][pair.Base] = tp
-				}
-				if candlesOk {
-					providerCandles[providerName][pair.Base] = cp
-				}
-
-				if !pricesOk && !candlesOk {
+			for _, pair := range currencyPairs {
+				success := SetProviderTickerPricesAndCandles(providerName, providerPrices, providerCandles, prices, candles, pair)
+				if !success {
 					mtx.Unlock()
 					return fmt.Errorf("failed to find any exchange rates in provider responses")
 				}
@@ -259,74 +234,105 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	filteredCandles, err := o.filterCandleDeviations(providerCandles)
+	computedPrices, err := GetComputedPrices(o.logger, providerCandles, providerPrices, o.providerPairs)
 	if err != nil {
 		return err
 	}
 
-	// attempt to use candles for TVWAP calculations
-	tvwapPrices, err := ComputeTVWAP(filteredCandles)
+	if len(computedPrices) != len(requiredRates) {
+		return fmt.Errorf("unable to get prices for all exchange candles")
+	}
+	for base := range requiredRates {
+		if _, ok := computedPrices[base]; !ok {
+			return fmt.Errorf("reported prices were not equal to required rates, missed: %s", base)
+		}
+	}
+
+	o.prices = computedPrices
+	return nil
+}
+
+// GetComputedPrices gets the candle and ticker prices and computes it.
+// It returns candles' TVWAP if possible, if not possible (not available
+// or due to some staleness) it will use the most recent ticker prices
+// and the VWAP formula instead.
+func GetComputedPrices(
+	logger zerolog.Logger,
+	providerCandles provider.AggregatedProviderCandles,
+	providerPrices provider.AggregatedProviderPrices,
+	providerPairs map[string][]types.CurrencyPair,
+) (prices map[string]sdk.Dec, err error) {
+	// filter out any erroneous candles
+	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	// convert any non-USD denominated candles into USD.
+	convertedCandles, err := convertCandlesToUSD(filteredCandles, providerPairs)
+	if err != nil {
+		return nil, err
+	}
+
+	// attempt to use candles for TVWAP calculations
+	tvwapPrices, err := ComputeTVWAP(convertedCandles)
+	if err != nil {
+		return nil, err
 	}
 
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		filteredProviderPrices, err := o.filterTickerDeviations(providerPrices)
+		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
+		convertedTickers, err := convertTickersToUSD(filteredProviderPrices, providerPairs)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		// warn the user of any missing prices
-		reportedPrices := make(map[string]struct{})
-		for _, providers := range filteredProviderPrices {
-			for base := range providers {
-				if _, ok := reportedPrices[base]; !ok {
-					reportedPrices[base] = struct{}{}
-				}
-			}
+		vwapPrices, err := ComputeVWAP(convertedTickers)
+		if err != nil {
+			return nil, err
 		}
 
-		if len(reportedPrices) != len(requiredRates) {
-			return fmt.Errorf("unable to get prices for all exchange prices")
-		}
-		for base := range requiredRates {
-			if _, ok := reportedPrices[base]; !ok {
-				return fmt.Errorf("reported prices were not equal to required rates")
-			}
-		}
-
-		o.prices = vwapPrices
-	} else {
-		// warn the user of any missing candles
-		reportedCandles := make(map[string]struct{})
-		for _, providers := range filteredCandles {
-			for base := range providers {
-				if _, ok := reportedCandles[base]; !ok {
-					reportedCandles[base] = struct{}{}
-				}
-			}
-		}
-
-		if len(reportedCandles) != len(requiredRates) {
-			return fmt.Errorf("unable to get prices for all exchange candles")
-		}
-		for base := range requiredRates {
-			if _, ok := reportedCandles[base]; !ok {
-				return fmt.Errorf("reported candles were not equal to required rates")
-			}
-		}
-
-		o.prices = tvwapPrices
+		return vwapPrices, nil
 	}
 
-	return nil
+	return tvwapPrices, nil
+}
+
+// SetProviderTickerPricesAndCandles flattens and collects prices for
+// candles and tickers based on the base currency per provider.
+// Returns true if at least one of price or candle exists.
+func SetProviderTickerPricesAndCandles(
+	providerName string,
+	providerPrices provider.AggregatedProviderPrices,
+	providerCandles provider.AggregatedProviderCandles,
+	prices map[string]provider.TickerPrice,
+	candles map[string][]provider.CandlePrice,
+	pair types.CurrencyPair,
+) (success bool) {
+	if _, ok := providerPrices[providerName]; !ok {
+		providerPrices[providerName] = make(map[string]provider.TickerPrice)
+	}
+	if _, ok := providerCandles[providerName]; !ok {
+		providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+	}
+
+	tp, pricesOk := prices[pair.String()]
+	cp, candlesOk := candles[pair.String()]
+
+	if pricesOk {
+		providerPrices[providerName][pair.Base] = tp
+	}
+	if candlesOk {
+		providerCandles[providerName][pair.Base] = cp
+	}
+
+	return pricesOk || candlesOk
 }
 
 // GetParams returns the current on-chain parameters of the x/oracle module.
@@ -403,120 +409,6 @@ func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger
 	}
 
 	return nil, fmt.Errorf("provider %s not found", providerName)
-}
-
-// filterTickerDeviations finds the standard deviations of the prices of
-// all assets, and filters out any providers that are not within 2𝜎 of the mean.
-func (o *Oracle) filterTickerDeviations(
-	prices provider.AggregatedProviderPrices,
-) (provider.AggregatedProviderPrices, error) {
-	var (
-		filteredPrices = make(provider.AggregatedProviderPrices)
-		priceMap       = make(map[string]map[string]sdk.Dec)
-	)
-
-	for providerName, priceTickers := range prices {
-		if _, ok := priceMap[providerName]; !ok {
-			priceMap[providerName] = make(map[string]sdk.Dec)
-		}
-		for base, tp := range priceTickers {
-			priceMap[providerName][base] = tp.Price
-		}
-	}
-
-	deviations, means, err := StandardDeviation(priceMap)
-	if err != nil {
-		return nil, err
-	}
-
-	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
-	for providerName, priceTickers := range prices {
-		for base, tp := range priceTickers {
-			if _, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					tp.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
-				if _, ok := filteredPrices[providerName]; !ok {
-					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
-				}
-
-				filteredPrices[providerName][base] = tp
-			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
-				o.logger.Warn().
-					Str("base", base).
-					Str("provider", providerName).
-					Str("price", tp.Price.String()).
-					Msg("provider deviating from other prices")
-			}
-		}
-	}
-
-	return filteredPrices, nil
-}
-
-// filterCandleDeviations finds the standard deviations of the tvwaps of
-// all assets, and filters out any providers that are not within 2𝜎 of the mean.
-func (o *Oracle) filterCandleDeviations(
-	candles provider.AggregatedProviderCandles,
-) (provider.AggregatedProviderCandles, error) {
-	var (
-		filteredCandles = make(provider.AggregatedProviderCandles)
-		tvwaps          = make(map[string]map[string]sdk.Dec)
-	)
-
-	for providerName, priceCandles := range candles {
-		candlePrices := make(provider.AggregatedProviderCandles)
-
-		for base, cp := range priceCandles {
-			if _, ok := candlePrices[providerName]; !ok {
-				candlePrices[providerName] = make(map[string][]provider.CandlePrice)
-			}
-
-			candlePrices[providerName][base] = cp
-		}
-
-		tvwap, err := ComputeTVWAP(candlePrices)
-		if err != nil {
-			return nil, err
-		}
-
-		for base, asset := range tvwap {
-			if _, ok := tvwaps[providerName]; !ok {
-				tvwaps[providerName] = make(map[string]sdk.Dec)
-			}
-
-			tvwaps[providerName][base] = asset
-		}
-	}
-
-	deviations, means, err := StandardDeviation(tvwaps)
-	if err != nil {
-		return nil, err
-	}
-
-	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
-	for providerName, priceMap := range tvwaps {
-		for base, price := range priceMap {
-			if _, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
-				if _, ok := filteredCandles[providerName]; !ok {
-					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
-				}
-
-				filteredCandles[providerName][base] = candles[providerName][base]
-			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
-				o.logger.Warn().
-					Str("base", base).
-					Str("provider", providerName).
-					Str("price", price.String()).
-					Msg("provider deviating from other candles")
-			}
-		}
-	}
-
-	return filteredCandles, nil
 }
 
 func (o *Oracle) checkAcceptList(params oracletypes.Params) {
