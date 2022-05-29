@@ -1,0 +1,28 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "google/api/annotations.proto";
+import "umee/incentive/v1/incentive.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v2/x/incentive/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // IncentivePrograms queries for all incentives programs that have ever existed.
+  rpc IncentivePrograms(QueryIncentiveProgramsRequest)
+      returns (QueryIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs";
+  }
+}
+
+// QueryIncentiveProgramsRequest defines the request structure for the IncentivePrograms
+// gRPC service handler.
+message QueryIncentiveProgramsResponse {}
+
+// QueryIncentiveProgramsResponse defines the response structure for the
+// IncentivePrograms gRPC service handler.
+message QueryIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}

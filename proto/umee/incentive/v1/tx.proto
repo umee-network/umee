@@ -1,0 +1,65 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/v2/x/incentive/types";
+
+// Msg defines the x/incentive module's Msg service.
+service Msg {
+  // Claim defines a method for lending coins to the capital facility.
+  rpc Claim(MsgClaim) returns (MsgClaimResponse);
+
+  // Lock defines a method for locking coins into a locking tier.
+  rpc Lock(MsgLock) returns (MsgLockResponse);
+
+  // Unlock defines a method for starting to unlock coins.
+  rpc Unlock(MsgUnlock) returns (MsgUnlockResponse);
+
+  // Sponsor defines a permissionless method for sponsoring incentive programs.
+  rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
+}
+
+// MsgClaim represents a lender's request to claim pending rewards.
+message MsgClaim {
+  string lender = 1;
+}
+
+// MsgClaimResponse defines the Msg/Claim response type.
+message MsgClaimResponse {
+  repeated cosmos.base.v1beta1.Coin amount = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgLock represents a lender's request to lock uToken collateral.
+message MsgLock {
+  string lender = 1;
+  uint32 tier   = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgLockResponse defines the Msg/Lock response type.
+message MsgLockResponse {}
+
+// MsgUnlock represents a lender's request to begin unlocking uToken collateral.
+message MsgUnlock {
+  string lender = 1;
+  uint32 tier   = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgUnlockResponse defines the Msg/Unlock response type.
+message MsgUnlockResponse {}
+
+// MsgSponsor represents a sponsor's request to contribute rewards to an incentive program.
+message MsgSponsor {
+  string sponsor    = 1;
+  uint32 program_id = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSponsorResponse defines the Msg/Unlock response type.
+message MsgSponsorResponse {}
