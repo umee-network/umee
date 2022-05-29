@@ -195,7 +195,7 @@ containerProtoGen=cosmos-sdk-proto-gen-$(containerProtoVer)
 containerProtoFmt=cosmos-sdk-proto-fmt-$(containerProtoVer)
 
 
-proto-all: proto-gen proto-lint proto-check-breaking proto-format
+proto-all: proto-lint proto-check-breaking proto-format proto-gen
 .PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format
 
 proto-gen:
