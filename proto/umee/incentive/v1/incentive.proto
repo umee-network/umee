@@ -12,7 +12,7 @@ message Params {
   // The id uniquely identifies the incentive program after it has been created.
   uint32 id = 1;
 
-  // The max_unlocks defines the maximum amount of concurrent unlockings an address cna have.
+  // The max_unlocks defines the maximum amount of concurrent unlockings an address can have.
   uint32 max_unlocks = 2 [(gogoproto.moretags) = "yaml:\"max_unlocks\""];
 
   // The lock_duration_long defines the unlocking duration of the long token lock tier.
