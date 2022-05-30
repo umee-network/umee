@@ -49,11 +49,19 @@ Incentives funding will be stored in the `x/incentive` module account.
 The `x/incentive` module will have a fixed number (3) of lock tiers, which will be the same for all asset classes at any given time. Typical unlocking durations for the tiers might be 1,7, and 14 days.
 
 The module will govern the lock durations of the tiers (in seconds) using parameters:
+
 ```go
 LockDurationShort uint64
 LockDurationMedium uint64
 LockDurationLong uint64
+MiddleTierWeight sdk.Dec
+ShortTierWeight  sdk.Dec
 ```
+
+Valid tier weights range from 0 to 1.
+
+For example, a `MiddleTierWeight` of `0.8` means that collateral locked at the middle duration tier accrues 80% of the rewards that the same amount would accrue at the longest tier.
+
 
 ### Locking and Unlocking
 
@@ -138,11 +146,8 @@ type IncentiveProgram struct {
   ID               uint32
   LockedDenom      string
   RewardDenom      string
-  TotalRewards     sdk.Int
   StartTime        uint64
   Duration         uint64
-  MiddleTierWeight sdk.Dec
-  ShortTierWeight  sdk.Dec
 }
 ```
 
@@ -150,14 +155,11 @@ Start time is unix time, and duration is measured in seconds.
 
 TotalRewards is the total amount of RewardDenom to be distributed as a result of the incentive program.
 
-Valid tier weights range from 0 to 1, and `LongTierWeight` is defined as always `1.0`.
-
-For example, a `MiddleTierWeight` of `0.8` means that collateral locked at the middle duration tier accrues 80% of the rewards that the same amount would accrue at the longest tier.
-
-Incentive programs, both active and historical, will be stored in state using protobuf marshaling and a simple uint32 ID once their initial governance proposal passes.
+Incentive programs, both active and historical, will be stored in state using protobuf marshaling and a simple uint32 ID once their initial governance proposal passes. Their total rewards, which are set when a valid program is funded, will also be stored by program ID.
 
 ```go
 IncentiveProgramPrefix | ID => IncentiveProgram
+ProgramRewardsPrefix   | ID => sdk.Coin
 ```
 
 ### Governance
