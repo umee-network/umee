@@ -17,10 +17,11 @@ message GenesisState {
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  repeated LockAmount        lock_amounts        = 6 [(gogoproto.nullable) = false];
-  repeated PendingReward     pending_rewards     = 7 [(gogoproto.nullable) = false];
-  repeated RewardBasis       reward_bases        = 8 [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 9 [(gogoproto.nullable) = false];
+  repeated LockAmount        lock_amounts        = 6  [(gogoproto.nullable) = false];
+  repeated PendingReward     pending_rewards     = 7  [(gogoproto.nullable) = false];
+  repeated RewardBasis       reward_bases        = 8  [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 9  [(gogoproto.nullable) = false];
+  repeated Unlocking         unlockings          = 10 [(gogoproto.nullable) = false];
 }
 
 // ProgramReward indicates the total amount of rewards that will be distributed by
@@ -64,4 +65,12 @@ message RewardAccumulator {
   uint32                      tier          = 1;
   string                      lock_denom    = 2;
   cosmos.base.v1beta1.DecCoin reward_basis  = 3 [(gogoproto.nullable) = false];
+}
+
+// Unlocking is a structure that tracks an in-progress token unlock.
+message Unlocking {
+  string                   address = 1;
+  uint32                   tier    = 2;
+  uint64                   end     = 3;
+  cosmos.base.v1beta1.Coin amount  = 4 [(gogoproto.nullable) = false];
 }
