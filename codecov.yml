@@ -47,6 +47,7 @@ ignore:
   - "types/*.pb.go"
   - "tests/*"
   - "tests/**/*"
+  - "**/tests/**/*"
   - "x/**/*.pb.go"
   - "x/**/test_common.go"
   - "scripts/"
