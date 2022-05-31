@@ -28,7 +28,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type Params struct {
 	// The id uniquely identifies the incentive program after it has been created.
 	Id uint32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// The max_unlocks defines the maximum amount of concurrent unlockings an address cna have.
+	// The max_unlocks defines the maximum amount of concurrent unlockings an address can have.
 	MaxUnlocks uint32 `protobuf:"varint,2,opt,name=max_unlocks,json=maxUnlocks,proto3" json:"max_unlocks,omitempty" yaml:"max_unlocks"`
 	// The lock_duration_long defines the unlocking duration of the long token lock tier.
 	LockDurationLong uint64 `protobuf:"varint,3,opt,name=lock_duration_long,json=lockDurationLong,proto3" json:"lock_duration_long,omitempty" yaml:"long_tier_duration"`
