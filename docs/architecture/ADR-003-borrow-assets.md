@@ -36,7 +36,7 @@ The `umee/x/leverage` module stores each open borrow position.
 If the same user account opens multiple borrow positions in the same token, the second position simply increases the amount of the first.
 
 Additionally, rather than segregating each borrow position with a specific collateral deposit (uToken coins) we aggregate them. The sum of all account's collateral uTokens related is used to calculate the account's borrow limit.
-We define a **borrow limit** invariant:
+We define a **borrow limit** rule:
 \__sum of account's borrow positions must be smaller than the account borrow limit_.
 
 Note that the exchange rate of Asset:u-Asset has a dynamic exchange rate that grows with accruing interest - see [ADR-001: Interest Stream](./ADR-001-interest-stream.md).
@@ -74,7 +74,7 @@ We propose to set a per token parameter: **max collateral utilization** using Co
 
 For the purposes of borrowing and repaying assets, as well as marking uTokens as collateral, the `umee/x/leverage` module does not mint or burn tokens. It stores borrower open positions and collateral settings, and uses the `x/bank` module to perform all necessary balance checks and token transfers. User collateral (uTokens) are deposited in `x/leverage` module and withdrawn back to the user `x/bank` account balance when the user disables uTokens as a collateral.
 
-During every operation which involves borrow position or collateral we check that the _borrow limit_ invariant holds.
+During every operation which involves borrow position or collateral we check that the _borrow limit_ rule holds.
 
 `x/oracle` module is used to provide exchange rates of tokens to calculate borrow limit.
 
