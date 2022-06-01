@@ -55,7 +55,10 @@ message RewardBasis {
   string                      address       = 1;
   uint32                      tier          = 2;
   string                      lock_denom    = 3;
-  cosmos.base.v1beta1.DecCoin reward_basis  = 4 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin reward_basis  = 4 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
 }
 
 // RewardAccumulator is a global reward tracking struct that indicates the amount
@@ -64,7 +67,10 @@ message RewardBasis {
 message RewardAccumulator {
   uint32                      tier          = 1;
   string                      lock_denom    = 2;
-  cosmos.base.v1beta1.DecCoin reward_basis  = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin reward_basis  = 4 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
 }
 
 // Unlocking is a structure that tracks an in-progress token unlock.
