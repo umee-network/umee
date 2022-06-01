@@ -9,18 +9,18 @@ import "gogoproto/gogo.proto";
 
 // GenesisState defines the x/incentive module's genesis state.
 message GenesisState {
-  Params                            params          = 1 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram         programs        = 2 [(gogoproto.nullable) = false];
-  repeated ProgramReward            program_rewards = 3 [(gogoproto.nullable) = false];
-  uint32                            next_id         = 4;
-  repeated cosmos.base.v1beta1.Coin total_locked    = 5 [
+  Params                    params               = 1 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram programs             = 2 [(gogoproto.nullable) = false];
+  repeated ProgramReward    program_rewards      = 3 [(gogoproto.nullable) = false];
+  uint32                    next_id              = 4;
+  repeated cosmos.base.v1beta1.Coin total_locked = 5 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  repeated LockAmount        lock_amounts        = 6  [(gogoproto.nullable) = false];
-  repeated PendingReward     pending_rewards     = 7  [(gogoproto.nullable) = false];
-  repeated RewardBasis       reward_bases        = 8  [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 9  [(gogoproto.nullable) = false];
+  repeated LockAmount        lock_amounts        = 6 [(gogoproto.nullable) = false];
+  repeated PendingReward     pending_rewards     = 7 [(gogoproto.nullable) = false];
+  repeated RewardBasis       reward_bases        = 8 [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 9 [(gogoproto.nullable) = false];
   repeated Unlocking         unlockings          = 10 [(gogoproto.nullable) = false];
 }
 
@@ -42,7 +42,7 @@ message LockAmount {
 // PendingReward tracks the amount of rewards that a given address has calculated
 // but not yet claimed.
 message PendingReward {
-  string                            address        = 1;
+  string   address                                 = 1;
   repeated cosmos.base.v1beta1.Coin pending_reward = 2 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
@@ -52,10 +52,10 @@ message PendingReward {
 // RewardBasis tracks the value of a given tier and lock denom's RewardAccumulator
 // at the last time a specific address calculated pending rewards for it.
 message RewardBasis {
-  string                      address       = 1;
-  uint32                      tier          = 2;
-  string                      lock_denom    = 3;
-  repeated cosmos.base.v1beta1.DecCoin reward_basis  = 4 [
+  string   address                                  = 1;
+  uint32   tier                                     = 2;
+  string   lock_denom                               = 3;
+  repeated cosmos.base.v1beta1.DecCoin reward_basis = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
@@ -65,9 +65,9 @@ message RewardBasis {
 // of rewards that a single unit of lock_denom would have acucmulated if it was
 // locked at a given tier since genesis.
 message RewardAccumulator {
-  uint32                      tier          = 1;
-  string                      lock_denom    = 2;
-  repeated cosmos.base.v1beta1.DecCoin reward_basis  = 4 [
+  uint32   tier                                     = 1;
+  string   lock_denom                               = 2;
+  repeated cosmos.base.v1beta1.DecCoin reward_basis = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];

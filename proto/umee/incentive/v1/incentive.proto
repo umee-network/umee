@@ -8,7 +8,7 @@ option go_package = "github.com/umee-network/umee/v2/x/incentive/types";
 // Params defines the parameters for the incentive module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
-  
+
   // The id uniquely identifies the incentive program after it has been created.
   uint32 id = 1;
 

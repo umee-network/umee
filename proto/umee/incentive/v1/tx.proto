@@ -36,8 +36,8 @@ message MsgClaimResponse {
 
 // MsgLock represents a lender's request to lock uToken collateral.
 message MsgLock {
-  string lender = 1;
-  uint32 tier   = 2;
+  string                   lender = 1;
+  uint32                   tier   = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 
@@ -46,8 +46,8 @@ message MsgLockResponse {}
 
 // MsgUnlock represents a lender's request to begin unlocking uToken collateral.
 message MsgUnlock {
-  string lender = 1;
-  uint32 tier   = 2;
+  string                   lender = 1;
+  uint32                   tier   = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 
@@ -56,9 +56,9 @@ message MsgUnlockResponse {}
 
 // MsgSponsor represents a sponsor's request to contribute rewards to an incentive program.
 message MsgSponsor {
-  string sponsor    = 1;
-  uint32 program_id = 2;
-  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  string                   sponsor    = 1;
+  uint32                   program_id = 2;
+  cosmos.base.v1beta1.Coin amount     = 3 [(gogoproto.nullable) = false];
 }
 
 // MsgSponsorResponse defines the Msg/Unlock response type.
