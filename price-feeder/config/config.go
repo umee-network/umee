@@ -54,6 +54,7 @@ type (
 	Config struct {
 		Server          Server         `toml:"server"`
 		CurrencyPairs   []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations      []Deviation    `toml:"deviation_thresholds"`
 		Account         Account        `toml:"account" validate:"required,gt=0,dive,required"`
 		Keyring         Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
 		RPC             RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
@@ -77,6 +78,13 @@ type (
 		Base      string   `toml:"base" validate:"required"`
 		Quote     string   `toml:"quote" validate:"required"`
 		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+	}
+
+	// Deviation defines a maximum amount of standard deviations that a given asset can
+	// be from the median without being filtered out before voting.
+	Deviation struct {
+		Base      string `toml:"base" validate:"required"`
+		Threshold string `toml:"threshold" validate:"required"`
 	}
 
 	// Account defines account related configuration that is related to the Umee

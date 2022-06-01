@@ -52,6 +52,7 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 	pricesFiltered, err := FilterCandleDeviations(
 		zerolog.Nop(),
 		providerCandles,
+		make(map[string]sdk.Dec),
 	)
 
 	_, ok := pricesFiltered[config.ProviderCoinbase]
@@ -93,6 +94,7 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 	pricesFiltered, err := FilterTickerDeviations(
 		zerolog.Nop(),
 		providerTickers,
+		make(map[string]sdk.Dec),
 	)
 
 	_, ok := pricesFiltered[config.ProviderCoinbase]
