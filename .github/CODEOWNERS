@@ -6,8 +6,5 @@
 # Primary repo maintainers
 *       @umee-network/core-devs
 
-# Infrastructure & devops maintainers
-/infra/ @umee-network/core-sre
-
 # Documentation
 *.md @umee-network/core-docs
