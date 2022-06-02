@@ -6,6 +6,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: docker/login-action@v1
+      with:
+        registry: us-docker.pkg.dev
+        username: _json_key_base64
+        password: '${{ secrets.GCP_SA_KEY }}'
     - name: Pack & Distribute Umee Images
       shell: bash
       run: |
