@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -47,6 +48,10 @@ var (
 		ProviderCoinbase: {},
 		ProviderMock:     {},
 	}
+
+	// maxDeviationThreshold is the maxmimum allowed amount of standard
+	// deviations which validators are able to set for a given asset.
+	maxDeviationThreshold = sdk.MustNewDecFromStr("3.0")
 )
 
 type (
@@ -235,6 +240,17 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 	if len(gatePairs) > 1 {
 		return cfg, fmt.Errorf("gate provider does not support multiple pairs: %v", gatePairs)
+	}
+
+	for _, deviation := range cfg.Deviations {
+		threshold, err := sdk.NewDecFromStr(deviation.Threshold)
+		if err != nil {
+			return cfg, fmt.Errorf("deviation thresholds must be numeric: %w", err)
+		}
+
+		if threshold.GT(maxDeviationThreshold) {
+			return cfg, fmt.Errorf("deviation thresholds must not exceed 3.0")
+		}
 	}
 
 	return cfg, cfg.Validate()
