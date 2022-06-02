@@ -6,6 +6,10 @@ read_timeout = "20s"
 verbose_cors = true
 write_timeout = "20s"
 
+[[deviation_thresholds]]
+base = "USDT"
+threshold = "2"
+
 [[currency_pairs]]
 base = "ATOM"
 providers = [
