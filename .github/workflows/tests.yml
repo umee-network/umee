@@ -24,12 +24,12 @@ jobs:
       - name: Display Go Version
         run: go version
       - uses: actions/cache@v3
-        id: cache-go-tpares
+        id: cache-go-tparse
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-tparse-binary
       - name: Install tparse
-        if: steps.cache-go-tpares.outputs.cache-hit != 'true'
+        if: steps.cache-go-tparse.outputs.cache-hit != 'true'
         run: |
           export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.9.0
 
