@@ -44,3 +44,5 @@ brew install hashicorp/tap/packer
 export GITHUB_SHA=foobar
 bin/pack-and-distribute-only-docker
 ```
+
+.
