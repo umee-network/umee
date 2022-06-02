@@ -97,16 +97,14 @@ type AppModule struct {
 	AppModuleBasic
 
 	keeper         keeper.Keeper
-	accountKeeper  types.AccountKeeper
 	bankKeeper     types.BankKeeper
 	leverageKeeper types.LeverageKeeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk types.BankKeeper, lk types.LeverageKeeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, bk types.BankKeeper, lk types.LeverageKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
-		accountKeeper:  ak,
 		bankKeeper:     bk,
 		leverageKeeper: lk,
 	}
