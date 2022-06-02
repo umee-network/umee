@@ -339,7 +339,7 @@ providers = [
 	require.Error(t, err)
 }
 
-func TestParseConfigValid_Deviations(t *testing.T) {
+func TestParseConfig_Valid_Deviations(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
@@ -434,7 +434,7 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 	require.Equal(t, "ATOM", cfg.Deviations[1].Base)
 }
 
-func TestParseConfigInvalid_Deviations(t *testing.T) {
+func TestParseConfig_Invalid_Deviations(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
