@@ -1,5 +1,6 @@
 package client
 
+/*
 import (
 	"net/http"
 
@@ -10,6 +11,11 @@ import (
 
 	"github.com/umee-network/umee/v2/x/leverage/client/cli"
 )
+
+
+
+TODO: need to be updated to new gov message hanlders
+   https://github.com/umee-network/umee/issues/1001
 
 // ProposalHandler defines an x/gov proposal handler for the CLI only.
 var ProposalHandler = govclient.NewProposalHandler(
@@ -25,3 +31,4 @@ func updateRegistryProposalNoOpHandler(clientCtx client.Context) govrest.Proposa
 		},
 	}
 }
+*/
