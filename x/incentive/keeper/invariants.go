@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v2/x/incentive/types"
 )
 
 const (
 	routeNextID = "next-id"
 )
 
-// RegisterInvariants registers the leverage module invariants
+// RegisterInvariants registers the incentive module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeNextID, NextIDInvariant(k))
 }
