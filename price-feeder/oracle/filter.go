@@ -38,7 +38,9 @@ func FilterTickerDeviations(
 		return nil, err
 	}
 
-	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
+	// We accept any prices that are within (2 * T)𝜎, or for which we couldn't get 𝜎.
+	// T is defined as the deviation threshold, either set by the config
+	// or defaulted to 1.
 	for providerName, priceTickers := range prices {
 		for base, tp := range priceTickers {
 			threshold := defaultDeviationThreshold
@@ -110,7 +112,9 @@ func FilterCandleDeviations(
 		return nil, err
 	}
 
-	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
+	// We accept any prices that are within (2 * T)𝜎, or for which we couldn't get 𝜎.
+	// T is defined as the deviation threshold, either set by the config
+	// or defaulted to 1.
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
 			threshold := defaultDeviationThreshold
