@@ -24,7 +24,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
@@ -100,7 +99,6 @@ import (
 	customante "github.com/umee-network/umee/v2/ante"
 	appparams "github.com/umee-network/umee/v2/app/params"
 	"github.com/umee-network/umee/v2/app/upgrades"
-	"github.com/umee-network/umee/v2/app/upgrades/calypso"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
@@ -678,10 +676,7 @@ func New(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
-	upgrades.RegisterUpgradeHandlers(
-		app.mm, app.configurator, &app.AccountKeeper, &baseBankKeeper, &app.bech32IbcKeeper, &app.DistrKeeper,
-		&app.MintKeeper, &app.StakingKeeper, &app.UpgradeKeeper, &app.LeverageKeeper, &app.OracleKeeper,
-	)
+	upgrades.RegisterUpgradeHandlers(app.mm, app.configurator, &app.bech32IbcKeeper, &app.UpgradeKeeper)
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
@@ -827,9 +822,6 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 
 	// registry Tendermint RPC proxy routes
 	rpc.RegisterRoutes(clientCtx, apiSvr.Router)
-
-	// register legacy tx routes
-	authrest.RegisterTxRoutes(clientCtx, apiSvr.Router)
 
 	// register new tx routes from grpc-gateway
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
