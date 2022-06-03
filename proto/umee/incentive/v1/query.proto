@@ -9,11 +9,26 @@ option go_package = "github.com/umee-network/umee/v2/x/incentive/types";
 
 // Query defines the gRPC querier service.
 service Query {
+  // Params queries the parameters of the x/incentive module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/params";
+  }
+
   // IncentivePrograms queries for all incentives programs that have ever existed.
   rpc IncentivePrograms(QueryIncentiveProgramsRequest)
       returns (QueryIncentiveProgramsResponse) {
     option (google.api.http).get = "/umee/incentive/v1/incentive_programs";
   }
+}
+
+// QueryParamsRequest defines the request structure for the Params gRPC service
+// handler.
+message QueryParamsRequest {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryIncentiveProgramsRequest defines the request structure for the IncentivePrograms
