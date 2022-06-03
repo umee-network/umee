@@ -1,6 +1,8 @@
 package upgrades
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
@@ -8,31 +10,41 @@ import (
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
+	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
-	"github.com/umee-network/umee/v2/app/upgrades/calypso"
-	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
-	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
+	// oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 )
 
+const UpgradeV3_0Plan = "v1.0-v3.0"
+
 // RegisterUpgradeHandlers registers handlers for all upgrades
-// Note: This method has crazy parameters because of circular import issues, I didn't want to make a Gravity struct
-// along with a Gravity interface
 func RegisterUpgradeHandlers(
-	mm *module.Manager, configurator *module.Configurator, accountKeeper *authkeeper.AccountKeeper,
-	bankKeeper *bankkeeper.BaseKeeper, bech32IbcKeeper *bech32ibckeeper.Keeper, distrKeeper *distrkeeper.Keeper,
-	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, upgradeKeeper *upgradekeeper.Keeper,
-	leverageKeeper *leveragekeeper.Keeper, oracleKeeper *oraclekeeper.Keeper,
+	mm *module.Manager, configurator *module.Configurator,
+	bech32IbcKeeper *bech32ibckeeper.Keeper, upgradeKeeper *upgradekeeper.Keeper,
 ) {
-	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
-		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil || upgradeKeeper == nil {
-		panic("Nil argument to RegisterUpgradeHandlers()!")
-	}
-	// Calypso aka v1->v2 UPGRADE HANDLER SETUP
+	// v3 upgrade handler performs upgrade from v1->v3
 	upgradeKeeper.SetUpgradeHandler(
-		calypso.PlanName, // Codename Calypso
-		calypso.GetCalypsoUpgradeHandler(
-			mm, configurator, accountKeeper, bankKeeper, bech32IbcKeeper,
-			distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, oracleKeeper,
-		),
-	)
+		UpgradeV3_0Plan,
+		func(
+			ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap,
+		) (module.VersionMap, error) {
+
+			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_0Plan)
+
+			err := setupBech32ibcKeeper(bech32IbcKeeper, ctx)
+			if err != nil {
+				return sdkerrors.Wrap(err, "Calypso Upgrade: Unable to upgrade, bech32ibc module not initialized")
+			}
+
+			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)
+			return mm.RunMigrations(ctx, *configurator, vmap)
+
+		})
+}
+
+// Sets up bech32ibc module by setting the native account prefix to "umee".
+// Failing to set the native prefix will cause a chain halt on init genesis or
+// in the firstBeginBlocker assertions.
+func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
+	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
 }
