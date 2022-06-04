@@ -98,6 +98,7 @@ func (p Params) Validate() error {
 	if err := validateMaxUnlocks(p.MaxUnlocks); err != nil {
 		return err
 	}
+	// TODO: ensure long > med > short, for durations
 	if err := validateLockDuration(p.LockDurationLong); err != nil {
 		return err
 	}
