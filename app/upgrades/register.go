@@ -10,6 +10,7 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	incentivekeeper "github.com/umee-network/umee/v2/x/incentive/keeper"
 	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
 	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 )
@@ -21,7 +22,7 @@ func RegisterUpgradeHandlers(
 	mm *module.Manager, configurator *module.Configurator, accountKeeper *authkeeper.AccountKeeper,
 	bankKeeper *bankkeeper.BaseKeeper, bech32IbcKeeper *bech32ibckeeper.Keeper, distrKeeper *distrkeeper.Keeper,
 	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, upgradeKeeper *upgradekeeper.Keeper,
-	leverageKeeper *leveragekeeper.Keeper, oracleKeeper *oraclekeeper.Keeper,
+	leverageKeeper *leveragekeeper.Keeper, incentiveKeeper *incentivekeeper.Keeper, oracleKeeper *oraclekeeper.Keeper,
 ) {
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
 		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil || upgradeKeeper == nil {
@@ -32,7 +33,7 @@ func RegisterUpgradeHandlers(
 		calypso.PlanName, // Codename Calypso
 		calypso.GetCalypsoUpgradeHandler(
 			mm, configurator, accountKeeper, bankKeeper, bech32IbcKeeper,
-			distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, oracleKeeper,
+			distrKeeper, mintKeeper, stakingKeeper, leverageKeeper, incentiveKeeper, oracleKeeper,
 		),
 	)
 }

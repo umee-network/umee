@@ -11,6 +11,9 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
+	"github.com/umee-network/umee/v2/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v2/x/incentive/keeper"
+	incentivetypes "github.com/umee-network/umee/v2/x/incentive/types"
 	"github.com/umee-network/umee/v2/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
@@ -19,18 +22,18 @@ import (
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
-// GetCalypsoUpgradeHandler contains the handler for the Calypso upgrade. It setups the Bech32IBC, Leverage and Oracle
-// modules.
+// GetCalypsoUpgradeHandler contains the handler for the Calypso upgrade. It setups the Bech32IBC, Leverage, Incentive,
+// and Oracle modules.
 func GetCalypsoUpgradeHandler(
 	mm *module.Manager, configurator *module.Configurator, accountKeeper *authkeeper.AccountKeeper,
 	bankKeeper *bankkeeper.BaseKeeper, bech32IbcKeeper *bech32ibckeeper.Keeper, distrKeeper *distrkeeper.Keeper,
 	mintKeeper *mintkeeper.Keeper, stakingKeeper *stakingkeeper.Keeper, leverageKeeper *leveragekeeper.Keeper,
-	oracleKeeper *oraclekeeper.Keeper,
+	incentiveKeeper *incentivekeeper.Keeper, oracleKeeper *oraclekeeper.Keeper,
 ) func(
 	ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap,
 ) (module.VersionMap, error) {
 	if mm == nil || configurator == nil || accountKeeper == nil || bankKeeper == nil || bech32IbcKeeper == nil ||
-		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil {
+		distrKeeper == nil || mintKeeper == nil || stakingKeeper == nil || leverageKeeper == nil || incentiveKeeper == nil {
 		panic("Nil argument to GetCalypsoUpgradeHandler")
 	}
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vmap module.VersionMap) (module.VersionMap, error) {
@@ -44,6 +47,9 @@ func GetCalypsoUpgradeHandler(
 
 		vmap[leveragetypes.ModuleName] = leverage.AppModule{}.ConsensusVersion()
 		leverage.InitGenesis(ctx, *leverageKeeper, *leveragetypes.DefaultGenesis())
+
+		vmap[incentivetypes.ModuleName] = incentive.AppModule{}.ConsensusVersion()
+		incentive.InitGenesis(ctx, *incentiveKeeper, *incentivetypes.DefaultGenesis())
 
 		vmap[oracletypes.ModuleName] = oracle.AppModule{}.ConsensusVersion()
 		oracle.InitGenesis(ctx, *oracleKeeper, *oracletypes.DefaultGenesisState())
