@@ -12,9 +12,9 @@ Proposed
 
 Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` lending APY for supplying base assets.
 
-For example, a user might "lock" for 14 days some of their `u/ATOM` collateral held in the leverage module, earning an additional 12% APY of the collateral's value, received as `UMEE` tokens.
+For example, a user might "lock" some of their `u/ATOM` collateral held in the leverage module for 14 days, earning an additional 12% APY of the collateral's value, received as `UMEE` tokens.
 
-Locked tokens will be unavailable for `x/leverage` withdrawal until unlocked, but still able to be liquidated. There will be 3 locking tiers, differing in unlocking duration.
+Locked tokens will be unavailable for `x/leverage` withdrawal until unlocked, but will still be able to be liquidated. There will be 3 locking tiers, differing in unlocking duration.
 
 Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to lenders of based on the lenders' locked value and lock tier. APY will vary as fixed reward amounts are divided amongst all participating lenders.
 
