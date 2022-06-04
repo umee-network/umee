@@ -133,7 +133,7 @@ Completed unlockings for an address are cleared from state the next time withdra
 Any collateral can potentially be seized during `MsgLiquidate`, whether it is locked, unlocking, or unlocked. In the event that the target of liquidation has collateral in various such states, it will be liquidated in this order:
 1) Unlocked collateral
 2) Locked collateral, starting from the least incentivized tier
-3) Unlocking collateral, starting from the least incentivized tier and breaking ties within tiers by choosing the unlockings created first. The siezed collateral is subtracted from the `Amount` of any active unlocking affected.
+3) Unlocking collateral, starting from the least incentivized tier and breaking ties within tiers by choosing the unlockings created first. The seized collateral is subtracted from the `Amount` of any active unlocking affected.
 
 ### Incentive Programs
 
