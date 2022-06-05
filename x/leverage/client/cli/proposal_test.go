@@ -40,7 +40,12 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 			"kink_borrow_rate": "0.2",
 			"max_borrow_rate": "1.5",
 			"kink_utilization_rate": "0.2",
-			"liquidation_incentive": "0.1"
+			"liquidation_incentive": "0.1",
+			"symbol_denom": "UMEE",
+			"exponent": 6,
+			"enable_msg_lend": true,
+			"enable_msg_borrow": true,
+			"blacklist": false
 		}
 	]
 }`)
