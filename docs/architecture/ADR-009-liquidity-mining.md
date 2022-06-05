@@ -18,6 +18,8 @@ Locked tokens will be unavailable for `x/leverage` withdrawal until unlocked, bu
 
 Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to lenders of based on the lenders' locked value and lock tier. APY will vary as fixed reward amounts are divided amongst all participating lenders.
 
+A message type `MsgSponsor` will allow for internal (multisig account) or external (ordinary wallet) funding of incentive programs with the `RewardDenom` that was set by governance. This message type will not require special permissions to run, only control of the funds to be used.
+
 ### Backwards Compatibility
 
 This will introduce a new module as well as new behavior in the `x/leverage` module. The changes will take place during the mainnet `calypso` upgrade.
