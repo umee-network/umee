@@ -31,6 +31,9 @@ jobs:
       - name: Run golangci-lint
         run: make lint
         if: env.GIT_DIFF
+      - name: Run price-feeder golangci-lint
+        run: make pf-lint
+        if: env.GIT_DIFF
 
   super-linter:
     name: Run super-linter
