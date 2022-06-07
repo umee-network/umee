@@ -75,7 +75,7 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"liquidation_threshold\""
   ];
 
-  // The base_borrow_rate defines the base interest rate for borrowing this
+  // The base_borrow_rate defines the minimum interest rate for borrowing this
   // asset.
   string base_borrow_rate = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",

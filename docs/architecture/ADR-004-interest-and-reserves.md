@@ -37,11 +37,6 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Dynamic Borrow Interest Rates
 
-Definitions:
-
-- `total_lending(tokenA)`: total amount of tokenA provided to the protocol (including coins marked as a collateral).
-- `supply_utilization(tokenA) = total_borrow(tokenA) / total_lending(tokenA)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
-
 Borrow interest rates are dynamic. They are calculated using the lending pool's current supply utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
 ```go

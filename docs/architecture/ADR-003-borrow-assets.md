@@ -49,7 +49,13 @@ Note also that as a consequence of uToken interest, the asset value of uToken co
 
 ### Max collateral utilization
 
-We define a _collateral utilization_ as ratio of lended collateral to total amount of collateral per token. Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
+Definitions:
+
+- `total_lend(tokenA)`: total amount of tokenA provided to the leverage protocol (including coins marked as a collateral).
+- `supply_utilization(tokenA) = total_borrow(tokenA) / total_lend(tokenA)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
+
+We define a _token collateral utilization_ as ratio of borrowed collateral to total amount of collateral of the token. Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
+Observation: for every token `t`: `collateral_utilization(t) <= supply_utilization(t)`.
 
 High collateral utilization is dangerous for the system:
 
@@ -69,6 +75,8 @@ Let's draw the following scenario to picture the liquidators risk:
 6. In case of the big crash, liquidators won't perform a liquidation, Bob will run away with 1M USD, system will end up with a bad debt and obligation to pay Alice.
 
 We propose to set a per token parameter: **max collateral utilization** using Cosmos SDK v0.46 gov messages. The system will forbid to make any collateral related operation if the operation would move token _collateral utilization_ above _max collateral utilization_.
+
+Stable assets will have high max collateral utilization (can go even to 99%). Volatile assets should have significant smaller collateral utilization.
 
 ## Detailed Design
 
