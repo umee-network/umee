@@ -45,8 +45,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
+
 ### Features
 
+- [#998](https://github.com/umee-network/umee/pull/998) Make deviation thresholds configurable for stablecoin support.
 - [#925](https://github.com/umee-network/umee/pull/925) Require stablecoins to be converted to USD to protect against depegging.
 
 ## [v0.2.1](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.1) - 2022-04-06
