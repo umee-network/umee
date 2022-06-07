@@ -17,7 +17,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 	github.com/tendermint/tendermint v0.34.19
 	github.com/umee-network/umee/v2 v2.0.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
