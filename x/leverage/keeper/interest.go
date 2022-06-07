@@ -62,17 +62,13 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return borrowRate.Mul(borrowUtilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
-// AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
-// It should accrue interest on all open borrows, increase reserves, and set
+// AccrueAllInterest is called by EndBlock to rebase the borrowed positions.
+// It accrue interest on all open borrows, increase reserves, and set
 // LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
-	// get current unix time in seconds
 	currentTime := ctx.BlockTime().Unix()
-
-	// get last time at which interest was accrued
 	prevInterestTime := k.GetLastInterestTime(ctx)
 	if prevInterestTime == 0 {
-		// on first ever interest epoch, ignore stored value
 		prevInterestTime = currentTime
 	}
 
@@ -159,6 +155,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"reserved", newReserves.String(),
 	)
 
+	// TODO: use typed events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeInterestAccrual,
@@ -186,14 +183,17 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error 
 	return nil
 }
 
-// GetLastInterestTime gets last time at which interest was accrued
+// GetLastInterestTime returns unix timestamp (in seconds) when the lasat interest was accrued.
+// Returns 0 if the value if the value is absent.
 func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
 	bz := store.Get(timeKey)
+	if bz == nil {
+		return 0
+	}
 
 	val := gogotypes.Int64Value{}
-
 	if err := k.cdc.Unmarshal(bz, &val); err != nil {
 		panic(err)
 	}
