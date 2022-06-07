@@ -83,9 +83,9 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
-// base asset type from the module. Amount can either be exact uTokens to withdraw
-// or equivalent base assets.
+// MsgWithdrawAsset represents a lender's request to withdraw a previously
+// loaned base asset type from the module. Amount can either be exact uTokens to
+// withdraw or equivalent base assets.
 type MsgWithdrawAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -254,8 +254,8 @@ func (m *MsgBorrowAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgRepayAsset represents a lender's request to repay a borrowed base asset type
-// to the module.
+// MsgRepayAsset represents a lender's request to repay a borrowed base asset
+// type to the module.
 type MsgRepayAsset struct {
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -704,10 +704,11 @@ type MsgClient interface {
 	SetCollateral(ctx context.Context, in *MsgSetCollateral, opts ...grpc.CallOption) (*MsgSetCollateralResponse, error)
 	// BorrowAsset defines a method for borrowing coins from the capital facility.
 	BorrowAsset(ctx context.Context, in *MsgBorrowAsset, opts ...grpc.CallOption) (*MsgBorrowAssetResponse, error)
-	// RepayAsset defines a method for repaying borrowed coins to the capital facility.
+	// RepayAsset defines a method for repaying borrowed coins to the capital
+	// facility.
 	RepayAsset(ctx context.Context, in *MsgRepayAsset, opts ...grpc.CallOption) (*MsgRepayAssetResponse, error)
-	// Liquidate defines a method for repaying a different user's borrowed coins to
-	// the capital facility in exchange for some of their collateral.
+	// Liquidate defines a method for repaying a different user's borrowed coins
+	// to the capital facility in exchange for some of their collateral.
 	Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grpc.CallOption) (*MsgLiquidateResponse, error)
 }
 
@@ -785,10 +786,11 @@ type MsgServer interface {
 	SetCollateral(context.Context, *MsgSetCollateral) (*MsgSetCollateralResponse, error)
 	// BorrowAsset defines a method for borrowing coins from the capital facility.
 	BorrowAsset(context.Context, *MsgBorrowAsset) (*MsgBorrowAssetResponse, error)
-	// RepayAsset defines a method for repaying borrowed coins to the capital facility.
+	// RepayAsset defines a method for repaying borrowed coins to the capital
+	// facility.
 	RepayAsset(context.Context, *MsgRepayAsset) (*MsgRepayAssetResponse, error)
-	// Liquidate defines a method for repaying a different user's borrowed coins to
-	// the capital facility in exchange for some of their collateral.
+	// Liquidate defines a method for repaying a different user's borrowed coins
+	// to the capital facility in exchange for some of their collateral.
 	Liquidate(context.Context, *MsgLiquidate) (*MsgLiquidateResponse, error)
 }
 
