@@ -60,6 +60,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 
+### API Breaking
+
+- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
 ### Features
