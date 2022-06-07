@@ -399,7 +399,12 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 	return priceProvider, nil
 }
 
-func NewProvider(ctx context.Context, providerName string, logger zerolog.Logger, providerPairs ...types.CurrencyPair) (provider.Provider, error) {
+func NewProvider(
+	ctx context.Context,
+	providerName string,
+	logger zerolog.Logger,
+	providerPairs ...types.CurrencyPair,
+) (provider.Provider, error) {
 	switch providerName {
 	case config.ProviderBinance:
 		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
