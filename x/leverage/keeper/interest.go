@@ -11,7 +11,7 @@ import (
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom
-// using its borrow utilization and token-specific params. Returns zero on
+// using its supply utilization and token-specific params. Returns zero on
 // invalid asset.
 func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	token, err := k.GetRegisteredToken(ctx, denom)
@@ -47,7 +47,7 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 }
 
 // DeriveLendAPY derives the current lend interest rate on a token denom
-// using its borrow utilization borrow APY. Returns zero on invalid asset.
+// using its supply utilization borrow APY. Returns zero on invalid asset.
 func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	token, err := k.GetRegisteredToken(ctx, denom)
 	if err != nil {
@@ -55,11 +55,11 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
-	borrowUtilization := k.DeriveBorrowUtilization(ctx, denom)
+	utilization := k.DeriveBorrowUtilization(ctx, denom)
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
 	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
-	return borrowRate.Mul(borrowUtilization).Mul(sdk.OneDec().Sub(reduction))
+	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
 // AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.

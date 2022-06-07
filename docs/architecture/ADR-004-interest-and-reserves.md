@@ -37,7 +37,12 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Dynamic Borrow Interest Rates
 
-Borrow interest rates are dynamic. They are calculated using the lending pool's current borrow utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
+Definitions:
+
+- `total_lending(tokenA)`: total amount of tokenA provided to the protocol (including coins marked as a collateral).
+- `supply_utilization(tokenA) = total_borrow(tokenA) / total_lending(tokenA)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
+
+Borrow interest rates are dynamic. They are calculated using the lending pool's current supply utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
 ```go
 BaseAPY = sdk.NewDec("0.02")
@@ -59,7 +64,7 @@ The `x/leverage` module keeper will contain a function which derives the current
 
 ```go
 func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) (sdk.Dec, error) {
-    // Implementation must calculate the denom's borrowing utilization
+    // Implementation must calculate the denom's supply utilization
     // then calculate and return annual interest rate as a decimal.
 }
 ```
@@ -161,7 +166,7 @@ Example scenario:
 
 Note that it is the module "reserved amount" has increased, not the actual balance of the `x/leverage` account.
 
-Here is an additional example scenario, to illustrate that the module account balance of a given token _can_ become less than the reserved amount, when a token type is at or near 100% borrow utilization:
+Here is an additional example scenario, to illustrate that the module account balance of a given token _can_ become less than the reserved amount, when a token type is at or near 100% supply utilization:
 
 > Lending pool and reserve amount of `atom` both start at zero.
 > Bob, lends 1000 `atom` to the lending pool.
@@ -173,7 +178,7 @@ Here is an additional example scenario, to illustrate that the module account ba
 
 The scenario above is not fatal to our model - Bob (lender) continues to gain value as the token:uToken exchange rate increases, and we are not storing any negative numbers in place of balances - but the next 50 `uatom` lent by a lender or repaid by a borrower will be blocked for the reserve requirements rather than being immediately available for borrowing or withdrawal.
 
-The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% borrow utilization.
+The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% supply utilization.
 
 This is not a threatening scenario, as it resolves as soon as either a sufficient `RepayAsset` or a `LendAsset` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
 
@@ -187,7 +192,7 @@ This is not a threatening scenario, as it resolves as soon as either a sufficien
 
 ### Negative
 
-- Reserved amounts can temporarily exceed module account balance in some cases (when interest accrues on a token type at or very near 100% borrowing utilization)
+- Reserved amounts can temporarily exceed module account balance in some cases (when interest accrues on a token type at or very near 100% supply utilization)
 - Requires multiple governance parameters to calculate dynamic interest rates.
 
 ### Neutral
