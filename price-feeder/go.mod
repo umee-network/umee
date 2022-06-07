@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v1.1.0
 	github.com/armon/go-metrics v0.4.0
-	github.com/cosmos/cosmos-sdk v0.46.0-rc1
+	github.com/cosmos/cosmos-sdk v0.46.0-rc1.0.20220606194936-99a0c3d1daf1
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
