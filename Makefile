@@ -150,11 +150,6 @@ lint:
 	@echo "--> Running linter"
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
 
-pf-lint:
-	@echo "--> Running Price Feeder linter"
-	@cd price-feeder
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
-
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
