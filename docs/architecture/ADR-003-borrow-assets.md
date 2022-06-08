@@ -129,11 +129,11 @@ Both CLI and gRPC must be supported for the above messages.
 
 ### Storage layout
 
-Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` module stores open borrow and collateral positions as follows:
+Borrow positions are stored using a mechanism discussed in ADR-008
+
+Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pairs as a single object, the `umee/x/leverage` module stores collateral settings and positions as follows:
 
 ```go
-// open borrows:
-borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 
 // borrower collateral settings for enabled denoms:
 collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = 0x01
