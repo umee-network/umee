@@ -52,7 +52,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message\
+- [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
 ### Features
