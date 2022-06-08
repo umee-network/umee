@@ -20,7 +20,7 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 	github.com/tendermint/starport v0.19.5
 	github.com/tendermint/tendermint v0.34.19
 	github.com/tendermint/tm-db v0.6.7
