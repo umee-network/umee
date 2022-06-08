@@ -83,12 +83,6 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	var logWriter io.Writer
-	if strings.ToLower(logFormatStr) == "text" {
-		logWriter = zerolog.ConsoleWriter{Out: os.Stderr}
-	} else {
-		logWriter = os.Stderr
-	}
-
 	switch strings.ToLower(logFormatStr) {
 	case logLevelJSON:
 		logWriter = os.Stderr
@@ -195,7 +189,7 @@ func getKeyringPassword() (string, error) {
 // trapSignal will listen for any OS signal and invoke Done on the main
 // WaitGroup allowing the main process to gracefully exit.
 func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
-	sigCh := make(chan os.Signal)
+	sigCh := make(chan os.Signal, 1)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
 	signal.Notify(sigCh, syscall.SIGINT)

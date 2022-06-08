@@ -137,7 +137,7 @@ type (
 		//
 		// Example:
 		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels""`
+		GlobalLabels [][]string `toml:"global_labels"`
 
 		// Type determines which type of telemetry to use
 		// Valid values are "prometheus" or "generic"
