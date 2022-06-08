@@ -62,9 +62,9 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return borrowRate.Mul(borrowUtilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
-// AccrueAllInterest is called by EndBlock to rebase the borrowed positions.
-// It accrues interest on all open borrows, increase reserves, and sets
-// LastInterestTime to BlockTime.
+// AccrueAllInterest is called by EndBlock to update borrow positions.
+// It accrues interest on all open borrows, increase reserves, funds 
+// oracle rewards, and sets LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	currentTime := ctx.BlockTime().Unix()
 	prevInterestTime := k.GetLastInterestTime(ctx)
