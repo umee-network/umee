@@ -49,3 +49,30 @@ jobs:
           VALIDATE_MARKDOWN: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  golangci-price-feeder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.0.1
+        with:
+          PATTERNS: |
+            **/**.go
+            price-feeder/go.mod
+            price-feeder/go.sum
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
+      - name: Lint price-feeder
+        run: |
+          cd price-feeder && make lint
+        if: env.GIT_DIFF
