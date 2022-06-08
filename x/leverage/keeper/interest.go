@@ -183,7 +183,7 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error 
 	return nil
 }
 
-// GetLastInterestTime returns unix timestamp (in seconds) when the lasat interest was accrued.
+// GetLastInterestTime returns unix timestamp (in seconds) when the last interest was accrued.
 // Returns 0 if the value if the value is absent.
 func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
