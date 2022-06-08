@@ -94,7 +94,6 @@ To implement the borrow/repay functionality of the Asset Facility, the three mes
 // MsgSetCollateral - a borrower enables or disables a specific uToken type in their wallet to be used as collateral
 type MsgSetCollateral struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  // not a uToken
   Denom    string         `json:"denom" yaml:"denom"`
   Enable   bool           `json:"enable" yaml:"enable"`
 }
@@ -109,7 +108,6 @@ type MsgBorrowAsset struct {
 // MsgRepayAsset - a user wishes to repay assets of a borrowed type
 type MsgRepayAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  // uToken
   Amount   sdk.Coin       `json:"amount" yaml:"amount"`
 }
 
