@@ -267,9 +267,9 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	gp := currencyPairToGatePair(cp)
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
-	} else {
-		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 	}
+
+	return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
@@ -323,7 +323,14 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "":
 			break
 		default:
-			p.reconnect()
+			err := p.reconnect()
+			if err != nil {
+				p.logger.Error().
+					AnErr("ticker", tickerErr).
+					AnErr("candle", candleErr).
+					AnErr("event", err).
+					Msg("Error on reconnecting")
+			}
 			return
 		}
 	}
@@ -393,7 +400,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 
 // UnmarshalParams is a helper function which unmarshals the 2d slice of interfaces
 // from a GateCandleResponse into the GateCandle.
-func (gc *GateCandle) UnmarshalParams(params [][]interface{}) error {
+func (candle *GateCandle) UnmarshalParams(params [][]interface{}) error {
 	var tmp []interface{}
 
 	if len(params) == 0 {
@@ -410,25 +417,25 @@ func (gc *GateCandle) UnmarshalParams(params [][]interface{}) error {
 	if time == 0 {
 		return fmt.Errorf("time field must be a float")
 	}
-	gc.TimeStamp = time
+	candle.TimeStamp = time
 
 	close, ok := tmp[1].(string)
 	if !ok {
 		return fmt.Errorf("close field must be a string")
 	}
-	gc.Close = close
+	candle.Close = close
 
 	volume, ok := tmp[5].(string)
 	if !ok {
 		return fmt.Errorf("volume field must be a string")
 	}
-	gc.Volume = volume
+	candle.Volume = volume
 
 	symbol, ok := tmp[7].(string)
 	if !ok {
 		return fmt.Errorf("symbol field must be a string")
 	}
-	gc.Symbol = symbol
+	candle.Symbol = symbol
 
 	return nil
 }
@@ -475,7 +482,7 @@ func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert gate timestamp seconds -> milliseconds
-	candle.TimeStamp = candle.TimeStamp * int64(time.Second/time.Millisecond)
+	candle.TimeStamp *= int64(time.Second / time.Millisecond)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []GateCandle{}
 

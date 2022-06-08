@@ -79,7 +79,9 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 	)
 
 	for _, providerPrices := range prices {
-		for base, cp := range providerPrices {
+		for base := range providerPrices {
+			cp := providerPrices[base]
+
 			if _, ok := weightedPrices[base]; !ok {
 				weightedPrices[base] = sdk.ZeroDec()
 			}

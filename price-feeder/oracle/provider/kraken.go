@@ -99,7 +99,11 @@ type (
 )
 
 // NewKrakenProvider returns a new Kraken provider with the WS connection and msg handler.
-func NewKrakenProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*KrakenProvider, error) {
+func NewKrakenProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	pairs ...types.CurrencyPair,
+) (*KrakenProvider, error) {
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   krakenHost,
@@ -383,7 +387,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	return nil
 }
 
-func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
+func (candle *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	var tmp []interface{}
 	if err := json.Unmarshal(buf, &tmp); err != nil {
 		return err
@@ -401,19 +405,19 @@ func (kc *KrakenCandle) UnmarshalJSON(buf []byte) error {
 	if err != nil {
 		return fmt.Errorf("unable to convert time to float")
 	}
-	kc.TimeStamp = int64(timeFloat)
+	candle.TimeStamp = int64(timeFloat)
 
 	close, ok := tmp[5].(string)
 	if !ok {
 		return fmt.Errorf("close field must be a string")
 	}
-	kc.Close = close
+	candle.Close = close
 
 	volume, ok := tmp[7].(string)
 	if !ok {
 		return fmt.Errorf("volume field must be a string")
 	}
-	kc.Volume = volume
+	candle.Volume = volume
 
 	return nil
 }
@@ -500,13 +504,13 @@ func (p *KrakenProvider) keepReconnecting() {
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
 			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
+			connectionTries++
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
 			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
 		}
-		connectionTries++
 		return
 	}
 }
@@ -559,7 +563,7 @@ func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert kraken timestamp seconds -> milliseconds
-	candle.TimeStamp = candle.TimeStamp * int64(time.Second/time.Millisecond)
+	candle.TimeStamp *= int64(time.Second / time.Millisecond)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []KrakenCandle{}
 
@@ -674,7 +678,7 @@ func newKrakenCandleSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
 // krakenPairToCurrencyPairSymbol receives a kraken pair formated
 // ex.: ATOM/USDT and return currencyPair Symbol ATOMUSDT.
 func krakenPairToCurrencyPairSymbol(krakenPair string) string {
-	return strings.Replace(krakenPair, "/", "", -1)
+	return strings.ReplaceAll(krakenPair, "/", "")
 }
 
 // currencyPairToKrakenPair receives a currency pair
