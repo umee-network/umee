@@ -159,7 +159,7 @@ Example scenario:
 >
 > The same math is applied to all open borrows, which may be from different users and in different asset types, during EndBlock.
 
-Note that it is the module "reserved amount" has increased, not the actual balance of the `x/leverage` account.
+Note that the module "reserved amount" has increased, but not the actual balance of the `x/leverage` account.
 
 Here is an additional example scenario, to illustrate that the module account balance of a given token _can_ become less than the reserved amount, when a token type is at or near 100% supply utilization:
 
