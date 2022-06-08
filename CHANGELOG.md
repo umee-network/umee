@@ -59,6 +59,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [962](https://github.com/umee-network/umee/pull/962) Streamline AccrueAllInterest
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
+- [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -73,11 +72,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
-	secondsElapsed := currentTime - prevInterestTime
-	if secondsElapsed < 0 {
-		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, fmt.Sprintf("%d seconds", secondsElapsed))
+	if currentTime < prevInterestTime {
+		return types.ErrNegativeTimeElapsed.Wrap(fmt.Sprintf("current: %d, prev: %d", currentTime, prevInterestTime))
 	}
-	yearsElapsed := sdk.NewDec(secondsElapsed).QuoInt64(types.SecondsPerYear)
+	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)
