@@ -73,7 +73,13 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	if currentTime < prevInterestTime {
-		return types.ErrNegativeTimeElapsed.Wrap(fmt.Sprintf("current: %d, prev: %d", currentTime, prevInterestTime))
+		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
+			types.ErrNegativeTimeElapsed.Error(),
+			"current", currentTime,
+			"prev", prevInterestTime,
+		)
+
+		return nil
 	}
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 
