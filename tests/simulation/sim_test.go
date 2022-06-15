@@ -185,6 +185,89 @@ func TestAppStateDeterminism(t *testing.T) {
 	}
 }
 
+func TestAppStateConsensusRegression(t *testing.T) {
+	if !simapp.FlagEnabledValue {
+		t.Skip("skipping application simulation")
+	}
+
+	config := simapp.NewConfigFromFlags()
+	config.InitialBlockHeight = 1
+	config.ExportParamsPath = ""
+	config.OnOperation = false
+	config.AllInvariants = false
+	config.ChainID = fmt.Sprintf("simulation-chain-%s", tmrand.NewRand().Str(6))
+
+	numSeeds := 3
+	numTimesToRunPerSeed := 5
+	appHashList := make([]json.RawMessage, numTimesToRunPerSeed)
+
+	for i := 0; i < numSeeds; i++ {
+		config.Seed = rand.Int63()
+
+		for j := 0; j < numTimesToRunPerSeed; j++ {
+			var logger log.Logger
+			if simapp.FlagVerboseValue {
+				logger = server.ZeroLogWrapper{
+					Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
+				}
+			} else {
+				logger = server.ZeroLogWrapper{
+					Logger: zerolog.Nop(),
+				}
+			}
+
+			db := dbm.NewMemDB()
+			app := umeeapp.New(
+				logger,
+				db,
+				nil,
+				true,
+				map[int64]bool{},
+				umeeapp.DefaultNodeHome,
+				simapp.FlagPeriodValue,
+				umeeapp.MakeEncodingConfig(),
+				umeeapp.EmptyAppOptions{},
+				interBlockCacheOpt(),
+			)
+
+			fmt.Printf(
+				"running non-determinism simulation; seed %d; run: %d/%d; attempt: %d/%d\n",
+				config.Seed, i+1, numSeeds, j+1, numTimesToRunPerSeed,
+			)
+
+			_, _, err := simulation.SimulateFromSeed(
+				t,
+				os.Stdout,
+				app.BaseApp,
+				appStateFn(app.AppCodec(), app.SimulationManager()),
+				simtypes.RandomAccounts,
+				simapp.SimulationOperations(app, app.AppCodec(), config),
+				app.ModuleAccountAddrs(),
+				config,
+				app.AppCodec(),
+			)
+			require.NoError(t, err)
+
+			if config.Commit {
+				simapp.PrintStats(db)
+			}
+
+			appHash := app.LastCommitID().Hash
+			appHashList[j] = appHash
+
+			if j != 0 {
+				require.Equal(
+					t,
+					string(appHashList[0]),
+					string(appHashList[j]),
+					"non-determinism in seed %d; run: %d/%d; attempt: %d/%d\n",
+					config.Seed, i+1, numSeeds, j+1, numTimesToRunPerSeed,
+				)
+			}
+		}
+	}
+}
+
 func BenchmarkFullAppSimulation(b *testing.B) {
 	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-bench-sim", "Simulation")
 	if skip {
