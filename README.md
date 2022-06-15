@@ -23,12 +23,13 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Releases](#releases)
+  - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
   - [Private](#private)
 - [Install](#install)
-- [Contributing](CONTRIBUTING.md)
 
 ## Releases
 
@@ -40,13 +41,14 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 | :-----: | :-----: | :----------: | :---------: | :---------: | :-----------: | :------------------: |
 | v0.8.x  |    ✗    |      ✓       |   v0.45.x   |   v2.0.x    |    v0.2.x     |        v0.1.x        |
 | v1.x.x  |    ✓    |      ✗       |   v0.45.x   |   v2.0.x    |    v0.2.x     |         N/A          |
-| v2.x.x  |    ✗    |      ✓       |   v0.45.x   |   v2.2.x    |    v0.2.x     |        v0.2.x        |
+| v2.x.x  |    ✗    |      ✓       |   v0.45.x   |   v2.3.x    |    v0.2.x     |        v0.2.x        |
 
 ## Active Networks
 
-### Mainnet
+### Public
 
-[umee-1](networks/umee-1)
+- [umee-1](networks/umee-1)
+- [umeemania-1](networks/umeemania-1)
 
 ### Private
 
