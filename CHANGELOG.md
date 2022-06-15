@@ -61,6 +61,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 
+### Bug Fixes
+
+- [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
 ### Features
