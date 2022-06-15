@@ -6,7 +6,7 @@ require (
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07
 	github.com/cosmos/cosmos-sdk v0.45.4
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v2 v2.2.0
+	github.com/cosmos/ibc-go/v2 v2.3.0
 	github.com/ethereum/go-ethereum v1.10.18
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
