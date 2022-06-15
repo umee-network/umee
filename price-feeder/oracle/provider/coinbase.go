@@ -91,7 +91,11 @@ type (
 )
 
 // NewCoinbaseProvider creates a new CoinbaseProvider.
-func NewCoinbaseProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*CoinbaseProvider, error) {
+func NewCoinbaseProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	pairs ...types.CurrencyPair,
+) (*CoinbaseProvider, error) {
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   coinbaseHost,
@@ -157,7 +161,8 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 
 	candles := make(map[string][]CandlePrice)
 
-	for cp, trades := range tradeMap {
+	for cp := range tradeMap {
+		trades := tradeMap[cp]
 		// sort oldest -> newest
 		sort.Slice(trades, func(i, j int) bool {
 			return time.Unix(trades[i].Time, 0).Before(time.Unix(trades[j].Time, 0))
@@ -287,9 +292,9 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 	gp := currencyPairToCoinbasePair(cp)
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
-	} else {
-		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", gp)
 	}
+
+	return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", gp)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
@@ -514,7 +519,7 @@ func currencyPairToCoinbasePair(pair types.CurrencyPair) string {
 // coinbasePairToCurrencyPair returns the currency pair string
 // ex.: "ATOMUSDT".
 func coinbasePairToCurrencyPair(coinbasePair string) string {
-	return strings.Replace(coinbasePair, "-", "", -1)
+	return strings.ReplaceAll(coinbasePair, "-", "")
 }
 
 // newCoinbaseSubscription returns a new subscription topic for matches/tickers.

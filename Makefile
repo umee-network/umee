@@ -208,11 +208,10 @@ proto-format:
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
 		find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \; ; fi
 
-proto-lint: 
+proto-lint:
 	@echo "Linting Protobuf files"
 	@$(DOCKER_BUF) lint --error-format=json
 
-proto-check-breaking: 
+proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
-

@@ -4,6 +4,13 @@ run:
     - tests/e2e
     - tests/simulation
 
+  govet:
+    # Enable analyzers by name (in addition to default).
+    # Run `go tool vet help` to see all analyzers.
+    # Default: []
+    enable:
+      - fieldalignment
+
 linters:
   enable:
     - bodyclose
@@ -15,17 +22,16 @@ linters:
     - gocritic
     - gofmt
     - goimports
-    - golint
+    - revive
     - gosec
     - gosimple
     - govet
     - ineffassign
     - lll
     - misspell
-    - maligned
     - nakedret
     - prealloc
-    - scopelint
+    - exportloopref
     - staticcheck
     - structcheck
     - stylecheck
@@ -54,8 +60,11 @@ linters-settings:
     max-blank-identifiers: 3
   golint:
     min-confidence: 0
-  maligned:
-    suggest-new: true
+  revive:
+    # Sets the default failure confidence.
+    # This means that linting errors with less than 0.8 confidence will be ignored.
+    # Default: 0.8
+    confidence: 0
   misspell:
     locale: US
   nolintlint:

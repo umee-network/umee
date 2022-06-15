@@ -7,15 +7,17 @@ import (
 	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
-// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-// without being considered faulty.
-var deviationThreshold = sdk.MustNewDecFromStr("1.0")
+// defaultDeviationThreshold defines how many 𝜎 a provider can be away
+// from the mean without being considered faulty. This can be overridden
+// in the config.
+var defaultDeviationThreshold = sdk.MustNewDecFromStr("1.0")
 
 // FilterTickerDeviations finds the standard deviations of the prices of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
 func FilterTickerDeviations(
 	logger zerolog.Logger,
 	prices provider.AggregatedProviderPrices,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderPrices, error) {
 	var (
 		filteredPrices = make(provider.AggregatedProviderPrices)
@@ -36,12 +38,19 @@ func FilterTickerDeviations(
 		return nil, err
 	}
 
-	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
+	// We accept any prices that are within (2 * T)𝜎, or for which we couldn't get 𝜎.
+	// T is defined as the deviation threshold, either set by the config
+	// or defaulted to 1.
 	for providerName, priceTickers := range prices {
 		for base, tp := range priceTickers {
+			threshold := defaultDeviationThreshold
+			if _, ok := deviationThresholds[base]; ok {
+				threshold = deviationThresholds[base]
+			}
+
 			if _, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					tp.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
+					tp.Price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
 				if _, ok := filteredPrices[providerName]; !ok {
 					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
 				}
@@ -66,6 +75,7 @@ func FilterTickerDeviations(
 func FilterCandleDeviations(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderCandles, error) {
 	var (
 		filteredCandles = make(provider.AggregatedProviderCandles)
@@ -102,12 +112,19 @@ func FilterCandleDeviations(
 		return nil, err
 	}
 
-	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
+	// We accept any prices that are within (2 * T)𝜎, or for which we couldn't get 𝜎.
+	// T is defined as the deviation threshold, either set by the config
+	// or defaulted to 1.
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
+			threshold := defaultDeviationThreshold
+			if _, ok := deviationThresholds[base]; ok {
+				threshold = deviationThresholds[base]
+			}
+
 			if _, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
-					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				(price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
+					price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
 				if _, ok := filteredCandles[providerName]; !ok {
 					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
 				}
