@@ -43,7 +43,6 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryTokenMarketSize(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationThreshold(),
-		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryMarketSummary(),
 	)
 
@@ -681,37 +680,6 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 			}
 
 			resp, err := queryClient.MarketSummary(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryLiquidationTargets returns a CLI command handler to query for
-// all eligible liquidation targets
-func GetCmdQueryLiquidationTargets() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "liquidation-targets",
-		Args:  cobra.ExactArgs(0),
-		Short: "Query for all borrower addresses eligible for liquidation",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLiquidationTargetsRequest{}
-
-			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

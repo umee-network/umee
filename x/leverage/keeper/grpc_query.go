@@ -536,29 +536,6 @@ func (q Querier) LiquidationThreshold(
 	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: t}, nil
 }
 
-func (q Querier) LiquidationTargets(
-	goCtx context.Context,
-	req *types.QueryLiquidationTargetsRequest,
-) (*types.QueryLiquidationTargetsResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	targets, err := q.Keeper.GetEligibleLiquidationTargets(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	stringTargets := []string{}
-	for _, addr := range targets {
-		stringTargets = append(stringTargets, addr.String())
-	}
-
-	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
-}
-
 func (q Querier) MarketSummary(
 	goCtx context.Context,
 	req *types.QueryMarketSummaryRequest,

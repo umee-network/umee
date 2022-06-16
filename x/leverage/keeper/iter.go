@@ -168,56 +168,6 @@ func (k Keeper) HasCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) bool
 	return false
 }
 
-// GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
-func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
-	prefix := types.KeyPrefixAdjustedBorrow
-	liquidationTargets := []sdk.AccAddress{}
-	checkedAddrs := map[string]struct{}{}
-
-	iterator := func(key, val []byte) error {
-		// get borrower address from key
-		addr := types.AddressFromKey(key, prefix)
-
-		// if the address is already checked, do not check again
-		if _, ok := checkedAddrs[addr.String()]; ok {
-			return nil
-		}
-		checkedAddrs[addr.String()] = struct{}{}
-
-		// get borrower's total borrowed
-		borrowed := k.GetBorrowerBorrows(ctx, addr)
-
-		// get borrower's total collateral
-		collateral := k.GetBorrowerCollateral(ctx, addr)
-
-		// use oracle helper functions to find total borrowed value in USD
-		borrowValue, err := k.TotalTokenValue(ctx, borrowed)
-		if err != nil {
-			return err
-		}
-
-		// compute liquidation threshold from enabled collateral
-		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
-		if err != nil {
-			return err
-		}
-
-		// If liquidation limit is smaller than borrowed value then the
-		// address is eligible for liquidation.
-		if liquidationLimit.LT(borrowValue) {
-			liquidationTargets = append(liquidationTargets, addr)
-		}
-
-		return nil
-	}
-
-	if err := k.iterate(ctx, prefix, iterator); err != nil {
-		return nil, err
-	}
-
-	return liquidationTargets, nil
-}
-
 // SweepBadDebts attempts to repay all bad debts in the system.
 func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	prefix := types.KeyPrefixBadDebt

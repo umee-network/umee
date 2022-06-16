@@ -5,7 +5,6 @@ The following queries are available on the leverage module:
 General queries:
 - **Registered Tokens** returns the entire [Token Registry](02_state.md#Token-Registry)
 - **Params** returns the module's current [parameters](07_params.md)
-- **Liquidation Targets** queries a list of all borrowers eligible for liquidation
 
 Queries on accepted asset types:
 - **Borrow APY** queries for the [Borrow APY](01_concepts.md#Borrow-APY) of a specified denomination.
