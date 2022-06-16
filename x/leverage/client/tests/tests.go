@@ -148,28 +148,6 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query collateral setting - invalid address",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				"xyz",
-				"u/uumee",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral setting - invalid denom",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				val.Address.String(),
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
 			"query loaned value - invalid address",
 			cli.GetCmdQueryLoanedValue(),
 			[]string{
@@ -361,12 +339,12 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		nil,
 	}
 
-	setCollateral := testTransaction{
-		"set collateral",
-		cli.GetCmdSetCollateral(),
+	addCollateral := testTransaction{
+		"add collateral",
+		cli.GetCmdAddCollateral(),
 		[]string{
 			val.Address.String(),
-			"u/uumee",
+			"1000u/uumee",
 			"true",
 		},
 		nil,
@@ -400,6 +378,17 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		[]string{
 			val.Address.String(),
 			"51uumee",
+		},
+		nil,
+	}
+
+	removeCollateral := testTransaction{
+		"remove collateral",
+		cli.GetCmdRemoveCollateral(),
+		[]string{
+			val.Address.String(),
+			"1000u/uumee",
+			"true",
 		},
 		nil,
 	}
@@ -501,19 +490,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Borrowed: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
 				),
-			},
-		},
-		testQuery{
-			"query collateral setting",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				val.Address.String(),
-				"u/uumee",
-			},
-			false,
-			&types.QueryCollateralSettingResponse{},
-			&types.QueryCollateralSettingResponse{
-				Enabled: true,
 			},
 		},
 		testQuery{
@@ -669,7 +645,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	// These transactions will set up nonzero leverage positions and allow nonzero query results
 	s.runTestCases(
 		lend,
-		setCollateral,
+		addCollateral,
 		borrow,
 		liquidate,
 	)
@@ -677,6 +653,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	// These transactions are deferred to run after nonzero queries are finished
 	defer s.runTestCases(
 		repay,
+		removeCollateral,
 		withdraw,
 	)
 

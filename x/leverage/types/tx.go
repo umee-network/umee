@@ -73,18 +73,17 @@ func (msg *MsgWithdrawAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgSetCollateral(borrower sdk.AccAddress, denom string, enable bool) *MsgSetCollateral {
-	return &MsgSetCollateral{
+func NewMsgAddCollateral(borrower sdk.AccAddress, amount sdk.Coin) *MsgAddCollateral {
+	return &MsgAddCollateral{
 		Borrower: borrower.String(),
-		Denom:    denom,
-		Enable:   enable,
+		Amount:   amount,
 	}
 }
 
-func (msg MsgSetCollateral) Route() string { return ModuleName }
-func (msg MsgSetCollateral) Type() string  { return EventTypeSetCollateralSetting }
+func (msg MsgAddCollateral) Route() string { return ModuleName }
+func (msg MsgAddCollateral) Type() string  { return EventTypeAddCollateral }
 
-func (msg *MsgSetCollateral) ValidateBasic() error {
+func (msg *MsgAddCollateral) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
@@ -92,13 +91,42 @@ func (msg *MsgSetCollateral) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgSetCollateral) GetSigners() []sdk.AccAddress {
+func (msg *MsgAddCollateral) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSetCollateral) GetSignBytes() []byte {
+func (msg *MsgAddCollateral) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func NewMsgRemoveCollateral(borrower sdk.AccAddress, amount sdk.Coin) *MsgRemoveCollateral {
+	return &MsgRemoveCollateral{
+		Borrower: borrower.String(),
+		Amount:   amount,
+	}
+}
+
+func (msg MsgRemoveCollateral) Route() string { return ModuleName }
+func (msg MsgRemoveCollateral) Type() string  { return EventTypeRemoveCollateral }
+
+func (msg *MsgRemoveCollateral) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (msg *MsgRemoveCollateral) GetSigners() []sdk.AccAddress {
+	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+	return []sdk.AccAddress{borrower}
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgRemoveCollateral) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

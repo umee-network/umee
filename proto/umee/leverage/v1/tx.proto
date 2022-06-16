@@ -15,9 +15,13 @@ service Msg {
   // the capital facility.
   rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
 
-  // SetCollateral defines a method for users to enable or disable a uToken
-  // denomination in their wallet for use as collateral.
-  rpc SetCollateral(MsgSetCollateral) returns (MsgSetCollateralResponse);
+  // AddCollateral defines a method for users to enable selected uTokens
+  // as collateral.
+  rpc AddCollateral(MsgAddCollateral) returns (MsgAddCollateralResponse);
+
+  // RemoveCollateral defines a method for users to disable selected uTokens
+  // as collateral.
+  rpc RemoveCollateral(MsgRemoveCollateral) returns (MsgRemoveCollateralResponse);
 
   // BorrowAsset defines a method for borrowing coins from the capital facility.
   rpc BorrowAsset(MsgBorrowAsset) returns (MsgBorrowAssetResponse);
@@ -46,12 +50,18 @@ message MsgWithdrawAsset {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgSetCollateral represents a lender's request to enable or disable
-// a uToken type in their possession as collateral.
-message MsgSetCollateral {
-  string borrower = 1;
-  string denom    = 2;
-  bool   enable   = 3;
+// MsgAddCollateral represents a lender's request to enable selected
+// uTokens as collateral.
+message MsgAddCollateral {
+  string                   borrower = 1;
+  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgRemoveCollateral represents a lender's request to disable selected
+// uTokens as collateral.
+message MsgRemoveCollateral {
+  string                   borrower = 1;
+  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
@@ -83,8 +93,11 @@ message MsgLendAssetResponse {}
 // MsgWithdrawAssetResponse defines the Msg/WithdrawAsset response type.
 message MsgWithdrawAssetResponse {}
 
-// MsgSetCollateralResponse defines the Msg/SetCollateral response type.
-message MsgSetCollateralResponse {}
+// MsgAddCollateralResponse defines the Msg/AddCollateral response type.
+message MsgAddCollateralResponse {}
+
+// MsgRemoveCollateralResponse defines the Msg/RemoveCollateral response type.
+message MsgRemoveCollateralResponse {}
 
 // MsgBorrowAssetResponse defines the Msg/BorrowAsset response type.
 message MsgBorrowAssetResponse {}

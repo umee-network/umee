@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -28,7 +27,8 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdLendAsset(),
 		GetCmdWithdrawAsset(),
-		GetCmdSetCollateral(),
+		GetCmdAddCollateral(),
+		GetCmdRemoveCollateral(),
 		GetCmdBorrowAsset(),
 		GetCmdRepayAsset(),
 		GetCmdLiquidate(),
@@ -103,13 +103,13 @@ func GetCmdWithdrawAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdSetCollateral returns a CLI command handler to generate or broadcast a
-// transaction with a MsgSetCollateral message.
-func GetCmdSetCollateral() *cobra.Command {
+// GetCmdAddCollateral returns a CLI command handler to generate or broadcast a
+// transaction with a MsgAddCollateral message.
+func GetCmdAddCollateral() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-collateral [borrower] [denom] [toggle]",
+		Use:   "add-collateral [borrower] [coin]",
 		Args:  cobra.ExactArgs(3),
-		Short: "Enable or disable an asset type to be used as collateral",
+		Short: "Enable some uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
@@ -120,12 +120,43 @@ func GetCmdSetCollateral() *cobra.Command {
 				return err
 			}
 
-			toggle, err := strconv.ParseBool(args[2])
+			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
-				return fmt.Errorf("failed to parse toggle: %w", err)
+				return err
+			}
+			msg := types.NewMsgAddCollateral(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdRemoveCollateral returns a CLI command handler to generate or broadcast a
+// transaction with a MsgRemoveCollateral message.
+func GetCmdRemoveCollateral() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove-collateral [borrower] [coin]",
+		Args:  cobra.ExactArgs(3),
+		Short: "Disable some uTokens as collateral",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
+				return err
 			}
 
-			msg := types.NewMsgSetCollateral(clientCtx.GetFromAddress(), args[1], toggle)
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[1])
+			if err != nil {
+				return err
+			}
+			msg := types.NewMsgRemoveCollateral(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

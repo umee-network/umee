@@ -350,36 +350,6 @@ func (q Querier) ReserveAmount(
 	return &types.QueryReserveAmountResponse{Amount: amount}, nil
 }
 
-func (q Querier) CollateralSetting(
-	goCtx context.Context,
-	req *types.QueryCollateralSettingRequest,
-) (*types.QueryCollateralSettingResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
-	}
-
-	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
-
-	return &types.QueryCollateralSettingResponse{Enabled: setting}, nil
-}
-
 func (q Querier) Collateral(
 	goCtx context.Context,
 	req *types.QueryCollateralRequest,
