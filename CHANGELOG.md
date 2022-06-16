@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### API Breaking
+
+- [1029](https://github.com/umee-network/umee/pull/1029) Removed bool collateral settings, now add/remove exact collateral amounts.
+
 ### Features
 
 - [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
