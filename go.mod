@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07
-	github.com/cosmos/cosmos-sdk v0.46.0-rc1.0.20220606194936-99a0c3d1daf1
+	github.com/cosmos/cosmos-sdk v0.46.0-rc1.0.20220614153655-ecdc68a26bd4
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v3 v3.0.0
 	github.com/ethereum/go-ethereum v1.10.18
@@ -380,9 +380,9 @@ require (
 )
 
 replace (
-	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge-umee/module
-	github.com/cosmos/ibc-go/v3 => ../ibc-go
 	// TODO: update to v3
 	github.com/cosmos/ibc-go/v2 => ../ibc-go
+	github.com/cosmos/ibc-go/v3 => ../ibc-go
+	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 )
