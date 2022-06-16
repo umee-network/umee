@@ -47,7 +47,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## [Unreleased]
 
 ### API Breaking
-TODO
+
+- [1028](https://github.com/umee-network/umee/pull/1028) Remove liquidation targets query
 
 ### Features
 
