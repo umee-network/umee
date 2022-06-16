@@ -309,7 +309,8 @@ func (k Keeper) AddCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin
 		return err
 	}
 
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(coin)); err != nil {
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(coin))
+	if err != nil {
 		return err
 	}
 
@@ -355,7 +356,8 @@ func (k Keeper) RemoveCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, c
 	if err := k.setCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(coin.Denom, newCollateralAmount)); err != nil {
 		return err
 	}
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(coin)); err != nil {
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(coin))
+	if err != nil {
 		return err
 	}
 
