@@ -13,7 +13,7 @@ var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
 
 const (
 	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
-	tvwapCandlePeriod = 3 * time.Minute
+	tvwapCandlePeriod = 5 * time.Minute
 )
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
@@ -79,7 +79,9 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 	)
 
 	for _, providerPrices := range prices {
-		for base, cp := range providerPrices {
+		for base := range providerPrices {
+			cp := providerPrices[base]
+
 			if _, ok := weightedPrices[base]; !ok {
 				weightedPrices[base] = sdk.ZeroDec()
 			}

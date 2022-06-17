@@ -1,8 +1,7 @@
 syntax = "proto3";
-package umeenetwork.umee.oracle.v1;
+package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 
@@ -22,8 +21,9 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  uint64         reward_distribution_window   = 4 [(gogoproto.moretags) = "yaml:\"reward_distribution_window\""];
-  repeated Denom accept_list                  = 5 [
+  uint64 reward_distribution_window = 4
+      [(gogoproto.moretags) = "yaml:\"reward_distribution_window\""];
+  repeated Denom accept_list = 5 [
     (gogoproto.moretags)     = "yaml:\"accept_list\"",
     (gogoproto.castrepeated) = "DenomList",
     (gogoproto.nullable)     = false
@@ -47,9 +47,9 @@ message Denom {
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
 
-  string base_denom    = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
-  string symbol_denom  = 2 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
-  uint32 exponent      = 3 [(gogoproto.moretags) = "yaml:\"exponent\""];
+  string base_denom   = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
+  string symbol_denom = 2 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
+  uint32 exponent     = 3 [(gogoproto.moretags) = "yaml:\"exponent\""];
 }
 
 // AggregateExchangeRatePrevote -

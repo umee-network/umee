@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
@@ -82,12 +83,6 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	var logWriter io.Writer
-	if strings.ToLower(logFormatStr) == "text" {
-		logWriter = zerolog.ConsoleWriter{Out: os.Stderr}
-	} else {
-		logWriter = os.Stderr
-	}
-
 	switch strings.ToLower(logFormatStr) {
 	case logLevelJSON:
 		logWriter = os.Stderr
@@ -145,7 +140,22 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse provider timeout: %w", err)
 	}
 
-	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs, providerTimeout)
+	deviations := make(map[string]sdk.Dec, len(cfg.Deviations))
+	for _, deviation := range cfg.Deviations {
+		threshold, err := sdk.NewDecFromStr(deviation.Threshold)
+		if err != nil {
+			return err
+		}
+		deviations[deviation.Base] = threshold
+	}
+
+	oracle := oracle.New(
+		logger,
+		oracleClient,
+		cfg.CurrencyPairs,
+		providerTimeout,
+		deviations,
+	)
 
 	metrics, err := telemetry.New(cfg.Telemetry)
 	if err != nil {
@@ -179,7 +189,7 @@ func getKeyringPassword() (string, error) {
 // trapSignal will listen for any OS signal and invoke Done on the main
 // WaitGroup allowing the main process to gracefully exit.
 func trapSignal(cancel context.CancelFunc, logger zerolog.Logger) {
-	sigCh := make(chan os.Signal)
+	sigCh := make(chan os.Signal, 1)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
 	signal.Notify(sigCh, syscall.SIGINT)

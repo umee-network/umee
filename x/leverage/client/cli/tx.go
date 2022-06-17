@@ -76,7 +76,7 @@ func GetCmdWithdrawAsset() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "withdraw-asset [lender] [amount]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Withdraw a specified amount of a loaned supported asset",
+		Short: "Withdraw a specified amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
@@ -175,7 +175,7 @@ func GetCmdRepayAsset() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "repay-asset [borrower] [amount]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Repay a specified amount of a borrowed supported asset",
+		Short: "Repay a specified amount of a borrowed asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
@@ -248,9 +248,6 @@ func GetCmdLiquidate() *cobra.Command {
 // NewCmdSubmitUpdateRegistryProposal returns a CLI command handler to generate
 // or broadcast a transaction with a governance proposal message containing a
 // UpdateRegistryProposal.
-//
-// NOTE: The "registry" provided in the proposal replaces the entire existing
-// registry.
 func NewCmdSubmitUpdateRegistryProposal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-registry [proposal-file] [deposit]",
@@ -268,7 +265,7 @@ Where proposal.json contains:
 
 {
   "title": "Update the Leverage Token Registry",
-  "description": "Replace the supported tokens in the leverage registry.",
+  "description": "Update the uumee token in the leverage registry.",
   "registry": [
     {
       "base_denom": "uumee",
@@ -279,7 +276,12 @@ Where proposal.json contains:
       "kink_borrow_rate": "0.2",
       "max_borrow_rate": "1.5",
       "kink_utilization_rate": "0.2",
-      "liquidation_incentive": "0.1"
+      "liquidation_incentive": "0.1",
+      "symbol_denom": "UMEE",
+      "exponent": 6,
+      "enable_msg_lend": true,
+      "enable_msg_borrow": true,
+      "blacklist": false
     },
     // ...
   ]

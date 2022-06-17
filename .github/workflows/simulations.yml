@@ -20,7 +20,16 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.18
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+
       - name: Install runsim
         run: export GO111MODULE="on" && go install github.com/cosmos/tools/cmd/runsim@v1.0.0
       - uses: actions/cache@v3
@@ -33,7 +42,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.18
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.0.1
         with:
@@ -41,6 +50,15 @@ jobs:
             **/**.go
             go.mod
             go.sum
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
       - name: Test application non-determinism
         run: |
           make test-sim-non-determinism
@@ -52,7 +70,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.18
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.0.1
         with:
@@ -60,6 +78,15 @@ jobs:
             **/**.go
             go.mod
             go.sum
+      - name: Get Go Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+        if: env.GIT_DIFF
       - uses: actions/cache@v3
         with:
           path: ~/go/bin

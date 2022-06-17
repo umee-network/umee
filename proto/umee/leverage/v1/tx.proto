@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1;
+package umee.leverage.v1;
 
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
@@ -22,11 +22,12 @@ service Msg {
   // BorrowAsset defines a method for borrowing coins from the capital facility.
   rpc BorrowAsset(MsgBorrowAsset) returns (MsgBorrowAssetResponse);
 
-  // RepayAsset defines a method for repaying borrowed coins to the capital facility.
+  // RepayAsset defines a method for repaying borrowed coins to the capital
+  // facility.
   rpc RepayAsset(MsgRepayAsset) returns (MsgRepayAssetResponse);
 
-  // Liquidate defines a method for repaying a different user's borrowed coins to
-  // the capital facility in exchange for some of their collateral.
+  // Liquidate defines a method for repaying a different user's borrowed coins
+  // to the capital facility in exchange for some of their collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
@@ -37,9 +38,9 @@ message MsgLendAsset {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously loaned
-// base asset type from the module. Amount can either be exact uTokens to withdraw
-// or equivalent base assets.
+// MsgWithdrawAsset represents a lender's request to withdraw a previously
+// loaned base asset type from the module. Amount can either be exact uTokens to
+// withdraw or equivalent base assets.
 message MsgWithdrawAsset {
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
@@ -49,8 +50,8 @@ message MsgWithdrawAsset {
 // a uToken type in their possession as collateral.
 message MsgSetCollateral {
   string borrower = 1;
-  string denom = 2;
-  bool   enable = 3;
+  string denom    = 2;
+  bool   enable   = 3;
 }
 
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
@@ -60,8 +61,8 @@ message MsgBorrowAsset {
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgRepayAsset represents a lender's request to repay a borrowed base asset type
-// to the module.
+// MsgRepayAsset represents a lender's request to repay a borrowed base asset
+// type to the module.
 message MsgRepayAsset {
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];

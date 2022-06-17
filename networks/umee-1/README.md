@@ -8,6 +8,7 @@
 - https://stakeangle.com/state-sync/umee
 - https://book.testnet.run/umee/state-sync
 - https://bitszn.com/snapshots.html
+- http://umee-state-sync.cyphercore.io
 
 ## Snapshot Providers (Quick Sync)
 
@@ -16,6 +17,7 @@
 - https://snapshots.weakhand.xyz/umee
 - http://singularity-services.xyz/umee
 - https://bitszn.com/snapshots.html
+- https://snapshot.testnet.run/mainnet/umee/
 
 ## Umee Archival Nodes
 
