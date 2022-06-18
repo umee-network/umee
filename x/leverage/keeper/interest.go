@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -62,26 +61,29 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
-// AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
-// It should accrue interest on all open borrows, increase reserves, and set
-// LastInterestTime to BlockTime.
+// AccrueAllInterest is called by EndBlock to update borrow positions.
+// It accrues interest on all open borrows, increase reserves, funds
+// oracle rewards, and sets LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
-	// get current unix time in seconds
 	currentTime := ctx.BlockTime().Unix()
-
-	// get last time at which interest was accrued
 	prevInterestTime := k.GetLastInterestTime(ctx)
 	if prevInterestTime == 0 {
-		// on first ever interest epoch, ignore stored value
 		prevInterestTime = currentTime
 	}
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
-	secondsElapsed := currentTime - prevInterestTime
-	if secondsElapsed < 0 {
-		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, fmt.Sprintf("%d seconds", secondsElapsed))
+	if currentTime < prevInterestTime {
+		// @todo fix this when tendermint solves #8773
+		// https://github.com/tendermint/tendermint/issues/8773
+		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
+			types.ErrNegativeTimeElapsed.Error(),
+			"current", currentTime,
+			"prev", prevInterestTime,
+		)
+
+		return nil
 	}
-	yearsElapsed := sdk.NewDec(secondsElapsed).QuoInt64(types.SecondsPerYear)
+	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)
@@ -159,6 +161,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"reserved", newReserves.String(),
 	)
 
+	// TODO: use typed events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeInterestAccrual,
@@ -186,14 +189,17 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error 
 	return nil
 }
 
-// GetLastInterestTime gets last time at which interest was accrued
+// GetLastInterestTime returns unix timestamp (in seconds) when the last interest was accrued.
+// Returns 0 if the value if the value is absent.
 func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
 	bz := store.Get(timeKey)
+	if bz == nil {
+		return 0
+	}
 
 	val := gogotypes.Int64Value{}
-
 	if err := k.cdc.Unmarshal(bz, &val); err != nil {
 		panic(err)
 	}
