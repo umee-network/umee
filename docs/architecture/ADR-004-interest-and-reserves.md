@@ -130,13 +130,6 @@ The token:uToken exchange rate, which would have previously been calculated by `
 
 Also, because Lend, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, it's enough to update the exchange rate during the EndBlocker `AccrueAllInterest`.
 
-The exchange rate is stored under the following key:
-
-```
-// append 0 for null-termination
-exchangeRatePrefix | denom | 0
-```
-
 ### Modifications to Withdraw and Borrow
 
 Existing functionality will be modified:
