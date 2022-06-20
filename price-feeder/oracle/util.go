@@ -13,7 +13,7 @@ var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
 
 const (
 	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
-	tvwapCandlePeriod = 3 * time.Minute
+	tvwapCandlePeriod = 5 * time.Minute
 )
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
