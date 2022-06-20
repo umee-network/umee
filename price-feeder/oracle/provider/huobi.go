@@ -94,7 +94,12 @@ type (
 )
 
 // NewHuobiProvider returns a new Huobi provider with the WS connection and msg handler.
-func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, endpoints config.ProviderEndpoint, pairs ...types.CurrencyPair) (*HuobiProvider, error) {
+func NewHuobiProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*HuobiProvider, error) {
 	if endpoints.Name != "huobi" {
 		endpoints = config.ProviderEndpoint{
 			Name:      "huobi",

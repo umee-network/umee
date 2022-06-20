@@ -105,7 +105,12 @@ type (
 )
 
 // NewGateProvider creates a new GateProvider.
-func NewGateProvider(ctx context.Context, logger zerolog.Logger, endpoints config.ProviderEndpoint, pairs ...types.CurrencyPair) (*GateProvider, error) {
+func NewGateProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*GateProvider, error) {
 	if endpoints.Name != "gate" {
 		endpoints = config.ProviderEndpoint{
 			Name:      "gate",
