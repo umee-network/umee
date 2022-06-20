@@ -37,13 +37,14 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Dynamic Borrow Interest Rates
 
-Borrow interest rates are dynamic. They are calculated using the lending pool's current supply utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
+Borrow interest rates are dynamic. They are calculated using the lending pool's current collateral utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
 ```go
 BaseAPY = sdk.NewDec("0.02")
 KinkAPY = sdk.NewDec("0.2")
 MaxAPY = sdk.NewDec("1.0")
 KinkUtilization = sdk.NewDec("0.8")
+MaxCollateralUtilization = sdk.NewDec("0.9")
 ```
 
 Each token-specific parameter will be stored in the `Token` registry.

@@ -82,7 +82,7 @@ Let's draw the following scenario to picture the liquidators risk:
    - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
 6. In case of the big crash, liquidators won't perform a liquidation, Bob will run away with 1M USD, system will end up with a bad debt and obligation to pay Alice.
 
-We propose to set a per token parameter: **max collateral utilization** using Cosmos SDK v0.46 gov messages. The system will forbid to make any collateral related operation if the operation would move token _collateral utilization_ above _max collateral utilization_.
+We propose to set a per token parameter: **max collateral utilization** stored in the `Token` registry (see ADR-004). The system will forbid to make any collateral related operation if the operation would move token _collateral utilization_ above _max collateral utilization_.
 
 Stable assets will have high max collateral utilization (can go even to 99%). Volatile assets should have significant smaller collateral utilization.
 
@@ -117,15 +117,6 @@ type MsgBorrowAsset struct {
 type MsgRepayAsset struct {
   Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
   Amount   sdk.Coin       `json:"amount" yaml:"amount"`
-}
-
-// MsgSetCollateralMaxUtilization is going to be used as CosmosSDK 0.46 gov message.
-type MsgSetCollateralMaxUtilization {
-  // must be x/gov
-  string signer = 1;
-  string token = 2;
-  // a number between 0 and 10'000 - ratio in basis points.
-  uint32 max_utilization = 3;
 }
 ```
 
