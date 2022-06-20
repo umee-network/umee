@@ -53,8 +53,16 @@ Definitions:
 
 - `total_lend(tokenA)`: total amount of tokenA provided to the leverage protocol (including coins marked as a collateral).
 - `supply_utilization(tokenA) = total_borrow(tokenA) / total_lend(tokenA)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
+- `total_collateral(tokenA)` -- total amount of tokenA
 
-We define a _token collateral utilization_ as ratio of borrowed collateral to total amount of collateral of the token. Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
+We define a _token collateral utilization_ as ratio of borrowed collateral to the total amount of collateral of the token.
+
+```
+collateral_utilization(tokenA) = total_borrow(tokenA) / total_collateral(tokenA)
+                               = u/tokenA borrowed / (u/tokenA borrowed + u/tokenA module balance)
+```
+
+Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
 Observation: for every token `t`: `collateral_utilization(t) <= supply_utilization(t)`.
 
 High collateral utilization is dangerous for the system:
