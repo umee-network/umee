@@ -99,9 +99,9 @@ func NewCoinbaseProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
-	if endpoints.Name != "coinbase" {
+	if endpoints.Name != config.ProviderCoinbase {
 		endpoints = config.ProviderEndpoint{
-			Name:      "coinbase",
+			Name:      config.ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,
 		}

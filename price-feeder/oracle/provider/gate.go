@@ -111,9 +111,9 @@ func NewGateProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*GateProvider, error) {
-	if endpoints.Name != "gate" {
+	if endpoints.Name != config.ProviderGate {
 		endpoints = config.ProviderEndpoint{
-			Name:      "gate",
+			Name:      config.ProviderGate,
 			Rest:      gateRestHost,
 			Websocket: gateWSHost,
 		}

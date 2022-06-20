@@ -109,9 +109,9 @@ func NewOkxProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
-	if endpoints.Name != "okx" {
+	if endpoints.Name != config.ProviderOkx {
 		endpoints = config.ProviderEndpoint{
-			Name:      "okx",
+			Name:      config.ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,
 		}

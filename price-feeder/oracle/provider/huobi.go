@@ -100,9 +100,9 @@ func NewHuobiProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*HuobiProvider, error) {
-	if endpoints.Name != "huobi" {
+	if endpoints.Name != config.ProviderHuobi {
 		endpoints = config.ProviderEndpoint{
-			Name:      "huobi",
+			Name:      config.ProviderHuobi,
 			Rest:      huobiRestHost,
 			Websocket: huobiWSHost,
 		}

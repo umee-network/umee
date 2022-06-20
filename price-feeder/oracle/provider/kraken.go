@@ -107,9 +107,9 @@ func NewKrakenProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
-	if endpoints.Name != "kraken" {
+	if endpoints.Name != config.ProviderKraken {
 		endpoints = config.ProviderEndpoint{
-			Name:      "kraken",
+			Name:      config.ProviderKraken,
 			Rest:      KrakenRestHost,
 			Websocket: krakenWSHost,
 		}

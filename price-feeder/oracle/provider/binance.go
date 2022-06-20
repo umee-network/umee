@@ -88,9 +88,9 @@ func NewBinanceProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
-	if (endpoints.Name) != "binance" {
+	if (endpoints.Name) != config.ProviderBinance {
 		endpoints = config.ProviderEndpoint{
-			Name:      "binance",
+			Name:      config.ProviderBinance,
 			Rest:      binanceRestHost,
 			Websocket: binanceWSHost,
 		}
