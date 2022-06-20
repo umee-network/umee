@@ -107,11 +107,9 @@ Both CLI and gRPC must be supported when sending the above message types, and al
 
 Assuming a placeholder token allow-list of one element (e.g. `umee`), and a uToken existing (e.g. `u-umee`), an end-to-end test can be created in which one user account sends a `MsgLendAsset` and a `MsgWithdrawAsset` of the appropriate token types.
 
-## Open Questions
+## Considerations
 
-- How will we allow-list asset types for deposit into the asset facilities?
-- How can IBC tokens be identified in such a way that they are unique, and immune to counterfeit? (e.g. someone makes a new Cosmos blockchain and Token with identical ChainID and token name to an existing one)
-  - this is not a problem because IBC tokens are identified by an IBC channel, not (chainID, denom).
+- IBC tokens coming from different channels will have different Denom. Hence we have a fragmentation problem. Example: `atom` coming directly from the Cosmos Hub will have different IBC denom than an `atom` coming directly from Osmosis.
 
 ## Consequences
 
