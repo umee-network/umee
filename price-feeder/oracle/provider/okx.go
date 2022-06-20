@@ -20,10 +20,11 @@ import (
 )
 
 const (
-	okxHost          = "ws.okx.com:8443"
-	okxPath          = "/ws/v5/public"
-	okxPingCheck     = time.Second * 28 // should be < 30
-	okxPairsEndpoint = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
+	okxWSHost          = "ws.okx.com:8443"
+	okxPath            = "/ws/v5/public"
+	okxPingCheck       = time.Second * 28 // should be < 30
+	okxRestHost        = "https://www.okx.com"
+	okxTickersEndpoint = "/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -39,6 +40,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -101,10 +103,23 @@ type (
 )
 
 // NewOkxProvider creates a new OkxProvider.
-func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*OkxProvider, error) {
+func NewOkxProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*OkxProvider, error) {
+	if endpoints.Name != "okx" {
+		endpoints = config.ProviderEndpoint{
+			Name:      "okx",
+			Rest:      okxRestHost,
+			Websocket: okxWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   okxHost,
+		Host:   endpoints.Websocket,
 		Path:   okxPath,
 	}
 
@@ -118,6 +133,7 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "okx").Logger(),
 		reconnectTimer:  time.NewTicker(okxPingCheck),
+		endpoints:       endpoints,
 		tickers:         map[string]OkxTickerPair{},
 		candles:         map[string][]OkxCandlePair{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -443,7 +459,7 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(okxPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + okxTickersEndpoint)
 	if err != nil {
 		return nil, err
 	}

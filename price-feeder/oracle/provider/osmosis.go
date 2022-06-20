@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	osmosisBaseURL        = "https://api-osmosis.imperator.co"
+	osmosisRestURL        = "https://api-osmosis.imperator.co"
 	osmosisTokenEndpoint  = "/tokens/v1"
 	osmosisCandleEndpoint = "/tokens/v2/historical"
 	osmosisPairsEndpoint  = "/pairs/v1/summary"
@@ -61,17 +61,16 @@ type (
 	}
 )
 
-func NewOsmosisProvider() *OsmosisProvider {
-	return &OsmosisProvider{
-		baseURL: osmosisBaseURL,
-		client:  newDefaultHTTPClient(),
+func NewOsmosisProvider(endpoint config.ProviderEndpoint) *OsmosisProvider {
+	if endpoint.Name == "osmosis" {
+		return &OsmosisProvider{
+			baseURL: endpoint.Rest,
+			client:  newDefaultHTTPClient(),
+		}
 	}
-}
-
-func NewOsmosisProviderWithTimeout(timeout time.Duration) *OsmosisProvider {
 	return &OsmosisProvider{
-		baseURL: osmosisBaseURL,
-		client:  newHTTPClientWithTimeout(timeout),
+		baseURL: osmosisRestURL,
+		client:  newDefaultHTTPClient(),
 	}
 }
 

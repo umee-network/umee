@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	binanceHost          = "stream.binance.com:9443"
+	binanceWSHost        = "stream.binance.com:9443"
 	binancePath          = "/ws/umeestream"
-	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
+	binanceRestHost      = "https://api1.binance.com"
+	binancePairsEndpoint = "/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -36,6 +37,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -83,11 +85,20 @@ type (
 func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
+	if (endpoints.Name) != "binance" {
+		endpoints = config.ProviderEndpoint{
+			Name:      "binance",
+			Rest:      binanceRestHost,
+			Websocket: binanceWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   binanceHost,
+		Host:   endpoints.Websocket,
 		Path:   binancePath,
 	}
 
@@ -100,6 +111,7 @@ func NewBinanceProvider(
 		wsURL:           wsURL,
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -408,7 +420,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 // ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(binancePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + binancePairsEndpoint)
 	if err != nil {
 		return nil, err
 	}

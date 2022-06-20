@@ -64,6 +64,7 @@ type Oracle struct {
 	priceProviders     map[string]provider.Provider
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
+	endpoints          map[string]config.ProviderEndpoint
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
@@ -76,6 +77,7 @@ func New(
 	currencyPairs []config.CurrencyPair,
 	providerTimeout time.Duration,
 	deviations map[string]sdk.Dec,
+	endpoints map[string]config.ProviderEndpoint,
 ) *Oracle {
 	providerPairs := make(map[string][]types.CurrencyPair)
 
@@ -97,6 +99,7 @@ func New(
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
+		endpoints:       endpoints,
 	}
 }
 
@@ -387,7 +390,13 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 
 	priceProvider, ok = o.priceProviders[providerName]
 	if !ok {
-		newProvider, err := NewProvider(ctx, providerName, o.logger, o.providerPairs[providerName]...)
+		newProvider, err := NewProvider(
+			ctx,
+			providerName,
+			o.logger,
+			o.endpoints[providerName],
+			o.providerPairs[providerName]...,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -403,29 +412,30 @@ func NewProvider(
 	ctx context.Context,
 	providerName string,
 	logger zerolog.Logger,
+	endpoint config.ProviderEndpoint,
 	providerPairs ...types.CurrencyPair,
 ) (provider.Provider, error) {
 	switch providerName {
 	case config.ProviderBinance:
-		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
+		return provider.NewBinanceProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderKraken:
-		return provider.NewKrakenProvider(ctx, logger, providerPairs...)
+		return provider.NewKrakenProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderOsmosis:
-		return provider.NewOsmosisProvider(), nil
+		return provider.NewOsmosisProvider(endpoint), nil
 
 	case config.ProviderHuobi:
-		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
+		return provider.NewHuobiProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderCoinbase:
-		return provider.NewCoinbaseProvider(ctx, logger, providerPairs...)
+		return provider.NewCoinbaseProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderOkx:
-		return provider.NewOkxProvider(ctx, logger, providerPairs...)
+		return provider.NewOkxProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderGate:
-		return provider.NewGateProvider(ctx, logger, providerPairs...)
+		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
 
 	case config.ProviderMock:
 		return provider.NewMockProvider(), nil
