@@ -20,11 +20,11 @@ import (
 )
 
 const (
-	okxWSHost          = "ws.okx.com:8443"
-	okxPath            = "/ws/v5/public"
-	okxPingCheck       = time.Second * 28 // should be < 30
-	okxRestHost        = "https://www.okx.com"
-	okxTickersEndpoint = "/api/v5/market/tickers?instType=SPOT"
+	okxWSHost    = "ws.okx.com:8443"
+	okxWSPath    = "/ws/v5/public"
+	okxPingCheck = time.Second * 28 // should be < 30
+	okxRestHost  = "https://www.okx.com"
+	okxRestPath  = "/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -120,7 +120,7 @@ func NewOkxProvider(
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   endpoints.Websocket,
-		Path:   okxPath,
+		Path:   okxWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -459,7 +459,7 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + okxTickersEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + okxRestPath)
 	if err != nil {
 		return nil, err
 	}

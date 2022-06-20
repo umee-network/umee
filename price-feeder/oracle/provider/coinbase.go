@@ -21,12 +21,12 @@ import (
 )
 
 const (
-	coinbaseWSHost           = "ws-feed.exchange.coinbase.com"
-	coinbasePingCheck        = time.Second * 28 // should be < 30
-	coinbaseRestHost         = "https://api.exchange.coinbase.com"
-	coinbaseProductsEndpoint = "/products"
-	timeLayout               = "2006-01-02T15:04:05.000000Z"
-	unixMinute               = 60000
+	coinbaseWSHost    = "ws-feed.exchange.coinbase.com"
+	coinbasePingCheck = time.Second * 28 // should be < 30
+	coinbaseRestHost  = "https://api.exchange.coinbase.com"
+	coinbaseRestPath  = "/products"
+	timeLayout        = "2006-01-02T15:04:05.000000Z"
+	unixMinute        = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -247,7 +247,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + coinbaseProductsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + coinbaseRestPath)
 	if err != nil {
 		return nil, err
 	}

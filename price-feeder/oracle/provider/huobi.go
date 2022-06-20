@@ -22,11 +22,11 @@ import (
 )
 
 const (
-	huobiWSHost          = "api-aws.huobi.pro"
-	huobiPath            = "/ws"
-	huobiReconnectTime   = time.Minute * 2
-	huobiRestHost        = "https://api.huobi.pro"
-	huobiTickersEndpoint = "/market/tickers"
+	huobiWSHost        = "api-aws.huobi.pro"
+	huobiWSPath        = "/ws"
+	huobiReconnectTime = time.Minute * 2
+	huobiRestHost      = "https://api.huobi.pro"
+	huobiRestPath      = "/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -111,7 +111,7 @@ func NewHuobiProvider(
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   endpoints.Websocket,
-		Path:   huobiPath,
+		Path:   huobiWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -459,7 +459,7 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + huobiTickersEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + huobiRestPath)
 	if err != nil {
 		return nil, err
 	}

@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	gateWSHost        = "ws.gate.io"
-	gatePath          = "/v3"
-	gatePingCheck     = time.Second * 28 // should be < 30
-	gateRestHost      = "https://api.gateio.ws"
-	gatePairsEndpoint = "/api/v4/spot/currency_pairs"
+	gateWSHost    = "ws.gate.io"
+	gateWSPath    = "/v3"
+	gatePingCheck = time.Second * 28 // should be < 30
+	gateRestHost  = "https://api.gateio.ws"
+	gateRestPath  = "/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -122,7 +122,7 @@ func NewGateProvider(
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   endpoints.Websocket,
-		Path:   gatePath,
+		Path:   gateWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -580,7 +580,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + gatePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + gateRestPath)
 	if err != nil {
 		return nil, err
 	}

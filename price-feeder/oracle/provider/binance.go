@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	binanceWSHost        = "stream.binance.com:9443"
-	binancePath          = "/ws/umeestream"
-	binanceRestHost      = "https://api1.binance.com"
-	binancePairsEndpoint = "/api/v3/ticker/price"
+	binanceWSHost   = "stream.binance.com:9443"
+	binanceWSPath   = "/ws/umeestream"
+	binanceRestHost = "https://api1.binance.com"
+	binanceRestPath = "/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -99,7 +99,7 @@ func NewBinanceProvider(
 	wsURL := url.URL{
 		Scheme: "wss",
 		Host:   endpoints.Websocket,
-		Path:   binancePath,
+		Path:   binanceWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -420,7 +420,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 // ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + binancePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + binanceRestPath)
 	if err != nil {
 		return nil, err
 	}

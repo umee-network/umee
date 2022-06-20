@@ -21,7 +21,7 @@ import (
 const (
 	krakenWSHost                  = "ws.kraken.com"
 	KrakenRestHost                = "https://api.kraken.com"
-	KrakenPairsEndpoint           = "/0/public/AssetPairs"
+	KrakenRestPath                = "/0/public/AssetPairs"
 	krakenEventSystemStatus       = "systemStatus"
 	krakenEventSubscriptionStatus = "subscriptionStatus"
 )
@@ -627,7 +627,7 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(p.endpoints.Rest + KrakenPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + KrakenRestPath)
 	if err != nil {
 		return nil, err
 	}
