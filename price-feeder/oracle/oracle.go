@@ -73,12 +73,12 @@ type Oracle struct {
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
 
-	oracleOnChain OracleOnChain
+	oracleOnChain OnChainData
 }
 
-// OracleOnChain used to cache data that can be updated
+// OnChainData used to cache data that can be updated
 // at each cacheOnChainBlockQuantity amount of blocks
-type OracleOnChain struct {
+type OnChainData struct {
 	params           *oracletypes.Params
 	lastUpdatedBlock uint64
 }
@@ -110,7 +110,7 @@ func New(
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
-		oracleOnChain:   OracleOnChain{},
+		oracleOnChain:   OnChainData{},
 	}
 }
 
@@ -368,14 +368,14 @@ func SetProviderTickerPricesAndCandles(
 }
 
 // Update update the values inside the onchain struct.
-func (onChain *OracleOnChain) Update(currentBlockHeigh uint64, params oracletypes.Params) {
+func (onChain *OnChainData) Update(currentBlockHeigh uint64, params oracletypes.Params) {
 	onChain.lastUpdatedBlock = currentBlockHeigh
 	onChain.params = &params
 }
 
-func (onChain *OracleOnChain) IsParamsOutdated(currentBlockHeigh uint64) bool {
+func (onChainData *OnChainData) IsParamsOutdated(currentBlockHeigh uint64) bool {
 	// doesn't have any data
-	if onChain.params == nil {
+	if onChainData.params == nil {
 		return true
 	}
 
@@ -389,11 +389,11 @@ func (onChain *OracleOnChain) IsParamsOutdated(currentBlockHeigh uint64) bool {
 	// which the current blockchain height is lower
 	// than the last updated block, to fix should
 	// just update the on chain params again
-	if currentBlockHeigh < onChain.lastUpdatedBlock {
+	if currentBlockHeigh < onChainData.lastUpdatedBlock {
 		return true
 	}
 
-	return (currentBlockHeigh - onChain.lastUpdatedBlock) > cacheOnChainBlockQuantity
+	return (currentBlockHeigh - onChainData.lastUpdatedBlock) > cacheOnChainBlockQuantity
 }
 
 // GetCachedParams returns the last updated parameters of the x/oracle module
