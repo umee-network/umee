@@ -83,9 +83,8 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously
-// loaned base asset type from the module. Amount can either be exact uTokens to
-// withdraw or equivalent base assets.
+// MsgWithdrawAsset represents a lender's request to withdraw lent assets.
+// Amount must be a uToken.
 type MsgWithdrawAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
