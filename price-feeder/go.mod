@@ -17,7 +17,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.5.0
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.7.4
 	github.com/tendermint/tendermint v0.34.19
 	github.com/umee-network/umee/v2 v2.0.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -216,7 +216,7 @@ require (
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
-	github.com/stretchr/objx v0.3.0 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/sylvia7788/contextcheck v1.0.4 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
