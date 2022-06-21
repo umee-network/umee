@@ -57,15 +57,16 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server          Server         `toml:"server"`
-		CurrencyPairs   []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Deviations      []Deviation    `toml:"deviation_thresholds"`
-		Account         Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring         Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC             RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry       Telemetry      `toml:"telemetry"`
-		GasAdjustment   float64        `toml:"gas_adjustment" validate:"required"`
-		ProviderTimeout string         `toml:"provider_timeout"`
+		Server            Server             `toml:"server"`
+		CurrencyPairs     []CurrencyPair     `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations        []Deviation        `toml:"deviation_thresholds"`
+		Account           Account            `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring           Keyring            `toml:"keyring" validate:"required,gt=0,dive,required"`
+		RPC               RPC                `toml:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry         Telemetry          `toml:"telemetry"`
+		GasAdjustment     float64            `toml:"gas_adjustment" validate:"required"`
+		ProviderTimeout   string             `toml:"provider_timeout"`
+		ProviderEndpoints []ProviderEndpoint `toml:"provider_endpoints" validate:"dive"`
 	}
 
 	// Server defines the API server configuration.
@@ -143,9 +144,22 @@ type (
 		// Valid values are "prometheus" or "generic"
 		Type string `toml:"type"`
 	}
+
+	// ProviderEndpoint defines an override setting in our config for the
+	// hardcoded rest and websocket api endpoints.
+	ProviderEndpoint struct {
+		// Name of the provider, ex. "binance"
+		Name string `toml:"name"`
+
+		// Rest endpoint for the provider, ex. "https://api1.binance.com"
+		Rest string `toml:"rest"`
+
+		// Websocket endpoint for the provider, ex. "stream.binance.com:9443"
+		Websocket string `toml:"websocket"`
+	}
 )
 
-// telemetryValidation is custom validation for the Telemetry struct
+// telemetryValidation is custom validation for the Telemetry struct.
 func telemetryValidation(sl validator.StructLevel) {
 	tel := sl.Current().Interface().(Telemetry)
 
@@ -159,9 +173,22 @@ func telemetryValidation(sl validator.StructLevel) {
 	}
 }
 
+// endpointValidation is custom validation for the ProviderEndpoint struct.
+func endpointValidation(sl validator.StructLevel) {
+	endpoint := sl.Current().Interface().(ProviderEndpoint)
+
+	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
+		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
+	}
+	if _, ok := SupportedProviders[endpoint.Name]; !ok {
+		sl.ReportError(endpoint.Name, "name", "Name", "unsupportedEndpointProvider", "")
+	}
+}
+
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
 	validate.RegisterStructValidation(telemetryValidation, Telemetry{})
+	validate.RegisterStructValidation(endpointValidation, ProviderEndpoint{})
 	return validate.Struct(c)
 }
 

@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
 - [#998](https://github.com/umee-network/umee/pull/998) Make deviation thresholds configurable for stablecoin support.
 - [#925](https://github.com/umee-network/umee/pull/925) Require stablecoins to be converted to USD to protect against depegging.

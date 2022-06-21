@@ -22,10 +22,11 @@ import (
 )
 
 const (
-	huobiHost          = "api-aws.huobi.pro"
-	huobiPath          = "/ws"
+	huobiWSHost        = "api-aws.huobi.pro"
+	huobiWSPath        = "/ws"
 	huobiReconnectTime = time.Minute * 2
-	huobiPairsEndpoint = "https://api.huobi.pro/market/tickers"
+	huobiRestHost      = "https://api.huobi.pro"
+	huobiRestPath      = "/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -41,6 +42,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -92,11 +94,24 @@ type (
 )
 
 // NewHuobiProvider returns a new Huobi provider with the WS connection and msg handler.
-func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*HuobiProvider, error) {
+func NewHuobiProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*HuobiProvider, error) {
+	if endpoints.Name != config.ProviderHuobi {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderHuobi,
+			Rest:      huobiRestHost,
+			Websocket: huobiWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   huobiHost,
-		Path:   huobiPath,
+		Host:   endpoints.Websocket,
+		Path:   huobiWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -108,6 +123,7 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 		wsURL:           wsURL,
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "huobi").Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]HuobiTicker{},
 		candles:         map[string][]HuobiCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -443,7 +459,7 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(huobiPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + huobiRestPath)
 	if err != nil {
 		return nil, err
 	}
