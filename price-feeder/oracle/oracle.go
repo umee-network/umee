@@ -34,8 +34,8 @@ const (
 	tickerSleep = 1000 * time.Millisecond
 
 	// cacheOnChainBlockQuantity represents the amount of blocks
-	// in which the oracle onchain data will wait to be updated
-	cacheOnChainBlockQuantity = 200
+	// in which the oracle onchain dat(a will wait to be updated
+	cacheOnChainBlockQuantity = uint64(200)
 )
 
 // PreviousPrevote defines a structure for defining the previous prevote
@@ -177,7 +177,7 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 // to determine prices. If candles are not available, uses the most recent prices
 // with VWAP. Warns the the user of any missing prices, and filters out any faulty
 // providers which do not report prices or candles within 2𝜎 of the others.
-func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
+func (o *Oracle) SetPrices(ctx context.Context) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(provider.AggregatedProviderPrices)
@@ -400,8 +400,6 @@ func (onChain *OracleOnChain) IsParamsOutdated(currentBlockHeigh uint64) bool {
 // if the current oracleOnChainParams is outdated we will query it again to
 // get the current oracle params.
 func (o *Oracle) GetCachedParams(currentBlockHeigh uint64) (oracletypes.Params, error) {
-	// blockQuantityCacheOracleOnChainParams
-	// o.oracleOnChainParams
 	if !o.oracleOnChain.IsParamsOutdated(currentBlockHeigh) {
 		return *o.oracleOnChain.params, nil
 	}
@@ -411,7 +409,9 @@ func (o *Oracle) GetCachedParams(currentBlockHeigh uint64) (oracletypes.Params, 
 		return oracletypes.Params{}, err
 	}
 
-	defer o.oracleOnChain.Update(currentBlockHeigh, params)
+	o.checkAcceptList(params)
+
+	o.oracleOnChain.Update(currentBlockHeigh, params)
 	return params, nil
 }
 
@@ -512,15 +512,6 @@ func (o *Oracle) tick(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	oracleParams, err := o.GetParams()
-	if err != nil {
-		return err
-	}
-	if err := o.SetPrices(ctx, oracleParams.AcceptList); err != nil {
-		return err
-	}
-
-	o.checkAcceptList(oracleParams)
 
 	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
 	if err != nil {
@@ -528,6 +519,15 @@ func (o *Oracle) tick(ctx context.Context) error {
 	}
 	if blockHeight < 1 {
 		return fmt.Errorf("expected positive block height")
+	}
+
+	oracleParams, err := o.GetCachedParams(uint64(blockHeight))
+	if err != nil {
+		return err
+	}
+
+	if err := o.SetPrices(ctx); err != nil {
+		return err
 	}
 
 	// Get oracle vote period, next block height, current vote period, and index
