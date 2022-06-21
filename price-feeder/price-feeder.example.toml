@@ -56,3 +56,8 @@ enabled = true
 global_labels = [["chain-id", "umee-local-testnet"]]
 service_name = "price-feeder"
 type = "prometheus"
+
+[[provider_endpoints]]
+name = "binance"
+rest = "https://api1.binance.com"
+websocket = "stream.binance.com:9443"
