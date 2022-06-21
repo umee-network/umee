@@ -180,6 +180,9 @@ func endpointValidation(sl validator.StructLevel) {
 	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
 		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
 	}
+	if _, ok := SupportedProviders[endpoint.Name]; !ok {
+		sl.ReportError(endpoint.Name, "name", "Name", "unsupportedEndpointProvider", "")
+	}
 }
 
 // Validate returns an error if the Config object is invalid.

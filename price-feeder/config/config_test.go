@@ -143,7 +143,54 @@ func TestValidate(t *testing.T) {
 				},
 				GasAdjustment: 1.5,
 				ProviderEndpoints: []config.ProviderEndpoint{
-					{},
+					{
+						Name: "binance",
+					},
+				},
+			},
+			true,
+		},
+		{
+			"invalid endpoint provider",
+			config.Config{
+				Server: config.Server{
+					ListenAddr:     "0.0.0.0:7171",
+					VerboseCORS:    false,
+					AllowedOrigins: []string{},
+				},
+				CurrencyPairs: []config.CurrencyPair{
+					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
+				},
+				Account: config.Account{
+					Address:   "fromaddr",
+					Validator: "valaddr",
+					ChainID:   "chain-id",
+				},
+				Keyring: config.Keyring{
+					Backend: "test",
+					Dir:     "/Users/username/.umee",
+				},
+				RPC: config.RPC{
+					TMRPCEndpoint: "http://localhost:26657",
+					GRPCEndpoint:  "localhost:9090",
+					RPCTimeout:    "100ms",
+				},
+				Telemetry: config.Telemetry{
+					ServiceName:         "price-feeder",
+					Enabled:             true,
+					EnableHostname:      true,
+					EnableHostnameLabel: true,
+					EnableServiceLabel:  true,
+					GlobalLabels:        make([][]string, 1),
+					Type:                "generic",
+				},
+				GasAdjustment: 1.5,
+				ProviderEndpoints: []config.ProviderEndpoint{
+					{
+						Name:      "foo",
+						Rest:      "bar",
+						Websocket: "baz",
+					},
 				},
 			},
 			true,
