@@ -16,7 +16,7 @@ require (
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.27.0
 	github.com/sirkon/goproxy v1.4.8
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.2
 	github.com/tendermint/tendermint v0.34.19
 	github.com/umee-network/umee/v2 v2.0.1
