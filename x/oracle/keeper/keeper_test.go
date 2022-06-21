@@ -263,11 +263,11 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 }
 
-func (s *IntegrationTestSuite) TestDeleteExchangeRate() {
+func (s *IntegrationTestSuite) TestClearExchangeRate() {
 	app, ctx := s.app, s.ctx
 
 	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
-	app.OracleKeeper.DeleteExchangeRate(ctx, displayDenom)
+	app.OracleKeeper.ClearExchangeRates(ctx)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)
 }
