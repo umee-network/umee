@@ -164,7 +164,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().Error(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().Error(ots.oracle.SetPrices(context.TODO()))
 	ots.Require().Empty(ots.oracle.GetPrices())
 
 	// use a mock provider without a conversion rate for these stablecoins
@@ -187,7 +187,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().Error(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().Error(ots.oracle.SetPrices(context.TODO()))
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 0)
@@ -236,7 +236,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
@@ -289,7 +289,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
@@ -341,7 +341,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
