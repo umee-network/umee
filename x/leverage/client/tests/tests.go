@@ -409,7 +409,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdWithdrawAsset(),
 		[]string{
 			val.Address.String(),
-			"1000uumee",
+			"1000u/uumee",
 		},
 		nil,
 	}
