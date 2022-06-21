@@ -32,6 +32,10 @@ import (
 // at least one block during each voting period.
 const (
 	tickerSleep = 1000 * time.Millisecond
+
+	// cacheOnChainBlockQuantity represents the amount of blocks
+	// in which the oracle onchain data will wait to be updated
+	cacheOnChainBlockQuantity = 200
 )
 
 // PreviousPrevote defines a structure for defining the previous prevote
@@ -68,6 +72,15 @@ type Oracle struct {
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
+
+	oracleOnChain OracleOnChain
+}
+
+// OracleOnChain used to cache data that can be updated
+// at each cacheOnChainBlockQuantity amount of blocks
+type OracleOnChain struct {
+	params           *oracletypes.Params
+	lastUpdatedBlock uint64
 }
 
 func New(
@@ -97,6 +110,7 @@ func New(
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
+		oracleOnChain:   OracleOnChain{},
 	}
 }
 
@@ -351,6 +365,54 @@ func SetProviderTickerPricesAndCandles(
 	}
 
 	return pricesOk || candlesOk
+}
+
+// Update update the values inside the onchain struct.
+func (onChain *OracleOnChain) Update(currentBlockHeigh uint64, params oracletypes.Params) {
+	onChain.lastUpdatedBlock = currentBlockHeigh
+	onChain.params = &params
+}
+
+func (onChain *OracleOnChain) IsParamsOutdated(currentBlockHeigh uint64) bool {
+	// doesn't have any data
+	if onChain.params == nil {
+		return true
+	}
+
+	// state in which the blockchain is under cacheOnChainBlockQuantity
+	// amount of blocks, but already has value for params
+	if currentBlockHeigh < cacheOnChainBlockQuantity {
+		return false
+	}
+
+	// an edge case, should never happen
+	// which the current blockchain height is lower
+	// than the last updated block, to fix should
+	// just update the on chain params again
+	if currentBlockHeigh < onChain.lastUpdatedBlock {
+		return true
+	}
+
+	return (currentBlockHeigh - onChain.lastUpdatedBlock) > cacheOnChainBlockQuantity
+}
+
+// GetCachedParams returns the last updated parameters of the x/oracle module
+// if the current oracleOnChainParams is outdated we will query it again to
+// get the current oracle params.
+func (o *Oracle) GetCachedParams(currentBlockHeigh uint64) (oracletypes.Params, error) {
+	// blockQuantityCacheOracleOnChainParams
+	// o.oracleOnChainParams
+	if !o.oracleOnChain.IsParamsOutdated(currentBlockHeigh) {
+		return *o.oracleOnChain.params, nil
+	}
+
+	params, err := o.GetParams()
+	if err != nil {
+		return oracletypes.Params{}, err
+	}
+
+	defer o.oracleOnChain.Update(currentBlockHeigh, params)
+	return params, nil
 }
 
 // GetParams returns the current on-chain parameters of the x/oracle module.
