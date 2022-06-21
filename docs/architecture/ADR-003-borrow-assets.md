@@ -51,18 +51,20 @@ Note also that as a consequence of uToken interest, the asset value of uToken co
 
 Definitions:
 
-- `total_lend(tokenA)`: total amount of tokenA provided to the leverage protocol (including coins marked as a collateral).
-- `supply_utilization(tokenA) = total_borrow(tokenA) / total_lend(tokenA)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
-- `total_collateral(tokenA)` -- total amount of tokenA
+- `total_supply(tokenA)`: total amount of tokenA provided to the leverage protocol (including coins marked as a collateral).
+- `available_supply(tokenA)`: amount of tokenA available in the system for borrowing.
+- `supply_utilization(tokenA) = total_borrow(tokenA) / (total_supply(tokenA) - reserve)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
+- `total_collateral(tokenA)`: total amount of tokenA used as a collateral.
 
-We define a _token collateral utilization_ as ratio of borrowed collateral to the total amount of collateral of the token.
+We define a _token collateral utilization_:
 
 ```
-collateral_utilization(tokenA) = total_borrow(tokenA) / total_collateral(tokenA)
-                               = u/tokenA borrowed / (u/tokenA borrowed + u/tokenA module balance)
+collateral_utilization(tokenA) = total_collateral(tokenA) / (total_supply(tokenA) - total_borrow(tokenA) - reserve)
+
+collateral_utilization(tokenA) = available_supply(tokenA) / total_collateral(tokenA)
 ```
 
-Collateral utilization is 0 when there is no borrow of given token collateral. It is equal to 1, when all token collateral is borrowed. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
+Collateral utilization is 0 when the given token is not used as a collateral. It is equal to 1, when available supply. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
 Observation: for every token `t`: `collateral_utilization(t) <= supply_utilization(t)`.
 
 High collateral utilization is dangerous for the system:
@@ -72,12 +74,12 @@ High collateral utilization is dangerous for the system:
 
 Let's draw the following scenario to picture the liquidators risk:
 
-1. Alice is providing \$1M USD for lending.
+1. Alice is providing \$1.2M USD for lending.
 2. Bob is providing \$1.5M in Luna as a collateral and borrows 1M USD from Alice.
-3. Charlie provides \$1.5M in BTC as a collateral and borrows $1M in Luna from Bob.
+3. Charlie provides \$2M in BTC as a collateral and borrows $1.4M in Luna from Bob.
 4. Charlie predicts Luna collapse and sells the Luna.
 5. Luna is sinking and Bob position has to be liquidated. However:
-   - Lenders can liquidate Bob, but they can only redeem up to 33% of `u/Luna` because the rest is not available (Charlie borrowed it).
+   - Lenders can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
    - Charlie will not pay off her borrow position - she will wait for the final collapse and buy Luna cheaply.
    - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
 6. In case of the big crash, liquidators won't perform a liquidation, Bob will run away with 1M USD, system will end up with a bad debt and obligation to pay Alice.
