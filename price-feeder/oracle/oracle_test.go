@@ -15,8 +15,6 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 type mockProvider struct {
@@ -155,15 +153,8 @@ func (ots *OracleTestSuite) TestPrices() {
 			},
 		},
 	}
-	acceptList := oracletypes.DenomList{
-		oracletypes.Denom{
-			BaseDenom:   "UUMEE",
-			SymbolDenom: "UMEE",
-			Exponent:    6,
-		},
-	}
 
-	ots.Require().Error(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().Error(ots.oracle.SetPrices(context.TODO()))
 	ots.Require().Empty(ots.oracle.GetPrices())
 
 	// use a mock provider without a conversion rate for these stablecoins
@@ -186,7 +177,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().Error(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().Error(ots.oracle.SetPrices(context.TODO()))
 
 	prices := ots.oracle.GetPrices()
 	ots.Require().Len(prices, 0)
@@ -235,7 +226,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
@@ -288,7 +279,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.70"), prices["UMEE"])
@@ -340,7 +331,7 @@ func (ots *OracleTestSuite) TestPrices() {
 		},
 	}
 
-	ots.Require().NoError(ots.oracle.SetPrices(context.TODO(), acceptList))
+	ots.Require().NoError(ots.oracle.SetPrices(context.TODO()))
 	prices = ots.oracle.GetPrices()
 	ots.Require().Len(prices, 4)
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.71"), prices["UMEE"])
