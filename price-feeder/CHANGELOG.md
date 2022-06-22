@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
+- [#1050](https://github.com/umee-network/umee/pull/1050) Cache x/oracle params to decrease the number of queries to nodes.
 
 ### Features
 
