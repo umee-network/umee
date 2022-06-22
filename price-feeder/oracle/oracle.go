@@ -31,7 +31,7 @@ import (
 // and broadcast pre-vote and vote transactions such that they're committed in
 // at least one block during each voting period.
 const (
-	tickerSleep = 1000 * time.Millisecond
+	tickerSleep = 1500 * time.Millisecond
 
 	// cacheOnChainBlockQuantity represents the amount of blocks
 	// in which the oracle onchain dat(a will wait to be updated
