@@ -370,10 +370,10 @@ func SetProviderTickerPricesAndCandles(
 	return pricesOk || candlesOk
 }
 
-// Update update the values inside the onchain struct.
-func (onChain *OnChainData) Update(currentBlockHeigh uint64, params oracletypes.Params) {
-	onChain.lastUpdatedBlock = currentBlockHeigh
-	onChain.params = &params
+// Update update the values inside the OnChainData struct.
+func (onChainData *OnChainData) Update(currentBlockHeigh uint64, params oracletypes.Params) {
+	onChainData.lastUpdatedBlock = currentBlockHeigh
+	onChainData.params = &params
 }
 
 func (onChainData *OnChainData) IsParamsOutdated(currentBlockHeigh uint64) bool {
