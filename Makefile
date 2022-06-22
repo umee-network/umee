@@ -89,7 +89,8 @@ go.sum: go.mod
 	@go mod verify
 
 go-mod-tidy:
-	@contrib/scripts/go-mod-tidy-all.sh
+#	go work 	@contrib/scripts/go-mod-tidy-all.sh
+	go work sync
 
 clean:
 	@echo "--> Cleaning..."
