@@ -95,12 +95,7 @@ func New(
 		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
-<<<<<<< HEAD
-=======
-		deviations:      deviations,
 		paramCache:      ParamCache{},
-		endpoints:       endpoints,
->>>>>>> b00862b (feat!: cache get params for 200 blocks (#1050))
 	}
 }
 
