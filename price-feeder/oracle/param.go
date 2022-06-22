@@ -22,9 +22,9 @@ func (paramCache *ParamCache) Update(currentBlockHeigh int64, params oracletypes
 	paramCache.params = &params
 }
 
-// IsParamsOutdated checks whether or not the current
+// IsOutdated checks whether or not the current
 // param data was fetched in the last 200 blocks.
-func (paramCache *ParamCache) IsParamsOutdated(currentBlockHeigh int64) bool {
+func (paramCache *ParamCache) IsOutdated(currentBlockHeigh int64) bool {
 	if paramCache.params == nil {
 		return true
 	}
