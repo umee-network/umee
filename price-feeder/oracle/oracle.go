@@ -361,7 +361,7 @@ func SetProviderTickerPricesAndCandles(
 // GetParamCache returns the last updated parameters of the x/oracle module
 // if the current ParamCache is outdated, we will query it again.
 func (o *Oracle) GetParamCache(currentBlockHeigh int64) (oracletypes.Params, error) {
-	if !o.paramCache.IsParamsOutdated(currentBlockHeigh) {
+	if !o.paramCache.IsOutdated(currentBlockHeigh) {
 		return *o.paramCache.params, nil
 	}
 
