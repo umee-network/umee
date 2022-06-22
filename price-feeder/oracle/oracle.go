@@ -32,10 +32,6 @@ import (
 // at least one block during each voting period.
 const (
 	tickerSleep = 1000 * time.Millisecond
-
-	// paramsCacheInterval represents the amount of blocks
-	// during which we will cache the oracle params.
-	paramsCacheInterval = uint64(200)
 )
 
 // PreviousPrevote defines a structure for defining the previous prevote
@@ -73,14 +69,7 @@ type Oracle struct {
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
-	oracleOnChain OnChainData
-}
-
-// ParamCache is used to cache oracle param data for
-// an amount of blocks, defined by paramsCacheInterval.
-type ParamCache struct {
-	params           *oracletypes.Params
-	lastUpdatedBlock int64
+	paramCache      ParamCache
 }
 
 func New(
@@ -111,7 +100,7 @@ func New(
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
-		paramCache:   ParamCache{},
+		paramCache:      ParamCache{},
 		endpoints:       endpoints,
 	}
 }
@@ -369,38 +358,11 @@ func SetProviderTickerPricesAndCandles(
 	return pricesOk || candlesOk
 }
 
-// Update retrieves the most recent oracle params and 
-// updates the instance. 
-func (onChainData *OnChainData) Update(currentBlockHeigh uint64, params oracletypes.Params) {
-	onChainData.lastUpdatedBlock = currentBlockHeigh
-	onChainData.params = &params
-}
-
-func (onChainData *OnChainData) IsParamsOutdated(currentBlockHeigh uint64) bool {
-	if onChainData.params == nil {
-		return true
-	}
-
-	if currentBlockHeigh < cacheOnChainBlockQuantity {
-		return false
-	}
-
-	// This is an edge case, which should never happen.
-	// The current blockchain height is lower
-	// than the last updated block, to fix we should
-	// just update the cached params again.
-	if currentBlockHeigh < onChainData.lastUpdatedBlock {
-		return true
-	}
-
-	return (currentBlockHeigh - onChainData.lastUpdatedBlock) > cacheOnChainBlockQuantity
-}
-
 // GetParamCache returns the last updated parameters of the x/oracle module
 // if the current ParamCache is outdated, we will query it again.
-func (o *Oracle) GetParamCache(currentBlockHeigh uint64) (oracletypes.Params, error) {
-	if !o.oracleOnChain.IsParamsOutdated(currentBlockHeigh) {
-		return *o.oracleOnChain.params, nil
+func (o *Oracle) GetParamCache(currentBlockHeigh int64) (oracletypes.Params, error) {
+	if !o.paramCache.IsParamsOutdated(currentBlockHeigh) {
+		return *o.paramCache.params, nil
 	}
 
 	params, err := o.GetParams()
@@ -410,7 +372,7 @@ func (o *Oracle) GetParamCache(currentBlockHeigh uint64) (oracletypes.Params, er
 
 	o.checkAcceptList(params)
 
-	o.oracleOnChain.Update(currentBlockHeigh, params)
+	o.paramCache.Update(currentBlockHeigh, params)
 	return params, nil
 }
 
@@ -527,7 +489,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 		return fmt.Errorf("expected positive block height")
 	}
 
-	oracleParams, err := o.GetCachedParams(uint64(blockHeight))
+	oracleParams, err := o.GetParamCache(blockHeight)
 	if err != nil {
 		return err
 	}

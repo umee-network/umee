@@ -15,7 +15,6 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 type mockProvider struct {
@@ -341,63 +340,6 @@ func (ots *OracleTestSuite) TestPrices() {
 	ots.Require().Equal(sdk.MustNewDecFromStr("3.717"), prices["XBT"])
 	ots.Require().Equal(sdk.MustNewDecFromStr("1"), prices["USDC"])
 	ots.Require().Equal(sdk.MustNewDecFromStr("1"), prices["USDT"])
-}
-
-func TestOnChainDataIsParamsOutdated(t *testing.T) {
-	testCases := map[string]struct {
-		onChainData       OnChainData
-		currentBlockHeigh uint64
-		expected          bool
-	}{
-		"Params Nil": {
-			onChainData: OnChainData{
-				params:           nil,
-				lastUpdatedBlock: 0,
-			},
-			currentBlockHeigh: 10,
-			expected:          true,
-		},
-		"currentBlockHeigh < cacheOnChainBlockQuantity": {
-			onChainData: OnChainData{
-				params:           &oracletypes.Params{},
-				lastUpdatedBlock: 0,
-			},
-			currentBlockHeigh: 199,
-			expected:          false,
-		},
-		"currentBlockHeigh < lastUpdatedBlock": {
-			onChainData: OnChainData{
-				params:           &oracletypes.Params{},
-				lastUpdatedBlock: 205,
-			},
-			currentBlockHeigh: 203,
-			expected:          true,
-		},
-		"Outdated": {
-			onChainData: OnChainData{
-				params:           &oracletypes.Params{},
-				lastUpdatedBlock: 200,
-			},
-			currentBlockHeigh: 401,
-			expected:          true,
-		},
-		"Limit to keep in cache": {
-			onChainData: OnChainData{
-				params:           &oracletypes.Params{},
-				lastUpdatedBlock: 200,
-			},
-			currentBlockHeigh: 400,
-			expected:          false,
-		},
-	}
-
-	for name, tc := range testCases {
-		tc := tc
-
-		t.Run(name, func(t *testing.T) {
-			require.Equal(t, tc.expected, tc.onChainData.IsParamsOutdated(tc.currentBlockHeigh))
-		})
-	}
 }
 
 func TestGenerateSalt(t *testing.T) {
