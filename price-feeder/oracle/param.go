@@ -17,15 +17,15 @@ type ParamCache struct {
 
 // Update retrieves the most recent oracle params and
 // updates the instance.
-func (onChainData *ParamCache) Update(currentBlockHeigh int64, params oracletypes.Params) {
-	onChainData.lastUpdatedBlock = currentBlockHeigh
-	onChainData.params = &params
+func (paramCache *ParamCache) Update(currentBlockHeigh int64, params oracletypes.Params) {
+	paramCache.lastUpdatedBlock = currentBlockHeigh
+	paramCache.params = &params
 }
 
 // IsParamsOutdated checks whether or not the current
 // param data was fetched in the last 200 blocks.
-func (onChainData *ParamCache) IsParamsOutdated(currentBlockHeigh int64) bool {
-	if onChainData.params == nil {
+func (paramCache *ParamCache) IsParamsOutdated(currentBlockHeigh int64) bool {
+	if paramCache.params == nil {
 		return true
 	}
 
@@ -37,9 +37,9 @@ func (onChainData *ParamCache) IsParamsOutdated(currentBlockHeigh int64) bool {
 	// The current blockchain height is lower
 	// than the last updated block, to fix we should
 	// just update the cached params again.
-	if currentBlockHeigh < onChainData.lastUpdatedBlock {
+	if currentBlockHeigh < paramCache.lastUpdatedBlock {
 		return true
 	}
 
-	return (currentBlockHeigh - onChainData.lastUpdatedBlock) > paramsCacheInterval
+	return (currentBlockHeigh - paramCache.lastUpdatedBlock) > paramsCacheInterval
 }
