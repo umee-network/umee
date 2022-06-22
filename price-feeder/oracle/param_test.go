@@ -7,7 +7,7 @@ import (
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
-func TestParamCacheIsParamsOutdated(t *testing.T) {
+func TestParamCacheIsOutdated(t *testing.T) {
 	testCases := map[string]struct {
 		paramCache        ParamCache
 		currentBlockHeigh int64
@@ -59,7 +59,7 @@ func TestParamCacheIsParamsOutdated(t *testing.T) {
 		tc := tc
 
 		t.Run(name, func(t *testing.T) {
-			require.Equal(t, tc.expected, tc.paramCache.IsParamsOutdated(tc.currentBlockHeigh))
+			require.Equal(t, tc.expected, tc.paramCache.IsOutdated(tc.currentBlockHeigh))
 		})
 	}
 }
