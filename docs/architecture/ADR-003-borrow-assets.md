@@ -47,30 +47,45 @@ The calculated borrow limit, which weighs collateral uTokens against borrowed as
 
 Note also that as a consequence of uToken interest, the asset value of uToken collateral increases over time, meaning a user who repays positions in full and redeems collateral uTokens will receive back more base assets than they deposited originally, reducing the effective interest.
 
-### Max collateral utilization
+### Collateral utilization
 
 Definitions:
 
 - `total_supply(tokenA)`: total amount of tokenA provided to the leverage protocol (including coins marked as a collateral).
-- `available_supply(tokenA)`: amount of tokenA available in the system for borrowing.
-- `supply_utilization(tokenA) = total_borrow(tokenA) / (total_supply(tokenA) - reserve)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all provided tokenA are borrowed.
+- `available_supply(tokenA) = total_supply(tokenA) - reserve - total_borrow(tokenA)`: amount of tokenA available in the system for borrowing.
+- `supply_utilization(tokenA) = total_borrow(tokenA) / (total_supply(tokenA) - reserve)`. It equals 0 if there is no borrow for tokenA. It equals 1 if all ledable tokenA are borrowed.
 - `total_collateral(tokenA)`: total amount of tokenA used as a collateral.
 
 We define a _token collateral utilization_:
 
 ```
-collateral_utilization(tokenA) = total_collateral(tokenA) / (total_supply(tokenA) - total_borrow(tokenA) - reserve)
-
-collateral_utilization(tokenA) = available_supply(tokenA) / total_collateral(tokenA)
+collateral_utilization(tokenA) = total_collateral(tokenA) / available_supply(tokenA)
 ```
 
-Collateral utilization is 0 when the given token is not used as a collateral. It is equal to 1, when available supply. Collateral utilization of token X is growing when lenders withdraw their token X collateral or borrowers take a new loan of token X.
-Observation: for every token `t`: `collateral_utilization(t) <= supply_utilization(t)`.
+Note: system must not allow to have available_supply to equal zero.
+
+Intuition: we want collateral utilization to grow when there is less liquid tokenA available in the system to cover the liquidation. Collateral utilization of tokenA is growing when lenders withdraw their tokenA collateral or when borrowers take a new loan of tokenA. If a `tokenA` is not used a collateral then it's _collateral utilization_ is zero. It is bigger than 1 when available supply is lower than the amount of `tokenA` used as a collateral. When it is `N`, it means that only `1/N` of the collateral is available for redemption (u/tokenA -> tokenA).
+
+#### Examples
+
+Let's say we have 1000A (token A) provided to a system for lending. Below let's consider a state with total amount of A borrowed (B) and total amount of B used as a collateral (C) and computed collateral utilization (CU):
+
+1. B=0, C=0 → CU=0
+1. B=0, C=500 → CU=0.5
+1. B=0, C=1000 → CU=1
+1. B=500, C=0 → CU=0
+1. B=500, C=500 → CU=1
+1. B=500, C=1000 → CU=2
+1. B=999, C=0 → CU=0
+1. B=999, C=500 → CU=500
+1. B=999, C=100 → CU=1000
+
+#### Motivation
 
 High collateral utilization is dangerous for the system:
 
-- When collateral utilization is approaching to 1, lenders may not be able to withdraw their collateral.
-- Liquidators, when liquidating a borrower, they get into position their _uToken_. In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying Token). However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits. This will dramatically increase the risk of getting a profit by liquidators and could cause the system being insolvent.
+- When collateral utilization is above 1, lenders may not be able to withdraw their the liquidated collateral.
+- Liquidators, when liquidating a borrower, they get into position their _uToken_. In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying token). However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits. This will dramatically increase the risk of getting a profit by liquidators and could cause the system being insolvent.
 
 Let's draw the following scenario to picture the liquidators risk:
 
@@ -86,7 +101,7 @@ Let's draw the following scenario to picture the liquidators risk:
 
 We propose to set a per token parameter: **max collateral utilization** stored in the `Token` registry (see ADR-004). The system will forbid to make any collateral related operation if the operation would move token _collateral utilization_ above _max collateral utilization_.
 
-Stable assets will have high max collateral utilization (can go even to 99%). Volatile assets should have significant smaller collateral utilization.
+Stable assets will have high max collateral utilization (can go even to 50). Volatile assets should have significant smaller collateral utilization, and assets with high risk should have max collateral utilization close to 1.
 
 ## Detailed Design
 
