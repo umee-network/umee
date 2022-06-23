@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	coinbaseHost          = "ws-feed.exchange.coinbase.com"
-	coinbasePingCheck     = time.Second * 28 // should be < 30
-	coinbasePairsEndpoint = "https://api.exchange.coinbase.com/products"
-	timeLayout            = "2006-01-02T15:04:05.000000Z"
-	unixMinute            = 60000
+	coinbaseWSHost    = "ws-feed.exchange.coinbase.com"
+	coinbasePingCheck = time.Second * 28 // should be < 30
+	coinbaseRestHost  = "https://api.exchange.coinbase.com"
+	coinbaseRestPath  = "/products"
+	timeLayout        = "2006-01-02T15:04:05.000000Z"
+	unixMinute        = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -41,6 +42,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -94,11 +96,19 @@ type (
 func NewCoinbaseProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
+	if endpoints.Name != config.ProviderCoinbase {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderCoinbase,
+			Rest:      coinbaseRestHost,
+			Websocket: coinbaseWSHost,
+		}
+	}
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   coinbaseHost,
+		Host:   endpoints.Websocket,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -111,6 +121,7 @@ func NewCoinbaseProvider(
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "coinbase").Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
+		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
 		tickers:         map[string]CoinbaseTicker{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -236,7 +247,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(coinbasePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + coinbaseRestPath)
 	if err != nil {
 		return nil, err
 	}
