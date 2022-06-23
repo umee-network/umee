@@ -13,7 +13,7 @@ import (
 // using its borrow utilization and token-specific params. Returns zero on
 // invalid asset.
 func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}
@@ -48,7 +48,7 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 // DeriveLendAPY derives the current lend interest rate on a token denom
 // using its borrow utilization borrow APY. Returns zero on invalid asset.
 func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}

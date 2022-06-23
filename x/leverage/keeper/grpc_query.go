@@ -572,7 +572,7 @@ func (q Querier) MarketSummary(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	token, err := q.Keeper.GetRegisteredToken(ctx, req.Denom)
+	token, err := q.Keeper.GetTokenSettings(ctx, req.Denom)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}

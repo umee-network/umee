@@ -85,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, token))
+		s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 
