@@ -23,25 +23,25 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
-	utilization := k.DeriveBorrowUtilization(ctx, denom)
+	utilization := k.ComputeBorrowUtilization(ctx, denom)
 
-	if utilization.GTE(token.KinkUtilizationRate) {
+	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,               // x
-			token.KinkUtilizationRate, // x1
-			token.KinkBorrowRate,      // y1
-			sdk.OneDec(),              // x2
-			token.MaxBorrowRate,       // y2
+			utilization,           // x
+			token.KinkUtilization, // x1
+			token.KinkBorrowRate,  // y1
+			sdk.OneDec(),          // x2
+			token.MaxBorrowRate,   // y2
 		)
 	}
 
 	// utilization is between 0% and kink value
 	return Interpolate(
-		utilization,               // x
-		sdk.ZeroDec(),             // x1
-		token.BaseBorrowRate,      // y1
-		token.KinkUtilizationRate, // x2
-		token.KinkBorrowRate,      // y2
+		utilization,           // x
+		sdk.ZeroDec(),         // x1
+		token.BaseBorrowRate,  // y1
+		token.KinkUtilization, // x2
+		token.KinkBorrowRate,  // y2
 	)
 }
 
@@ -54,7 +54,7 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
-	borrowUtilization := k.DeriveBorrowUtilization(ctx, denom)
+	borrowUtilization := k.ComputeBorrowUtilization(ctx, denom)
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
 	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor

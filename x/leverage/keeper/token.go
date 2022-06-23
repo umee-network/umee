@@ -125,7 +125,7 @@ func (k Keeper) GetInterestKinkUtilization(ctx sdk.Context, denom string) (sdk.D
 		return sdk.ZeroDec(), err
 	}
 
-	return token.KinkUtilizationRate, nil
+	return token.KinkUtilization, nil
 }
 
 // GetCollateralWeight gets collateral weight of a given token.

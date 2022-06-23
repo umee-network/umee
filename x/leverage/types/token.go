@@ -54,8 +54,8 @@ func (t Token) Validate() error {
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
 	// multiple interest rates being defined at exactly 0% or 100% utilization
 	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.
-	if !t.KinkUtilizationRate.IsPositive() || t.KinkUtilizationRate.GTE(sdk.OneDec()) {
-		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilizationRate)
+	if !t.KinkUtilization.IsPositive() || t.KinkUtilization.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilization)
 	}
 
 	// interest rates are non-negative; they do not need to have a maximum value

@@ -57,8 +57,8 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
 }
 
-// DeriveBorrowUtilization derives the current borrow utilization of a token denom.
-func (k Keeper) DeriveBorrowUtilization(ctx sdk.Context, denom string) sdk.Dec {
+// ComputeBorrowUtilization derives the current borrow utilization of a token denom.
+func (k Keeper) ComputeBorrowUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Borrow utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
 	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
