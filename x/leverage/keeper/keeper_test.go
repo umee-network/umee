@@ -246,36 +246,19 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	uabc := newToken("uabc", "ABC")
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, uabc))
 
-	reserveFactor, err := s.app.LeverageKeeper.GetReserveFactor(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(reserveFactor, sdk.MustNewDecFromStr("0.2"))
-
 	t, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uabc")
-	collateralWeight, err := s.app.LeverageKeeper.GetCollateralWeight(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal(collateralWeight, sdk.MustNewDecFromStr("0.25"))
-
-	liquidationThreshold, err := s.app.LeverageKeeper.GetLiquidationThreshold(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(liquidationThreshold, sdk.MustNewDecFromStr("0.25"))
-
-	baseBorrowRate, err := s.app.LeverageKeeper.GetInterestBase(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(baseBorrowRate, sdk.MustNewDecFromStr("0.02"))
-
-	kinkBorrowRate, err := s.app.LeverageKeeper.GetInterestAtKink(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(kinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
-
+	s.Require().Equal(t.ReserveFactor, sdk.MustNewDecFromStr("0.2"))
+	s.Require().Equal(t.CollateralWeight, sdk.MustNewDecFromStr("0.25"))
+	s.Require().Equal(t.LiquidationThreshold, sdk.MustNewDecFromStr("0.25"))
+	s.Require().Equal(t.BaseBorrowRate, sdk.MustNewDecFromStr("0.02"))
+	s.Require().Equal(t.KinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
 	s.Require().Equal(t.MaxBorrowRate, sdk.MustNewDecFromStr("1.52"))
 	s.Require().Equal(t.KinkUtilization, sdk.MustNewDecFromStr("0.8"))
+	s.Require().Equal(t.LiquidationIncentive, sdk.MustNewDecFromStr("0.1"))
 
-	liquidationIncentive, err := s.app.LeverageKeeper.GetLiquidationIncentive(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(liquidationIncentive, sdk.MustNewDecFromStr("0.1"))
-
-	s.Require().NoError(s.app.LeverageKeeper.AssertBorrowEnabled(s.ctx, "uabc"))
-	s.Require().NoError(s.app.LeverageKeeper.AssertLendEnabled(s.ctx, "uabc"))
+	s.Require().NoError(t.AssertBorrowEnabled())
+	s.Require().NoError(t.AssertLendEnabled())
 	s.Require().NoError(s.app.LeverageKeeper.AssertNotBlacklisted(s.ctx, "uabc"))
 }
 

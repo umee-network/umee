@@ -86,3 +86,19 @@ func (t Token) Validate() error {
 
 	return nil
 }
+
+// AssertLendEnabled returns an error if a token does not exist or cannot be lent.
+func (t Token) AssertLendEnabled() error {
+	if !t.EnableMsgLend {
+		return sdkerrors.Wrap(ErrLendNotAllowed, t.BaseDenom)
+	}
+	return nil
+}
+
+// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+func (t Token) AssertBorrowEnabled() error {
+	if !t.EnableMsgBorrow {
+		return sdkerrors.Wrap(ErrBorrowNotAllowed, t.BaseDenom)
+	}
+	return nil
+}

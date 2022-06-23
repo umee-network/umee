@@ -63,11 +63,22 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
+func (k Keeper) validateLendAsset(ctx sdk.Context, loan sdk.Coin) error {
+	if !loan.IsValid() {
+		return types.ErrInvalidAsset.Wrap(loan.String())
+	}
+	token, err := k.GetTokenSettings(ctx, loan.Denom)
+	if err != nil {
+		return err
+	}
+	return token.AssertLendEnabled()
+}
+
 // LendAsset attempts to deposit assets into the leverage module account in
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if err := k.AssertLendEnabled(ctx, loan.Denom); err != nil {
+	if err := k.validateLendAsset(ctx, loan); err != nil {
 		return err
 	}
 
@@ -195,15 +206,23 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 	return nil
 }
 
-// BorrowAsset attempts to borrow tokens from the leverage module account using
-// collateral uTokens. If asset type is invalid, collateral is insufficient,
-// or module balance is insufficient, we return an error.
-func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+func (k Keeper) validateBorrowAsset(ctx sdk.Context, borrow sdk.Coin) error {
 	if !borrow.IsValid() {
 		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
 
-	if err := k.AssertBorrowEnabled(ctx, borrow.Denom); err != nil {
+	token, err := k.GetTokenSettings(ctx, borrow.Denom)
+	if err != nil {
+		return err
+	}
+	return token.AssertBorrowEnabled()
+}
+
+// BorrowAsset attempts to borrow tokens from the leverage module account using
+// collateral uTokens. If asset type is invalid, collateral is insufficient,
+// or module balance is insufficient, we return an error.
+func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+	if err := k.validateBorrowAsset(ctx, borrow); err != nil {
 		return err
 	}
 
@@ -536,7 +555,7 @@ func (k Keeper) LiquidateBorrow(
 // borrowed value that can be repaid by a liquidator in a single liquidation event.)
 func (k Keeper) LiquidationParams(
 	ctx sdk.Context,
-	reward string,
+	rewardDenom string,
 	borrowed sdk.Dec,
 	limit sdk.Dec,
 ) (sdk.Dec, sdk.Dec, error) {
@@ -547,15 +566,14 @@ func (k Keeper) LiquidationParams(
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
 	}
 
-	// liquidation incentive is determined by collateral reward denom
-	liquidationIncentive, err := k.GetLiquidationIncentive(ctx, reward)
+	ts, err := k.GetTokenSettings(ctx, rewardDenom)
 	if err != nil {
 		return sdk.ZeroDec(), sdk.ZeroDec(), err
 	}
 
 	// special case: If liquidation threshold is zero, close factor is always 1
 	if limit.IsZero() {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	params := k.GetParams(ctx)
@@ -563,12 +581,12 @@ func (k Keeper) LiquidationParams(
 	// special case: If borrowed value is less than small liquidation size,
 	// close factor is always 1
 	if borrowed.LTE(params.SmallLiquidationSize) {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	// special case: If complete liquidation threshold is zero, close factor is always 1
 	if params.CompleteLiquidationThreshold.IsZero() {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	// outside of special cases, close factor scales linearly between MinimumCloseFactor and 1.0,
@@ -588,5 +606,5 @@ func (k Keeper) LiquidationParams(
 		closeFactor = sdk.ZeroDec()
 	}
 
-	return liquidationIncentive, closeFactor, nil
+	return ts.LiquidationIncentive, closeFactor, nil
 }

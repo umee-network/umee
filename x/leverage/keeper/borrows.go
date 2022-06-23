@@ -90,19 +90,19 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD value of base assets
-		value, err := k.TokenValue(ctx, baseAsset)
+		// get USD v of base assets
+		v, err := k.TokenValue(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		weight, err := k.GetCollateralWeight(ctx, baseAsset.Denom)
+		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
 		// add each collateral coin's weighted value to borrow limit
-		limit = limit.Add(value.Mul(weight))
+		limit = limit.Add(v.Mul(ts.CollateralWeight))
 	}
 
 	return limit, nil
@@ -114,7 +114,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 // An error is returned if any input coins are not uTokens or if value
 // calculation fails.
 func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	threshold := sdk.ZeroDec()
+	totalThreshold := sdk.ZeroDec()
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
@@ -123,22 +123,21 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD value of base assets
-		value, err := k.TokenValue(ctx, baseAsset)
+		// get USD v of base assets
+		v, err := k.TokenValue(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		weight, err := k.GetLiquidationThreshold(ctx, baseAsset.Denom)
+		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		// add each liquidation threshold value to total
-		threshold = threshold.Add(value.Mul(weight))
+		totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
 	}
 
-	return threshold, nil
+	return totalThreshold, nil
 }
 
 // setBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
