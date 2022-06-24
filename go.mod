@@ -13,6 +13,7 @@ require (
 	github.com/golangci/golangci-lint v1.46.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2
 	github.com/rs/zerolog v1.27.0
@@ -27,7 +28,6 @@ require (
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
 	google.golang.org/grpc v1.46.2
 	gopkg.in/yaml.v3 v3.0.1
-	github.com/hashicorp/golang-lru v0.5.4
 )
 
 require (
@@ -201,7 +201,6 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.4.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20210204194344-59a8610d2b87 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
