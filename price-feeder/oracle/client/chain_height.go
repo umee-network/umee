@@ -10,7 +10,7 @@ import (
 
 const (
 	// nodeStatsCacheInterval represents the amount of seconds
-	// to update the node stats info from.
+	// to update the chain height.
 	nodeStatsCacheInterval = time.Second * 5
 )
 
