@@ -58,7 +58,7 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
 
 	k.hooks.AfterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
-	k.tokenReg.Add(token.BaseDenom, token)
+	k.tokenRegCache.Add(token.BaseDenom, token)
 	ctx.BlockGasMeter().ConsumeGas(gasCacheUpdate, "cache update")
 	return nil
 }
@@ -66,9 +66,8 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
 // GetRegisteredToken gets a token from the x/leverage module's KVStore.
 func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, error) {
 	ctx.BlockGasMeter().ConsumeGas(gasCacheAccess, "cache access")
-	if v, ok := k.tokenReg.Get(denom); ok {
+	if v, ok := k.tokenRegCache.Get(denom); ok {
 		return v.(types.Token), nil
-
 	}
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.CreateRegisteredTokenKey(denom)
