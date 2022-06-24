@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	// nodeStatsCacheInterval represents the amount of seconds
+	// chainHeightCacheInterval represents the amount of seconds
 	// to update the chain height.
-	nodeStatsCacheInterval = time.Second * 5
+	chainHeightCacheInterval = time.Second * 5
 )
 
 // ChainHeight is used to cache the chain height of the
 // current node which keeps getting updated at the amount
-// of interval nodeStatsCacheInterval.
+// of interval chainHeightCacheInterval.
 type ChainHeight struct {
 	clientCtx         client.Context
 	mtx               sync.RWMutex
@@ -62,11 +62,11 @@ func (chainHeight *ChainHeight) UpdateChainHeight() {
 }
 
 // KeepUpdating keeps asking for the current chain
-// height from the node at each nodeStatsCacheInterval.
+// height from the node at each chainHeightCacheInterval.
 func (chainHeight *ChainHeight) KeepUpdating() {
 	for {
 		chainHeight.UpdateChainHeight()
-		time.Sleep(nodeStatsCacheInterval)
+		time.Sleep(chainHeightCacheInterval)
 	}
 }
 
