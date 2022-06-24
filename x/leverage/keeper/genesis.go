@@ -88,7 +88,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	panicOnErr(err)
 	reserves, err := k.GetAllReserves(ctx)
 	panicOnErr(err)
-	usuppy, err := k.GetAllUTokenSupply(ctx)
+	usupplies, err := k.GetAllUTokenSupply(ctx)
 	panicOnErr(err)
 	return types.NewGenesisState(
 		k.GetParams(ctx),
@@ -100,7 +100,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.GetLastInterestTime(ctx),
 		k.getAllBadDebts(ctx),
 		k.getAllInterestScalars(ctx),
-		usuppy,
+		usupplies,
 	)
 }
 
