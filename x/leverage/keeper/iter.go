@@ -27,30 +27,25 @@ func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte)
 }
 
 // GetAllBadDebts gets bad debt instances across all borrowers.
-func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
+func (k Keeper) GetAllBadDebts(ctx sdk.Context) ([]types.BadDebt, error) {
 	prefix := types.KeyPrefixBadDebt
 	badDebts := []types.BadDebt{}
 
 	iterator := func(key, val []byte) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
-
 		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
 
 		return nil
 	}
 
 	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return badDebts
+	return badDebts, err
 }
 
 // GetAllRegisteredTokens returns all the registered tokens from the x/leverage
 // module's KVStore.
-func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
+func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) ([]types.Token, error) {
 	tokens := []types.Token{}
 
 	iterator := func(key, val []byte) error {
@@ -64,15 +59,12 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 		return nil
 	}
 
-	if err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator); err != nil {
-		panic(err)
-	}
-
-	return tokens
+	err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator)
+	return tokens, err
 }
 
 // GetAllReserves returns all reserves.
-func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
+func (k Keeper) GetAllReserves(ctx sdk.Context) (sdk.Coins, error) {
 	prefix := types.KeyPrefixReserveAmount
 	reserves := sdk.NewCoins()
 
@@ -90,16 +82,12 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 	}
 
 	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return reserves
+	return reserves, err
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
-func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
+func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
 	prefix := types.CreateAdjustedBorrowKeyNoDenom(borrowerAddr)
 	totalBorrowed := sdk.NewCoins()
 
@@ -111,7 +99,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		var adjustedAmount sdk.Dec
 		if err := adjustedAmount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
-			panic(err)
+			return err
 		}
 
 		// apply interest scalar
@@ -122,13 +110,12 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		return nil
 	}
 
-	_ = k.iterate(ctx, prefix, iterator)
-
-	return totalBorrowed
+	err := k.iterate(ctx, prefix, iterator)
+	return totalBorrowed, err
 }
 
 // GetBorrowerCollateral returns an sdk.Coins containing all of a borrower's collateral.
-func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
+func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) (sdk.Coins, error) {
 	prefix := types.CreateCollateralAmountKeyNoDenom(borrowerAddr)
 	totalCollateral := sdk.NewCoins()
 
@@ -140,7 +127,7 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled amount should never happen
-			panic(err)
+			return err
 		}
 
 		// add to totalBorrowed
@@ -148,9 +135,8 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		return nil
 	}
 
-	_ = k.iterate(ctx, prefix, iterator)
-
-	return totalCollateral
+	err := k.iterate(ctx, prefix, iterator)
+	return totalCollateral, err
 }
 
 // HasCollateral returns true if a borrower has any collateral.
@@ -185,10 +171,15 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		checkedAddrs[addr.String()] = struct{}{}
 
 		// get borrower's total borrowed
-		borrowed := k.GetBorrowerBorrows(ctx, addr)
-
+		borrowed, err := k.GetBorrowerBorrows(ctx, addr)
+		if err != nil {
+			return err
+		}
 		// get borrower's total collateral
-		collateral := k.GetBorrowerCollateral(ctx, addr)
+		collateral, err := k.GetBorrowerCollateral(ctx, addr)
+		if err != nil {
+			return err
+		}
 
 		// use oracle helper functions to find total borrowed value in USD
 		borrowValue, err := k.TotalTokenValue(ctx, borrowed)
@@ -251,7 +242,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 }
 
 // GetAllUTokenSupply returns total supply of all uToken denoms.
-func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
+func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) (sdk.Coins, error) {
 	prefix := types.KeyPrefixUtokenSupply
 	supplies := sdk.NewCoins()
 
@@ -269,9 +260,5 @@ func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 	}
 
 	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return supplies
+	return supplies, err
 }

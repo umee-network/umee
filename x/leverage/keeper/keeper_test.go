@@ -386,7 +386,8 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Valid() {
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 
 	// verify lender's total loan balance (sdk.Coins) is also 20 umee (no other coins present)
-	totalLoanBalance := s.app.LeverageKeeper.GetBorrowerBorrows(s.ctx, lenderAddr)
+	totalLoanBalance, err := s.app.LeverageKeeper.GetBorrowerBorrows(s.ctx, lenderAddr)
+	s.Require().NoError(err)
 	s.Require().Equal(totalLoanBalance, sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 20000000)))
 
 	// verify lender's new umee balance (10 - 1k from initial + 20 from loan = 9020 umee)

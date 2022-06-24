@@ -31,7 +31,10 @@ func (q Querier) RegisteredTokens(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	tokens := q.Keeper.GetAllRegisteredTokens(ctx)
+	tokens, err := q.Keeper.GetAllRegisteredTokens(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &types.QueryRegisteredTokensResponse{
 		Registry: make([]types.Token, len(tokens)),
@@ -75,9 +78,8 @@ func (q Querier) Borrowed(
 	}
 
 	if len(req.Denom) == 0 {
-		tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
-
-		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
+		tokens, err := q.Keeper.GetBorrowerBorrows(ctx, borrower)
+		return &types.QueryBorrowedResponse{Borrowed: tokens}, err
 	}
 
 	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
@@ -110,7 +112,10 @@ func (q Querier) BorrowedValue(
 	var tokens sdk.Coins
 
 	if len(req.Denom) == 0 {
-		tokens = q.Keeper.GetBorrowerBorrows(ctx, borrower)
+		tokens, err = q.Keeper.GetBorrowerBorrows(ctx, borrower)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
 			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
@@ -399,9 +404,8 @@ func (q Querier) Collateral(
 	}
 
 	if len(req.Denom) == 0 {
-		tokens := q.Keeper.GetBorrowerCollateral(ctx, borrower)
-
-		return &types.QueryCollateralResponse{Collateral: tokens}, nil
+		tokens, err := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+		return &types.QueryCollateralResponse{Collateral: tokens}, err
 	}
 
 	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
@@ -434,14 +438,16 @@ func (q Querier) CollateralValue(
 	var uTokens sdk.Coins
 
 	if len(req.Denom) == 0 {
-		uTokens = q.Keeper.GetBorrowerCollateral(ctx, lender)
+		uTokens, err = q.Keeper.GetBorrowerCollateral(ctx, lender)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
 			return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
 		}
 
 		collateral := q.Keeper.GetCollateralAmount(ctx, lender, req.Denom)
-
 		uTokens = sdk.NewCoins(collateral)
 	}
 
@@ -498,7 +504,10 @@ func (q Querier) BorrowLimit(
 		return nil, err
 	}
 
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+	collateral, err := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+	if err != nil {
+		return nil, err
+	}
 
 	limit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
@@ -526,7 +535,10 @@ func (q Querier) LiquidationThreshold(
 		return nil, err
 	}
 
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+	collateral, err := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+	if err != nil {
+		return nil, err
+	}
 
 	t, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {

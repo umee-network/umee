@@ -86,7 +86,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 
 	// fetch required parameters
-	tokens := k.GetAllRegisteredTokens(ctx)
+	tokens, err := k.GetAllRegisteredTokens(ctx)
+	if err != nil {
+		return err
+	}
 	oracleRewardFactor := k.GetParams(ctx).OracleRewardFactor
 
 	// create sdk.Coins objects to track oracle rewards, new reserves, and total interest accrued
@@ -146,7 +149,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	err := k.SetLastInterestTime(ctx, currentTime)
+	err = k.SetLastInterestTime(ctx, currentTime)
 	if err != nil {
 		return err
 	}
