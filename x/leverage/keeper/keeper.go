@@ -22,7 +22,7 @@ type Keeper struct {
 	bankKeeper   types.BankKeeper
 	oracleKeeper types.OracleKeeper
 
-	tokenReg simplelru.LRUCache
+	tokenRegCache simplelru.LRUCache
 }
 
 func NewKeeper(
@@ -43,12 +43,12 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		paramSpace:   paramSpace,
-		bankKeeper:   bk,
-		oracleKeeper: ok,
-		tokenReg:     tokenRegCache,
+		cdc:           cdc,
+		storeKey:      storeKey,
+		paramSpace:    paramSpace,
+		bankKeeper:    bk,
+		oracleKeeper:  ok,
+		tokenRegCache: tokenRegCache,
 	}, nil
 }
 
