@@ -41,6 +41,7 @@ while [ ${CNT} -lt $ITER ]; do
     exit 0
   fi
 
+  ((CNT=CNT+1))
   sleep $SLEEP
 done
 
