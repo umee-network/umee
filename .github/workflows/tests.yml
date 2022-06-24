@@ -155,7 +155,6 @@ jobs:
       - name: Start Local Network via Starport
         run: |
           /usr/local/bin/ignite chain serve --reset-once -v -c ./starport.ci.yml  &
-          # ignite chain serve --reset-once -v -c ./starport.ci.yml > starport.out 2>&1 &
         if: env.GIT_DIFF
       - name: Test Local Network Liveness
         run: |
