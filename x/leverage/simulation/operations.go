@@ -355,8 +355,7 @@ func randomWithdrawFields(
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
-	collateral := lk.GetBorrowerCollateral(ctx, acc.Address)
-	uTokens = uTokens.Add(collateral...)
+	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
 
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
 
@@ -388,9 +387,8 @@ func randomBorrowedFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, borrowToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-	b := lk.GetBorrowerBorrows(ctx, acc.Address)
 
-	borrowTokens := simtypes.RandSubsetCoins(r, b)
+	borrowTokens := simtypes.RandSubsetCoins(r, lk.GetBorrowerBorrows(ctx, acc.Address))
 	if borrowTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
