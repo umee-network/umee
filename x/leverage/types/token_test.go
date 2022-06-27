@@ -49,7 +49,7 @@ registry:
       base_borrow_rate: "32.000000000000000000"
       kink_borrow_rate: "26.000000000000000000"
       max_borrow_rate: "21.000000000000000000"
-      kink_utilization_rate: "0.250000000000000000"
+      kink_utilization: "0.250000000000000000"
       liquidation_incentive: "88.000000000000000000"
       symbol_denom: umee
       exponent: 6
