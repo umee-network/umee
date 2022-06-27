@@ -167,6 +167,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 				Str("tx_hash", hash).
 				Uint32("tx_code", code).
 				Msg("failed to broadcast tx; retrying...")
+
+			time.Sleep(time.Second * 1)
 			continue
 		}
 
