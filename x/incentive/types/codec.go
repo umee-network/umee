@@ -31,6 +31,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLock{}, "umee/incentive/MsgLock", nil)
 	cdc.RegisterConcrete(&MsgUnlock{}, "umee/incentive/MsgUnlock", nil)
 	cdc.RegisterConcrete(&MsgClaim{}, "umee/incentive/MsgClaim", nil)
+	cdc.RegisterConcrete(&MsgSponsor{}, "umee/incentive/MsgSponsor", nil)
 	cdc.RegisterConcrete(&CreateIncentiveProgramProposal{}, "umee/incentive/CreateIncentiveProgramProposal", nil)
 }
 
@@ -40,6 +41,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgLock{},
 		&MsgUnlock{},
 		&MsgClaim{},
+		&MsgSponsor{},
 	)
 
 	registry.RegisterImplementations(

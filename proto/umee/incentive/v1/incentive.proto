@@ -9,25 +9,22 @@ option go_package = "github.com/umee-network/umee/v2/x/incentive/types";
 message Params {
   option (gogoproto.goproto_stringer) = false;
 
-  // The id uniquely identifies the incentive program after it has been created.
-  uint32 id = 1;
-
   // The max_unlocks defines the maximum amount of concurrent unlockings an address can have.
-  uint32 max_unlocks = 2 [(gogoproto.moretags) = "yaml:\"max_unlocks\""];
+  uint32 max_unlocks = 1 [(gogoproto.moretags) = "yaml:\"max_unlocks\""];
 
   // The lock_duration_long defines the unlocking duration of the long token lock tier.
-  uint64 lock_duration_long = 3 [(gogoproto.moretags) = "yaml:\"long_tier_duration\""];
+  uint64 lock_duration_long = 2 [(gogoproto.moretags) = "yaml:\"long_tier_duration\""];
 
   // The lock_duration_middle defines the unlocking duration of the middle token lock tier.
-  uint64 lock_duration_middle = 4 [(gogoproto.moretags) = "yaml:\"lock_duration_middle\""];
+  uint64 lock_duration_middle = 3 [(gogoproto.moretags) = "yaml:\"lock_duration_middle\""];
 
   // The lock_duration_short defines the unlocking duration of the short token lock tier.
-  uint64 lock_duration_short = 5 [(gogoproto.moretags) = "yaml:\"lock_duration_short\""];
+  uint64 lock_duration_short = 4 [(gogoproto.moretags) = "yaml:\"lock_duration_short\""];
 
   // The tier_weight_short defines how the proportion of rewards assets locked
   // in the short locking duration receive compared to what the same amount
   // would receive on the long tier.
-  string tier_weight_short = 6 [
+  string tier_weight_short = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"tier_weight_short\""
@@ -36,7 +33,7 @@ message Params {
   // The tier_weight_middle defines how the proportion of rewards assets locked
   // in the short locking duration receive compared to what the same amount
   // would receive on the long tier.
-  string tier_weight_middle = 7 [
+  string tier_weight_middle = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"tier_weight_middle\""
@@ -48,15 +45,18 @@ message Params {
 message IncentiveProgram {
   option (gogoproto.equal) = true;
 
+  // The id uniquely identifies the incentive program after it has been created.
+  uint32 id = 1;
+
   // The supply_denom defines the denomination of the incentivized base token.
-  string supply_denom = 1 [(gogoproto.moretags) = "yaml:\"supply_denom\""];
+  string supply_denom = 2 [(gogoproto.moretags) = "yaml:\"supply_denom\""];
 
   // The reward_denom defines the denomination of the reward base token.
-  string reward_denom = 2 [(gogoproto.moretags) = "yaml:\"reward_denom\""];
+  string reward_denom = 3 [(gogoproto.moretags) = "yaml:\"reward_denom\""];
 
   // The start_date is the unix time in seconds at which the incentives begin.
-  uint64 start_date = 3 [(gogoproto.moretags) = "yaml:\"start_date\""];
+  uint64 start_date = 4 [(gogoproto.moretags) = "yaml:\"start_date\""];
 
   // The duration is the length of the incentive program in seconds.
-  uint64 duration = 4;
+  uint64 duration = 5;
 }
