@@ -90,7 +90,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD v of base assets
+		// get USD value of base assets
 		v, err := k.TokenValue(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
@@ -123,7 +123,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD v of base assets
+		// get USD value of base assets
 		v, err := k.TokenValue(ctx, baseAsset)
 		if err != nil {
 			return sdk.ZeroDec(), err
