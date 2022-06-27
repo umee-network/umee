@@ -31,7 +31,7 @@ func (k Keeper) FromTokenToUTokenDenom(ctx sdk.Context, tokenDenom string) strin
 // IsAcceptedToken returns true if a given (non-UToken) token denom is an
 // existing, non-blacklisted asset type.
 func (k Keeper) IsAcceptedToken(ctx sdk.Context, tokenDenom string) bool {
-	t, err := k.GetRegisteredToken(ctx, tokenDenom)
+	t, err := k.GetTokenSettings(ctx, tokenDenom)
 	return err == nil && !t.Blacklist
 }
 
@@ -42,8 +42,8 @@ func (k Keeper) IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool {
 	return k.IsAcceptedToken(ctx, tokenDenom)
 }
 
-// SetRegisteredToken stores a Token into the x/leverage module's KVStore.
-func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
+// SetTokenSettings stores a Token into the x/leverage module's KVStore.
+func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 	if err := token.Validate(); err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
 
 	bz, err := k.cdc.Marshal(&token)
 	if err != nil {
-		panic(fmt.Sprintf("failed to encode token: %s", err))
+		panic(fmt.Errorf("failed to encode token settings: %w", err))
 	}
 
 	k.hooks.AfterTokenRegistered(ctx, token)
@@ -61,8 +61,8 @@ func (k Keeper) SetRegisteredToken(ctx sdk.Context, token types.Token) error {
 	return nil
 }
 
-// GetRegisteredToken gets a token from the x/leverage module's KVStore.
-func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, error) {
+// GetTokenSettings gets a token from the x/leverage module's KVStore.
+func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, error) {
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.CreateRegisteredTokenKey(denom)
 
@@ -76,117 +76,9 @@ func (k Keeper) GetRegisteredToken(ctx sdk.Context, denom string) (types.Token, 
 	return token, err
 }
 
-// GetReserveFactor gets the reserve factor for a given token.
-func (k Keeper) GetReserveFactor(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.ReserveFactor, nil
-}
-
-// GetInterestBase gets the base interest rate for a given token.
-func (k Keeper) GetInterestBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.BaseBorrowRate, nil
-}
-
-// GetInterestMax gets the maximum interest rate for a given token.
-func (k Keeper) GetInterestMax(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.MaxBorrowRate, nil
-}
-
-// GetInterestAtKink gets the interest rate at the "kink" in the
-// utilization:interest graph for a given token.
-func (k Keeper) GetInterestAtKink(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.KinkBorrowRate, nil
-}
-
-// GetInterestKinkUtilization gets the utilization at the "kink" in the
-// utilization:interest graph for a given token.
-func (k Keeper) GetInterestKinkUtilization(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.KinkUtilizationRate, nil
-}
-
-// GetCollateralWeight gets collateral weight of a given token.
-func (k Keeper) GetCollateralWeight(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.CollateralWeight, nil
-}
-
-// GetLiquidationThreshold gets liquidation threshold of a given token.
-func (k Keeper) GetLiquidationThreshold(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.LiquidationThreshold, nil
-}
-
-// GetLiquidationIncentive gets liquidation incentive of a given token.
-func (k Keeper) GetLiquidationIncentive(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	return token.LiquidationIncentive, nil
-}
-
-// AssertLendEnabled returns an error if a token does not exist or cannot be lent.
-func (k Keeper) AssertLendEnabled(ctx sdk.Context, denom string) error {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return err
-	}
-	if !token.EnableMsgLend {
-		return sdkerrors.Wrap(types.ErrLendNotAllowed, denom)
-	}
-
-	return nil
-}
-
-// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
-func (k Keeper) AssertBorrowEnabled(ctx sdk.Context, denom string) error {
-	token, err := k.GetRegisteredToken(ctx, denom)
-	if err != nil {
-		return err
-	}
-	if !token.EnableMsgBorrow {
-		return sdkerrors.Wrap(types.ErrBorrowNotAllowed, denom)
-	}
-
-	return nil
-}
-
 // AssertNotBlacklisted returns an error if a token does not exist or is blacklisted.
 func (k Keeper) AssertNotBlacklisted(ctx sdk.Context, denom string) error {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return err
 	}

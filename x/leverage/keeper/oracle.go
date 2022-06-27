@@ -17,7 +17,7 @@ import (
 // This function will only return positive exchange rates or errors, unless a
 // token is blacklisted, in which case it will return zero.
 func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	t, err := k.GetRegisteredToken(ctx, denom)
+	t, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
