@@ -136,12 +136,12 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
-		if collateral.AmountOf(uToken.Denom).LT(amountFromCollateral) {
-			return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String())
+		if collateral.AmountOf(coin.Denom).LT(amountFromCollateral) {
+			return sdkerrors.Wrap(types.ErrInsufficientBalance, coin.String())
 		}
 
 		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromCollateral))
+		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromCollateral))
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
 		if err != nil {
 			return err
@@ -154,7 +154,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 		}
 
 		// reduce the lender's collateral by amountFromCollateral
-		newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(amountFromCollateral))
+		newCollateral := sdk.NewCoin(coin.Denom, collateral.AmountOf(coin.Denom).Sub(amountFromCollateral))
 		if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
 			return err
 		}
