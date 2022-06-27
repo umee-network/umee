@@ -322,7 +322,8 @@ func (s *IntegrationTestSuite) mintAndLendAtom(mintTo sdk.AccAddress, amountToMi
 	s.Require().NoError(err)
 
 	// lender enables u/atom as collateral
-	collat, err := s.app.LeverageKeeper.ExchangeUToken(ctx, lendCoin)
+	collat, err := s.app.LeverageKeeper.ExchangeToken(ctx, lendCoin)
+	s.Require().NoError(err)
 	err = s.app.LeverageKeeper.AddCollateral(ctx, mintTo, collat)
 	s.Require().NoError(err)
 }
@@ -840,7 +841,6 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 	s.Require().Error(err)
 }
 
-/*
 func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset() {
 	// The "lender" user from the init scenario is being used because it
 	// already has 1k u/umee enabled as collateral.
@@ -934,8 +934,6 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	s.Require().NoError(err)
 	s.Require().Equal([]sdk.AccAddress{lenderAddr, anotherLender}, lenderAddress)
 }
-
-*/
 
 func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	// artificially set reserves
