@@ -26,7 +26,7 @@ func newTestToken(base, symbol, reserveFactor string) types.Token {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		EnableMsgLend:        true,
 		EnableMsgBorrow:      true,
@@ -60,10 +60,10 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 	})
 
 	t.Run("valid proposal", func(t *testing.T) {
-		require.NoError(t, k.SetRegisteredToken(ctx,
+		require.NoError(t, k.SetTokenSettings(ctx,
 			newTestToken("uosmo", "OSMO", "0.2"),
 		))
-		require.NoError(t, k.SetRegisteredToken(ctx,
+		require.NoError(t, k.SetTokenSettings(ctx,
 			newTestToken("uatom", "ATOM", "0.2"),
 		))
 
@@ -81,10 +81,10 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 		tokens := k.GetAllRegisteredTokens(ctx)
 		require.Len(t, tokens, 3)
 
-		_, err := k.GetRegisteredToken(ctx, "uumee")
+		_, err := k.GetTokenSettings(ctx, "uumee")
 		require.NoError(t, err)
 
-		token, err := k.GetRegisteredToken(ctx, "uosmo")
+		token, err := k.GetTokenSettings(ctx, "uosmo")
 		require.NoError(t, err)
 		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String())
 	})
