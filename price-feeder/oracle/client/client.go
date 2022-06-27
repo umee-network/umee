@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -92,7 +93,12 @@ func NewOracleClient(
 		return OracleClient{}, err
 	}
 
-	oracleClient.ChainHeight = ChainHeightInstance(clientCtx)
+	chainHeight, err := ChainHeightInstance(context.Background(), clientCtx.Client, oracleClient.Logger)
+	if err != nil {
+		return OracleClient{}, err
+	}
+	oracleClient.ChainHeight = chainHeight
+
 	return oracleClient, nil
 }
 

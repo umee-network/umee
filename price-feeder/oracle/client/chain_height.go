@@ -1,24 +1,27 @@
 package client
 
 import (
+	"context"
+	"errors"
 	"sync"
-	"time"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/rs/zerolog"
+	tmrpcclient "github.com/tendermint/tendermint/rpc/client"
+	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-const (
-	// chainHeightCacheInterval represents the amount of seconds
-	// to update the chain height.
-	chainHeightCacheInterval = time.Second * 5
+var (
+	errParseEventDataNewBlockHeader = errors.New("error parsing EventDataNewBlockHeader")
+	queryEventNewBlockHeader        = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader)
 )
 
 // ChainHeight is used to cache the chain height of the
 // current node which keeps getting updated at the amount
 // of interval chainHeightCacheInterval.
 type ChainHeight struct {
-	clientCtx         client.Context
+	Logger zerolog.Logger
+
 	mtx               sync.RWMutex
 	errGetChainHeight error
 	lastChainHeight   int64
@@ -33,40 +36,68 @@ var (
 )
 
 // ChainHeightInstance returns the single instance of ChainHeight.
-func ChainHeightInstance(clientCtx client.Context) *ChainHeight {
+func ChainHeightInstance(ctx context.Context, rpcClient tmrpcclient.Client, logger zerolog.Logger) (*ChainHeight, error) {
+	if !rpcClient.IsRunning() {
+		if err := rpcClient.Start(); err != nil {
+			return nil, err
+		}
+	}
+
+	newBlockHeaderSubscription, err := rpcClient.Subscribe(
+		ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
+	if err != nil {
+		return nil, err
+	}
+
 	once.Do(func() {
 		instance = &ChainHeight{
-			clientCtx:         clientCtx,
+			Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
 			errGetChainHeight: nil,
 			lastChainHeight:   0,
 		}
-		go instance.KeepUpdating()
+
+		go instance.KeepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
 	})
 
-	return instance
+	return instance, nil
 }
 
 // Update retrieves the most recent oracle params and
 // updates the instance.
-func (chainHeight *ChainHeight) UpdateChainHeight() {
+func (chainHeight *ChainHeight) UpdateChainHeight(blockHeight int64, err error) {
 	chainHeight.mtx.Lock()
 	defer chainHeight.mtx.Unlock()
 
-	blockHeight, err := rpcclient.GetChainHeight(chainHeight.clientCtx)
-	if err != nil {
-		chainHeight.errGetChainHeight = err
-		return
-	}
 	chainHeight.lastChainHeight = blockHeight
-	chainHeight.errGetChainHeight = nil
+	chainHeight.errGetChainHeight = err
 }
 
 // KeepUpdating keeps asking for the current chain
 // height from the node at each chainHeightCacheInterval.
-func (chainHeight *ChainHeight) KeepUpdating() {
+func (chainHeight *ChainHeight) KeepUpdating(
+	ctx context.Context,
+	eventsClient tmrpcclient.EventsClient,
+	newBlockHeaderSubscription <-chan tmctypes.ResultEvent,
+) {
 	for {
-		chainHeight.UpdateChainHeight()
-		time.Sleep(chainHeightCacheInterval)
+		select {
+		case <-ctx.Done():
+			err := eventsClient.Unsubscribe(ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
+			if err != nil {
+				chainHeight.Logger.Err(err)
+				chainHeight.UpdateChainHeight(chainHeight.lastChainHeight, err)
+			}
+			return
+
+		case resultEvent := <-newBlockHeaderSubscription:
+			eventDataNewBlockHeader, ok := resultEvent.Data.(tmtypes.EventDataNewBlockHeader)
+			if !ok {
+				chainHeight.Logger.Err(errParseEventDataNewBlockHeader)
+				chainHeight.UpdateChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)
+				continue
+			}
+			chainHeight.UpdateChainHeight(eventDataNewBlockHeader.Header.Height, nil)
+		}
 	}
 }
 
