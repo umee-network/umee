@@ -1966,7 +1966,7 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 
 func (c *queryClient) RegisteredTokens(ctx context.Context, in *QueryRegisteredTokens, opts ...grpc.CallOption) (*QueryRegisteredTokensResponse, error) {
 	out := new(QueryRegisteredTokensResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/RegisteredTokens", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/RegisteredTokens", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1975,7 +1975,7 @@ func (c *queryClient) RegisteredTokens(ctx context.Context, in *QueryRegisteredT
 
 func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
 	out := new(QueryParamsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/Params", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Params", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1984,7 +1984,7 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 
 func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
 	out := new(QueryBorrowedResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/Borrowed", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Borrowed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1993,7 +1993,7 @@ func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, op
 
 func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error) {
 	out := new(QueryBorrowedValueResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/BorrowedValue", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowedValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2002,7 +2002,7 @@ func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueR
 
 func (c *queryClient) Loaned(ctx context.Context, in *QueryLoanedRequest, opts ...grpc.CallOption) (*QueryLoanedResponse, error) {
 	out := new(QueryLoanedResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/Loaned", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Loaned", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2011,7 +2011,7 @@ func (c *queryClient) Loaned(ctx context.Context, in *QueryLoanedRequest, opts .
 
 func (c *queryClient) LoanedValue(ctx context.Context, in *QueryLoanedValueRequest, opts ...grpc.CallOption) (*QueryLoanedValueResponse, error) {
 	out := new(QueryLoanedValueResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/LoanedValue", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LoanedValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2020,7 +2020,7 @@ func (c *queryClient) LoanedValue(ctx context.Context, in *QueryLoanedValueReque
 
 func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error) {
 	out := new(QueryAvailableBorrowResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/AvailableBorrow", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/AvailableBorrow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2029,7 +2029,7 @@ func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBor
 
 func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error) {
 	out := new(QueryBorrowAPYResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/BorrowAPY", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowAPY", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2038,7 +2038,7 @@ func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, 
 
 func (c *queryClient) LendAPY(ctx context.Context, in *QueryLendAPYRequest, opts ...grpc.CallOption) (*QueryLendAPYResponse, error) {
 	out := new(QueryLendAPYResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/LendAPY", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LendAPY", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2047,7 +2047,7 @@ func (c *queryClient) LendAPY(ctx context.Context, in *QueryLendAPYRequest, opts
 
 func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error) {
 	out := new(QueryMarketSizeResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/MarketSize", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2056,7 +2056,7 @@ func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSizeRequest
 
 func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketSizeRequest, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error) {
 	out := new(QueryTokenMarketSizeResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/TokenMarketSize", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/TokenMarketSize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2065,7 +2065,7 @@ func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketS
 
 func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error) {
 	out := new(QueryReserveAmountResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/ReserveAmount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ReserveAmount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2074,7 +2074,7 @@ func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountR
 
 func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error) {
 	out := new(QueryCollateralResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/Collateral", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Collateral", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2083,7 +2083,7 @@ func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest
 
 func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error) {
 	out := new(QueryCollateralValueResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/CollateralValue", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/CollateralValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2092,7 +2092,7 @@ func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralVa
 
 func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
 	out := new(QueryExchangeRateResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/ExchangeRate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ExchangeRate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2101,7 +2101,7 @@ func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateReq
 
 func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
 	out := new(QueryBorrowLimitResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/BorrowLimit", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowLimit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2110,7 +2110,7 @@ func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitReque
 
 func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquidationThresholdRequest, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error) {
 	out := new(QueryLiquidationThresholdResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/LiquidationThreshold", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationThreshold", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2119,7 +2119,7 @@ func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquida
 
 func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
 	out := new(QueryLiquidationTargetsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/LiquidationTargets", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationTargets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2128,7 +2128,7 @@ func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidati
 
 func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
 	out := new(QueryMarketSummaryResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Query/MarketSummary", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSummary", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2274,7 +2274,7 @@ func _Query_RegisteredTokens_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/RegisteredTokens",
+		FullMethod: "/umee.leverage.v1.Query/RegisteredTokens",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).RegisteredTokens(ctx, req.(*QueryRegisteredTokens))
@@ -2292,7 +2292,7 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/Params",
+		FullMethod: "/umee.leverage.v1.Query/Params",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Params(ctx, req.(*QueryParamsRequest))
@@ -2310,7 +2310,7 @@ func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/Borrowed",
+		FullMethod: "/umee.leverage.v1.Query/Borrowed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowedRequest))
@@ -2328,7 +2328,7 @@ func _Query_BorrowedValue_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/BorrowedValue",
+		FullMethod: "/umee.leverage.v1.Query/BorrowedValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).BorrowedValue(ctx, req.(*QueryBorrowedValueRequest))
@@ -2346,7 +2346,7 @@ func _Query_Loaned_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/Loaned",
+		FullMethod: "/umee.leverage.v1.Query/Loaned",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Loaned(ctx, req.(*QueryLoanedRequest))
@@ -2364,7 +2364,7 @@ func _Query_LoanedValue_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/LoanedValue",
+		FullMethod: "/umee.leverage.v1.Query/LoanedValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).LoanedValue(ctx, req.(*QueryLoanedValueRequest))
@@ -2382,7 +2382,7 @@ func _Query_AvailableBorrow_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/AvailableBorrow",
+		FullMethod: "/umee.leverage.v1.Query/AvailableBorrow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).AvailableBorrow(ctx, req.(*QueryAvailableBorrowRequest))
@@ -2400,7 +2400,7 @@ func _Query_BorrowAPY_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/BorrowAPY",
+		FullMethod: "/umee.leverage.v1.Query/BorrowAPY",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).BorrowAPY(ctx, req.(*QueryBorrowAPYRequest))
@@ -2418,7 +2418,7 @@ func _Query_LendAPY_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/LendAPY",
+		FullMethod: "/umee.leverage.v1.Query/LendAPY",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).LendAPY(ctx, req.(*QueryLendAPYRequest))
@@ -2436,7 +2436,7 @@ func _Query_MarketSize_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/MarketSize",
+		FullMethod: "/umee.leverage.v1.Query/MarketSize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).MarketSize(ctx, req.(*QueryMarketSizeRequest))
@@ -2454,7 +2454,7 @@ func _Query_TokenMarketSize_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/TokenMarketSize",
+		FullMethod: "/umee.leverage.v1.Query/TokenMarketSize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TokenMarketSize(ctx, req.(*QueryTokenMarketSizeRequest))
@@ -2472,7 +2472,7 @@ func _Query_ReserveAmount_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/ReserveAmount",
+		FullMethod: "/umee.leverage.v1.Query/ReserveAmount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).ReserveAmount(ctx, req.(*QueryReserveAmountRequest))
@@ -2490,7 +2490,7 @@ func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/Collateral",
+		FullMethod: "/umee.leverage.v1.Query/Collateral",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Collateral(ctx, req.(*QueryCollateralRequest))
@@ -2508,7 +2508,7 @@ func _Query_CollateralValue_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/CollateralValue",
+		FullMethod: "/umee.leverage.v1.Query/CollateralValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).CollateralValue(ctx, req.(*QueryCollateralValueRequest))
@@ -2526,7 +2526,7 @@ func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/ExchangeRate",
+		FullMethod: "/umee.leverage.v1.Query/ExchangeRate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).ExchangeRate(ctx, req.(*QueryExchangeRateRequest))
@@ -2544,7 +2544,7 @@ func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/BorrowLimit",
+		FullMethod: "/umee.leverage.v1.Query/BorrowLimit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimitRequest))
@@ -2562,7 +2562,7 @@ func _Query_LiquidationThreshold_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/LiquidationThreshold",
+		FullMethod: "/umee.leverage.v1.Query/LiquidationThreshold",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).LiquidationThreshold(ctx, req.(*QueryLiquidationThresholdRequest))
@@ -2580,7 +2580,7 @@ func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/LiquidationTargets",
+		FullMethod: "/umee.leverage.v1.Query/LiquidationTargets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargetsRequest))
@@ -2598,7 +2598,7 @@ func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Query/MarketSummary",
+		FullMethod: "/umee.leverage.v1.Query/MarketSummary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummaryRequest))
@@ -2607,7 +2607,7 @@ func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 var _Query_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "umeenetwork.umee.leverage.v1.Query",
+	ServiceName: "umee.leverage.v1.Query",
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	krakenHost                    = "ws.kraken.com"
-	KrakenPairsEndpoint           = "https://api.kraken.com/0/public/AssetPairs"
+	krakenWSHost                  = "ws.kraken.com"
+	KrakenRestHost                = "https://api.kraken.com"
+	KrakenRestPath                = "/0/public/AssetPairs"
 	krakenEventSystemStatus       = "systemStatus"
 	krakenEventSubscriptionStatus = "subscriptionStatus"
 )
@@ -37,6 +38,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -102,11 +104,20 @@ type (
 func NewKrakenProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
+	if endpoints.Name != config.ProviderKraken {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderKraken,
+			Rest:      KrakenRestHost,
+			Websocket: krakenWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   krakenHost,
+		Host:   endpoints.Websocket,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -118,6 +129,7 @@ func NewKrakenProvider(
 		wsURL:           wsURL,
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "kraken").Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]TickerPrice{},
 		candles:         map[string][]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -615,7 +627,7 @@ func (p *KrakenProvider) removeSubscribedTickers(tickerSymbols ...string) {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(KrakenPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + KrakenRestPath)
 	if err != nil {
 		return nil, err
 	}

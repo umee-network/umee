@@ -83,9 +83,8 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously
-// loaned base asset type from the module. Amount can either be exact uTokens to
-// withdraw or equivalent base assets.
+// MsgWithdrawAsset represents a lender's request to withdraw lent assets.
+// Amount must be a uToken.
 type MsgWithdrawAsset struct {
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
@@ -810,7 +809,7 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 
 func (c *msgClient) LendAsset(ctx context.Context, in *MsgLendAsset, opts ...grpc.CallOption) (*MsgLendAssetResponse, error) {
 	out := new(MsgLendAssetResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/LendAsset", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/LendAsset", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -819,7 +818,7 @@ func (c *msgClient) LendAsset(ctx context.Context, in *MsgLendAsset, opts ...grp
 
 func (c *msgClient) WithdrawAsset(ctx context.Context, in *MsgWithdrawAsset, opts ...grpc.CallOption) (*MsgWithdrawAssetResponse, error) {
 	out := new(MsgWithdrawAssetResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/WithdrawAsset", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/WithdrawAsset", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -838,6 +837,7 @@ func (c *msgClient) AddCollateral(ctx context.Context, in *MsgAddCollateral, opt
 func (c *msgClient) RemoveCollateral(ctx context.Context, in *MsgRemoveCollateral, opts ...grpc.CallOption) (*MsgRemoveCollateralResponse, error) {
 	out := new(MsgRemoveCollateralResponse)
 	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/RemoveCollateral", in, out, opts...)
+
 	if err != nil {
 		return nil, err
 	}
@@ -846,7 +846,7 @@ func (c *msgClient) RemoveCollateral(ctx context.Context, in *MsgRemoveCollatera
 
 func (c *msgClient) BorrowAsset(ctx context.Context, in *MsgBorrowAsset, opts ...grpc.CallOption) (*MsgBorrowAssetResponse, error) {
 	out := new(MsgBorrowAssetResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/BorrowAsset", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/BorrowAsset", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -855,7 +855,7 @@ func (c *msgClient) BorrowAsset(ctx context.Context, in *MsgBorrowAsset, opts ..
 
 func (c *msgClient) RepayAsset(ctx context.Context, in *MsgRepayAsset, opts ...grpc.CallOption) (*MsgRepayAssetResponse, error) {
 	out := new(MsgRepayAssetResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/RepayAsset", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/RepayAsset", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -864,7 +864,7 @@ func (c *msgClient) RepayAsset(ctx context.Context, in *MsgRepayAsset, opts ...g
 
 func (c *msgClient) Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grpc.CallOption) (*MsgLiquidateResponse, error) {
 	out := new(MsgLiquidateResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.leverage.v1.Msg/Liquidate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Liquidate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -934,7 +934,7 @@ func _Msg_LendAsset_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Msg/LendAsset",
+		FullMethod: "/umee.leverage.v1.Msg/LendAsset",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).LendAsset(ctx, req.(*MsgLendAsset))
@@ -952,7 +952,7 @@ func _Msg_WithdrawAsset_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Msg/WithdrawAsset",
+		FullMethod: "/umee.leverage.v1.Msg/WithdrawAsset",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).WithdrawAsset(ctx, req.(*MsgWithdrawAsset))
@@ -1006,7 +1006,7 @@ func _Msg_BorrowAsset_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Msg/BorrowAsset",
+		FullMethod: "/umee.leverage.v1.Msg/BorrowAsset",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).BorrowAsset(ctx, req.(*MsgBorrowAsset))
@@ -1024,7 +1024,7 @@ func _Msg_RepayAsset_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Msg/RepayAsset",
+		FullMethod: "/umee.leverage.v1.Msg/RepayAsset",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).RepayAsset(ctx, req.(*MsgRepayAsset))
@@ -1042,7 +1042,7 @@ func _Msg_Liquidate_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.leverage.v1.Msg/Liquidate",
+		FullMethod: "/umee.leverage.v1.Msg/Liquidate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).Liquidate(ctx, req.(*MsgLiquidate))
@@ -1051,7 +1051,7 @@ func _Msg_Liquidate_Handler(srv interface{}, ctx context.Context, dec func(inter
 }
 
 var _Msg_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "umeenetwork.umee.leverage.v1.Msg",
+	ServiceName: "umee.leverage.v1.Msg",
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

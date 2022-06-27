@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1;
+package umee.leverage.v1;
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 

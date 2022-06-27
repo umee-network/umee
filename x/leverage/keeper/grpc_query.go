@@ -76,7 +76,6 @@ func (q Querier) Borrowed(
 
 	if len(req.Denom) == 0 {
 		tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
-
 		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
 	}
 
@@ -370,7 +369,6 @@ func (q Querier) Collateral(
 
 	if len(req.Denom) == 0 {
 		tokens := q.Keeper.GetBorrowerCollateral(ctx, borrower)
-
 		return &types.QueryCollateralResponse{Collateral: tokens}, nil
 	}
 
@@ -411,7 +409,6 @@ func (q Querier) CollateralValue(
 		}
 
 		collateral := q.Keeper.GetCollateralAmount(ctx, lender, req.Denom)
-
 		uTokens = sdk.NewCoins(collateral)
 	}
 
@@ -542,7 +539,7 @@ func (q Querier) MarketSummary(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	token, err := q.Keeper.GetRegisteredToken(ctx, req.Denom)
+	token, err := q.Keeper.GetTokenSettings(ctx, req.Denom)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}

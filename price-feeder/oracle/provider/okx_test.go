@@ -7,11 +7,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
+	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestOkxProvider_GetTickerPrices(t *testing.T) {
-	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewOkxProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		config.ProviderEndpoint{},
+		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
@@ -80,7 +86,12 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 }
 
 func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	p, err := NewOkxProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		config.ProviderEndpoint{},
+		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {

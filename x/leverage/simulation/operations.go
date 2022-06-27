@@ -406,6 +406,7 @@ func randomWithdrawFields(
 
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
 	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
+
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
 
 	if uTokens.Empty() {
@@ -469,6 +470,7 @@ func randomLiquidateFields(
 	}
 
 	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
+
 	borrowed = simtypes.RandSubsetCoins(r, borrowed)
 	if borrowed.Empty() {
 		return liquidator, borrower, sdk.Coin{}, "", true

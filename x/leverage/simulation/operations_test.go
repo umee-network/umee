@@ -39,7 +39,7 @@ func (s *SimTestSuite) SetupTest() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
@@ -55,7 +55,7 @@ func (s *SimTestSuite) SetupTest() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.05"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.3"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0.9"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.75"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
 		SymbolDenom:          "ATOM",
 		Exponent:             6,
@@ -71,7 +71,7 @@ func (s *SimTestSuite) SetupTest() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.87"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.87"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
 		Exponent:             6,
@@ -85,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, token))
+		s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 

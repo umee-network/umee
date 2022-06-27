@@ -11,7 +11,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
 	for _, token := range genState.Registry {
-		if err := k.SetRegisteredToken(ctx, token); err != nil {
+		if err := k.SetTokenSettings(ctx, token); err != nil {
 			panic(err)
 		}
 	}
