@@ -211,8 +211,8 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 	}
 }
 
-// SimulateMsgAddCollateral tests and runs a single msg which removes
-// some collateral from a user.
+// SimulateMsgAddCollateral tests and runs a single msg which adds
+// some collateral to a user.
 func SimulateMsgAddCollateral(
 	ak simulation.AccountKeeper,
 	bk types.BankKeeper,
