@@ -8,7 +8,6 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
@@ -155,6 +154,8 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
 	}
 }
+
+/*
 
 func (s *SimTestSuite) TestSimulateMsgLendAsset() {
 	r := rand.New(rand.NewSource(1))
@@ -333,6 +334,8 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
 	s.Require().Len(futureOperations, 0)
 }
+
+*/
 
 func TestSimTestSuite(t *testing.T) {
 	suite.Run(t, new(SimTestSuite))
