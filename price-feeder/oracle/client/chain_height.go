@@ -17,8 +17,8 @@ var (
 )
 
 // ChainHeight is used to cache the chain height of the
-// current node which keeps getting updated at the amount
-// of interval chainHeightCacheInterval.
+// current node which is being updated each time the
+// node sends an event of EventNewBlockHeader.
 type ChainHeight struct {
 	Logger zerolog.Logger
 
@@ -36,7 +36,11 @@ var (
 )
 
 // ChainHeightInstance returns the single instance of ChainHeight.
-func ChainHeightInstance(ctx context.Context, rpcClient tmrpcclient.Client, logger zerolog.Logger) (*ChainHeight, error) {
+func ChainHeightInstance(
+	ctx context.Context,
+	rpcClient tmrpcclient.Client,
+	logger zerolog.Logger,
+) (*ChainHeight, error) {
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err
@@ -56,14 +60,13 @@ func ChainHeightInstance(ctx context.Context, rpcClient tmrpcclient.Client, logg
 			lastChainHeight:   0,
 		}
 
-		go instance.KeepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
+		go instance.keepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
 	})
 
 	return instance, nil
 }
 
-// Update retrieves the most recent oracle params and
-// updates the instance.
+// UpdateChainHeight receives the data to be updated thread safe.
 func (chainHeight *ChainHeight) UpdateChainHeight(blockHeight int64, err error) {
 	chainHeight.mtx.Lock()
 	defer chainHeight.mtx.Unlock()
@@ -72,9 +75,9 @@ func (chainHeight *ChainHeight) UpdateChainHeight(blockHeight int64, err error) 
 	chainHeight.errGetChainHeight = err
 }
 
-// KeepUpdating keeps asking for the current chain
-// height from the node at each chainHeightCacheInterval.
-func (chainHeight *ChainHeight) KeepUpdating(
+// keepUpdating keeps listening to new blocks being made
+// and updates the chain height.
+func (chainHeight *ChainHeight) keepUpdating(
 	ctx context.Context,
 	eventsClient tmrpcclient.EventsClient,
 	newBlockHeaderSubscription <-chan tmctypes.ResultEvent,
