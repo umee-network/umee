@@ -108,7 +108,7 @@ func GetCmdWithdrawAsset() *cobra.Command {
 func GetCmdAddCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-collateral [borrower] [coin]",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(2),
 		Short: "Enable some uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
@@ -140,7 +140,7 @@ func GetCmdAddCollateral() *cobra.Command {
 func GetCmdRemoveCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove-collateral [borrower] [coin]",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(2),
 		Short: "Disable some uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {

@@ -345,7 +345,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		[]string{
 			val.Address.String(),
 			"1000u/uumee",
-			"true",
 		},
 		nil,
 	}
@@ -367,7 +366,17 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			val.Address.String(),
 			val.Address.String(),
 			"5uumee",
-			"1uumee",
+			"4uumee",
+		},
+		nil,
+	}
+
+	fixCollateral := testTransaction{
+		"add back collateral received from liquidation",
+		cli.GetCmdAddCollateral(),
+		[]string{
+			val.Address.String(),
+			"4u/uumee",
 		},
 		nil,
 	}
@@ -388,7 +397,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		[]string{
 			val.Address.String(),
 			"1000u/uumee",
-			"true",
 		},
 		nil,
 	}
@@ -648,6 +656,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		addCollateral,
 		borrow,
 		liquidate,
+		fixCollateral,
 	)
 
 	// These transactions are deferred to run after nonzero queries are finished
