@@ -334,10 +334,7 @@ func randomTokenFields(
 ) (acc simtypes.Account, token sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
 
-	allTokens, err := lk.GetAllRegisteredTokens(ctx)
-	if err != nil {
-		panic(err)
-	}
+	allTokens := lk.GetAllRegisteredTokens(ctx)
 	if len(allTokens) == 0 {
 		return acc, sdk.Coin{}, true
 	}
@@ -358,10 +355,7 @@ func randomWithdrawFields(
 	acc, _ = simtypes.RandomAcc(r, accs)
 
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
-	collateral, err := lk.GetBorrowerCollateral(ctx, acc.Address)
-	if err != nil {
-		panic(err)
-	}
+	collateral := lk.GetBorrowerCollateral(ctx, acc.Address)
 	uTokens = uTokens.Add(collateral...)
 
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
@@ -394,10 +388,8 @@ func randomBorrowedFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, borrowToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-	b, err := lk.GetBorrowerBorrows(ctx, acc.Address)
-	if err != nil {
-		panic(err)
-	}
+	b := lk.GetBorrowerBorrows(ctx, acc.Address)
+
 	borrowTokens := simtypes.RandSubsetCoins(r, b)
 	if borrowTokens.Empty() {
 		return acc, sdk.Coin{}, true
@@ -424,18 +416,13 @@ func randomLiquidateFields(
 	liquidator = accs[idxLiquidator]
 	borrower = accs[idxLiquidator+1]
 
-	collateral, err := lk.GetBorrowerCollateral(ctx, borrower.Address)
-	if err != nil {
-		panic(err)
-	}
+	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
 	if collateral.Empty() {
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	borrowed, err := lk.GetBorrowerBorrows(ctx, borrower.Address)
-	if err != nil {
-		panic(err)
-	}
+	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
+
 	borrowed = simtypes.RandSubsetCoins(r, borrowed)
 	if borrowed.Empty() {
 		return liquidator, borrower, sdk.Coin{}, "", true

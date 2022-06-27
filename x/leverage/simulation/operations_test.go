@@ -100,7 +100,7 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAcc
 	initAmt := sdk.NewInt(200000000) // 200 * 10^6
 	accCoins := sdk.NewCoins()
 
-	tokens, _ := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
+	tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
 
 	for _, token := range tokens {
 		accCoins = accCoins.Add(sdk.NewCoin(token.BaseDenom, initAmt))

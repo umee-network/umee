@@ -27,10 +27,7 @@ func (k Keeper) GetLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress, denom stri
 // including any interest accrued.
 func (k Keeper) GetLenderLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk.Coins, error) {
 	// get all uTokens set as collateral
-	collateral, err := k.GetBorrowerCollateral(ctx, lenderAddr)
-	if err != nil {
-		return nil, err
-	}
+	collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
 
 	// get all uTokens not set as collateral by filtering non-uTokens from lender balance
 	uTokens := sdk.Coins{}

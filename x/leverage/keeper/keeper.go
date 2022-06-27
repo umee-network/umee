@@ -147,20 +147,14 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 	if amountFromCollateral.IsPositive() {
 		if k.GetCollateralSetting(ctx, lenderAddr, coin.Denom) {
 			// Calculate current borrowed value
-			borrowed, err := k.GetBorrowerBorrows(ctx, lenderAddr)
-			if err != nil {
-				return err
-			}
+			borrowed := k.GetBorrowerBorrows(ctx, lenderAddr)
 			borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
 			if err != nil {
 				return err
 			}
 
 			// Check for sufficient collateral
-			collateral, err := k.GetBorrowerCollateral(ctx, lenderAddr)
-			if err != nil {
-				return err
-			}
+			collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
 			if collateral.AmountOf(coin.Denom).LT(amountFromCollateral) {
 				return sdkerrors.Wrap(types.ErrInsufficientBalance, coin.String())
 			}
@@ -240,16 +234,10 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 	}
 
 	// Determine amount of all tokens currently borrowed
-	borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	if err != nil {
-		return err
-	}
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 
 	// Calculate current borrow limit
-	collateral, err := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	if err != nil {
-		return err
-	}
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
@@ -344,20 +332,14 @@ func (k Keeper) SetCollateralSetting(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		}
 	} else {
 		// Determine currently borrowed value
-		borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
-		if err != nil {
-			return err
-		}
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 		borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
 		if err != nil {
 			return err
 		}
 
 		// Determine what borrow limit would be AFTER disabling this denom as collateral
-		collateral, err := k.GetBorrowerCollateral(ctx, borrowerAddr)
-		if err != nil {
-			return err
-		}
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 		collateralToDisable := sdk.NewCoins(sdk.NewCoin(denom, collateral.AmountOf(denom)))
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToDisable))
 		if err != nil {
@@ -418,15 +400,9 @@ func (k Keeper) LiquidateBorrow(
 		return sdk.ZeroInt(), sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(desiredReward.String())
 	}
 
-	collateral, err := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	if err != nil {
-		return sdk.Int{}, sdk.Int{}, err
-	}
-	// get total borrowed by borrower (all denoms)
-	borrowed, err := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	if err != nil {
-		return sdk.Int{}, sdk.Int{}, err
-	}
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+
 	borrowValue, err := k.TotalTokenValue(ctx, borrowed) // total borrowed value in USD
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
