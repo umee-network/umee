@@ -63,17 +63,6 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
-func (k Keeper) validateLendAsset(ctx sdk.Context, loan sdk.Coin) error {
-	if !loan.IsValid() {
-		return types.ErrInvalidAsset.Wrap(loan.String())
-	}
-	token, err := k.GetTokenSettings(ctx, loan.Denom)
-	if err != nil {
-		return err
-	}
-	return token.AssertLendEnabled()
-}
-
 // LendAsset attempts to deposit assets into the leverage module account in
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
@@ -204,18 +193,6 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 	}
 
 	return nil
-}
-
-func (k Keeper) validateBorrowAsset(ctx sdk.Context, borrow sdk.Coin) error {
-	if !borrow.IsValid() {
-		return types.ErrInvalidAsset.Wrap(borrow.String())
-	}
-
-	token, err := k.GetTokenSettings(ctx, borrow.Denom)
-	if err != nil {
-		return err
-	}
-	return token.AssertBorrowEnabled()
 }
 
 // BorrowAsset attempts to borrow tokens from the leverage module account using
