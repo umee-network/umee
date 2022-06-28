@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/stretchr/testify/require"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
@@ -18,19 +19,21 @@ type TestKeeper struct {
 // an additional TestKeeper that exposes normally
 // unexported methods for testing.
 func NewTestKeeper(
+	require *require.Assertions,
 	cdc codec.Codec,
 	storeKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 ) (Keeper, TestKeeper) {
-	k := NewKeeper(
+	k, err := NewKeeper(
 		cdc,
 		storeKey,
 		paramSpace,
 		bk,
 		ok,
 	)
+	require.NoError(err)
 	return k, TestKeeper{&k}
 }
 
