@@ -396,13 +396,17 @@ func New(
 		&app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
-	app.LeverageKeeper = leveragekeeper.NewKeeper(
+	var err error
+	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
 	)
+	if err != nil {
+		panic(err)
+	}
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(
 			app.OracleKeeper.Hooks(),
