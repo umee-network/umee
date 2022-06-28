@@ -149,12 +149,18 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		deviations[deviation.Base] = threshold
 	}
 
+	endpoints := make(map[string]config.ProviderEndpoint, len(cfg.ProviderEndpoints))
+	for _, endpoint := range cfg.ProviderEndpoints {
+		endpoints[endpoint.Name] = endpoint
+	}
+
 	oracle := oracle.New(
 		logger,
 		oracleClient,
 		cfg.CurrencyPairs,
 		providerTimeout,
 		deviations,
+		endpoints,
 	)
 
 	metrics, err := telemetry.New(cfg.Telemetry)

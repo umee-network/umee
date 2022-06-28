@@ -19,10 +19,11 @@ import (
 )
 
 const (
-	gateHost          = "ws.gate.io"
-	gatePath          = "/v3"
-	gatePingCheck     = time.Second * 28 // should be < 30
-	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
+	gateWSHost    = "ws.gate.io"
+	gateWSPath    = "/v3"
+	gatePingCheck = time.Second * 28 // should be < 30
+	gateRestHost  = "https://api.gateio.ws"
+	gateRestPath  = "/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -38,6 +39,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]GateTicker         // Symbol => GateTicker
 		candles         map[string][]GateCandle       // Symbol => GateCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -103,11 +105,24 @@ type (
 )
 
 // NewGateProvider creates a new GateProvider.
-func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*GateProvider, error) {
+func NewGateProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*GateProvider, error) {
+	if endpoints.Name != config.ProviderGate {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderGate,
+			Rest:      gateRestHost,
+			Websocket: gateWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   gateHost,
-		Path:   gatePath,
+		Host:   endpoints.Websocket,
+		Path:   gateWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -120,6 +135,7 @@ func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "gate").Logger(),
 		reconnectTimer:  time.NewTicker(gatePingCheck),
+		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
 		candles:         map[string][]GateCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -564,7 +580,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(gatePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + gateRestPath)
 	if err != nil {
 		return nil, err
 	}

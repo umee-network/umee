@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.leverage.v1;
+package umee.leverage.v1;
 
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
@@ -38,9 +38,8 @@ message MsgLendAsset {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawAsset represents a lender's request to withdraw a previously
-// loaned base asset type from the module. Amount can either be exact uTokens to
-// withdraw or equivalent base assets.
+// MsgWithdrawAsset represents a lender's request to withdraw lent assets.
+// Amount must be a uToken.
 message MsgWithdrawAsset {
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
