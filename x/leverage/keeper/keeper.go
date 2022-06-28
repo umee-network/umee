@@ -37,7 +37,8 @@ func NewKeeper(
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 
-	tokenRegCache, err := simplelru.NewLRU(100, nil)
+	const tokenRegCacheSize = 100
+	tokenRegCache, err := simplelru.NewLRU(tokenRegCacheSize, nil)
 	if err != nil {
 		return Keeper{}, err
 	}
