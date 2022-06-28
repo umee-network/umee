@@ -29,3 +29,8 @@ func (getExchangeRateBase *GetExchangeRateBase) Validate() error {
 
 	return nil
 }
+
+// Validate GetAllRegisteredTokens implements the iterface.
+func (getAllRegisteredTokens *GetAllRegisteredTokens) Validate() error {
+	return nil
+}

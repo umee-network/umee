@@ -9,6 +9,7 @@ import (
 
 	"github.com/umee-network/umee/v2/app/wasm/query"
 	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	"github.com/umee-network/umee/v2/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 )
 
@@ -29,14 +30,19 @@ func NewQueryPlugin(
 	}
 }
 
-// GetBorrow wraps leverage GetBorrow
+// GetBorrow wraps leverage GetBorrow.
 func (qp *QueryPlugin) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
 	return qp.leverageKeeper.GetBorrow(ctx, borrowerAddr, denom)
 }
 
-// GetExchangeRateBase wraps oracle GetExchangeRateBase
+// GetExchangeRateBase wraps oracle GetExchangeRateBase.
 func (qp *QueryPlugin) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	return qp.oracleKeeper.GetExchangeRateBase(ctx, denom)
+}
+
+// GetAllRegisteredTokens wraps oracle GetAllRegisteredTokens.
+func (qp *QueryPlugin) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
+	return qp.leverageKeeper.GetAllRegisteredTokens(ctx)
 }
 
 // CustomQuerier implements custom querier for wasm smartcontracts acess umee native modules
@@ -52,6 +58,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleGetBorrow(ctx, queryPlugin)
 		case query.AssignedQueryGetExchangeRateBase:
 			return smartcontractQuery.HandleGetExchangeRateBase(ctx, queryPlugin)
+		case query.AssignedQueryGetAllRegisteredTokens:
+			return smartcontractQuery.HandleGetAllRegisteredTokens(ctx, queryPlugin)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}

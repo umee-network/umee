@@ -48,3 +48,9 @@ func (umeeQuery UmeeQuery) HandleGetExchangeRateBase(ctx sdk.Context, keepers Ke
 
 	return umeeQuery.Handler(ctx, keepers, getExchangeRateBase)
 }
+
+// HandleGetAllRegisteredTokens handles the get all registered tokens query and response.
+func (umeeQuery UmeeQuery) HandleGetAllRegisteredTokens(ctx sdk.Context, keepers Keepers) ([]byte, error) {
+	getAllRegisteredTokens := umeeQuery.GetAllRegisteredTokens
+	return umeeQuery.Handler(ctx, keepers, getAllRegisteredTokens)
+}
