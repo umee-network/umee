@@ -13,7 +13,7 @@ import (
 // using its borrow utilization and token-specific params. Returns zero on
 // invalid asset.
 func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}
@@ -23,38 +23,38 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
-	utilization := k.DeriveBorrowUtilization(ctx, denom)
+	utilization := k.ComputeBorrowUtilization(ctx, denom)
 
-	if utilization.GTE(token.KinkUtilizationRate) {
+	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,               // x
-			token.KinkUtilizationRate, // x1
-			token.KinkBorrowRate,      // y1
-			sdk.OneDec(),              // x2
-			token.MaxBorrowRate,       // y2
+			utilization,           // x
+			token.KinkUtilization, // x1
+			token.KinkBorrowRate,  // y1
+			sdk.OneDec(),          // x2
+			token.MaxBorrowRate,   // y2
 		)
 	}
 
 	// utilization is between 0% and kink value
 	return Interpolate(
-		utilization,               // x
-		sdk.ZeroDec(),             // x1
-		token.BaseBorrowRate,      // y1
-		token.KinkUtilizationRate, // x2
-		token.KinkBorrowRate,      // y2
+		utilization,           // x
+		sdk.ZeroDec(),         // x1
+		token.BaseBorrowRate,  // y1
+		token.KinkUtilization, // x2
+		token.KinkBorrowRate,  // y2
 	)
 }
 
 // DeriveLendAPY derives the current lend interest rate on a token denom
 // using its borrow utilization borrow APY. Returns zero on invalid asset.
 func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
-	borrowUtilization := k.DeriveBorrowUtilization(ctx, denom)
+	borrowUtilization := k.ComputeBorrowUtilization(ctx, denom)
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
 	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
@@ -73,7 +73,15 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	if currentTime < prevInterestTime {
-		return types.ErrNegativeTimeElapsed.Wrap(fmt.Sprintf("current: %d, prev: %d", currentTime, prevInterestTime))
+		// @todo fix this when tendermint solves #8773
+		// https://github.com/tendermint/tendermint/issues/8773
+		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
+			types.ErrNegativeTimeElapsed.Error(),
+			"current", currentTime,
+			"prev", prevInterestTime,
+		)
+
+		return nil
 	}
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 

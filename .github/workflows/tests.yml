@@ -40,7 +40,7 @@ jobs:
         with:
           go-version: 1.18
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
@@ -73,7 +73,7 @@ jobs:
         with:
           go-version: 1.18
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
@@ -104,7 +104,7 @@ jobs:
         with:
           go-version: 1.18
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
@@ -132,7 +132,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.18
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         id: git_diff
         with:
           PATTERNS: |
@@ -150,14 +150,14 @@ jobs:
         if: env.GIT_DIFF
       - name: Install Starport
         run: |
-          curl https://get.starport.network/starport@v0.19.5! | bash
+          curl https://get.ignite.com/cli! | bash
         if: env.GIT_DIFF
       - name: Start Local Network via Starport
         run: |
-          starport chain serve --reset-once -v -c ./starport.ci.yml > starport.out 2>&1 &
+          /usr/local/bin/ignite chain serve --reset-once -v -c ./starport.ci.yml  &
         if: env.GIT_DIFF
       - name: Test Local Network Liveness
         run: |
-          sleep 2m
-          ./contrib/scripts/test_localnet_liveness.sh 100 5 50 localhost
+          sleep 1m
+          ./contrib/scripts/test_localnet_liveness.sh 40 5 50 localhost
         if: env.GIT_DIFF
