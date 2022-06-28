@@ -291,7 +291,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 						KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
-						KinkUtilizationRate:  sdk.MustNewDecFromStr("0.2"),
+						KinkUtilization:      sdk.MustNewDecFromStr("0.2"),
 						LiquidationIncentive: sdk.MustNewDecFromStr("0.18"),
 						EnableMsgLend:        true,
 						EnableMsgBorrow:      true,
