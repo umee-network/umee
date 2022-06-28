@@ -76,6 +76,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
+		s.Require(),
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
 		app.GetSubspace(types.ModuleName),
