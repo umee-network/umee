@@ -8,6 +8,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -20,6 +21,8 @@ type Keeper struct {
 	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
 	oracleKeeper types.OracleKeeper
+
+	tokenRegCache simplelru.LRUCache
 }
 
 func NewKeeper(
@@ -28,19 +31,26 @@ func NewKeeper(
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
-) Keeper {
+) (Keeper, error) {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 
-	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		paramSpace:   paramSpace,
-		bankKeeper:   bk,
-		oracleKeeper: ok,
+	const tokenRegCacheSize = 100
+	tokenRegCache, err := simplelru.NewLRU(tokenRegCacheSize, nil)
+	if err != nil {
+		return Keeper{}, err
 	}
+
+	return Keeper{
+		cdc:           cdc,
+		storeKey:      storeKey,
+		paramSpace:    paramSpace,
+		bankKeeper:    bk,
+		oracleKeeper:  ok,
+		tokenRegCache: tokenRegCache,
+	}, nil
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
@@ -67,7 +77,7 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if err := k.AssertLendEnabled(ctx, loan.Denom); err != nil {
+	if err := k.validateLendAsset(ctx, loan); err != nil {
 		return err
 	}
 
@@ -199,11 +209,7 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
 func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
-	if !borrow.IsValid() {
-		return types.ErrInvalidAsset.Wrap(borrow.String())
-	}
-
-	if err := k.AssertBorrowEnabled(ctx, borrow.Denom); err != nil {
+	if err := k.validateBorrowAsset(ctx, borrow); err != nil {
 		return err
 	}
 
@@ -382,8 +388,8 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	// get total borrowed by borrower (all denoms)
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+
 	borrowValue, err := k.TotalTokenValue(ctx, borrowed) // total borrowed value in USD
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroInt(), err
@@ -536,7 +542,7 @@ func (k Keeper) LiquidateBorrow(
 // borrowed value that can be repaid by a liquidator in a single liquidation event.)
 func (k Keeper) LiquidationParams(
 	ctx sdk.Context,
-	reward string,
+	rewardDenom string,
 	borrowed sdk.Dec,
 	limit sdk.Dec,
 ) (sdk.Dec, sdk.Dec, error) {
@@ -547,15 +553,14 @@ func (k Keeper) LiquidationParams(
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
 	}
 
-	// liquidation incentive is determined by collateral reward denom
-	liquidationIncentive, err := k.GetLiquidationIncentive(ctx, reward)
+	ts, err := k.GetTokenSettings(ctx, rewardDenom)
 	if err != nil {
 		return sdk.ZeroDec(), sdk.ZeroDec(), err
 	}
 
 	// special case: If liquidation threshold is zero, close factor is always 1
 	if limit.IsZero() {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	params := k.GetParams(ctx)
@@ -563,12 +568,12 @@ func (k Keeper) LiquidationParams(
 	// special case: If borrowed value is less than small liquidation size,
 	// close factor is always 1
 	if borrowed.LTE(params.SmallLiquidationSize) {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	// special case: If complete liquidation threshold is zero, close factor is always 1
 	if params.CompleteLiquidationThreshold.IsZero() {
-		return liquidationIncentive, sdk.OneDec(), nil
+		return ts.LiquidationIncentive, sdk.OneDec(), nil
 	}
 
 	// outside of special cases, close factor scales linearly between MinimumCloseFactor and 1.0,
@@ -588,5 +593,5 @@ func (k Keeper) LiquidationParams(
 		closeFactor = sdk.ZeroDec()
 	}
 
-	return liquidationIncentive, closeFactor, nil
+	return ts.LiquidationIncentive, closeFactor, nil
 }

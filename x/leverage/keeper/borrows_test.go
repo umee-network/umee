@@ -152,7 +152,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1")
 
-	s.Require().NoError(s.app.LeverageKeeper.SetRegisteredToken(s.ctx, umeeToken))
+	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
 	// lender borrows 600 uumee, reducing module account to 0 uumee
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))

@@ -147,7 +147,7 @@ Umee uses a dynamic interest rate model. The borrow APY for each borrowed token 
 The `Token` struct stored in state for a given denomination defines three points on the `Utilization vs Borrow APY` graph:
 
 - At utilization = `0.0`, borrow APY = `Token.BaseBorrowRate`
-- At utilization = `Token.KinkUtilizationRate`, borrow APY = `Token.KinkBorrowRate`
+- At utilization = `Token.KinkUtilization`, borrow APY = `Token.KinkBorrowRate`
 - At utilization = `1.0`, borrow APY = `Token.MaxBorrowRate`
 
 When utilization is between two of the above values, borrow APY is determined by linear interpolation between the two points. The resulting graph looks like a straight line with a "kink" in it.
