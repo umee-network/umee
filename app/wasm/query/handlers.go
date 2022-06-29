@@ -128,3 +128,16 @@ func (umeeQuery UmeeQuery) HandleLoanedValue(
 
 	return MarshalResponse(resp)
 }
+
+// HandleAvailableBorrow retrieves the available borrow amoun of an denom.
+func (umeeQuery UmeeQuery) HandleAvailableBorrow(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.AvailableBorrow(sdk.WrapSDKContext(ctx), umeeQuery.AvailableBorrow)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Available Borrow", err)}
+	}
+
+	return MarshalResponse(resp)
+}

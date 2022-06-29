@@ -22,9 +22,12 @@ const (
 	AssignedQueryBorrowedValue
 	// AssignedQueryLoaned represents the call to query the Loaned amoun of an address.
 	AssignedQueryLoaned
-	// AssignedQueryLoaned represents the call to query the Loaned amoun of an
+	// AssignedQueryLoaned represents the call to query the Loaned amount of an
 	// address in USD.
 	AssignedQueryLoanedValue
+	// AssignedQueryAvailableBorrow represents the call to query the Available
+	// amount of an denom.
+	AssignedQueryAvailableBorrow
 )
 
 // Handler query handler that an object must implement.
@@ -57,4 +60,6 @@ type UmeeQuery struct {
 	Loaned *lvtypes.QueryLoanedRequest `json:"loaned,omitempty"`
 	// Used to query an the amount loaned of an address in USD.
 	LoanedValue *lvtypes.QueryLoanedValueRequest `json:"loaned_value,omitempty"`
+	// Used to query an the amount available to borrow.
+	AvailableBorrow *lvtypes.QueryAvailableBorrowRequest `json:"available_borrow,omitempty"`
 }
