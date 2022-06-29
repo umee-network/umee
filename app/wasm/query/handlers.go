@@ -39,14 +39,17 @@ func (umeeQuery UmeeQuery) Handler(ctx sdk.Context, keepers Keepers, query Handl
 	return bz, nil
 }
 
-// HandleGetBorrow handles the get borrow query and response
-func (umeeQuery UmeeQuery) HandleGetBorrow(ctx sdk.Context, keepers Keepers) ([]byte, error) {
-	getBorrow := umeeQuery.GetBorrow
-	if getBorrow == nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: "assigned query GetBorrow with 'getBorrow' empty"}
+// HandleBorrowed handles the get of every borrowed value of an address.
+func (umeeQuery UmeeQuery) HandleBorrowed(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.Borrowed(sdk.WrapSDKContext(ctx), umeeQuery.Borrowed)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrowed", err)}
 	}
 
-	return umeeQuery.Handler(ctx, keepers, getBorrow)
+	return MarshalResponse(resp)
 }
 
 // HandleGetExchangeRateBase handles the get exchange rate base query and response
@@ -81,7 +84,7 @@ func (umeeQuery UmeeQuery) HandleLeverageParams(
 ) ([]byte, error) {
 	resp, err := querier.Params(sdk.WrapSDKContext(ctx), &leveragetypes.QueryParamsRequest{})
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query RegisteredTokens", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query LeverageParams", err)}
 	}
 
 	return MarshalResponse(resp)

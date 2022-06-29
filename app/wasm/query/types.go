@@ -9,8 +9,8 @@ import (
 type AssignedQuery uint16
 
 const (
-	// AssignedQueryGetBorrow represents the call of leverage get borrow.
-	AssignedQueryGetBorrow AssignedQuery = iota + 1
+	// AssignedQueryBorrowed represents the call to query the Borrowed coins of an address.
+	AssignedQueryBorrowed AssignedQuery = iota + 1
 	// AssignedQueryGetExchangeRateBase represents the call of oracle get exchange rate.
 	AssignedQueryGetExchangeRateBase
 	// AssignedQueryRegisteredTokens represents the call of leverage get all registered tokens.
@@ -27,8 +27,6 @@ type Handler interface {
 
 // Keepers wraps the interface to encapsulate keepers.
 type Keepers interface {
-	// GetBorrow executes the GetBorrow from leverage keeper.
-	GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
 	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper.
 	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
 }
@@ -37,12 +35,12 @@ type Keepers interface {
 type UmeeQuery struct {
 	// Mandatory field to determine which query to call.
 	AssignedQuery AssignedQuery `json:"assigned_query"`
-	// Used to query an open borrow position of an address for specific denom.
-	GetBorrow *GetBorrow `json:"get_borrow,omitempty"`
+	// Used to query the Borrowed coins of an address.
+	Borrowed *lvtypes.QueryBorrowedRequest `json:"borrowed,omitempty"`
 	// Used to query an exchange rate of a denom.
 	GetExchangeRateBase *GetExchangeRateBase `json:"get_exchange_rate_base,omitempty"`
 	// Used to query all the registered tokens.
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to query the x/leverage module's parameters.
-	LeverageParams *lvtypes.Params `json:"params,omitempty"`
+	LeverageParams *lvtypes.QueryParamsRequest `json:"leverage_params,omitempty"`
 }

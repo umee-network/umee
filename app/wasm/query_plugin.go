@@ -56,8 +56,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 		}
 
 		switch smartcontractQuery.AssignedQuery {
-		case query.AssignedQueryGetBorrow:
-			return smartcontractQuery.HandleGetBorrow(ctx, queryPlugin)
+		case query.AssignedQueryBorrowed:
+			return smartcontractQuery.HandleBorrowed(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryGetExchangeRateBase:
 			return smartcontractQuery.HandleGetExchangeRateBase(ctx, queryPlugin)
 		case query.AssignedQueryRegisteredTokens:
