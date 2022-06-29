@@ -50,7 +50,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAllRegisteredTokens returns a CLI command handler to query for all
+// GetCmdQueryAllRegisteredTokens creates a Cobra command to query for all
 // the registered tokens in the x/leverage module.
 func GetCmdQueryAllRegisteredTokens() *cobra.Command {
 	cmd := &cobra.Command{
@@ -79,7 +79,7 @@ func GetCmdQueryAllRegisteredTokens() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryParams returns a CLI command handler to query for the x/leverage
+// GetCmdQueryParams creates a Cobra command to query for the x/leverage
 // module parameters.
 func GetCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{
@@ -108,7 +108,7 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowed returns a CLI command handler to query for the amount of
+// GetCmdQueryBorrowed creates a Cobra command to query for the amount of
 // total borrowed tokens for a given address.
 func GetCmdQueryBorrowed() *cobra.Command {
 	cmd := &cobra.Command{
@@ -145,7 +145,7 @@ func GetCmdQueryBorrowed() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowedValue returns a CLI command handler to query for the USD
+// GetCmdQueryBorrowedValue creates a Cobra command to query for the USD
 // value of total borrowed tokens for a given address.
 func GetCmdQueryBorrowedValue() *cobra.Command {
 	cmd := &cobra.Command{
@@ -182,7 +182,7 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLoaned returns a CLI command handler to query for the amount of
+// GetCmdQueryLoaned creates a Cobra command to query for the amount of
 // tokens loaned by a given address.
 func GetCmdQueryLoaned() *cobra.Command {
 	cmd := &cobra.Command{
@@ -219,7 +219,7 @@ func GetCmdQueryLoaned() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLoanedValue returns a CLI command handler to query for the USD value of
+// GetCmdQueryLoanedValue creates a Cobra command to query for the USD value of
 // total tokens loaned by a given address.
 func GetCmdQueryLoanedValue() *cobra.Command {
 	cmd := &cobra.Command{
@@ -256,7 +256,7 @@ func GetCmdQueryLoanedValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryReserveAmount returns a CLI command handler to query for the
+// GetCmdQueryReserveAmount creates a Cobra command to query for the
 // reserved amount of a specific token.
 func GetCmdQueryReserveAmount() *cobra.Command {
 	cmd := &cobra.Command{
@@ -289,7 +289,7 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateralSetting returns a CLI command handler to query for the collateral
+// GetCmdQueryCollateralSetting creates a Cobra command to query for the collateral
 // setting of a specific token denom for an address.
 func GetCmdQueryCollateralSetting() *cobra.Command {
 	cmd := &cobra.Command{
@@ -323,7 +323,7 @@ func GetCmdQueryCollateralSetting() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateral returns a CLI command handler to query for the amount of
+// GetCmdQueryCollateral creates a Cobra command to query for the amount of
 // total collateral tokens for a given address.
 func GetCmdQueryCollateral() *cobra.Command {
 	cmd := &cobra.Command{
@@ -360,7 +360,7 @@ func GetCmdQueryCollateral() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateralValue returns a CLI command handler to query for the USD
+// GetCmdQueryCollateralValue creates a Cobra command to query for the USD
 // value of total collateral tokens for a given address.
 func GetCmdQueryCollateralValue() *cobra.Command {
 	cmd := &cobra.Command{
@@ -397,7 +397,7 @@ func GetCmdQueryCollateralValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryExchangeRate returns a CLI command handler to query for the
+// GetCmdQueryExchangeRate creates a Cobra command to query for the
 // exchange rate of a specific uToken.
 func GetCmdQueryExchangeRate() *cobra.Command {
 	cmd := &cobra.Command{
@@ -430,7 +430,7 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAvailableBorrow returns a CLI command handler to query for the
+// GetCmdQueryAvailableBorrow creates a Cobra command to query for the
 // available amount to borrow of a specific denom.
 func GetCmdQueryAvailableBorrow() *cobra.Command {
 	cmd := &cobra.Command{
@@ -463,7 +463,7 @@ func GetCmdQueryAvailableBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLendAPY returns a CLI command handler to query for the
+// GetCmdQueryLendAPY creates a Cobra command to query for the
 // lend APY of a specific uToken.
 func GetCmdQueryLendAPY() *cobra.Command {
 	cmd := &cobra.Command{
@@ -496,7 +496,7 @@ func GetCmdQueryLendAPY() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowAPY returns a CLI command handler to query for the
+// GetCmdQueryBorrowAPY creates a Cobra command to query for the
 // borrow APY of a specific token.
 func GetCmdQueryBorrowAPY() *cobra.Command {
 	cmd := &cobra.Command{
@@ -529,7 +529,7 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMarketSize returns a CLI command handler to query for the
+// GetCmdQueryMarketSize creates a Cobra command to query for the
 // Market Size of a specific token.
 func GetCmdQueryMarketSize() *cobra.Command {
 	cmd := &cobra.Command{
@@ -562,7 +562,7 @@ func GetCmdQueryMarketSize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryTokenMarketSize returns a CLI command handler to query for the
+// GetCmdQueryTokenMarketSize creates a Cobra command to query for the
 // Market Size of a specific token, in token denomination instead of USD.
 func GetCmdQueryTokenMarketSize() *cobra.Command {
 	cmd := &cobra.Command{
@@ -595,7 +595,7 @@ func GetCmdQueryTokenMarketSize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowLimit returns a CLI command handler to query for the
+// GetCmdQueryBorrowLimit creates a Cobra command to query for the
 // borrow limit of a specific borrower.
 func GetCmdQueryBorrowLimit() *cobra.Command {
 	cmd := &cobra.Command{
@@ -628,7 +628,7 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationThreshold returns a CLI command handler to query a
+// GetCmdQueryLiquidationThreshold creates a Cobra command to query a
 // liquidation threshold of a specific borrower.
 func GetCmdQueryLiquidationThreshold() *cobra.Command {
 	cmd := &cobra.Command{
@@ -661,7 +661,7 @@ func GetCmdQueryLiquidationThreshold() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMarketSummary returns a CLI command handler to query for the
+// GetCmdQueryMarketSummary creates a Cobra command to query for the
 // Market Summary of a specific token.
 func GetCmdQueryMarketSummary() *cobra.Command {
 	cmd := &cobra.Command{
@@ -694,7 +694,7 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationTargets returns a CLI command handler to query for
+// GetCmdQueryLiquidationTargets creates a Cobra command to query for
 // all eligible liquidation targets
 func GetCmdQueryLiquidationTargets() *cobra.Command {
 	cmd := &cobra.Command{
