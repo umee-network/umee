@@ -310,9 +310,6 @@ func (k Keeper) RemoveCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, c
 	if err := coin.Validate(); err != nil {
 		return err
 	}
-	if !k.IsAcceptedUToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.Denom)
-	}
 
 	// Detect where sufficient collateral exists to disable
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
