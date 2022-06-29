@@ -27,16 +27,9 @@ type ChainHeight struct {
 	lastChainHeight   int64
 }
 
-var (
-	// keep the instance thread safe.
-	once sync.Once
-
-	// keeps the single instance of ChainHeight.
-	instance *ChainHeight
-)
-
-// ChainHeightInstance returns the single instance of ChainHeight.
-func ChainHeightInstance(
+// NewChainHeight returns a new ChainHeight struct that
+// already subscribe to EventNewBlockHeader.
+func NewChainHeight(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
 	logger zerolog.Logger,
@@ -53,17 +46,15 @@ func ChainHeightInstance(
 		return nil, err
 	}
 
-	once.Do(func() {
-		instance = &ChainHeight{
-			Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
-			errGetChainHeight: nil,
-			lastChainHeight:   0,
-		}
+	chainHeight := &ChainHeight{
+		Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
+		errGetChainHeight: nil,
+		lastChainHeight:   0,
+	}
 
-		go instance.keepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
-	})
+	go chainHeight.keepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
 
-	return instance, nil
+	return chainHeight, nil
 }
 
 // updateChainHeight receives the data to be updated thread safe.

@@ -93,7 +93,7 @@ func NewOracleClient(
 		return OracleClient{}, err
 	}
 
-	chainHeight, err := ChainHeightInstance(context.Background(), clientCtx.Client, oracleClient.Logger)
+	chainHeight, err := NewChainHeight(context.Background(), clientCtx.Client, oracleClient.Logger)
 	if err != nil {
 		return OracleClient{}, err
 	}
