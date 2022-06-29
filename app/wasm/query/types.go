@@ -17,6 +17,9 @@ const (
 	AssignedQueryRegisteredTokens
 	// AssignedQueryLeverageParams represents the call of the x/leverage module's parameters.
 	AssignedQueryLeverageParams
+	// AssignedQueryBorrowedValue represents the call to query the Borrowed amount of an
+	// specific coin of an address.
+	AssignedQueryBorrowedValue
 )
 
 // Handler query handler that an object must implement.
@@ -43,4 +46,6 @@ type UmeeQuery struct {
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to query the x/leverage module's parameters.
 	LeverageParams *lvtypes.QueryParamsRequest `json:"leverage_params,omitempty"`
+	// Used to query an specific borrow address value in usd.
+	BorrowedValue *lvtypes.QueryBorrowedValueRequest `json:"borrowed_value,omitempty"`
 }

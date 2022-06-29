@@ -89,3 +89,16 @@ func (umeeQuery UmeeQuery) HandleLeverageParams(
 
 	return MarshalResponse(resp)
 }
+
+// HandleBorrowedValue handles the borrowed value of an specific denom and address.
+func (umeeQuery UmeeQuery) HandleBorrowedValue(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.BorrowedValue(sdk.WrapSDKContext(ctx), umeeQuery.BorrowedValue)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query BorrowedValue", err)}
+	}
+
+	return MarshalResponse(resp)
+}
