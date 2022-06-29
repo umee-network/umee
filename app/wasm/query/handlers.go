@@ -167,3 +167,16 @@ func (umeeQuery UmeeQuery) HandleLendAPY(
 
 	return MarshalResponse(resp)
 }
+
+// HandleMarketSize get the market size in USD of a token denom.
+func (umeeQuery UmeeQuery) HandleMarketSize(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.MarketSize(sdk.WrapSDKContext(ctx), umeeQuery.MarketSize)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Size", err)}
+	}
+
+	return MarshalResponse(resp)
+}
