@@ -32,7 +32,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryParams returns a CLI command handler to query for the x/leverage
+// GetCmdQueryParams creates a Cobra command to query for the x/leverage
 // module parameters.
 func GetCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{

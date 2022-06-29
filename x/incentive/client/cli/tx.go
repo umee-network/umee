@@ -28,7 +28,7 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
-// GetCmdClaim returns a CLI command handler to generate or broadcast a
+// GetCmdClaim creates a Cobra command to generate or broadcast a
 // transaction with a MsgClaim message.
 func GetCmdClaim() *cobra.Command {
 	cmd := &cobra.Command{
