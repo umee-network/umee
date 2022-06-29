@@ -37,7 +37,7 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
-// GetCmdLendAsset returns a CLI command handler to generate or broadcast a
+// GetCmdLendAsset creates a Cobra command to generate or broadcast a
 // transaction with a MsgLendAsset message.
 func GetCmdLendAsset() *cobra.Command {
 	cmd := &cobra.Command{
@@ -70,7 +70,7 @@ func GetCmdLendAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdWithdrawAsset returns a CLI command handler to generate or broadcast a
+// GetCmdWithdrawAsset creates a Cobra command to generate or broadcast a
 // transaction with a MsgWithdrawAsset message.
 func GetCmdWithdrawAsset() *cobra.Command {
 	cmd := &cobra.Command{
@@ -103,7 +103,7 @@ func GetCmdWithdrawAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdSetCollateral returns a CLI command handler to generate or broadcast a
+// GetCmdSetCollateral creates a Cobra command to generate or broadcast a
 // transaction with a MsgSetCollateral message.
 func GetCmdSetCollateral() *cobra.Command {
 	cmd := &cobra.Command{
@@ -136,7 +136,7 @@ func GetCmdSetCollateral() *cobra.Command {
 	return cmd
 }
 
-// GetCmdBorrowAsset returns a CLI command handler to generate or broadcast a
+// GetCmdBorrowAsset creates a Cobra command to generate or broadcast a
 // transaction with a MsgBorrowAsset message.
 func GetCmdBorrowAsset() *cobra.Command {
 	cmd := &cobra.Command{
@@ -169,7 +169,7 @@ func GetCmdBorrowAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRepayAsset returns a CLI command handler to generate or broadcast a
+// GetCmdRepayAsset creates a Cobra command to generate or broadcast a
 // transaction with a MsgRepayAsset message.
 func GetCmdRepayAsset() *cobra.Command {
 	cmd := &cobra.Command{
@@ -202,7 +202,7 @@ func GetCmdRepayAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdLiquidate returns a CLI command handler to generate or broadcast a
+// GetCmdLiquidate creates a Cobra command to generate or broadcast a
 // transaction with a MsgLiquidate message.
 func GetCmdLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
@@ -245,7 +245,7 @@ func GetCmdLiquidate() *cobra.Command {
 	return cmd
 }
 
-// NewCmdSubmitUpdateRegistryProposal returns a CLI command handler to generate
+// NewCmdSubmitUpdateRegistryProposal creates a Cobra command to generate
 // or broadcast a transaction with a governance proposal message containing a
 // UpdateRegistryProposal.
 func NewCmdSubmitUpdateRegistryProposal() *cobra.Command {
