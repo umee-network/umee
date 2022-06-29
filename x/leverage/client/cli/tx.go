@@ -109,7 +109,7 @@ func GetCmdAddCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-collateral [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Enable some uTokens as collateral",
+		Short: "Add uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
