@@ -90,6 +90,7 @@ func (chainHeight *ChainHeight) keepUpdating(
 				chainHeight.Logger.Err(err)
 				chainHeight.UpdateChainHeight(chainHeight.lastChainHeight, err)
 			}
+			chainHeight.Logger.Info("closing the ChainHeight subscription")
 			return
 
 		case resultEvent := <-newBlockHeaderSubscription:
