@@ -46,6 +46,9 @@ const (
 	// AssignedQueryExchangeRate represents the call to query and calculate the
 	// token:uToken exchange rate of a base token denom.
 	AssignedQueryExchangeRate
+	// AssignedQueryBorrowLimit represents the call to query and calculate the
+	// borrow limit (in USD).
+	AssignedQueryBorrowLimit
 )
 
 // Handler query handler that an object must implement.
@@ -92,4 +95,6 @@ type UmeeQuery struct {
 	ReserveAmount *lvtypes.QueryReserveAmountRequest `json:"reserve_amount,omitempty"`
 	// Used to calculate the token:uToken exchange rate of a base token denom.
 	ExchangeRate *lvtypes.QueryExchangeRateRequest `json:"exchange_rate,omitempty"`
+	// Uses the price oracle to determine the borrow limit (in USD).
+	BorrowLimit *lvtypes.QueryBorrowLimitRequest `json:"borrow_limit,omitempty"`
 }

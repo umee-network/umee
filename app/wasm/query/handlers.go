@@ -220,3 +220,17 @@ func (umeeQuery UmeeQuery) HandleExchangeRate(
 
 	return MarshalResponse(resp)
 }
+
+// HandleBorrowLimit uses the price oracle to determine the borrow limit
+// (in USD) provided by collateral sdk.Coins.
+func (umeeQuery UmeeQuery) HandleBorrowLimit(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.BorrowLimit(sdk.WrapSDKContext(ctx), umeeQuery.BorrowLimit)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
+	}
+
+	return MarshalResponse(resp)
+}
