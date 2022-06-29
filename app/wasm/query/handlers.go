@@ -206,3 +206,17 @@ func (umeeQuery UmeeQuery) HandleReserveAmount(
 
 	return MarshalResponse(resp)
 }
+
+// HandleExchangeRate gets calculated the token:uToken exchange
+// rate of a base token denom.
+func (umeeQuery UmeeQuery) HandleExchangeRate(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.ExchangeRate(sdk.WrapSDKContext(ctx), umeeQuery.ExchangeRate)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Exchange Rate", err)}
+	}
+
+	return MarshalResponse(resp)
+}

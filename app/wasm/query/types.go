@@ -34,15 +34,18 @@ const (
 	// AssignedQueryLendAPY represents the call to query and derives the current lend
 	// interest rate on a token denom.
 	AssignedQueryLendAPY
-	// AssignedQueryMarketSize represents the call to query get the market size of
+	// AssignedQueryMarketSize represents the call to query the market size of
 	// an token denom in USD.
 	AssignedQueryMarketSize
-	// AssignedQueryTokenMarketSize represents the call to query get the market size of
+	// AssignedQueryTokenMarketSize represents the call to query the market size of
 	// an token denom.
 	AssignedQueryTokenMarketSize
-	// AssignedQueryReserveAmount represents the call to query get the gets the amount
+	// AssignedQueryReserveAmount represents the call to query the gets the amount
 	// reserved of a specified token.
 	AssignedQueryReserveAmount
+	// AssignedQueryExchangeRate represents the call to query and calculate the
+	// token:uToken exchange rate of a base token denom.
+	AssignedQueryExchangeRate
 )
 
 // Handler query handler that an object must implement.
@@ -87,4 +90,6 @@ type UmeeQuery struct {
 	TokenMarketSize *lvtypes.QueryTokenMarketSizeRequest `json:"token_market_size,omitempty"`
 	// Used to gets the amount reserved of a specified token.
 	ReserveAmount *lvtypes.QueryReserveAmountRequest `json:"reserve_amount,omitempty"`
+	// Used to calculate the token:uToken exchange rate of a base token denom.
+	ExchangeRate *lvtypes.QueryExchangeRateRequest `json:"exchange_rate,omitempty"`
 }
