@@ -180,3 +180,16 @@ func (umeeQuery UmeeQuery) HandleMarketSize(
 
 	return MarshalResponse(resp)
 }
+
+// HandleTokenMarketSize handles the market size of an token.
+func (umeeQuery UmeeQuery) HandleTokenMarketSize(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.TokenMarketSize(sdk.WrapSDKContext(ctx), umeeQuery.TokenMarketSize)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Token Market Size", err)}
+	}
+
+	return MarshalResponse(resp)
+}

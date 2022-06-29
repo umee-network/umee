@@ -35,8 +35,11 @@ const (
 	// interest rate on a token denom.
 	AssignedQueryLendAPY
 	// AssignedQueryMarketSize represents the call to query get the market size of
-	// an token denom in USD
+	// an token denom in USD.
 	AssignedQueryMarketSize
+	// AssignedQueryTokenMarketSize represents the call to query get the market size of
+	// an token denom.
+	AssignedQueryTokenMarketSize
 )
 
 // Handler query handler that an object must implement.
@@ -77,4 +80,6 @@ type UmeeQuery struct {
 	LendAPY *lvtypes.QueryLendAPYRequest `json:"lend_apy,omitempty"`
 	// Used to get the market size in USD of a token denom.
 	MarketSize *lvtypes.QueryMarketSizeRequest `json:"market_size,omitempty"`
+	// Used to get the market size of a token denom.
+	TokenMarketSize *lvtypes.QueryTokenMarketSizeRequest `json:"token_market_size,omitempty"`
 }
