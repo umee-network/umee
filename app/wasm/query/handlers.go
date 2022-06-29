@@ -248,3 +248,16 @@ func (umeeQuery UmeeQuery) HandleLiquidationThreshold(
 
 	return MarshalResponse(resp)
 }
+
+// HandleLiquidationTargets determines an list of borrower addresses eligible for liquidation.
+func (umeeQuery UmeeQuery) HandleLiquidationTargets(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.LiquidationTargets(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationTargets)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
+	}
+
+	return MarshalResponse(resp)
+}

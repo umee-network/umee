@@ -89,6 +89,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleBorrowLimit(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryLiquidationThreshold:
 			return smartcontractQuery.HandleLiquidationThreshold(ctx, queryPlugin.leverageQuerier)
+		case query.AssignedQueryLiquidationTargets:
+			return smartcontractQuery.HandleLiquidationTargets(ctx, queryPlugin.leverageQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
