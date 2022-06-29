@@ -66,8 +66,8 @@ func (s *SimTestSuite) SetupTest() {
 	uabc := types.Token{
 		BaseDenom:            "uabc",
 		ReserveFactor:        sdk.MustNewDecFromStr("0"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.1"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
@@ -147,9 +147,9 @@ func (s *SimTestSuite) TestWeightedOperations() {
 
 	for i, w := range weightesOps {
 		operationMsg, _, _ := w.Op()(r, s.app.BaseApp, s.ctx, accs, "")
-		// 	// the following checks are very much dependent from the ordering of the output given
-		// 	// by WeightedOperations. if the ordering in WeightedOperations changes some tests
-		// 	// will fail
+		// the following checks are very much dependent from the ordering of the output given
+		// by WeightedOperations. if the ordering in WeightedOperations changes some tests
+		// will fail
 		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
 		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
