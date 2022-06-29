@@ -2,7 +2,7 @@ package query
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // AssignedQuery defines the query to be called.
@@ -30,7 +30,7 @@ type Keepers interface {
 	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper.
 	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
 	// GetAllRegisteredTokens executes the GetAllRegisteredTokens from leverage keeper.
-	GetAllRegisteredTokens(ctx sdk.Context) []types.Token
+	GetAllRegisteredTokens(ctx sdk.Context) []lvtypes.Token
 }
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.
@@ -43,4 +43,7 @@ type UmeeQuery struct {
 	GetExchangeRateBase *GetExchangeRateBase `json:"get_exchange_rate_base,omitempty"`
 	// Used to query all the registered tokens.
 	GetAllRegisteredTokens *GetAllRegisteredTokens `json:"get_all_registered_tokens,omitempty"`
+
+	// Used to query all the registered tokens.
+	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 }

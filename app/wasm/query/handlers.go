@@ -2,11 +2,23 @@ package query
 
 import (
 	"encoding/json"
+	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	leveragekeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
 )
+
+// MarshalResponse marshals any response.
+func MarshalResponse(resp interface{}) ([]byte, error) {
+	bz, err := json.Marshal(resp)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v umee query response error on marshal", err)}
+	}
+	return bz, err
+}
 
 // Handler handles any query that implement the QueryHandler interface
 func (umeeQuery UmeeQuery) Handler(ctx sdk.Context, keepers Keepers, query Handler) ([]byte, error) {
@@ -21,7 +33,7 @@ func (umeeQuery UmeeQuery) Handler(ctx sdk.Context, keepers Keepers, query Handl
 
 	bz, err := json.Marshal(resp)
 	if err != nil {
-		return nil, sdkerrors.Wrap(err, "umee get exchange rate base response marshal")
+		return nil, sdkerrors.Wrap(err, "umee query response error on marshal")
 	}
 
 	return bz, nil
@@ -53,4 +65,18 @@ func (umeeQuery UmeeQuery) HandleGetExchangeRateBase(ctx sdk.Context, keepers Ke
 func (umeeQuery UmeeQuery) HandleGetAllRegisteredTokens(ctx sdk.Context, keepers Keepers) ([]byte, error) {
 	getAllRegisteredTokens := umeeQuery.GetAllRegisteredTokens
 	return umeeQuery.Handler(ctx, keepers, getAllRegisteredTokens)
+}
+
+// HandleRegisteredTokens handles the get all registered tokens query and response.
+func (umeeQuery UmeeQuery) HandleRegisteredTokens(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+	keepers Keepers,
+) ([]byte, error) {
+	resp, err := querier.RegisteredTokens(sdk.WrapSDKContext(ctx), &leveragetypes.QueryRegisteredTokens{})
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query RegisteredTokens", err)}
+	}
+
+	return MarshalResponse(resp)
 }

@@ -15,8 +15,9 @@ import (
 
 // QueryPlugin wraps the query plugin with keepers
 type QueryPlugin struct {
-	leverageKeeper leveragekeeper.Keeper
-	oracleKeeper   oraclekeeper.Keeper
+	leverageKeeper  leveragekeeper.Keeper
+	oracleKeeper    oraclekeeper.Keeper
+	leverageQuerier leveragekeeper.Querier
 }
 
 // NewQueryPlugin basic constructor
@@ -25,8 +26,9 @@ func NewQueryPlugin(
 	oracleKeeper oraclekeeper.Keeper,
 ) *QueryPlugin {
 	return &QueryPlugin{
-		leverageKeeper: leverageKeeper,
-		oracleKeeper:   oracleKeeper,
+		leverageKeeper:  leverageKeeper,
+		oracleKeeper:    oracleKeeper,
+		leverageQuerier: leveragekeeper.NewQuerier(leverageKeeper),
 	}
 }
 
@@ -58,8 +60,10 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleGetBorrow(ctx, queryPlugin)
 		case query.AssignedQueryGetExchangeRateBase:
 			return smartcontractQuery.HandleGetExchangeRateBase(ctx, queryPlugin)
+		// case query.AssignedQueryGetAllRegisteredTokens:
+		// 	return smartcontractQuery.HandleGetAllRegisteredTokens(ctx, queryPlugin)
 		case query.AssignedQueryGetAllRegisteredTokens:
-			return smartcontractQuery.HandleGetAllRegisteredTokens(ctx, queryPlugin)
+			return smartcontractQuery.HandleRegisteredTokens(ctx, queryPlugin.leverageQuerier, queryPlugin)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
