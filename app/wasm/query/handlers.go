@@ -141,3 +141,16 @@ func (umeeQuery UmeeQuery) HandleAvailableBorrow(
 
 	return MarshalResponse(resp)
 }
+
+// HandleBorrowAPY retrieves the current borrow interest rate on a token denom.
+func (umeeQuery UmeeQuery) HandleBorrowAPY(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.BorrowAPY(sdk.WrapSDKContext(ctx), umeeQuery.BorrowAPY)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow APY", err)}
+	}
+
+	return MarshalResponse(resp)
+}
