@@ -13,8 +13,10 @@ const (
 	AssignedQueryGetBorrow AssignedQuery = iota + 1
 	// AssignedQueryGetExchangeRateBase represents the call of oracle get exchange rate.
 	AssignedQueryGetExchangeRateBase
-	// AssignedQueryGetAllRegisteredTokens represents the call of leverage get all registered tokens.
-	AssignedQueryGetAllRegisteredTokens
+	// AssignedQueryRegisteredTokens represents the call of leverage get all registered tokens.
+	AssignedQueryRegisteredTokens
+	// AssignedQueryLeverageParams represents the call of the x/leverage module's parameters.
+	AssignedQueryLeverageParams
 )
 
 // Handler query handler that an object must implement.
@@ -29,8 +31,6 @@ type Keepers interface {
 	GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
 	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper.
 	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
-	// GetAllRegisteredTokens executes the GetAllRegisteredTokens from leverage keeper.
-	GetAllRegisteredTokens(ctx sdk.Context) []lvtypes.Token
 }
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.
@@ -42,8 +42,7 @@ type UmeeQuery struct {
 	// Used to query an exchange rate of a denom.
 	GetExchangeRateBase *GetExchangeRateBase `json:"get_exchange_rate_base,omitempty"`
 	// Used to query all the registered tokens.
-	GetAllRegisteredTokens *GetAllRegisteredTokens `json:"get_all_registered_tokens,omitempty"`
-
-	// Used to query all the registered tokens.
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
+	// Used to query the x/leverage module's parameters.
+	LeverageParams *lvtypes.Params `json:"params,omitempty"`
 }

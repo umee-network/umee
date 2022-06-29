@@ -61,19 +61,25 @@ func (umeeQuery UmeeQuery) HandleGetExchangeRateBase(ctx sdk.Context, keepers Ke
 	return umeeQuery.Handler(ctx, keepers, getExchangeRateBase)
 }
 
-// HandleGetAllRegisteredTokens handles the get all registered tokens query and response.
-func (umeeQuery UmeeQuery) HandleGetAllRegisteredTokens(ctx sdk.Context, keepers Keepers) ([]byte, error) {
-	getAllRegisteredTokens := umeeQuery.GetAllRegisteredTokens
-	return umeeQuery.Handler(ctx, keepers, getAllRegisteredTokens)
-}
-
 // HandleRegisteredTokens handles the get all registered tokens query and response.
 func (umeeQuery UmeeQuery) HandleRegisteredTokens(
 	ctx sdk.Context,
 	querier leveragekeeper.Querier,
-	keepers Keepers,
 ) ([]byte, error) {
 	resp, err := querier.RegisteredTokens(sdk.WrapSDKContext(ctx), &leveragetypes.QueryRegisteredTokens{})
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query RegisteredTokens", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleLeverageParams handles the get the x/leverage module's parameters.
+func (umeeQuery UmeeQuery) HandleLeverageParams(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.Params(sdk.WrapSDKContext(ctx), &leveragetypes.QueryParamsRequest{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query RegisteredTokens", err)}
 	}

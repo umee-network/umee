@@ -60,10 +60,10 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleGetBorrow(ctx, queryPlugin)
 		case query.AssignedQueryGetExchangeRateBase:
 			return smartcontractQuery.HandleGetExchangeRateBase(ctx, queryPlugin)
-		// case query.AssignedQueryGetAllRegisteredTokens:
-		// 	return smartcontractQuery.HandleGetAllRegisteredTokens(ctx, queryPlugin)
-		case query.AssignedQueryGetAllRegisteredTokens:
-			return smartcontractQuery.HandleRegisteredTokens(ctx, queryPlugin.leverageQuerier, queryPlugin)
+		case query.AssignedQueryRegisteredTokens:
+			return smartcontractQuery.HandleRegisteredTokens(ctx, queryPlugin.leverageQuerier)
+		case query.AssignedQueryLeverageParams:
+			return smartcontractQuery.HandleLeverageParams(ctx, queryPlugin.leverageQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
