@@ -243,7 +243,9 @@ func (umeeQuery UmeeQuery) HandleLiquidationThreshold(
 ) ([]byte, error) {
 	resp, err := querier.LiquidationThreshold(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationThreshold)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{
+			Kind: fmt.Sprintf("error %+v to assigned query Liquidation Threshold", err),
+		}
 	}
 
 	return MarshalResponse(resp)
@@ -256,7 +258,20 @@ func (umeeQuery UmeeQuery) HandleLiquidationTargets(
 ) ([]byte, error) {
 	resp, err := querier.LiquidationTargets(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationTargets)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Liquidation Targets", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleMarketSummary gets the summary data of an denom.
+func (umeeQuery UmeeQuery) HandleMarketSummary(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.MarketSummary(sdk.WrapSDKContext(ctx), umeeQuery.MarketSummary)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Summary", err)}
 	}
 
 	return MarshalResponse(resp)

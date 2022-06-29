@@ -82,7 +82,7 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleTokenMarketSize(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryReserveAmount:
 			return smartcontractQuery.HandleReserveAmount(ctx, queryPlugin.leverageQuerier)
-			// collateral stuffs go here
+			// collateral stuffs can go here
 		case query.AssignedQueryExchangeRate:
 			return smartcontractQuery.HandleExchangeRate(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryBorrowLimit:
@@ -91,6 +91,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleLiquidationThreshold(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryLiquidationTargets:
 			return smartcontractQuery.HandleLiquidationTargets(ctx, queryPlugin.leverageQuerier)
+		case query.AssignedQueryMarketSummary:
+			return smartcontractQuery.HandleMarketSummary(ctx, queryPlugin.leverageQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}

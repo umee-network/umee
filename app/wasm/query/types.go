@@ -56,6 +56,9 @@ const (
 	// AssignedQueryLiquidationTargets represents the call to query the list of
 	// borrower addresses eligible for liquidation.
 	AssignedQueryLiquidationTargets
+	// AssignedQueryMarketSummary represents the call to query the market
+	// summary data of an denom.
+	AssignedQueryMarketSummary
 )
 
 // Handler query handler that an object must implement.
@@ -107,6 +110,8 @@ type UmeeQuery struct {
 	// determines the maximum borrowed value (in USD) that a borrower with given
 	// collateral could reach before being eligible for liquidation.
 	LiquidationThreshold *lvtypes.QueryLiquidationThresholdRequest `json:"liquidation_threshold,omitempty"`
-	// returns a list of borrower addresses eligible for liquidation.
+	// request to return a list of borrower addresses eligible for liquidation.
 	LiquidationTargets *lvtypes.QueryLiquidationTargetsRequest `json:"liquidation_targets,omitempty"`
+	// Used to get the summary data of an denom.
+	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
 }
