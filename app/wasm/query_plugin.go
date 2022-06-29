@@ -80,6 +80,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleMarketSize(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryTokenMarketSize:
 			return smartcontractQuery.HandleTokenMarketSize(ctx, queryPlugin.leverageQuerier)
+		case query.AssignedQueryReserveAmount:
+			return smartcontractQuery.HandleReserveAmount(ctx, queryPlugin.leverageQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}

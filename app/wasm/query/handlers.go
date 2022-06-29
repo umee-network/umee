@@ -193,3 +193,16 @@ func (umeeQuery UmeeQuery) HandleTokenMarketSize(
 
 	return MarshalResponse(resp)
 }
+
+// HandleReserveAmount gets the amount reserved of a specified token.
+func (umeeQuery UmeeQuery) HandleReserveAmount(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.ReserveAmount(sdk.WrapSDKContext(ctx), umeeQuery.ReserveAmount)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Reserve Amount Size", err)}
+	}
+
+	return MarshalResponse(resp)
+}

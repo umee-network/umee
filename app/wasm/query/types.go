@@ -40,6 +40,9 @@ const (
 	// AssignedQueryTokenMarketSize represents the call to query get the market size of
 	// an token denom.
 	AssignedQueryTokenMarketSize
+	// AssignedQueryReserveAmount represents the call to query get the gets the amount
+	// reserved of a specified token.
+	AssignedQueryReserveAmount
 )
 
 // Handler query handler that an object must implement.
@@ -82,4 +85,6 @@ type UmeeQuery struct {
 	MarketSize *lvtypes.QueryMarketSizeRequest `json:"market_size,omitempty"`
 	// Used to get the market size of a token denom.
 	TokenMarketSize *lvtypes.QueryTokenMarketSizeRequest `json:"token_market_size,omitempty"`
+	// Used to gets the amount reserved of a specified token.
+	ReserveAmount *lvtypes.QueryReserveAmountRequest `json:"reserve_amount,omitempty"`
 }
