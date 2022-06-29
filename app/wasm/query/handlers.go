@@ -234,3 +234,17 @@ func (umeeQuery UmeeQuery) HandleBorrowLimit(
 
 	return MarshalResponse(resp)
 }
+
+// HandleLiquidationThreshold determines the maximum borrowed value (in USD) that a borrower with given
+// collateral could reach before being eligible for liquidation.
+func (umeeQuery UmeeQuery) HandleLiquidationThreshold(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.LiquidationThreshold(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationThreshold)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
+	}
+
+	return MarshalResponse(resp)
+}

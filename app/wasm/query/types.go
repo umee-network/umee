@@ -49,6 +49,10 @@ const (
 	// AssignedQueryBorrowLimit represents the call to query and calculate the
 	// borrow limit (in USD).
 	AssignedQueryBorrowLimit
+	// AssignedQueryLiquidationThreshold represents the call to query and calculate
+	// the maximum borrowed value (in USD) that a borrower with given
+	// collateral could reach before being eligible for liquidation.
+	AssignedQueryLiquidationThreshold
 )
 
 // Handler query handler that an object must implement.
@@ -97,4 +101,7 @@ type UmeeQuery struct {
 	ExchangeRate *lvtypes.QueryExchangeRateRequest `json:"exchange_rate,omitempty"`
 	// Uses the price oracle to determine the borrow limit (in USD).
 	BorrowLimit *lvtypes.QueryBorrowLimitRequest `json:"borrow_limit,omitempty"`
+	// determines the maximum borrowed value (in USD) that a borrower with given
+	// collateral could reach before being eligible for liquidation.
+	LiquidationThreshold *lvtypes.QueryLiquidationThresholdRequest `json:"liquidation_threshold,omitempty"`
 }
