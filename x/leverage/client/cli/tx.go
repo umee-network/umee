@@ -141,7 +141,7 @@ func GetCmdRemoveCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove-collateral [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Disable some uTokens as collateral",
+		Short: "Remove uTokens from collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
