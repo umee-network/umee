@@ -285,11 +285,8 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 
 // AddCollateral enables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) AddCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
+	if err := k.validateCollateralAsset(ctx, coin); err != nil {
 		return err
-	}
-	if !k.IsAcceptedUToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.Denom)
 	}
 
 	currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, coin.Denom)
