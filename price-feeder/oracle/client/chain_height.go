@@ -66,8 +66,8 @@ func ChainHeightInstance(
 	return instance, nil
 }
 
-// UpdateChainHeight receives the data to be updated thread safe.
-func (chainHeight *ChainHeight) UpdateChainHeight(blockHeight int64, err error) {
+// updateChainHeight receives the data to be updated thread safe.
+func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) {
 	chainHeight.mtx.Lock()
 	defer chainHeight.mtx.Unlock()
 
@@ -88,19 +88,19 @@ func (chainHeight *ChainHeight) keepUpdating(
 			err := eventsClient.Unsubscribe(ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
 			if err != nil {
 				chainHeight.Logger.Err(err)
-				chainHeight.UpdateChainHeight(chainHeight.lastChainHeight, err)
+				chainHeight.updateChainHeight(chainHeight.lastChainHeight, err)
 			}
-			chainHeight.Logger.Info("closing the ChainHeight subscription")
+			chainHeight.Logger.Info().Msg("closing the ChainHeight subscription")
 			return
 
 		case resultEvent := <-newBlockHeaderSubscription:
 			eventDataNewBlockHeader, ok := resultEvent.Data.(tmtypes.EventDataNewBlockHeader)
 			if !ok {
 				chainHeight.Logger.Err(errParseEventDataNewBlockHeader)
-				chainHeight.UpdateChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)
+				chainHeight.updateChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)
 				continue
 			}
-			chainHeight.UpdateChainHeight(eventDataNewBlockHeader.Header.Height, nil)
+			chainHeight.updateChainHeight(eventDataNewBlockHeader.Header.Height, nil)
 		}
 	}
 }
