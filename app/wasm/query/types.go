@@ -20,6 +20,11 @@ const (
 	// AssignedQueryBorrowedValue represents the call to query the Borrowed amount of an
 	// specific coin of an address.
 	AssignedQueryBorrowedValue
+	// AssignedQueryLoaned represents the call to query the Loaned amoun of an address.
+	AssignedQueryLoaned
+	// AssignedQueryLoaned represents the call to query the Loaned amoun of an
+	// address in USD.
+	AssignedQueryLoanedValue
 )
 
 // Handler query handler that an object must implement.
@@ -48,4 +53,8 @@ type UmeeQuery struct {
 	LeverageParams *lvtypes.QueryParamsRequest `json:"leverage_params,omitempty"`
 	// Used to query an specific borrow address value in usd.
 	BorrowedValue *lvtypes.QueryBorrowedValueRequest `json:"borrowed_value,omitempty"`
+	// Used to query an the amount loaned of an address.
+	Loaned *lvtypes.QueryLoanedRequest `json:"loaned,omitempty"`
+	// Used to query an the amount loaned of an address in USD.
+	LoanedValue *lvtypes.QueryLoanedValueRequest `json:"loaned_value,omitempty"`
 }

@@ -102,3 +102,29 @@ func (umeeQuery UmeeQuery) HandleBorrowedValue(
 
 	return MarshalResponse(resp)
 }
+
+// HandleLoaned handles the loaned amount of an address.
+func (umeeQuery UmeeQuery) HandleLoaned(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.Loaned(sdk.WrapSDKContext(ctx), umeeQuery.Loaned)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Loaned", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleLoanedValue handles the loaned amount of an address in USD.
+func (umeeQuery UmeeQuery) HandleLoanedValue(
+	ctx sdk.Context,
+	querier leveragekeeper.Querier,
+) ([]byte, error) {
+	resp, err := querier.LoanedValue(sdk.WrapSDKContext(ctx), umeeQuery.LoanedValue)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Loaned Value", err)}
+	}
+
+	return MarshalResponse(resp)
+}
