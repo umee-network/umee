@@ -20,3 +20,16 @@ func (umeeQuery UmeeQuery) HandleExchangeRates(
 
 	return MarshalResponse(resp)
 }
+
+// HandleMarketSummary gets all active denoms.
+func (umeeQuery UmeeQuery) HandleActiveExchangeRates(
+	ctx sdk.Context,
+	queryServer octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.ActiveExchangeRates(sdk.WrapSDKContext(ctx), umeeQuery.ActiveExchangeRates)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Active Exchange Rates", err)}
+	}
+
+	return MarshalResponse(resp)
+}

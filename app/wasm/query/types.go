@@ -66,6 +66,8 @@ const (
 	// AssignedQueryExchangeRates represents the call to query the exchange rates
 	// of all denoms.
 	AssignedQueryExchangeRates
+	// AssignedQueryActiveExchangeRates represents the call to query all active denoms.
+	AssignedQueryActiveExchangeRates
 )
 
 // MarshalResponse marshals any response.
@@ -120,4 +122,6 @@ type UmeeQuery struct {
 	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
 	// Used to get the exchange rates of all denoms.
 	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
+	// Used to get all active denoms.
+	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
 }
