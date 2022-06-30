@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
@@ -443,12 +442,7 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 func (o *Oracle) tick(ctx context.Context) error {
 	o.logger.Debug().Msg("executing oracle tick")
 
-	clientCtx, err := o.oracleClient.CreateClientContext()
-	if err != nil {
-		return err
-	}
-
-	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
+	blockHeight, err := o.oracleClient.ChainHeight.GetChainHeight()
 	if err != nil {
 		return err
 	}
@@ -533,7 +527,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 			return err
 		}
 
-		currentHeight, err := rpcclient.GetChainHeight(clientCtx)
+		currentHeight, err := o.oracleClient.ChainHeight.GetChainHeight()
 		if err != nil {
 			return err
 		}
