@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -44,6 +44,7 @@ type (
 		GasAdjustment       float64
 		GRPCEndpoint        string
 		KeyringPassphrase   string
+		ChainHeight         *ChainHeight
 	}
 
 	passReader struct {
@@ -70,7 +71,7 @@ func NewOracleClient(
 		return OracleClient{}, err
 	}
 
-	return OracleClient{
+	oracleClient := OracleClient{
 		Logger:              logger.With().Str("module", "oracle_client").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,
@@ -85,7 +86,20 @@ func NewOracleClient(
 		Encoding:            umeeapp.MakeEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
 		GRPCEndpoint:        grpcEndpoint,
-	}, nil
+	}
+
+	clientCtx, err := oracleClient.CreateClientContext()
+	if err != nil {
+		return OracleClient{}, err
+	}
+
+	chainHeight, err := NewChainHeight(context.Background(), clientCtx.Client, oracleClient.Logger)
+	if err != nil {
+		return OracleClient{}, err
+	}
+	oracleClient.ChainHeight = chainHeight
+
+	return oracleClient, nil
 }
 
 func newPassReader(pass string) io.Reader {
@@ -125,7 +139,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 
 	// re-try voting until timeout
 	for lastCheckHeight < maxBlockHeight {
-		latestBlockHeight, err := rpcClient.GetChainHeight(clientCtx)
+		latestBlockHeight, err := oc.ChainHeight.GetChainHeight()
 		if err != nil {
 			return err
 		}
@@ -159,6 +173,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 				Str("tx_hash", hash).
 				Uint32("tx_code", code).
 				Msg("failed to broadcast tx; retrying...")
+
+			time.Sleep(time.Second * 1)
 			continue
 		}
 
