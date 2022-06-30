@@ -19,6 +19,7 @@ var (
 // ChainHeight is used to cache the chain height of the
 // current node which is being updated each time the
 // node sends an event of EventNewBlockHeader.
+// It starts a goroutine to subscribe to blockchain new block event and update the cached height.
 type ChainHeight struct {
 	Logger zerolog.Logger
 
@@ -28,7 +29,7 @@ type ChainHeight struct {
 }
 
 // NewChainHeight returns a new ChainHeight struct that
-// already subscribe to EventNewBlockHeader.
+// starts a new goroutine subscribed to EventNewBlockHeader.
 func NewChainHeight(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
