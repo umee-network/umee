@@ -28,7 +28,9 @@ func (umeeQuery UmeeQuery) HandleActiveExchangeRates(
 ) ([]byte, error) {
 	resp, err := queryServer.ActiveExchangeRates(sdk.WrapSDKContext(ctx), umeeQuery.ActiveExchangeRates)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Active Exchange Rates", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{
+			Kind: fmt.Sprintf("error %+v to assigned query Active Exchange Rates", err),
+		}
 	}
 
 	return MarshalResponse(resp)
