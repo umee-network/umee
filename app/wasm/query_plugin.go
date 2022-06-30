@@ -41,8 +41,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 		switch smartcontractQuery.AssignedQuery {
 		case query.AssignedQueryBorrowed:
 			return smartcontractQuery.HandleBorrowed(ctx, queryPlugin.leverageQuerier)
-		// case query.AssignedQueryGetExchangeRateBase:
-		// 	return smartcontractQuery.HandleGetExchangeRateBase(ctx, queryPlugin)
+		case query.AssignedQueryExchangeRates:
+			return smartcontractQuery.HandleExchangeRates(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryRegisteredTokens:
 			return smartcontractQuery.HandleRegisteredTokens(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryLeverageParams:
@@ -76,8 +76,6 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleLiquidationTargets(ctx, queryPlugin.leverageQuerier)
 		case query.AssignedQueryMarketSummary:
 			return smartcontractQuery.HandleMarketSummary(ctx, queryPlugin.leverageQuerier)
-		case query.AssignedQueryExchangeRates:
-			return smartcontractQuery.HandleExchangeRates(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryActiveExchangeRates:
 			return smartcontractQuery.HandleActiveExchangeRates(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryActiveFeederDelegation:
@@ -86,6 +84,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleMissCounter(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryAggregatePrevote:
 			return smartcontractQuery.HandleAggregatePrevote(ctx, queryPlugin.oracleQuerier)
+		case query.AssignedQueryAggregatePrevotes:
+			return smartcontractQuery.HandleAggregatePrevotes(ctx, queryPlugin.oracleQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}

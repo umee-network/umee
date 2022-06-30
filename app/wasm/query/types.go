@@ -15,8 +15,9 @@ type AssignedQuery uint16
 const (
 	// AssignedQueryBorrowed represents the call to query the Borrowed coins of an address.
 	AssignedQueryBorrowed AssignedQuery = iota + 1
-	// AssignedQueryGetExchangeRateBase represents the call of oracle get exchange rate.
-	AssignedQueryGetExchangeRateBase
+	// AssignedQueryExchangeRates represents the call to query the exchange rates
+	// of all denoms.
+	AssignedQueryExchangeRates
 	// AssignedQueryRegisteredTokens represents the call of leverage get all registered tokens.
 	AssignedQueryRegisteredTokens
 	// AssignedQueryLeverageParams represents the call of the x/leverage module's parameters.
@@ -63,9 +64,6 @@ const (
 	// AssignedQueryMarketSummary represents the call to query the market
 	// summary data of an denom.
 	AssignedQueryMarketSummary
-	// AssignedQueryExchangeRates represents the call to query the exchange rates
-	// of all denoms.
-	AssignedQueryExchangeRates
 	// AssignedQueryActiveExchangeRates represents the call to query all active denoms.
 	AssignedQueryActiveExchangeRates
 	// AssignedQueryActiveFeederDelegation represents the call to query all the feeder
@@ -77,6 +75,9 @@ const (
 	// AssignedQueryAggregatePrevote represents the call to query an aggregate prevote of
 	// a validator.
 	AssignedQueryAggregatePrevote
+	// AssignedQueryAggregatePrevotes represents the call to query an aggregate prevote of
+	// all validators.
+	AssignedQueryAggregatePrevotes
 )
 
 // MarshalResponse marshals any response.
@@ -94,8 +95,8 @@ type UmeeQuery struct {
 	AssignedQuery AssignedQuery `json:"assigned_query"`
 	// Used to query the Borrowed coins of an address.
 	Borrowed *lvtypes.QueryBorrowedRequest `json:"borrowed,omitempty"`
-	// Used to query an exchange rate of a denom.
-	GetExchangeRateBase *GetExchangeRateBase `json:"get_exchange_rate_base,omitempty"`
+	// Used to get the exchange rates of all denoms.
+	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
 	// Used to query all the registered tokens.
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to query the x/leverage module's parameters.
@@ -129,8 +130,6 @@ type UmeeQuery struct {
 	LiquidationTargets *lvtypes.QueryLiquidationTargetsRequest `json:"liquidation_targets,omitempty"`
 	// Used to get the summary data of an denom.
 	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
-	// Used to get the exchange rates of all denoms.
-	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
 	// Used to get all active denoms.
 	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
 	// Used to get all feeder delegation of a validator.
@@ -139,4 +138,6 @@ type UmeeQuery struct {
 	MissCounter *octypes.QueryMissCounterRequest `json:"miss_counter,omitempty"`
 	// Used to get an aggregate prevote of a validator.
 	AggregatePrevote *octypes.QueryAggregatePrevoteRequest `json:"aggregate_prevote,omitempty"`
+	// Used to get an aggregate prevote of all validators.
+	AggregatePrevotes *octypes.QueryAggregatePrevotesRequest `json:"aggregate_prevotes,omitempty"`
 }
