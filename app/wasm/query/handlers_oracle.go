@@ -87,3 +87,16 @@ func (umeeQuery UmeeQuery) HandleAggregatePrevotes(
 
 	return MarshalResponse(resp)
 }
+
+// HandleAggregateVote gets an aggregate vote of a validator.
+func (umeeQuery UmeeQuery) HandleAggregateVote(
+	ctx sdk.Context,
+	queryServer octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.AggregateVote(sdk.WrapSDKContext(ctx), umeeQuery.AggregateVote)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Vote", err)}
+	}
+
+	return MarshalResponse(resp)
+}
