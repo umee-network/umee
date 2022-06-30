@@ -71,6 +71,12 @@ const (
 	// AssignedQueryActiveFeederDelegation represents the call to query all the feeder
 	// delegation of a validator.
 	AssignedQueryActiveFeederDelegation
+	// AssignedQueryMissCounter represents the call to query all the oracle
+	// miss counter of a validator.
+	AssignedQueryMissCounter
+	// AssignedQueryAggregatePrevote represents the call to query an aggregate prevote of
+	// a validator.
+	AssignedQueryAggregatePrevote
 )
 
 // MarshalResponse marshals any response.
@@ -129,4 +135,8 @@ type UmeeQuery struct {
 	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
 	// Used to get all feeder delegation of a validator.
 	FeederDelegation *octypes.QueryFeederDelegationRequest `json:"feeder_delegation,omitempty"`
+	// Used to get all the oracle miss counter of a validator.
+	MissCounter *octypes.QueryMissCounterRequest `json:"miss_counter,omitempty"`
+	// Used to get an aggregate prevote of a validator.
+	AggregatePrevote *octypes.QueryAggregatePrevoteRequest `json:"aggregate_prevote,omitempty"`
 }

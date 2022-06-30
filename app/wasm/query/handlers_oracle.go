@@ -48,3 +48,29 @@ func (umeeQuery UmeeQuery) HandleFeederDelegation(
 
 	return MarshalResponse(resp)
 }
+
+// HandleMissCounter gets all the oracle miss counter of a validator.
+func (umeeQuery UmeeQuery) HandleMissCounter(
+	ctx sdk.Context,
+	queryServer octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.MissCounter(sdk.WrapSDKContext(ctx), umeeQuery.MissCounter)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Miss Counter", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleAggregatePrevote gets an aggregate prevote of a validator.
+func (umeeQuery UmeeQuery) HandleAggregatePrevote(
+	ctx sdk.Context,
+	queryServer octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.AggregatePrevote(sdk.WrapSDKContext(ctx), umeeQuery.AggregatePrevote)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Prevote", err)}
+	}
+
+	return MarshalResponse(resp)
+}
