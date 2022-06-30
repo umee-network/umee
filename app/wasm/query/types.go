@@ -1,8 +1,12 @@
 package query
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"encoding/json"
+	"fmt"
+
+	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	lvtypes "github.com/umee-network/umee/v2/x/leverage/types"
+	octypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // AssignedQuery defines the query to be called.
@@ -59,18 +63,18 @@ const (
 	// AssignedQueryMarketSummary represents the call to query the market
 	// summary data of an denom.
 	AssignedQueryMarketSummary
+	// AssignedQueryExchangeRates represents the call to query the exchange rates
+	// of all denoms.
+	AssignedQueryExchangeRates
 )
 
-// Handler query handler that an object must implement.
-type Handler interface {
-	Validate() error
-	QueryResponse(ctx sdk.Context, keepers Keepers) (interface{}, error)
-}
-
-// Keepers wraps the interface to encapsulate keepers.
-type Keepers interface {
-	// GetExchangeRateBase executes the GetExchangeRateBase from oracle keeper.
-	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
+// MarshalResponse marshals any response.
+func MarshalResponse(resp interface{}) ([]byte, error) {
+	bz, err := json.Marshal(resp)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v umee query response error on marshal", err)}
+	}
+	return bz, err
 }
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.
@@ -114,4 +118,6 @@ type UmeeQuery struct {
 	LiquidationTargets *lvtypes.QueryLiquidationTargetsRequest `json:"liquidation_targets,omitempty"`
 	// Used to get the summary data of an denom.
 	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
+	// Used to get the exchange rates of all denoms.
+	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
 }
