@@ -68,6 +68,9 @@ const (
 	AssignedQueryExchangeRates
 	// AssignedQueryActiveExchangeRates represents the call to query all active denoms.
 	AssignedQueryActiveExchangeRates
+	// AssignedQueryActiveFeederDelegation represents the call to query all the feeder
+	// delegation of a validator.
+	AssignedQueryActiveFeederDelegation
 )
 
 // MarshalResponse marshals any response.
@@ -124,4 +127,6 @@ type UmeeQuery struct {
 	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
 	// Used to get all active denoms.
 	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
+	// Used to get all feeder delegation of a validator.
+	FeederDelegation *octypes.QueryFeederDelegationRequest `json:"feeder_delegation,omitempty"`
 }

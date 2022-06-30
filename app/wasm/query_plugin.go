@@ -80,6 +80,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleExchangeRates(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryActiveExchangeRates:
 			return smartcontractQuery.HandleActiveExchangeRates(ctx, queryPlugin.oracleQuerier)
+		case query.AssignedQueryActiveFeederDelegation:
+			return smartcontractQuery.HandleFeederDelegation(ctx, queryPlugin.oracleQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
