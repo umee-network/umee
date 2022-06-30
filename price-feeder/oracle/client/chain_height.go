@@ -67,9 +67,9 @@ func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) 
 	chainHeight.errGetChainHeight = err
 }
 
-// keepUpdating keeps listening to new blocks being made
+// subscribe listens to new blocks being made
 // and updates the chain height.
-func (chainHeight *ChainHeight) keepUpdating(
+func (chainHeight *ChainHeight) subscribe(
 	ctx context.Context,
 	eventsClient tmrpcclient.EventsClient,
 	newBlockHeaderSubscription <-chan tmctypes.ResultEvent,
