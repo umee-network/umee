@@ -81,6 +81,9 @@ const (
 	// AssignedQueryAggregateVote represents the call to query an aggregate vote of
 	// a validator.
 	AssignedQueryAggregateVote
+	// AssignedQueryAggregateVotes represents the call to query an aggregate vote of
+	// all validators.
+	AssignedQueryAggregateVotes
 )
 
 // MarshalResponse marshals any response.
@@ -145,4 +148,6 @@ type UmeeQuery struct {
 	AggregatePrevotes *octypes.QueryAggregatePrevotesRequest `json:"aggregate_prevotes,omitempty"`
 	// Used to get an aggregate vote of a validator.
 	AggregateVote *octypes.QueryAggregateVoteRequest `json:"aggregate_vote,omitempty"`
+	// Used to get an aggregate vote of all validators.
+	AggregateVotes *octypes.QueryAggregateVotesRequest `json:"aggregate_votes,omitempty"`
 }

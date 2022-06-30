@@ -88,6 +88,8 @@ func CustomQuerier(queryPlugin *QueryPlugin) func(ctx sdk.Context, request json.
 			return smartcontractQuery.HandleAggregatePrevotes(ctx, queryPlugin.oracleQuerier)
 		case query.AssignedQueryAggregateVote:
 			return smartcontractQuery.HandleAggregateVote(ctx, queryPlugin.oracleQuerier)
+		case query.AssignedQueryAggregateVotes:
+			return smartcontractQuery.HandleAggregateVotes(ctx, queryPlugin.oracleQuerier)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
