@@ -84,6 +84,9 @@ const (
 	// AssignedQueryAggregateVotes represents the call to query an aggregate vote of
 	// all validators.
 	AssignedQueryAggregateVotes
+	// AssignedQueryOracleParams represents the call of the x/leverage module's
+	// parameters.
+	AssignedQueryOracleParams
 )
 
 // MarshalResponse marshals any response.
@@ -150,4 +153,6 @@ type UmeeQuery struct {
 	AggregateVote *octypes.QueryAggregateVoteRequest `json:"aggregate_vote,omitempty"`
 	// Used to get an aggregate vote of all validators.
 	AggregateVotes *octypes.QueryAggregateVotesRequest `json:"aggregate_votes,omitempty"`
+	// Used to query the x/oracle module's parameters.
+	OracleParams *octypes.QueryParamsRequest `json:"oracle_params,omitempty"`
 }

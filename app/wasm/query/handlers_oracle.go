@@ -113,3 +113,16 @@ func (umeeQuery UmeeQuery) HandleAggregateVotes(
 
 	return MarshalResponse(resp)
 }
+
+// HandleOracleParams gets the x/oracle module's parameters.
+func (umeeQuery UmeeQuery) HandleOracleParams(
+	ctx sdk.Context,
+	queryServer octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.Params(sdk.WrapSDKContext(ctx), umeeQuery.OracleParams)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Oracle Parameters", err)}
+	}
+
+	return MarshalResponse(resp)
+}
