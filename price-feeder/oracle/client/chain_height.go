@@ -53,7 +53,7 @@ func NewChainHeight(
 		lastChainHeight:   0,
 	}
 
-	go chainHeight.keepUpdating(ctx, rpcClient, newBlockHeaderSubscription)
+	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)
 
 	return chainHeight, nil
 }
