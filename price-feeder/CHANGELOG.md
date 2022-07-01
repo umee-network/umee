@@ -49,7 +49,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
-- [#1069](https://github.com/umee-network/umee/pull/1069) Subscribe to node event EventNewBlockHeader to have the current chain height.
 
 ### Features
 
@@ -61,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [#1069](https://github.com/umee-network/umee/pull/1069) Subscribe to chain height events instead of querying for it.
+- [#1069](https://github.com/umee-network/umee/pull/1069) Subscribe to node event EventNewBlockHeader to have the current chain height.
 
 ## [v0.2.2](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.2) - 2022-06-27
 
@@ -72,7 +71,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [#925](https://github.com/umee-network/umee/pull/925) Require stablecoins to be converted to USD to protect against depegging.
--
 
 ## [v0.2.1](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.1) - 2022-04-06
 
