@@ -105,7 +105,8 @@ In the codebase, the function above will be written more efficiently with regard
 
 ### Protocol Reserve (insurance treasury)
 
-Leverage module will build treasury to secure the protocol and act as a protocol insurance.
+The leverage module will build reserves to secure the protocol and act as insurance. These reserves are used during bad debt repayment, which is discussed in ADR 007.
+
 The portion of accrued interest set for reserve is determined per-token as a governance parameter called `ReserveFactor`, and will be managed by the `Token` registry.
 
 Reserve amount is stored for each denom using the following format.:
