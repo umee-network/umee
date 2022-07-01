@@ -49,14 +49,27 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
-- [#1050](https://github.com/umee-network/umee/pull/1050) Cache x/oracle params to decrease the number of queries to nodes.
-- [#1069](https://github.com/umee-network/umee/pull/1069) Subscribe to node event EventNewBlockHeader to have the current chain height.
 
 ### Features
 
 - [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
 - [#998](https://github.com/umee-network/umee/pull/998) Make deviation thresholds configurable for stablecoin support.
+
+## [v0.2.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.3) - 2022-06-30
+
+### Improvements
+
+- [#1069](https://github.com/umee-network/umee/pull/1069) Subscribe to node event EventNewBlockHeader to have the current chain height.
+
+## [v0.2.2](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.2) - 2022-06-27
+
+### Improvements
+
+- [#1050](https://github.com/umee-network/umee/pull/1050) Cache x/oracle params to decrease the number of queries to nodes.
+
+### Features
+
 - [#925](https://github.com/umee-network/umee/pull/925) Require stablecoins to be converted to USD to protect against depegging.
 
 ## [v0.2.1](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.1) - 2022-04-06
