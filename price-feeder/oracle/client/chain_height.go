@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -13,7 +14,6 @@ import (
 
 var (
 	errParseEventDataNewBlockHeader = errors.New("error parsing EventDataNewBlockHeader")
-	errNoBlockHeightEvents          = errors.New("no block height events have been received")
 	queryEventNewBlockHeader        = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader)
 )
 
@@ -35,7 +35,12 @@ func NewChainHeight(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
 	logger zerolog.Logger,
+	initialHeight int64,
 ) (*ChainHeight, error) {
+	if initialHeight < 1 {
+		return nil, fmt.Errorf("expected positive initial block height")
+	}
+
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err
@@ -51,7 +56,7 @@ func NewChainHeight(
 	chainHeight := &ChainHeight{
 		Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
 		errGetChainHeight: nil,
-		lastChainHeight:   0,
+		lastChainHeight:   initialHeight,
 	}
 
 	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)
@@ -102,11 +107,6 @@ func (chainHeight *ChainHeight) subscribe(
 func (chainHeight *ChainHeight) GetChainHeight() (int64, error) {
 	chainHeight.mtx.RLock()
 	defer chainHeight.mtx.RUnlock()
-
-	if chainHeight.lastChainHeight == 0 &&
-		chainHeight.errGetChainHeight == nil {
-		chainHeight.errGetChainHeight = errNoBlockHeightEvents
-	}
 
 	return chainHeight.lastChainHeight, chainHeight.errGetChainHeight
 }
