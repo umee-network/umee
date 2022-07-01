@@ -120,11 +120,11 @@ func GetCmdAddCollateral() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			coin, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
-			msg := types.NewMsgAddCollateral(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgAddCollateral(clientCtx.GetFromAddress(), coin)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -152,11 +152,11 @@ func GetCmdRemoveCollateral() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			coin, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
-			msg := types.NewMsgRemoveCollateral(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgRemoveCollateral(clientCtx.GetFromAddress(), coin)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
