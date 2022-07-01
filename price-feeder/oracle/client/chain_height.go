@@ -13,6 +13,7 @@ import (
 
 var (
 	errParseEventDataNewBlockHeader = errors.New("error parsing EventDataNewBlockHeader")
+	errNoBlockHeightEvents          = errors.New("no block height events have been received")
 	queryEventNewBlockHeader        = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader)
 )
 
@@ -101,6 +102,11 @@ func (chainHeight *ChainHeight) subscribe(
 func (chainHeight *ChainHeight) GetChainHeight() (int64, error) {
 	chainHeight.mtx.RLock()
 	defer chainHeight.mtx.RUnlock()
+
+	if chainHeight.lastChainHeight == 0 &&
+		chainHeight.errGetChainHeight == nil {
+		chainHeight.errGetChainHeight = errNoBlockHeightEvents
+	}
 
 	return chainHeight.lastChainHeight, chainHeight.errGetChainHeight
 }
