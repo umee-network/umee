@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -34,7 +35,12 @@ func NewChainHeight(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
 	logger zerolog.Logger,
+	initialHeight int64,
 ) (*ChainHeight, error) {
+	if initialHeight < 1 {
+		return nil, fmt.Errorf("expected positive initial block height")
+	}
+
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err
@@ -50,7 +56,7 @@ func NewChainHeight(
 	chainHeight := &ChainHeight{
 		Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
 		errGetChainHeight: nil,
-		lastChainHeight:   0,
+		lastChainHeight:   initialHeight,
 	}
 
 	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)

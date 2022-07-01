@@ -11,6 +11,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,7 +20,6 @@ import (
 	"github.com/rs/zerolog"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-
 	"github.com/umee-network/umee/price-feeder/telemetry"
 	umeeapp "github.com/umee-network/umee/v2/app"
 	umeeparams "github.com/umee-network/umee/v2/app/params"
@@ -93,7 +93,17 @@ func NewOracleClient(
 		return OracleClient{}, err
 	}
 
-	chainHeight, err := NewChainHeight(context.Background(), clientCtx.Client, oracleClient.Logger)
+	blockHeight, err := rpc.GetChainHeight(clientCtx)
+	if err != nil {
+		return OracleClient{}, err
+	}
+
+	chainHeight, err := NewChainHeight(
+		context.Background(),
+		clientCtx.Client,
+		oracleClient.Logger,
+		blockHeight,
+	)
 	if err != nil {
 		return OracleClient{}, err
 	}
