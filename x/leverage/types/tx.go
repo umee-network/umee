@@ -73,10 +73,10 @@ func (msg *MsgWithdrawAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgAddCollateral(borrower sdk.AccAddress, amount sdk.Coin) *MsgAddCollateral {
+func NewMsgAddCollateral(borrower sdk.AccAddress, coin sdk.Coin) *MsgAddCollateral {
 	return &MsgAddCollateral{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Coin:     coin,
 	}
 }
 
@@ -102,10 +102,10 @@ func (msg *MsgAddCollateral) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRemoveCollateral(borrower sdk.AccAddress, amount sdk.Coin) *MsgRemoveCollateral {
+func NewMsgRemoveCollateral(borrower sdk.AccAddress, coin sdk.Coin) *MsgRemoveCollateral {
 	return &MsgRemoveCollateral{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Coin:     coin,
 	}
 }
 

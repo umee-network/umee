@@ -53,14 +53,14 @@ message MsgWithdrawAsset {
 // uTokens as collateral.
 message MsgAddCollateral {
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgRemoveCollateral represents a lender's request to disable selected
 // uTokens as collateral.
 message MsgRemoveCollateral {
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrowAsset represents a lender's request to borrow a base asset type

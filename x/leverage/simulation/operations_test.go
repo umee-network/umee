@@ -247,7 +247,7 @@ func (s *SimTestSuite) TestSimulateMsgAddCollateral() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeAddCollateral, msg.Type())
-	s.Require().Equal("0u/uabc", msg.Amount.String())
+	s.Require().Equal("0u/uabc", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -268,7 +268,7 @@ func (s *SimTestSuite) TestSimulateMsgRemoveCollateral() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeRemoveCollateral, msg.Type())
-	s.Require().Equal("0u/uabc", msg.Amount.String())
+	s.Require().Equal("0u/uabc", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 

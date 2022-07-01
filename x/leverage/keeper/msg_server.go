@@ -105,21 +105,21 @@ func (s msgServer) AddCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.AddCollateral(ctx, borrowerAddr, msg.Amount); err != nil {
+	if err := s.keeper.AddCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Amount.String(),
+		"amount", msg.Coin.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeAddCollateral,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -142,21 +142,21 @@ func (s msgServer) RemoveCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.RemoveCollateral(ctx, borrowerAddr, msg.Amount); err != nil {
+	if err := s.keeper.RemoveCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral removed",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Amount.String(),
+		"amount", msg.Coin.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRemoveCollateral,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
