@@ -38,7 +38,7 @@ From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-de
 >
 > The only way to unlock the locked tokens on blockchain A is to send the voucher token back from blockchain B. The result is that the voucher token on blockchain B is burned. The burn process purposefully takes the tokens out of circulation.
 
-Behavior over IBC (and Ethereum) bridges can be expected to follow this pattern, where the _amount_ of uTokens transferred is represented faithfully, but and complex _behavior_ of uTokens is lost.
+Behavior over IBC (and Ethereum) bridges can be expected to follow this pattern, where the _amount_ of uTokens transferred is represented faithfully, but any complex _behavior_ of uTokens is lost.
 
 ## Decision
 
