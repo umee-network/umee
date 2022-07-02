@@ -109,11 +109,11 @@ The leverage module will build reserves to secure the protocol and act as insura
 
 The portion of accrued interest set for reserve is determined per-token as a governance parameter called `ReserveFactor`, and will be managed by the `Token` registry.
 
-Reserve amount is stored for each denom using the following format.:
+Reserve amount is stored for each denom using the following format:
 
-```
+```go
 // append 0 for null-termination
-KeyPrefixReserveAmount | denom | 0 := reserve amount (sdk.Int)
+KeyPrefixReserveAmount | denom | 0 -> sdk.Int
 ```
 
 Reserves are part of the module account's balance, but may not leave the module account as the result of `MsgBorrowAsset` or `MsgWithdrawAsset`. Only governance actions (outside the scope of this ADR) may release or transfer reserves.
