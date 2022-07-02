@@ -56,7 +56,7 @@ Example scenario:
 >
 > At a time we will label week=0, Alice deposits `2000 ATOM` and receives `2000 u/ATOM` per the exchange rate.
 >
-> By week=1, the `u/ATOM` exchange rate has increased to `1.001` due to interest. While Alice's `2000 u/ATOM` are now worth `2002 ATOM` if redeemed.
+> By week=1, the `u/ATOM` exchange rate has increased to `1.001` due to interest. Alice's `2000 u/ATOM` are now worth `2002 ATOM` if redeemed.
 >
 > By week=2, the `u/ATOM` exchange rate is `1.002` (technically `1.002001` due to compound interest, but approximate amount will be displayed here)
 >
