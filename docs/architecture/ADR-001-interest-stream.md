@@ -46,7 +46,7 @@ Behavior over IBC (and Ethereum) bridges can be expected to follow this pattern,
 
 - Requirement: Umee chain maintains `Token:Utoken` exchange rate for each token
 
-In this implementation, for each token type accepted by the `x/leverage` module, the Umee chain computes an "exchange rate" between the base asset and its associated uToken. The exchange rate starts equal to 1, and increases whenever interest accrues. Whenever a lender deposits or withdraws base assets for uToken, this exchange rate is used.
+In this implementation, for each token type accepted by the `x/leverage` module, the Umee chain computes an "exchange rate" between the base asset and its associated uToken. The exchange rate starts equal to 1, and increases as interest accrues. Whenever a lender deposits or withdraws base assets for uToken, the current exchange rate is used.
 
 Example scenario:
 
