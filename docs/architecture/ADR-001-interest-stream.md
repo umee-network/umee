@@ -2,8 +2,8 @@
 
 ## Changelog
 
-- September 10, 2021: Initial Draft (@toteki)
-- Jul 2, 2022: Simplification and Formatting (@toteki)
+- September 10, 2021: Initial draft (@toteki)
+- Jul 2, 2022: Cleanup and simplify (@toteki)
 
 ## Status
 
