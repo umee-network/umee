@@ -60,7 +60,7 @@ Example scenario:
 >
 > By week=2, the `u/ATOM` exchange rate is `1.002` (technically `1.002001` due to compound interest, but approximate amount will be displayed here)
 >
-> Also at week=2, Bob deposits `1000 ATOM`. Because the exchange rate has shifted, he receives `998 u/ATOM`, which are worth `1000 ATOM` if he were to redeem them immediately.
+> Also at week=2, Bob deposits `1000 ATOM`. Because the exchange rate has shifted, he receives `998 u/ATOM`, which is worth `1000 ATOM` if redeemed immediately.
 >
 > By week=3, the `u/ATOM` exchange rate is `1.003`. Bob's `998 u/ATOM` are now worth `1001 ATOM` if redeemed. Alice's `2000 u/ATOM` is worth `2006 ATOM`.
 >
