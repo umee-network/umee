@@ -12,7 +12,7 @@ Implemented
 
 ## Context
 
-One of the base functions of the `x/leverage` module is to allow users to supply assets, and earn interest on their deposits.
+The `x/leverage` module allows users to supply and withdraw assets.
 
 The flow of events is as follows:
 - Lender supplies a token to the module
