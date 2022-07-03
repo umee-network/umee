@@ -19,7 +19,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
     - Important Derived Values:
         - [Adjusted Borrow Amounts](01_concepts.md#Adjusted-Borrow-Amounts)
         - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
-        - [Borrow Utilization](01_concepts.md#Borrow-Utilization)
+        - [Supply Utilization](01_concepts.md#Supply-Utilization)
         - [Borrow Limit](01_concepts.md#Borrow-Limit)
         - [Liquidation Limit](01_concepts.md#Liquidation-Limit)
         - [Borrow APY](01_concepts.md#Borrow-APY)

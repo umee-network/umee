@@ -105,13 +105,13 @@ In state, uToken exchange rates are not stored as the can be calculated on deman
 
 Exchange rates satisfy the invariant `exchangeRate(denom) >= 1.0`
 
-### Borrow Utilization
+### Supply Utilization
 
-Borrow utilization of a token denomination is calculated as:
+Supply utilization of a token denomination is calculated as:
 
-`borrowUtilization(denom) = TotalBorrowed(denom) / [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`
+`supplyUtilization(denom) = TotalBorrowed(denom) / [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`
 
-Borrow utilization ranges between zero and one in general. In edge cases where `ReservedAmount(denom) > ModuleBalance(denom)`, utilization is taken to be `1.0`.
+Supply utilization ranges between zero and one in general. In edge cases where `ReservedAmount(denom) > ModuleBalance(denom)`, utilization is taken to be `1.0`.
 
 ### Borrow Limit
 
@@ -141,7 +141,7 @@ A user's liquidation threshold is the sum of the contributions from each denomin
 
 ### Borrow APY
 
-Umee uses a dynamic interest rate model. The borrow APY for each borrowed token denomination changes based on that denomination's Borrow Utilization.
+Umee uses a dynamic interest rate model. The borrow APY for each borrowed token denomination changes based on that denomination's Supply Utilization.
 
 The `Token` struct stored in state for a given denomination defines three points on the `Utilization vs Borrow APY` graph:
 
@@ -157,7 +157,7 @@ The interest accrued on borrows, after some of it is set aside for reserves, is 
 
 While Lending APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
 
-`LendAPY(token) = BorrowAPY(token) * BorrowUtilization(token) * [1.0 - ReserveFactor(token)]`
+`LendAPY(token) = BorrowAPY(token) * SupplyUtilization(token) * [1.0 - ReserveFactor(token)]`
 
 ### Close Factor
 

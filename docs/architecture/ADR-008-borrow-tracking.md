@@ -12,8 +12,8 @@ Proposed
 
 One of the more computationally expensive operations in Umee is "iterate over all borrows". It is currently necessary on several occasions:
 
-- When calculating borrow utilization (require's a denomination's total borrowed)
-- When accruing interest (dynamic interest requires borrow utilization, and all borrows must be modified)
+- When calculating supply utilization (require's a denomination's total borrowed)
+- When accruing interest (dynamic interest requires supply utilization, and all borrows must be modified)
 - When deriving uToken exchange rates (require's a denomination's total borrowed)
 
 In order to reduce the performance impact of such iteration, `InterestEpoch` was created, so that such calculations only occurred every N blocks (e.g. 100).
@@ -102,7 +102,7 @@ This design change should address our lingering tradeoff between performance and
 
 ### Positive
 
-- Borrow totals and borrow utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
+- Borrow totals and supply utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
 - Periodic functions can now take place every block instead of every `InterestEpoch` blocks
 - Quantities like uToken exchange rates and lend APYs now update instantly to new borrow and lend activity, even between multiple transactions within the same block.
 

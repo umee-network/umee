@@ -91,17 +91,17 @@ type Token struct {
 	// asset can contribute to a user's liquidation threshold (above which they
 	// become eligible for liquidation).
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
-	// The base_borrow_rate defines the base interest rate for borrowing this
+	// The base_borrow_rate defines the minimum interest rate for borrowing this
 	// asset.
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
 	// The kink_borrow_rate defines the interest rate for borrowing this
-	// asset when utilization equals to 'kink_utilization'.
+	// asset when supply utilization equals to 'kink_utilization'.
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
 	// The max_borrow_rate defines the interest rate for borrowing this
-	// asset (seen when utilization is 100%).
+	// asset when supply utilization is 100%.
 	MaxBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_rate" yaml:"max_borrow_rate"`
-	// The kink_utilization defines the value where the kink rate kicks off for
-	// borrow rates.
+	// The kink_utilization defines the supply utilization value where
+	// the dynamic interest rate starts increasing faster.
 	KinkUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization,json=kinkUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization" yaml:"kink_utilization"`
 	// The liquidation_incentive determines the portion of bonus collateral of
 	// a token type liquidators receive as a liquidation reward.
