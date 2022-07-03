@@ -1,4 +1,4 @@
-# ADR 001: uToken Interest Stream
+# ADR 001: uToken Interest
 
 ## Changelog
 
