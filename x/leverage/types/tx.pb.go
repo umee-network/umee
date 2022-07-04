@@ -140,6 +140,7 @@ func (m *MsgWithdrawAsset) GetAmount() types.Coin {
 // MsgAddCollateral represents a lender's request to enable selected
 // uTokens as collateral.
 type MsgAddCollateral struct {
+	// Borrower is the account address adding collateral and the signer of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
@@ -194,6 +195,7 @@ func (m *MsgAddCollateral) GetCoin() types.Coin {
 // MsgRemoveCollateral represents a lender's request to disable selected
 // uTokens as collateral.
 type MsgRemoveCollateral struct {
+	// Borrower is the account address removing collateral and the signer of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
