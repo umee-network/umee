@@ -39,7 +39,7 @@ Additionally, rather than segregating each borrow position with a specific colla
 We define a **borrow limit** rule:
 \__sum of account's borrow positions must be smaller than the account borrow limit_.
 
-Note that the exchange rate of Asset:u-Asset has a dynamic exchange rate that grows with accruing interest - see [ADR-001: Interest Stream](./ADR-001-interest-stream.md).
+Note that the exchange rate of Asset:u-Asset has a dynamic exchange rate that grows with accruing interest - see [ADR-001: uToken Interest](./ADR-001-uToken-interest.md).
 
 In contrast, the exchange rate of collateral:borrowed assets (e.g. `atom:ether`) can only be determined using a price oracle.
 

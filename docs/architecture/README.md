@@ -26,13 +26,9 @@ Note the context/background should be written in the present tense.
 
 ## Table of Contents
 
-### Accepted
+### Implemented
 
-### Rejected
-
-### Proposed
-
-- [ADR-001: Interest Stream](./ADR-001-interest-stream.md)
+- [ADR-001: uToken Interest](./ADR-001-uToken-interest.md)
 - [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md)
 - [ADR-003: Borrow Assets](./ADR-003-borrow-assets.md)
 - [ADR-004: Borrow interest implementation and reserves](./ADR-004-interest-and-reserves.md)
@@ -40,3 +36,7 @@ Note the context/background should be written in the present tense.
 - [ADR-006: Oracle](./ADR-006-oracle.md)
 - [ADR-007: Bad debt](./ADR-007-bad-debt.md)
 - [ADR-008: Borrow tracking](./ADR-008-borrow-tracking.md)
+
+### Accepted
+
+- [ADR-009: Liquidity Mining](./ADR-009-liquidity-mining.md)
