@@ -127,7 +127,7 @@ type Token struct {
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
 	// Maximum allowed collateral supply specifies how much of the token can
-	// be provided in total as a collateral in the system.
+	// be provided in total as a collateral to the system.
 	// Value is provided in pre cent, Allowed values are in [0; 100] range.
 	// 100 means that the token has no restriction. 10 means maximum 10% of total
 	// collateral value can provided by this token.
