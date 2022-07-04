@@ -81,26 +81,6 @@ func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, borrow s
 	return nil
 }
 
-// setCollateralSetting enables or disables a borrower's collateral setting for a single denom
-func (k Keeper) setCollateralSetting(ctx sdk.Context, addr sdk.AccAddress, denom string, enable bool) error {
-	if err := sdk.ValidateDenom(denom); err != nil {
-		return err
-	}
-	if addr.Empty() {
-		return types.ErrEmptyAddress
-	}
-
-	// Enable sets to true; disable removes from KVstore rather than setting false
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateCollateralSettingKey(addr, denom)
-	if enable {
-		store.Set(key, []byte{0x01})
-	} else {
-		store.Delete(key)
-	}
-	return nil
-}
-
 // getInterestScalar gets the interest scalar for a given base token
 // denom. Returns 1.0 if no value is stored.
 func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
