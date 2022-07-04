@@ -70,7 +70,21 @@ Example scenario:
 >
 > Also at week=4, Bob deposits an additional `1000 ATOM`, and receives `996 u/ATOM` using the current exchange rate. His `u/ATOM` balance of 998+996 = `1994 u/ATOM` is worth 1002+1000 = `2002 ATOM`, as the two parts have grown by 0.2% and 0% respectively.
 
-This implementation sacrifices the "1:1 uToken to base asset exchange rate" and "uToken balances grow over time" facts promised in the whitepaper, while maintaining a mathematically identical incentive structure. In exchange, IBC and ERC20 transfer of uTokens becomes possible without stopping interest. A uToken's value increases no matter where it is held, by virtue of the Token:uToken exchange rate.
+This implementation sacrifices the "1:1 uToken to base asset exchange rate" and "uToken balances grow over time" facts promised in the whitepaper, while maintaining a mathematically identical incentive structure.
+
+In exchange, IBC and ERC20 transfer of uTokens becomes possible without stopping interest. A uToken's value increases no matter where it is held, by virtue of the Token:uToken exchange rate.
+
+## Alternatives
+
+> Automatically mint interest uTokens and send to holders
+
+This behavior would match what was described in the whitepaper.
+
+However, it would require that uTokens are not allowed to be sent to other chains via IBC or Gravity Bridge, because we cannot reliably track how balances are split or transferred while on other chains. Minting and sending cross-chain would be unreliable and expensive.
+
+This transfer restriction would oppose our long term vision of "money legos", reducing the utility of uTokens overall.
+
+Even on the native chain, iterating over every uToken balance is inefficient.
 
 ## Consequences
 
