@@ -54,7 +54,8 @@ func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 }
 
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
-// the x/leverage module account currently holds as collateral.
+// the x/leverage module account currently holds as collateral. Non-uTokens and invalid
+// assets return zero.
 func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Int {
 	if !k.IsAcceptedUToken(ctx, denom) {
 		// non-uTokens cannot be collateral
