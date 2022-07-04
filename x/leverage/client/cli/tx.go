@@ -125,6 +125,9 @@ func GetCmdAddCollateral() *cobra.Command {
 				return err
 			}
 			msg := types.NewMsgAddCollateral(clientCtx.GetFromAddress(), coin)
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -157,6 +160,9 @@ func GetCmdRemoveCollateral() *cobra.Command {
 				return err
 			}
 			msg := types.NewMsgRemoveCollateral(clientCtx.GetFromAddress(), coin)
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
