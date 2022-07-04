@@ -549,6 +549,7 @@ func (q Querier) MarketSummary(
 	marketSizeCoin, _ := q.Keeper.GetTotalLoaned(ctx, req.Denom)
 	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
+	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
 
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:        token.SymbolDenom,
@@ -559,6 +560,7 @@ func (q Querier) MarketSummary(
 		MarketSize:         marketSizeCoin.Amount,
 		AvailableBorrow:    availableBorrow,
 		Reserved:           reserved,
+		Collateral:         collateral,
 	}
 
 	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
@@ -566,4 +568,19 @@ func (q Querier) MarketSummary(
 	}
 
 	return &resp, nil
+}
+
+func (q Querier) TotalCollateral(
+	goCtx context.Context,
+	req *types.QueryTotalCollateralRequest,
+) (*types.QueryTotalCollateralResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
+
+	return &types.QueryTotalCollateralResponse{Amount: collateral}, nil
 }

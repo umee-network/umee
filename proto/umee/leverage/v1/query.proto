@@ -135,6 +135,13 @@ service Query {
       returns (QueryMarketSummaryResponse) {
     option (google.api.http).get = "/umee/leverage/v1/market_summary";
   }
+
+  // TotalCollateral returns the total collateral system-wide of a given
+  // uToken denomination.
+  rpc TotalCollateral(QueryTotalCollateralRequest)
+      returns (QueryTotalCollateralResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/total_collateral";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -434,6 +441,25 @@ message QueryMarketSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   string reserved = 9 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  string collateral = 10 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryTotalCollateralRequest defines the request structure for the
+// TotalCollateral gRPC service handler.
+message QueryTotalCollateralRequest {
+  string denom = 1;
+}
+
+// QueryTotalCollateralResponse defines the response structure for the
+// TotalCollateral gRPC service handler.
+message QueryTotalCollateralResponse {
+  string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
