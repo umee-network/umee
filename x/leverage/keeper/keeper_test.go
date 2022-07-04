@@ -1020,7 +1020,7 @@ func (s *IntegrationTestSuite) TestTotalCollateral() {
 	// Uses borrow scenario, because lender possesses collateral
 	_, _ = s.initBorrowScenario()
 
-	// Test zero collateral
+	// Test nonzero collateral
 	collateral = s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
 	s.Require().Equal(sdk.NewInt(1000000000), collateral)
 }
