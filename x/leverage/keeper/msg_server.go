@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -95,10 +94,10 @@ func (s msgServer) WithdrawAsset(
 	return &types.MsgWithdrawAssetResponse{}, nil
 }
 
-func (s msgServer) SetCollateral(
+func (s msgServer) AddCollateral(
 	goCtx context.Context,
-	msg *types.MsgSetCollateral,
-) (*types.MsgSetCollateralResponse, error) {
+	msg *types.MsgAddCollateral,
+) (*types.MsgAddCollateralResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -106,23 +105,21 @@ func (s msgServer) SetCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.SetCollateralSetting(ctx, borrowerAddr, msg.Denom, msg.Enable); err != nil {
+	if err := s.keeper.AddCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"collateral setting set",
+		"collateral added",
 		"borrower", borrowerAddr.String(),
-		"denom", msg.Denom,
-		"enable", strconv.FormatBool(msg.Enable),
+		"amount", msg.Coin.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeSetCollateralSetting,
+			types.EventTypeAddCollateral,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(types.EventAttrDenom, msg.Denom),
-			sdk.NewAttribute(types.EventAttrEnable, strconv.FormatBool(msg.Enable)),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -131,7 +128,44 @@ func (s msgServer) SetCollateral(
 		),
 	})
 
-	return &types.MsgSetCollateralResponse{}, nil
+	return &types.MsgAddCollateralResponse{}, nil
+}
+
+func (s msgServer) RemoveCollateral(
+	goCtx context.Context,
+	msg *types.MsgRemoveCollateral,
+) (*types.MsgRemoveCollateralResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.RemoveCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"collateral removed",
+		"borrower", borrowerAddr.String(),
+		"amount", msg.Coin.String(),
+	)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeRemoveCollateral,
+			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
+			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
+		),
+	})
+
+	return &types.MsgRemoveCollateralResponse{}, nil
 }
 
 func (s msgServer) BorrowAsset(
