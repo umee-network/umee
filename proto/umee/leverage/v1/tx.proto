@@ -38,6 +38,7 @@ service Msg {
 // MsgLendAsset represents a lender's request to lend a base asset type to the
 // module.
 message MsgLendAsset {
+  // Lender is the account address supplying assets and the signer of the message.
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
@@ -45,6 +46,7 @@ message MsgLendAsset {
 // MsgWithdrawAsset represents a lender's request to withdraw lent assets.
 // Amount must be a uToken.
 message MsgWithdrawAsset {
+  // Lender is the account address withdrawing assets and the signer of the message.
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
@@ -68,6 +70,8 @@ message MsgRemoveCollateral {
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
 // from the module.
 message MsgBorrowAsset {
+  // Borrower is the account address taking a loan and the signer
+  // of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
@@ -75,6 +79,8 @@ message MsgBorrowAsset {
 // MsgRepayAsset represents a lender's request to repay a borrowed base asset
 // type to the module.
 message MsgRepayAsset {
+  // Borrower is the account address repaying a loan and the signer
+  // of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
@@ -82,6 +88,8 @@ message MsgRepayAsset {
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
 // borrowed base asset type to the module in exchange for collateral reward.
 message MsgLiquidate {
+  // Liquidator is the account address performing a liquidation and the signer
+  // of the message.
   string                   liquidator = 1;
   string                   borrower   = 2;
   cosmos.base.v1beta1.Coin repayment  = 3 [(gogoproto.nullable) = false];

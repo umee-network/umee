@@ -32,6 +32,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // MsgLendAsset represents a lender's request to lend a base asset type to the
 // module.
 type MsgLendAsset struct {
+	// Lender is the account address supplying assets and the signer of the message.
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
@@ -86,6 +87,7 @@ func (m *MsgLendAsset) GetAmount() types.Coin {
 // MsgWithdrawAsset represents a lender's request to withdraw lent assets.
 // Amount must be a uToken.
 type MsgWithdrawAsset struct {
+	// Lender is the account address withdrawing assets and the signer of the message.
 	Lender string     `protobuf:"bytes,1,opt,name=lender,proto3" json:"lender,omitempty"`
 	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
@@ -250,6 +252,8 @@ func (m *MsgRemoveCollateral) GetCoin() types.Coin {
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
 // from the module.
 type MsgBorrowAsset struct {
+	// Borrower is the account address taking a loan and the signer
+	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
@@ -304,6 +308,8 @@ func (m *MsgBorrowAsset) GetAmount() types.Coin {
 // MsgRepayAsset represents a lender's request to repay a borrowed base asset
 // type to the module.
 type MsgRepayAsset struct {
+	// Borrower is the account address repaying a loan and the signer
+	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
@@ -358,6 +364,8 @@ func (m *MsgRepayAsset) GetAmount() types.Coin {
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
 // borrowed base asset type to the module in exchange for collateral reward.
 type MsgLiquidate struct {
+	// Liquidator is the account address performing a liquidation and the signer
+	// of the message.
 	Liquidator string     `protobuf:"bytes,1,opt,name=liquidator,proto3" json:"liquidator,omitempty"`
 	Borrower   string     `protobuf:"bytes,2,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Repayment  types.Coin `protobuf:"bytes,3,opt,name=repayment,proto3" json:"repayment"`
