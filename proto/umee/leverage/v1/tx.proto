@@ -52,6 +52,7 @@ message MsgWithdrawAsset {
 // MsgAddCollateral represents a lender's request to enable selected
 // uTokens as collateral.
 message MsgAddCollateral {
+  // Borrower is the account address adding collateral and the signer of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
@@ -59,6 +60,7 @@ message MsgAddCollateral {
 // MsgRemoveCollateral represents a lender's request to disable selected
 // uTokens as collateral.
 message MsgRemoveCollateral {
+  // Borrower is the account address removing collateral and the signer of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
