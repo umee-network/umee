@@ -519,7 +519,7 @@ func (k Keeper) LiquidateBorrow(
 		}
 	}
 
-	// Detect bad debt (collateral == 0 after reward) for repayment by reserves next InterestEpoch
+	// Detect bad debt (collateral == 0 after reward) for repayment by protocol reserves (see ADR-004)
 	if collateral.Sub(sdk.NewCoins(reward)).IsZero() {
 		for _, coin := range borrowed {
 			// Mark repayment denom as bad debt only if some debt remains after
