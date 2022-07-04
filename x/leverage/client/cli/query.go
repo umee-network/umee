@@ -35,7 +35,6 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralValue(),
-		GetCmdQueryCollateralSetting(),
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryLendAPY(),
 		GetCmdQueryBorrowAPY(),
@@ -276,40 +275,6 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 			}
 
 			resp, err := queryClient.ReserveAmount(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryCollateralSetting creates a Cobra command to query for the collateral
-// setting of a specific token denom for an address.
-func GetCmdQueryCollateralSetting() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "collateral-setting [addr] [denom]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Query for the collateral setting of a specific denom for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryCollateralSettingRequest{
-				Address: args[0],
-				Denom:   args[1],
-			}
-
-			resp, err := queryClient.CollateralSetting(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

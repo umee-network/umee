@@ -11,27 +11,28 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 ## Contents
 
 1. **[Concepts](01_concepts.md)**
-    - [Accepted Assets](01_concepts.md#Accepted-Assets)
-        - [uTokens](01_concepts.md#uTokens)
-    - [Lending and Borrowing](01_concepts.md#Lending-and-Borrowing)
-    - [Reserves](01_concepts.md#Reserves)
-    - [Liquidation](01_concepts.md#Liquidation)
-    - Important Derived Values:
-        - [Adjusted Borrow Amounts](01_concepts.md#Adjusted-Borrow-Amounts)
-        - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
-        - [Supply Utilization](01_concepts.md#Supply-Utilization)
-        - [Borrow Limit](01_concepts.md#Borrow-Limit)
-        - [Liquidation Limit](01_concepts.md#Liquidation-Limit)
-        - [Borrow APY](01_concepts.md#Borrow-APY)
-        - [Lending APY](01_concepts.md#Lending-APY)
-        - [Close Factor](01_concepts.md#Close-Factor)
-        - [Market Size](01_concepts.md#Market-Size)
+   - [Accepted Assets](01_concepts.md#Accepted-Assets)
+     - [uTokens](01_concepts.md#uTokens)
+   - [Lending and Borrowing](01_concepts.md#Lending-and-Borrowing)
+   - [Reserves](01_concepts.md#Reserves)
+   - [Liquidation](01_concepts.md#Liquidation)
+   - Important Derived Values:
+     - [Adjusted Borrow Amounts](01_concepts.md#Adjusted-Borrow-Amounts)
+     - [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate)
+     - [Supply Utilization](01_concepts.md#Supply-Utilization)
+     - [Borrow Limit](01_concepts.md#Borrow-Limit)
+     - [Liquidation Limit](01_concepts.md#Liquidation-Limit)
+     - [Borrow APY](01_concepts.md#Borrow-APY)
+     - [Lending APY](01_concepts.md#Lending-APY)
+     - [Close Factor](01_concepts.md#Close-Factor)
+     - [Market Size](01_concepts.md#Market-Size)
 2. **[State](02_state.md)**
 3. **[Queries](03_queries.md)**
 4. **[Messages](04_messages.md)**
     - [MsgLendAsset](04_messages.md#MsgLendAsset)
     - [MsgWithdrawAsset](04_messages.md#MsgWithdrawAsset)
-    - [MsgSetCollateral](04_messages.md#MsgSetCollateral)
+    - [MsgAddCollateral](04_messages.md#MsgAddCollateral)
+    - [MsgRemoveCollateral](04_messages.md#MsgRemoveCollateral)
     - [MsgBorrowAsset](04_messages.md#MsgBorrowAsset)
     - [MsgRepayAsset](04_messages.md#MsgRepayAsset)
     - [MsgLiquidate](04_messages.md#MsgLiquidate)

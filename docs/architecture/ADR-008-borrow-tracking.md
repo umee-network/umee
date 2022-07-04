@@ -12,9 +12,9 @@ Proposed
 
 One of the more computationally expensive operations in Umee is "iterate over all borrows". It is currently necessary on several occasions:
 
-- When calculating supply utilization (require's a denomination's total borrowed)
+- When calculating supply utilization (requires total borrowed tokens)
 - When accruing interest (dynamic interest requires supply utilization, and all borrows must be modified)
-- When deriving uToken exchange rates (require's a denomination's total borrowed)
+- When deriving uToken exchange rates (requires total borrowed tokens)
 
 In order to reduce the performance impact of such iteration, `InterestEpoch` was created, so that such calculations only occurred every N blocks (e.g. 100).
 
@@ -26,7 +26,7 @@ Chain state will now store an `InterestScalar` for each accepted asset denom, wh
 
 Instead of directly storing `sdk.Int BorrowedAmount` for each of a user's borrowed denoms, state records their `sdk.Dec AdjustedBorrow`, respecting the following definition:
 
-> `AdjustedBorrow(denom, address)` * `InterestScalar(denom)` = `BorrowedAmount(denom, address)`
+> `AdjustedBorrow(denom, address)` \* `InterestScalar(denom)` = `BorrowedAmount(denom, address)`
 
 State will additionally store a value `TotalAdjustedBorrows` for each denom, which tracks the sum of all users' adjusted borrows in the chosen denomination.
 It must increase or decrease every time assets are borrowed or repaid (including bad debt repayment), but is not modified when interest accrues.
@@ -78,7 +78,7 @@ The following example scenario should help clarify the meaning of the `AdjustedB
 >
 > User `Alice` borrows `1000 uumee`. This information is stored in state as `AdjustedBorrow(alice,"uumee") = 1000.000`, because adjusted borrow amount is real borrow amount divided by interest scalar. As a result, `TotalAdjustedBorrow("uumee") = 1000.000`. Interest scalar is unchanged by borrowing.
 >
-> User `Bob` also borrows `2000 uumee`, which is stored as  `AdjustedBorrow(bob,"uumee") = 2000.000`. As a result, `TotalAdjustedBorrow("uumee") = 3000.000`. Interest scalar is unchanged.
+> User `Bob` also borrows `2000 uumee`, which is stored as `AdjustedBorrow(bob,"uumee") = 2000.000`. As a result, `TotalAdjustedBorrow("uumee") = 3000.000`. Interest scalar is unchanged.
 >
 > Suppose that the interest rate for `uumee` borrows works out to be `0.0003% per block`. On the next EndBlock, `InterestScalar("uumee") *= 1.000003`. Both `AdjustedBorrow` values and `TotalAdjustedBorrow` are unchanged.
 >
@@ -102,7 +102,7 @@ This design change should address our lingering tradeoff between performance and
 
 ### Positive
 
-- Borrow totals and supply utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
+- Total borrows and supply utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
 - Periodic functions can now take place every block instead of every `InterestEpoch` blocks
 - Quantities like uToken exchange rates and lend APYs now update instantly to new borrow and lend activity, even between multiple transactions within the same block.
 
@@ -113,5 +113,6 @@ This design change should address our lingering tradeoff between performance and
 ## References
 
 The implementations discussed in some previous ADRs are partially superseded by this decision:
+
 - [ADR-002: Borrow Assets](./ADR-002-borrow-assets.md)
 - [ADR-004: Interest and Reserves](./ADR-004-interest-and-reserves.md)

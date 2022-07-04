@@ -54,11 +54,11 @@ func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
-	supplyUtilization := k.SupplyUtilization(ctx, denom)
+	utilization := k.SupplyUtilization(ctx, denom)
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
 	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
-	return borrowRate.Mul(supplyUtilization).Mul(sdk.OneDec().Sub(reduction))
+	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
 // AccrueAllInterest is called by EndBlock to update borrow positions.

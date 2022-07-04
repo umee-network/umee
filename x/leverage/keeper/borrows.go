@@ -57,15 +57,13 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
 }
 
-// SupplyUtilization derives the current supply utilization of a token denom.
+// SupplyUtilization calculates the current supply utilization of a token denom.
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
 	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
 	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
 	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount.ToDec()
-
-	// Derive effective token supply
 	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
 
 	// This edge case can be safely interpreted as 100% utilization.
@@ -73,7 +71,6 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.OneDec()
 	}
 
-	// Derive supply utilization
 	return totalBorrowed.Quo(tokenSupply)
 }
 

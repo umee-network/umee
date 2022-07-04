@@ -92,7 +92,7 @@ message Token {
   ];
 
   // The max_borrow_rate defines the interest rate for borrowing this
-  // asset when supply utilization is 100%.
+  // asset (seen when supply utilization is 100%).
   string max_borrow_rate = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
