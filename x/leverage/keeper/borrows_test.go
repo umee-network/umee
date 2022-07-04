@@ -120,7 +120,7 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 
 func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	// unregistered denom (0 borrowed and 0 lending pool is considered 100%)
-	utilization := s.tk.ComputeBorrowUtilization(s.ctx, "abcd")
+	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
 	s.Require().Equal(sdk.OneDec(), utilization)
 
 	// creates account which has loaned 1000 uumee, and borrowed 0 uumee
@@ -130,21 +130,21 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	//   utilization = (Total Borrowed / (Total Borrowed + Module Balance - Reserved Amount))
 
 	// 0% utilization (0 / 0+1000-0)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.ZeroDec(), utilization)
 
 	// lender borrows 200 uumee, reducing module account to 800 uumee
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
 
 	// 20% utilization (200 / 200+800-0)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.2"), utilization)
 
 	// artificially reserve 200 uumee
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 200)))
 
 	// 25% utilization (200 / 200+800-200)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.25"), utilization)
 
 	// Setting umee collateral weight to 1.0 to allow lender to borrow heavily
@@ -158,28 +158,28 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))
 
 	// 100% utilization (800 / 800+200-200))
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set lender borrow to 1200 umee
 	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1200)))
 
 	// still 100% utilization (1200 / 1200+200-200)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 800 uumee
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 800)))
 
 	// edge case interpreted as 100% utilization (1200 / 1200+200-800)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 4000 uumee
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 4000)))
 
 	// impossible case interpreted as 100% utilization (1200 / 1200+200-4000)
-	utilization = s.tk.ComputeBorrowUtilization(s.ctx, umeeDenom)
+	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 }
 

@@ -29,4 +29,5 @@ var (
 	ErrLendNotAllowed          = sdkerrors.Register(ModuleName, 1119, "lending of asset disabled")
 	ErrBorrowNotAllowed        = sdkerrors.Register(ModuleName, 1120, "borrowing of asset disabled")
 	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
+	ErrCollateralWeightZero    = sdkerrors.Register(ModuleName, 1122, "token collateral weight is zero")
 )

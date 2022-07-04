@@ -35,9 +35,6 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			}
 			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
-		case bytes.Equal(prefixA, types.KeyPrefixCollateralSetting):
-			return fmt.Sprintf("%v\n%v", kvA, kvB) // it is bytes: []byte{0x01}
-
 		case bytes.Equal(prefixA, types.KeyPrefixCollateralAmount):
 			var amountA, amountB sdk.Int
 			if err := amountA.Unmarshal(kvA.Value); err != nil {

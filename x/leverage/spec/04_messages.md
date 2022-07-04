@@ -34,22 +34,33 @@ The following additional failures are only possible for collateral-enabled _uTok
 - Withdrawing the required uToken collateral would reduce `lender`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
-## MsgSetCollateral
+## MsgAddCollateral
 
-A user enables or disables a uToken denomination as collateral for their account.
+A user adds some uTokens from their balance to the module as collateral.
 
 ```protobuf
-message MsgSetCollateral {
-  string borrower = 1;
-  string denom = 2;
-  bool   enable = 3;
+message MsgAddCollateral {
+  string                   lender = 1;
+  cosmos.base.v1beta1.Coin amount = 2;
 }
 ```
 
 The message will fail under the following conditions:
-- `denom` is not a valid uToken
+- Insufficient uTokens in wallet
 
-The following additional failures are only possible for collateral-enabled _uTokens_
+## MsgRemoveCollateral
+
+A user moves some uTokens from their collateral back to their balance.
+
+```protobuf
+message MsgRemoveCollateral {
+  string                   lender = 1;
+  cosmos.base.v1beta1.Coin amount = 2;
+}
+```
+
+The message will fail under the following conditions:
+- Insufficient uTokens in collateral
 - Disabling the required _uTokens_ as collateral would reduce `borrower`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
