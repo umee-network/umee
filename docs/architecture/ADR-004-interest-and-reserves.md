@@ -37,14 +37,13 @@ When accruing interest, the borrowed amount (`sdk.Int`) must be increased for ea
 
 ### Dynamic Borrow Interest Rates
 
-Borrow interest rates are dynamic. They are calculated using the lending pool's current collateral utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
+Borrow interest rates are dynamic. They are calculated using the lending pool's current supply utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
 ```go
-BaseAPY = sdk.NewDec("0.02") // 2%
+BaseAPY = sdk.NewDec("0.02")
 KinkAPY = sdk.NewDec("0.2")
 MaxAPY = sdk.NewDec("1.0")
-KinkCollateralUtilization = sdk.NewDec("1")
-MaxCollateralUtilization = sdk.NewDec("20")  // 5% of the underlying token is available for redeem
+KinkUtilization = sdk.NewDec("0.8")
 ```
 
 Each token-specific parameter will be stored in the `Token` registry.
@@ -56,24 +55,16 @@ The initial interest rate model, based on [Compound's JumpRateModelV2](https://c
 > The kink at `KinkUtilization` utilization has interest rate `KinkInterest`
 > At 100% utilization, the interest rate is `MaxInterest`
 
-We modify the Compound formula to use collateral utilization rather than supply utilization, and interpolate over the collateral utilization to compute the borrow interest rate:
+The `x/leverage` module keeper will contain a function which derives the current interest rate of an asset type:
 
 ```go
-func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) (sdk.Dec, error) {
-    ts := k.GetTokenSettings(ctx, denom)
-
-    u := k.CollateralUtilization(ctx, denom)
-    if u > ts.Kink {
-        xMin := ts.Kink
-        xMax := ts.MaxCollateralUtilization
-        return interpolate(u, xmin, ts.BaseBorrowRate, xMax, ts.MaxBorrowRate)
-    }
-
-    xMin := 0
-    xMax := ts.Kink
-    return interpolate(u, xMin, ts.BaseBorrowRate, xMax, ts.KinkBorrowRate)
+func (k Keeper) DeriveInterestRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
+    // Implementation must calculate the denom's borrowing utilization
+    // then calculate and return annual interest rate as a decimal.
 }
 ```
+
+We modify the Compound formula to use collateral utilization rather than supply utilization, and interpolate over the collateral utilization to compute the borrow interest rate:
 
 ### Accruing Interest
 
