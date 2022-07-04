@@ -31,7 +31,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // MsgAggregateExchangeRatePrevote represents a message to submit an aggregate
 // exchange rate prevote.
 type MsgAggregateExchangeRatePrevote struct {
-	Hash      string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty" yaml:"hash"`
+	Hash string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty" yaml:"hash"`
+	// Feeder is the author and the signer of the message.
 	Feeder    string `protobuf:"bytes,2,opt,name=feeder,proto3" json:"feeder,omitempty" yaml:"feeder"`
 	Validator string `protobuf:"bytes,3,opt,name=validator,proto3" json:"validator,omitempty" yaml:"validator"`
 }
@@ -114,8 +115,9 @@ var xxx_messageInfo_MsgAggregateExchangeRatePrevoteResponse proto.InternalMessag
 type MsgAggregateExchangeRateVote struct {
 	Salt          string `protobuf:"bytes,1,opt,name=salt,proto3" json:"salt,omitempty" yaml:"salt"`
 	ExchangeRates string `protobuf:"bytes,2,opt,name=exchange_rates,json=exchangeRates,proto3" json:"exchange_rates,omitempty" yaml:"exchange_rates"`
-	Feeder        string `protobuf:"bytes,3,opt,name=feeder,proto3" json:"feeder,omitempty" yaml:"feeder"`
-	Validator     string `protobuf:"bytes,4,opt,name=validator,proto3" json:"validator,omitempty" yaml:"validator"`
+	// Feeder is the author and the signer of the message.
+	Feeder    string `protobuf:"bytes,3,opt,name=feeder,proto3" json:"feeder,omitempty" yaml:"feeder"`
+	Validator string `protobuf:"bytes,4,opt,name=validator,proto3" json:"validator,omitempty" yaml:"validator"`
 }
 
 func (m *MsgAggregateExchangeRateVote) Reset()         { *m = MsgAggregateExchangeRateVote{} }
@@ -192,6 +194,7 @@ var xxx_messageInfo_MsgAggregateExchangeRateVoteResponse proto.InternalMessageIn
 // MsgDelegateFeedConsent represents a message to delegate oracle voting rights
 // to another address.
 type MsgDelegateFeedConsent struct {
+	// Operator is the author and the signer of the message.
 	Operator string `protobuf:"bytes,1,opt,name=operator,proto3" json:"operator,omitempty" yaml:"operator"`
 	Delegate string `protobuf:"bytes,2,opt,name=delegate,proto3" json:"delegate,omitempty" yaml:"delegate"`
 }
