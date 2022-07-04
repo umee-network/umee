@@ -579,8 +579,6 @@ func (q Querier) TotalCollateral(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
-
 	return &types.QueryTotalCollateralResponse{Amount: collateral}, nil
 }

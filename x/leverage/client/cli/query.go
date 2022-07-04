@@ -705,11 +705,9 @@ func GetCmdQueryTotalCollateral() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryTotalCollateralRequest{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
 			if err != nil {
 				return err

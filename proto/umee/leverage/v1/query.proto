@@ -140,7 +140,7 @@ service Query {
   // uToken denomination.
   rpc TotalCollateral(QueryTotalCollateralRequest)
       returns (QueryTotalCollateralResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/total_collateral";
+    option (google.api.http).get = "/umee/leverage/v1/total_collateral/{denom}";
   }
 }
 
