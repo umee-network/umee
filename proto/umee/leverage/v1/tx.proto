@@ -34,6 +34,8 @@ service Msg {
 // MsgLendAsset represents a lender's request to lend a base asset type to the
 // module.
 message MsgLendAsset {
+  // Lender is an account address providing lending capability and the signer
+  // of the message.
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
@@ -41,6 +43,8 @@ message MsgLendAsset {
 // MsgWithdrawAsset represents a lender's request to withdraw lent assets.
 // Amount must be a uToken.
 message MsgWithdrawAsset {
+  // Lender is an account address updating lending capability and the signer
+  // of the message.
   string                   lender = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
@@ -48,6 +52,8 @@ message MsgWithdrawAsset {
 // MsgSetCollateral represents a lender's request to enable or disable
 // a uToken type in their possession as collateral.
 message MsgSetCollateral {
+  // Borrower is an account address setting a collateral and the signer
+  // of the message.
   string borrower = 1;
   string denom    = 2;
   bool   enable   = 3;
@@ -56,6 +62,8 @@ message MsgSetCollateral {
 // MsgBorrowAsset represents a lender's request to borrow a base asset type
 // from the module.
 message MsgBorrowAsset {
+  // Borrower is an account address taking a loan and the signer
+  // of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
@@ -63,6 +71,8 @@ message MsgBorrowAsset {
 // MsgRepayAsset represents a lender's request to repay a borrowed base asset
 // type to the module.
 message MsgRepayAsset {
+  // Borrower is an account address repaying a loan and the signer
+  // of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
@@ -70,6 +80,8 @@ message MsgRepayAsset {
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
 // borrowed base asset type to the module in exchange for collateral reward.
 message MsgLiquidate {
+  // Liquidator is an account address performing a liquidation and the signer
+  // of the message.
   string                   liquidator = 1;
   string                   borrower   = 2;
   cosmos.base.v1beta1.Coin repayment  = 3 [(gogoproto.nullable) = false];
