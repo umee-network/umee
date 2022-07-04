@@ -112,9 +112,13 @@ func TestToken_Validate(t *testing.T) {
 	invalidLiquidationIncentive := validToken()
 	invalidLiquidationIncentive.LiquidationIncentive = sdk.MustNewDecFromStr("-0.05")
 
-	invalidBlacklisted := validToken()
-	invalidBlacklisted.EnableMsgBorrow = false
-	invalidBlacklisted.Blacklist = true
+	invalidBlacklistedBorrow := validToken()
+	invalidBlacklistedBorrow.EnableMsgLend = false
+	invalidBlacklistedBorrow.Blacklist = true
+
+	invalidBlacklistedLend := validToken()
+	invalidBlacklistedLend.EnableMsgBorrow = false
+	invalidBlacklistedLend.Blacklist = true
 
 	invalidMaxCollateralSupply := validToken()
 	invalidMaxCollateralSupply.MaxCollateralSupply = 101
@@ -169,7 +173,11 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidLiquidationIncentive,
 			expectErr: true},
 		"blacklisted but lend enabled": {
-			input:     invalidBlacklisted,
+			input:     invalidBlacklistedLend,
+			expectErr: true,
+		},
+		"blacklisted but borrow enabled": {
+			input:     invalidBlacklistedBorrow,
 			expectErr: true,
 		},
 		"invalid max collateral supply": {
