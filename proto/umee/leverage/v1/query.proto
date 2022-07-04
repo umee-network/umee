@@ -89,13 +89,6 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/reserve_amount";
   }
 
-  // CollateralSetting queries a borrower's collateral setting (enabled or
-  // disabled) for a specified uToken denomination.
-  rpc CollateralSetting(QueryCollateralSettingRequest)
-      returns (QueryCollateralSettingResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/collateral_setting";
-  }
-
   // Collateral queries the collateral amount of a user by token denomination.
   // If the denomination is not supplied, all of the user's collateral tokens
   // are returned.
@@ -332,19 +325,6 @@ message QueryReserveAmountResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-}
-
-// QueryCollateralSettingsRequest defines the request structure for the
-// CollateralSetting gRPC service handler.
-message QueryCollateralSettingRequest {
-  string address = 1;
-  string denom   = 2;
-}
-
-// QueryCollateralSettingsResponse defines the response structure for the
-// CollateralSetting gRPC service handler.
-message QueryCollateralSettingResponse {
-  bool enabled = 1;
 }
 
 // QueryCollateralRequest defines the request structure for the Collateral gRPC
