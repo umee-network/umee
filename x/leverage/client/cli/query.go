@@ -44,6 +44,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryMarketSummary(),
+		GetCmdQueryTotalCollateral(),
 	)
 
 	return cmd
@@ -677,6 +678,37 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 			req := &types.QueryLiquidationTargetsRequest{}
 
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryTotalCollateral creates a Cobra command to query for the
+// reserved amount of a specific token.
+func GetCmdQueryTotalCollateral() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "total-collateral [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the amount of collateral of a uToken denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryTotalCollateralRequest{
+				Denom: args[0],
+			}
+			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

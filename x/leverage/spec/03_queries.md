@@ -11,6 +11,7 @@ Queries on accepted asset types:
 - **Borrow APY** queries for the [Borrow APY](01_concepts.md#Borrow-APY) of a specified denomination.
 - **Lend APY** queries for the [Lending APY](01_concepts.md#Lending-APY) of a specified denomination.
 - **Reserve Amount** queries for the amount reserved of a specified denomination.
+- **Total Collateral** queries for the total collateral amount of a specified uToken denomination.
 - **Exchange Rate** queries the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) of a given uToken denomination.
 - **Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination.
 - **Token Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination, but denominated in base tokens instead of USD. This amounts to _total loaned by all lenders + interest accrued._
