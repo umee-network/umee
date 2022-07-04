@@ -71,6 +71,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
 
+### API Breaking
+
+- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
 ### Features
