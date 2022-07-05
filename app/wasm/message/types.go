@@ -16,6 +16,9 @@ const (
 	// AssignedMsgAddCollateral represents the call to enable an amount of
 	// selected uTokens as collateral.
 	AssignedMsgAddCollateral
+	// AssignedMsgRemoveCollateral represents the call to disable amount of
+	// an selected uTokens as collateral.
+	AssignedMsgRemoveCollateral
 	// AssignedMsgBorrowAsset represents the call to borrowing coins from the
 	// capital facility.
 	AssignedMsgBorrowAsset
@@ -38,6 +41,8 @@ type UmeeMsg struct {
 	WithdrawAsset *lvtypes.MsgWithdrawAsset `json:"withdraw_asset,omitempty"`
 	// Used to enable an amount of selected uTokens as collateral.
 	AddCollateral *lvtypes.MsgAddCollateral `json:"add_collateral,omitempty"`
+	// Used to disable amount of an selected uTokens as collateral.
+	RemoveCollateral *lvtypes.MsgRemoveCollateral `json:"remove_collateral,omitempty"`
 	// Used to borrowing coins from the capital facility.
 	BorrowAsset *lvtypes.MsgBorrowAsset `json:"borrow_asset,omitempty"`
 	// Used to repaying borrowed coins to the capital facility.

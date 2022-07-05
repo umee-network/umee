@@ -46,6 +46,8 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 		return smartcontractMessage.HandleWithdrawAsset(ctx, plugin.leverageMsgServer)
 	case AssignedMsgAddCollateral:
 		return smartcontractMessage.HandleAddCollateral(ctx, plugin.leverageMsgServer)
+	case AssignedMsgRemoveCollateral:
+		return smartcontractMessage.HandleRemoveCollateral(ctx, plugin.leverageMsgServer)
 	case AssignedMsgBorrowAsset:
 		return smartcontractMessage.HandleBorrowAsset(ctx, plugin.leverageMsgServer)
 	case AssignedMsgRepayAsset:
