@@ -10,7 +10,7 @@ Proposed
 
 ## Abstract
 
-Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` supplying APY for supplying base assets.
+Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` APY for supplying base assets.
 
 For example, a user might "lock" some of their `u/ATOM` collateral held in the leverage module for 14 days, earning an additional 12% APY of the collateral's value, received as `UMEE` tokens.
 

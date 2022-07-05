@@ -43,7 +43,7 @@ message MsgSupply {
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawAsset represents a user's request to withdraw lent assets.
+// MsgWithdrawAsset represents a user's request to withdraw supplied assets.
 // Amount must be a uToken.
 message MsgWithdrawAsset {
   // Supplier is the account address withdrawing assets and the signer of the message.

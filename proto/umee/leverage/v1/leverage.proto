@@ -135,8 +135,8 @@ message Token {
   // This should only be used to eliminate an asset completely. A blacklisted
   // asset is treated as though its oracle price is zero, and thus ignored by
   // calculations such as collateral value and borrow limit. Can still be repaid
-  // or withdrawn, but not liquidated. A blacklisted token must have enable_supply
-  // and enable_borrow set to false. Such tokens can be safely removed from the
+  // or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
+  // and enable_msg_borrow set to false. Such tokens can be safely removed from the
   // oracle and price feeder as well.
   bool blacklist = 14;
 }
