@@ -54,8 +54,8 @@ type (
 )
 
 func NewOracleClient(
-	logger zerolog.Logger,
 	ctx context.Context,
+	logger zerolog.Logger,
 	chainID string,
 	keyringBackend string,
 	keyringDir string,
