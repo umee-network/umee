@@ -52,11 +52,11 @@ As an alternative, transfer of uTokens via IBC could be forbidden or unsupported
 
 - Requirement: Umee chain stores uAsset <-> Asset exchange rate for each asset (not 1:1)
 
-In this implementation, for each whitelisted Cosmos asset type, the Umee chain stores an "exchange rate" between the base asset and its associated uToken. The exchange rate starts equal to 1, and increases whenever interest would have been applied to uToken balances in the original implementation. Whenever a lender deposits or withdraws base assets for uToken, this exchange rate is used.
+In this implementation, for each whitelisted Cosmos asset type, the Umee chain stores an "exchange rate" between the base asset and its associated uToken. The exchange rate starts equal to 1, and increases whenever interest would have been applied to uToken balances in the original implementation. Whenever a user supplies or withdraws base assets for uToken, this exchange rate is used.
 
 Example scenario:
 
-> Two lenders Alice and Bob provide Atoms to the asset facility at different times and earn interest. Assume that for the duration of this scenario, the interest on deposited uAtoms is 0.1 percent per week (or 1 atom per week per 1000 deposited).
+> Two users Alice and Bob supply Atoms to the asset facility at different times and earn interest. Assume that for the duration of this scenario, the interest on deposited uAtoms is 0.1 percent per week (or 1 atom per week per 1000 deposited).
 >
 > The asset facility starts with 0 atoms in custody and 0 uAtoms in circulation. The exchange rate of Atom:uAtom starts at 1.
 >

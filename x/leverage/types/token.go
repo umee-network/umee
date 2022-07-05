@@ -74,13 +74,13 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
 	}
 
-	// Blacklisted assets cannot have borrow or lend enabled
+	// Blacklisted assets cannot have borrow or supply enabled
 	if t.Blacklist {
 		if t.EnableMsgBorrow {
 			return fmt.Errorf("blacklisted assets cannot have borrowing enabled")
 		}
-		if t.EnableMsgLend {
-			return fmt.Errorf("blacklisted assets cannot have lending enabled")
+		if t.EnableMsgSupply {
+			return fmt.Errorf("blacklisted assets cannot have supplying enabled")
 		}
 	}
 
@@ -91,10 +91,10 @@ func (t Token) Validate() error {
 	return nil
 }
 
-// AssertLendEnabled returns an error if a token does not exist or cannot be lent.
-func (t Token) AssertLendEnabled() error {
-	if !t.EnableMsgLend {
-		return sdkerrors.Wrap(ErrLendNotAllowed, t.BaseDenom)
+// AssertSupplyEnabled returns an error if a token does not exist or cannot be supplied.
+func (t Token) AssertSupplyEnabled() error {
+	if !t.EnableMsgSupply {
+		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)
 	}
 	return nil
 }

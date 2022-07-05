@@ -76,7 +76,7 @@ func (m *Params) XXX_DiscardUnknown() {
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
 // Token defines a token, along with its capital metadata, in the Umee capital
-// facility that can be loaned and borrowed.
+// facility that can be supplied and borrowed.
 type Token struct {
 	// The base_denom defines the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
@@ -110,10 +110,10 @@ type Token struct {
 	// list of allowed tokens.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
 	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows lending and setting a collateral using this token. Note that
-	// withdrawing is always enabled. Disabling lending would be one step in
+	// Allows supplying for lending or collateral using this token. Note that
+	// withdrawing is always enabled. Disabling supplying would be one step in
 	// phasing out an asset type.
-	EnableMsgLend bool `protobuf:"varint,12,opt,name=enable_msg_lend,json=enableMsgLend,proto3" json:"enable_msg_lend,omitempty" yaml:"enable_msg_lend"`
+	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
 	// Allows borrowing of this token. Note that repaying is always enabled.
 	// Disabling borrowing would be one step in phasing out an asset type, but
 	// could also be used from the start for asset types meant to be collateral
@@ -122,8 +122,8 @@ type Token struct {
 	// This should only be used to eliminate an asset completely. A blacklisted
 	// asset is treated as though its oracle price is zero, and thus ignored by
 	// calculations such as collateral value and borrow limit. Can still be repaid
-	// or withdrawn, but not liquidated. A blacklisted token must have enable_lend
-	// and enable_borrow set to false. Such tokens can be safely removed from the
+	// or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
+	// and enable_msg_borrow set to false. Such tokens can be safely removed from the
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
 	// Maximum collateral share specifies how much of the
@@ -188,9 +188,9 @@ func (m *Token) GetExponent() uint32 {
 	return 0
 }
 
-func (m *Token) GetEnableMsgLend() bool {
+func (m *Token) GetEnableMsgSupply() bool {
 	if m != nil {
-		return m.EnableMsgLend
+		return m.EnableMsgSupply
 	}
 	return false
 }
@@ -329,7 +329,7 @@ func (this *Token) Equal(that interface{}) bool {
 	if this.Exponent != that1.Exponent {
 		return false
 	}
-	if this.EnableMsgLend != that1.EnableMsgLend {
+	if this.EnableMsgSupply != that1.EnableMsgSupply {
 		return false
 	}
 	if this.EnableMsgBorrow != that1.EnableMsgBorrow {
@@ -451,9 +451,9 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x68
 	}
-	if m.EnableMsgLend {
+	if m.EnableMsgSupply {
 		i--
-		if m.EnableMsgLend {
+		if m.EnableMsgSupply {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -624,7 +624,7 @@ func (m *Token) Size() (n int) {
 	if m.Exponent != 0 {
 		n += 1 + sovLeverage(uint64(m.Exponent))
 	}
-	if m.EnableMsgLend {
+	if m.EnableMsgSupply {
 		n += 2
 	}
 	if m.EnableMsgBorrow {
@@ -1217,7 +1217,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			}
 		case 12:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgLend", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgSupply", wireType)
 			}
 			var v int
 			for shift := uint(0); ; shift += 7 {
@@ -1234,7 +1234,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-			m.EnableMsgLend = bool(v != 0)
+			m.EnableMsgSupply = bool(v != 0)
 		case 13:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgBorrow", wireType)

@@ -33,7 +33,7 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				MaxBorrowRate:        sdk.NewDec(21),
 				KinkUtilization:      sdk.MustNewDecFromStr("0.25"),
 				LiquidationIncentive: sdk.NewDec(88),
-				EnableMsgLend:        true,
+				EnableMsgSupply:      true,
 				EnableMsgBorrow:      true,
 				Blacklist:            false,
 			},
@@ -53,7 +53,7 @@ registry:
       liquidation_incentive: "88.000000000000000000"
       symbol_denom: umee
       exponent: 6
-      enable_msg_lend: true
+      enable_msg_supply: true
       enable_msg_borrow: true
       blacklist: false
 `
@@ -113,12 +113,12 @@ func TestToken_Validate(t *testing.T) {
 	invalidLiquidationIncentive.LiquidationIncentive = sdk.MustNewDecFromStr("-0.05")
 
 	invalidBlacklistedBorrow := validToken()
-	invalidBlacklistedBorrow.EnableMsgLend = false
+	invalidBlacklistedBorrow.EnableMsgBorrow = false
 	invalidBlacklistedBorrow.Blacklist = true
 
-	invalidBlacklistedLend := validToken()
-	invalidBlacklistedLend.EnableMsgBorrow = false
-	invalidBlacklistedLend.Blacklist = true
+	invalidBlacklistedSupply := validToken()
+	invalidBlacklistedSupply.EnableMsgSupply = false
+	invalidBlacklistedSupply.Blacklist = true
 
 	invalidMaxCollateralShare := validToken()
 	invalidMaxCollateralShare.MaxCollateralShare = 101
@@ -172,12 +172,14 @@ func TestToken_Validate(t *testing.T) {
 		"invalid liquidation incentive": {
 			input:     invalidLiquidationIncentive,
 			expectErr: true},
-		"blacklisted but lend enabled": {
-			input:     invalidBlacklistedLend,
+		"blacklisted but supply enabled": {
+			input:     invalidBlacklistedSupply,
 			expectErr: true,
 		},
 		"blacklisted but borrow enabled": {
 			input:     invalidBlacklistedBorrow,
+			expectErr: true,
+		},
 			expectErr: true,
 		},
 		"invalid max collateral share": {
