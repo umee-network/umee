@@ -48,6 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### API Breaking
 
+- [1029](https://github.com/umee-network/umee/pull/1029) Removed MsgSetCollateral(addr,denom,bool), and replaced with MsgAddCollateral(addr,coin) and MsgRemoveCollateral(addr,coin)
 - [1023](https://github.com/umee-network/umee/pull/1023) Restrict MsgWithdraw to only uToken input (no base token auto-convert)
 
 ### Features
@@ -56,6 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
 - [1068](https://github.com/umee-network/umee/pull/1068) Add a cache layer for token registry.
+- [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 
 ### Improvements
 
@@ -69,6 +71,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+
+### API Breaking
+
+- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

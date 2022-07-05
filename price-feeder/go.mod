@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/BurntSushi/toml v1.1.0
 	github.com/armon/go-metrics v0.4.0
-	github.com/cosmos/cosmos-sdk v0.45.5
+	github.com/cosmos/cosmos-sdk v0.45.6
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/golangci/golangci-lint v1.46.2
 	github.com/gorilla/mux v1.8.0
@@ -17,7 +17,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.5.0
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.19
 	github.com/umee-network/umee/v2 v2.0.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

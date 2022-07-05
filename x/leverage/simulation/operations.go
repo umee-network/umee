@@ -16,18 +16,20 @@ import (
 
 // Default simulation operation weights for leverage messages
 const (
-	DefaultWeightMsgLendAsset       int = 100
-	DefaultWeightMsgWithdrawAsset   int = 85
-	DefaultWeightMsgBorrowAsset     int = 80
-	DefaultWeightMsgSetCollateral   int = 60
-	DefaultWeightMsgRepayAsset      int = 70
-	DefaultWeightMsgLiquidate       int = 75
-	OperationWeightMsgLendAsset         = "op_weight_msg_lend_asset"
-	OperationWeightMsgWithdrawAsset     = "op_weight_msg_withdraw_asset"
-	OperationWeightMsgBorrowAsset       = "op_weight_msg_borrow_asset"
-	OperationWeightMsgSetCollateral     = "op_weight_msg_set_collateral"
-	OperationWeightMsgRepayAsset        = "op_weight_msg_repay_asset"
-	OperationWeightMsgLiquidate         = "op_weight_msg_liquidate"
+	DefaultWeightMsgLendAsset          int = 100
+	DefaultWeightMsgWithdrawAsset      int = 85
+	DefaultWeightMsgBorrowAsset        int = 80
+	DefaultWeightMsgAddCollateral      int = 60
+	DefaultWeightMsgRemoveCollateral   int = 0
+	DefaultWeightMsgRepayAsset         int = 70
+	DefaultWeightMsgLiquidate          int = 75
+	OperationWeightMsgLendAsset            = "op_weight_msg_lend_asset"
+	OperationWeightMsgWithdrawAsset        = "op_weight_msg_withdraw_asset"
+	OperationWeightMsgBorrowAsset          = "op_weight_msg_borrow_asset"
+	OperationWeightMsgAddCollateral        = "op_weight_msg_add_collateral"
+	OperationWeightMsgRemoveCollateral     = "op_weight_msg_remove_collateral"
+	OperationWeightMsgRepayAsset           = "op_weight_msg_repay_asset"
+	OperationWeightMsgLiquidate            = "op_weight_msg_liquidate"
 )
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
@@ -36,12 +38,13 @@ func WeightedOperations(
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
 	var (
-		weightMsgLend          int
-		weightMsgWithdraw      int
-		weightMsgBorrow        int
-		weightMsgSetCollateral int
-		weightMsgRepayAsset    int
-		weightMsgLiquidate     int
+		weightMsgLend             int
+		weightMsgWithdraw         int
+		weightMsgBorrow           int
+		weightMsgAddCollateral    int
+		weightMsgRemoveCollateral int
+		weightMsgRepayAsset       int
+		weightMsgLiquidate        int
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgLendAsset, &weightMsgLend, nil,
 		func(_ *rand.Rand) {
@@ -58,9 +61,14 @@ func WeightedOperations(
 			weightMsgBorrow = DefaultWeightMsgBorrowAsset
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgSetCollateral, &weightMsgSetCollateral, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgAddCollateral, &weightMsgAddCollateral, nil,
 		func(_ *rand.Rand) {
-			weightMsgSetCollateral = DefaultWeightMsgSetCollateral
+			weightMsgAddCollateral = DefaultWeightMsgAddCollateral
+		},
+	)
+	appParams.GetOrGenerate(cdc, OperationWeightMsgRemoveCollateral, &weightMsgRemoveCollateral, nil,
+		func(_ *rand.Rand) {
+			weightMsgRemoveCollateral = DefaultWeightMsgRemoveCollateral
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgRepayAsset, &weightMsgRepayAsset, nil,
@@ -88,8 +96,12 @@ func WeightedOperations(
 			SimulateMsgBorrowAsset(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgSetCollateral,
-			SimulateMsgSetCollateralSetting(ak, bk, lk),
+			weightMsgAddCollateral,
+			SimulateMsgAddCollateral(ak, bk, lk),
+		),
+		simulation.NewWeightedOperation(
+			weightMsgRemoveCollateral,
+			SimulateMsgRemoveCollateral(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgRepayAsset,
@@ -199,9 +211,9 @@ func SimulateMsgBorrowAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk
 	}
 }
 
-// SimulateMsgSetCollateralSetting tests and runs a single msg set collateral
-// where an account enables or disables a uToken denom as collateral.
-func SimulateMsgSetCollateralSetting(
+// SimulateMsgAddCollateral tests and runs a single msg which adds
+// some collateral to a user.
+func SimulateMsgAddCollateral(
 	ak simulation.AccountKeeper,
 	bk types.BankKeeper,
 	lk keeper.Keeper,
@@ -212,12 +224,12 @@ func SimulateMsgSetCollateralSetting(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, token, skip := randomTokenFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSetCollateralSetting, "skip all transfers"), nil, nil
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeAddCollateral, "skip all transfers"), nil, nil
 		}
 
 		uDenom := lk.FromTokenToUTokenDenom(ctx, token.Denom)
-		enable := lk.GetCollateralSetting(ctx, from.Address.Bytes(), uDenom)
-		msg := types.NewMsgSetCollateral(from.Address, uDenom, !enable)
+		coin := sdk.NewCoin(uDenom, token.Amount)
+		msg := types.NewMsgAddCollateral(from.Address, coin)
 
 		txCtx := simulation.OperationInput{
 			R:             r,
@@ -225,7 +237,45 @@ func SimulateMsgSetCollateralSetting(
 			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:           nil,
 			Msg:           msg,
-			MsgType:       types.EventTypeSetCollateralSetting,
+			MsgType:       types.EventTypeAddCollateral,
+			Context:       ctx,
+			SimAccount:    from,
+			AccountKeeper: ak,
+			Bankkeeper:    bk,
+			ModuleName:    types.ModuleName,
+		}
+
+		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+	}
+}
+
+// SimulateMsgRemoveCollateral tests and runs a single msg which removes
+// some collateral from a user.
+func SimulateMsgRemoveCollateral(
+	ak simulation.AccountKeeper,
+	bk types.BankKeeper,
+	lk keeper.Keeper,
+) simtypes.Operation {
+	return func(
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+		accs []simtypes.Account, chainID string,
+	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		from, token, skip := randomTokenFields(r, ctx, accs, lk)
+		if skip {
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRemoveCollateral, "skip all transfers"), nil, nil
+		}
+
+		uDenom := lk.FromTokenToUTokenDenom(ctx, token.Denom)
+		coin := sdk.NewCoin(uDenom, token.Amount)
+		msg := types.NewMsgRemoveCollateral(from.Address, coin)
+
+		txCtx := simulation.OperationInput{
+			R:             r,
+			App:           app,
+			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
+			Cdc:           nil,
+			Msg:           msg,
+			MsgType:       types.EventTypeRemoveCollateral,
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,

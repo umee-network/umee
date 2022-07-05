@@ -23,7 +23,6 @@ const (
 var (
 	KeyPrefixRegisteredToken     = []byte{0x01}
 	KeyPrefixAdjustedBorrow      = []byte{0x02}
-	KeyPrefixCollateralSetting   = []byte{0x03}
 	KeyPrefixCollateralAmount    = []byte{0x04}
 	KeyPrefixReserveAmount       = []byte{0x05}
 	KeyPrefixLastInterestTime    = []byte{0x06}
@@ -59,17 +58,6 @@ func CreateAdjustedBorrowKeyNoDenom(borrowerAddr sdk.AccAddress) []byte {
 	key = append(key, KeyPrefixAdjustedBorrow...)
 	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
 	return key
-}
-
-// CreateCollateralSettingKey returns a KVStore key for getting and setting a borrower's
-// collateral setting for a single uToken
-func CreateCollateralSettingKey(borrowerAddr sdk.AccAddress, uTokenDenom string) []byte {
-	// collatprefix | lengthprefixed(borrowerAddr) | denom | 0x00
-	var key []byte
-	key = append(key, KeyPrefixCollateralSetting...)
-	key = append(key, address.MustLengthPrefix(borrowerAddr)...)
-	key = append(key, []byte(uTokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
 }
 
 // CreateCollateralAmountKey returns a KVStore key for getting and setting the amount of

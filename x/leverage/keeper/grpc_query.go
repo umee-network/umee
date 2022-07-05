@@ -349,36 +349,6 @@ func (q Querier) ReserveAmount(
 	return &types.QueryReserveAmountResponse{Amount: amount}, nil
 }
 
-func (q Querier) CollateralSetting(
-	goCtx context.Context,
-	req *types.QueryCollateralSettingRequest,
-) (*types.QueryCollateralSettingResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
-	}
-
-	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
-
-	return &types.QueryCollateralSettingResponse{Enabled: setting}, nil
-}
-
 func (q Querier) Collateral(
 	goCtx context.Context,
 	req *types.QueryCollateralRequest,
@@ -579,6 +549,7 @@ func (q Querier) MarketSummary(
 	marketSizeCoin, _ := q.Keeper.GetTotalLoaned(ctx, req.Denom)
 	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
+	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
 
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:        token.SymbolDenom,
@@ -589,6 +560,7 @@ func (q Querier) MarketSummary(
 		MarketSize:         marketSizeCoin.Amount,
 		AvailableBorrow:    availableBorrow,
 		Reserved:           reserved,
+		Collateral:         collateral,
 	}
 
 	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
@@ -596,4 +568,17 @@ func (q Querier) MarketSummary(
 	}
 
 	return &resp, nil
+}
+
+func (q Querier) TotalCollateral(
+	goCtx context.Context,
+	req *types.QueryTotalCollateralRequest,
+) (*types.QueryTotalCollateralResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
+	return &types.QueryTotalCollateralResponse{Amount: collateral}, nil
 }

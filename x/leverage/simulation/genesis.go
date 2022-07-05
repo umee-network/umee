@@ -73,7 +73,6 @@ func RandomizedGenState(simState *module.SimulationState) {
 		},
 		[]types.Token{},
 		[]types.AdjustedBorrow{},
-		[]types.CollateralSetting{},
 		[]types.Collateral{},
 		sdk.Coins{},
 		0,
