@@ -28,7 +28,7 @@ func newTestToken(base, symbol, reserveFactor string) types.Token {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
-		EnableMsgLend:        true,
+		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}

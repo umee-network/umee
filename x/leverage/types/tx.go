@@ -5,18 +5,18 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewMsgLendAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgLendAsset {
-	return &MsgLendAsset{
-		Lender: lender.String(),
-		Amount: amount,
+func NewMsgSupply(supplier sdk.AccAddress, amount sdk.Coin) *MsgSupply {
+	return &MsgSupply{
+		Supplier: supplier.String(),
+		Amount:   amount,
 	}
 }
 
-func (msg MsgLendAsset) Route() string { return ModuleName }
-func (msg MsgLendAsset) Type() string  { return EventTypeLoanAsset }
+func (msg MsgSupply) Route() string { return ModuleName }
+func (msg MsgSupply) Type() string  { return EventTypeLoanAsset }
 
-func (msg *MsgLendAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLender())
+func (msg *MsgSupply) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())
 	if err != nil {
 		return err
 	}
@@ -28,29 +28,29 @@ func (msg *MsgLendAsset) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgLendAsset) GetSigners() []sdk.AccAddress {
-	lender, _ := sdk.AccAddressFromBech32(msg.GetLender())
-	return []sdk.AccAddress{lender}
+func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
+	supplier, _ := sdk.AccAddressFromBech32(msg.GetSupplier())
+	return []sdk.AccAddress{supplier}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgLendAsset) GetSignBytes() []byte {
+func (msg *MsgSupply) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdrawAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
+func NewMsgWithdrawAsset(supplier sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
 	return &MsgWithdrawAsset{
-		Lender: lender.String(),
-		Amount: amount,
+		Supplier: supplier.String(),
+		Amount:   amount,
 	}
 }
 
 func (msg MsgWithdrawAsset) Route() string { return ModuleName }
-func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawLoanedAsset }
+func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawAsset }
 
 func (msg *MsgWithdrawAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLender())
+	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,8 @@ func (msg *MsgWithdrawAsset) ValidateBasic() error {
 }
 
 func (msg *MsgWithdrawAsset) GetSigners() []sdk.AccAddress {
-	lender, _ := sdk.AccAddressFromBech32(msg.GetLender())
-	return []sdk.AccAddress{lender}
+	supplier, _ := sdk.AccAddressFromBech32(msg.GetSupplier())
+	return []sdk.AccAddress{supplier}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
