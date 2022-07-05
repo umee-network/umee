@@ -26,11 +26,7 @@ Note the context/background should be written in the present tense.
 
 ## Table of Contents
 
-### Accepted
-
-### Rejected
-
-### Proposed
+### Implemented
 
 - [ADR-001: Interest Stream](./ADR-001-interest-stream.md)
 - [ADR-002: Deposit Assets](./ADR-002-deposit-assets.md)
@@ -40,3 +36,7 @@ Note the context/background should be written in the present tense.
 - [ADR-006: Oracle](./ADR-006-oracle.md)
 - [ADR-007: Bad debt](./ADR-007-bad-debt.md)
 - [ADR-008: Borrow tracking](./ADR-008-borrow-tracking.md)
+
+### Accepted
+
+- [ADR-009: Liquidity Mining](./ADR-009-liquidity-mining.md)
