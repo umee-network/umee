@@ -65,8 +65,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query lend APY - invalid denom",
-			cli.GetCmdQueryLendAPY(),
+			"query supply APY - invalid denom",
+			cli.GetCmdQuerySupplyAPY(),
 			[]string{
 				"abcd",
 			},
@@ -271,7 +271,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
 						KinkUtilization:      sdk.MustNewDecFromStr("0.2"),
 						LiquidationIncentive: sdk.MustNewDecFromStr("0.18"),
-						EnableMsgLend:        true,
+						EnableMsgSupply:      true,
 						EnableMsgBorrow:      true,
 						Blacklist:            false,
 					},
@@ -303,16 +303,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		testQuery{
-			"query lend APY",
-			cli.GetCmdQueryLendAPY(),
+			"query supply APY",
+			cli.GetCmdQuerySupplyAPY(),
 			[]string{
 				umeeapp.BondDenom,
 			},
 			false,
-			&types.QueryLendAPYResponse{},
+			&types.QuerySupplyAPYResponse{},
 			// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
 			// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
-			&types.QueryLendAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
+			&types.QuerySupplyAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
 		},
 		testQuery{
 			"query borrow APY",
@@ -329,9 +329,9 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		},
 	}
 
-	lend := testTransaction{
-		"lend",
-		cli.GetCmdLendAsset(),
+	supply := testTransaction{
+		"supply",
+		cli.GetCmdSupply(),
 		[]string{
 			val.Address.String(),
 			"1000uumee",
@@ -652,7 +652,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	// These transactions will set up nonzero leverage positions and allow nonzero query results
 	s.runTestCases(
-		lend,
+		supply,
 		addCollateral,
 		borrow,
 		liquidate,
@@ -666,6 +666,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		withdraw,
 	)
 
-	// These queries run while the lending and borrowing is active to produce nonzero output
+	// These queries run while the supplying and borrowing is active to produce nonzero output
 	s.runTestCases(nonzeroQueries...)
 }

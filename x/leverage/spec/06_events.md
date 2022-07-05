@@ -4,25 +4,25 @@ The leverage module emits the following events:
 
 ## Handlers
 
-### MsgLendAsset
+### MsgSupply
 
 | Type     | Attribute Key | Attribute Value                                 |
 | -------- | ------------- | ----------------------------------------------- |
-| lend     | sender        | {lenderAddress}                                 |
-| lend     | amount        | {amount}                                        |
+| supply     | sender        | {supplierAddress}                                 |
+| supply     | amount        | {amount}                                        |
 | message  | module        | leverage                                        |
-| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgLendAsset |
-| message  | sender        | {lenderAddress}                                 |
+| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgSupply |
+| message  | sender        | {supplierAddress}                                 |
 
 ### MsgWithdrawAsset
 
 | Type     | Attribute Key | Attribute Value                                     |
 | -------- | ------------- | --------------------------------------------------- |
-| withdraw | sender        | {lenderAddress}                                     |
+| withdraw | sender        | {supplierAddress}                                     |
 | withdraw | amount        | {amount}                                            |
 | message  | module        | leverage                                            |
 | message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgWithdrawAsset |
-| message  | sender        | {lenderAddress}                                     |
+| message  | sender        | {supplierAddress}                                     |
 
 ### MsgSetCollateral
 

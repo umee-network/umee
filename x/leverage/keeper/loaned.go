@@ -8,30 +8,30 @@ import (
 )
 
 // GetLoaned returns an sdk.Coin representing how much of a given denom a
-// lender has loaned, including interest accrued.
-func (k Keeper) GetLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
+// supplier has loaned, including interest accrued.
+func (k Keeper) GetLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
 
 	// sum wallet-held and collateral-enabled uTokens in the associated uToken denom
 	uDenom := k.FromTokenToUTokenDenom(ctx, denom)
-	balance := k.bankKeeper.GetBalance(ctx, lenderAddr, uDenom)
-	collateral := k.GetCollateralAmount(ctx, lenderAddr, uDenom)
+	balance := k.bankKeeper.GetBalance(ctx, supplierAddr, uDenom)
+	collateral := k.GetCollateralAmount(ctx, supplierAddr, uDenom)
 
 	// convert uTokens to tokens
 	return k.ExchangeUToken(ctx, balance.Add(collateral))
 }
 
-// GetLenderLoaned returns the total tokens loaned by a lender across all denoms,
+// GetSupplierLoaned returns the total tokens loaned by a supplier across all denoms,
 // including any interest accrued.
-func (k Keeper) GetLenderLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) GetSupplierLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error) {
 	// get all uTokens set as collateral
-	collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
+	collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 
-	// get all uTokens not set as collateral by filtering non-uTokens from lender balance
+	// get all uTokens not set as collateral by filtering non-uTokens from supplier balance
 	uTokens := sdk.Coins{}
-	balance := k.bankKeeper.GetAllBalances(ctx, lenderAddr)
+	balance := k.bankKeeper.GetAllBalances(ctx, supplierAddr)
 	for _, coin := range balance {
 		if k.IsAcceptedUToken(ctx, coin.Denom) {
 			uTokens = uTokens.Add(coin)
@@ -42,7 +42,7 @@ func (k Keeper) GetLenderLoaned(ctx sdk.Context, lenderAddr sdk.AccAddress) (sdk
 	return k.ExchangeUTokens(ctx, collateral.Add(uTokens...))
 }
 
-// GetTotalLoaned returns the total loaned by all lenders in a given denom,
+// GetTotalLoaned returns the total loaned by all suppliers in a given denom,
 // including any interest accrued.
 func (k Keeper) GetTotalLoaned(ctx sdk.Context, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {

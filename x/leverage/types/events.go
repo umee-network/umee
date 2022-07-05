@@ -15,7 +15,7 @@ const (
 	EventTypeFundOracle          = "fund_oracle"
 
 	EventAttrModule      = ModuleName
-	EventAttrLender      = "lender"
+	EventAttrSupplier    = "supplier"
 	EventAttrBorrower    = "borrower"
 	EventAttrLiquidator  = "liquidator"
 	EventAttrDenom       = "denom"

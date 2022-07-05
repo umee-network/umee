@@ -62,9 +62,9 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/borrow_apy";
   }
 
-  // LendAPY queries for the lend APY of a specified denomination.
-  rpc LendAPY(QueryLendAPYRequest) returns (QueryLendAPYResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/lend_apy";
+  // SupplyAPY queries for the supply APY of a specified denomination.
+  rpc SupplyAPY(QuerySupplyAPYRequest) returns (QuerySupplyAPYResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/supply_apy";
   }
 
   // MarketSize queries for the Market Size in USD of a specified denomination,
@@ -129,7 +129,7 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/liquidation_targets";
   }
 
-  // MarketSummary queries a base asset's current borrowing and lending
+  // MarketSummary queries a base asset's current borrowing and supplying
   // conditions.
   rpc MarketSummary(QueryMarketSummaryRequest)
       returns (QueryMarketSummaryResponse) {
@@ -178,15 +178,15 @@ message QueryBorrowAPYResponse {
   ];
 }
 
-// QueryLendAPYRequest defines the request structure for the LendAPY
+// QuerySupplyAPYRequest defines the request structure for the SupplyAPY
 // gRPC service handler.
-message QueryLendAPYRequest {
+message QuerySupplyAPYRequest {
   string denom = 1;
 }
 
-// QueryLendAPYResponse defines the response structure for the LendAPY
+// QuerySupplyAPYResponse defines the response structure for the SupplyAPY
 // gRPC service handler.
-message QueryLendAPYResponse {
+message QuerySupplyAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
@@ -424,7 +424,7 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  string lend_APY = 5 [
+  string supply_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];

@@ -16,14 +16,14 @@ import (
 
 // Default simulation operation weights for leverage messages
 const (
-	DefaultWeightMsgLendAsset          int = 100
+	DefaultWeightMsgSupply             int = 100
 	DefaultWeightMsgWithdrawAsset      int = 85
 	DefaultWeightMsgBorrowAsset        int = 80
 	DefaultWeightMsgAddCollateral      int = 60
 	DefaultWeightMsgRemoveCollateral   int = 0
 	DefaultWeightMsgRepayAsset         int = 70
 	DefaultWeightMsgLiquidate          int = 75
-	OperationWeightMsgLendAsset            = "op_weight_msg_lend_asset"
+	OperationWeightMsgSupply               = "op_weight_msg_supply_asset"
 	OperationWeightMsgWithdrawAsset        = "op_weight_msg_withdraw_asset"
 	OperationWeightMsgBorrowAsset          = "op_weight_msg_borrow_asset"
 	OperationWeightMsgAddCollateral        = "op_weight_msg_add_collateral"
@@ -38,7 +38,7 @@ func WeightedOperations(
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
 	var (
-		weightMsgLend             int
+		weightMsgSupply           int
 		weightMsgWithdraw         int
 		weightMsgBorrow           int
 		weightMsgAddCollateral    int
@@ -46,9 +46,9 @@ func WeightedOperations(
 		weightMsgRepayAsset       int
 		weightMsgLiquidate        int
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgLendAsset, &weightMsgLend, nil,
+	appParams.GetOrGenerate(cdc, OperationWeightMsgSupply, &weightMsgSupply, nil,
 		func(_ *rand.Rand) {
-			weightMsgLend = DefaultWeightMsgLendAsset
+			weightMsgSupply = DefaultWeightMsgSupply
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgWithdrawAsset, &weightMsgWithdraw, nil,
@@ -84,8 +84,8 @@ func WeightedOperations(
 
 	return simulation.WeightedOperations{
 		simulation.NewWeightedOperation(
-			weightMsgLend,
-			SimulateMsgLendAsset(ak, bk),
+			weightMsgSupply,
+			SimulateMsgSupply(ak, bk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgWithdraw,
@@ -114,9 +114,9 @@ func WeightedOperations(
 	}
 }
 
-// SimulateMsgLendAsset tests and runs a single msg lend where
-// an account lends some available assets.
-func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simtypes.Operation {
+// SimulateMsgSupply tests and runs a single msg supply where
+// an account supplies some available assets.
+func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -126,7 +126,7 @@ func SimulateMsgLendAsset(ak simulation.AccountKeeper, bk types.BankKeeper) simt
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgLendAsset(from.Address, coin)
+		msg := types.NewMsgSupply(from.Address, coin)
 
 		txCtx := simulation.OperationInput{
 			R:               r,

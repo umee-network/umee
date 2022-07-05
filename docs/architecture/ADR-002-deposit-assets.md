@@ -13,11 +13,11 @@ Accepted
 
 One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets, and earn interest on their deposits.
 
-The associated feature “Lender deposits asset for uToken & redeems uToken for a single Cosmos asset type" was initially discussed as follows:
+The associated feature “User supplies asset for uToken & redeems uToken for a single Cosmos asset type" was initially discussed as follows:
 
-- Lender deposits (locks) a Cosmos asset (like Atoms or Umee) into asset facilities.
+- User supplies (locks) a Cosmos asset (like Atoms or Umee) into asset facilities.
 - Facility mints and sends u-Assets in response (u-Atom, u-umee).
-- Lender redeems u-Assets for the original assets.
+- User redeems u-Assets for the original assets.
 - Asset facility knows its current balances of all asset types.
 - Asset facility knows the amount of all u-Asset types in circulation.
 
@@ -71,21 +71,21 @@ The `sdk.Coins` type is a slice (ordered list) of `sdk.Coin` which contains a de
 Asset Facility deposit functionality is provided by the two following message types:
 
 ```go
-// MsgLendAsset - a lender wishes to deposit assets and receive uAssets
-type MsgLendAsset struct {
-  Lender sdk.AccAddress `json:"lender" yaml:"lender"`
+// MsgSupply - a supplier wishes to deposit assets and receive uAssets
+type MsgSupply struct {
+  Supplier sdk.AccAddress `json:"supplier" yaml:"supplier"`
   Amount sdk.Coin       `json:"amount" yaml:"amount"`
 }
 
 // MsgWithdrawAsset - redeems uAsset for original assets
 type MsgWithdrawAsset struct {
-  // Lender is the owner of the uAsset
-  Lender sdk.AccAddress `json:"lender" yaml:"lender"`
+  // Supplier is the owner of the uAsset
+  Supplier sdk.AccAddress `json:"supplier" yaml:"supplier"`
   Amount sdk.Coin       `json:"amount" yaml:"amount"`
 }
 ```
 
-This resembles the built-in MsgSend, but either ToAddress or FromAddress is removed because the module's address should be used automatically. The remaining address is that of the lender.
+This resembles the built-in MsgSend, but either ToAddress or FromAddress is removed because the module's address should be used automatically. The remaining address is that of the supplier.
 
 MsgDepositAsset must use only allow-listed, non-uToken denominations. MsgWithdrawAsset must use only uToken denominations.
 
@@ -93,11 +93,11 @@ These messages should trigger the appropriate reaction (disbursement of uTokens 
 
 _Note: The `Coin` type seen in the `Amount` fields contains a single token denomination and amount._
 
-It is necessary that `MsgLendAsset` and `MsgWithdrawAsset` be signed by the lender's account. According to the [Transactions Page](https://docs.cosmos.network/master/core/transactions.html)
+It is necessary that `MsgSupply` and `MsgWithdrawAsset` be signed by the supplier's account. According to the [Transactions Page](https://docs.cosmos.network/master/core/transactions.html)
 
 > Every message in a transaction must be signed by the addresses specified by its GetSigners.
 
-Thus `MsgLendAsset.GetSigners` and `MsgWithdrawAsset.GetSigners` should return the `Lender` address.
+Thus `MsgSupply.GetSigners` and `MsgWithdrawAsset.GetSigners` should return the `Supplier` address.
 
 ### API
 
@@ -105,7 +105,7 @@ Both CLI and gRPC must be supported when sending the above message types, and al
 
 ### Testing
 
-Assuming a placeholder token allow-list of one element (e.g. `umee`), and a uToken existing (e.g. `u-umee`), an end-to-end test can be created in which one user account sends a `MsgLendAsset` and a `MsgWithdrawAsset` of the appropriate token types.
+Assuming a placeholder token allow-list of one element (e.g. `umee`), and a uToken existing (e.g. `u-umee`), an end-to-end test can be created in which one user account sends a `MsgSupply` and a `MsgWithdrawAsset` of the appropriate token types.
 
 ## Considerations
 

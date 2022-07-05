@@ -65,14 +65,14 @@ collateral_utilization(tokenA) = total_collateral(tokenA) / available_supply(tok
 Note: system must not allow to have available_supply to equal zero.
 
 Intuition: we want collateral utilization to grow when there is less liquid tokenA available in the system to cover the liquidation.
-Collateral utilization of tokenA is growing when lenders withdraw their tokenA collateral or when borrowers take a new loan of tokenA.
+Collateral utilization of tokenA is growing when suppliers withdraw their tokenA collateral or when borrowers take a new loan of tokenA.
 If a `tokenA` is not used a collateral then it's _collateral utilization_ is zero.
 It is bigger than 1 when available supply is lower than the amount of `tokenA` used as a collateral.
 When it is `N`, it means that only `1/N` of the collateral is available for redemption (u/tokenA -> tokenA).
 
 #### Examples
 
-Let's say we have 1000A (token A) provided to a system for lending. Below let's consider a state with total amount of A borrowed (B) and total amount of B used as a collateral (C) and computed collateral utilization (CU):
+Let's say we have 1000A (token A) supplied to the system. Below let's consider a state with total amount of A borrowed (B) and total amount of B used as a collateral (C) and computed collateral utilization (CU):
 
 1. B=0, C=0 → CU=0
 1. B=0, C=500 → CU=0.5
@@ -88,7 +88,7 @@ Let's say we have 1000A (token A) provided to a system for lending. Below let's 
 
 High collateral utilization is dangerous for the system:
 
-- When collateral utilization is above 1, lenders may not be able to withdraw their the liquidated collateral.
+- When collateral utilization is above 1, suppliers may not be able to withdraw their the liquidated collateral.
 - Liquidators, when liquidating a borrower, they get into position their _uToken_.
 In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying token).
 However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits.
@@ -96,12 +96,12 @@ This will dramatically increase the risk of getting a profit by liquidators and 
 
 Let's draw the following scenario to picture the liquidators risk:
 
-1. Alice is providing \$1.2M USD for lending.
+1. Alice is providing \$1.2M USD supply.
 2. Bob is providing \$1.5M in Luna as a collateral and borrows 1M USD from Alice.
 3. Charlie provides \$2M in BTC as a collateral and borrows $1.4M in Luna from Bob.
 4. Charlie predicts Luna collapse and sells the Luna.
 5. Luna is sinking and Bob position has to be liquidated. However:
-   - Lenders can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
+   - Suppliers can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
    - Charlie will not pay off her borrow position - she will wait for the final collapse and buy Luna cheaply.
    - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
 6. In case of the big crash, liquidators won't perform a liquidation, Bob will run away with 1M USD, system will end up with a bad debt and obligation to pay Alice.
@@ -184,7 +184,7 @@ In contrast, if we had put tokenDenom before borrower address, it would favor op
 
 ### Positive
 
-- uTokens used as a collateral increase in base asset value in the same way that lends positions do. This counteracts borrow position interest.
+- uTokens used as a collateral increase in base asset value in the same way that supply positions do. This counteracts borrow position interest.
 - UX of enabling/disabling token types as collateral is simpler than depositing specific amounts
 - `lengthPrefixed(borrowerAddress) | tokenDenom` key pattern facilitates getting open borrow and collateral positions by account address.
 

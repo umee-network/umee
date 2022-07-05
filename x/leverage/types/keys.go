@@ -61,20 +61,20 @@ func CreateAdjustedBorrowKeyNoDenom(borrowerAddr sdk.AccAddress) []byte {
 }
 
 // CreateCollateralAmountKey returns a KVStore key for getting and setting the amount of
-// collateral stored for a lender in a given denom.
-func CreateCollateralAmountKey(lenderAddr sdk.AccAddress, uTokenDenom string) []byte {
-	// collateralPrefix | lengthprefixed(lenderAddr) | denom | 0x00
-	key := CreateCollateralAmountKeyNoDenom(lenderAddr)
+// collateral stored for a supplier in a given denom.
+func CreateCollateralAmountKey(supplierAddr sdk.AccAddress, uTokenDenom string) []byte {
+	// collateralPrefix | lengthprefixed(supplierAddr) | denom | 0x00
+	key := CreateCollateralAmountKeyNoDenom(supplierAddr)
 	key = append(key, []byte(uTokenDenom)...)
 	return append(key, 0) // append 0 for null-termination
 }
 
 // CreateCollateralAmountKeyNoDenom returns the common prefix used by all collateral associated
-// with a given lender address.
-func CreateCollateralAmountKeyNoDenom(lenderAddr sdk.AccAddress) []byte {
-	// collateralPrefix | lengthprefixed(lenderAddr)
+// with a given supplier address.
+func CreateCollateralAmountKeyNoDenom(supplierAddr sdk.AccAddress) []byte {
+	// collateralPrefix | lengthprefixed(supplierAddr)
 	key := CreateCollateralAmountKeyNoAddress()
-	key = append(key, address.MustLengthPrefix(lenderAddr)...)
+	key = append(key, address.MustLengthPrefix(supplierAddr)...)
 	return key
 }
 

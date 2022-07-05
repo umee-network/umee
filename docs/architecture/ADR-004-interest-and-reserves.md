@@ -13,9 +13,9 @@ Accepted
 ## Context
 
 Borrow positions on Umee accrue interest over time.
-When interest accrues, the sum of all assets owed by all users increases for each borrowed token denomination. The amount of that increase serves to benefit lenders (by increasing the token:uToken exchange rate), and also to increase the amount of base assets the Umee system holds in reserve.
+When interest accrues, the sum of all assets owed by all users increases for each borrowed token denomination. The amount of that increase serves to benefit suppliers (by increasing the token:uToken exchange rate), and also to increase the amount of base assets the Umee system holds in reserve.
 
-The mechanism by which interest is calculated, and then split between incentivizing lenders as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
+The mechanism by which interest is calculated, and then split between incentivizing suppliers as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
 
 ## Decision
 
@@ -70,7 +70,7 @@ We modify the Compound formula to use collateral utilization rather than supply 
 
 The `x/leverage` module keeper will contain a function which accrues interest on all open borrow positions at once, which is called when `EndBlock` detects that has elapsed.
 
-The accrued interest is split between protocol reserves and lender profits as explained in the following sections.
+The accrued interest is split between protocol reserves and supplier profits as explained in the following sections.
 
 ```go
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
@@ -131,13 +131,13 @@ for _, coin := range newReserves {
 
 The token:uToken exchange rate, which would have previously been calculated by `(total tokens borrowed + module account balance) / uTokens in circulation` for a given token and associated uToken, must now be computed as `(total tokens borrowed + module account balance - reserved amount) / uTokens in circulation`.
 
-Also, because Lend, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, it's enough to update the exchange rate during the EndBlocker `AccrueAllInterest`.
+Also, because Supply, Withdraw, Borrow, and Repay transactions don't affect the token:uToken exchange rate, it's enough to update the exchange rate during the EndBlocker `AccrueAllInterest`.
 
 ### Modifications to Withdraw and Borrow
 
 Existing functionality will be modified:
 
-- Asset withdrawal (by lenders) will not permit withdrawals that would reduce the module account's balance of a token to below the reserved amount of that token.
+- Asset withdrawal (by suppliers) will not permit withdrawals that would reduce the module account's balance of a token to below the reserved amount of that token.
 - Asset borrowing (by borrowers) will not permit borrows that would do the same.
 
 ### Example Scenarios
@@ -160,18 +160,18 @@ Note that the module "reserved amount" has increased, but not the actual balance
 Here is an additional example scenario, to illustrate that the module account balance of a given token _can_ become less than the reserved amount, when a token type is at or near 100% supply utilization:
 
 > Lending pool and reserve amount of `atom` both start at zero.
-> Bob, lends 1000 `atom` to the lending pool.
+> Bob, supplies 1000 `atom` to the lending pool.
 > Alice immediately borrows all 1000 `atom`.
 >
 > During the next `EndBlock`. Alice now owes 1000.001 `atom`. The amount of `uatom` the module is required to reserve increases from 0 to 50 (assuming the `ReserveFactor` parameter is 0.05 like in the previous example).
 >
 > The module account (lending pool + reserves) still contains 0 `uatom` due to the first two steps. Its `uatom` balance is therefore less than the required 50 `uatom` reserves.
 
-The scenario above is not fatal to our model - Bob (lender) continues to gain value as the token:uToken exchange rate increases, and we are not storing any negative numbers in place of balances - but the next 50 `uatom` lent by a lender or repaid by a borrower will be blocked for the reserve requirements rather than being immediately available for borrowing or withdrawal.
+The scenario above is not fatal to our model - Bob (supplier) continues to gain value as the token:uToken exchange rate increases, and we are not storing any negative numbers in place of balances - but the next 50 `uatom` lent by a supplier or repaid by a borrower will be blocked for the reserve requirements rather than being immediately available for borrowing or withdrawal.
 
 The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% supply utilization.
 
-This is not a threatening scenario, as it resolves as soon as either a sufficient `RepayAsset` or a `LendAsset` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
+This is not a threatening scenario, as it resolves as soon as either a sufficient `RepayAsset` or a `MsgSupply` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
 
 ## Consequences
 

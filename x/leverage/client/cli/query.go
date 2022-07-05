@@ -36,7 +36,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralValue(),
 		GetCmdQueryExchangeRate(),
-		GetCmdQueryLendAPY(),
+		GetCmdQuerySupplyAPY(),
 		GetCmdQueryBorrowAPY(),
 		GetCmdQueryMarketSize(),
 		GetCmdQueryTokenMarketSize(),
@@ -429,13 +429,13 @@ func GetCmdQueryAvailableBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLendAPY creates a Cobra command to query for the
-// lend APY of a specific uToken.
-func GetCmdQueryLendAPY() *cobra.Command {
+// GetCmdQuerySupplyAPY creates a Cobra command to query for the
+// supply APY of a specific uToken.
+func GetCmdQuerySupplyAPY() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lend-apy [denom]",
+		Use:   "supply-apy [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the lend APY of a specified denomination",
+		Short: "Query for the supply APY of a specified denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -444,11 +444,11 @@ func GetCmdQueryLendAPY() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLendAPYRequest{
+			req := &types.QuerySupplyAPYRequest{
 				Denom: args[0],
 			}
 
-			resp, err := queryClient.LendAPY(cmd.Context(), req)
+			resp, err := queryClient.SupplyAPY(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

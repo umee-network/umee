@@ -10,13 +10,13 @@ Proposed
 
 ## Abstract
 
-Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` lending APY for supplying base assets.
+Umee wishes to add support for liquidity mining incentives; i.e. additional rewards on top of the normal `x/leverage` supplying APY for supplying base assets.
 
 For example, a user might "lock" some of their `u/ATOM` collateral held in the leverage module for 14 days, earning an additional 12% APY of the collateral's value, received as `UMEE` tokens.
 
 Locked tokens will be unavailable for `x/leverage` withdrawal until unlocked, but will still be able to be liquidated. There will be 3 locking tiers, differing in unlocking duration.
 
-Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to lenders of based on the lenders' locked value and lock tier. APY will vary as fixed reward amounts are divided amongst all participating lenders.
+Incentive programs will be created by governance proposals, get funded with tokens, then (from `StartDate` to `EndDate`) distribute those tokens to suppliers of based on the suppliers' locked value and lock tier. APY will vary as fixed reward amounts are divided amongst all participating suppliers.
 
 A message type `MsgSponsor` will allow for internal (multisig account) or external (ordinary wallet) funding of incentive programs with the `RewardDenom` that was set by governance. This message type will not require special permissions to run, only control of the funds to be used.
 
@@ -75,13 +75,13 @@ Locking of funds is independent of active incentive programs, and can even be do
 
 ```go
 type MsgLock struct {
-  Lender sdk.AccAddress
+  Supplier sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
 }
 
 type MsgUnlock struct {
-  Lender sdk.AccAddress
+  Supplier sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
 }
@@ -92,8 +92,8 @@ Amounts are `uToken` balances, exact integers which will not experience rounding
 On receiving a `MsgLock`, the module must perform the following steps:
 
 - Validate tier and uToken amount
-- Verify lender has sufficient unlocked uTokens
-- Distribute the lender's current `x/incentive` rewards for the selected denom and tier, if any
+- Verify supplier has sufficient unlocked uTokens
+- Distribute the supplier's current `x/incentive` rewards for the selected denom and tier, if any
 - Record the new locked utoken amount for the selected denom and tier
 
 See later sections for reward mechanics - it is mathematically necessary to update pending rewards when updating locked amounts.
@@ -101,13 +101,13 @@ See later sections for reward mechanics - it is mathematically necessary to upda
 On receiving a `MsgUnlock`, the module must perform the following steps:
 
 - Validate tier and uToken amount
-- Verify lender has sufficient locked uTokens of the selected tier that are not currently unlocking
-- Start an unlocking for the lender in question
+- Verify supplier has sufficient locked uTokens of the selected tier that are not currently unlocking
+- Start an unlocking for the supplier in question
 
 Unlockings are defined as a struct:
 ```go
 type CollateralUnlocking struct {
-  Lender sdk.AccAddress
+  Supplier sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
   End    uint64
@@ -130,7 +130,7 @@ MaxUnlockings uint32
 
 When an unlocking period ends, the restrictions on withdrawing and disabling collateral release, but the `uTokens` remain in the `x/leverage` module account as collateral. Since no transfer occurs at the moment funds unlock, there is no need for any action in `EndBlock`.
 
-Completed unlockings for an address are cleared from state the next time withdraw restrictions are calculated during a transaction - that is, during a `MsgLock`, `MsgUnlock`, `MsgWithdraw`, `MsgSetCollateral` sent by the lender, or a `MsgLiquidate` where the lender is being liquidated.
+Completed unlockings for an address are cleared from state the next time withdraw restrictions are calculated during a transaction - that is, during a `MsgLock`, `MsgUnlock`, `MsgWithdraw`, `MsgSetCollateral` sent by the supplier, or a `MsgLiquidate` where the supplier is being liquidated.
 
 Any collateral can potentially be seized during `MsgLiquidate`, whether it is locked, unlocking, or unlocked. In the event that the target of liquidation has collateral in various such states, it will be liquidated in this order:
 1) Unlocked collateral
@@ -211,11 +211,11 @@ There will be a message type which manually claims rewards.
 
 ```go
 type MsgClaim struct {
-  Lender      sdk.AccAddress
+  Supplier      sdk.AccAddress
 }
 ```
 
-This message type gathers `PendingRewards` by updating `RewardBasis` for each nonzero `Locked(addr,denom,tier)` associated with the lender's address, then claims all pending rewards.
+This message type gathers `PendingRewards` by updating `RewardBasis` for each nonzero `Locked(addr,denom,tier)` associated with the supplier's address, then claims all pending rewards.
 
 ### Funding Programs
 
