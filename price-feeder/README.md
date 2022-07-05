@@ -48,6 +48,20 @@ $ price-feeder /path/to/price_feeder_config.toml
 ```
 
 ## Configuration
+There are multiple new options for validators to setup in the price feeder config, the options are telemetry, deviation, and custom endpoints. 
+
+### `Telemetry`
+• A set of options for the /metrics endpoint when running the price feeder. 
+
+### `Deviation`
+• Deviation allows validators to set a custom amount of standard deviations around the median which helps distinguish providers from other providers. 
+
+• The deviation works by defining a maximum amount of standard deviations that a given asset can be from the median without being filtered out before voting. 
+
+### `Custom Endpoints`
+• Custom endpoints allows providers to set their own API endpoints for a given provider (switch out APIs). 
+
+• The custom endpoint option provides an override setting in our config for the hardcoded rest and websocket API endpoints. 
 
 ### `server`
 
