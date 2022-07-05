@@ -33,3 +33,16 @@ func (umeeQuery UmeeMsg) HandleWithdrawAsset(
 
 	return nil
 }
+
+// HandleBorrowAsset handles the borrowing coins from the capital facility.
+func (umeeQuery UmeeMsg) HandleBorrowAsset(
+	ctx sdk.Context,
+	msgServer lvtypes.MsgServer,
+) error {
+	_, err := msgServer.BorrowAsset(sdk.WrapSDKContext(ctx), umeeQuery.BorrowAsset)
+	if err != nil {
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Asset", err)}
+	}
+
+	return nil
+}
