@@ -1010,3 +1010,17 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_InsufficientCollateral() {
 	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, lenderAddr, uToken)
 	s.Require().EqualError(err, "1000001u/uumee: insufficient balance")
 }
+
+func (s *IntegrationTestSuite) TestTotalCollateral() {
+	// Test zero collateral
+	uDenom := types.UTokenFromTokenDenom(umeeDenom)
+	collateral := s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
+	s.Require().Equal(sdk.ZeroInt(), collateral)
+
+	// Uses borrow scenario, because lender possesses collateral
+	_, _ = s.initBorrowScenario()
+
+	// Test nonzero collateral
+	collateral = s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
+	s.Require().Equal(sdk.NewInt(1000000000), collateral)
+}
