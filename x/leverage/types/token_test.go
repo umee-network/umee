@@ -36,6 +36,7 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				EnableMsgSupply:      true,
 				EnableMsgBorrow:      true,
 				Blacklist:            false,
+				MaxCollateralShare:   10,
 			},
 		},
 	}
@@ -56,6 +57,7 @@ registry:
       enable_msg_supply: true
       enable_msg_borrow: true
       blacklist: false
+      max_collateral_share: 10
 `
 	require.Equal(t, expected, p.String())
 }
@@ -74,7 +76,7 @@ func TestToken_Validate(t *testing.T) {
 			MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
 			KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
 			LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-			EnableMsgLend:        true,
+			EnableMsgSupply:      true,
 			EnableMsgBorrow:      true,
 			Blacklist:            false,
 			MaxCollateralShare:   0,
@@ -171,7 +173,8 @@ func TestToken_Validate(t *testing.T) {
 		},
 		"invalid liquidation incentive": {
 			input:     invalidLiquidationIncentive,
-			expectErr: true},
+			expectErr: true,
+		},
 		"blacklisted but supply enabled": {
 			input:     invalidBlacklistedSupply,
 			expectErr: true,
