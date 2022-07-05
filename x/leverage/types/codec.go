@@ -28,7 +28,7 @@ func init() {
 // concrete types on the provided LegacyAmino codec. These types are used for
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgLendAsset{}, "umee/leverage/MsgLendAsset", nil)
+	cdc.RegisterConcrete(&MsgSupply{}, "umee/leverage/MsgSupply", nil)
 	cdc.RegisterConcrete(&MsgWithdrawAsset{}, "umee/leverage/MsgWithdrawAsset", nil)
 	cdc.RegisterConcrete(&UpdateRegistryProposal{}, "umee/leverage/UpdateRegistryProposal", nil)
 	cdc.RegisterConcrete(&MsgAddCollateral{}, "umee/leverage/MsgAddCollateral", nil)
@@ -41,7 +41,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
-		&MsgLendAsset{},
+		&MsgSupply{},
 		&MsgWithdrawAsset{},
 		&MsgAddCollateral{},
 		&MsgRemoveCollateral{},

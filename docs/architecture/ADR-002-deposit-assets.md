@@ -33,11 +33,11 @@ message MsgLendAsset {
 
 When a user supplies tokens, the tokens are moved to the `x/leverage` module account. Simultaneously, uTokens are minted and sent to the user's wallet. The module uses its current token:uToken exchange rate.
 
-// MsgWithdrawAsset represents a lender's request to withdraw supplied assets.
+// MsgWithdrawAsset represents a user's request to withdraw supplied assets.
 // Coin denomination must be a uToken.
 message MsgWithdrawAsset {
-  string                   lender = 1;
-  cosmos.base.v1beta1.Coin coin   = 2 [(gogoproto.nullable) = false];
+  string                   supplier = 1;
+  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
 ```
 

@@ -1,37 +1,37 @@
 # Messages
 
-## MsgLendAsset
+## MsgSupply
 
-A user lends assets the the module.
+A user supplies assets the the module.
 
 ```protobuf
-message MsgLendAsset {
-  string                   lender = 1;
+message MsgSupply {
+  string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
 ```
 
 The message will fail under the following conditions:
 - `amount` is not a valid amount of an accepted asset
-- `lender` balance is insufficient
+- `supplier` balance is insufficient
 
 ## MsgWithdrawAsset
 
-A user withdraws lent assets.
+A user withdraws supplied assets.
 
 ```protobuf
 message MsgWithdrawAsset {
-  string                   lender = 1;
+  string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
 ```
 
 The message will fail under the following conditions:
 - `amount` is not a valid amount of an accepted asset's corresponding uToken
-- The sum of `lender` uToken balance and uToken collateral (if enabled) is insufficient
+- The sum of `supplier` uToken balance and uToken collateral (if enabled) is insufficient
 
 The following additional failures are only possible for collateral-enabled _uTokens_
-- Withdrawing the required uToken collateral would reduce `lender`'s `BorrowLimit` below their total borrowed value
+- Withdrawing the required uToken collateral would reduce `supplier`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
 ## MsgAddCollateral
@@ -40,7 +40,7 @@ A user adds some uTokens from their balance to the module as collateral.
 
 ```protobuf
 message MsgAddCollateral {
-  string                   lender = 1;
+  string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
 ```
@@ -54,7 +54,7 @@ A user moves some uTokens from their collateral back to their balance.
 
 ```protobuf
 message MsgRemoveCollateral {
-  string                   lender = 1;
+  string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
 ```
