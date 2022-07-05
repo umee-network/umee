@@ -120,6 +120,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 
 	oracleClient, err := client.NewOracleClient(
 		logger,
+		ctx,
 		cfg.Account.ChainID,
 		cfg.Keyring.Backend,
 		cfg.Keyring.Dir,
