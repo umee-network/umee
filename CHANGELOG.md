@@ -57,7 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
 - [1068](https://github.com/umee-network/umee/pull/1068) Add a cache layer for token registry.
-- [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_supply` to the x/leverage token registry.
+- [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 
 ### Improvements
