@@ -180,8 +180,6 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidBlacklistedBorrow,
 			expectErr: true,
 		},
-			expectErr: true,
-		},
 		"invalid max collateral share": {
 			input:     invalidMaxCollateralShare,
 			expectErr: true,
