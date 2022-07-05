@@ -35,8 +35,7 @@ service Msg {
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
-// MsgSupply represents a user's request to supply a base asset type to the
-// module.
+// MsgSupply is the request structure for the Supply RPC.
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
