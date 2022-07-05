@@ -140,9 +140,9 @@ message Token {
   // oracle and price feeder as well.
   bool blacklist = 14;
 
-  // Maximum collateral share specifies how much of the token can
-  // be provided in total as a collateral to the system.
-  // Value is provided in pre cent, Allowed values are in [0; 100] range.
+  // Maximum collateral share specifies how much of the
+  // system's overall collateral be provided by a single token.
+  // Value is a percent; allowed values are in [0, 100] range.
   // 100 means that the token has no restriction. 10 means maximum 10% of total
   // collateral value can provided by this token.
   uint32 max_collateral_share = 15 [
