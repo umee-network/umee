@@ -142,6 +142,13 @@ service Query {
       returns (QueryTotalCollateralResponse) {
     option (google.api.http).get = "/umee/leverage/v1/total_collateral/{denom}";
   }
+
+  // TotalBorrowed returns the total borrowed system-wide of a given
+  // token denomination.
+  rpc TotalBorrowed(QueryTotalBorrowedRequest)
+      returns (QueryTotalBorrowedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/total_borrowed/{denom}";
+  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
@@ -448,6 +455,10 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
+  string borrowed = 11 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // QueryTotalCollateralRequest defines the request structure for the
@@ -459,6 +470,21 @@ message QueryTotalCollateralRequest {
 // QueryTotalCollateralResponse defines the response structure for the
 // TotalCollateral gRPC service handler.
 message QueryTotalCollateralResponse {
+  string amount = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryTotalBorrowedRequest defines the request structure for the
+// TotalBorrowed gRPC service handler.
+message QueryTotalBorrowedRequest {
+  string denom = 1;
+}
+
+// QueryTotalBorrowedResponse defines the response structure for the
+// TotalBorrowed gRPC service handler.
+message QueryTotalBorrowedResponse {
   string amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
