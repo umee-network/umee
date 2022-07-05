@@ -16,6 +16,9 @@ const (
 	// AssignedMsgBorrowAsset represents the call to borrowing coins from the
 	// capital facility.
 	AssignedMsgBorrowAsset
+	// AssignedMsgRepayAsset represents the call to repaying borrowed coins to
+	// the capital facility.
+	AssignedMsgRepayAsset
 )
 
 // UmeeMsg wraps all the queries availables for cosmwasm smartcontracts.
@@ -28,4 +31,6 @@ type UmeeMsg struct {
 	WithdrawAsset *lvtypes.MsgWithdrawAsset `json:"withdraw_asset,omitempty"`
 	// Used to borrowing coins from the capital facility.
 	BorrowAsset *lvtypes.MsgBorrowAsset `json:"borrow_asset,omitempty"`
+	// Used to repaying borrowed coins to the capital facility.
+	RepayAsset *lvtypes.MsgRepayAsset `json:"repay_asset,omitempty"`
 }

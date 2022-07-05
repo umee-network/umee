@@ -46,3 +46,16 @@ func (umeeQuery UmeeMsg) HandleBorrowAsset(
 
 	return nil
 }
+
+// HandleRepayAsset handles repaying borrowed coins to the capital facility.
+func (umeeQuery UmeeMsg) HandleRepayAsset(
+	ctx sdk.Context,
+	msgServer lvtypes.MsgServer,
+) error {
+	_, err := msgServer.RepayAsset(sdk.WrapSDKContext(ctx), umeeQuery.RepayAsset)
+	if err != nil {
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Repay Asset", err)}
+	}
+
+	return nil
+}
