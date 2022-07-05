@@ -34,6 +34,19 @@ func (umeeMsg UmeeMsg) HandleWithdrawAsset(
 	return nil
 }
 
+// HandleAddCollateral handles the enable selected uTokens as collateral.
+func (umeeMsg UmeeMsg) HandleAddCollateral(
+	ctx sdk.Context,
+	msgServer lvtypes.MsgServer,
+) error {
+	_, err := msgServer.AddCollateral(sdk.WrapSDKContext(ctx), umeeMsg.AddCollateral)
+	if err != nil {
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Add Collateral", err)}
+	}
+
+	return nil
+}
+
 // HandleBorrowAsset handles the borrowing coins from the capital facility.
 func (umeeMsg UmeeMsg) HandleBorrowAsset(
 	ctx sdk.Context,

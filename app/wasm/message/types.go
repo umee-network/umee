@@ -13,6 +13,9 @@ const (
 	// AssignedMsgWithdraw represents the call to withdraw previously loaned coins
 	// from the capital facility.
 	AssignedMsgWithdraw
+	// AssignedMsgAddCollateral represents the call to enable an amount of
+	// selected uTokens as collateral.
+	AssignedMsgAddCollateral
 	// AssignedMsgBorrowAsset represents the call to borrowing coins from the
 	// capital facility.
 	AssignedMsgBorrowAsset
@@ -25,7 +28,7 @@ const (
 	AssignedMsgLiquidate
 )
 
-// UmeeMsg wraps all the queries availables for cosmwasm smartcontracts.
+// UmeeMsg wraps all the messages availables for cosmwasm smartcontracts.
 type UmeeMsg struct {
 	// Mandatory field to determine which msg to call.
 	AssignedMsg AssignedMsg `json:"assigned_msg"`
@@ -33,6 +36,8 @@ type UmeeMsg struct {
 	LendAsset *lvtypes.MsgLendAsset `json:"lend_asset,omitempty"`
 	// Used to withdraw previously loaned coins from the capital facility.
 	WithdrawAsset *lvtypes.MsgWithdrawAsset `json:"withdraw_asset,omitempty"`
+	// Used to enable an amount of selected uTokens as collateral.
+	AddCollateral *lvtypes.MsgAddCollateral `json:"add_collateral,omitempty"`
 	// Used to borrowing coins from the capital facility.
 	BorrowAsset *lvtypes.MsgBorrowAsset `json:"borrow_asset,omitempty"`
 	// Used to repaying borrowed coins to the capital facility.
