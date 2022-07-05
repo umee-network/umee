@@ -77,7 +77,7 @@ func TestToken_Validate(t *testing.T) {
 			EnableMsgLend:        true,
 			EnableMsgBorrow:      true,
 			Blacklist:            false,
-			MaxCollateralSupply:  0,
+			MaxCollateralShare:   0,
 		}
 	}
 	invalidBaseToken := validToken()
@@ -121,10 +121,10 @@ func TestToken_Validate(t *testing.T) {
 	invalidBlacklistedLend.Blacklist = true
 
 	invalidMaxCollateralSupply := validToken()
-	invalidMaxCollateralSupply.MaxCollateralSupply = 101
+	invalidMaxCollateralSupply.MaxCollateralShare = 101
 
 	validMaxCollateralSupply := validToken()
-	validMaxCollateralSupply.MaxCollateralSupply = 100
+	validMaxCollateralSupply.MaxCollateralShare = 100
 
 	testCases := map[string]struct {
 		input     types.Token
