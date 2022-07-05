@@ -19,7 +19,7 @@ From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 >
 > The balance of uTokens grows over time by the underlying interest rate applied to the deposits. uTokens will employ an interest stream mechanism which means that a balance of uTokens will constantly generate income even when split or transferred.
 
-Interest on uTokens should function in at least the following scenarios:
+Interest on uTokens must be applied in at least the following scenarios:
 
 - uToken balances held on the Umee chain
 - uToken balances held on Ethereum as ERC20
