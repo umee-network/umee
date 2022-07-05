@@ -20,41 +20,41 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
-func (s msgServer) LendAsset(
+func (s msgServer) Supply(
 	goCtx context.Context,
-	msg *types.MsgLendAsset,
-) (*types.MsgLendAssetResponse, error) {
+	msg *types.MsgSupply,
+) (*types.MsgSupplyResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.keeper.LendAsset(ctx, lenderAddr, msg.Amount); err != nil {
+	if err := s.keeper.Supply(ctx, supplierAddr, msg.Amount); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"assets loaned",
-		"lender", lenderAddr.String(),
+		"assets supplied",
+		"supplier", supplierAddr.String(),
 		"amount", msg.Amount.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeLoanAsset,
-			sdk.NewAttribute(types.EventAttrLender, lenderAddr.String()),
+			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, lenderAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, supplierAddr.String()),
 		),
 	})
 
-	return &types.MsgLendAssetResponse{}, nil
+	return &types.MsgSupplyResponse{}, nil
 }
 
 func (s msgServer) WithdrawAsset(
@@ -63,31 +63,31 @@ func (s msgServer) WithdrawAsset(
 ) (*types.MsgWithdrawAssetResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.keeper.WithdrawAsset(ctx, lenderAddr, msg.Amount); err != nil {
+	if err := s.keeper.WithdrawAsset(ctx, supplierAddr, msg.Amount); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"loaned assets withdrawn",
-		"lender", lenderAddr.String(),
+		"supplied assets withdrawn",
+		"supplier", supplierAddr.String(),
 		"amount", msg.Amount.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeWithdrawLoanedAsset,
-			sdk.NewAttribute(types.EventAttrLender, lenderAddr.String()),
+			types.EventTypeWithdrawAsset,
+			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, lenderAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, supplierAddr.String()),
 		),
 	})
 

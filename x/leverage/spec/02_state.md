@@ -46,8 +46,8 @@ type Token struct {
     LiquidationIncentive sdk.Dec
     SymbolDenom          string
     Exponent             uint32
-    EnableMsgLend           bool
-    EnableMsgBorrow         bool
+    EnableMsgSupply      bool
+    EnableMsgBorrow      bool
     Blacklist            bool
 }
 ```
