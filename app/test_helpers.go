@@ -118,7 +118,7 @@ func IntegrationTestNetworkConfig() network.Config {
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
 		KinkUtilization:      sdk.MustNewDecFromStr("0.200000000000000000"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
-		EnableMsgLend:        true,
+		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	})

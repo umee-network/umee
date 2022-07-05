@@ -43,7 +43,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 			"liquidation_incentive": "0.1",
 			"symbol_denom": "UMEE",
 			"exponent": 6,
-			"enable_msg_lend": true,
+			"enable_msg_supply": true,
 			"enable_msg_borrow": true,
 			"blacklist": false
 		}

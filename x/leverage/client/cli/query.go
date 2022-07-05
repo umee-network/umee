@@ -30,13 +30,13 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryBorrowed(),
 		GetCmdQueryBorrowedValue(),
-		GetCmdQueryLoaned(),
-		GetCmdQueryLoanedValue(),
+		GetCmdQuerySupplied(),
+		GetCmdQuerySuppliedValue(),
 		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralValue(),
 		GetCmdQueryExchangeRate(),
-		GetCmdQueryLendAPY(),
+		GetCmdQuerySupplyAPY(),
 		GetCmdQueryBorrowAPY(),
 		GetCmdQueryMarketSize(),
 		GetCmdQueryTokenMarketSize(),
@@ -183,13 +183,13 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLoaned creates a Cobra command to query for the amount of
-// tokens loaned by a given address.
-func GetCmdQueryLoaned() *cobra.Command {
+// GetCmdQuerySupplied creates a Cobra command to query for the amount of
+// tokens supplied by a given address.
+func GetCmdQuerySupplied() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "loaned [addr]",
+		Use:   "supplied [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of tokens loaned by an address",
+		Short: "Query for the total amount of tokens supplied by an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -198,14 +198,14 @@ func GetCmdQueryLoaned() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLoanedRequest{
+			req := &types.QuerySuppliedRequest{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
 
-			resp, err := queryClient.Loaned(cmd.Context(), req)
+			resp, err := queryClient.Supplied(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
@@ -220,13 +220,13 @@ func GetCmdQueryLoaned() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLoanedValue creates a Cobra command to query for the USD value of
-// total tokens loaned by a given address.
-func GetCmdQueryLoanedValue() *cobra.Command {
+// GetCmdQuerySuppliedValue creates a Cobra command to query for the USD value of
+// total tokens supplied by a given address.
+func GetCmdQuerySuppliedValue() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "loaned-value [addr]",
+		Use:   "supplied-value [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD value of tokens loaned by an address",
+		Short: "Query for the USD value of tokens supplied by an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -235,14 +235,14 @@ func GetCmdQueryLoanedValue() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLoanedValueRequest{
+			req := &types.QuerySuppliedValueRequest{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
 
-			resp, err := queryClient.LoanedValue(cmd.Context(), req)
+			resp, err := queryClient.SuppliedValue(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
@@ -430,13 +430,13 @@ func GetCmdQueryAvailableBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLendAPY creates a Cobra command to query for the
-// lend APY of a specific uToken.
-func GetCmdQueryLendAPY() *cobra.Command {
+// GetCmdQuerySupplyAPY creates a Cobra command to query for the
+// supply APY of a specific uToken.
+func GetCmdQuerySupplyAPY() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lend-apy [denom]",
+		Use:   "supply-apy [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the lend APY of a specified denomination",
+		Short: "Query for the supply APY of a specified denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -445,11 +445,11 @@ func GetCmdQueryLendAPY() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLendAPYRequest{
+			req := &types.QuerySupplyAPYRequest{
 				Denom: args[0],
 			}
 
-			resp, err := queryClient.LendAPY(cmd.Context(), req)
+			resp, err := queryClient.SupplyAPY(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
