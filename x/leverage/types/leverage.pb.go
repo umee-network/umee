@@ -76,7 +76,7 @@ func (m *Params) XXX_DiscardUnknown() {
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
 // Token defines a token, along with its capital metadata, in the Umee capital
-// facility that can be loaned and borrowed.
+// facility that can be supplied and borrowed.
 type Token struct {
 	// The base_denom defines the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
@@ -122,8 +122,8 @@ type Token struct {
 	// This should only be used to eliminate an asset completely. A blacklisted
 	// asset is treated as though its oracle price is zero, and thus ignored by
 	// calculations such as collateral value and borrow limit. Can still be repaid
-	// or withdrawn, but not liquidated. A blacklisted token must have enable_supply
-	// and enable_borrow set to false. Such tokens can be safely removed from the
+	// or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
+	// and enable_msg_borrow set to false. Such tokens can be safely removed from the
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
 }

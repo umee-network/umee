@@ -29,7 +29,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgSupply represents a supplier's request to supply a base asset type to the
+// MsgSupply represents a user's request to supply a base asset type to the
 // module.
 type MsgSupply struct {
 	// Supplier is the account address supplying assets and the signer of the message.
@@ -84,7 +84,7 @@ func (m *MsgSupply) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a supplier's request to withdraw lent assets.
+// MsgWithdrawAsset represents a user's request to withdraw supplied assets.
 // Amount must be a uToken.
 type MsgWithdrawAsset struct {
 	// Supplier is the account address withdrawing assets and the signer of the message.
@@ -139,7 +139,7 @@ func (m *MsgWithdrawAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgAddCollateral represents a supplier's request to enable selected
+// MsgAddCollateral represents a user's request to enable selected
 // uTokens as collateral.
 type MsgAddCollateral struct {
 	// Borrower is the account address adding collateral and the signer of the message.
@@ -194,7 +194,7 @@ func (m *MsgAddCollateral) GetCoin() types.Coin {
 	return types.Coin{}
 }
 
-// MsgRemoveCollateral represents a supplier's request to disable selected
+// MsgRemoveCollateral represents a user's request to disable selected
 // uTokens as collateral.
 type MsgRemoveCollateral struct {
 	// Borrower is the account address removing collateral and the signer of the message.
@@ -249,7 +249,7 @@ func (m *MsgRemoveCollateral) GetCoin() types.Coin {
 	return types.Coin{}
 }
 
-// MsgBorrowAsset represents a supplier's request to borrow a base asset type
+// MsgBorrowAsset represents a user's request to borrow a base asset type
 // from the module.
 type MsgBorrowAsset struct {
 	// Borrower is the account address taking a loan and the signer
@@ -305,7 +305,7 @@ func (m *MsgBorrowAsset) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgRepayAsset represents a supplier's request to repay a borrowed base asset
+// MsgRepayAsset represents a user's request to repay a borrowed base asset
 // type to the module.
 type MsgRepayAsset struct {
 	// Borrower is the account address repaying a loan and the signer
@@ -791,7 +791,7 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// Supply defines a method for supplying coins to the capital facility.
 	Supply(ctx context.Context, in *MsgSupply, opts ...grpc.CallOption) (*MsgSupplyResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously loaned coins from
+	// WithdrawAsset defines a method for withdrawing previously supplied coins from
 	// the capital facility.
 	WithdrawAsset(ctx context.Context, in *MsgWithdrawAsset, opts ...grpc.CallOption) (*MsgWithdrawAssetResponse, error)
 	// AddCollateral defines a method for users to enable selected uTokens
@@ -885,7 +885,7 @@ func (c *msgClient) Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grp
 type MsgServer interface {
 	// Supply defines a method for supplying coins to the capital facility.
 	Supply(context.Context, *MsgSupply) (*MsgSupplyResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously loaned coins from
+	// WithdrawAsset defines a method for withdrawing previously supplied coins from
 	// the capital facility.
 	WithdrawAsset(context.Context, *MsgWithdrawAsset) (*MsgWithdrawAssetResponse, error)
 	// AddCollateral defines a method for users to enable selected uTokens
