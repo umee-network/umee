@@ -110,7 +110,7 @@ type Token struct {
 	// list of allowed tokens.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
 	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows supplying and setting a collateral using this token. Note that
+	// Allows supplying for lending or collateral using this token. Note that
 	// withdrawing is always enabled. Disabling supplying would be one step in
 	// phasing out an asset type.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`

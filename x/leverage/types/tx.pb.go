@@ -29,8 +29,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgSupply represents a user's request to supply a base asset type to the
-// module.
+// MsgSupply is the request structure for the Supply RPC.
 type MsgSupply struct {
 	// Supplier is the account address supplying assets and the signer of the message.
 	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
@@ -789,7 +788,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// Supply defines a method for supplying coins to the capital facility.
+	// Supply moves tokens from user balance to the module balance for lending or collateral.
 	Supply(ctx context.Context, in *MsgSupply, opts ...grpc.CallOption) (*MsgSupplyResponse, error)
 	// WithdrawAsset defines a method for withdrawing previously supplied coins from
 	// the capital facility.
@@ -883,7 +882,7 @@ func (c *msgClient) Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grp
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// Supply defines a method for supplying coins to the capital facility.
+	// Supply moves tokens from user balance to the module balance for lending or collateral.
 	Supply(context.Context, *MsgSupply) (*MsgSupplyResponse, error)
 	// WithdrawAsset defines a method for withdrawing previously supplied coins from
 	// the capital facility.
