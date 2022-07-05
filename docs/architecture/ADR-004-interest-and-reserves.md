@@ -15,7 +15,7 @@ Accepted
 Borrow positions on Umee accrue interest over time.
 When interest accrues, the sum of all assets owed by all users increases for each borrowed token denomination. The amount of that increase serves to benefit lenders (by increasing the token:uToken exchange rate), and also to increase the amount of base assets the Umee system holds in reserve.
 
-The mechanism by which interest is calculated, and then split between incentivizing lenders as per [ADR-001](./ADR-001-uToken-interest.md) and reserves as defined in this ADR, will follow.
+The mechanism by which interest is calculated, and then split between incentivizing lenders as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
 
 ## Decision
 
