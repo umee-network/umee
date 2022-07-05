@@ -92,8 +92,8 @@ Amounts are `uToken` balances, exact integers which will not experience rounding
 On receiving a `MsgLock`, the module must perform the following steps:
 
 - Validate tier and uToken amount
-- Verify supplier has sufficient unlocked uTokens
-- Distribute the supplier's current `x/incentive` rewards for the selected denom and tier, if any
+- Verify user has sufficient unlocked uTokens
+- Distribute the user's current `x/incentive` rewards for the selected denom and tier, if any
 - Record the new locked utoken amount for the selected denom and tier
 
 See later sections for reward mechanics - it is mathematically necessary to update pending rewards when updating locked amounts.
@@ -101,8 +101,8 @@ See later sections for reward mechanics - it is mathematically necessary to upda
 On receiving a `MsgUnlock`, the module must perform the following steps:
 
 - Validate tier and uToken amount
-- Verify supplier has sufficient locked uTokens of the selected tier that are not currently unlocking
-- Start an unlocking for the supplier in question
+- Verify user has sufficient locked uTokens of the selected tier that are not currently unlocking
+- Start an unlocking for the user in question
 
 Unlockings are defined as a struct:
 ```go
@@ -130,7 +130,7 @@ MaxUnlockings uint32
 
 When an unlocking period ends, the restrictions on withdrawing and disabling collateral release, but the `uTokens` remain in the `x/leverage` module account as collateral. Since no transfer occurs at the moment funds unlock, there is no need for any action in `EndBlock`.
 
-Completed unlockings for an address are cleared from state the next time withdraw restrictions are calculated during a transaction - that is, during a `MsgLock`, `MsgUnlock`, `MsgWithdraw`, `MsgSetCollateral` sent by the supplier, or a `MsgLiquidate` where the supplier is being liquidated.
+Completed unlockings for an address are cleared from state the next time withdraw restrictions are calculated during a transaction - that is, during a `MsgLock`, `MsgUnlock`, `MsgWithdraw`, `MsgSetCollateral` sent by the user, or a `MsgLiquidate` where the user is being liquidated.
 
 Any collateral can potentially be seized during `MsgLiquidate`, whether it is locked, unlocking, or unlocked. In the event that the target of liquidation has collateral in various such states, it will be liquidated in this order:
 1) Unlocked collateral
@@ -215,7 +215,7 @@ type MsgClaim struct {
 }
 ```
 
-This message type gathers `PendingRewards` by updating `RewardBasis` for each nonzero `Locked(addr,denom,tier)` associated with the supplier's address, then claims all pending rewards.
+This message type gathers `PendingRewards` by updating `RewardBasis` for each nonzero `Locked(addr,denom,tier)` associated with the user's address, then claims all pending rewards.
 
 ### Funding Programs
 

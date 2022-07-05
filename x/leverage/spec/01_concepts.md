@@ -26,7 +26,7 @@ Users have the following actions available to them:
 
   Additionally, for assets denominations already enabled as collateral, the lent assets immediately become collateral as well, causing their borrow limit to increase.
 
-  If a supplier is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
+  If a user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
 
   Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly lent assets will be eligible for liquidation immediately.
 

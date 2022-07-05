@@ -100,7 +100,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
-// setupAccount executes some common boilerplate before a test, where a supplier account is given tokens of a given denom,
+// setupAccount executes some common boilerplate before a test, where a user account is given tokens of a given denom,
 // may also supply them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.
 func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmount, borrowAmount int64, collateral bool) sdk.AccAddress {
 	// create a unique address
@@ -146,9 +146,9 @@ func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmou
 }
 
 func (s *IntegrationTestSuite) TestSupply_InvalidAsset() {
-	supplierAddr := sdk.AccAddress([]byte("addr________________"))
-	supplierAcc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, supplierAddr)
-	s.app.AccountKeeper.SetAccount(s.ctx, supplierAcc)
+	addr := sdk.AccAddress([]byte("addr________________"))
+	acc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, addr)
+	s.app.AccountKeeper.SetAccount(s.ctx, acc)
 
 	// create coins of an unregistered base asset type "uabcd"
 	invalidCoin := sdk.NewInt64Coin("uabcd", 1000000000) // 1k abcd
@@ -156,26 +156,26 @@ func (s *IntegrationTestSuite) TestSupply_InvalidAsset() {
 
 	// mint and send coins
 	s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName, invalidCoins))
-	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, supplierAddr, invalidCoins))
+	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, addr, invalidCoins))
 
 	// supplying should fail as we have not registered token "uabcd"
-	err := s.app.LeverageKeeper.Supply(s.ctx, supplierAddr, invalidCoin)
+	err := s.app.LeverageKeeper.Supply(s.ctx, addr, invalidCoin)
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestSupply_Valid() {
 	app, ctx := s.app, s.ctx
 
-	supplierAddr := sdk.AccAddress([]byte("addr________________1234"))
-	supplierAcc := app.AccountKeeper.NewAccountWithAddress(ctx, supplierAddr)
-	app.AccountKeeper.SetAccount(ctx, supplierAcc)
+	addr := sdk.AccAddress([]byte("addr________________1234"))
+	acc := app.AccountKeeper.NewAccountWithAddress(ctx, addr)
+	app.AccountKeeper.SetAccount(ctx, acc)
 
 	// mint and send coins
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, supplierAddr, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
 	// supply asset
-	err := s.app.LeverageKeeper.Supply(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
@@ -184,27 +184,27 @@ func (s *IntegrationTestSuite) TestSupply_Valid() {
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
 
-	// verify the supplier's balances
-	tokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify the user's balances
+	tokenBalance := app.BankKeeper.GetBalance(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(initTokens.Sub(sdk.NewInt(1000000000)), tokenBalance.Amount)
 
-	uTokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, uTokenDenom)
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, addr, uTokenDenom)
 	s.Require().Equal(int64(1000000000), uTokenBalance.Amount.Int64())
 }
 
 func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 	app, ctx := s.app, s.ctx
 
-	supplierAddr := sdk.AccAddress([]byte("addr________________"))
-	supplierAcc := app.AccountKeeper.NewAccountWithAddress(ctx, supplierAddr)
-	app.AccountKeeper.SetAccount(ctx, supplierAcc)
+	addr := sdk.AccAddress([]byte("addr________________"))
+	acc := app.AccountKeeper.NewAccountWithAddress(ctx, addr)
+	app.AccountKeeper.SetAccount(ctx, acc)
 
 	// mint and send coins
 	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, supplierAddr, initCoins))
+	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
 	// supply asset
-	err := s.app.LeverageKeeper.Supply(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
@@ -215,18 +215,18 @@ func (s *IntegrationTestSuite) TestWithdrawAsset_Valid() {
 
 	// withdraw the total amount of assets loaned
 	uToken := expected
-	err = s.app.LeverageKeeper.WithdrawAsset(ctx, supplierAddr, uToken)
+	err = s.app.LeverageKeeper.WithdrawAsset(ctx, addr, uToken)
 	s.Require().NoError(err)
 
 	// verify total supply of the uTokens
 	supply = s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	s.Require().Equal(int64(0), supply.Amount.Int64())
 
-	// verify the supplier's balances
-	tokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify the user's balances
+	tokenBalance := app.BankKeeper.GetBalance(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(initTokens, tokenBalance.Amount)
 
-	uTokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, uTokenDenom)
+	uTokenBalance := app.BankKeeper.GetBalance(ctx, addr, uTokenDenom)
 	s.Require().Equal(int64(0), uTokenBalance.Amount.Int64())
 }
 
@@ -317,12 +317,12 @@ func (s *IntegrationTestSuite) mintAndSupplyAtom(mintTo sdk.AccAddress, amountTo
 		sdk.NewCoins(sdk.NewInt64Coin(atomIBCDenom, amountToMint)), // amountToMint Atom,
 	))
 
-	// supplier supplies amountToSupply atom and receives amountToSupply u/atom
+	// user supplies amountToSupply atom and receives amountToSupply u/atom
 	supplyCoin := sdk.NewInt64Coin(atomIBCDenom, amountToSupply)
 	err := s.app.LeverageKeeper.Supply(ctx, mintTo, supplyCoin)
 	s.Require().NoError(err)
 
-	// supplier enables u/atom as collateral
+	// user enables u/atom as collateral
 	collat, err := s.app.LeverageKeeper.ExchangeToken(ctx, supplyCoin)
 	s.Require().NoError(err)
 	err = s.app.LeverageKeeper.AddCollateral(ctx, mintTo, collat)
@@ -330,17 +330,17 @@ func (s *IntegrationTestSuite) mintAndSupplyAtom(mintTo sdk.AccAddress, amountTo
 }
 
 func (s *IntegrationTestSuite) TestBorrowAsset_Invalid() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
-	// supplier attempts to borrow 200 u/umee, fails because uTokens cannot be borrowed
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000))
+	// user attempts to borrow 200 u/umee, fails because uTokens cannot be borrowed
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000))
 	s.Require().Error(err)
 
-	// supplier attempts to borrow 200 abcd, fails because "abcd" is not a valid denom
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin("uabcd", 200000000))
+	// user attempts to borrow 200 abcd, fails because "abcd" is not a valid denom
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin("uabcd", 200000000))
 	s.Require().Error(err)
 }
 
@@ -357,96 +357,96 @@ func (s *IntegrationTestSuite) TestBorrowAsset_InsufficientCollateral() {
 
 func (s *IntegrationTestSuite) TestBorrowAsset_InsufficientLendingPool() {
 	// Any user from the init scenario can perform this test, because it errors on module balance
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
-	// supplier attempts to borrow 20000 umee, fails because of insufficient module account balance
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000000))
+	// user attempts to borrow 20000 umee, fails because of insufficient module account balance
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000000))
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestRepayAsset_Invalid() {
 	// Any user from the init scenario can be used for this test.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
-	// supplier attempts to repay 200 abcd, fails because "abcd" is not an accepted asset type
-	_, err := s.app.LeverageKeeper.RepayAsset(s.ctx, supplierAddr, sdk.NewInt64Coin("uabcd", 200000000))
+	// user attempts to repay 200 abcd, fails because "abcd" is not an accepted asset type
+	_, err := s.app.LeverageKeeper.RepayAsset(s.ctx, addr, sdk.NewInt64Coin("uabcd", 200000000))
 	s.Require().Error(err)
 
-	// supplier attempts to repay 200 u/umee, fails because utokens are not loanable assets
-	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, supplierAddr, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000))
+	// user attempts to repay 200 u/umee, fails because utokens are not loanable assets
+	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, addr, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000))
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestBorrowAsset_Valid() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
-	// supplier borrows 20 umee
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	// user borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 	s.Require().NoError(err)
 
-	// verify supplier's new loan amount in the correct denom (20 umee)
-	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount in the correct denom (20 umee)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 
-	// verify supplier's total loan balance (sdk.Coins) is also 20 umee (no other coins present)
-	totalLoanBalance := s.app.LeverageKeeper.GetBorrowerBorrows(s.ctx, supplierAddr)
+	// verify user's total loan balance (sdk.Coins) is also 20 umee (no other coins present)
+	totalLoanBalance := s.app.LeverageKeeper.GetBorrowerBorrows(s.ctx, addr)
 	s.Require().Equal(totalLoanBalance, sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 20000000)))
 
-	// verify supplier's new umee balance (10 - 1k from initial + 20 from loan = 9020 umee)
-	tokenBalance := s.app.BankKeeper.GetBalance(s.ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new umee balance (10 - 1k from initial + 20 from loan = 9020 umee)
+	tokenBalance := s.app.BankKeeper.GetBalance(s.ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9020000000))
 
-	// verify supplier's uToken balance remains at 0 u/umee from initial conditions
-	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
 
-	// verify supplier's uToken collateral remains at 1000 u/umee from initial conditions
-	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 }
 
 func (s *IntegrationTestSuite) TestBorrowAsset_BorrowLimit() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
-	// determine an amount of umee to borrow, such that the supplier will be at about 90% of their borrow limit
+	// determine an amount of umee to borrow, such that the user will be at about 90% of their borrow limit
 	token, _ := s.app.LeverageKeeper.GetTokenSettings(s.ctx, umeeapp.BondDenom)
 	uDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, umeeapp.BondDenom)
-	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, uDenom)
+	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, uDenom)
 	amountToBorrow := token.CollateralWeight.Mul(sdk.MustNewDecFromStr("0.9")).MulInt(collateral.Amount).TruncateInt()
 
-	// supplier borrows umee up to 90% of their borrow limit
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewCoin(umeeapp.BondDenom, amountToBorrow))
+	// user borrows umee up to 90% of their borrow limit
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewCoin(umeeapp.BondDenom, amountToBorrow))
 	s.Require().NoError(err)
 
-	// supplier tries to borrow the same amount again, fails due to borrow limit
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewCoin(umeeapp.BondDenom, amountToBorrow))
+	// user tries to borrow the same amount again, fails due to borrow limit
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewCoin(umeeapp.BondDenom, amountToBorrow))
 	s.Require().Error(err)
 
-	// supplier tries to disable u/umee as collateral, fails due to borrow limit
-	err = s.app.LeverageKeeper.RemoveCollateral(s.ctx, supplierAddr, sdk.NewCoin(uDenom, collateral.Amount))
+	// user tries to disable u/umee as collateral, fails due to borrow limit
+	err = s.app.LeverageKeeper.RemoveCollateral(s.ctx, addr, sdk.NewCoin(uDenom, collateral.Amount))
 	s.Require().Error(err)
 
-	// supplier tries to withdraw all its u/umee, fails due to borrow limit
-	err = s.app.LeverageKeeper.WithdrawAsset(s.ctx, supplierAddr, sdk.NewCoin(uDenom, collateral.Amount))
+	// user tries to withdraw all its u/umee, fails due to borrow limit
+	err = s.app.LeverageKeeper.WithdrawAsset(s.ctx, addr, sdk.NewCoin(uDenom, collateral.Amount))
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// artifically reserve 200 umee
 	err := s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 	s.Require().NoError(err)
 
-	// Note: Setting umee collateral weight to 1.0 to allow supplier to borrow heavily
+	// Note: Setting umee collateral weight to 1.0 to allow user to borrow heavily
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1.0")
@@ -455,116 +455,116 @@ func (s *IntegrationTestSuite) TestBorrowAsset_Reserved() {
 
 	// Supplier tries to borrow 1000 umee, insufficient balance because 200 of the
 	// module's 1000 umee are reserved.
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
 	s.Require().Error(err)
 
-	// supplier borrows 800 umee
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 800000000))
+	// user borrows 800 umee
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 800000000))
 	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TestRepayAsset_Valid() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 	app, ctx := s.app, s.ctx
 
-	// supplier borrows 20 umee
-	err := s.app.LeverageKeeper.BorrowAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	// user borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 	s.Require().NoError(err)
 
-	// supplier repays 8 umee
-	repaid, err := s.app.LeverageKeeper.RepayAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 8000000))
+	// user repays 8 umee
+	repaid, err := s.app.LeverageKeeper.RepayAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 8000000))
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(8000000), repaid)
 
-	// verify supplier's new loan amount (12 umee)
-	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount (12 umee)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 12000000))
 
-	// verify supplier's new umee balance (10 - 1k from initial + 20 from loan - 8 repaid = 9012 umee)
-	tokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new umee balance (10 - 1k from initial + 20 from loan - 8 repaid = 9012 umee)
+	tokenBalance := app.BankKeeper.GetBalance(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9012000000))
 
-	// verify supplier's uToken balance remains at 0 u/umee from initial conditions
-	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
 
-	// verify supplier's uToken collateral remains at 1000 u/umee from initial conditions
-	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 
-	// supplier repays 12 umee (loan repaid in full)
-	repaid, err = s.app.LeverageKeeper.RepayAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 12000000))
+	// user repays 12 umee (loan repaid in full)
+	repaid, err = s.app.LeverageKeeper.RepayAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 12000000))
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(12000000), repaid)
 
-	// verify supplier's new loan amount in the correct denom (zero)
-	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount in the correct denom (zero)
+	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
-	// verify supplier's new umee balance (10 - 1k from initial + 20 from loan - 20 repaid = 9000 umee)
-	tokenBalance = app.BankKeeper.GetBalance(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new umee balance (10 - 1k from initial + 20 from loan - 20 repaid = 9000 umee)
+	tokenBalance = app.BankKeeper.GetBalance(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9000000000))
 
-	// verify supplier's uToken balance remains at 0 u/umee from initial conditions
-	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
 
-	// verify supplier's uToken collateral remains at 1000 u/umee from initial conditions
-	collateralBalance = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 }
 
 func (s *IntegrationTestSuite) TestRepayAsset_Overpay() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 	app, ctx := s.app, s.ctx
 
-	// supplier borrows 20 umee
-	err := s.app.LeverageKeeper.BorrowAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	// user borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 	s.Require().NoError(err)
 
-	// supplier repays 30 umee - should automatically reduce to 20 (the loan amount) and succeed
+	// user repays 30 umee - should automatically reduce to 20 (the loan amount) and succeed
 	coinToRepay := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000)
-	repaid, err := s.app.LeverageKeeper.RepayAsset(ctx, supplierAddr, coinToRepay)
+	repaid, err := s.app.LeverageKeeper.RepayAsset(ctx, addr, coinToRepay)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(20000000), repaid)
 
 	// verify that coinToRepay has not been modified
 	s.Require().Equal(sdk.NewInt(30000000), coinToRepay.Amount)
 
-	// verify supplier's new loan amount is 0 umee
-	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount is 0 umee
+	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
-	// verify supplier's new umee balance (10 - 1k from initial + 20 from loan - 20 repaid = 9000 umee)
-	tokenBalance := app.BankKeeper.GetBalance(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new umee balance (10 - 1k from initial + 20 from loan - 20 repaid = 9000 umee)
+	tokenBalance := app.BankKeeper.GetBalance(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9000000000))
 
-	// verify supplier's uToken balance remains at 0 u/umee from initial conditions
-	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken balance remains at 0 u/umee from initial conditions
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 0))
 
-	// verify supplier's uToken collateral remains at 1000 u/umee from initial conditions
-	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, "u/"+umeeapp.BondDenom)
+	// verify user's uToken collateral remains at 1000 u/umee from initial conditions
+	collateralBalance := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, "u/"+umeeapp.BondDenom)
 	s.Require().Equal(collateralBalance, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 1000000000))
 
-	// supplier repays 50 umee - this time it fails because the loan no longer exists
-	_, err = s.app.LeverageKeeper.RepayAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
+	// user repays 50 umee - this time it fails because the loan no longer exists
+	_, err = s.app.LeverageKeeper.RepayAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 50000000))
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 	app, ctx := s.app, s.ctx
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral.
 
-	// supplier borrows 90 umee
-	err := s.app.LeverageKeeper.BorrowAsset(ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 90000000))
+	// user borrows 90 umee
+	err := s.app.LeverageKeeper.BorrowAsset(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 90000000))
 	s.Require().NoError(err)
 
 	// create an account and address which will represent a liquidator
@@ -580,12 +580,12 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 		sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 10000000000)), // 10k umee,
 	))
 
-	// liquidator attempts to liquidate supplier, but supplier is ineligible (not over borrow limit)
+	// liquidator attempts to liquidate user, but user is ineligible (not over borrow limit)
 	// liquidator does not specify a minimum reward (hence 0 u/umee)
 	repayment := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000) // 30 umee
 	rewardDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(ctx, umeeapp.BondDenom)
 	unrestrictedReward := sdk.NewInt64Coin(umeeapp.BondDenom, 0) // 0 umee (rewardDenom = u/umee)
-	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, supplierAddr, repayment, unrestrictedReward)
+	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, unrestrictedReward)
 	s.Require().Error(err)
 
 	// Note: Setting umee collateral weight to 0.0 to allow liquidation
@@ -595,21 +595,21 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
-	// liquidator attempts to liquidate supplier, but specifies too high of a minimum reward
+	// liquidator attempts to liquidate user, but specifies too high of a minimum reward
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000)        // 10 umee
 	excessiveReward := sdk.NewInt64Coin(umeeapp.BondDenom, 20000000) // 20 umee (rewardDenom = u/umee)
-	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, supplierAddr, repayment, excessiveReward)
+	_, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, excessiveReward)
 	s.Require().Error(err)
 
-	// liquidator partially liquidates supplier, receiving some collateral
+	// liquidator partially liquidates user, receiving some collateral
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
-	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, supplierAddr, repayment, unrestrictedReward)
+	repaid, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, unrestrictedReward)
 	s.Require().NoError(err)
 	s.Require().Equal(repayment.Amount, repaid)
 	s.Require().Equal(sdk.NewInt(11000000), reward)
 
-	// verify supplier's new loan amount is 80 umee (still over borrow limit)
-	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount is 80 umee (still over borrow limit)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance.String(), sdk.NewInt64Coin(umeeapp.BondDenom, 80000000).String())
 
 	// verify liquidator's new u/umee balance = 11 = (10 + liquidation incentive)
@@ -620,9 +620,9 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	tokenBalance := app.BankKeeper.GetBalance(ctx, liquidatorAddr, umeeapp.BondDenom)
 	s.Require().Equal(tokenBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 9990000000))
 
-	// liquidator fully liquidates supplier, receiving more collateral and reducing borrowed amount to zero
+	// liquidator fully liquidates user, receiving more collateral and reducing borrowed amount to zero
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 300000000) // 300 umee
-	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, supplierAddr, repayment, unrestrictedReward)
+	repaid, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, unrestrictedReward)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt(80000000), repaid)
 	s.Require().Equal(sdk.NewInt(88000000), reward)
@@ -634,8 +634,8 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	uTokenBalance = app.BankKeeper.GetBalance(ctx, liquidatorAddr, rewardDenom)
 	s.Require().Equal(uTokenBalance, sdk.NewInt64Coin(rewardDenom, 99000000))
 
-	// verify supplier's new loan amount is zero
-	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's new loan amount is zero
+	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 0))
 
 	// verify liquidator's new umee balance (10k - 90) = 9910 umee
@@ -723,14 +723,14 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
-	// supplier borrows 40 umee
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
+	// user borrows 40 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
 	s.Require().NoError(err)
 
-	// verify supplier's loan amount (40 umee)
-	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's loan amount (40 umee)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
 
 	// Because no time has passed since genesis (due to test setup) this will not
@@ -738,8 +738,8 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	err = s.app.LeverageKeeper.AccrueAllInterest(s.ctx)
 	s.Require().NoError(err)
 
-	// verify supplier's loan amount (40 umee)
-	loanBalance = s.app.LeverageKeeper.GetBorrow(s.ctx, supplierAddr, umeeapp.BondDenom)
+	// verify user's loan amount (40 umee)
+	loanBalance = s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
 	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
 
 	// borrow APY at utilization = 4%
@@ -758,7 +758,7 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 func (s *IntegrationTestSuite) TestDynamicInterest() {
 	// Init scenario is being used because the module account (lending pool)
 	// already has 1000 umee.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")     // to allow high utilization
@@ -770,16 +770,16 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	rate := s.app.LeverageKeeper.DeriveBorrowAPY(s.ctx, umeeapp.BondDenom)
 	s.Require().Equal(rate, sdk.MustNewDecFromStr("0.02"))
 
-	// supplier borrows 200 umee, utilization 200/1000
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	// user borrows 200 umee, utilization 200/1000
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
 	s.Require().NoError(err)
 
 	// Between base interest and kink (20% utilization)
 	rate = s.app.LeverageKeeper.DeriveBorrowAPY(s.ctx, umeeapp.BondDenom)
 	s.Require().Equal(rate, sdk.MustNewDecFromStr("0.07"))
 
-	// supplier borrows 600 more umee, utilization 800/1000
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 600000000))
+	// user borrows 600 more umee, utilization 800/1000
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 600000000))
 	s.Require().NoError(err)
 
 	// Kink interest rate (80% utilization)
@@ -787,8 +787,8 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.MustNewDecFromStr("0.22"))
 
-	// supplier borrows 100 more umee, utilization 900/1000
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	// user borrows 100 more umee, utilization 900/1000
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
 	s.Require().NoError(err)
 
 	// Between kink interest and max (90% utilization)
@@ -796,8 +796,8 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.MustNewDecFromStr("0.87"))
 
-	// supplier borrows 100 more umee, utilization 1000/1000
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	// user borrows 100 more umee, utilization 1000/1000
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
 	s.Require().NoError(err)
 
 	// Max interest rate (100% utilization)
@@ -814,43 +814,43 @@ func (s *IntegrationTestSuite) TestDynamicInterest_InvalidAsset() {
 func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee enabled as collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
-	// supplier borrows 100 umee (max current allowed) supplier amount enabled as collateral * CollateralWeight
+	// user borrows 100 umee (max current allowed) user amount enabled as collateral * CollateralWeight
 	// = 1000 * 0.1
 	// = 100
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
 	s.Require().NoError(err)
 
 	zeroAddresses, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
 	s.Require().Equal([]sdk.AccAddress{}, zeroAddresses)
 
-	// Note: Setting umee liquidation threshold to 0.05 to make the supplier eligible to liquidation
+	// Note: Setting umee liquidation threshold to 0.05 to make the user eligible to liquidation
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
 
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
-	supplierAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	targetAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal([]sdk.AccAddress{supplierAddr}, supplierAddress)
+	s.Require().Equal([]sdk.AccAddress{addr}, targetAddress)
 
 	// if it tries to borrow any other asset it should return an error
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(atomIBCDenom, 1))
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(atomIBCDenom, 1))
 	s.Require().Error(err)
 }
 
 func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset() {
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee enabled as collateral.
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
-	// supplier borrows 100 umee (max current allowed) supplier amount enabled as collateral * CollateralWeight
+	// user borrows 100 umee (max current allowed) user amount enabled as collateral * CollateralWeight
 	// = 1000 * 0.1
 	// = 100
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 100000000))
 	s.Require().NoError(err)
 
 	zeroAddresses, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
@@ -860,33 +860,33 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	mintAmountAtom := int64(100000000)  // 100 atom
 	supplyAmountAtom := int64(50000000) // 50 atom
 
-	// mints and send to supplier 100 atom and already
+	// mints and send to user 100 atom and already
 	// enable 50 u/atom as collateral.
-	s.mintAndSupplyAtom(supplierAddr, mintAmountAtom, supplyAmountAtom)
+	s.mintAndSupplyAtom(addr, mintAmountAtom, supplyAmountAtom)
 
-	// supplier borrows 4 atom (max current allowed - 1) supplier amount enabled as collateral * CollateralWeight
+	// user borrows 4 atom (max current allowed - 1) user amount enabled as collateral * CollateralWeight
 	// = (50 * 0.1) - 1
 	// = 4
-	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
+	err = s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(atomIBCDenom, 4000000)) // 4 atom
 	s.Require().NoError(err)
 
-	// Note: Setting umee liquidation threshold to 0.05 to make the supplier eligible for liquidation
+	// Note: Setting umee liquidation threshold to 0.05 to make the user eligible for liquidation
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
 
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
-	// Note: Setting atom collateral weight to 0.01 to make the supplier eligible for liquidation
+	// Note: Setting atom collateral weight to 0.01 to make the user eligible for liquidation
 	atomIBCToken := newToken(atomIBCDenom, "ATOM")
 	atomIBCToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
 	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
 
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, atomIBCToken))
 
-	supplierAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
+	targetAddr, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
-	s.Require().Equal([]sdk.AccAddress{supplierAddr}, supplierAddress)
+	s.Require().Equal([]sdk.AccAddress{addr}, targetAddr)
 }
 
 func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
@@ -947,7 +947,7 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
@@ -959,7 +959,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 
 	// withdraw the supplyed umee in the initBorrowScenario
-	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
+	err := s.app.LeverageKeeper.WithdrawAsset(s.ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
 	s.Require().NoError(err)
 
 	// check invariant
@@ -968,22 +968,22 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
-	supplierAddr, _ := s.initBorrowScenario()
+	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
 	// already has 1k u/umee for collateral
 
-	// supplier borrows 20 umee
-	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	// user borrows 20 umee
+	err := s.app.LeverageKeeper.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
 	s.Require().NoError(err)
 
 	// check invariant
 	_, broken := keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
 
-	// supplier repays 30 umee, actually only 20 because is the min between
+	// user repays 30 umee, actually only 20 because is the min between
 	// the amount borrowed and the amount repaid
-	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, supplierAddr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
+	_, err = s.app.LeverageKeeper.RepayAsset(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
 	s.Require().NoError(err)
 
 	// check invariant

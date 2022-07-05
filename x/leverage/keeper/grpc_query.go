@@ -139,13 +139,13 @@ func (q Querier) Loaned(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	supplier, err := sdk.AccAddressFromBech32(req.Address)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(req.Denom) == 0 {
-		tokens, err := q.Keeper.GetSupplierLoaned(ctx, supplier)
+		tokens, err := q.Keeper.GetSupplierLoaned(ctx, addr)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +157,7 @@ func (q Querier) Loaned(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	token, err := q.Keeper.GetLoaned(ctx, supplier, req.Denom)
+	token, err := q.Keeper.GetLoaned(ctx, addr, req.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (q Querier) LoanedValue(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	supplier, err := sdk.AccAddressFromBech32(req.Address)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (q Querier) LoanedValue(
 	var tokens sdk.Coins
 
 	if len(req.Denom) == 0 {
-		tokens, err = q.Keeper.GetSupplierLoaned(ctx, supplier)
+		tokens, err = q.Keeper.GetSupplierLoaned(ctx, addr)
 		if err != nil {
 			return nil, err
 		}
@@ -195,7 +195,7 @@ func (q Querier) LoanedValue(
 			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 		}
 
-		loaned, err := q.Keeper.GetLoaned(ctx, supplier, req.Denom)
+		loaned, err := q.Keeper.GetLoaned(ctx, addr, req.Denom)
 		if err != nil {
 			return nil, err
 		}
@@ -394,7 +394,7 @@ func (q Querier) CollateralValue(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	supplier, err := sdk.AccAddressFromBech32(req.Address)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -402,13 +402,13 @@ func (q Querier) CollateralValue(
 	var uTokens sdk.Coins
 
 	if len(req.Denom) == 0 {
-		uTokens = q.Keeper.GetBorrowerCollateral(ctx, supplier)
+		uTokens = q.Keeper.GetBorrowerCollateral(ctx, addr)
 	} else {
 		if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
 			return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
 		}
 
-		collateral := q.Keeper.GetCollateralAmount(ctx, supplier, req.Denom)
+		collateral := q.Keeper.GetCollateralAmount(ctx, addr, req.Denom)
 		uTokens = sdk.NewCoins(collateral)
 	}
 

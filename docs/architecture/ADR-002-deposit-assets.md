@@ -71,7 +71,7 @@ The `sdk.Coins` type is a slice (ordered list) of `sdk.Coin` which contains a de
 Asset Facility deposit functionality is provided by the two following message types:
 
 ```go
-// MsgSupply - a supplier wishes to deposit assets and receive uAssets
+// MsgSupply - a user wishes to deposit assets and receive uAssets
 type MsgSupply struct {
   Supplier sdk.AccAddress `json:"supplier" yaml:"supplier"`
   Amount sdk.Coin       `json:"amount" yaml:"amount"`

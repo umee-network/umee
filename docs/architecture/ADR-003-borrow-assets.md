@@ -88,7 +88,7 @@ Let's say we have 1000A (token A) supplied to the system. Below let's consider a
 
 High collateral utilization is dangerous for the system:
 
-- When collateral utilization is above 1, suppliers may not be able to withdraw their the liquidated collateral.
+- When collateral utilization is above 1, liquidators may not be able to withdraw their the liquidated collateral.
 - Liquidators, when liquidating a borrower, they get into position their _uToken_.
 In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying token).
 However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits.
