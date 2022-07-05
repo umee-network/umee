@@ -120,11 +120,11 @@ func TestToken_Validate(t *testing.T) {
 	invalidBlacklistedLend.EnableMsgBorrow = false
 	invalidBlacklistedLend.Blacklist = true
 
-	invalidMaxCollateralSupply := validToken()
-	invalidMaxCollateralSupply.MaxCollateralShare = 101
+	invalidMaxCollateralShare := validToken()
+	invalidMaxCollateralShare.MaxCollateralShare = 101
 
-	validMaxCollateralSupply := validToken()
-	validMaxCollateralSupply.MaxCollateralShare = 100
+	validMaxCollateralShare := validToken()
+	validMaxCollateralShare.MaxCollateralShare = 100
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -180,12 +180,12 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidBlacklistedBorrow,
 			expectErr: true,
 		},
-		"invalid max collateral supply": {
-			input:     invalidMaxCollateralSupply,
+		"invalid max collateral share": {
+			input:     invalidMaxCollateralShare,
 			expectErr: true,
 		},
-		"valid max collateral supply": {
-			input:     validMaxCollateralSupply,
+		"valid max collateral share": {
+			input:     validMaxCollateralShare,
 			expectErr: false,
 		},
 	}
