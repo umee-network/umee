@@ -49,5 +49,6 @@ type Token struct {
     EnableMsgSupply      bool
     EnableMsgBorrow      bool
     Blacklist            bool
+    MaxCollateralShare   uint32
 }
 ```
