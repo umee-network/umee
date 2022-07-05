@@ -80,7 +80,7 @@ func (s msgServer) WithdrawAsset(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeWithdrawSuppliedAsset,
+			types.EventTypeWithdrawAsset,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
 		),

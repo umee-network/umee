@@ -156,7 +156,7 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawSuppliedAsset, "skip all transfers"), nil, nil
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawAsset, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgWithdrawAsset(from.Address, withdrawUToken)
@@ -167,7 +167,7 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:           nil,
 			Msg:           msg,
-			MsgType:       types.EventTypeWithdrawSuppliedAsset,
+			MsgType:       types.EventTypeWithdrawAsset,
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,

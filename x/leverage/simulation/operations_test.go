@@ -137,7 +137,7 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		opMsgName  string
 	}{
 		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeLoanAsset},
-		{simulation.DefaultWeightMsgWithdrawAsset, types.ModuleName, types.EventTypeWithdrawSuppliedAsset},
+		{simulation.DefaultWeightMsgWithdrawAsset, types.ModuleName, types.EventTypeWithdrawAsset},
 		{simulation.DefaultWeightMsgBorrowAsset, types.ModuleName, types.EventTypeBorrowAsset},
 		{simulation.DefaultWeightMsgAddCollateral, types.ModuleName, types.EventTypeAddCollateral},
 		{simulation.DefaultWeightMsgRemoveCollateral, types.ModuleName, types.EventTypeRemoveCollateral},
@@ -195,7 +195,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeWithdrawSuppliedAsset, msg.Type())
+	s.Require().Equal(types.EventTypeWithdrawAsset, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Amount.String())
 	s.Require().Len(futureOperations, 0)
 }
