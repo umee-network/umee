@@ -501,6 +501,18 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		testQuery{
+			"query total borrowed - denom",
+			cli.GetCmdQueryTotalBorrowed(),
+			[]string{
+				"uumee",
+			},
+			false,
+			&types.QueryTotalBorrowedResponse{},
+			&types.QueryTotalBorrowedResponse{
+				Amount: sdk.NewInt(47),
+			},
+		},
+		testQuery{
 			"query collateral - all",
 			cli.GetCmdQueryCollateral(),
 			[]string{
@@ -527,6 +539,18 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Collateral: sdk.NewCoins(
 					sdk.NewInt64Coin("u/uumee", 1000),
 				),
+			},
+		},
+		testQuery{
+			"query total collateral - denom",
+			cli.GetCmdQueryTotalCollateral(),
+			[]string{
+				"u/uumee",
+			},
+			false,
+			&types.QueryTotalCollateralResponse{},
+			&types.QueryTotalCollateralResponse{
+				Amount: sdk.NewInt(1000),
 			},
 		},
 		testQuery{
