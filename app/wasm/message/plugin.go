@@ -48,6 +48,8 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 		return smartcontractMessage.HandleBorrowAsset(ctx, plugin.leverageMsgServer)
 	case AssignedMsgRepayAsset:
 		return smartcontractMessage.HandleRepayAsset(ctx, plugin.leverageMsgServer)
+	case AssignedMsgLiquidate:
+		return smartcontractMessage.HandleLiquidate(ctx, plugin.leverageMsgServer)
 	default:
 		return wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
 	}
