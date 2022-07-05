@@ -37,7 +37,7 @@ service Query {
   }
 
   // Supplied queries for the amount of tokens  by a user by denomination.
-  // If the denomination is not specified, the total for each  token is
+  // If the denomination is not specified, the total for each supplied token is
   // returned.
   rpc Supplied(QuerySuppliedRequest) returns (QuerySuppliedResponse) {
     option (google.api.http).get = "/umee/leverage/v1/supplied";
