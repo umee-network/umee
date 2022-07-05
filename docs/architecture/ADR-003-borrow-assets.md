@@ -72,7 +72,7 @@ When it is `N`, it means that only `1/N` of the collateral is available for rede
 
 #### Examples
 
-Let's say we have 1000A (token A) supplied to the system. Below let's consider a state with total amount of A borrowed (B) and total amount of B used as a collateral (C) and computed collateral utilization (CU):
+Let's say we have 1000A (token A) supplied to the system (for lending or collateral). Below let's consider a state with total amount of A borrowed (B) and total amount of B used as a collateral (C) and computed collateral utilization (CU):
 
 1. B=0, C=0 → CU=0
 1. B=0, C=500 → CU=0.5
