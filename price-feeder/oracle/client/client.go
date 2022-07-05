@@ -54,6 +54,7 @@ type (
 )
 
 func NewOracleClient(
+	ctx context.Context,
 	logger zerolog.Logger,
 	chainID string,
 	keyringBackend string,
@@ -99,7 +100,7 @@ func NewOracleClient(
 	}
 
 	chainHeight, err := NewChainHeight(
-		context.Background(),
+		ctx,
 		clientCtx.Client,
 		oracleClient.Logger,
 		blockHeight,
