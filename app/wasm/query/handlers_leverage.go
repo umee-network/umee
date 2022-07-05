@@ -164,6 +164,35 @@ func (umeeQuery UmeeQuery) HandleReserveAmount(
 	return MarshalResponse(resp)
 }
 
+// HandleCollateral gets the collateral amount of a user by token denomination.
+// If the denomination is not supplied, all of the user's collateral tokens
+// are returned.
+func (umeeQuery UmeeQuery) HandleCollateral(
+	ctx sdk.Context,
+	queryServer lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.Collateral(sdk.WrapSDKContext(ctx), umeeQuery.Collateral)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Collateral", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleCollateralValue gets the total USD value of a user's collateral, or
+// the USD value held as a given base asset's associated uToken denomination.
+func (umeeQuery UmeeQuery) HandleCollateralValue(
+	ctx sdk.Context,
+	queryServer lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := queryServer.CollateralValue(sdk.WrapSDKContext(ctx), umeeQuery.CollateralValue)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Collateral Value", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
 // HandleExchangeRate gets calculated the token:uToken exchange
 // rate of a base token denom.
 func (umeeQuery UmeeQuery) HandleExchangeRate(

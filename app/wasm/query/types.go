@@ -48,6 +48,14 @@ const (
 	// AssignedQueryReserveAmount represents the call to query the gets the amount
 	// reserved of a specified token.
 	AssignedQueryReserveAmount
+	// AssignedQueryCollateral represents the call to query the collateral amount
+	// of a user by token denomination. If the denomination is not supplied, all
+	// of the user's collateral tokens are returned.
+	AssignedQueryCollateral
+	// AssignedQueryCollateralValue represents the call to query the total USD
+	// value of a user's collateral, or the USD value held as a given base
+	// asset's associated uToken denomination.
+	AssignedQueryCollateralValue
 	// AssignedQueryExchangeRate represents the call to query and calculate the
 	// token:uToken exchange rate of a base token denom.
 	AssignedQueryExchangeRate
@@ -128,6 +136,13 @@ type UmeeQuery struct {
 	TokenMarketSize *lvtypes.QueryTokenMarketSizeRequest `json:"token_market_size,omitempty"`
 	// Used to gets the amount reserved of a specified token.
 	ReserveAmount *lvtypes.QueryReserveAmountRequest `json:"reserve_amount,omitempty"`
+	// Used to gets the collateral amount of a user by token denomination.
+	// If the denomination is not supplied, all of the user's collateral tokens
+	// are returned.
+	Collateral *lvtypes.QueryCollateralRequest `json:"collateral,omitempty"`
+	// Used to gets the total USD value of a user's collateral, or
+	// the USD value held as a given base asset's associated uToken denomination.
+	CollateralValue *lvtypes.QueryCollateralValueRequest `json:"collateral_value,omitempty"`
 	// Used to calculate the token:uToken exchange rate of a base token denom.
 	ExchangeRate *lvtypes.QueryExchangeRateRequest `json:"exchange_rate,omitempty"`
 	// Uses the price oracle to determine the borrow limit (in USD).

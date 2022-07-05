@@ -65,7 +65,10 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			return smartcontractQuery.HandleTokenMarketSize(ctx, plugin.leverageQueryServer)
 		case AssignedQueryReserveAmount:
 			return smartcontractQuery.HandleReserveAmount(ctx, plugin.leverageQueryServer)
-			// collateral stuffs can go here
+		case AssignedQueryCollateral:
+			return smartcontractQuery.HandleCollateral(ctx, plugin.leverageQueryServer)
+		case AssignedQueryCollateralValue:
+			return smartcontractQuery.HandleCollateralValue(ctx, plugin.leverageQueryServer)
 		case AssignedQueryExchangeRate:
 			return smartcontractQuery.HandleExchangeRate(ctx, plugin.leverageQueryServer)
 		case AssignedQueryBorrowLimit:
