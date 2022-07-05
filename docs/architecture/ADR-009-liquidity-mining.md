@@ -75,13 +75,13 @@ Locking of funds is independent of active incentive programs, and can even be do
 
 ```go
 type MsgLock struct {
-  Supplier sdk.AccAddress
+  User sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
 }
 
 type MsgUnlock struct {
-  Supplier sdk.AccAddress
+  User sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
 }
@@ -107,7 +107,7 @@ On receiving a `MsgUnlock`, the module must perform the following steps:
 Unlockings are defined as a struct:
 ```go
 type CollateralUnlocking struct {
-  Supplier sdk.AccAddress
+  User sdk.AccAddress
   Amount sdk.Coin
   Tier   uint32
   End    uint64
@@ -211,7 +211,7 @@ There will be a message type which manually claims rewards.
 
 ```go
 type MsgClaim struct {
-  Supplier      sdk.AccAddress
+  User      sdk.AccAddress
 }
 ```
 
