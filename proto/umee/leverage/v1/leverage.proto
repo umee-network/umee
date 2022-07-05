@@ -120,7 +120,7 @@ message Token {
   string symbol_denom = 10 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
   uint32 exponent     = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
 
-  // Allows supplying and setting a collateral using this token. Note that
+  // Allows supplying for lending or collateral using this token. Note that
   // withdrawing is always enabled. Disabling supplying would be one step in
   // phasing out an asset type.
   bool enable_msg_supply = 12 [(gogoproto.moretags) = "yaml:\"enable_msg_supply\""];
