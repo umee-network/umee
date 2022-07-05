@@ -111,7 +111,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 }
 
 // WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
-// for the original tokens loaned. Accepts a uToken amount to exchange for base tokens.
+// for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
 // If the uToken denom is invalid or account or module balance insufficient, returns error.
 func (k Keeper) WithdrawAsset(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
 	if !k.IsAcceptedUToken(ctx, coin.Denom) {

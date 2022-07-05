@@ -7,9 +7,9 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// GetLoaned returns an sdk.Coin representing how much of a given denom a
-// supplier has loaned, including interest accrued.
-func (k Keeper) GetLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
+// GetSupplied returns an sdk.Coin representing how much of a given denom a
+// user has supplied, including interest accrued.
+func (k Keeper) GetSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}
@@ -23,9 +23,9 @@ func (k Keeper) GetLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress, denom st
 	return k.ExchangeUToken(ctx, balance.Add(collateral))
 }
 
-// GetSupplierLoaned returns the total tokens loaned by a supplier across all denoms,
-// including any interest accrued.
-func (k Keeper) GetSupplierLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error) {
+// GetAllSupplied returns the total tokens supplied by a user, including
+// any interest accrued.
+func (k Keeper) GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error) {
 	// get all uTokens set as collateral
 	collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 
@@ -42,9 +42,9 @@ func (k Keeper) GetSupplierLoaned(ctx sdk.Context, supplierAddr sdk.AccAddress) 
 	return k.ExchangeUTokens(ctx, collateral.Add(uTokens...))
 }
 
-// GetTotalLoaned returns the total loaned by all suppliers in a given denom,
+// GetTotalSupply returns the total supplied by all suppliers in a given denom,
 // including any interest accrued.
-func (k Keeper) GetTotalLoaned(ctx sdk.Context, denom string) (sdk.Coin, error) {
+func (k Keeper) GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error) {
 	if !k.IsAcceptedToken(ctx, denom) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
 	}

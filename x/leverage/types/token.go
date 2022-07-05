@@ -87,7 +87,7 @@ func (t Token) Validate() error {
 	return nil
 }
 
-// AssertSupplyEnabled returns an error if a token does not exist or cannot be lent.
+// AssertSupplyEnabled returns an error if a token does not exist or cannot be supplied.
 func (t Token) AssertSupplyEnabled() error {
 	if !t.EnableMsgSupply {
 		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)

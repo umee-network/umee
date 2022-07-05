@@ -24,11 +24,11 @@ Users have the following actions available to them:
 
   Suppliers earn interest at an effective rate of the asset's [Supplying APY](01_concepts.md#Supplying-APY) as the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) increases over time.
 
-  Additionally, for assets denominations already enabled as collateral, the lent assets immediately become collateral as well, causing their borrow limit to increase.
+  Additionally, for assets denominations already enabled as collateral, the supplied assets immediately become collateral as well, causing their borrow limit to increase.
 
   If a user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
 
-  Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly lent assets will be eligible for liquidation immediately.
+  Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
 - [Enable or Disable](04_messages.md#MsgSetCollateral) a uToken denomination as collateral for borrowing.
 
@@ -36,7 +36,7 @@ Users have the following actions available to them:
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
-- [Withdraw](04_messages.md#MsgWithdrawAsset) lent assets by turning in uTokens of the associated denomination.
+- [Withdraw](04_messages.md#MsgWithdrawAsset) supplied assets by turning in uTokens of the associated denomination.
 
   Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
@@ -186,6 +186,6 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
 
 ### Market Size
 
-The `MarketSize` of a token denom is the USD value of all tokens loaned to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
+The `MarketSize` of a token denom is the USD value of all tokens supplied to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
 
 `MarketSize(denom) = oracle.Price(denom) * [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`

@@ -47,7 +47,7 @@ func NewMsgWithdrawAsset(supplier sdk.AccAddress, amount sdk.Coin) *MsgWithdrawA
 }
 
 func (msg MsgWithdrawAsset) Route() string { return ModuleName }
-func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawLoanedAsset }
+func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawSuppliedAsset }
 
 func (msg *MsgWithdrawAsset) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())

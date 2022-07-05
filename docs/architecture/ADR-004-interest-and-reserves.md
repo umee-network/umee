@@ -167,7 +167,7 @@ Here is an additional example scenario, to illustrate that the module account ba
 >
 > The module account (lending pool + reserves) still contains 0 `uatom` due to the first two steps. Its `uatom` balance is therefore less than the required 50 `uatom` reserves.
 
-The scenario above is not fatal to our model - Bob (supplier) continues to gain value as the token:uToken exchange rate increases, and we are not storing any negative numbers in place of balances - but the next 50 `uatom` lent by a supplier or repaid by a borrower will be blocked for the reserve requirements rather than being immediately available for borrowing or withdrawal.
+The scenario above is not fatal to our model - Bob (supplier) continues to gain value as the token:uToken exchange rate increases, and we are not storing any negative numbers in place of balances - but the next 50 `uatom` supplied by a supplier or repaid by a borrower will be blocked for the reserve requirements rather than being immediately available for borrowing or withdrawal.
 
 The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% supply utilization.
 

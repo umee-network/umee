@@ -36,7 +36,7 @@ func (s msgServer) Supply(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"assets loaned",
+		"assets supplied",
 		"supplier", supplierAddr.String(),
 		"amount", msg.Amount.String(),
 	)
@@ -73,14 +73,14 @@ func (s msgServer) WithdrawAsset(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"loaned assets withdrawn",
+		"supplied assets withdrawn",
 		"supplier", supplierAddr.String(),
 		"amount", msg.Amount.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeWithdrawLoanedAsset,
+			types.EventTypeWithdrawSuppliedAsset,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
 		),

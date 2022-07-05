@@ -85,8 +85,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query loaned - invalid address",
-			cli.GetCmdQueryLoaned(),
+			"query supplied - invalid address",
+			cli.GetCmdQuerySupplied(),
 			[]string{
 				"xyz",
 			},
@@ -95,8 +95,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query loaned - invalid denom",
-			cli.GetCmdQueryLoaned(),
+			"query supplied - invalid denom",
+			cli.GetCmdQuerySupplied(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
@@ -148,8 +148,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query loaned value - invalid address",
-			cli.GetCmdQueryLoanedValue(),
+			"query supplied value - invalid address",
+			cli.GetCmdQuerySuppliedValue(),
 			[]string{
 				"xyz",
 			},
@@ -158,8 +158,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query loaned value - invalid denom",
-			cli.GetCmdQueryLoanedValue(),
+			"query supplied value - invalid denom",
+			cli.GetCmdQuerySuppliedValue(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
@@ -443,30 +443,30 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("0.03424421")},
 		},
 		testQuery{
-			"query loaned - all",
-			cli.GetCmdQueryLoaned(),
+			"query supplied - all",
+			cli.GetCmdQuerySupplied(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLoanedResponse{},
-			&types.QueryLoanedResponse{
-				Loaned: sdk.NewCoins(
+			&types.QuerySuppliedResponse{},
+			&types.QuerySuppliedResponse{
+				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
 				),
 			},
 		},
 		testQuery{
-			"query loaned - denom",
-			cli.GetCmdQueryLoaned(),
+			"query supplied - denom",
+			cli.GetCmdQuerySupplied(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
 			},
 			false,
-			&types.QueryLoanedResponse{},
-			&types.QueryLoanedResponse{
-				Loaned: sdk.NewCoins(
+			&types.QuerySuppliedResponse{},
+			&types.QuerySuppliedResponse{
+				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
 				),
 			},
@@ -530,33 +530,33 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		testQuery{
-			"query loaned value - all",
-			cli.GetCmdQueryLoanedValue(),
+			"query supplied value - all",
+			cli.GetCmdQuerySuppliedValue(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLoanedValueResponse{},
-			&types.QueryLoanedValueResponse{
+			&types.QuerySuppliedValueResponse{},
+			&types.QuerySuppliedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's oracle exchange rate times the
-				// amount loaned.
-				LoanedValue: sdk.MustNewDecFromStr("0.03424421"),
+				// amount supplied.
+				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
 				// (1001 / 1000000) umee * 34.21 = 0.03424421
 			},
 		},
 		testQuery{
-			"query loaned value - denom",
-			cli.GetCmdQueryLoanedValue(),
+			"query supplied value - denom",
+			cli.GetCmdQuerySuppliedValue(),
 			[]string{
 				val.Address.String(),
 				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
 			},
 			false,
-			&types.QueryLoanedValueResponse{},
-			&types.QueryLoanedValueResponse{
+			&types.QuerySuppliedValueResponse{},
+			&types.QuerySuppliedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				LoanedValue: sdk.MustNewDecFromStr("0.03424421"),
+				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
 				// (1001 / 1000000) umee * 34.21 = 0.03424421
 			},
 		},

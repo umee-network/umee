@@ -22,32 +22,32 @@ service Query {
   }
 
   // Borrowed queries for the borrowed amount of a user by token denomination.
-  // If the denomination is not supplied, the total for each borrowed token is
+  // If the denomination is not specified, the total for each borrowed token is
   // returned.
   rpc Borrowed(QueryBorrowedRequest) returns (QueryBorrowedResponse) {
     option (google.api.http).get = "/umee/leverage/v1/borrowed";
   }
 
   // BorrowedValue queries for the usd value of the borrowed amount of a user
-  // by token denomination.  If the denomination is not supplied, the sum across
+  // by token denomination.  If the denomination is not specified, the sum across
   // all borrowed tokens is returned.
   rpc BorrowedValue(QueryBorrowedValueRequest)
       returns (QueryBorrowedValueResponse) {
     option (google.api.http).get = "/umee/leverage/v1/borrowed_value";
   }
 
-  // Loaned queries for the amount of tokens loaned by a user by denomination.
-  // If the denomination is not supplied, the total for each loaned token is
+  // Supplied queries for the amount of tokens  by a user by denomination.
+  // If the denomination is not specified, the total for each  token is
   // returned.
-  rpc Loaned(QueryLoanedRequest) returns (QueryLoanedResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/loaned";
+  rpc Supplied(QuerySuppliedRequest) returns (QuerySuppliedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/supplied";
   }
 
-  // LoanedValue queries for the USD value loaned by a user by token
-  // denomination. If the denomination is not supplied, the sum across all
-  // loaned tokens is returned.
-  rpc LoanedValue(QueryLoanedValueRequest) returns (QueryLoanedValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/loaned_value";
+  // SuppliedValue queries for the USD value supplied by a user by token
+  // denomination. If the denomination is not specified, the sum across all
+  // supplied tokens is returned.
+  rpc SuppliedValue(QuerySuppliedValueRequest) returns (QuerySuppliedValueResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/supplied_value";
   }
 
   // AvailableBorrow queries for the available amount to borrow of a specified
@@ -68,14 +68,14 @@ service Query {
   }
 
   // MarketSize queries for the Market Size in USD of a specified denomination,
-  // which is the USD value of total tokens loaned by all users plus borrow
+  // which is the USD value of total tokens supplied by all users plus borrow
   // interest owed by all users.
   rpc MarketSize(QueryMarketSizeRequest) returns (QueryMarketSizeResponse) {
     option (google.api.http).get = "/umee/leverage/v1/market_size";
   }
 
   // TokenMarketSize queries for the Market Size in base tokens of a specified
-  // denomination, which is the total tokens loaned by all users plus borrow
+  // denomination, which is the total tokens supplied by all users plus borrow
   // interest owed by all users.
   rpc TokenMarketSize(QueryTokenMarketSizeRequest)
       returns (QueryTokenMarketSizeResponse) {
@@ -90,7 +90,7 @@ service Query {
   }
 
   // Collateral queries the collateral amount of a user by token denomination.
-  // If the denomination is not supplied, all of the user's collateral tokens
+  // If the denomination is not specified, all of the user's collateral tokens
   // are returned.
   rpc Collateral(QueryCollateralRequest) returns (QueryCollateralResponse) {
     option (google.api.http).get = "/umee/leverage/v1/collateral";
@@ -287,33 +287,33 @@ message QueryCollateralValueResponse {
   ];
 }
 
-// QueryLoanedRequest defines the request structure for the Loaned gRPC service
+// QuerySuppliedRequest defines the request structure for the Supplied gRPC service
 // handler.
-message QueryLoanedRequest {
+message QuerySuppliedRequest {
   string address = 1;
   string denom   = 2;
 }
 
-// QueryLoanedResponse defines the response structure for the Loaned gRPC
+// QuerySuppliedResponse defines the response structure for the Supplied gRPC
 // service handler.
-message QueryLoanedResponse {
-  repeated cosmos.base.v1beta1.Coin loaned = 1 [
+message QuerySuppliedResponse {
+  repeated cosmos.base.v1beta1.Coin supplied = 1 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
 
-// QueryLoanedValueRequest defines the request structure for the LoanedValue
+// QuerySuppliedValueRequest defines the request structure for the SuppliedValue
 // gRPC service handler.
-message QueryLoanedValueRequest {
+message QuerySuppliedValueRequest {
   string address = 1;
   string denom   = 2;
 }
 
-// QueryLoanedValueResponse defines the response structure for the LoanedValue
+// QuerySuppliedValueResponse defines the response structure for the SuppliedValue
 // gRPC service handler.
-message QueryLoanedValueResponse {
-  string loaned_value = 1 [
+message QuerySuppliedValueResponse {
+  string supplied_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];

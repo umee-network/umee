@@ -148,7 +148,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 }
 
 // SimulateMsgWithdrawAsset tests and runs a single msg withdraw where
-// an account attempts to withdraw some loaned assets.
+// an account attempts to withdraw some supplied assets.
 func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
@@ -156,7 +156,7 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawLoanedAsset, "skip all transfers"), nil, nil
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdrawSuppliedAsset, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgWithdrawAsset(from.Address, withdrawUToken)
@@ -167,7 +167,7 @@ func SimulateMsgWithdrawAsset(ak simulation.AccountKeeper, bk types.BankKeeper, 
 			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:           nil,
 			Msg:           msg,
-			MsgType:       types.EventTypeWithdrawLoanedAsset,
+			MsgType:       types.EventTypeWithdrawSuppliedAsset,
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,

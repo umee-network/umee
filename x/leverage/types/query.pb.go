@@ -910,25 +910,25 @@ func (m *QueryCollateralValueResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryCollateralValueResponse proto.InternalMessageInfo
 
-// QueryLoanedRequest defines the request structure for the Loaned gRPC service
+// QuerySuppliedRequest defines the request structure for the Supplied gRPC service
 // handler.
-type QueryLoanedRequest struct {
+type QuerySuppliedRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryLoanedRequest) Reset()         { *m = QueryLoanedRequest{} }
-func (m *QueryLoanedRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedRequest) ProtoMessage()    {}
-func (*QueryLoanedRequest) Descriptor() ([]byte, []int) {
+func (m *QuerySuppliedRequest) Reset()         { *m = QuerySuppliedRequest{} }
+func (m *QuerySuppliedRequest) String() string { return proto.CompactTextString(m) }
+func (*QuerySuppliedRequest) ProtoMessage()    {}
+func (*QuerySuppliedRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{20}
 }
-func (m *QueryLoanedRequest) XXX_Unmarshal(b []byte) error {
+func (m *QuerySuppliedRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLoanedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySuppliedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLoanedRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySuppliedRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -938,50 +938,50 @@ func (m *QueryLoanedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *QueryLoanedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedRequest.Merge(m, src)
+func (m *QuerySuppliedRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySuppliedRequest.Merge(m, src)
 }
-func (m *QueryLoanedRequest) XXX_Size() int {
+func (m *QuerySuppliedRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLoanedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedRequest.DiscardUnknown(m)
+func (m *QuerySuppliedRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySuppliedRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLoanedRequest proto.InternalMessageInfo
+var xxx_messageInfo_QuerySuppliedRequest proto.InternalMessageInfo
 
-func (m *QueryLoanedRequest) GetAddress() string {
+func (m *QuerySuppliedRequest) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryLoanedRequest) GetDenom() string {
+func (m *QuerySuppliedRequest) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
 	return ""
 }
 
-// QueryLoanedResponse defines the response structure for the Loaned gRPC
+// QuerySuppliedResponse defines the response structure for the Supplied gRPC
 // service handler.
-type QueryLoanedResponse struct {
-	Loaned github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=loaned,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"loaned"`
+type QuerySuppliedResponse struct {
+	Supplied github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=loaned,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"loaned"`
 }
 
-func (m *QueryLoanedResponse) Reset()         { *m = QueryLoanedResponse{} }
-func (m *QueryLoanedResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedResponse) ProtoMessage()    {}
-func (*QueryLoanedResponse) Descriptor() ([]byte, []int) {
+func (m *QuerySuppliedResponse) Reset()         { *m = QuerySuppliedResponse{} }
+func (m *QuerySuppliedResponse) String() string { return proto.CompactTextString(m) }
+func (*QuerySuppliedResponse) ProtoMessage()    {}
+func (*QuerySuppliedResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{21}
 }
-func (m *QueryLoanedResponse) XXX_Unmarshal(b []byte) error {
+func (m *QuerySuppliedResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLoanedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySuppliedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLoanedResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySuppliedResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -991,44 +991,44 @@ func (m *QueryLoanedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *QueryLoanedResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedResponse.Merge(m, src)
+func (m *QuerySuppliedResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySuppliedResponse.Merge(m, src)
 }
-func (m *QueryLoanedResponse) XXX_Size() int {
+func (m *QuerySuppliedResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLoanedResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedResponse.DiscardUnknown(m)
+func (m *QuerySuppliedResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySuppliedResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLoanedResponse proto.InternalMessageInfo
+var xxx_messageInfo_QuerySuppliedResponse proto.InternalMessageInfo
 
-func (m *QueryLoanedResponse) GetLoaned() github_com_cosmos_cosmos_sdk_types.Coins {
+func (m *QuerySuppliedResponse) GetSupplied() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
-		return m.Loaned
+		return m.Supplied
 	}
 	return nil
 }
 
-// QueryLoanedValueRequest defines the request structure for the LoanedValue
+// QuerySuppliedValueRequest defines the request structure for the SuppliedValue
 // gRPC service handler.
-type QueryLoanedValueRequest struct {
+type QuerySuppliedValueRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryLoanedValueRequest) Reset()         { *m = QueryLoanedValueRequest{} }
-func (m *QueryLoanedValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedValueRequest) ProtoMessage()    {}
-func (*QueryLoanedValueRequest) Descriptor() ([]byte, []int) {
+func (m *QuerySuppliedValueRequest) Reset()         { *m = QuerySuppliedValueRequest{} }
+func (m *QuerySuppliedValueRequest) String() string { return proto.CompactTextString(m) }
+func (*QuerySuppliedValueRequest) ProtoMessage()    {}
+func (*QuerySuppliedValueRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{22}
 }
-func (m *QueryLoanedValueRequest) XXX_Unmarshal(b []byte) error {
+func (m *QuerySuppliedValueRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLoanedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySuppliedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLoanedValueRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySuppliedValueRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1038,50 +1038,50 @@ func (m *QueryLoanedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return b[:n], nil
 	}
 }
-func (m *QueryLoanedValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedValueRequest.Merge(m, src)
+func (m *QuerySuppliedValueRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySuppliedValueRequest.Merge(m, src)
 }
-func (m *QueryLoanedValueRequest) XXX_Size() int {
+func (m *QuerySuppliedValueRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLoanedValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedValueRequest.DiscardUnknown(m)
+func (m *QuerySuppliedValueRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySuppliedValueRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLoanedValueRequest proto.InternalMessageInfo
+var xxx_messageInfo_QuerySuppliedValueRequest proto.InternalMessageInfo
 
-func (m *QueryLoanedValueRequest) GetAddress() string {
+func (m *QuerySuppliedValueRequest) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryLoanedValueRequest) GetDenom() string {
+func (m *QuerySuppliedValueRequest) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
 	return ""
 }
 
-// QueryLoanedValueResponse defines the response structure for the LoanedValue
+// QuerySuppliedValueResponse defines the response structure for the SuppliedValue
 // gRPC service handler.
-type QueryLoanedValueResponse struct {
-	LoanedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=loaned_value,json=loanedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"loaned_value"`
+type QuerySuppliedValueResponse struct {
+	SuppliedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=loaned_value,json=SuppliedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"loaned_value"`
 }
 
-func (m *QueryLoanedValueResponse) Reset()         { *m = QueryLoanedValueResponse{} }
-func (m *QueryLoanedValueResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedValueResponse) ProtoMessage()    {}
-func (*QueryLoanedValueResponse) Descriptor() ([]byte, []int) {
+func (m *QuerySuppliedValueResponse) Reset()         { *m = QuerySuppliedValueResponse{} }
+func (m *QuerySuppliedValueResponse) String() string { return proto.CompactTextString(m) }
+func (*QuerySuppliedValueResponse) ProtoMessage()    {}
+func (*QuerySuppliedValueResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{23}
 }
-func (m *QueryLoanedValueResponse) XXX_Unmarshal(b []byte) error {
+func (m *QuerySuppliedValueResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLoanedValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySuppliedValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLoanedValueResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySuppliedValueResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1091,17 +1091,17 @@ func (m *QueryLoanedValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *QueryLoanedValueResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedValueResponse.Merge(m, src)
+func (m *QuerySuppliedValueResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySuppliedValueResponse.Merge(m, src)
 }
-func (m *QueryLoanedValueResponse) XXX_Size() int {
+func (m *QuerySuppliedValueResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLoanedValueResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedValueResponse.DiscardUnknown(m)
+func (m *QuerySuppliedValueResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySuppliedValueResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLoanedValueResponse proto.InternalMessageInfo
+var xxx_messageInfo_QuerySuppliedValueResponse proto.InternalMessageInfo
 
 // QueryReserveAmountRequest defines the request structure for the ReserveAmount
 // gRPC service handler.
@@ -1841,10 +1841,10 @@ func init() {
 	proto.RegisterType((*QueryBorrowedValueResponse)(nil), "umee.leverage.v1.QueryBorrowedValueResponse")
 	proto.RegisterType((*QueryCollateralValueRequest)(nil), "umee.leverage.v1.QueryCollateralValueRequest")
 	proto.RegisterType((*QueryCollateralValueResponse)(nil), "umee.leverage.v1.QueryCollateralValueResponse")
-	proto.RegisterType((*QueryLoanedRequest)(nil), "umee.leverage.v1.QueryLoanedRequest")
-	proto.RegisterType((*QueryLoanedResponse)(nil), "umee.leverage.v1.QueryLoanedResponse")
-	proto.RegisterType((*QueryLoanedValueRequest)(nil), "umee.leverage.v1.QueryLoanedValueRequest")
-	proto.RegisterType((*QueryLoanedValueResponse)(nil), "umee.leverage.v1.QueryLoanedValueResponse")
+	proto.RegisterType((*QuerySuppliedRequest)(nil), "umee.leverage.v1.QuerySuppliedRequest")
+	proto.RegisterType((*QuerySuppliedResponse)(nil), "umee.leverage.v1.QuerySuppliedResponse")
+	proto.RegisterType((*QuerySuppliedValueRequest)(nil), "umee.leverage.v1.QuerySuppliedValueRequest")
+	proto.RegisterType((*QuerySuppliedValueResponse)(nil), "umee.leverage.v1.QuerySuppliedValueResponse")
 	proto.RegisterType((*QueryReserveAmountRequest)(nil), "umee.leverage.v1.QueryReserveAmountRequest")
 	proto.RegisterType((*QueryReserveAmountResponse)(nil), "umee.leverage.v1.QueryReserveAmountResponse")
 	proto.RegisterType((*QueryCollateralRequest)(nil), "umee.leverage.v1.QueryCollateralRequest")
@@ -1990,21 +1990,21 @@ type QueryClient interface {
 	// Params queries the parameters of the x/leverage module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	// Borrowed queries for the borrowed amount of a user by token denomination.
-	// If the denomination is not supplied, the total for each borrowed token is
+	// If the denomination is not specified, the total for each borrowed token is
 	// returned.
 	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
-	// by token denomination.  If the denomination is not supplied, the sum across
+	// by token denomination.  If the denomination is not specified, the sum across
 	// all borrowed tokens is returned.
 	BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error)
-	// Loaned queries for the amount of tokens loaned by a user by denomination.
-	// If the denomination is not supplied, the total for each loaned token is
+	// Supplied queries for the amount of tokens loaned by a user by denomination.
+	// If the denomination is not specified, the total for each loaned token is
 	// returned.
-	Loaned(ctx context.Context, in *QueryLoanedRequest, opts ...grpc.CallOption) (*QueryLoanedResponse, error)
-	// LoanedValue queries for the USD value loaned by a user by token
-	// denomination. If the denomination is not supplied, the sum across all
+	Supplied(ctx context.Context, in *QuerySuppliedRequest, opts ...grpc.CallOption) (*QuerySuppliedResponse, error)
+	// SuppliedValue queries for the USD value loaned by a user by token
+	// denomination. If the denomination is not specified, the sum across all
 	// loaned tokens is returned.
-	LoanedValue(ctx context.Context, in *QueryLoanedValueRequest, opts ...grpc.CallOption) (*QueryLoanedValueResponse, error)
+	SuppliedValue(ctx context.Context, in *QuerySuppliedValueRequest, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error)
 	// AvailableBorrow queries for the available amount to borrow of a specified
 	// denomination.
 	AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error)
@@ -2024,7 +2024,7 @@ type QueryClient interface {
 	// If the token is not valid, the reserved amount is zero.
 	ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error)
 	// Collateral queries the collateral amount of a user by token denomination.
-	// If the denomination is not supplied, all of the user's collateral tokens
+	// If the denomination is not specified, all of the user's collateral tokens
 	// are returned.
 	Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
 	// CollateralValue queries for the total USD value of a user's collateral, or
@@ -2093,18 +2093,18 @@ func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueR
 	return out, nil
 }
 
-func (c *queryClient) Loaned(ctx context.Context, in *QueryLoanedRequest, opts ...grpc.CallOption) (*QueryLoanedResponse, error) {
-	out := new(QueryLoanedResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Loaned", in, out, opts...)
+func (c *queryClient) Supplied(ctx context.Context, in *QuerySuppliedRequest, opts ...grpc.CallOption) (*QuerySuppliedResponse, error) {
+	out := new(QuerySuppliedResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Supplied", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) LoanedValue(ctx context.Context, in *QueryLoanedValueRequest, opts ...grpc.CallOption) (*QueryLoanedValueResponse, error) {
-	out := new(QueryLoanedValueResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LoanedValue", in, out, opts...)
+func (c *queryClient) SuppliedValue(ctx context.Context, in *QuerySuppliedValueRequest, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error) {
+	out := new(QuerySuppliedValueResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/SuppliedValue", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2244,21 +2244,21 @@ type QueryServer interface {
 	// Params queries the parameters of the x/leverage module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	// Borrowed queries for the borrowed amount of a user by token denomination.
-	// If the denomination is not supplied, the total for each borrowed token is
+	// If the denomination is not specified, the total for each borrowed token is
 	// returned.
 	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
-	// by token denomination.  If the denomination is not supplied, the sum across
+	// by token denomination.  If the denomination is not specified, the sum across
 	// all borrowed tokens is returned.
 	BorrowedValue(context.Context, *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error)
-	// Loaned queries for the amount of tokens loaned by a user by denomination.
-	// If the denomination is not supplied, the total for each loaned token is
+	// Supplied queries for the amount of tokens loaned by a user by denomination.
+	// If the denomination is not specified, the total for each loaned token is
 	// returned.
-	Loaned(context.Context, *QueryLoanedRequest) (*QueryLoanedResponse, error)
-	// LoanedValue queries for the USD value loaned by a user by token
-	// denomination. If the denomination is not supplied, the sum across all
+	Supplied(context.Context, *QuerySuppliedRequest) (*QuerySuppliedResponse, error)
+	// SuppliedValue queries for the USD value loaned by a user by token
+	// denomination. If the denomination is not specified, the sum across all
 	// loaned tokens is returned.
-	LoanedValue(context.Context, *QueryLoanedValueRequest) (*QueryLoanedValueResponse, error)
+	SuppliedValue(context.Context, *QuerySuppliedValueRequest) (*QuerySuppliedValueResponse, error)
 	// AvailableBorrow queries for the available amount to borrow of a specified
 	// denomination.
 	AvailableBorrow(context.Context, *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error)
@@ -2278,7 +2278,7 @@ type QueryServer interface {
 	// If the token is not valid, the reserved amount is zero.
 	ReserveAmount(context.Context, *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error)
 	// Collateral queries the collateral amount of a user by token denomination.
-	// If the denomination is not supplied, all of the user's collateral tokens
+	// If the denomination is not specified, all of the user's collateral tokens
 	// are returned.
 	Collateral(context.Context, *QueryCollateralRequest) (*QueryCollateralResponse, error)
 	// CollateralValue queries for the total USD value of a user's collateral, or
@@ -2319,11 +2319,11 @@ func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowe
 func (*UnimplementedQueryServer) BorrowedValue(ctx context.Context, req *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowedValue not implemented")
 }
-func (*UnimplementedQueryServer) Loaned(ctx context.Context, req *QueryLoanedRequest) (*QueryLoanedResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Loaned not implemented")
+func (*UnimplementedQueryServer) Supplied(ctx context.Context, req *QuerySuppliedRequest) (*QuerySuppliedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Supplied not implemented")
 }
-func (*UnimplementedQueryServer) LoanedValue(ctx context.Context, req *QueryLoanedValueRequest) (*QueryLoanedValueResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoanedValue not implemented")
+func (*UnimplementedQueryServer) SuppliedValue(ctx context.Context, req *QuerySuppliedValueRequest) (*QuerySuppliedValueResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuppliedValue not implemented")
 }
 func (*UnimplementedQueryServer) AvailableBorrow(ctx context.Context, req *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AvailableBorrow not implemented")
@@ -2444,38 +2444,38 @@ func _Query_BorrowedValue_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_Loaned_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLoanedRequest)
+func _Query_Supplied_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuerySuppliedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).Loaned(ctx, in)
+		return srv.(QueryServer).Supplied(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/Loaned",
+		FullMethod: "/umee.leverage.v1.Query/Supplied",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Loaned(ctx, req.(*QueryLoanedRequest))
+		return srv.(QueryServer).Supplied(ctx, req.(*QuerySuppliedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_LoanedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLoanedValueRequest)
+func _Query_SuppliedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuerySuppliedValueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).LoanedValue(ctx, in)
+		return srv.(QueryServer).SuppliedValue(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/LoanedValue",
+		FullMethod: "/umee.leverage.v1.Query/SuppliedValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LoanedValue(ctx, req.(*QueryLoanedValueRequest))
+		return srv.(QueryServer).SuppliedValue(ctx, req.(*QuerySuppliedValueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2753,12 +2753,12 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_BorrowedValue_Handler,
 		},
 		{
-			MethodName: "Loaned",
-			Handler:    _Query_Loaned_Handler,
+			MethodName: "Supplied",
+			Handler:    _Query_Supplied_Handler,
 		},
 		{
-			MethodName: "LoanedValue",
-			Handler:    _Query_LoanedValue_Handler,
+			MethodName: "SuppliedValue",
+			Handler:    _Query_SuppliedValue_Handler,
 		},
 		{
 			MethodName: "AvailableBorrow",
@@ -3466,7 +3466,7 @@ func (m *QueryCollateralValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLoanedRequest) Marshal() (dAtA []byte, err error) {
+func (m *QuerySuppliedRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3476,12 +3476,12 @@ func (m *QueryLoanedRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLoanedRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySuppliedRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLoanedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySuppliedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3503,7 +3503,7 @@ func (m *QueryLoanedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLoanedResponse) Marshal() (dAtA []byte, err error) {
+func (m *QuerySuppliedResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3513,20 +3513,20 @@ func (m *QueryLoanedResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLoanedResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySuppliedResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLoanedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySuppliedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Loaned) > 0 {
-		for iNdEx := len(m.Loaned) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Supplied) > 0 {
+		for iNdEx := len(m.Supplied) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Loaned[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Supplied[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3540,7 +3540,7 @@ func (m *QueryLoanedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLoanedValueRequest) Marshal() (dAtA []byte, err error) {
+func (m *QuerySuppliedValueRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3550,12 +3550,12 @@ func (m *QueryLoanedValueRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLoanedValueRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValueRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLoanedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3577,7 +3577,7 @@ func (m *QueryLoanedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLoanedValueResponse) Marshal() (dAtA []byte, err error) {
+func (m *QuerySuppliedValueResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3587,20 +3587,20 @@ func (m *QueryLoanedValueResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLoanedValueResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValueResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLoanedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	{
-		size := m.LoanedValue.Size()
+		size := m.SuppliedValue.Size()
 		i -= size
-		if _, err := m.LoanedValue.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.SuppliedValue.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
@@ -4464,7 +4464,7 @@ func (m *QueryCollateralValueResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryLoanedRequest) Size() (n int) {
+func (m *QuerySuppliedRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4481,14 +4481,14 @@ func (m *QueryLoanedRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryLoanedResponse) Size() (n int) {
+func (m *QuerySuppliedResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.Loaned) > 0 {
-		for _, e := range m.Loaned {
+	if len(m.Supplied) > 0 {
+		for _, e := range m.Supplied {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -4496,7 +4496,7 @@ func (m *QueryLoanedResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryLoanedValueRequest) Size() (n int) {
+func (m *QuerySuppliedValueRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4513,13 +4513,13 @@ func (m *QueryLoanedValueRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryLoanedValueResponse) Size() (n int) {
+func (m *QuerySuppliedValueResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = m.LoanedValue.Size()
+	l = m.SuppliedValue.Size()
 	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
@@ -6444,7 +6444,7 @@ func (m *QueryCollateralValueResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLoanedRequest) Unmarshal(dAtA []byte) error {
+func (m *QuerySuppliedRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6467,10 +6467,10 @@ func (m *QueryLoanedRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySuppliedRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySuppliedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6558,7 +6558,7 @@ func (m *QueryLoanedRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLoanedResponse) Unmarshal(dAtA []byte) error {
+func (m *QuerySuppliedResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6581,15 +6581,15 @@ func (m *QueryLoanedResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySuppliedResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySuppliedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Loaned", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Supplied", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6616,8 +6616,8 @@ func (m *QueryLoanedResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Loaned = append(m.Loaned, types.Coin{})
-			if err := m.Loaned[len(m.Loaned)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Supplied = append(m.Supplied, types.Coin{})
+			if err := m.Supplied[len(m.Supplied)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6642,7 +6642,7 @@ func (m *QueryLoanedResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLoanedValueRequest) Unmarshal(dAtA []byte) error {
+func (m *QuerySuppliedValueRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6665,10 +6665,10 @@ func (m *QueryLoanedValueRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedValueRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySuppliedValueRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySuppliedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6756,7 +6756,7 @@ func (m *QueryLoanedValueRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLoanedValueResponse) Unmarshal(dAtA []byte) error {
+func (m *QuerySuppliedValueResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6779,15 +6779,15 @@ func (m *QueryLoanedValueResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedValueResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySuppliedValueResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySuppliedValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LoanedValue", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SuppliedValue", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6815,7 +6815,7 @@ func (m *QueryLoanedValueResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.LoanedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.SuppliedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

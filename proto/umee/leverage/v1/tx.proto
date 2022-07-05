@@ -11,7 +11,7 @@ service Msg {
   // Supply defines a method for supplying coins to the capital facility.
   rpc Supply(MsgSupply) returns (MsgSupplyResponse);
 
-  // WithdrawAsset defines a method for withdrawing previously loaned coins from
+  // WithdrawAsset defines a method for withdrawing previously supplied coins from
   // the capital facility.
   rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
 

@@ -17,7 +17,7 @@ The message will fail under the following conditions:
 
 ## MsgWithdrawAsset
 
-A user withdraws lent assets.
+A user withdraws supplied assets.
 
 ```protobuf
 message MsgWithdrawAsset {
