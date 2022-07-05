@@ -126,9 +126,9 @@ type Token struct {
 	// and enable_borrow set to false. Such tokens can be safely removed from the
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
-	// Maximum collateral share specifies how much of the token can
-	// be provided in total as a collateral to the system.
-	// Value is provided in pre cent, Allowed values are in [0; 100] range.
+	// Maximum collateral share specifies how much of the
+	// system's overall collateral be provided by a single token.
+	// Value is a percent; allowed values are in [0, 100] range.
 	// 100 means that the token has no restriction. 10 means maximum 10% of total
 	// collateral value can provided by this token.
 	MaxCollateralShare uint32 `protobuf:"varint,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3" json:"max_collateral_share,omitempty" yaml:"max_collateral_supply"`
