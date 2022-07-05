@@ -50,7 +50,7 @@ In this implementation, for each token type accepted by the `x/leverage` module,
 
 Example scenario:
 
-> Two lenders Alice and Bob provide `ATOM` to the asset facility at different times and earn interest. Assume that for the duration of this scenario, the interest on deposited uAtoms is 0.1 percent per week (or `1 ATOM` per week per `1000 ATOM` deposited).
+> Two lenders Alice and Bob supply `ATOM` to the asset facility at different times and earn interest. Assume that for the duration of this scenario, the interest on deposited uAtoms is 0.1 percent per week (or `1 ATOM` per week per `1000 ATOM` deposited).
 >
 > The asset facility starts with `0 ATOM` in custody and `0 u/ATOM` in circulation. The `u/ATOM` exchange rate starts at `1.0`.
 >

@@ -26,7 +26,7 @@ var (
 	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 1116, "interest scalar less than one")
 	ErrEmptyAddress            = sdkerrors.Register(ModuleName, 1117, "empty address")
 	ErrLiquidationRewardRatio  = sdkerrors.Register(ModuleName, 1118, "requested liquidation reward not met")
-	ErrLendNotAllowed          = sdkerrors.Register(ModuleName, 1119, "lending of asset disabled")
+	ErrSupplyNotAllowed        = sdkerrors.Register(ModuleName, 1119, "supplying of asset disabled")
 	ErrBorrowNotAllowed        = sdkerrors.Register(ModuleName, 1120, "borrowing of asset disabled")
 	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
 	ErrCollateralWeightZero    = sdkerrors.Register(ModuleName, 1122, "token collateral weight is zero")

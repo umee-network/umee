@@ -96,14 +96,14 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	available := s.tk.GetAvailableToBorrow(s.ctx, "abcd")
 	s.Require().Equal(sdk.ZeroInt(), available)
 
-	// creates account which has loaned 1000 uumee, and borrowed 0 uumee
+	// creates account which has supplied 1000 uumee, and borrowed 0 uumee
 	_ = s.setupAccount(umeeDenom, 1000, 1000, 0, true)
 
 	// confirm lending pool is 1000 uumee
 	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt(1000), available)
 
-	// creates account which has loaned 1000 uumee, and borrowed 123 uumee
+	// creates account which has supplied 1000 uumee, and borrowed 123 uumee
 	_ = s.setupAccount(umeeDenom, 1000, 1000, 123, true)
 
 	// confirm lending pool is 1877 uumee
@@ -123,7 +123,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
 	s.Require().Equal(sdk.OneDec(), utilization)
 
-	// creates account which has loaned 1000 uumee, and borrowed 0 uumee
+	// creates account which has supplied 1000 uumee, and borrowed 0 uumee
 	addr := s.setupAccount(umeeDenom, 1000, 1000, 0, true)
 
 	// All tests below are commented with the following equation in mind:
@@ -133,7 +133,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.ZeroDec(), utilization)
 
-	// lender borrows 200 uumee, reducing module account to 800 uumee
+	// user borrows 200 uumee, reducing module account to 800 uumee
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
 
 	// 20% utilization (200 / 200+800-0)
@@ -147,21 +147,21 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.25"), utilization)
 
-	// Setting umee collateral weight to 1.0 to allow lender to borrow heavily
+	// Setting umee collateral weight to 1.0 to allow user to borrow heavily
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1")
 
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
-	// lender borrows 600 uumee, reducing module account to 0 uumee
+	// user borrows 600 uumee, reducing module account to 0 uumee
 	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))
 
 	// 100% utilization (800 / 800+200-200))
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
-	// artificially set lender borrow to 1200 umee
+	// artificially set user borrow to 1200 umee
 	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1200)))
 
 	// still 100% utilization (1200 / 1200+200-200)

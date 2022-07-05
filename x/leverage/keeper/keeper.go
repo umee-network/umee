@@ -73,11 +73,11 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
-// LendAsset attempts to deposit assets into the leverage module account in
+// Supply attempts to deposit assets into the leverage module account in
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
-func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.Coin) error {
-	if err := k.validateLendAsset(ctx, loan); err != nil {
+func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Coin) error {
+	if err := k.validateSupply(ctx, loan); err != nil {
 		return err
 	}
 
@@ -89,7 +89,7 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 
 	// send token balance to leverage module account
 	loanTokens := sdk.NewCoins(loan)
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, loanTokens); err != nil {
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, loanTokens); err != nil {
 		return err
 	}
 
@@ -102,8 +102,8 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 		return err
 	}
 
-	// The uTokens are sent to lender address
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, uTokens); err != nil {
+	// The uTokens are sent to supplier address
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, uTokens); err != nil {
 		return err
 	}
 
@@ -111,9 +111,9 @@ func (k Keeper) LendAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, loan sdk.C
 }
 
 // WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
-// for the original tokens loaned. Accepts a uToken amount to exchange for base tokens.
+// for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
 // If the uToken denom is invalid or account or module balance insufficient, returns error.
-func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin sdk.Coin) error {
+func (k Keeper) WithdrawAsset(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
 	if !k.IsAcceptedUToken(ctx, coin.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
 	}
@@ -131,21 +131,21 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 		return sdkerrors.Wrap(types.ErrLendingPoolInsufficient, token.String())
 	}
 
-	// Withdraw will first attempt to use any uTokens in the lender's wallet
-	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, lenderAddr).AmountOf(coin.Denom), coin.Amount)
-	// Any additional uTokens must come from the lender's collateral
+	// Withdraw will first attempt to use any uTokens in the supplier's wallet
+	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(coin.Denom), coin.Amount)
+	// Any additional uTokens must come from the supplier's collateral
 	amountFromCollateral := coin.Amount.Sub(amountFromWallet)
 
 	if amountFromCollateral.IsPositive() {
 		// Calculate current borrowed value
-		borrowed := k.GetBorrowerBorrows(ctx, lenderAddr)
+		borrowed := k.GetBorrowerBorrows(ctx, supplierAddr)
 		borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
 		if err != nil {
 			return err
 		}
 
 		// Check for sufficient collateral
-		collateral := k.GetBorrowerCollateral(ctx, lenderAddr)
+		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 		if collateral.AmountOf(coin.Denom).LT(amountFromCollateral) {
 			return sdkerrors.Wrap(types.ErrInsufficientBalance, coin.String())
 		}
@@ -163,22 +163,22 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, lenderAddr sdk.AccAddress, coin s
 				"withdraw would decrease borrow limit to %s, below the current borrowed value %s", newBorrowLimit, borrowedValue)
 		}
 
-		// reduce the lender's collateral by amountFromCollateral
+		// reduce the supplier's collateral by amountFromCollateral
 		newCollateral := sdk.NewCoin(coin.Denom, collateral.AmountOf(coin.Denom).Sub(amountFromCollateral))
-		if err = k.setCollateralAmount(ctx, lenderAddr, newCollateral); err != nil {
+		if err = k.setCollateralAmount(ctx, supplierAddr, newCollateral); err != nil {
 			return err
 		}
 	}
 
 	// transfer amountFromWallet uTokens to the module account
 	uTokens := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromWallet))
-	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, lenderAddr, types.ModuleName, uTokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
 
-	// send the base assets to lender
+	// send the base assets to supplier
 	tokens := sdk.NewCoins(token)
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lenderAddr, tokens); err != nil {
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, tokens); err != nil {
 		return err
 	}
 
