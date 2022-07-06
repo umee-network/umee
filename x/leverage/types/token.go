@@ -84,6 +84,10 @@ func (t Token) Validate() error {
 		}
 	}
 
+	if t.MaxCollateralShare > 100 {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be in [0; 100] range")
+	}
+
 	return nil
 }
 
