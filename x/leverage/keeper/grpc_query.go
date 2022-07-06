@@ -582,3 +582,16 @@ func (q Querier) TotalCollateral(
 	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
 	return &types.QueryTotalCollateralResponse{Amount: collateral}, nil
 }
+
+func (q Querier) TotalBorrowed(
+	goCtx context.Context,
+	req *types.QueryTotalBorrowedRequest,
+) (*types.QueryTotalBorrowedResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
+	return &types.QueryTotalBorrowedResponse{Amount: borrowed.Amount}, nil
+}

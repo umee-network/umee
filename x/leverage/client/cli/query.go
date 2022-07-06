@@ -45,6 +45,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryMarketSummary(),
 		GetCmdQueryTotalCollateral(),
+		GetCmdQueryTotalBorrowed(),
 	)
 
 	return cmd
@@ -692,12 +693,12 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 }
 
 // GetCmdQueryTotalCollateral creates a Cobra command to query for the
-// reserved amount of a specific token.
+// total collateral amount of a specific token.
 func GetCmdQueryTotalCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "total-collateral [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the amount of collateral of a uToken denomination",
+		Short: "Query for the total amount of collateral of a uToken denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -709,6 +710,37 @@ func GetCmdQueryTotalCollateral() *cobra.Command {
 				Denom: args[0],
 			}
 			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryTotalBorrowed creates a Cobra command to query for the
+// total borrowed amount of a specific token.
+func GetCmdQueryTotalBorrowed() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "total-borrowed [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total amount borrowed of a token denomination",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryTotalBorrowedRequest{
+				Denom: args[0],
+			}
+			resp, err := queryClient.TotalBorrowed(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

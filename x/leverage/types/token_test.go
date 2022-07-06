@@ -36,6 +36,7 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				EnableMsgSupply:      true,
 				EnableMsgBorrow:      true,
 				Blacklist:            false,
+				MaxCollateralShare:   10,
 			},
 		},
 	}
@@ -56,240 +57,139 @@ registry:
       enable_msg_supply: true
       enable_msg_borrow: true
       blacklist: false
+      max_collateral_share: 10
 `
 	require.Equal(t, expected, p.String())
 }
 
 func TestToken_Validate(t *testing.T) {
+	validToken := func() types.Token {
+		return types.Token{
+			BaseDenom:            "uumee",
+			SymbolDenom:          "umee",
+			Exponent:             6,
+			ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
+			CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
+			BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
+			KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
+			MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+			KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
+			LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
+			EnableMsgSupply:      true,
+			EnableMsgBorrow:      true,
+			Blacklist:            false,
+			MaxCollateralShare:   0,
+		}
+	}
+	invalidBaseToken := validToken()
+	invalidBaseToken.BaseDenom = "$$"
+	invalidBaseToken.SymbolDenom = ""
+
+	invalidUToken := validToken()
+	invalidUToken.BaseDenom = "u/uumee"
+	invalidUToken.SymbolDenom = ""
+
+	invalidReserveFactor := validToken()
+	invalidReserveFactor.ReserveFactor = sdk.MustNewDecFromStr("-0.25")
+
+	invalidCollateralWeight := validToken()
+	invalidCollateralWeight.CollateralWeight = sdk.MustNewDecFromStr("50.00")
+
+	invalidLiquidationThreshold := validToken()
+	invalidLiquidationThreshold.LiquidationThreshold = sdk.MustNewDecFromStr("0.40")
+
+	invalidBaseBorrowRate := validToken()
+	invalidBaseBorrowRate.BaseBorrowRate = sdk.MustNewDecFromStr("-0.01")
+
+	invalidKinkBorrowRate := validToken()
+	invalidKinkBorrowRate.KinkBorrowRate = sdk.MustNewDecFromStr("-0.05")
+
+	invalidMaxBorrowRate := validToken()
+	invalidMaxBorrowRate.MaxBorrowRate = sdk.MustNewDecFromStr("-1.0")
+
+	invalidKinkUtilization := validToken()
+	invalidKinkUtilization.KinkUtilization = sdk.ZeroDec()
+
+	invalidLiquidationIncentive := validToken()
+	invalidLiquidationIncentive.LiquidationIncentive = sdk.MustNewDecFromStr("-0.05")
+
+	invalidBlacklistedBorrow := validToken()
+	invalidBlacklistedBorrow.EnableMsgBorrow = false
+	invalidBlacklistedBorrow.Blacklist = true
+
+	invalidBlacklistedSupply := validToken()
+	invalidBlacklistedSupply.EnableMsgSupply = false
+	invalidBlacklistedSupply.Blacklist = true
+
+	invalidMaxCollateralShare := validToken()
+	invalidMaxCollateralShare.MaxCollateralShare = 101
+
+	validMaxCollateralShare := validToken()
+	validMaxCollateralShare.MaxCollateralShare = 100
+
 	testCases := map[string]struct {
 		input     types.Token
 		expectErr bool
 	}{
 		"valid token": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				SymbolDenom:          "umee",
-				Exponent:             6,
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input: validToken(),
 		},
 		"invalid base token": {
-			input: types.Token{
-				BaseDenom:            "$$",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidBaseToken,
 			expectErr: true,
 		},
 		"invalid base token (utoken)": {
-			input: types.Token{
-				BaseDenom:            "u/uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidUToken,
 			expectErr: true,
 		},
 		"invalid reserve factor": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("-0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidReserveFactor,
 			expectErr: true,
 		},
 		"invalid collateral weight": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("50.00"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidCollateralWeight,
 			expectErr: true,
 		},
 		"invalid liquidation threshold": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.40"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidLiquidationThreshold,
 			expectErr: true,
 		},
 		"invalid base borrow rate": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("-0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidBaseBorrowRate,
 			expectErr: true,
 		},
 		"invalid kink borrow rate": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("-0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidKinkBorrowRate,
 			expectErr: true,
 		},
 		"invalid max borrow rate": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("-1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidMaxBorrowRate,
 			expectErr: true,
 		},
 		"invalid kink utilization rate": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.ZeroDec(),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidKinkUtilization,
 			expectErr: true,
 		},
 		"invalid liquidation incentive": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("-0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-			},
+			input:     invalidLiquidationIncentive,
 			expectErr: true,
 		},
 		"blacklisted but supply enabled": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				SymbolDenom:          "umee",
-				Exponent:             6,
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      false,
-				Blacklist:            true,
-			},
+			input:     invalidBlacklistedSupply,
 			expectErr: true,
 		},
 		"blacklisted but borrow enabled": {
-			input: types.Token{
-				BaseDenom:            "uumee",
-				SymbolDenom:          "umee",
-				Exponent:             6,
-				ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-				CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-				BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-				KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-				MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-				KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-				LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-				EnableMsgSupply:      false,
-				EnableMsgBorrow:      true,
-				Blacklist:            true,
-			},
+			input:     invalidBlacklistedBorrow,
 			expectErr: true,
+		},
+		"invalid max collateral share": {
+			input:     invalidMaxCollateralShare,
+			expectErr: true,
+		},
+		"valid max collateral share": {
+			input:     validMaxCollateralShare,
+			expectErr: false,
 		},
 	}
 
