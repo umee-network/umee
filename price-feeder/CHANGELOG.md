@@ -47,6 +47,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bugs
 
+- [1110](https://github.com/umee-network/umee/pull/1110) Fix an issue where non-redenominated prices were being filtered out before voting.
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
 
 ### Improvements
