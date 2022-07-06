@@ -12,6 +12,25 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
+var (
+	atomPrice  = sdk.MustNewDecFromStr("29.93")
+	atomVolume = sdk.MustNewDecFromStr("894123.00")
+
+	usdtPrice  = sdk.MustNewDecFromStr("0.98")
+	usdtVolume = sdk.MustNewDecFromStr("894123.00")
+
+	currencyPairs = []types.CurrencyPair{
+		{
+			Base:  "ATOM",
+			Quote: "USDT",
+		},
+		{
+			Base:  "USDT",
+			Quote: "USD",
+		},
+	}
+)
+
 func TestGetUSDBasedProviders(t *testing.T) {
 	providerPairs := make(map[string][]types.CurrencyPair, 3)
 	providerPairs["coinbase"] = []types.CurrencyPair{
@@ -60,22 +79,6 @@ func TestGetUSDBasedProviders(t *testing.T) {
 
 func TestConvertCandlesToUSD(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 2)
-	pairs := []types.CurrencyPair{
-		{
-			Base:  "ATOM",
-			Quote: "USDT",
-		},
-		{
-			Base:  "USDT",
-			Quote: "USD",
-		},
-	}
-
-	atomPrice := sdk.MustNewDecFromStr("29.93")
-	atomVolume := sdk.MustNewDecFromStr("894123.00")
-
-	usdtPrice := sdk.MustNewDecFromStr("0.98")
-	usdtVolume := sdk.MustNewDecFromStr("894123.00")
 
 	binanceCandles := make(map[string][]provider.CandlePrice, 1)
 	binanceCandles["ATOM"] = []provider.CandlePrice{
@@ -98,8 +101,8 @@ func TestConvertCandlesToUSD(t *testing.T) {
 	providerCandles[config.ProviderKraken] = krakenCandles
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {pairs[0]},
-		config.ProviderKraken:  {pairs[1]},
+		config.ProviderBinance: {currencyPairs[0]},
+		config.ProviderKraken:  {currencyPairs[1]},
 	}
 
 	convertedCandles, err := convertCandlesToUSD(
@@ -119,22 +122,6 @@ func TestConvertCandlesToUSD(t *testing.T) {
 
 func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
-	pairs := []types.CurrencyPair{
-		{
-			Base:  "ATOM",
-			Quote: "USDT",
-		},
-		{
-			Base:  "USDT",
-			Quote: "USD",
-		},
-	}
-
-	atomPrice := sdk.MustNewDecFromStr("29.93")
-	atomVolume := sdk.MustNewDecFromStr("894123.00")
-
-	usdtPrice := sdk.MustNewDecFromStr("0.98")
-	usdtVolume := sdk.MustNewDecFromStr("894123.00")
 
 	binanceTickers := make(map[string]provider.TickerPrice, 1)
 	binanceTickers["ATOM"] = provider.TickerPrice{
@@ -151,8 +138,8 @@ func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices[config.ProviderKraken] = krakenTicker
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {pairs[0]},
-		config.ProviderKraken:  {pairs[1]},
+		config.ProviderBinance: {currencyPairs[0]},
+		config.ProviderKraken:  {currencyPairs[1]},
 	}
 
 	convertedTickers, err := convertTickersToUSD(
@@ -167,5 +154,56 @@ func TestConvertTickersToUSD(t *testing.T) {
 		t,
 		atomPrice.Mul(usdtPrice),
 		convertedTickers["binance"]["ATOM"].Price,
+	)
+}
+
+func TestConvertTickersToUSDFiltering(t *testing.T) {
+	providerPrices := make(provider.AggregatedProviderPrices, 2)
+
+	binanceTickers := make(map[string]provider.TickerPrice, 1)
+	binanceTickers["ATOM"] = provider.TickerPrice{
+		Price:  atomPrice,
+		Volume: atomVolume,
+	}
+	providerPrices[config.ProviderBinance] = binanceTickers
+
+	krakenTicker := make(map[string]provider.TickerPrice, 1)
+	krakenTicker["USDT"] = provider.TickerPrice{
+		Price:  usdtPrice,
+		Volume: usdtVolume,
+	}
+	providerPrices[config.ProviderKraken] = krakenTicker
+
+	// deviation detection
+	gateTicker := make(map[string]provider.TickerPrice, 1)
+	gateTicker["USDT"] = krakenTicker["USDT"]
+	providerPrices[config.ProviderGate] = gateTicker
+
+	huobiTicker := make(map[string]provider.TickerPrice, 1)
+	huobiTicker["USDT"] = provider.TickerPrice{
+		Price:  sdk.MustNewDecFromStr("10000"),
+		Volume: usdtVolume,
+	}
+	providerPrices[config.ProviderHuobi] = huobiTicker
+
+	providerPairs := map[string][]types.CurrencyPair{
+		config.ProviderBinance: {currencyPairs[0]},
+		config.ProviderKraken:  {currencyPairs[1]},
+		config.ProviderGate:    {currencyPairs[1]},
+		config.ProviderHuobi:   {currencyPairs[1]},
+	}
+
+	covertedDeviation, err := convertTickersToUSD(
+		zerolog.Nop(),
+		providerPrices,
+		providerPairs,
+		make(map[string]sdk.Dec),
+	)
+	require.NoError(t, err)
+
+	require.Equal(
+		t,
+		atomPrice.Mul(usdtPrice),
+		covertedDeviation["binance"]["ATOM"].Price,
 	)
 }
