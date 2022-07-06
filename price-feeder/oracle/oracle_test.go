@@ -399,13 +399,13 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	prices := make(map[string]provider.TickerPrice, 1)
-	prices[pair.String()] = provider.TickerPrice{
+	prices[pair.Base] = provider.TickerPrice{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
 
 	candles := make(map[string][]provider.CandlePrice, 1)
-	candles[pair.String()] = []provider.CandlePrice{
+	candles[pair.Base] = []provider.CandlePrice{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -454,7 +454,7 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	candles := make(map[string][]provider.CandlePrice, 1)
-	candles[pair.String()] = []provider.CandlePrice{
+	candles[pair.Base] = []provider.CandlePrice{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -476,7 +476,7 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	)
 
 	require.NoError(t, err, "It should successfully get computed candle prices")
-	require.Equal(t, prices[pair.String()], atomPrice)
+	require.Equal(t, prices[pair.Base], atomPrice)
 }
 
 func TestSuccessGetComputedPricesTickers(t *testing.T) {
@@ -490,7 +490,7 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	tickerPrices := make(map[string]provider.TickerPrice, 1)
-	tickerPrices[pair.String()] = provider.TickerPrice{
+	tickerPrices[pair.Base] = provider.TickerPrice{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
@@ -509,5 +509,81 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	)
 
 	require.NoError(t, err, "It should successfully get computed ticker prices")
-	require.Equal(t, prices[pair.String()], atomPrice)
+	require.Equal(t, prices[pair.Base], atomPrice)
+}
+
+func TestGetComputedPricesCandlesConversion(t *testing.T) {
+	providerCandles := make(provider.AggregatedProviderCandles, 6)
+	btcPair := types.CurrencyPair{
+		Base:  "BTC",
+		Quote: "ETH",
+	}
+	ethPair := types.CurrencyPair{
+		Base:  "ETH",
+		Quote: "USD",
+	}
+
+	volume := sdk.MustNewDecFromStr("894123.00")
+
+	btcEthPrice := sdk.MustNewDecFromStr("17.55")
+	ethUsdPrice := sdk.MustNewDecFromStr("1195.02")
+
+	// binance candles with normal rates
+	binanceCandles := make(map[string][]provider.CandlePrice, 1)
+	binanceCandles[btcPair.Base] = []provider.CandlePrice{
+		{
+			Price:     btcEthPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	binanceCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderBinance] = binanceCandles
+
+	// gate with normal USDT rate
+	gateCandles := make(map[string][]provider.CandlePrice, 1)
+	gateCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderGate] = gateCandles
+
+	// okx with huge USDT rate
+	okxCandles := make(map[string][]provider.CandlePrice, 1)
+	okxCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     sdk.MustNewDecFromStr("1.0"),
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderOkx] = okxCandles
+
+	providerPair := map[string][]types.CurrencyPair{
+		config.ProviderBinance: {btcPair, ethPair},
+		config.ProviderGate:    {ethPair},
+		config.ProviderOkx:     {ethPair},
+	}
+
+	prices, err := GetComputedPrices(
+		zerolog.Nop(),
+		providerCandles,
+		make(provider.AggregatedProviderPrices, 1),
+		providerPair,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(t, err,
+		"It should successfully filter out bad conversion rates and convert everything to USD",
+	)
+	require.Equal(t, sdk.MustNewDecFromStr("20972.601"), prices[btcPair.Base])
 }
