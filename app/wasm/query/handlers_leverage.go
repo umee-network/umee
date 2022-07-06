@@ -86,7 +86,7 @@ func (umeeQuery UmeeQuery) HandleLoanedValue(
 	return MarshalResponse(resp)
 }
 
-// HandleAvailableBorrow retrieves the available borrow amoun of an denom.
+// HandleAvailableBorrow retrieves the available borrow amount of an denom.
 func (umeeQuery UmeeQuery) HandleAvailableBorrow(
 	ctx sdk.Context,
 	queryServer lvtypes.QueryServer,
