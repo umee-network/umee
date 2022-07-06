@@ -48,8 +48,6 @@ $ price-feeder /path/to/price_feeder_config.toml
 ```
 
 ## Configuration
-There are multiple new options for validators to setup in the price feeder config, the options are telemetry, deviation, and custom endpoints. 
-
 ### `Telemetry`
 • A set of options for the /metrics endpoint when running the price feeder. 
 
