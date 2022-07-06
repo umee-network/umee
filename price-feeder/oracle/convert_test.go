@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
@@ -101,7 +102,12 @@ func TestConvertCandlesToUSD(t *testing.T) {
 		config.ProviderKraken:  {pairs[1]},
 	}
 
-	convertedCandles, err := convertCandlesToUSD(providerCandles, providerPairs)
+	convertedCandles, err := convertCandlesToUSD(
+		zerolog.Nop(),
+		providerCandles,
+		providerPairs,
+		make(map[string]sdk.Dec),
+	)
 	require.NoError(t, err)
 
 	require.Equal(
@@ -149,7 +155,12 @@ func TestConvertTickersToUSD(t *testing.T) {
 		config.ProviderKraken:  {pairs[1]},
 	}
 
-	convertedTickers, err := convertTickersToUSD(providerPrices, providerPairs)
+	convertedTickers, err := convertTickersToUSD(
+		zerolog.Nop(),
+		providerPrices,
+		providerPairs,
+		make(map[string]sdk.Dec),
+	)
 	require.NoError(t, err)
 
 	require.Equal(

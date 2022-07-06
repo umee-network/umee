@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -30,10 +31,13 @@ func getUSDBasedProviders(asset string, providerPairs map[string][]types.Currenc
 }
 
 // ConvertCandlesToUSD converts any candles which are not quoted in USD
-// to USD by other price feeds.
+// to USD by other price feeds. It will also filter out any erroneous
+// candles to be used as conversions.
 func convertCandlesToUSD(
+	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
 	providerPairs map[string][]types.CurrencyPair,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderCandles, error) {
 	if len(candles) == 0 {
 		return candles, nil
@@ -71,7 +75,19 @@ func convertCandlesToUSD(
 				if len(validCandleList) == 0 {
 					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
 				}
-				tvwap, err := ComputeTVWAP(validCandleList)
+
+				// filter conversion rate candle deviations
+				filteredCandles, err := FilterCandleDeviations(
+					logger,
+					validCandleList,
+					deviationThresholds,
+				)
+				if err != nil {
+					return nil, err
+				}
+
+				// compute tvwap for filtered candles
+				tvwap, err := ComputeTVWAP(filteredCandles)
 				if err != nil {
 					return nil, err
 				}
@@ -101,8 +117,10 @@ func convertCandlesToUSD(
 // convertTickersToUSD converts any tickers which are not quoted in USD to USD,
 // using the conversion rates of other tickers.
 func convertTickersToUSD(
+	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,
 	providerPairs map[string][]types.CurrencyPair,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderPrices, error) {
 	if len(tickers) == 0 {
 		return tickers, nil
@@ -141,7 +159,17 @@ func convertTickersToUSD(
 				if len(validTickerList) == 0 {
 					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
 				}
-				vwap, err := ComputeVWAP(validTickerList)
+
+				filteredTickers, err := FilterTickerDeviations(
+					logger,
+					validTickerList,
+					deviationThresholds,
+				)
+				if err != nil {
+					return nil, err
+				}
+
+				vwap, err := ComputeVWAP(filteredTickers)
 				if err != nil {
 					return nil, err
 				}
