@@ -28,7 +28,7 @@ func (umeeQuery UmeeQuery) HandleRegisteredTokens(
 ) ([]byte, error) {
 	resp, err := queryServer.RegisteredTokens(sdk.WrapSDKContext(ctx), &lvtypes.QueryRegisteredTokens{})
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query RegisteredTokens", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Registered Tokens", err)}
 	}
 
 	return MarshalResponse(resp)
@@ -41,7 +41,7 @@ func (umeeQuery UmeeQuery) HandleLeverageParams(
 ) ([]byte, error) {
 	resp, err := queryServer.Params(sdk.WrapSDKContext(ctx), &lvtypes.QueryParamsRequest{})
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query LeverageParams", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Leverage Params", err)}
 	}
 
 	return MarshalResponse(resp)
@@ -54,7 +54,7 @@ func (umeeQuery UmeeQuery) HandleBorrowedValue(
 ) ([]byte, error) {
 	resp, err := queryServer.BorrowedValue(sdk.WrapSDKContext(ctx), umeeQuery.BorrowedValue)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query BorrowedValue", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrowed Value", err)}
 	}
 
 	return MarshalResponse(resp)
