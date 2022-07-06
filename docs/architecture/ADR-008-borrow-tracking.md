@@ -114,5 +114,5 @@ This design change should address our lingering tradeoff between performance and
 
 The implementations discussed in some previous ADRs are partially superseded by this decision:
 
-- [ADR-002: Borrow Assets](./ADR-002-borrow-assets.md)
+- [ADR-003: Borrow Assets](./ADR-003-borrow-assets.md)
 - [ADR-004: Interest and Reserves](./ADR-004-interest-and-reserves.md)
