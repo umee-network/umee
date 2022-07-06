@@ -15,19 +15,16 @@ import (
 var (
 	atomPrice  = sdk.MustNewDecFromStr("29.93")
 	atomVolume = sdk.MustNewDecFromStr("894123.00")
-
 	usdtPrice  = sdk.MustNewDecFromStr("0.98")
 	usdtVolume = sdk.MustNewDecFromStr("894123.00")
 
-	currencyPairs = []types.CurrencyPair{
-		{
-			Base:  "ATOM",
-			Quote: "USDT",
-		},
-		{
-			Base:  "USDT",
-			Quote: "USD",
-		},
+	atomPair = types.CurrencyPair{
+		Base:  "ATOM",
+		Quote: "USDT",
+	}
+	usdtPair = types.CurrencyPair{
+		Base:  "USDT",
+		Quote: "USD",
 	}
 )
 
@@ -101,8 +98,8 @@ func TestConvertCandlesToUSD(t *testing.T) {
 	providerCandles[config.ProviderKraken] = krakenCandles
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {currencyPairs[0]},
-		config.ProviderKraken:  {currencyPairs[1]},
+		config.ProviderBinance: {atomPair},
+		config.ProviderKraken:  {usdtPair},
 	}
 
 	convertedCandles, err := convertCandlesToUSD(
@@ -164,10 +161,10 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	providerCandles[config.ProviderOkx] = okxCandles
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {currencyPairs[0]},
-		config.ProviderKraken:  {currencyPairs[1]},
-		config.ProviderGate:    {currencyPairs[1]},
-		config.ProviderOkx:     {currencyPairs[1]},
+		config.ProviderBinance: {atomPair},
+		config.ProviderKraken:  {usdtPair},
+		config.ProviderGate:    {usdtPair},
+		config.ProviderOkx:     {usdtPair},
 	}
 
 	convertedCandles, err := convertCandlesToUSD(
@@ -203,8 +200,8 @@ func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices[config.ProviderKraken] = krakenTicker
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {currencyPairs[0]},
-		config.ProviderKraken:  {currencyPairs[1]},
+		config.ProviderBinance: {atomPair},
+		config.ProviderKraken:  {usdtPair},
 	}
 
 	convertedTickers, err := convertTickersToUSD(
@@ -252,10 +249,10 @@ func TestConvertTickersToUSDFiltering(t *testing.T) {
 	providerPrices[config.ProviderHuobi] = huobiTicker
 
 	providerPairs := map[string][]types.CurrencyPair{
-		config.ProviderBinance: {currencyPairs[0]},
-		config.ProviderKraken:  {currencyPairs[1]},
-		config.ProviderGate:    {currencyPairs[1]},
-		config.ProviderHuobi:   {currencyPairs[1]},
+		config.ProviderBinance: {atomPair},
+		config.ProviderKraken:  {usdtPair},
+		config.ProviderGate:    {usdtPair},
+		config.ProviderHuobi:   {usdtPair},
 	}
 
 	covertedDeviation, err := convertTickersToUSD(
