@@ -48,8 +48,9 @@ $ price-feeder /path/to/price_feeder_config.toml
 ```
 
 ## Configuration
-### `Telemetry`
-• A set of options for the /metrics endpoint when running the price feeder. 
+### `telemetry`
+
+A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported.
 
 ### `Deviation`
 • Deviation allows validators to set a custom amount of standard deviations around the median which helps distinguish providers from other providers. 
