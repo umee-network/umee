@@ -10,25 +10,20 @@ import (
 
 	lvkeeper "github.com/umee-network/umee/v2/x/leverage/keeper"
 	lvtypes "github.com/umee-network/umee/v2/x/leverage/types"
-	ockeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
-	ocpes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 // Plugin wraps the msg plugin with Messengers.
 type Plugin struct {
 	leverageMsgServer lvtypes.MsgServer
-	oracleQuerier     ocpes.QueryServer
 	wrapped           wasmkeeper.Messenger
 }
 
 // NewMessagePlugin creates a plugin to msg umee native modules.
 func NewMessagePlugin(
 	leverageKeeper lvkeeper.Keeper,
-	oracleKeeper ockeeper.Keeper,
 ) *Plugin {
 	return &Plugin{
 		leverageMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
-		oracleQuerier:     ockeeper.NewQuerier(oracleKeeper),
 	}
 }
 

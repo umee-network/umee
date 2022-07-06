@@ -20,7 +20,7 @@ func registerCustomPlugins(
 	})
 
 	messagePluginOpt := wasmkeeper.WithMessageHandlerDecorator(func(old wasmkeeper.Messenger) wasmkeeper.Messenger {
-		return message.NewMessagePlugin(leverageKeeper, oracleKeeper)
+		return message.NewMessagePlugin(leverageKeeper)
 	})
 
 	return []wasm.Option{
