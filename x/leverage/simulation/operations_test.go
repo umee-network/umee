@@ -172,7 +172,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal(types.EventTypeLoanAsset, msg.Type())
-	s.Require().Equal("185121068uumee", msg.Amount.String())
+	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -196,7 +196,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal(types.EventTypeWithdrawAsset, msg.Type())
-	s.Require().Equal("73u/uumee", msg.Amount.String())
+	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -226,7 +226,7 @@ func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
 	s.Require().Equal(types.EventTypeBorrowAsset, msg.Type())
-	s.Require().Equal("67uumee", msg.Amount.String())
+	s.Require().Equal("67uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -300,7 +300,7 @@ func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeRepayBorrowedAsset, msg.Type())
-	s.Require().Equal("9uumee", msg.Amount.String())
+	s.Require().Equal("9uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
