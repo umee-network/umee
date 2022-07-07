@@ -607,7 +607,11 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 	require.NoError(t, err,
 		"It should successfully filter out bad candles and convert everything to USD",
 	)
-	require.Equal(t, sdk.MustNewDecFromStr("20967.601"), prices[btcPair.Base])
+	require.Equal(t,
+		ethUsdPrice.Mul(
+			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
+		prices[btcPair.Base],
+	)
 }
 
 func TestGetComputedPricesTickersConversion(t *testing.T) {
@@ -687,5 +691,9 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	require.NoError(t, err,
 		"It should successfully filter out bad tickers and convert everything to USD",
 	)
-	require.Equal(t, sdk.MustNewDecFromStr("724653.401"), prices[btcPair.Base])
+	require.Equal(t,
+		ethUsdPrice.Mul(
+			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
+		prices[btcPair.Base],
+	)
 }
