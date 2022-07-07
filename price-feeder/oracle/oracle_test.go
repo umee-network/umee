@@ -549,11 +549,18 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 	}
 	providerCandles[config.ProviderBinance] = binanceCandles
 
-	// normal eth rate
+	// normal rates
 	gateCandles := make(map[string][]provider.CandlePrice, 1)
 	gateCandles[ethPair.Base] = []provider.CandlePrice{
 		{
 			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	gateCandles[btcPair.Base] = []provider.CandlePrice{
+		{
+			Price:     btcEthPrice,
 			Volume:    volume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
 		},
@@ -634,8 +641,12 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	}
 	providerPrices[config.ProviderBinance] = binanceTickerPrices
 
-	// normal eth rate
+	// normal rates
 	gateTickerPrices := make(map[string]provider.TickerPrice, 1)
+	gateTickerPrices[btcPair.Base] = provider.TickerPrice{
+		Price:  btcEthPrice,
+		Volume: volume,
+	}
 	gateTickerPrices[ethPair.Base] = provider.TickerPrice{
 		Price:  ethUsdPrice,
 		Volume: volume,
