@@ -526,7 +526,7 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 		Quote: "USD",
 	}
 	btcEthPrice := sdk.MustNewDecFromStr("17.55")
-	btcUSDPrice := sdk.MustNewDecFromStr("20972.601")
+	btcUSDPrice := sdk.MustNewDecFromStr("20962.601")
 	ethUsdPrice := sdk.MustNewDecFromStr("1195.02")
 	volume := sdk.MustNewDecFromStr("894123.00")
 	providerCandles := make(provider.AggregatedProviderCandles, 6)
@@ -600,7 +600,7 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 	require.NoError(t, err,
 		"It should successfully filter out bad candles and convert everything to USD",
 	)
-	require.Equal(t, btcUSDPrice, prices[btcPair.Base])
+	require.Equal(t, sdk.MustNewDecFromStr("20967.601"), prices[btcPair.Base])
 }
 
 func TestGetComputedPricesTickersConversion(t *testing.T) {
@@ -619,7 +619,7 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	volume := sdk.MustNewDecFromStr("881272.00")
 	btcEthPrice := sdk.MustNewDecFromStr("72.55")
 	ethUsdPrice := sdk.MustNewDecFromStr("9989.02")
-	btcUSDPrice := sdk.MustNewDecFromStr("724703.401")
+	btcUSDPrice := sdk.MustNewDecFromStr("724603.401")
 	providerPrices := make(provider.AggregatedProviderPrices, 1)
 
 	// normal rates
@@ -676,5 +676,5 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	require.NoError(t, err,
 		"It should successfully filter out bad tickers and convert everything to USD",
 	)
-	require.Equal(t, btcUSDPrice, prices[btcPair.Base])
+	require.Equal(t, sdk.MustNewDecFromStr("724653.401"), prices[btcPair.Base])
 }
