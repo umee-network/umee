@@ -90,9 +90,9 @@ High collateral utilization is dangerous for the system:
 
 - When collateral utilization is above 1, liquidators may not be able to withdraw their the liquidated collateral.
 - Liquidators, when liquidating a borrower, they get into position their _uToken_.
-In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying token).
-However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits.
-This will dramatically increase the risk of getting a profit by liquidators and could cause the system being insolvent.
+  In case of bad market conditions and magnified liquidations, liquidators will like to redeem the _uToken_ for the principle (the underlying token).
+  However, when there are many `uToken` redeem operation, the collateral utilization is approaching to 1 and liquidators won't be able to get the principle and sell it to monetize their profits.
+  This will dramatically increase the risk of getting a profit by liquidators and could cause the system being insolvent.
 
 Let's draw the following scenario to picture the liquidators risk:
 
@@ -127,22 +127,22 @@ To implement the borrow/repay functionality of the Asset Facility, the three mes
 ```go
 // MsgSetCollateral - a borrower enables or disables a specific uToken type in their wallet to be used as collateral
 type MsgSetCollateral struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Denom    string         `json:"denom" yaml:"denom"`
-  Enable   bool           `json:"enable" yaml:"enable"`
+  Borrower sdk.AccAddress
+  Denom    string
+  Enable   bool
 }
 
 // MsgBorrowAsset - a user wishes to borrow assets of an allowed type
 type MsgBorrowAsset struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
+  Borrower sdk.AccAddress
   // not a uToken
-  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
+  Asset   sdk.Coin
 }
 
 // MsgRepayAsset - a user wishes to repay assets of a borrowed type
 type MsgRepayAsset struct {
-  Borrower sdk.AccAddress `json:"borrower" yaml:"borrower"`
-  Amount   sdk.Coin       `json:"amount" yaml:"amount"`
+  Borrower sdk.AccAddress
+  Asset    sdk.Coin
 }
 ```
 

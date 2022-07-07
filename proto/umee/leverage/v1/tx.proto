@@ -39,15 +39,15 @@ service Msg {
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdrawAsset represents a user's request to withdraw supplied assets.
-// Amount must be a uToken.
+// Asset must be a uToken.
 message MsgWithdrawAsset {
   // Supplier is the account address withdrawing assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgAddCollateral represents a user's request to enable selected
@@ -72,7 +72,7 @@ message MsgBorrowAsset {
   // Borrower is the account address taking a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgRepayAsset represents a user's request to repay a borrowed base asset
@@ -81,7 +81,7 @@ message MsgRepayAsset {
   // Borrower is the account address repaying a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
