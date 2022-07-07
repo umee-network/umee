@@ -31,8 +31,8 @@ func getUSDBasedProviders(asset string, providerPairs map[string][]types.Currenc
 }
 
 // ConvertCandlesToUSD converts any candles which are not quoted in USD
-// to USD by other price feeds. It will also filter out any erroneous
-// candles to be used as conversions.
+// to USD by other price feeds. It will also filter out any abnormal
+// candles to be used as conversion rates.
 func convertCandlesToUSD(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
@@ -115,7 +115,8 @@ func convertCandlesToUSD(
 }
 
 // convertTickersToUSD converts any tickers which are not quoted in USD to USD,
-// using the conversion rates of other tickers.
+// using the conversion rates of other tickers. It will also filter out any abnormal
+// tickers to be used as conversion rates.
 func convertTickersToUSD(
 	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,

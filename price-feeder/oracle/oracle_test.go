@@ -399,13 +399,13 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	prices := make(map[string]provider.TickerPrice, 1)
-	prices[pair.Base] = provider.TickerPrice{
+	prices[pair.String()] = provider.TickerPrice{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
 
 	candles := make(map[string][]provider.CandlePrice, 1)
-	candles[pair.Base] = []provider.CandlePrice{
+	candles[pair.String()] = []provider.CandlePrice{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -423,8 +423,8 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	)
 
 	require.True(t, success, "It should successfully set the prices")
-	require.Equal(t, providerPrices[config.ProviderGate][pair.Base].Price, atomPrice)
-	require.Equal(t, providerCandles[config.ProviderGate][pair.Base][0].Price, atomPrice)
+	require.Equal(t, atomPrice, providerPrices[config.ProviderGate][pair.Base].Price)
+	require.Equal(t, atomPrice, providerCandles[config.ProviderGate][pair.Base][0].Price)
 }
 
 func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
