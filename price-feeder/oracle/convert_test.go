@@ -236,7 +236,6 @@ func TestConvertTickersToUSDFiltering(t *testing.T) {
 	}
 	providerPrices[config.ProviderKraken] = krakenTicker
 
-	// deviation detection
 	gateTicker := make(map[string]provider.TickerPrice, 1)
 	gateTicker["USDT"] = krakenTicker["USDT"]
 	providerPrices[config.ProviderGate] = gateTicker

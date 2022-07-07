@@ -76,7 +76,6 @@ func convertCandlesToUSD(
 					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
 				}
 
-				// filter conversion rate candle deviations
 				filteredCandles, err := FilterCandleDeviations(
 					logger,
 					validCandleList,
@@ -86,7 +85,6 @@ func convertCandlesToUSD(
 					return nil, err
 				}
 
-				// compute tvwap for filtered candles
 				tvwap, err := ComputeTVWAP(filteredCandles)
 				if err != nil {
 					return nil, err

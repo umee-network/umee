@@ -529,7 +529,7 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 	btcUSDPrice := sdk.MustNewDecFromStr("20962.601")
 	ethUsdPrice := sdk.MustNewDecFromStr("1195.02")
 	volume := sdk.MustNewDecFromStr("894123.00")
-	providerCandles := make(provider.AggregatedProviderCandles, 6)
+	providerCandles := make(provider.AggregatedProviderCandles, 4)
 
 	// normal rates
 	binanceCandles := make(map[string][]provider.CandlePrice, 2)
@@ -642,7 +642,7 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	providerPrices[config.ProviderBinance] = binanceTickerPrices
 
 	// normal rates
-	gateTickerPrices := make(map[string]provider.TickerPrice, 1)
+	gateTickerPrices := make(map[string]provider.TickerPrice, 4)
 	gateTickerPrices[btcPair.Base] = provider.TickerPrice{
 		Price:  btcEthPrice,
 		Volume: volume,
