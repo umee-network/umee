@@ -49,18 +49,16 @@ $ price-feeder /path/to/price_feeder_config.toml
 
 ## Configuration
 ### `telemetry`
+• A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported.
+```shell
+$ price-feeder /path/to/price_feeder_config.toml
+```
 
-A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported.
+### `deviation`
+• Deviation allows validators to set a custom amount of standard deviations around the median which is helpful if any providers become faulty. It should be noted that the default for this option is 1 standard deviation. 
 
-### `Deviation`
-• Deviation allows validators to set a custom amount of standard deviations around the median which helps distinguish providers from other providers. 
-
-• The deviation works by defining a maximum amount of standard deviations that a given asset can be from the median without being filtered out before voting. 
-
-### `Custom Endpoints`
-• Custom endpoints allows providers to set their own API endpoints for a given provider (switch out APIs). 
-
-• The custom endpoint option provides an override setting in our config for the hardcoded rest and websocket API endpoints. 
+### `provider_endpoints`
+• Allows providers to setup their own API endpoints for a given provider. 
 
 ### `server`
 
