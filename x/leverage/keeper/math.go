@@ -27,3 +27,29 @@ func ApproxExponential(x sdk.Dec) sdk.Dec {
 	sum = sum.Add(next.QuoInt64(6)) // 3!
 	return sum                      // approximated e^x
 }
+
+// ReduceProportionally accepts two sdk.Int to be interpreted as a fraction (a/b), and
+// any number of pointers to sdk.Int which will be multiplied by (a/b) if a < b, then
+// rounded up. If a >= b or b == 0 this is a no-op.
+func ReduceProportionally(a, b sdk.Int, nums ...*sdk.Int) {
+	if a.GTE(b) || b.IsZero() {
+		return
+	}
+	ratio := a.ToDec().Quo(b.ToDec()) // a/b
+	for _, n := range nums {
+		*n = n.ToDec().Mul(ratio).Ceil().RoundInt()
+	}
+}
+
+// ReduceProportionallyDec accepts two sdk.Dec to be interpreted as a fraction (a/b), and
+// any number of pointers to sdk.Int which will be multiplied by (a/b) if a < b, then
+// rounded up. If a >= b or b == 0 this is a no-op.
+func ReduceProportionallyDec(a, b sdk.Dec, nums ...*sdk.Int) {
+	if a.GTE(b) || b.IsZero() {
+		return
+	}
+	ratio := a.Quo(b)
+	for _, n := range nums {
+		*n = n.ToDec().Mul(ratio).Ceil().RoundInt()
+	}
+}

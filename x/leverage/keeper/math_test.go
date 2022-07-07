@@ -40,3 +40,32 @@ func TestInterpolate(t *testing.T) {
 	x = Interpolate(x1, x1, y1, x1, y1)
 	require.Equal(t, x, y1)
 }
+
+func TestReduceProportional(t *testing.T) {
+	testCase := func(a, b, initial, expected int64) {
+		n := sdk.NewInt(initial)
+		ReduceProportionally(sdk.NewInt(a), sdk.NewInt(b), &n)
+		require.Equal(t, expected, n.Int64())
+
+		m := sdk.NewInt(initial)
+		ReduceProportionallyDec(sdk.NewDecFromInt(sdk.NewInt(a)), sdk.NewDecFromInt(sdk.NewInt(b)), &m)
+		require.Equal(t, expected, m.Int64())
+	}
+
+	// No-op tests
+	testCase(2, 1, 40, 40) // a/b > 0
+	testCase(1, 0, 50, 50) // b == 0
+
+	// Zero result tests
+	testCase(1, 2, 0, 0)  // (1/2)0 = 0
+	testCase(0, 1, 60, 0) // (0/1)60 = 0
+
+	// Round number tests
+	testCase(1, 2, 70, 35)     // (1/2)70 = 35
+	testCase(1, 2, 8866, 4433) // (1/2)8866 = 4433
+	testCase(1, 3, 3000, 1000) // (1/3)3000 = 1000
+
+	// Ceiling tests
+	testCase(1, 3, 1, 1)  // (1/3)1 -> 1
+	testCase(1, 3, 10, 4) // (1/3)10 -> 4
+}

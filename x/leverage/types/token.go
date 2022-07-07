@@ -91,7 +91,7 @@ func (t Token) Validate() error {
 	return nil
 }
 
-// AssertSupplyEnabled returns an error if a token does not exist or cannot be supplied.
+// AssertSupplyEnabled returns an error if a Token cannot be supplied.
 func (t Token) AssertSupplyEnabled() error {
 	if !t.EnableMsgSupply {
 		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)
@@ -99,10 +99,18 @@ func (t Token) AssertSupplyEnabled() error {
 	return nil
 }
 
-// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+// AssertBorrowEnabled returns an error if a Token cannot be borrowed.
 func (t Token) AssertBorrowEnabled() error {
 	if !t.EnableMsgBorrow {
 		return sdkerrors.Wrap(ErrBorrowNotAllowed, t.BaseDenom)
+	}
+	return nil
+}
+
+// AssertNotBlacklisted returns an error if a Token is blacklisted.
+func (t Token) AssertNotBlacklisted() error {
+	if t.Blacklist {
+		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
 	}
 	return nil
 }

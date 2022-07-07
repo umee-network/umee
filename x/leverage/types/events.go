@@ -21,6 +21,8 @@ const (
 	EventAttrDenom       = "denom"
 	EventAttrEnable      = "enabled"
 	EventAttrAttempted   = "attempted"
+	EventAttrRepaid      = "repaid"
+	EventAttrCollateral  = "collateral"
 	EventAttrReward      = "reward"
 	EventAttrInterest    = "total_interest"
 	EventAttrBlockHeight = "block_height"

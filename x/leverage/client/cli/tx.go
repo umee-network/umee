@@ -243,7 +243,7 @@ func GetCmdRepayAsset() *cobra.Command {
 // transaction with a MsgLiquidate message.
 func GetCmdLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "liquidate [liquidator] [borrower] [amount] [reward]",
+		Use:   "liquidate [liquidator] [borrower] [amount] [reward-denom]",
 		Args:  cobra.ExactArgs(4),
 		Short: "Liquidate a specified amount of a borrower's debt for a chosen reward denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -266,12 +266,12 @@ func GetCmdLiquidate() *cobra.Command {
 				return err
 			}
 
-			reward, err := sdk.ParseCoinNormalized(args[3])
-			if err != nil {
+			rewardDenom := args[3]
+
+			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
+			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
-
-			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, reward)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

@@ -121,6 +121,7 @@ func IntegrationTestNetworkConfig() network.Config {
 		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
+		MaxCollateralShare:   100,
 	})
 
 	// Marshal the modified state and add it back into appGenState

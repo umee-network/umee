@@ -274,6 +274,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						EnableMsgSupply:      true,
 						EnableMsgBorrow:      true,
 						Blacklist:            false,
+						MaxCollateralShare:   100,
 					},
 				},
 			},
@@ -366,17 +367,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			val.Address.String(),
 			val.Address.String(),
 			"5uumee",
-			"4uumee",
-		},
-		nil,
-	}
-
-	fixCollateral := testTransaction{
-		"add back collateral received from liquidation",
-		cli.GetCmdAddCollateral(),
-		[]string{
-			val.Address.String(),
-			"4u/uumee",
+			"uumee",
 		},
 		nil,
 	}
@@ -386,7 +377,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdRepayAsset(),
 		[]string{
 			val.Address.String(),
-			"51uumee",
+			"50uumee",
 		},
 		nil,
 	}
@@ -396,7 +387,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdRemoveCollateral(),
 		[]string{
 			val.Address.String(),
-			"1000u/uumee",
+			"950u/uumee",
 		},
 		nil,
 	}
@@ -406,7 +397,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdWithdrawAsset(),
 		[]string{
 			val.Address.String(),
-			"1000u/uumee",
+			"950u/uumee",
 		},
 		nil,
 	}
@@ -420,8 +411,9 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 			false,
 			&types.QueryTokenMarketSizeResponse{},
-			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.NewInt(1001)},
+			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.NewInt(1000)},
 		},
+
 		testQuery{
 			"query available to borrow",
 			cli.GetCmdQueryAvailableBorrow(),
@@ -430,7 +422,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 			false,
 			&types.QueryAvailableBorrowResponse{},
-			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(955)},
+			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(950)},
 		},
 		testQuery{
 			"query market size",
@@ -440,7 +432,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 			false,
 			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("0.03424421")},
+			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("0.03421")},
 		},
 		testQuery{
 			"query supplied - all",
@@ -452,7 +444,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QuerySuppliedResponse{},
 			&types.QuerySuppliedResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 			},
 		},
@@ -467,10 +459,11 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QuerySuppliedResponse{},
 			&types.QuerySuppliedResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 			},
 		},
+
 		testQuery{
 			"query borrowed - all",
 			cli.GetCmdQueryBorrowed(),
@@ -481,7 +474,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
 				),
 			},
 		},
@@ -496,7 +489,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryBorrowedResponse{},
 			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
 				),
 			},
 		},
@@ -509,7 +502,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryTotalBorrowedResponse{},
 			&types.QueryTotalBorrowedResponse{
-				Amount: sdk.NewInt(47),
+				Amount: sdk.NewInt(51),
 			},
 		},
 		testQuery{
@@ -565,8 +558,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				// This result is umee's oracle exchange rate times the
 				// amount supplied.
-				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) umee * 34.21 = 0.034241
 			},
 		},
 		testQuery{
@@ -580,8 +573,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QuerySuppliedValueResponse{},
 			&types.QuerySuppliedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) umee * 34.21 = 0.03421
 			},
 		},
 		testQuery{
@@ -594,8 +587,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryCollateralValueResponse{},
 			&types.QueryCollateralValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
+				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1001 / 1000000) umee * 34.21 = 0.03421
 			},
 		},
 		testQuery{
@@ -608,8 +601,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryCollateralValueResponse{},
 			&types.QueryCollateralValueResponse{
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
+				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) umee * 34.21 = 0.03421
 			},
 		},
 		testQuery{
@@ -622,8 +615,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
+				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
+				// (51 / 1000000) umee * 34.21 = 0.00174471
 			},
 		},
 		testQuery{
@@ -637,8 +630,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryBorrowedValueResponse{},
 			&types.QueryBorrowedValueResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
+				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
+				// (51 / 1000000) umee * 34.21 = 0.00174471
 			},
 		},
 		testQuery{
@@ -651,8 +644,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryBorrowLimitResponse{},
 			&types.QueryBorrowLimitResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
+				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
+				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
 			},
 		},
 		testQuery{
@@ -665,8 +658,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryLiquidationThresholdResponse{},
 			&types.QueryLiquidationThresholdResponse{
 				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
+				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
 			},
 		},
 	}
@@ -679,17 +672,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		supply,
 		addCollateral,
 		borrow,
-		liquidate,
-		fixCollateral,
-	)
-
-	// These transactions are deferred to run after nonzero queries are finished
-	defer s.runTestCases(
-		repay,
-		removeCollateral,
-		withdraw,
 	)
 
 	// These queries run while the supplying and borrowing is active to produce nonzero output
 	s.runTestCases(nonzeroQueries...)
+
+	// These transactions run after nonzero queries are finished
+	s.runTestCases(
+		liquidate,
+		repay,
+		removeCollateral,
+		withdraw,
+	)
 }

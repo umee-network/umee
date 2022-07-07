@@ -30,8 +30,8 @@ service Msg {
   // facility.
   rpc RepayAsset(MsgRepayAsset) returns (MsgRepayAssetResponse);
 
-  // Liquidate defines a method for repaying a different user's borrowed coins
-  // to the capital facility in exchange for some of their collateral.
+  // Liquidate defines a method for repaying another user's borrowed
+  // coins in exchange for some of their collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
@@ -84,15 +84,14 @@ message MsgRepayAsset {
   cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgLiquidate represents a liquidator's request to repay a specific borrower's
-// borrowed base asset type to the module in exchange for collateral reward.
+// MsgLiquidate is the request structure for the Liquidate RPC.
 message MsgLiquidate {
   // Liquidator is the account address performing a liquidation and the signer
   // of the message.
-  string                   liquidator = 1;
-  string                   borrower   = 2;
-  cosmos.base.v1beta1.Coin repayment  = 3 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin reward     = 4 [(gogoproto.nullable) = false];
+  string                   liquidator   = 1;
+  string                   borrower     = 2;
+  cosmos.base.v1beta1.Coin repayment    = 3 [(gogoproto.nullable) = false];
+  string                   reward_denom = 4;
 }
 
 // MsgSupplyResponse defines the Msg/Supply response type.

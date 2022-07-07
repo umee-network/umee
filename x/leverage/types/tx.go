@@ -199,12 +199,12 @@ func (msg *MsgRepayAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment, reward sdk.Coin) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
 	return &MsgLiquidate{
-		Liquidator: liquidator.String(),
-		Borrower:   borrower.String(),
-		Repayment:  repayment,
-		Reward:     reward,
+		Liquidator:  liquidator.String(),
+		Borrower:    borrower.String(),
+		Repayment:   repayment,
+		RewardDenom: rewardDenom,
 	}
 }
 
@@ -212,23 +212,18 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLiquidator())
-	if err != nil {
+	if _, err := sdk.AccAddressFromBech32(msg.GetLiquidator()); err != nil {
 		return err
 	}
-	_, err = sdk.AccAddressFromBech32(msg.GetBorrower())
-	if err != nil {
+	if _, err := sdk.AccAddressFromBech32(msg.GetBorrower()); err != nil {
 		return err
 	}
-
-	if asset := msg.GetRepayment(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if err := msg.Repayment.Validate(); err != nil {
+		return err
 	}
-
-	if asset := msg.GetReward(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
+		return err
 	}
-
 	return nil
 }
 

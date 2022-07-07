@@ -66,34 +66,25 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	return total, nil
 }
 
-// EquivalentValue returns the amount of a selected denom which would have equal
-// USD value to a provided sdk.Coin
-func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom string) (sdk.Coin, error) {
-	// get USD price of input (fromCoin) denomination
-	p1, err := k.TokenPrice(ctx, fromCoin.Denom)
+// PriceRatio computed the ratio of the USD prices of two tokens, as sdk.Dec(fromPrice/toPrice).
+// Will return an error if either token price is not positive, and guarantees a positive output.
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec, error) {
+	p1, err := k.TokenPrice(ctx, fromDenom)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.ZeroDec(), err
 	}
-
-	// return immediately on zero input value
 	if p1.IsZero() {
-		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
+		return sdk.ZeroDec(), types.ErrZeroValuePriceRatio.Wrap(fromDenom)
 	}
-
-	// get USD price of output denomination
 	p2, err := k.TokenPrice(ctx, toDenom)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.ZeroDec(), err
 	}
-	if !p2.IsPositive() {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrBadValue, p2.String())
+	if p2.IsZero() {
+		return sdk.ZeroDec(), types.ErrZeroValuePriceRatio.Wrap(toDenom)
 	}
-
-	// then return the amount corrected by the price ratio
-	return sdk.NewCoin(
-		toDenom,
-		fromCoin.Amount.ToDec().Mul(p1).Quo(p2).TruncateInt(),
-	), nil
+	// Price ratio > 1 if fromDenom is worth more than toDenom.
+	return p1.Quo(p2), nil
 }
 
 // FundOracle transfers requested coins to the oracle module account, as
