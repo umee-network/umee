@@ -5,10 +5,10 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewMsgSupply(supplier sdk.AccAddress, amount sdk.Coin) *MsgSupply {
+func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 	return &MsgSupply{
 		Supplier: supplier.String(),
-		Amount:   amount,
+		Asset:    asset,
 	}
 }
 
@@ -21,8 +21,8 @@ func (msg *MsgSupply) ValidateBasic() error {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
@@ -39,10 +39,10 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdrawAsset(supplier sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
+func NewMsgWithdrawAsset(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdrawAsset {
 	return &MsgWithdrawAsset{
 		Supplier: supplier.String(),
-		Amount:   amount,
+		Asset:    asset,
 	}
 }
 
@@ -55,8 +55,8 @@ func (msg *MsgWithdrawAsset) ValidateBasic() error {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
@@ -131,10 +131,10 @@ func (msg *MsgRemoveCollateral) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrowAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgBorrowAsset {
+func NewMsgBorrowAsset(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrowAsset {
 	return &MsgBorrowAsset{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Asset:    asset,
 	}
 }
 
@@ -147,8 +147,8 @@ func (msg *MsgBorrowAsset) ValidateBasic() error {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
@@ -165,10 +165,10 @@ func (msg *MsgBorrowAsset) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
+func NewMsgRepayAsset(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepayAsset {
 	return &MsgRepayAsset{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Asset:    asset,
 	}
 }
 
@@ -181,8 +181,8 @@ func (msg *MsgRepayAsset) ValidateBasic() error {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil

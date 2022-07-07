@@ -35,6 +35,7 @@ Locked funds must be collateral-enabled uTokens. Locked funds will not leave the
 There will be three tiers of locking, differing in their unlocking durations, which may receive differing incentives. The tiers will be of fixed durations and will exist independent of active incentive programs.
 
 The intended structure of what is described as a single incentive program is as follows:
+
 - A fixed sum of a single token denomination
 - To be distributed evenly over time between a start date and an end date
 - To all addresses which have locked a specified uToken denomination
@@ -64,7 +65,6 @@ Valid tier weights range from 0 to 1.
 
 For example, a `MiddleTierWeight` of `0.8` means that collateral locked at the middle duration tier accrues 80% of the rewards that the same amount would accrue at the longest tier.
 
-
 ### Locking and Unlocking
 
 Users lock and unlock `uTokens` they have enabled as collateral in `x/leverage` by sumbitting `x/incentive` message types.
@@ -76,18 +76,18 @@ Locking of funds is independent of active incentive programs, and can even be do
 ```go
 type MsgLock struct {
   User sdk.AccAddress
-  Amount sdk.Coin
+  Asset sdk.Coin
   Tier   uint32
 }
 
 type MsgUnlock struct {
   User sdk.AccAddress
-  Amount sdk.Coin
+  Asset sdk.Coin
   Tier   uint32
 }
 ```
 
-Amounts are `uToken` balances, exact integers which will not experience rounding errors.
+Assets are `uToken`, exact integers which will not experience rounding errors.
 
 On receiving a `MsgLock`, the module must perform the following steps:
 
@@ -105,10 +105,11 @@ On receiving a `MsgUnlock`, the module must perform the following steps:
 - Start an unlocking for the user in question
 
 Unlockings are defined as a struct:
+
 ```go
 type CollateralUnlocking struct {
   User sdk.AccAddress
-  Amount sdk.Coin
+  Asset sdk.Coin
   Tier   uint32
   End    uint64
 }
@@ -119,11 +120,13 @@ type CollateralUnlockings struct {
 ```
 
 Ongoing unlockings are stored together in state. Concurrent unlockings are added to the end of the slice as they are created.
+
 ```go
 UnlockingPrefix | addr => CollateralUnlockings
 ```
 
 To avoid spam, a parameter in the module will limit the number of concurrent unlockings per address
+
 ```go
 MaxUnlockings uint32
 ```
@@ -133,9 +136,10 @@ When an unlocking period ends, the restrictions on withdrawing and disabling col
 Completed unlockings for an address are cleared from state the next time withdraw restrictions are calculated during a transaction - that is, during a `MsgLock`, `MsgUnlock`, `MsgWithdraw`, `MsgSetCollateral` sent by the user, or a `MsgLiquidate` where the user is being liquidated.
 
 Any collateral can potentially be seized during `MsgLiquidate`, whether it is locked, unlocking, or unlocked. In the event that the target of liquidation has collateral in various such states, it will be liquidated in this order:
-1) Unlocked collateral
-2) Locked collateral, starting from the least incentivized tier
-3) Unlocking collateral, starting from the least incentivized tier and breaking ties within tiers by choosing the unlockings created first. The seized collateral is subtracted from the `Amount` of any active unlocking affected.
+
+1. Unlocked collateral
+2. Locked collateral, starting from the least incentivized tier
+3. Unlocking collateral, starting from the least incentivized tier and breaking ties within tiers by choosing the unlockings created first. The seized collateral is subtracted from the `Asset.Denom` of any active unlocking affected.
 
 ### Incentive Programs
 
@@ -201,8 +205,8 @@ The following approach is proposed:
 
 The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, HistoricalReward) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
 
-The F1 algoritm only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims).
-Our implementation is less complex than F1 because there is no equivalent to slashing  in `x/incentive`, and we move rewards to the `PendingRewards` instead of claiming them directly.
+The F1 algorithm only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims).
+Our implementation is less complex than F1 because there is no equivalent to slashing in `x/incentive`, and we move rewards to the `PendingRewards` instead of claiming them directly.
 The same mathematical effect is achieved, where `Locked(addr,denom,tier)` remains constant in the time `RewardAccumulator(denom,tier)` has increased to its current value from `RewardBasis(denom,tier)`, allowing reward calculation on demand using only those three values.
 
 ### Claiming Rewards
@@ -227,7 +231,7 @@ To fund programs, we first require them to pass governance (setting denoms, date
 type MsgFundProgram struct {
   Sponsor sdk.AccAddress
   ID      uint32
-  Amount  sdk.Coin
+  Asset   sdk.Coin
 }
 ```
 
@@ -251,16 +255,19 @@ The proposed algorithm avoids iteration, at the cost of a moderate amount of com
 It allows for external and overlapping incentive programs, but does not provide a means to alter or cancel programs already in progress.
 
 ### Positive
+
 - Locking funds encourages stability and provides our primary defense against bank runs.
 - No iteration.
 - Allows external (non-`UMEE`-denominated) incentive programs to further engourage liquidity.
 
 ### Negative
+
 - Changing lock tier durations after launch would blindside existing users.
 - Rewards must be claimed via claim transaction (or automatically on other action).
 - Fairly complex.
 
 ### Neutral
+
 - Lock tiers are not adjustable per program.
 - Rewards are liquid (not locked).
 - Allows overlapping incentive programs in the same denom.
