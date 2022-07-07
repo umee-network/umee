@@ -88,11 +88,10 @@ func TestConvertCandlesToUSD(t *testing.T) {
 
 	krakenCandles := map[string][]provider.CandlePrice{
 		"USDT": {{
-		{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderKraken] = krakenCandles
 
@@ -121,41 +120,37 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 
 	binanceCandles := map[string][]provider.CandlePrice{
 		"ATOM": {{
-		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderBinance] = binanceCandles
 
 	krakenCandles := map[string][]provider.CandlePrice{
 		"USDT": {{
-		{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderKraken] = krakenCandles
 
 	gateCandles := map[string][]provider.CandlePrice{
-		"UST": {{
-		{
+		"USDT": {{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderGate] = gateCandles
 
 	okxCandles := map[string][]provider.CandlePrice{
 		"USDT": {{
-		{
-			Price:     sdk.MustNewDecFromStr("2.0"),
+			Price:     sdk.MustNewDecFromStr("100.0"),
 			Volume:    usdtVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderOkx] = okxCandles
 
@@ -184,17 +179,19 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := map[string][]provider.CandlePrice{
-		"ATOM": {{
-		Price:  atomPrice,
-		Volume: atomVolume,
+	binanceTickers := map[string]provider.TickerPrice{
+		"ATOM": {
+			Price:  atomPrice,
+			Volume: atomVolume,
+		},
 	}
 	providerPrices[config.ProviderBinance] = binanceTickers
 
-	krakenTicker := map[string][]provider.CandlePrice{
-		"USDT": {{
-		Price:  usdtPrice,
-		Volume: usdtVolume,
+	krakenTicker := map[string]provider.TickerPrice{
+		"USDT": {
+			Price:  usdtPrice,
+			Volume: usdtVolume,
+		},
 	}
 	providerPrices[config.ProviderKraken] = krakenTicker
 
@@ -221,30 +218,32 @@ func TestConvertTickersToUSD(t *testing.T) {
 func TestConvertTickersToUSDFiltering(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := map[string][]provider.CandlePrice{
-		"ATOM": {{
-		Price:  atomPrice,
-		Volume: atomVolume,
+	binanceTickers := map[string]provider.TickerPrice{
+		"ATOM": {
+			Price:  atomPrice,
+			Volume: atomVolume,
+		},
 	}
 	providerPrices[config.ProviderBinance] = binanceTickers
 
-	krakenTicker := map[string][]provider.CandlePrice{
-		"USDT": {{
-		Price:  usdtPrice,
-		Volume: usdtVolume,
+	krakenTicker := map[string]provider.TickerPrice{
+		"USDT": {
+			Price:  usdtPrice,
+			Volume: usdtVolume,
+		},
 	}
 	providerPrices[config.ProviderKraken] = krakenTicker
 
-	gateTicker := := map[string][]provider.CandlePrice{
-		"USDT": {
-			krakenTicker["USDT"]
-		}
+	gateTicker := map[string]provider.TickerPrice{
+		"USDT": krakenTicker["USDT"],
+	}
 	providerPrices[config.ProviderGate] = gateTicker
 
-	huobiTicker := map[string][]provider.CandlePrice{
-		"USDT": {{
-		Price:  sdk.MustNewDecFromStr("10000"),
-		Volume: usdtVolume,
+	huobiTicker := map[string]provider.TickerPrice{
+		"USDT": {
+			Price:  sdk.MustNewDecFromStr("10000"),
+			Volume: usdtVolume,
+		},
 	}
 	providerPrices[config.ProviderHuobi] = huobiTicker
 
