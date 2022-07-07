@@ -463,7 +463,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				),
 			},
 		},
-
 		testQuery{
 			"query borrowed - all",
 			cli.GetCmdQueryBorrowed(),
