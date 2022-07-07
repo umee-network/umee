@@ -255,25 +255,25 @@ func (s msgServer) Liquidate(
 ) (*types.MsgLiquidateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	liquidatorAddr, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
 	if err != nil {
 		return nil, err
 	}
 
-	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	borrower, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
 
-	repaid, collateral, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.RewardDenom)
+	repaid, collateral, reward, err := s.keeper.LiquidateBorrow(ctx, liquidator, borrower, msg.Repayment, msg.RewardDenom)
 	if err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid by liquidator",
-		"liquidator", liquidatorAddr.String(),
-		"borrower", borrowerAddr.String(),
+		"liquidator", liquidator.String(),
+		"borrower", borrower.String(),
 		"attempted", msg.Repayment.String(),
 		"repaid", repaid.String(),
 		"collateral", collateral.String(),
@@ -283,8 +283,8 @@ func (s msgServer) Liquidate(
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeLiquidate,
-			sdk.NewAttribute(types.EventAttrLiquidator, liquidatorAddr.String()),
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
+			sdk.NewAttribute(types.EventAttrLiquidator, liquidator.String()),
+			sdk.NewAttribute(types.EventAttrBorrower, borrower.String()),
 			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
 			sdk.NewAttribute(types.EventAttrRepaid, reward.String()),
 			sdk.NewAttribute(types.EventAttrCollateral, collateral.String()),
@@ -293,7 +293,7 @@ func (s msgServer) Liquidate(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, liquidator.String()),
 		),
 	})
 
