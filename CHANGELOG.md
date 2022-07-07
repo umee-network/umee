@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1023](https://github.com/umee-network/umee/pull/1023) Restrict MsgWithdraw to only uToken input (no base token auto-convert)
 - [1106](https://github.com/umee-network/umee/pull/1106) Rename Lend to Supply, including MsgLendAsset, Token EnableLend, docs, and internal functions. Also QueryLoaned similar queries to QuerySupplied.
 - [1113](https://github.com/umee-network/umee/pull/1113) Rename Amount field to Asset when sdk.Coin type in Msg proto.
+- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate now has reward denom instead of full coin
 
 ### Features
 
@@ -62,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
+- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate rewards base assets instead of requiring an addtional MsgWithdraw
 
 ### Improvements
 
