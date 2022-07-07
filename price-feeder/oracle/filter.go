@@ -25,11 +25,13 @@ func FilterTickerDeviations(
 	)
 
 	for providerName, priceTickers := range prices {
-		if _, ok := priceMap[providerName]; !ok {
-			priceMap[providerName] = make(map[string]sdk.Dec)
+		p, ok := priceMap[providerName]
+		if !ok {
+			p = map[string]sdk.Dec{}
+			priceMap[providerName] = p
 		}
 		for base, tp := range priceTickers {
-			priceMap[providerName][base] = tp.Price
+			p[base] = tp.Price
 		}
 	}
 
@@ -48,14 +50,15 @@ func FilterTickerDeviations(
 				threshold = deviationThresholds[base]
 			}
 
-			if _, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-					tp.Price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
-				if _, ok := filteredPrices[providerName]; !ok {
-					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
+			if d, ok := deviations[base]; !ok ||
+				(tp.Price.GTE(means[base].Sub(d.Mul(threshold))) &&
+					tp.Price.LTE(means[base].Add(d.Mul(threshold)))) {
+				p, ok := filteredPrices[providerName]
+				if !ok {
+					p = map[string]provider.TickerPrice{}
+					filteredPrices[providerName] = p
 				}
-
-				filteredPrices[providerName][base] = tp
+				p[base] = tp
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
 				logger.Warn().
@@ -86,11 +89,12 @@ func FilterCandleDeviations(
 		candlePrices := make(provider.AggregatedProviderCandles)
 
 		for base, cp := range priceCandles {
-			if _, ok := candlePrices[providerName]; !ok {
-				candlePrices[providerName] = make(map[string][]provider.CandlePrice)
+			p, ok := candlePrices[providerName]
+			if !ok {
+				p = map[string][]provider.CandlePrice{}
+				candlePrices[providerName] = p
 			}
-
-			candlePrices[providerName][base] = cp
+			p[base] = cp
 		}
 
 		tvwap, err := ComputeTVWAP(candlePrices)
@@ -122,14 +126,15 @@ func FilterCandleDeviations(
 				threshold = deviationThresholds[base]
 			}
 
-			if _, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-					price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
-				if _, ok := filteredCandles[providerName]; !ok {
-					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
+			if d, ok := deviations[base]; !ok ||
+				(price.GTE(means[base].Sub(d.Mul(threshold))) &&
+					price.LTE(means[base].Add(d.Mul(threshold)))) {
+				p, ok := filteredCandles[providerName]
+				if !ok {
+					p = map[string][]provider.CandlePrice{}
+					filteredCandles[providerName] = p
 				}
-
-				filteredCandles[providerName][base] = candles[providerName][base]
+				p[base] = candles[providerName][base]
 			} else {
 				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
 				logger.Warn().
