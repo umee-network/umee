@@ -8,7 +8,7 @@ import (
 func NewMsgSupply(supplier sdk.AccAddress, amount sdk.Coin) *MsgSupply {
 	return &MsgSupply{
 		Supplier: supplier.String(),
-		Amount:   amount,
+		Asset:    amount,
 	}
 }
 
@@ -42,7 +42,7 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 func NewMsgWithdrawAsset(supplier sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
 	return &MsgWithdrawAsset{
 		Supplier: supplier.String(),
-		Amount:   amount,
+		Asset:    amount,
 	}
 }
 
@@ -134,7 +134,7 @@ func (msg *MsgRemoveCollateral) GetSignBytes() []byte {
 func NewMsgBorrowAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgBorrowAsset {
 	return &MsgBorrowAsset{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Asset:    amount,
 	}
 }
 
@@ -168,7 +168,7 @@ func (msg *MsgBorrowAsset) GetSignBytes() []byte {
 func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
 	return &MsgRepayAsset{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Asset:    amount,
 	}
 }
 

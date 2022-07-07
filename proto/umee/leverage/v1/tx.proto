@@ -4,10 +4,11 @@ package umee.leverage.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
+option go_package      = "github.com/umee-network/umee/v2/x/leverage/types";
+option goproto_getters = false
 
-// Msg defines the x/leverage module's Msg service.
-service Msg {
+    // Msg defines the x/leverage module's Msg service.
+    service Msg {
   // Supply moves tokens from user balance to the module balance for lending or collateral.
   rpc Supply(MsgSupply) returns (MsgSupplyResponse);
 
@@ -39,15 +40,15 @@ service Msg {
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdrawAsset represents a user's request to withdraw supplied assets.
-// Amount must be a uToken.
+// Asset must be a uToken.
 message MsgWithdrawAsset {
   // Supplier is the account address withdrawing assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgAddCollateral represents a user's request to enable selected
@@ -72,7 +73,7 @@ message MsgBorrowAsset {
   // Borrower is the account address taking a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgRepayAsset represents a user's request to repay a borrowed base asset
@@ -81,7 +82,7 @@ message MsgRepayAsset {
   // Borrower is the account address repaying a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin amount   = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidate represents a liquidator's request to repay a specific borrower's
