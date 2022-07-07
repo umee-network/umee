@@ -98,27 +98,23 @@ The message will fail under the following conditions:
 
 ## MsgLiquidate
 
-A user liquidates all or part of an undercollateralized borrower's borrow positions in exchange for an equivalent value of the borrower's collateral, plus liquidation incentive. If the requested repayment amount would overpay or is limited by available collateral rewards or the dynamic `CloseFactor`, the repayment amount will be reduced to the maximum acceptable value before liquidation is attempted.
-
-The user specifies a minimum reward amount (in a base token denom) that they would accept for the full repayment amount. This is used to compute a ratio of actual repayment (which could be lower than intended) to token equivalent of actual uToken reward. Transactions that would result in a reward:repayment amount lower than the minimum will fail instead.
-
-A minimum reward amount of zero ignores this check and trusts oracle prices.
+A user liquidates all or part of an undercollateralized borrower's borrow positions in exchange for an equivalent value of the borrower's collateral, plus liquidation incentive. If the requested repayment amount would overpay or is limited by available balances or the dynamic `CloseFactor`, the repayment amount will be reduced to the maximum acceptable value before liquidation is attempted.
 
 ```protobuf
 message MsgLiquidate {
   string                   liquidator = 1;
   string                   borrower = 2;
   cosmos.base.v1beta1.Coin repayment = 3;
-  cosmos.base.v1beta1.Coin reward = 4;
+  string                   reward_denom = 4;
 }
 ```
 
 The message will fail under the following conditions:
 - `repayment` is not a valid amount of an accepted base asset
-- `reward` is not a valid amount of an accepted base asset
+- `reward_denom` is not an accepted base asset
 - `borrower` has not borrowed any of the specified asset to repay
-- `borrower` has no collateral of the requested reward denom
-- `borrower`'s total borrowed value does not exceed their `LiquidationThreshold`
-- `liquidator` balance is insufficient
-- the message's ratio of `reward` to `repayment` is higher than the ratio that would result from liquidation at the current oracle prices and liquidation incentives
+- `borrower` has no collateral of the requested reward's uToken denom
+- `borrower`'s `BorrowedValue` does not exceed their `LiquidationThreshold`
+- `liquidator` balance of the repayment denom is zero
+- `x/leverage` unreserved module balance or the reward denom is zero
 - Borrowed value or `LiquidationThreshold` cannot be computed due to a missing `x/oracle` price
