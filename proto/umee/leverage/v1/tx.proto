@@ -116,6 +116,7 @@ message MsgRepayAssetResponse {
 
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 message MsgLiquidateResponse {
-  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin reward = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin repaid     = 1 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin collateral = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin reward     = 3 [(gogoproto.nullable) = false];
 }

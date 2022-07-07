@@ -298,7 +298,8 @@ func (s msgServer) Liquidate(
 	})
 
 	return &types.MsgLiquidateResponse{
-		Repaid: repaid,
-		Reward: reward,
+		Repaid:     repaid,
+		Collateral: collateral,
+		Reward:     reward,
 	}, nil
 }
