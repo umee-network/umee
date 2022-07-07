@@ -47,7 +47,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bugs
 
-- [1110](https://github.com/umee-network/umee/pull/1110) Fix an issue where non-converted prices were being filtered out before voting.
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
 
 ### Improvements
@@ -57,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [1110](https://github.com/umee-network/umee/pull/1110) Add the ability to detect deviations with multi-quoted prices, ex. using BTC/USD and BTC/ETH at the same time.
 - [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
 - [#998](https://github.com/umee-network/umee/pull/998) Make deviation thresholds configurable for stablecoin support.
