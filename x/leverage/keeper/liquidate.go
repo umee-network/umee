@@ -7,11 +7,11 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// liquidationMaximum takes a repayment and reward denom proposed by a liquidator and calculates
+// liquidationOutcome takes a repayment and reward denom proposed by a liquidator and calculates
 // the maximum repayment amounts a target address is eligible for, and the corresponding reward
 // amounts using current oracle, params, and available balances. Inputs must be registered tokens.
 // Outputs are base token repayment, uToken collateral cost, and base token reward from liquidation.
-func (k Keeper) liquidationMaximum(
+func (k Keeper) liquidationOutcome(
 	ctx sdk.Context,
 	liquidatorAddr sdk.AccAddress,
 	targetAddr sdk.AccAddress,
