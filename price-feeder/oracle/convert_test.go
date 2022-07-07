@@ -77,18 +77,17 @@ func TestGetUSDBasedProviders(t *testing.T) {
 func TestConvertCandlesToUSD(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 2)
 
-	binanceCandles := make(map[string][]provider.CandlePrice, 1)
-	binanceCandles["ATOM"] = []provider.CandlePrice{
-		{
+	binanceCandles := map[string][]provider.CandlePrice{
+		"ATOM": {{
 			Price:     atomPrice,
 			Volume:    atomVolume,
 			TimeStamp: provider.PastUnixTime(1 * time.Minute),
-		},
+		}},
 	}
 	providerCandles[config.ProviderBinance] = binanceCandles
 
-	krakenCandles := make(map[string][]provider.CandlePrice, 1)
-	krakenCandles["USDT"] = []provider.CandlePrice{
+	krakenCandles := map[string][]provider.CandlePrice{
+		"USDT": {{
 		{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -120,8 +119,8 @@ func TestConvertCandlesToUSD(t *testing.T) {
 func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 2)
 
-	binanceCandles := make(map[string][]provider.CandlePrice, 1)
-	binanceCandles["ATOM"] = []provider.CandlePrice{
+	binanceCandles := map[string][]provider.CandlePrice{
+		"ATOM": {{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -130,8 +129,8 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[config.ProviderBinance] = binanceCandles
 
-	krakenCandles := make(map[string][]provider.CandlePrice, 1)
-	krakenCandles["USDT"] = []provider.CandlePrice{
+	krakenCandles := map[string][]provider.CandlePrice{
+		"USDT": {{
 		{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -140,8 +139,8 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[config.ProviderKraken] = krakenCandles
 
-	gateCandles := make(map[string][]provider.CandlePrice, 1)
-	gateCandles["USDT"] = []provider.CandlePrice{
+	gateCandles := map[string][]provider.CandlePrice{
+		"UST": {{
 		{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -150,8 +149,8 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[config.ProviderGate] = gateCandles
 
-	okxCandles := make(map[string][]provider.CandlePrice, 1)
-	okxCandles["USDT"] = []provider.CandlePrice{
+	okxCandles := map[string][]provider.CandlePrice{
+		"USDT": {{
 		{
 			Price:     sdk.MustNewDecFromStr("2.0"),
 			Volume:    usdtVolume,
@@ -185,15 +184,15 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := make(map[string]provider.TickerPrice, 1)
-	binanceTickers["ATOM"] = provider.TickerPrice{
+	binanceTickers := map[string][]provider.CandlePrice{
+		"ATOM": {{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
 	providerPrices[config.ProviderBinance] = binanceTickers
 
-	krakenTicker := make(map[string]provider.TickerPrice, 1)
-	krakenTicker["USDT"] = provider.TickerPrice{
+	krakenTicker := map[string][]provider.CandlePrice{
+		"USDT": {{
 		Price:  usdtPrice,
 		Volume: usdtVolume,
 	}
@@ -222,26 +221,28 @@ func TestConvertTickersToUSD(t *testing.T) {
 func TestConvertTickersToUSDFiltering(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := make(map[string]provider.TickerPrice, 1)
-	binanceTickers["ATOM"] = provider.TickerPrice{
+	binanceTickers := map[string][]provider.CandlePrice{
+		"ATOM": {{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
 	providerPrices[config.ProviderBinance] = binanceTickers
 
-	krakenTicker := make(map[string]provider.TickerPrice, 1)
-	krakenTicker["USDT"] = provider.TickerPrice{
+	krakenTicker := map[string][]provider.CandlePrice{
+		"USDT": {{
 		Price:  usdtPrice,
 		Volume: usdtVolume,
 	}
 	providerPrices[config.ProviderKraken] = krakenTicker
 
-	gateTicker := make(map[string]provider.TickerPrice, 1)
-	gateTicker["USDT"] = krakenTicker["USDT"]
+	gateTicker := := map[string][]provider.CandlePrice{
+		"USDT": {
+			krakenTicker["USDT"]
+		}
 	providerPrices[config.ProviderGate] = gateTicker
 
-	huobiTicker := make(map[string]provider.TickerPrice, 1)
-	huobiTicker["USDT"] = provider.TickerPrice{
+	huobiTicker := map[string][]provider.CandlePrice{
+		"USDT": {{
 		Price:  sdk.MustNewDecFromStr("10000"),
 		Volume: usdtVolume,
 	}
