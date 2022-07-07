@@ -21,7 +21,7 @@ func (msg *MsgSupply) ValidateBasic() error {
 		return err
 	}
 
-	if msg.Asset.IsValid() {
+	if !msg.Asset.IsValid() {
 		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
