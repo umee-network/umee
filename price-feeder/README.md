@@ -59,11 +59,11 @@ $ price-feeder /path/to/price_feeder_config.toml
 
 ### `deviation`
 
-Deviation allows validators to set a custom amount of standard deviations around the median which is helpful if any providers become faulty. It should be noted that the default for this option is 1 standard deviation. 
+Deviation allows validators to set a custom amount of standard deviations around the median which is helpful if any providers become faulty. It should be noted that the default for this option is 1 standard deviation.
 
 ### `provider_endpoints`
 
-The provider_endpoints option enables validators to setup their own API endpoints for a given provider. 
+The provider_endpoints option enables validators to setup their own API endpoints for a given provider.
 
 ### `server`
 
