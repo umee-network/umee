@@ -45,14 +45,12 @@ func FilterTickerDeviations(
 	// or defaulted to 1.
 	for providerName, priceTickers := range prices {
 		for base, tp := range priceTickers {
-			threshold := defaultDeviationThreshold
+			t := defaultDeviationThreshold
 			if _, ok := deviationThresholds[base]; ok {
-				threshold = deviationThresholds[base]
+				t = deviationThresholds[base]
 			}
 
-			if d, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(d.Mul(threshold))) &&
-					tp.Price.LTE(means[base].Add(d.Mul(threshold)))) {
+			if d, ok := deviations[base]; !ok || isBetween(tp.Price, means[base], d.Mul(t)) {
 				p, ok := filteredPrices[providerName]
 				if !ok {
 					p = map[string]provider.TickerPrice{}
@@ -121,14 +119,12 @@ func FilterCandleDeviations(
 	// or defaulted to 1.
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
-			threshold := defaultDeviationThreshold
+			t := defaultDeviationThreshold
 			if _, ok := deviationThresholds[base]; ok {
-				threshold = deviationThresholds[base]
+				t = deviationThresholds[base]
 			}
 
-			if d, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(d.Mul(threshold))) &&
-					price.LTE(means[base].Add(d.Mul(threshold)))) {
+			if d, ok := deviations[base]; !ok || isBetween(price, means[base], d.Mul(t)) {
 				p, ok := filteredCandles[providerName]
 				if !ok {
 					p = map[string][]provider.CandlePrice{}
@@ -147,4 +143,9 @@ func FilterCandleDeviations(
 	}
 
 	return filteredCandles, nil
+}
+
+func isBetween(p, mean, margin sdk.Dec) bool {
+	return p.GTE(mean.Sub(margin)) &&
+		p.LTE(mean.Add(margin))
 }
