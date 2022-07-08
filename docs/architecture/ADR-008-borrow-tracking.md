@@ -35,7 +35,7 @@ This change in borrow storage will be opaque to other parts of the leverage modu
 
 As a result of efficiency gains, the parameter `InterestEpoch` will be removed, with periodic functions taking place every block.
 
-Additionally, the values `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` will be removed from state, instead being efficiently calculated when needed.
+Additionally, the values `BorrowAPY`, `SupplyAPY`, and `uTokenExchangeRate` will be removed from state, instead being efficiently calculated when needed.
 
 ## Detailed Design
 
@@ -48,11 +48,11 @@ This decision mainly updates existing features, rather than adding new ones. The
 **State:**
 
 - Add `InterestScalar` and `TotalAdjustedBorrows` to state, and add `Get/Set` functions
-- Remove `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` from state, and remove `Set` functions
+- Remove `BorrowAPY`, `SupplyAPY`, and `uTokenExchangeRate` from state, and remove `Set` functions
 
 **Getters:**
 
-- Modify `Get` functions for `BorrowAPY`, `LendAPY`, and `uTokenExchangeRate` to calculate values in real time.
+- Modify `Get` functions for `BorrowAPY`, `SupplyAPY`, and `uTokenExchangeRate` to calculate values in real time.
 - Modify `GetBorrow(addr,denom)`, `GetBorrowerBorrows(addr)`, and `GetAllBorrows()` to use `InterestScalar` and `AdjustedBorrow`
 - Modify `GetTotalBorrows(denom)` to use `InterestScalar` and `TotalAdjustedBorrows`
 
@@ -104,7 +104,7 @@ This design change should address our lingering tradeoff between performance and
 
 - Total borrows and supply utilization can be calculated in O(1) time instead of O(N) as N is the total number of borrow positions across all users
 - Periodic functions can now take place every block instead of every `InterestEpoch` blocks
-- Quantities like uToken exchange rates and lend APYs now update instantly to new borrow and lend activity, even between multiple transactions within the same block.
+- Quantities like uToken exchange rates and supply APYs now update instantly to new borrow and supply activity, even between multiple transactions within the same block.
 
 ### Negative
 
@@ -114,5 +114,5 @@ This design change should address our lingering tradeoff between performance and
 
 The implementations discussed in some previous ADRs are partially superseded by this decision:
 
-- [ADR-002: Borrow Assets](./ADR-002-borrow-assets.md)
+- [ADR-003: Borrow Assets](./ADR-003-borrow-assets.md)
 - [ADR-004: Interest and Reserves](./ADR-004-interest-and-reserves.md)

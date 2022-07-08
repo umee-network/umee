@@ -25,7 +25,7 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdLendAsset(),
+		GetCmdSupply(),
 		GetCmdWithdrawAsset(),
 		GetCmdAddCollateral(),
 		GetCmdRemoveCollateral(),
@@ -37,13 +37,13 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
-// GetCmdLendAsset creates a Cobra command to generate or broadcast a
-// transaction with a MsgLendAsset message.
-func GetCmdLendAsset() *cobra.Command {
+// GetCmdSupply creates a Cobra command to generate or broadcast a
+// transaction with a MsgSupply message.
+func GetCmdSupply() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lend-asset [lender] [amount]",
+		Use:   "supply-asset [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Lend a specified amount of a supported asset",
+		Short: "Supply a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
@@ -59,7 +59,7 @@ func GetCmdLendAsset() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgLendAsset(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgSupply(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -74,7 +74,7 @@ func GetCmdLendAsset() *cobra.Command {
 // transaction with a MsgWithdrawAsset message.
 func GetCmdWithdrawAsset() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw-asset [lender] [amount]",
+		Use:   "withdraw-asset [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Withdraw a specified amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -316,7 +316,7 @@ Where proposal.json contains:
       "liquidation_incentive": "0.1",
       "symbol_denom": "UMEE",
       "exponent": 6,
-      "enable_msg_lend": true,
+      "enable_msg_supply": true,
       "enable_msg_borrow": true,
       "blacklist": false
     },
