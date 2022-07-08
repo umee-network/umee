@@ -13,18 +13,19 @@ import (
 	"time"
 
 	input "github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -164,7 +165,15 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		endpoints,
 	)
 
-	metrics, err := telemetry.New(cfg.Telemetry)
+	telemetryCfg := telemetry.Config{}
+	err = mapstructure.Decode(cfg.Telemetry, &telemetryCfg)
+	if err != nil {
+		return err
+	}
+	if cfg.Telemetry.Type == "prometheus" {
+		telemetryCfg.PrometheusRetentionTime = 120
+	}
+	metrics, err := telemetry.New(telemetryCfg)
 	if err != nil {
 		return err
 	}
