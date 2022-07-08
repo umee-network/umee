@@ -51,11 +51,7 @@ $ price-feeder /path/to/price_feeder_config.toml
 
 ### `telemetry`
 
-A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported.
-```shell
-$ price-feeder /path/to/price_feeder_config.toml
-```
-[Cosmos-SDK Telemetry](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md)
+A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md).
 
 ### `deviation`
 
