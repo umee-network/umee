@@ -55,6 +55,7 @@ A set of options for the application's telemetry, which is disabled by default. 
 ```shell
 $ price-feeder /path/to/price_feeder_config.toml
 ```
+[Cosmos-SDK Telemetry](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md)
 
 ### `deviation`
 
