@@ -40,9 +40,6 @@ jobs:
   test-sim-non-determinism:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.0
         with:
@@ -50,7 +47,12 @@ jobs:
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.18
       - name: Get Go Cache
+        if: env.GIT_DIFF
         uses: actions/cache@v3
         with:
           path: |
@@ -58,7 +60,6 @@ jobs:
             ~/.cache/golangci-lint
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-        if: env.GIT_DIFF
       - name: Test application non-determinism
         run: |
           make test-sim-non-determinism
@@ -78,7 +79,12 @@ jobs:
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.18
       - name: Get Go Cache
+        if: env.GIT_DIFF
         uses: actions/cache@v3
         with:
           path: |
@@ -86,17 +92,15 @@ jobs:
             ~/.cache/golangci-lint
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-        if: env.GIT_DIFF
       - uses: actions/cache@v3
+        if: env.GIT_DIFF
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-runsim-binary
-        if: env.GIT_DIFF
       - name: test-sim-multi-seed-short
         run: |
           make test-sim-multi-seed-short
         # TODO: We disable multi-seed simulations due to the gravity bridge.
-        #
         # Ref: https://github.com/umee-network/umee/issues/389
         if: ${{ false }}
         # if: env.GIT_DIFF
