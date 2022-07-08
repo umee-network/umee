@@ -41,13 +41,13 @@ func TestValidate(t *testing.T) {
 					RPCTimeout:    "100ms",
 				},
 				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
+					ServiceName:             "price-feeder",
+					Enabled:                 true,
+					EnableHostname:          true,
+					EnableHostnameLabel:     true,
+					EnableServiceLabel:      true,
+					GlobalLabels:            make([][]string, 1),
+					PrometheusRetentionTime: 120,
 				},
 				GasAdjustment: 1.5,
 			},
@@ -133,13 +133,13 @@ func TestValidate(t *testing.T) {
 					RPCTimeout:    "100ms",
 				},
 				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
+					ServiceName:             "price-feeder",
+					Enabled:                 true,
+					EnableHostname:          true,
+					EnableHostnameLabel:     true,
+					EnableServiceLabel:      true,
+					GlobalLabels:            make([][]string, 1),
+					PrometheusRetentionTime: 120,
 				},
 				GasAdjustment: 1.5,
 				ProviderEndpoints: []config.ProviderEndpoint{
@@ -176,13 +176,13 @@ func TestValidate(t *testing.T) {
 					RPCTimeout:    "100ms",
 				},
 				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
+					ServiceName:             "price-feeder",
+					Enabled:                 true,
+					EnableHostname:          true,
+					EnableHostnameLabel:     true,
+					EnableServiceLabel:      true,
+					GlobalLabels:            make([][]string, 1),
+					PrometheusRetentionTime: 120,
 				},
 				GasAdjustment: 1.5,
 				ProviderEndpoints: []config.ProviderEndpoint{
@@ -266,7 +266,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
@@ -497,7 +497,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
@@ -592,7 +592,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)

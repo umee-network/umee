@@ -140,9 +140,9 @@ type (
 		// [["chain_id", "cosmoshub-1"]]
 		GlobalLabels [][]string `toml:"global_labels" mapstructure:"global-labels"`
 
-		// Type determines which type of telemetry to use
-		// Valid values are "prometheus" or "generic"
-		Type string `toml:"type"`
+		// PrometheusRetentionTime, when positive, enables a Prometheus metrics sink.
+		// It defines the retention duration in seconds.
+		PrometheusRetentionTime int64 `toml:"prometheus_retention" mapstructure:"prometheus-retention-time"`
 	}
 
 	// ProviderEndpoint defines an override setting in our config for the
@@ -163,13 +163,8 @@ type (
 func telemetryValidation(sl validator.StructLevel) {
 	tel := sl.Current().Interface().(Telemetry)
 
-	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0 ||
-		len(tel.Type) == 0) {
+	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0) {
 		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
-	} else if tel.Enabled &&
-		(len(tel.Type) == 0 ||
-			(tel.Type != "prometheus" && tel.Type != "generic")) {
-		sl.ReportError(tel.Enabled, "type", "Type", "unsupportedTelemetryType", "")
 	}
 }
 

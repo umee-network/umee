@@ -170,9 +170,6 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if cfg.Telemetry.Type == "prometheus" {
-		telemetryCfg.PrometheusRetentionTime = 120
-	}
 	metrics, err := telemetry.New(telemetryCfg)
 	if err != nil {
 		return err
