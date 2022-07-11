@@ -52,7 +52,7 @@ func local_request_Query_RegisteredTokens_0(ctx context.Context, marshaler runti
 }
 
 func request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryParamsRequest
+	var protoReq QueryParams
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.Params(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -61,7 +61,7 @@ func request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, cl
 }
 
 func local_request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryParamsRequest
+	var protoReq QueryParams
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.Params(ctx, &protoReq)
@@ -74,7 +74,7 @@ var (
 )
 
 func request_Query_Borrowed_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowedRequest
+	var protoReq QueryBorrowed
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -90,7 +90,7 @@ func request_Query_Borrowed_0(ctx context.Context, marshaler runtime.Marshaler, 
 }
 
 func local_request_Query_Borrowed_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowedRequest
+	var protoReq QueryBorrowed
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -110,7 +110,7 @@ var (
 )
 
 func request_Query_BorrowedValue_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowedValueRequest
+	var protoReq QueryBorrowedValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -126,7 +126,7 @@ func request_Query_BorrowedValue_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_BorrowedValue_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowedValueRequest
+	var protoReq QueryBorrowedValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -146,7 +146,7 @@ var (
 )
 
 func request_Query_Supplied_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySuppliedRequest
+	var protoReq QuerySupplied
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -162,7 +162,7 @@ func request_Query_Supplied_0(ctx context.Context, marshaler runtime.Marshaler, 
 }
 
 func local_request_Query_Supplied_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySuppliedRequest
+	var protoReq QuerySupplied
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -182,7 +182,7 @@ var (
 )
 
 func request_Query_SuppliedValue_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySuppliedValueRequest
+	var protoReq QuerySuppliedValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -198,7 +198,7 @@ func request_Query_SuppliedValue_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_SuppliedValue_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySuppliedValueRequest
+	var protoReq QuerySuppliedValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -218,7 +218,7 @@ var (
 )
 
 func request_Query_AvailableBorrow_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAvailableBorrowRequest
+	var protoReq QueryAvailableBorrow
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -234,7 +234,7 @@ func request_Query_AvailableBorrow_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Query_AvailableBorrow_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAvailableBorrowRequest
+	var protoReq QueryAvailableBorrow
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -254,7 +254,7 @@ var (
 )
 
 func request_Query_BorrowAPY_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowAPYRequest
+	var protoReq QueryBorrowAPY
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -270,7 +270,7 @@ func request_Query_BorrowAPY_0(ctx context.Context, marshaler runtime.Marshaler,
 }
 
 func local_request_Query_BorrowAPY_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowAPYRequest
+	var protoReq QueryBorrowAPY
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -290,7 +290,7 @@ var (
 )
 
 func request_Query_SupplyAPY_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySupplyAPYRequest
+	var protoReq QuerySupplyAPY
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -306,7 +306,7 @@ func request_Query_SupplyAPY_0(ctx context.Context, marshaler runtime.Marshaler,
 }
 
 func local_request_Query_SupplyAPY_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QuerySupplyAPYRequest
+	var protoReq QuerySupplyAPY
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -326,7 +326,7 @@ var (
 )
 
 func request_Query_MarketSize_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMarketSizeRequest
+	var protoReq QueryMarketSize
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -342,7 +342,7 @@ func request_Query_MarketSize_0(ctx context.Context, marshaler runtime.Marshaler
 }
 
 func local_request_Query_MarketSize_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMarketSizeRequest
+	var protoReq QueryMarketSize
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -362,7 +362,7 @@ var (
 )
 
 func request_Query_TokenMarketSize_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryTokenMarketSizeRequest
+	var protoReq QueryTokenMarketSize
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -378,7 +378,7 @@ func request_Query_TokenMarketSize_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Query_TokenMarketSize_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryTokenMarketSizeRequest
+	var protoReq QueryTokenMarketSize
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -398,7 +398,7 @@ var (
 )
 
 func request_Query_ReserveAmount_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryReserveAmountRequest
+	var protoReq QueryReserveAmount
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -414,7 +414,7 @@ func request_Query_ReserveAmount_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_ReserveAmount_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryReserveAmountRequest
+	var protoReq QueryReserveAmount
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -434,7 +434,7 @@ var (
 )
 
 func request_Query_Collateral_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryCollateralRequest
+	var protoReq QueryCollateral
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -450,7 +450,7 @@ func request_Query_Collateral_0(ctx context.Context, marshaler runtime.Marshaler
 }
 
 func local_request_Query_Collateral_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryCollateralRequest
+	var protoReq QueryCollateral
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -470,7 +470,7 @@ var (
 )
 
 func request_Query_CollateralValue_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryCollateralValueRequest
+	var protoReq QueryCollateralValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -486,7 +486,7 @@ func request_Query_CollateralValue_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_Query_CollateralValue_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryCollateralValueRequest
+	var protoReq QueryCollateralValue
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -506,7 +506,7 @@ var (
 )
 
 func request_Query_ExchangeRate_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryExchangeRateRequest
+	var protoReq QueryExchangeRate
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -522,7 +522,7 @@ func request_Query_ExchangeRate_0(ctx context.Context, marshaler runtime.Marshal
 }
 
 func local_request_Query_ExchangeRate_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryExchangeRateRequest
+	var protoReq QueryExchangeRate
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -542,7 +542,7 @@ var (
 )
 
 func request_Query_BorrowLimit_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowLimitRequest
+	var protoReq QueryBorrowLimit
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -558,7 +558,7 @@ func request_Query_BorrowLimit_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_Query_BorrowLimit_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryBorrowLimitRequest
+	var protoReq QueryBorrowLimit
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -578,7 +578,7 @@ var (
 )
 
 func request_Query_LiquidationThreshold_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryLiquidationThresholdRequest
+	var protoReq QueryLiquidationThreshold
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -594,7 +594,7 @@ func request_Query_LiquidationThreshold_0(ctx context.Context, marshaler runtime
 }
 
 func local_request_Query_LiquidationThreshold_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryLiquidationThresholdRequest
+	var protoReq QueryLiquidationThreshold
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -610,7 +610,7 @@ func local_request_Query_LiquidationThreshold_0(ctx context.Context, marshaler r
 }
 
 func request_Query_LiquidationTargets_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryLiquidationTargetsRequest
+	var protoReq QueryLiquidationTargets
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.LiquidationTargets(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -619,7 +619,7 @@ func request_Query_LiquidationTargets_0(ctx context.Context, marshaler runtime.M
 }
 
 func local_request_Query_LiquidationTargets_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryLiquidationTargetsRequest
+	var protoReq QueryLiquidationTargets
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.LiquidationTargets(ctx, &protoReq)
@@ -632,7 +632,7 @@ var (
 )
 
 func request_Query_MarketSummary_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMarketSummaryRequest
+	var protoReq QueryMarketSummary
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -648,7 +648,7 @@ func request_Query_MarketSummary_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_MarketSummary_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMarketSummaryRequest
+	var protoReq QueryMarketSummary
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
