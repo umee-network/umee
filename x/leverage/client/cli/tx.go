@@ -26,11 +26,11 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdSupply(),
-		GetCmdWithdrawAsset(),
-		GetCmdAddCollateral(),
-		GetCmdRemoveCollateral(),
-		GetCmdBorrowAsset(),
-		GetCmdRepayAsset(),
+		GetCmdWithdraw(),
+		GetCmdCollateralize(),
+		GetCmdDecollateralize(),
+		GetCmdBorrow(),
+		GetCmdRepay(),
 		GetCmdLiquidate(),
 	)
 
@@ -41,7 +41,7 @@ func GetTxCmd() *cobra.Command {
 // transaction with a MsgSupply message.
 func GetCmdSupply() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "supply-asset [supplier] [amount]",
+		Use:   "supply [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Supply a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -70,11 +70,11 @@ func GetCmdSupply() *cobra.Command {
 	return cmd
 }
 
-// GetCmdWithdrawAsset creates a Cobra command to generate or broadcast a
-// transaction with a MsgWithdrawAsset message.
-func GetCmdWithdrawAsset() *cobra.Command {
+// GetCmdWithdraw creates a Cobra command to generate or broadcast a
+// transaction with a MsgWithdraw message.
+func GetCmdWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw-asset [supplier] [amount]",
+		Use:   "withdraw [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Withdraw a specified amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -92,7 +92,7 @@ func GetCmdWithdrawAsset() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgWithdrawAsset(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgWithdraw(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -103,11 +103,11 @@ func GetCmdWithdrawAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdAddCollateral creates a Cobra command to generate or broadcast a
-// transaction with a MsgAddCollateral message.
-func GetCmdAddCollateral() *cobra.Command {
+// GetCmdCollateralize creates a Cobra command to generate or broadcast a
+// transaction with a MsgCollateralize message.
+func GetCmdCollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-collateral [borrower] [coin]",
+		Use:   "collateralize [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Add uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -124,7 +124,7 @@ func GetCmdAddCollateral() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			msg := types.NewMsgAddCollateral(clientCtx.GetFromAddress(), coin)
+			msg := types.NewMsgCollateralize(clientCtx.GetFromAddress(), coin)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -138,11 +138,11 @@ func GetCmdAddCollateral() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRemoveCollateral returns a CLI command handler to generate or broadcast a
-// transaction with a MsgRemoveCollateral message.
-func GetCmdRemoveCollateral() *cobra.Command {
+// GetCmdDecollateralize returns a CLI command handler to generate or broadcast a
+// transaction with a MsgDecollateralize message.
+func GetCmdDecollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove-collateral [borrower] [coin]",
+		Use:   "decollateralize [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Remove uTokens from collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -159,7 +159,7 @@ func GetCmdRemoveCollateral() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			msg := types.NewMsgRemoveCollateral(clientCtx.GetFromAddress(), coin)
+			msg := types.NewMsgDecollateralize(clientCtx.GetFromAddress(), coin)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -173,11 +173,11 @@ func GetCmdRemoveCollateral() *cobra.Command {
 	return cmd
 }
 
-// GetCmdBorrowAsset creates a Cobra command to generate or broadcast a
-// transaction with a MsgBorrowAsset message.
-func GetCmdBorrowAsset() *cobra.Command {
+// GetCmdBorrow creates a Cobra command to generate or broadcast a
+// transaction with a MsgBorrow message.
+func GetCmdBorrow() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrow-asset [borrower] [amount]",
+		Use:   "borrow [borrower] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Borrow a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -195,7 +195,7 @@ func GetCmdBorrowAsset() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgBorrowAsset(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgBorrow(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -206,11 +206,11 @@ func GetCmdBorrowAsset() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRepayAsset creates a Cobra command to generate or broadcast a
-// transaction with a MsgRepayAsset message.
-func GetCmdRepayAsset() *cobra.Command {
+// GetCmdRepay creates a Cobra command to generate or broadcast a
+// transaction with a MsgRepay message.
+func GetCmdRepay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "repay-asset [borrower] [amount]",
+		Use:   "repay [borrower] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Repay a specified amount of a borrowed asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -228,7 +228,7 @@ func GetCmdRepayAsset() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgRepayAsset(clientCtx.GetFromAddress(), asset)
+			msg := types.NewMsgRepay(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

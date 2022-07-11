@@ -18,8 +18,8 @@ func (k Keeper) validateSupply(ctx sdk.Context, loan sdk.Coin) error {
 	return token.AssertSupplyEnabled()
 }
 
-// validateBorrowAsset validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
-func (k Keeper) validateBorrowAsset(ctx sdk.Context, borrow sdk.Coin) error {
+// validateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
+func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	if !borrow.IsValid() {
 		return types.ErrInvalidAsset.Wrap(borrow.String())
 	}
