@@ -13,20 +13,20 @@ import (
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
-	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRatesRequest{})
+	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
-	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{})
+	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
 		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
 	}, res.ExchangeRates)
 
-	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{
+	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{
 		Denom: displayDenom,
 	})
 	s.Require().NoError(err)
@@ -44,7 +44,7 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	err := s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
 	s.Require().Error(err)
 
-	_, err = s.queryClient.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegationRequest{
+	_, err = s.queryClient.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegation{
 		ValidatorAddr: inactiveValidator,
 	})
 	s.Require().Error(err)
@@ -54,7 +54,7 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 	err = s.app.OracleKeeper.ValidateFeeder(s.ctx, feederAddr, valAddr)
 	s.Require().NoError(err)
 
-	res, err := s.queryClient.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegationRequest{
+	res, err := s.queryClient.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegation{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) TestQuerier_FeeederDelegation() {
 func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	missCounter := uint64(rand.Intn(100))
 
-	res, err := s.queryClient.MissCounter(s.ctx.Context(), &types.QueryMissCounterRequest{
+	res, err := s.queryClient.MissCounter(s.ctx.Context(), &types.QueryMissCounter{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
@@ -72,7 +72,7 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 
 	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, missCounter)
 
-	res, err = s.queryClient.MissCounter(s.ctx.Context(), &types.QueryMissCounterRequest{
+	res, err = s.queryClient.MissCounter(s.ctx.Context(), &types.QueryMissCounter{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
@@ -91,7 +91,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	s.Require().NoError(err)
 	s.Require().Equal(prevote, res)
 
-	queryRes, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
+	queryRes, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevote{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
@@ -103,7 +103,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
-	res, err := s.queryClient.AggregatePrevotes(s.ctx.Context(), &types.QueryAggregatePrevotesRequest{})
+	res, err := s.queryClient.AggregatePrevotes(s.ctx.Context(), &types.QueryAggregatePrevotes{})
 	s.Require().Equal([]types.AggregateExchangeRatePrevote(nil), res.AggregatePrevotes)
 	s.Require().NoError(err)
 }
@@ -121,7 +121,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, vote)
 
-	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVoteRequest{
+	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVote{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().NoError(err)
@@ -132,13 +132,13 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotes() {
-	res, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotesRequest{})
+	res, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotes{})
 	s.Require().NoError(err)
 	s.Require().Equal([]types.AggregateExchangeRateVote(nil), res.AggregateVotes)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVoteInvalidExchangeRate() {
-	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVoteRequest{
+	res, err := s.queryClient.AggregateVote(s.ctx.Context(), &types.QueryAggregateVote{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().Nil(res)
@@ -146,7 +146,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVoteInvalidExchangeRate() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidExchangeRate() {
-	res, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
+	res, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevote{
 		ValidatorAddr: valAddr.String(),
 	})
 	s.Require().Nil(res)
@@ -154,13 +154,13 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidExchangeRate()
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	res, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParamsRequest{})
+	res, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParams{})
 	s.Require().NoError(err)
 	s.Require().Equal(types.DefaultGenesisState().Params, res.Params)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesInvalidExchangeRate() {
-	resExchangeRate, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRatesRequest{
+	resExchangeRate, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{
 		Denom: " ",
 	})
 	s.Require().Nil(resExchangeRate)
@@ -168,7 +168,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesInvalidExchangeRate() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevoteInvalidValAddr() {
-	resExchangeRate, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{
+	resExchangeRate, err := s.queryClient.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevote{
 		ValidatorAddr: "valAddrInvalid",
 	})
 	s.Require().Nil(resExchangeRate)
@@ -182,7 +182,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 		uint64(s.ctx.BlockHeight()),
 	))
 
-	_, err := s.queryClient.AggregatePrevotes(s.ctx.Context(), &types.QueryAggregatePrevotesRequest{})
+	_, err := s.queryClient.AggregatePrevotes(s.ctx.Context(), &types.QueryAggregatePrevotes{})
 	s.Require().Nil(err)
 }
 
@@ -192,7 +192,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 		valAddr,
 	))
 
-	_, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotesRequest{})
+	_, err := s.queryClient.AggregateVotes(s.ctx.Context(), &types.QueryAggregateVotes{})
 	s.Require().Nil(err)
 }
 
@@ -241,19 +241,19 @@ func (s *IntegrationTestSuite) TestInvalidBechAddress() {
 	q := keeper.NewQuerier(keeper.Keeper{})
 	invalidAddressMsg := "empty address string is not allowed"
 
-	resFeederDelegation, err := q.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegationRequest{})
+	resFeederDelegation, err := q.FeederDelegation(s.ctx.Context(), &types.QueryFeederDelegation{})
 	s.Require().Nil(resFeederDelegation)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 
-	resMissCounter, err := q.MissCounter(s.ctx.Context(), &types.QueryMissCounterRequest{})
+	resMissCounter, err := q.MissCounter(s.ctx.Context(), &types.QueryMissCounter{})
 	s.Require().Nil(resMissCounter)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 
-	resAggregatePrevote, err := q.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevoteRequest{})
+	resAggregatePrevote, err := q.AggregatePrevote(s.ctx.Context(), &types.QueryAggregatePrevote{})
 	s.Require().Nil(resAggregatePrevote)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 
-	resAggregateVote, err := q.AggregateVote(s.ctx.Context(), &types.QueryAggregateVoteRequest{})
+	resAggregateVote, err := q.AggregateVote(s.ctx.Context(), &types.QueryAggregateVote{})
 	s.Require().Nil(resAggregateVote)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 }

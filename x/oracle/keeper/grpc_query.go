@@ -26,7 +26,7 @@ func NewQuerier(keeper Keeper) types.QueryServer {
 // Params queries params of x/oracle module.
 func (q querier) Params(
 	goCtx context.Context,
-	req *types.QueryParamsRequest,
+	req *types.QueryParams,
 ) (*types.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -42,7 +42,7 @@ func (q querier) Params(
 // a single denom.
 func (q querier) ExchangeRates(
 	goCtx context.Context,
-	req *types.QueryExchangeRatesRequest,
+	req *types.QueryExchangeRates,
 ) (*types.QueryExchangeRatesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -72,7 +72,7 @@ func (q querier) ExchangeRates(
 // ActiveExchangeRates queries all denoms for which exchange rates exist.
 func (q querier) ActiveExchangeRates(
 	goCtx context.Context,
-	req *types.QueryActiveExchangeRatesRequest,
+	req *types.QueryActiveExchangeRates,
 ) (*types.QueryActiveExchangeRatesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -93,7 +93,7 @@ func (q querier) ActiveExchangeRates(
 // delegated oracle vote rights.
 func (q querier) FeederDelegation(
 	goCtx context.Context,
-	req *types.QueryFeederDelegationRequest,
+	req *types.QueryFeederDelegation,
 ) (*types.QueryFeederDelegationResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -118,7 +118,7 @@ func (q querier) FeederDelegation(
 // MissCounter queries oracle miss counter of a validator.
 func (q querier) MissCounter(
 	goCtx context.Context,
-	req *types.QueryMissCounterRequest,
+	req *types.QueryMissCounter,
 ) (*types.QueryMissCounterResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -139,7 +139,7 @@ func (q querier) MissCounter(
 // AggregatePrevote queries an aggregate prevote of a validator.
 func (q querier) AggregatePrevote(
 	goCtx context.Context,
-	req *types.QueryAggregatePrevoteRequest,
+	req *types.QueryAggregatePrevote,
 ) (*types.QueryAggregatePrevoteResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -165,7 +165,7 @@ func (q querier) AggregatePrevote(
 // AggregatePrevotes queries aggregate prevotes of all validators
 func (q querier) AggregatePrevotes(
 	goCtx context.Context,
-	req *types.QueryAggregatePrevotesRequest,
+	req *types.QueryAggregatePrevotes,
 ) (*types.QueryAggregatePrevotesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -187,7 +187,7 @@ func (q querier) AggregatePrevotes(
 // AggregateVote queries an aggregate vote of a validator
 func (q querier) AggregateVote(
 	goCtx context.Context,
-	req *types.QueryAggregateVoteRequest,
+	req *types.QueryAggregateVote,
 ) (*types.QueryAggregateVoteResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -213,7 +213,7 @@ func (q querier) AggregateVote(
 // AggregateVotes queries aggregate votes of all validators
 func (q querier) AggregateVotes(
 	goCtx context.Context,
-	req *types.QueryAggregateVotesRequest,
+	req *types.QueryAggregateVotes,
 ) (*types.QueryAggregateVotesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
