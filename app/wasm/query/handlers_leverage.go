@@ -262,3 +262,31 @@ func (q UmeeQuery) HandleMarketSummary(
 
 	return MarshalResponse(resp)
 }
+
+// HandleTotalCollateral gets the total collateral system-wide of a given
+// uToken denomination.
+func (q UmeeQuery) HandleTotalCollateral(
+	ctx sdk.Context,
+	qs lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.TotalCollateral(sdk.WrapSDKContext(ctx), q.TotalCollateral)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Total Collateral", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleTotalBorrowed gets the total borrowed system-wide of a given
+// token denomination.
+func (q UmeeQuery) HandleTotalBorrowed(
+	ctx sdk.Context,
+	qs lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.TotalBorrowed(sdk.WrapSDKContext(ctx), q.TotalBorrowed)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Total Borrowed", err)}
+	}
+
+	return MarshalResponse(resp)
+}

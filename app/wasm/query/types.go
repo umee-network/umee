@@ -72,6 +72,12 @@ const (
 	// AssignedQueryMarketSummary represents the call to query the market
 	// summary data of an denom.
 	AssignedQueryMarketSummary
+	// AssignedQueryTotalCollateral represents the call to query the total collateral
+	// system-wide of a given uToken denomination.
+	AssignedQueryTotalCollateral
+	// AssignedQueryTotalBorrowed represents the call to query the total borrowed
+	// system-wide of a given token denomination.
+	AssignedQueryTotalBorrowed
 	// AssignedQueryActiveExchangeRates represents the call to query all active denoms.
 	AssignedQueryActiveExchangeRates
 	// AssignedQueryActiveFeederDelegation represents the call to query all the feeder
@@ -154,6 +160,10 @@ type UmeeQuery struct {
 	LiquidationTargets *lvtypes.QueryLiquidationTargetsRequest `json:"liquidation_targets,omitempty"`
 	// Used to get the summary data of an denom.
 	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
+	// Used to get the total collateral system-wide of a given uToken denomination.
+	TotalCollateral *lvtypes.QueryTotalCollateralRequest `json:"total_collateral,omitempty"`
+	// Used to get the total borrowed system-wide of a given token denomination.
+	TotalBorrowed *lvtypes.QueryTotalBorrowedRequest `json:"total_borrowed,omitempty"`
 	// Used to get all active denoms.
 	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
 	// Used to get all feeder delegation of a validator.

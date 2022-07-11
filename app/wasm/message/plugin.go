@@ -14,8 +14,8 @@ import (
 
 // Plugin wraps the msg plugin with Messengers.
 type Plugin struct {
-	leverageMsgServer lvtypes.MsgServer
-	wrapped           wasmkeeper.Messenger
+	lvMsgServer lvtypes.MsgServer
+	wrapped     wasmkeeper.Messenger
 }
 
 // NewMessagePlugin creates a plugin to msg umee native modules.
@@ -23,7 +23,7 @@ func NewMessagePlugin(
 	leverageKeeper lvkeeper.Keeper,
 ) *Plugin {
 	return &Plugin{
-		leverageMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
+		lvMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
 	}
 }
 
@@ -36,19 +36,19 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 
 	switch smartcontractMessage.AssignedMsg {
 	case AssignedMsgSupply:
-		return smartcontractMessage.HandleSupply(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleSupply(ctx, plugin.lvMsgServer)
 	case AssignedMsgWithdraw:
-		return smartcontractMessage.HandleWithdrawAsset(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleWithdrawAsset(ctx, plugin.lvMsgServer)
 	case AssignedMsgAddCollateral:
-		return smartcontractMessage.HandleAddCollateral(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleAddCollateral(ctx, plugin.lvMsgServer)
 	case AssignedMsgRemoveCollateral:
-		return smartcontractMessage.HandleRemoveCollateral(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleRemoveCollateral(ctx, plugin.lvMsgServer)
 	case AssignedMsgBorrowAsset:
-		return smartcontractMessage.HandleBorrowAsset(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleBorrowAsset(ctx, plugin.lvMsgServer)
 	case AssignedMsgRepayAsset:
-		return smartcontractMessage.HandleRepayAsset(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleRepayAsset(ctx, plugin.lvMsgServer)
 	case AssignedMsgLiquidate:
-		return smartcontractMessage.HandleLiquidate(ctx, plugin.leverageMsgServer)
+		return smartcontractMessage.HandleLiquidate(ctx, plugin.lvMsgServer)
 	default:
 		return wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}
