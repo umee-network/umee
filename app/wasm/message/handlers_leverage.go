@@ -21,67 +21,67 @@ func (m UmeeMsg) HandleSupply(
 	return nil
 }
 
-// HandleWithdrawAsset handles the WithdrawAsset value of an address.
-func (m UmeeMsg) HandleWithdrawAsset(
+// HandleWithdraw handles the Withdraw value of an address.
+func (m UmeeMsg) HandleWithdraw(
 	ctx sdk.Context,
 	s lvtypes.MsgServer,
 ) error {
-	_, err := s.WithdrawAsset(sdk.WrapSDKContext(ctx), m.WithdrawAsset)
+	_, err := s.Withdraw(sdk.WrapSDKContext(ctx), m.Withdraw)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Withdraw Asset", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Withdraw", err)}
 	}
 
 	return nil
 }
 
-// HandleAddCollateral handles the enable selected uTokens as collateral.
-func (m UmeeMsg) HandleAddCollateral(
+// HandleCollateralize handles the enable selected uTokens as collateral.
+func (m UmeeMsg) HandleCollateralize(
 	ctx sdk.Context,
 	s lvtypes.MsgServer,
 ) error {
-	_, err := s.AddCollateral(sdk.WrapSDKContext(ctx), m.AddCollateral)
+	_, err := s.Collateralize(sdk.WrapSDKContext(ctx), m.Collateralize)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Add Collateral", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Collateralize", err)}
 	}
 
 	return nil
 }
 
-// HandleRemoveCollateral handles the disable amount of an selected uTokens
+// HandleDecollateralize handles the disable amount of an selected uTokens
 // as collateral.
-func (m UmeeMsg) HandleRemoveCollateral(
+func (m UmeeMsg) HandleDecollateralize(
 	ctx sdk.Context,
 	s lvtypes.MsgServer,
 ) error {
-	_, err := s.RemoveCollateral(sdk.WrapSDKContext(ctx), m.RemoveCollateral)
+	_, err := s.Decollateralize(sdk.WrapSDKContext(ctx), m.Decollateralize)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Remove Collateral", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Decollateralize", err)}
 	}
 
 	return nil
 }
 
-// HandleBorrowAsset handles the borrowing coins from the capital facility.
-func (m UmeeMsg) HandleBorrowAsset(
+// HandleBorrow handles the borrowing coins from the capital facility.
+func (m UmeeMsg) HandleBorrow(
 	ctx sdk.Context,
 	s lvtypes.MsgServer,
 ) error {
-	_, err := s.BorrowAsset(sdk.WrapSDKContext(ctx), m.BorrowAsset)
+	_, err := s.Borrow(sdk.WrapSDKContext(ctx), m.Borrow)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Borrow Asset", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Borrow", err)}
 	}
 
 	return nil
 }
 
-// HandleRepayAsset handles repaying borrowed coins to the capital facility.
-func (m UmeeMsg) HandleRepayAsset(
+// HandleRepay handles repaying borrowed coins to the capital facility.
+func (m UmeeMsg) HandleRepay(
 	ctx sdk.Context,
 	s lvtypes.MsgServer,
 ) error {
-	_, err := s.RepayAsset(sdk.WrapSDKContext(ctx), m.RepayAsset)
+	_, err := s.Repay(sdk.WrapSDKContext(ctx), m.Repay)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Repay Asset", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Repay", err)}
 	}
 
 	return nil

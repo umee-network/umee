@@ -13,18 +13,18 @@ const (
 	// AssignedMsgWithdraw represents the call to withdraw previously loaned coins
 	// from the capital facility.
 	AssignedMsgWithdraw
-	// AssignedMsgAddCollateral represents the call to enable an amount of
+	// AssignedMsgCollateralize represents the call to enable an amount of
 	// selected uTokens as collateral.
-	AssignedMsgAddCollateral
-	// AssignedMsgRemoveCollateral represents the call to disable amount of
+	AssignedMsgCollateralize
+	// AssignedMsgDecollateralize represents the call to disable amount of
 	// an selected uTokens as collateral.
-	AssignedMsgRemoveCollateral
-	// AssignedMsgBorrowAsset represents the call to borrowing coins from the
+	AssignedMsgDecollateralize
+	// AssignedMsgBorrow represents the call to borrowing coins from the
 	// capital facility.
-	AssignedMsgBorrowAsset
-	// AssignedMsgRepayAsset represents the call to repaying borrowed coins to
+	AssignedMsgBorrow
+	// AssignedMsgRepay represents the call to repaying borrowed coins to
 	// the capital facility.
-	AssignedMsgRepayAsset
+	AssignedMsgRepay
 	// AssignedMsgLiquidate represents the call to repaying a different user's
 	// borrowed coins to the capital facility in exchange for some of their
 	// collateral.
@@ -38,15 +38,15 @@ type UmeeMsg struct {
 	// Used to supply coins to the capital facility.
 	Supply *lvtypes.MsgSupply `json:"supply,omitempty"`
 	// Used to withdraw previously loaned coins from the capital facility.
-	WithdrawAsset *lvtypes.MsgWithdrawAsset `json:"withdraw_asset,omitempty"`
+	Withdraw *lvtypes.MsgWithdraw `json:"withdraw,omitempty"`
 	// Used to enable an amount of selected uTokens as collateral.
-	AddCollateral *lvtypes.MsgAddCollateral `json:"add_collateral,omitempty"`
+	Collateralize *lvtypes.MsgCollateralize `json:"collateralize,omitempty"`
 	// Used to disable amount of an selected uTokens as collateral.
-	RemoveCollateral *lvtypes.MsgRemoveCollateral `json:"remove_collateral,omitempty"`
+	Decollateralize *lvtypes.MsgDecollateralize `json:"decollateralize,omitempty"`
 	// Used to borrowing coins from the capital facility.
-	BorrowAsset *lvtypes.MsgBorrowAsset `json:"borrow_asset,omitempty"`
+	Borrow *lvtypes.MsgBorrow `json:"borrow,omitempty"`
 	// Used to repaying borrowed coins to the capital facility.
-	RepayAsset *lvtypes.MsgRepayAsset `json:"repay_asset,omitempty"`
+	Repay *lvtypes.MsgRepay `json:"repay,omitempty"`
 	// Used to repaying a different user's borrowed coins
 	// to the capital facility in exchange for some of their collateral.
 	Liquidate *lvtypes.MsgLiquidate `json:"liquidate,omitempty"`

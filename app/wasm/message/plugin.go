@@ -38,15 +38,15 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 	case AssignedMsgSupply:
 		return smartcontractMessage.HandleSupply(ctx, plugin.lvMsgServer)
 	case AssignedMsgWithdraw:
-		return smartcontractMessage.HandleWithdrawAsset(ctx, plugin.lvMsgServer)
-	case AssignedMsgAddCollateral:
-		return smartcontractMessage.HandleAddCollateral(ctx, plugin.lvMsgServer)
-	case AssignedMsgRemoveCollateral:
-		return smartcontractMessage.HandleRemoveCollateral(ctx, plugin.lvMsgServer)
-	case AssignedMsgBorrowAsset:
-		return smartcontractMessage.HandleBorrowAsset(ctx, plugin.lvMsgServer)
-	case AssignedMsgRepayAsset:
-		return smartcontractMessage.HandleRepayAsset(ctx, plugin.lvMsgServer)
+		return smartcontractMessage.HandleWithdraw(ctx, plugin.lvMsgServer)
+	case AssignedMsgCollateralize:
+		return smartcontractMessage.HandleCollateralize(ctx, plugin.lvMsgServer)
+	case AssignedMsgDecollateralize:
+		return smartcontractMessage.HandleDecollateralize(ctx, plugin.lvMsgServer)
+	case AssignedMsgBorrow:
+		return smartcontractMessage.HandleBorrow(ctx, plugin.lvMsgServer)
+	case AssignedMsgRepay:
+		return smartcontractMessage.HandleRepay(ctx, plugin.lvMsgServer)
 	case AssignedMsgLiquidate:
 		return smartcontractMessage.HandleLiquidate(ctx, plugin.lvMsgServer)
 	default:
