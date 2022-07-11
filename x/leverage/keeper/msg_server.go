@@ -265,7 +265,7 @@ func (s msgServer) Liquidate(
 		return nil, err
 	}
 
-	repaid, collateral, reward, err := s.keeper.LiquidateBorrow(ctx, liquidator, borrower, msg.Repayment, msg.RewardDenom)
+	repaid, collateral, reward, err := s.keeper.Liquidate(ctx, liquidator, borrower, msg.Repayment, msg.RewardDenom)
 	if err != nil {
 		return nil, err
 	}

@@ -584,7 +584,7 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 	// liquidator does not specify a minimum reward (hence 0 u/umee)
 	repayment := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000) // 30 umee
 	rewardDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(ctx, umeeapp.BondDenom)
-	_, _, _, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, umeeapp.BondDenom)
+	_, _, _, err = s.app.LeverageKeeper.Liquidate(ctx, liquidatorAddr, addr, repayment, umeeapp.BondDenom)
 	s.Require().Error(err)
 
 	// Note: Setting umee collateral weight to 0.0 to allow liquidation
@@ -596,7 +596,7 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 
 	// liquidator partially liquidates user, receiving some collateral
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
-	repaid, collateral, reward, err := s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, umeeapp.BondDenom)
+	repaid, collateral, reward, err := s.app.LeverageKeeper.Liquidate(ctx, liquidatorAddr, addr, repayment, umeeapp.BondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(repayment, repaid)
 	s.Require().Equal(sdk.NewInt64Coin("u/"+umeeDenom, 11000000), collateral)
@@ -616,7 +616,7 @@ func (s *IntegrationTestSuite) TestLiqudateBorrow_Valid() {
 
 	// liquidator fully liquidates user, receiving more collateral and reducing borrowed amount to zero
 	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 300000000) // 300 umee
-	repaid, collateral, reward, err = s.app.LeverageKeeper.LiquidateBorrow(ctx, liquidatorAddr, addr, repayment, umeeDenom)
+	repaid, collateral, reward, err = s.app.LeverageKeeper.Liquidate(ctx, liquidatorAddr, addr, repayment, umeeDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 80000000), repaid)
 	s.Require().Equal(sdk.NewInt64Coin("u/"+umeeDenom, 88000000), collateral)

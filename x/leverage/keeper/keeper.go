@@ -346,19 +346,16 @@ func (k Keeper) RemoveCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, c
 	return nil
 }
 
-// LiquidateBorrow attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
-// for a selected denomination of uToken collateral, specified by its associated token denom. The liquidator
-// may also specify a minimum reward amount, again in base token denom that will be adjusted by uToken exchange
-// rate, they would accept for the specified repayment. If the borrower is not over their liquidation limit, or
-// the repayment or reward denominations are invalid, an error is returned. If the attempted repayment
-// is greater than the amount owed or the maximum that can be repaid due to parameters (close factor)
-// then a partial liquidation, equal to the maximum valid amount, is performed. The same occurs if the
-// value of collateral in the selected reward denomination cannot cover the proposed repayment.
-// Because partial liquidation is possible and exchange rates vary, LiquidateBorrow returns the actual
-// amount of tokens repaid and uTokens rewarded (in that order).
-func (k Keeper) LiquidateBorrow(
+// Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
+// for a the base token equivalent of selected denomination of the borrower's uToken collateral. If the
+// borrower is not over their liquidation limit, or the repayment or reward denominations are invalid,
+// an error is returned. If the attempted repayment is greater than the amount owed or the maximum that
+// can be repaid due to parameters or available balances, then a partial liquidation, equal to the maximum
+// valid amount, is performed. Because partial liquidation is possible and exchange rates vary, Liquidate
+// returns the actual amount of tokens repaid, uTokens consumed, and base tokens rewarded (in that order).
+func (k Keeper) Liquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepay sdk.Coin, rewardDenom string,
-) (sdk.Coin, sdk.Coin, sdk.Coin, error) {
+) (baseRepay sdk.Coin, collateralReward sdk.Coin, baseReward sdk.Coin, err error) {
 	if err := k.validateAcceptedAsset(ctx, desiredRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -367,7 +364,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// calculate Token repay, and uToken and Token reward amounts allowed by liquidation rules and available balances
-	baseRepay, collateralReward, baseReward, err := k.liquidationOutcome(
+	baseRepay, collateralReward, baseReward, err = k.liquidationOutcome(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
