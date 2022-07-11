@@ -136,7 +136,7 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		opMsgRoute string
 		opMsgName  string
 	}{
-		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeLoanAsset},
+		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeSupply},
 		{simulation.DefaultWeightMsgWithdraw, types.ModuleName, types.EventTypeWithdraw},
 		{simulation.DefaultWeightMsgBorrow, types.ModuleName, types.EventTypeBorrow},
 		{simulation.DefaultWeightMsgCollateralize, types.ModuleName, types.EventTypeCollateralize},
@@ -171,7 +171,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeLoanAsset, msg.Type())
+	s.Require().Equal(types.EventTypeSupply, msg.Type())
 	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }

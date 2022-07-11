@@ -123,7 +123,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, coin, skip := randomSpendableFields(r, ctx, accs, bk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLoanAsset, "skip all transfers"), nil, nil
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSupply, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgSupply(from.Address, coin)
@@ -134,7 +134,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeLoanAsset,
+			MsgType:         types.EventTypeSupply,
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,

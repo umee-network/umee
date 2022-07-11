@@ -43,7 +43,7 @@ func (s msgServer) Supply(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeLoanAsset,
+			types.EventTypeSupply,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),

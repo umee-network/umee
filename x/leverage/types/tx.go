@@ -13,7 +13,7 @@ func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 }
 
 func (msg MsgSupply) Route() string { return ModuleName }
-func (msg MsgSupply) Type() string  { return EventTypeLoanAsset }
+func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())

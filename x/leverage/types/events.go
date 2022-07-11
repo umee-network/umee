@@ -2,13 +2,13 @@ package types
 
 // Event types and attributes for the leverage module
 const (
-	EventTypeLoanAsset          = "loan_asset"
-	EventTypeWithdraw           = "withdraw_asset"
-	EventTypeCollateralize      = "add_collateral"
-	EventTypeDecollateralize    = "remove_collateral"
-	EventTypeBorrow             = "borrow_asset"
-	EventTypeRepayBorrowedAsset = "repay_borrowed_asset"
-	EventTypeLiquidate          = "liquidate_borrow_position"
+	EventTypeSupply             = "supply"
+	EventTypeWithdraw           = "withdraw"
+	EventTypeCollateralize      = "collateralize"
+	EventTypeDecollateralize    = "decollateralize"
+	EventTypeBorrow             = "borrow"
+	EventTypeRepayBorrowedAsset = "repay"
+	EventTypeLiquidate          = "liquidate"
 	EventTypeRepayBadDebt       = "repay_bad_debt"
 	EventTypeReservesExhausted  = "reserves_exhausted"
 	EventTypeInterestAccrual    = "interest_accrual"
