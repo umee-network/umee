@@ -69,24 +69,24 @@ func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
 
-// QueryAvailableBorrowRequest defines the request structure for the
+// QueryAvailableBorrow defines the request structure for the
 // AvailableBorrow gRPC service handler.
-type QueryAvailableBorrowRequest struct {
+type QueryAvailableBorrow struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryAvailableBorrowRequest) Reset()         { *m = QueryAvailableBorrowRequest{} }
-func (m *QueryAvailableBorrowRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryAvailableBorrowRequest) ProtoMessage()    {}
-func (*QueryAvailableBorrowRequest) Descriptor() ([]byte, []int) {
+func (m *QueryAvailableBorrow) Reset()         { *m = QueryAvailableBorrow{} }
+func (m *QueryAvailableBorrow) String() string { return proto.CompactTextString(m) }
+func (*QueryAvailableBorrow) ProtoMessage()    {}
+func (*QueryAvailableBorrow) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{1}
 }
-func (m *QueryAvailableBorrowRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryAvailableBorrow) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryAvailableBorrowRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAvailableBorrow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryAvailableBorrowRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAvailableBorrow.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -96,19 +96,19 @@ func (m *QueryAvailableBorrowRequest) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *QueryAvailableBorrowRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAvailableBorrowRequest.Merge(m, src)
+func (m *QueryAvailableBorrow) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAvailableBorrow.Merge(m, src)
 }
-func (m *QueryAvailableBorrowRequest) XXX_Size() int {
+func (m *QueryAvailableBorrow) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryAvailableBorrowRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAvailableBorrowRequest.DiscardUnknown(m)
+func (m *QueryAvailableBorrow) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAvailableBorrow.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryAvailableBorrowRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryAvailableBorrow proto.InternalMessageInfo
 
-func (m *QueryAvailableBorrowRequest) GetDenom() string {
+func (m *QueryAvailableBorrow) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -154,24 +154,24 @@ func (m *QueryAvailableBorrowResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAvailableBorrowResponse proto.InternalMessageInfo
 
-// QueryBorrowAPYRequest defines the request structure for the BorrowAPY
+// QueryBorrowAPY defines the request structure for the BorrowAPY
 // gRPC service handler.
-type QueryBorrowAPYRequest struct {
+type QueryBorrowAPY struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryBorrowAPYRequest) Reset()         { *m = QueryBorrowAPYRequest{} }
-func (m *QueryBorrowAPYRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowAPYRequest) ProtoMessage()    {}
-func (*QueryBorrowAPYRequest) Descriptor() ([]byte, []int) {
+func (m *QueryBorrowAPY) Reset()         { *m = QueryBorrowAPY{} }
+func (m *QueryBorrowAPY) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowAPY) ProtoMessage()    {}
+func (*QueryBorrowAPY) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{3}
 }
-func (m *QueryBorrowAPYRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryBorrowAPY) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryBorrowAPY) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowAPYRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryBorrowAPY.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -181,19 +181,19 @@ func (m *QueryBorrowAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowAPYRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowAPYRequest.Merge(m, src)
+func (m *QueryBorrowAPY) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowAPY.Merge(m, src)
 }
-func (m *QueryBorrowAPYRequest) XXX_Size() int {
+func (m *QueryBorrowAPY) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowAPYRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowAPYRequest.DiscardUnknown(m)
+func (m *QueryBorrowAPY) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowAPY.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowAPYRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryBorrowAPY proto.InternalMessageInfo
 
-func (m *QueryBorrowAPYRequest) GetDenom() string {
+func (m *QueryBorrowAPY) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -239,24 +239,24 @@ func (m *QueryBorrowAPYResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowAPYResponse proto.InternalMessageInfo
 
-// QuerySupplyAPYRequest defines the request structure for the SupplyAPY
+// QuerySupplyAPY defines the request structure for the SupplyAPY
 // gRPC service handler.
-type QuerySupplyAPYRequest struct {
+type QuerySupplyAPY struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QuerySupplyAPYRequest) Reset()         { *m = QuerySupplyAPYRequest{} }
-func (m *QuerySupplyAPYRequest) String() string { return proto.CompactTextString(m) }
-func (*QuerySupplyAPYRequest) ProtoMessage()    {}
-func (*QuerySupplyAPYRequest) Descriptor() ([]byte, []int) {
+func (m *QuerySupplyAPY) Reset()         { *m = QuerySupplyAPY{} }
+func (m *QuerySupplyAPY) String() string { return proto.CompactTextString(m) }
+func (*QuerySupplyAPY) ProtoMessage()    {}
+func (*QuerySupplyAPY) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{5}
 }
-func (m *QuerySupplyAPYRequest) XXX_Unmarshal(b []byte) error {
+func (m *QuerySupplyAPY) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QuerySupplyAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySupplyAPY) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QuerySupplyAPYRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySupplyAPY.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -266,19 +266,19 @@ func (m *QuerySupplyAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *QuerySupplyAPYRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QuerySupplyAPYRequest.Merge(m, src)
+func (m *QuerySupplyAPY) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySupplyAPY.Merge(m, src)
 }
-func (m *QuerySupplyAPYRequest) XXX_Size() int {
+func (m *QuerySupplyAPY) XXX_Size() int {
 	return m.Size()
 }
-func (m *QuerySupplyAPYRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QuerySupplyAPYRequest.DiscardUnknown(m)
+func (m *QuerySupplyAPY) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySupplyAPY.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QuerySupplyAPYRequest proto.InternalMessageInfo
+var xxx_messageInfo_QuerySupplyAPY proto.InternalMessageInfo
 
-func (m *QuerySupplyAPYRequest) GetDenom() string {
+func (m *QuerySupplyAPY) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -324,24 +324,24 @@ func (m *QuerySupplyAPYResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QuerySupplyAPYResponse proto.InternalMessageInfo
 
-// QueryMarketSizeRequest defines the request structure for the Market Size in
+// QueryMarketSize defines the request structure for the Market Size in
 // USD gRPC service handler.
-type QueryMarketSizeRequest struct {
+type QueryMarketSize struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryMarketSizeRequest) Reset()         { *m = QueryMarketSizeRequest{} }
-func (m *QueryMarketSizeRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryMarketSizeRequest) ProtoMessage()    {}
-func (*QueryMarketSizeRequest) Descriptor() ([]byte, []int) {
+func (m *QueryMarketSize) Reset()         { *m = QueryMarketSize{} }
+func (m *QueryMarketSize) String() string { return proto.CompactTextString(m) }
+func (*QueryMarketSize) ProtoMessage()    {}
+func (*QueryMarketSize) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{7}
 }
-func (m *QueryMarketSizeRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryMarketSize) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryMarketSize) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryMarketSizeRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryMarketSize.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -351,19 +351,19 @@ func (m *QueryMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *QueryMarketSizeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMarketSizeRequest.Merge(m, src)
+func (m *QueryMarketSize) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMarketSize.Merge(m, src)
 }
-func (m *QueryMarketSizeRequest) XXX_Size() int {
+func (m *QueryMarketSize) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryMarketSizeRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMarketSizeRequest.DiscardUnknown(m)
+func (m *QueryMarketSize) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMarketSize.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryMarketSizeRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryMarketSize proto.InternalMessageInfo
 
-func (m *QueryMarketSizeRequest) GetDenom() string {
+func (m *QueryMarketSize) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -409,24 +409,24 @@ func (m *QueryMarketSizeResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMarketSizeResponse proto.InternalMessageInfo
 
-// QueryTokenMarketSizeRequest defines the request structure for the Token
+// QueryTokenMarketSize defines the request structure for the Token
 // Market Size gRPC service handler.
-type QueryTokenMarketSizeRequest struct {
+type QueryTokenMarketSize struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryTokenMarketSizeRequest) Reset()         { *m = QueryTokenMarketSizeRequest{} }
-func (m *QueryTokenMarketSizeRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryTokenMarketSizeRequest) ProtoMessage()    {}
-func (*QueryTokenMarketSizeRequest) Descriptor() ([]byte, []int) {
+func (m *QueryTokenMarketSize) Reset()         { *m = QueryTokenMarketSize{} }
+func (m *QueryTokenMarketSize) String() string { return proto.CompactTextString(m) }
+func (*QueryTokenMarketSize) ProtoMessage()    {}
+func (*QueryTokenMarketSize) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{9}
 }
-func (m *QueryTokenMarketSizeRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryTokenMarketSize) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryTokenMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryTokenMarketSize) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryTokenMarketSizeRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryTokenMarketSize.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -436,19 +436,19 @@ func (m *QueryTokenMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *QueryTokenMarketSizeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTokenMarketSizeRequest.Merge(m, src)
+func (m *QueryTokenMarketSize) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryTokenMarketSize.Merge(m, src)
 }
-func (m *QueryTokenMarketSizeRequest) XXX_Size() int {
+func (m *QueryTokenMarketSize) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryTokenMarketSizeRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTokenMarketSizeRequest.DiscardUnknown(m)
+func (m *QueryTokenMarketSize) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryTokenMarketSize.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryTokenMarketSizeRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryTokenMarketSize proto.InternalMessageInfo
 
-func (m *QueryTokenMarketSizeRequest) GetDenom() string {
+func (m *QueryTokenMarketSize) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -540,23 +540,23 @@ func (m *QueryRegisteredTokensResponse) GetRegistry() []Token {
 	return nil
 }
 
-// QueryParamsRequest defines the request structure for the Params gRPC service
+// QueryParams defines the request structure for the Params gRPC service
 // handler.
-type QueryParamsRequest struct {
+type QueryParams struct {
 }
 
-func (m *QueryParamsRequest) Reset()         { *m = QueryParamsRequest{} }
-func (m *QueryParamsRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryParamsRequest) ProtoMessage()    {}
-func (*QueryParamsRequest) Descriptor() ([]byte, []int) {
+func (m *QueryParams) Reset()         { *m = QueryParams{} }
+func (m *QueryParams) String() string { return proto.CompactTextString(m) }
+func (*QueryParams) ProtoMessage()    {}
+func (*QueryParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{12}
 }
-func (m *QueryParamsRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryParamsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryParamsRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryParams.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -566,17 +566,17 @@ func (m *QueryParamsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *QueryParamsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryParamsRequest.Merge(m, src)
+func (m *QueryParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryParams.Merge(m, src)
 }
-func (m *QueryParamsRequest) XXX_Size() int {
+func (m *QueryParams) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryParamsRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryParamsRequest.DiscardUnknown(m)
+func (m *QueryParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryParams.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryParamsRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryParams proto.InternalMessageInfo
 
 // QueryParamsResponse defines the response structure for the Params gRPC
 // service handler.
@@ -624,25 +624,25 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// QueryBorrowedRequest defines the request structure for the Borrowed gRPC
+// QueryBorrowed defines the request structure for the Borrowed gRPC
 // service handler.
-type QueryBorrowedRequest struct {
+type QueryBorrowed struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryBorrowedRequest) Reset()         { *m = QueryBorrowedRequest{} }
-func (m *QueryBorrowedRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedRequest) ProtoMessage()    {}
-func (*QueryBorrowedRequest) Descriptor() ([]byte, []int) {
+func (m *QueryBorrowed) Reset()         { *m = QueryBorrowed{} }
+func (m *QueryBorrowed) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowed) ProtoMessage()    {}
+func (*QueryBorrowed) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{14}
 }
-func (m *QueryBorrowedRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryBorrowed) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryBorrowed) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowedRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryBorrowed.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -652,26 +652,26 @@ func (m *QueryBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedRequest.Merge(m, src)
+func (m *QueryBorrowed) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowed.Merge(m, src)
 }
-func (m *QueryBorrowedRequest) XXX_Size() int {
+func (m *QueryBorrowed) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedRequest.DiscardUnknown(m)
+func (m *QueryBorrowed) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowed.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowedRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryBorrowed proto.InternalMessageInfo
 
-func (m *QueryBorrowedRequest) GetAddress() string {
+func (m *QueryBorrowed) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryBorrowedRequest) GetDenom() string {
+func (m *QueryBorrowed) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -724,25 +724,25 @@ func (m *QueryBorrowedResponse) GetBorrowed() github_com_cosmos_cosmos_sdk_types
 	return nil
 }
 
-// QueryBorrowedValueRequest defines the request structure for the BorrowedValue
+// QueryBorrowedValue defines the request structure for the BorrowedValue
 // gRPC service handler.
-type QueryBorrowedValueRequest struct {
+type QueryBorrowedValue struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryBorrowedValueRequest) Reset()         { *m = QueryBorrowedValueRequest{} }
-func (m *QueryBorrowedValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedValueRequest) ProtoMessage()    {}
-func (*QueryBorrowedValueRequest) Descriptor() ([]byte, []int) {
+func (m *QueryBorrowedValue) Reset()         { *m = QueryBorrowedValue{} }
+func (m *QueryBorrowedValue) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowedValue) ProtoMessage()    {}
+func (*QueryBorrowedValue) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{16}
 }
-func (m *QueryBorrowedValueRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryBorrowedValue) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryBorrowedValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowedValueRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryBorrowedValue.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -752,26 +752,26 @@ func (m *QueryBorrowedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowedValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedValueRequest.Merge(m, src)
+func (m *QueryBorrowedValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowedValue.Merge(m, src)
 }
-func (m *QueryBorrowedValueRequest) XXX_Size() int {
+func (m *QueryBorrowedValue) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowedValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedValueRequest.DiscardUnknown(m)
+func (m *QueryBorrowedValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowedValue.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowedValueRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryBorrowedValue proto.InternalMessageInfo
 
-func (m *QueryBorrowedValueRequest) GetAddress() string {
+func (m *QueryBorrowedValue) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryBorrowedValueRequest) GetDenom() string {
+func (m *QueryBorrowedValue) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -817,25 +817,25 @@ func (m *QueryBorrowedValueResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowedValueResponse proto.InternalMessageInfo
 
-// QueryCollateralValueRequest defines the request structure for the
+// QueryCollateralValue defines the request structure for the
 // CollateralValue gRPC service handler.
-type QueryCollateralValueRequest struct {
+type QueryCollateralValue struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryCollateralValueRequest) Reset()         { *m = QueryCollateralValueRequest{} }
-func (m *QueryCollateralValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralValueRequest) ProtoMessage()    {}
-func (*QueryCollateralValueRequest) Descriptor() ([]byte, []int) {
+func (m *QueryCollateralValue) Reset()         { *m = QueryCollateralValue{} }
+func (m *QueryCollateralValue) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateralValue) ProtoMessage()    {}
+func (*QueryCollateralValue) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{18}
 }
-func (m *QueryCollateralValueRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryCollateralValue) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryCollateralValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryCollateralValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryCollateralValueRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryCollateralValue.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -845,26 +845,26 @@ func (m *QueryCollateralValueRequest) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *QueryCollateralValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralValueRequest.Merge(m, src)
+func (m *QueryCollateralValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateralValue.Merge(m, src)
 }
-func (m *QueryCollateralValueRequest) XXX_Size() int {
+func (m *QueryCollateralValue) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryCollateralValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralValueRequest.DiscardUnknown(m)
+func (m *QueryCollateralValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateralValue.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryCollateralValueRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryCollateralValue proto.InternalMessageInfo
 
-func (m *QueryCollateralValueRequest) GetAddress() string {
+func (m *QueryCollateralValue) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryCollateralValueRequest) GetDenom() string {
+func (m *QueryCollateralValue) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -910,25 +910,25 @@ func (m *QueryCollateralValueResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryCollateralValueResponse proto.InternalMessageInfo
 
-// QuerySuppliedRequest defines the request structure for the Supplied gRPC service
+// QuerySupplied defines the request structure for the Supplied gRPC service
 // handler.
-type QuerySuppliedRequest struct {
+type QuerySupplied struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QuerySuppliedRequest) Reset()         { *m = QuerySuppliedRequest{} }
-func (m *QuerySuppliedRequest) String() string { return proto.CompactTextString(m) }
-func (*QuerySuppliedRequest) ProtoMessage()    {}
-func (*QuerySuppliedRequest) Descriptor() ([]byte, []int) {
+func (m *QuerySupplied) Reset()         { *m = QuerySupplied{} }
+func (m *QuerySupplied) String() string { return proto.CompactTextString(m) }
+func (*QuerySupplied) ProtoMessage()    {}
+func (*QuerySupplied) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{20}
 }
-func (m *QuerySuppliedRequest) XXX_Unmarshal(b []byte) error {
+func (m *QuerySupplied) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QuerySuppliedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySupplied) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QuerySuppliedRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySupplied.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -938,26 +938,26 @@ func (m *QuerySuppliedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *QuerySuppliedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QuerySuppliedRequest.Merge(m, src)
+func (m *QuerySupplied) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySupplied.Merge(m, src)
 }
-func (m *QuerySuppliedRequest) XXX_Size() int {
+func (m *QuerySupplied) XXX_Size() int {
 	return m.Size()
 }
-func (m *QuerySuppliedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QuerySuppliedRequest.DiscardUnknown(m)
+func (m *QuerySupplied) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySupplied.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QuerySuppliedRequest proto.InternalMessageInfo
+var xxx_messageInfo_QuerySupplied proto.InternalMessageInfo
 
-func (m *QuerySuppliedRequest) GetAddress() string {
+func (m *QuerySupplied) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QuerySuppliedRequest) GetDenom() string {
+func (m *QuerySupplied) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1010,25 +1010,25 @@ func (m *QuerySuppliedResponse) GetSupplied() github_com_cosmos_cosmos_sdk_types
 	return nil
 }
 
-// QuerySuppliedValueRequest defines the request structure for the SuppliedValue
+// QuerySuppliedValue defines the request structure for the SuppliedValue
 // gRPC service handler.
-type QuerySuppliedValueRequest struct {
+type QuerySuppliedValue struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QuerySuppliedValueRequest) Reset()         { *m = QuerySuppliedValueRequest{} }
-func (m *QuerySuppliedValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QuerySuppliedValueRequest) ProtoMessage()    {}
-func (*QuerySuppliedValueRequest) Descriptor() ([]byte, []int) {
+func (m *QuerySuppliedValue) Reset()         { *m = QuerySuppliedValue{} }
+func (m *QuerySuppliedValue) String() string { return proto.CompactTextString(m) }
+func (*QuerySuppliedValue) ProtoMessage()    {}
+func (*QuerySuppliedValue) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{22}
 }
-func (m *QuerySuppliedValueRequest) XXX_Unmarshal(b []byte) error {
+func (m *QuerySuppliedValue) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QuerySuppliedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QuerySuppliedValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QuerySuppliedValueRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QuerySuppliedValue.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1038,26 +1038,26 @@ func (m *QuerySuppliedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QuerySuppliedValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QuerySuppliedValueRequest.Merge(m, src)
+func (m *QuerySuppliedValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySuppliedValue.Merge(m, src)
 }
-func (m *QuerySuppliedValueRequest) XXX_Size() int {
+func (m *QuerySuppliedValue) XXX_Size() int {
 	return m.Size()
 }
-func (m *QuerySuppliedValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QuerySuppliedValueRequest.DiscardUnknown(m)
+func (m *QuerySuppliedValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySuppliedValue.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QuerySuppliedValueRequest proto.InternalMessageInfo
+var xxx_messageInfo_QuerySuppliedValue proto.InternalMessageInfo
 
-func (m *QuerySuppliedValueRequest) GetAddress() string {
+func (m *QuerySuppliedValue) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QuerySuppliedValueRequest) GetDenom() string {
+func (m *QuerySuppliedValue) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1103,24 +1103,24 @@ func (m *QuerySuppliedValueResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QuerySuppliedValueResponse proto.InternalMessageInfo
 
-// QueryReserveAmountRequest defines the request structure for the ReserveAmount
+// QueryReserveAmount defines the request structure for the ReserveAmount
 // gRPC service handler.
-type QueryReserveAmountRequest struct {
+type QueryReserveAmount struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryReserveAmountRequest) Reset()         { *m = QueryReserveAmountRequest{} }
-func (m *QueryReserveAmountRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryReserveAmountRequest) ProtoMessage()    {}
-func (*QueryReserveAmountRequest) Descriptor() ([]byte, []int) {
+func (m *QueryReserveAmount) Reset()         { *m = QueryReserveAmount{} }
+func (m *QueryReserveAmount) String() string { return proto.CompactTextString(m) }
+func (*QueryReserveAmount) ProtoMessage()    {}
+func (*QueryReserveAmount) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{24}
 }
-func (m *QueryReserveAmountRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryReserveAmount) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryReserveAmountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryReserveAmount) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryReserveAmountRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryReserveAmount.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1130,19 +1130,19 @@ func (m *QueryReserveAmountRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryReserveAmountRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryReserveAmountRequest.Merge(m, src)
+func (m *QueryReserveAmount) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryReserveAmount.Merge(m, src)
 }
-func (m *QueryReserveAmountRequest) XXX_Size() int {
+func (m *QueryReserveAmount) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryReserveAmountRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryReserveAmountRequest.DiscardUnknown(m)
+func (m *QueryReserveAmount) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryReserveAmount.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryReserveAmountRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryReserveAmount proto.InternalMessageInfo
 
-func (m *QueryReserveAmountRequest) GetDenom() string {
+func (m *QueryReserveAmount) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1188,25 +1188,25 @@ func (m *QueryReserveAmountResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryReserveAmountResponse proto.InternalMessageInfo
 
-// QueryCollateralRequest defines the request structure for the Collateral gRPC
+// QueryCollateral defines the request structure for the Collateral gRPC
 // service handler.
-type QueryCollateralRequest struct {
+type QueryCollateral struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryCollateralRequest) Reset()         { *m = QueryCollateralRequest{} }
-func (m *QueryCollateralRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralRequest) ProtoMessage()    {}
-func (*QueryCollateralRequest) Descriptor() ([]byte, []int) {
+func (m *QueryCollateral) Reset()         { *m = QueryCollateral{} }
+func (m *QueryCollateral) String() string { return proto.CompactTextString(m) }
+func (*QueryCollateral) ProtoMessage()    {}
+func (*QueryCollateral) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{26}
 }
-func (m *QueryCollateralRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryCollateral) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryCollateralRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryCollateralRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryCollateral.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1216,26 +1216,26 @@ func (m *QueryCollateralRequest) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *QueryCollateralRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralRequest.Merge(m, src)
+func (m *QueryCollateral) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCollateral.Merge(m, src)
 }
-func (m *QueryCollateralRequest) XXX_Size() int {
+func (m *QueryCollateral) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryCollateralRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralRequest.DiscardUnknown(m)
+func (m *QueryCollateral) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCollateral.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryCollateralRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryCollateral proto.InternalMessageInfo
 
-func (m *QueryCollateralRequest) GetAddress() string {
+func (m *QueryCollateral) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryCollateralRequest) GetDenom() string {
+func (m *QueryCollateral) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1288,24 +1288,24 @@ func (m *QueryCollateralResponse) GetCollateral() github_com_cosmos_cosmos_sdk_t
 	return nil
 }
 
-// QueryExchangeRateRequest defines the request structure for the ExchangeRate
+// QueryExchangeRate defines the request structure for the ExchangeRate
 // gRPC service handler.
-type QueryExchangeRateRequest struct {
+type QueryExchangeRate struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryExchangeRateRequest) Reset()         { *m = QueryExchangeRateRequest{} }
-func (m *QueryExchangeRateRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryExchangeRateRequest) ProtoMessage()    {}
-func (*QueryExchangeRateRequest) Descriptor() ([]byte, []int) {
+func (m *QueryExchangeRate) Reset()         { *m = QueryExchangeRate{} }
+func (m *QueryExchangeRate) String() string { return proto.CompactTextString(m) }
+func (*QueryExchangeRate) ProtoMessage()    {}
+func (*QueryExchangeRate) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{28}
 }
-func (m *QueryExchangeRateRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryExchangeRate) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryExchangeRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryExchangeRate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryExchangeRateRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryExchangeRate.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1315,19 +1315,19 @@ func (m *QueryExchangeRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *QueryExchangeRateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryExchangeRateRequest.Merge(m, src)
+func (m *QueryExchangeRate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryExchangeRate.Merge(m, src)
 }
-func (m *QueryExchangeRateRequest) XXX_Size() int {
+func (m *QueryExchangeRate) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryExchangeRateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryExchangeRateRequest.DiscardUnknown(m)
+func (m *QueryExchangeRate) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryExchangeRate.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryExchangeRateRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryExchangeRate proto.InternalMessageInfo
 
-func (m *QueryExchangeRateRequest) GetDenom() string {
+func (m *QueryExchangeRate) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1373,24 +1373,24 @@ func (m *QueryExchangeRateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryExchangeRateResponse proto.InternalMessageInfo
 
-// QueryBorrowLimitRequest defines the request structure for the BorrowLimit
+// QueryBorrowLimit defines the request structure for the BorrowLimit
 // gRPC service handler.
-type QueryBorrowLimitRequest struct {
+type QueryBorrowLimit struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
 
-func (m *QueryBorrowLimitRequest) Reset()         { *m = QueryBorrowLimitRequest{} }
-func (m *QueryBorrowLimitRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowLimitRequest) ProtoMessage()    {}
-func (*QueryBorrowLimitRequest) Descriptor() ([]byte, []int) {
+func (m *QueryBorrowLimit) Reset()         { *m = QueryBorrowLimit{} }
+func (m *QueryBorrowLimit) String() string { return proto.CompactTextString(m) }
+func (*QueryBorrowLimit) ProtoMessage()    {}
+func (*QueryBorrowLimit) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{30}
 }
-func (m *QueryBorrowLimitRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryBorrowLimit) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowLimitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryBorrowLimit) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowLimitRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryBorrowLimit.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1400,19 +1400,19 @@ func (m *QueryBorrowLimitRequest) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowLimitRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowLimitRequest.Merge(m, src)
+func (m *QueryBorrowLimit) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBorrowLimit.Merge(m, src)
 }
-func (m *QueryBorrowLimitRequest) XXX_Size() int {
+func (m *QueryBorrowLimit) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowLimitRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowLimitRequest.DiscardUnknown(m)
+func (m *QueryBorrowLimit) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBorrowLimit.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowLimitRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryBorrowLimit proto.InternalMessageInfo
 
-func (m *QueryBorrowLimitRequest) GetAddress() string {
+func (m *QueryBorrowLimit) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
@@ -1458,24 +1458,24 @@ func (m *QueryBorrowLimitResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBorrowLimitResponse proto.InternalMessageInfo
 
-// QueryLiquidationThresholdRequest defines the request structure for the
+// QueryLiquidationThreshold defines the request structure for the
 // LiquidationThreshold gRPC service handler.
-type QueryLiquidationThresholdRequest struct {
+type QueryLiquidationThreshold struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
 
-func (m *QueryLiquidationThresholdRequest) Reset()         { *m = QueryLiquidationThresholdRequest{} }
-func (m *QueryLiquidationThresholdRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationThresholdRequest) ProtoMessage()    {}
-func (*QueryLiquidationThresholdRequest) Descriptor() ([]byte, []int) {
+func (m *QueryLiquidationThreshold) Reset()         { *m = QueryLiquidationThreshold{} }
+func (m *QueryLiquidationThreshold) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationThreshold) ProtoMessage()    {}
+func (*QueryLiquidationThreshold) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{32}
 }
-func (m *QueryLiquidationThresholdRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryLiquidationThreshold) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLiquidationThresholdRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryLiquidationThreshold) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLiquidationThresholdRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryLiquidationThreshold.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1485,19 +1485,19 @@ func (m *QueryLiquidationThresholdRequest) XXX_Marshal(b []byte, deterministic b
 		return b[:n], nil
 	}
 }
-func (m *QueryLiquidationThresholdRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationThresholdRequest.Merge(m, src)
+func (m *QueryLiquidationThreshold) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationThreshold.Merge(m, src)
 }
-func (m *QueryLiquidationThresholdRequest) XXX_Size() int {
+func (m *QueryLiquidationThreshold) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLiquidationThresholdRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationThresholdRequest.DiscardUnknown(m)
+func (m *QueryLiquidationThreshold) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationThreshold.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLiquidationThresholdRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryLiquidationThreshold proto.InternalMessageInfo
 
-func (m *QueryLiquidationThresholdRequest) GetAddress() string {
+func (m *QueryLiquidationThreshold) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
@@ -1543,23 +1543,23 @@ func (m *QueryLiquidationThresholdResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryLiquidationThresholdResponse proto.InternalMessageInfo
 
-// QueryLiquidationTargetsRequest defines the request structure for the
+// QueryLiquidationTargets defines the request structure for the
 // LiquidationTargets gRPC service handler.
-type QueryLiquidationTargetsRequest struct {
+type QueryLiquidationTargets struct {
 }
 
-func (m *QueryLiquidationTargetsRequest) Reset()         { *m = QueryLiquidationTargetsRequest{} }
-func (m *QueryLiquidationTargetsRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationTargetsRequest) ProtoMessage()    {}
-func (*QueryLiquidationTargetsRequest) Descriptor() ([]byte, []int) {
+func (m *QueryLiquidationTargets) Reset()         { *m = QueryLiquidationTargets{} }
+func (m *QueryLiquidationTargets) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationTargets) ProtoMessage()    {}
+func (*QueryLiquidationTargets) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{34}
 }
-func (m *QueryLiquidationTargetsRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryLiquidationTargets) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryLiquidationTargetsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryLiquidationTargets) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryLiquidationTargetsRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryLiquidationTargets.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1569,17 +1569,17 @@ func (m *QueryLiquidationTargetsRequest) XXX_Marshal(b []byte, deterministic boo
 		return b[:n], nil
 	}
 }
-func (m *QueryLiquidationTargetsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationTargetsRequest.Merge(m, src)
+func (m *QueryLiquidationTargets) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationTargets.Merge(m, src)
 }
-func (m *QueryLiquidationTargetsRequest) XXX_Size() int {
+func (m *QueryLiquidationTargets) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryLiquidationTargetsRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationTargetsRequest.DiscardUnknown(m)
+func (m *QueryLiquidationTargets) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationTargets.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryLiquidationTargetsRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryLiquidationTargets proto.InternalMessageInfo
 
 // QueryLiquidationTargetsResponse defines the response structure for the
 // LiquidationTargets gRPC service handler.
@@ -1627,24 +1627,24 @@ func (m *QueryLiquidationTargetsResponse) GetTargets() []string {
 	return nil
 }
 
-// QueryMarketSummaryRequest defines the request structure for the
+// QueryMarketSummary defines the request structure for the
 // MarketSummary gRPC service handler.
-type QueryMarketSummaryRequest struct {
+type QueryMarketSummary struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryMarketSummaryRequest) Reset()         { *m = QueryMarketSummaryRequest{} }
-func (m *QueryMarketSummaryRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryMarketSummaryRequest) ProtoMessage()    {}
-func (*QueryMarketSummaryRequest) Descriptor() ([]byte, []int) {
+func (m *QueryMarketSummary) Reset()         { *m = QueryMarketSummary{} }
+func (m *QueryMarketSummary) String() string { return proto.CompactTextString(m) }
+func (*QueryMarketSummary) ProtoMessage()    {}
+func (*QueryMarketSummary) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{36}
 }
-func (m *QueryMarketSummaryRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryMarketSummary) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryMarketSummaryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryMarketSummary) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryMarketSummaryRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryMarketSummary.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1654,19 +1654,19 @@ func (m *QueryMarketSummaryRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryMarketSummaryRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMarketSummaryRequest.Merge(m, src)
+func (m *QueryMarketSummary) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMarketSummary.Merge(m, src)
 }
-func (m *QueryMarketSummaryRequest) XXX_Size() int {
+func (m *QueryMarketSummary) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryMarketSummaryRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMarketSummaryRequest.DiscardUnknown(m)
+func (m *QueryMarketSummary) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMarketSummary.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryMarketSummaryRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryMarketSummary proto.InternalMessageInfo
 
-func (m *QueryMarketSummaryRequest) GetDenom() string {
+func (m *QueryMarketSummary) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1736,24 +1736,24 @@ func (m *QueryMarketSummaryResponse) GetExponent() uint32 {
 	return 0
 }
 
-// QueryTotalCollateralRequest defines the request structure for the
+// QueryTotalCollateral defines the request structure for the
 // TotalCollateral gRPC service handler.
-type QueryTotalCollateralRequest struct {
+type QueryTotalCollateral struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryTotalCollateralRequest) Reset()         { *m = QueryTotalCollateralRequest{} }
-func (m *QueryTotalCollateralRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryTotalCollateralRequest) ProtoMessage()    {}
-func (*QueryTotalCollateralRequest) Descriptor() ([]byte, []int) {
+func (m *QueryTotalCollateral) Reset()         { *m = QueryTotalCollateral{} }
+func (m *QueryTotalCollateral) String() string { return proto.CompactTextString(m) }
+func (*QueryTotalCollateral) ProtoMessage()    {}
+func (*QueryTotalCollateral) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{38}
 }
-func (m *QueryTotalCollateralRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryTotalCollateral) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryTotalCollateralRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryTotalCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryTotalCollateralRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryTotalCollateral.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1763,19 +1763,19 @@ func (m *QueryTotalCollateralRequest) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *QueryTotalCollateralRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTotalCollateralRequest.Merge(m, src)
+func (m *QueryTotalCollateral) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryTotalCollateral.Merge(m, src)
 }
-func (m *QueryTotalCollateralRequest) XXX_Size() int {
+func (m *QueryTotalCollateral) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryTotalCollateralRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTotalCollateralRequest.DiscardUnknown(m)
+func (m *QueryTotalCollateral) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryTotalCollateral.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryTotalCollateralRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryTotalCollateral proto.InternalMessageInfo
 
-func (m *QueryTotalCollateralRequest) GetDenom() string {
+func (m *QueryTotalCollateral) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1821,24 +1821,24 @@ func (m *QueryTotalCollateralResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryTotalCollateralResponse proto.InternalMessageInfo
 
-// QueryTotalBorrowedRequest defines the request structure for the
+// QueryTotalBorrowed defines the request structure for the
 // TotalBorrowed gRPC service handler.
-type QueryTotalBorrowedRequest struct {
+type QueryTotalBorrowed struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryTotalBorrowedRequest) Reset()         { *m = QueryTotalBorrowedRequest{} }
-func (m *QueryTotalBorrowedRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryTotalBorrowedRequest) ProtoMessage()    {}
-func (*QueryTotalBorrowedRequest) Descriptor() ([]byte, []int) {
+func (m *QueryTotalBorrowed) Reset()         { *m = QueryTotalBorrowed{} }
+func (m *QueryTotalBorrowed) String() string { return proto.CompactTextString(m) }
+func (*QueryTotalBorrowed) ProtoMessage()    {}
+func (*QueryTotalBorrowed) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{40}
 }
-func (m *QueryTotalBorrowedRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryTotalBorrowed) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryTotalBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryTotalBorrowed) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryTotalBorrowedRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryTotalBorrowed.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1848,19 +1848,19 @@ func (m *QueryTotalBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryTotalBorrowedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTotalBorrowedRequest.Merge(m, src)
+func (m *QueryTotalBorrowed) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryTotalBorrowed.Merge(m, src)
 }
-func (m *QueryTotalBorrowedRequest) XXX_Size() int {
+func (m *QueryTotalBorrowed) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryTotalBorrowedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTotalBorrowedRequest.DiscardUnknown(m)
+func (m *QueryTotalBorrowed) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryTotalBorrowed.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryTotalBorrowedRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryTotalBorrowed proto.InternalMessageInfo
 
-func (m *QueryTotalBorrowedRequest) GetDenom() string {
+func (m *QueryTotalBorrowed) GetDenom() string {
 	if m != nil {
 		return m.Denom
 	}
@@ -1908,160 +1908,158 @@ var xxx_messageInfo_QueryTotalBorrowedResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*QueryRegisteredTokens)(nil), "umee.leverage.v1.QueryRegisteredTokens")
-	proto.RegisterType((*QueryAvailableBorrowRequest)(nil), "umee.leverage.v1.QueryAvailableBorrowRequest")
+	proto.RegisterType((*QueryAvailableBorrow)(nil), "umee.leverage.v1.QueryAvailableBorrow")
 	proto.RegisterType((*QueryAvailableBorrowResponse)(nil), "umee.leverage.v1.QueryAvailableBorrowResponse")
-	proto.RegisterType((*QueryBorrowAPYRequest)(nil), "umee.leverage.v1.QueryBorrowAPYRequest")
+	proto.RegisterType((*QueryBorrowAPY)(nil), "umee.leverage.v1.QueryBorrowAPY")
 	proto.RegisterType((*QueryBorrowAPYResponse)(nil), "umee.leverage.v1.QueryBorrowAPYResponse")
-	proto.RegisterType((*QuerySupplyAPYRequest)(nil), "umee.leverage.v1.QuerySupplyAPYRequest")
+	proto.RegisterType((*QuerySupplyAPY)(nil), "umee.leverage.v1.QuerySupplyAPY")
 	proto.RegisterType((*QuerySupplyAPYResponse)(nil), "umee.leverage.v1.QuerySupplyAPYResponse")
-	proto.RegisterType((*QueryMarketSizeRequest)(nil), "umee.leverage.v1.QueryMarketSizeRequest")
+	proto.RegisterType((*QueryMarketSize)(nil), "umee.leverage.v1.QueryMarketSize")
 	proto.RegisterType((*QueryMarketSizeResponse)(nil), "umee.leverage.v1.QueryMarketSizeResponse")
-	proto.RegisterType((*QueryTokenMarketSizeRequest)(nil), "umee.leverage.v1.QueryTokenMarketSizeRequest")
+	proto.RegisterType((*QueryTokenMarketSize)(nil), "umee.leverage.v1.QueryTokenMarketSize")
 	proto.RegisterType((*QueryTokenMarketSizeResponse)(nil), "umee.leverage.v1.QueryTokenMarketSizeResponse")
 	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umee.leverage.v1.QueryRegisteredTokensResponse")
-	proto.RegisterType((*QueryParamsRequest)(nil), "umee.leverage.v1.QueryParamsRequest")
+	proto.RegisterType((*QueryParams)(nil), "umee.leverage.v1.QueryParams")
 	proto.RegisterType((*QueryParamsResponse)(nil), "umee.leverage.v1.QueryParamsResponse")
-	proto.RegisterType((*QueryBorrowedRequest)(nil), "umee.leverage.v1.QueryBorrowedRequest")
+	proto.RegisterType((*QueryBorrowed)(nil), "umee.leverage.v1.QueryBorrowed")
 	proto.RegisterType((*QueryBorrowedResponse)(nil), "umee.leverage.v1.QueryBorrowedResponse")
-	proto.RegisterType((*QueryBorrowedValueRequest)(nil), "umee.leverage.v1.QueryBorrowedValueRequest")
+	proto.RegisterType((*QueryBorrowedValue)(nil), "umee.leverage.v1.QueryBorrowedValue")
 	proto.RegisterType((*QueryBorrowedValueResponse)(nil), "umee.leverage.v1.QueryBorrowedValueResponse")
-	proto.RegisterType((*QueryCollateralValueRequest)(nil), "umee.leverage.v1.QueryCollateralValueRequest")
+	proto.RegisterType((*QueryCollateralValue)(nil), "umee.leverage.v1.QueryCollateralValue")
 	proto.RegisterType((*QueryCollateralValueResponse)(nil), "umee.leverage.v1.QueryCollateralValueResponse")
-	proto.RegisterType((*QuerySuppliedRequest)(nil), "umee.leverage.v1.QuerySuppliedRequest")
+	proto.RegisterType((*QuerySupplied)(nil), "umee.leverage.v1.QuerySupplied")
 	proto.RegisterType((*QuerySuppliedResponse)(nil), "umee.leverage.v1.QuerySuppliedResponse")
-	proto.RegisterType((*QuerySuppliedValueRequest)(nil), "umee.leverage.v1.QuerySuppliedValueRequest")
+	proto.RegisterType((*QuerySuppliedValue)(nil), "umee.leverage.v1.QuerySuppliedValue")
 	proto.RegisterType((*QuerySuppliedValueResponse)(nil), "umee.leverage.v1.QuerySuppliedValueResponse")
-	proto.RegisterType((*QueryReserveAmountRequest)(nil), "umee.leverage.v1.QueryReserveAmountRequest")
+	proto.RegisterType((*QueryReserveAmount)(nil), "umee.leverage.v1.QueryReserveAmount")
 	proto.RegisterType((*QueryReserveAmountResponse)(nil), "umee.leverage.v1.QueryReserveAmountResponse")
-	proto.RegisterType((*QueryCollateralRequest)(nil), "umee.leverage.v1.QueryCollateralRequest")
+	proto.RegisterType((*QueryCollateral)(nil), "umee.leverage.v1.QueryCollateral")
 	proto.RegisterType((*QueryCollateralResponse)(nil), "umee.leverage.v1.QueryCollateralResponse")
-	proto.RegisterType((*QueryExchangeRateRequest)(nil), "umee.leverage.v1.QueryExchangeRateRequest")
+	proto.RegisterType((*QueryExchangeRate)(nil), "umee.leverage.v1.QueryExchangeRate")
 	proto.RegisterType((*QueryExchangeRateResponse)(nil), "umee.leverage.v1.QueryExchangeRateResponse")
-	proto.RegisterType((*QueryBorrowLimitRequest)(nil), "umee.leverage.v1.QueryBorrowLimitRequest")
+	proto.RegisterType((*QueryBorrowLimit)(nil), "umee.leverage.v1.QueryBorrowLimit")
 	proto.RegisterType((*QueryBorrowLimitResponse)(nil), "umee.leverage.v1.QueryBorrowLimitResponse")
-	proto.RegisterType((*QueryLiquidationThresholdRequest)(nil), "umee.leverage.v1.QueryLiquidationThresholdRequest")
+	proto.RegisterType((*QueryLiquidationThreshold)(nil), "umee.leverage.v1.QueryLiquidationThreshold")
 	proto.RegisterType((*QueryLiquidationThresholdResponse)(nil), "umee.leverage.v1.QueryLiquidationThresholdResponse")
-	proto.RegisterType((*QueryLiquidationTargetsRequest)(nil), "umee.leverage.v1.QueryLiquidationTargetsRequest")
+	proto.RegisterType((*QueryLiquidationTargets)(nil), "umee.leverage.v1.QueryLiquidationTargets")
 	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umee.leverage.v1.QueryLiquidationTargetsResponse")
-	proto.RegisterType((*QueryMarketSummaryRequest)(nil), "umee.leverage.v1.QueryMarketSummaryRequest")
+	proto.RegisterType((*QueryMarketSummary)(nil), "umee.leverage.v1.QueryMarketSummary")
 	proto.RegisterType((*QueryMarketSummaryResponse)(nil), "umee.leverage.v1.QueryMarketSummaryResponse")
-	proto.RegisterType((*QueryTotalCollateralRequest)(nil), "umee.leverage.v1.QueryTotalCollateralRequest")
+	proto.RegisterType((*QueryTotalCollateral)(nil), "umee.leverage.v1.QueryTotalCollateral")
 	proto.RegisterType((*QueryTotalCollateralResponse)(nil), "umee.leverage.v1.QueryTotalCollateralResponse")
-	proto.RegisterType((*QueryTotalBorrowedRequest)(nil), "umee.leverage.v1.QueryTotalBorrowedRequest")
+	proto.RegisterType((*QueryTotalBorrowed)(nil), "umee.leverage.v1.QueryTotalBorrowed")
 	proto.RegisterType((*QueryTotalBorrowedResponse)(nil), "umee.leverage.v1.QueryTotalBorrowedResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1/query.proto", fileDescriptor_1e8137dcabb0ccc7) }
 
 var fileDescriptor_1e8137dcabb0ccc7 = []byte{
-	// 1700 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0x4b, 0x6f, 0xdc, 0xd4,
-	0x17, 0x8f, 0xfb, 0x48, 0x93, 0x93, 0xe4, 0x9f, 0xea, 0xfe, 0xa7, 0x74, 0x6a, 0xd2, 0x99, 0xa9,
-	0x69, 0x9a, 0x34, 0x6d, 0xec, 0x3c, 0x24, 0x24, 0x04, 0x0b, 0x92, 0x96, 0x0a, 0x4a, 0x03, 0xe9,
-	0xf4, 0x21, 0xb5, 0x1b, 0xe3, 0x99, 0xb9, 0x4c, 0xac, 0x78, 0xec, 0x89, 0xed, 0x99, 0x76, 0x8a,
-	0x10, 0x08, 0x21, 0xe8, 0x82, 0x45, 0x25, 0xd8, 0x20, 0xc1, 0x8e, 0x05, 0x62, 0xc5, 0x57, 0x80,
-	0x55, 0x97, 0x95, 0xd8, 0x20, 0x16, 0x05, 0xb5, 0x7c, 0x10, 0x74, 0xaf, 0xaf, 0xdf, 0xbe, 0x9e,
-	0xa9, 0x93, 0xae, 0x9a, 0xb9, 0x3e, 0x8f, 0xdf, 0x3d, 0xf7, 0x9c, 0x73, 0xcf, 0xef, 0x16, 0xe6,
-	0x7a, 0x1d, 0x8c, 0x15, 0x03, 0xf7, 0xb1, 0xad, 0xb5, 0xb1, 0xd2, 0x5f, 0x55, 0xf6, 0x7a, 0xd8,
-	0x1e, 0xc8, 0x5d, 0xdb, 0x72, 0x2d, 0x74, 0x9c, 0x7c, 0x95, 0xfd, 0xaf, 0x72, 0x7f, 0x55, 0x9c,
-	0x6b, 0x5b, 0x56, 0xdb, 0xc0, 0x8a, 0xd6, 0xd5, 0x15, 0xcd, 0x34, 0x2d, 0x57, 0x73, 0x75, 0xcb,
-	0x74, 0x3c, 0x79, 0xb1, 0x9a, 0xb2, 0x16, 0xe8, 0x7a, 0x02, 0xa5, 0xb6, 0xd5, 0xb6, 0xe8, 0x9f,
-	0x0a, 0xf9, 0x8b, 0xad, 0x56, 0x9a, 0x96, 0xd3, 0xb1, 0x1c, 0xa5, 0xa1, 0x39, 0x44, 0xa9, 0x81,
-	0x5d, 0x6d, 0x55, 0x69, 0x5a, 0xba, 0xe9, 0x7d, 0x97, 0x4e, 0xc2, 0x89, 0xeb, 0x04, 0x55, 0x1d,
-	0xb7, 0x75, 0xc7, 0xc5, 0x36, 0x6e, 0xdd, 0xb4, 0x76, 0xb1, 0xe9, 0x48, 0xeb, 0xf0, 0x2a, 0xfd,
-	0xb0, 0xd1, 0xd7, 0x74, 0x43, 0x6b, 0x18, 0x78, 0xd3, 0xb2, 0x6d, 0xeb, 0x5e, 0x1d, 0xef, 0xf5,
-	0xb0, 0xe3, 0xa2, 0x12, 0x1c, 0x6d, 0x61, 0xd3, 0xea, 0x94, 0x85, 0x9a, 0xb0, 0x38, 0x59, 0xf7,
-	0x7e, 0x48, 0x1f, 0xc3, 0x5c, 0xb6, 0x92, 0xd3, 0xb5, 0x4c, 0x07, 0xa3, 0x2b, 0x30, 0xae, 0x75,
-	0xac, 0x9e, 0xe9, 0x7a, 0x6a, 0x9b, 0xf2, 0xe3, 0xa7, 0xd5, 0xb1, 0xbf, 0x9e, 0x56, 0xcf, 0xb5,
-	0x75, 0x77, 0xa7, 0xd7, 0x90, 0x9b, 0x56, 0x47, 0x61, 0x80, 0xbd, 0x7f, 0x96, 0x9d, 0xd6, 0xae,
-	0xe2, 0x0e, 0xba, 0xd8, 0x91, 0xdf, 0x33, 0xdd, 0x3a, 0xd3, 0x96, 0x96, 0x19, 0x6a, 0xcf, 0xfc,
-	0xc6, 0xf6, 0x9d, 0x7c, 0x58, 0x77, 0xe1, 0x95, 0xa4, 0x38, 0x03, 0xf4, 0x36, 0x1c, 0xde, 0xd8,
-	0xbe, 0x53, 0x00, 0xcd, 0x65, 0xdc, 0xac, 0x13, 0xd5, 0x00, 0xca, 0x8d, 0x5e, 0xb7, 0x6b, 0x0c,
-	0x46, 0x86, 0x12, 0x11, 0x3f, 0x30, 0x28, 0x32, 0xb3, 0xbd, 0xa5, 0xd9, 0xbb, 0xd8, 0xbd, 0xa1,
-	0x3f, 0xc0, 0xf9, 0x58, 0xf6, 0xe0, 0x64, 0x4a, 0x9e, 0x81, 0xb9, 0x0d, 0xb3, 0x1d, 0xba, 0xaa,
-	0x3a, 0xfa, 0x03, 0xac, 0xf6, 0x9c, 0x56, 0x41, 0x60, 0x33, 0x9d, 0xc0, 0xf8, 0x2d, 0xa7, 0x15,
-	0x64, 0x15, 0x4d, 0xb2, 0x51, 0x71, 0x5a, 0x2c, 0xab, 0x52, 0x4a, 0x0c, 0xec, 0x87, 0x30, 0x15,
-	0x01, 0x5b, 0x30, 0xb5, 0x20, 0x04, 0x2a, 0xdd, 0x85, 0xd3, 0x99, 0x45, 0x11, 0x78, 0x7c, 0x03,
-	0x26, 0x6c, 0xfa, 0xcd, 0x1e, 0x94, 0x85, 0xda, 0xe1, 0xc5, 0xa9, 0xb5, 0x93, 0x72, 0xb2, 0x9e,
-	0x65, 0xaa, 0xb3, 0x79, 0x84, 0xe0, 0xa8, 0x07, 0xe2, 0x52, 0x09, 0x10, 0xb5, 0xbd, 0xad, 0xd9,
-	0x5a, 0xc7, 0x61, 0x1b, 0x97, 0xb6, 0xe0, 0xff, 0xb1, 0x55, 0xe6, 0xe7, 0x75, 0x18, 0xef, 0xd2,
-	0x15, 0xba, 0xa9, 0xa9, 0xb5, 0x72, 0xda, 0x8b, 0xa7, 0xc1, 0xdc, 0x30, 0x69, 0xe9, 0x0a, 0x94,
-	0x22, 0x09, 0x8f, 0x5b, 0x7e, 0x7c, 0xcb, 0x70, 0x4c, 0x6b, 0xb5, 0x6c, 0xec, 0x38, 0x2c, 0xc2,
-	0xfe, 0xcf, 0x30, 0xf2, 0x87, 0xa2, 0x91, 0xff, 0x5c, 0x88, 0x15, 0x1a, 0x31, 0xc4, 0x90, 0xb5,
-	0x61, 0xa2, 0xc1, 0xd6, 0x58, 0x04, 0x4e, 0xc9, 0x5e, 0x5c, 0x65, 0xd2, 0x6a, 0x64, 0xd6, 0x6a,
-	0xe4, 0x4b, 0x96, 0x6e, 0x6e, 0xae, 0x10, 0x70, 0xbf, 0xfc, 0x5d, 0x5d, 0x1c, 0xe1, 0x2c, 0x88,
-	0x82, 0x53, 0x0f, 0x8c, 0x4b, 0xef, 0xc3, 0xa9, 0x18, 0x82, 0xdb, 0x9a, 0xd1, 0xc3, 0x45, 0xf7,
-	0xe3, 0x80, 0x98, 0x65, 0x8c, 0xed, 0xe9, 0x16, 0xfc, 0xcf, 0x77, 0xab, 0xf6, 0xc9, 0x97, 0xa2,
-	0x39, 0xdf, 0x88, 0x9a, 0x97, 0xb6, 0x58, 0xce, 0x5f, 0xb2, 0x0c, 0x43, 0x73, 0xb1, 0xad, 0x19,
-	0xfb, 0xda, 0xc3, 0x80, 0x55, 0x43, 0xca, 0x1c, 0xdb, 0xc5, 0x1d, 0x38, 0xde, 0x0c, 0x3e, 0xed,
-	0x6b, 0x1f, 0xb3, 0xcd, 0xb8, 0x8b, 0x20, 0xad, 0x68, 0xf3, 0xd2, 0x0f, 0x20, 0xad, 0x42, 0x43,
-	0x61, 0x5a, 0x39, 0x6c, 0xed, 0xa5, 0xa4, 0x95, 0x6f, 0x3c, 0x48, 0x2b, 0x1f, 0xc1, 0x81, 0xa4,
-	0x55, 0xc2, 0x58, 0x98, 0x56, 0xbe, 0xdb, 0xfd, 0xa5, 0x95, 0x13, 0x35, 0x2f, 0xad, 0xb2, 0x1d,
-	0xd4, 0xb1, 0x83, 0xed, 0x3e, 0xde, 0xa0, 0x37, 0x63, 0x7e, 0x23, 0x6d, 0x31, 0x9c, 0x09, 0x95,
-	0x03, 0xbe, 0x9c, 0xdf, 0x65, 0xd7, 0x50, 0x98, 0xa0, 0x45, 0xe3, 0xfa, 0x95, 0xc0, 0x6e, 0xa8,
-	0xa8, 0x29, 0x86, 0x76, 0x17, 0x20, 0x4c, 0xcf, 0x97, 0x91, 0x2b, 0x11, 0xf3, 0xd2, 0x0a, 0x94,
-	0x29, 0x8e, 0x77, 0xee, 0x37, 0x77, 0x34, 0xb3, 0x8d, 0xeb, 0x9a, 0x3b, 0xe4, 0xce, 0xea, 0xb2,
-	0xd3, 0x89, 0x6b, 0x30, 0xec, 0x37, 0x60, 0x06, 0xb3, 0x75, 0xd5, 0xd6, 0xdc, 0xa2, 0x09, 0x31,
-	0x8d, 0x23, 0xc6, 0xa5, 0x75, 0x16, 0x2b, 0xaf, 0xb7, 0x5d, 0xd3, 0x3b, 0xba, 0x3b, 0x34, 0xee,
-	0x52, 0x87, 0x6d, 0x2c, 0xa6, 0xc4, 0x50, 0x5e, 0x87, 0x69, 0xaf, 0x91, 0xa9, 0x06, 0x59, 0x2f,
-	0x08, 0x72, 0xaa, 0x11, 0x9a, 0x96, 0xde, 0x82, 0x1a, 0x75, 0x77, 0x4d, 0xdf, 0xeb, 0xe9, 0x2d,
-	0x3a, 0xdf, 0xde, 0xdc, 0xb1, 0xb1, 0xb3, 0x63, 0x19, 0xc3, 0x9b, 0x89, 0xf4, 0x50, 0x80, 0x33,
-	0x39, 0xea, 0x0c, 0x76, 0x13, 0x4e, 0x18, 0xe1, 0x77, 0xd5, 0xf5, 0x05, 0x0a, 0xe2, 0x2f, 0x19,
-	0x19, 0xce, 0xa4, 0x1a, 0x54, 0x52, 0x48, 0x34, 0xbb, 0x8d, 0xdd, 0xe0, 0x46, 0x7f, 0x13, 0xaa,
-	0x5c, 0x09, 0x86, 0xb4, 0x0c, 0xc7, 0x5c, 0x6f, 0x89, 0xe6, 0xef, 0x64, 0xdd, 0xff, 0x19, 0xd4,
-	0x36, 0x1b, 0x76, 0x7a, 0x9d, 0x8e, 0x46, 0xaa, 0x36, 0x2f, 0xe1, 0x7e, 0x1f, 0x67, 0xc5, 0x9d,
-	0xd0, 0x61, 0xbe, 0xce, 0xc0, 0xb4, 0x33, 0xe8, 0x34, 0x2c, 0x43, 0x8d, 0xea, 0x4e, 0x79, 0x6b,
-	0x97, 0xc9, 0x12, 0x12, 0x61, 0x02, 0xdf, 0xef, 0x5a, 0x26, 0x36, 0x5d, 0x5a, 0x86, 0x33, 0xf5,
-	0xe0, 0x37, 0xc9, 0x05, 0xcb, 0xd6, 0x9a, 0x06, 0x56, 0xbb, 0xb6, 0xde, 0xc4, 0xe5, 0xc3, 0x41,
-	0x2c, 0x85, 0x17, 0xc9, 0x05, 0xcf, 0xc6, 0x36, 0x31, 0x81, 0x3e, 0x82, 0x52, 0x8f, 0x8e, 0x48,
-	0x6a, 0xbc, 0x16, 0x8e, 0x14, 0x3a, 0x26, 0xe4, 0xd9, 0x8a, 0x96, 0x1b, 0xda, 0x02, 0xa0, 0x2d,
-	0x73, 0xa0, 0x92, 0xc1, 0xfa, 0x68, 0x21, 0xbb, 0x93, 0x8e, 0x3f, 0xa8, 0x13, 0x73, 0xac, 0x1e,
-	0x88, 0xb9, 0xf1, 0x62, 0xe6, 0x1a, 0x3e, 0x05, 0x49, 0x4e, 0xad, 0xc7, 0xf6, 0x3b, 0xb5, 0x92,
-	0x8b, 0x5f, 0xf3, 0x79, 0x97, 0xea, 0xf9, 0x29, 0x4f, 0x14, 0xb2, 0x3a, 0xab, 0xc5, 0xf9, 0x1b,
-	0xba, 0x4a, 0xe6, 0x5d, 0x7a, 0x67, 0xb4, 0xca, 0x93, 0x85, 0x4c, 0x06, 0xfa, 0xe8, 0x83, 0x58,
-	0xe3, 0x86, 0x62, 0xdb, 0x0e, 0x2d, 0x10, 0x6c, 0xc1, 0x24, 0x3a, 0x55, 0x0c, 0x5b, 0x30, 0x6c,
-	0x86, 0xf4, 0xc4, 0xd5, 0x8c, 0xf4, 0xfd, 0x95, 0x4f, 0x7a, 0x53, 0x4a, 0x07, 0x7c, 0xaf, 0xfa,
-	0x4d, 0x81, 0xfa, 0x49, 0x4e, 0xf6, 0xf9, 0x17, 0x7e, 0x42, 0xe5, 0x60, 0x81, 0xad, 0xfd, 0x56,
-	0x86, 0xa3, 0xd4, 0x0d, 0xfa, 0x5e, 0x80, 0xe3, 0x49, 0xd2, 0x84, 0x16, 0xd2, 0xa4, 0x25, 0x93,
-	0x5d, 0x89, 0xca, 0x88, 0x82, 0xfe, 0x06, 0xa4, 0x0b, 0x5f, 0xfc, 0xf1, 0xef, 0xb7, 0x87, 0xe6,
-	0xd1, 0x6b, 0x4a, 0xea, 0x71, 0xc4, 0x0e, 0x74, 0x54, 0xd7, 0x83, 0x71, 0x0f, 0xc6, 0x3d, 0xae,
-	0x84, 0xce, 0x72, 0xfc, 0xc4, 0x28, 0x99, 0x38, 0x3f, 0x44, 0x8a, 0x61, 0xa8, 0x51, 0x0c, 0x22,
-	0x2a, 0xa7, 0x31, 0x78, 0x64, 0x0c, 0x7d, 0x06, 0x13, 0x7e, 0xe8, 0xd1, 0x39, 0x8e, 0xd1, 0xc4,
-	0x71, 0x8a, 0x0b, 0x43, 0xe5, 0x98, 0x7b, 0x89, 0xba, 0x9f, 0x43, 0x62, 0xda, 0xbd, 0x9f, 0xd5,
-	0xe8, 0x3b, 0x01, 0x66, 0x62, 0x8c, 0x07, 0x5d, 0x18, 0x62, 0x3e, 0x3a, 0x0d, 0x8b, 0x17, 0x47,
-	0x13, 0x66, 0x80, 0x16, 0x29, 0x20, 0x09, 0xd5, 0xf8, 0x80, 0xbc, 0x29, 0x98, 0xc4, 0xc5, 0x1f,
-	0x98, 0xb9, 0x71, 0x49, 0x30, 0x0d, 0x6e, 0x5c, 0x92, 0x44, 0x22, 0x2f, 0x2e, 0xfe, 0x18, 0x4d,
-	0xe3, 0x12, 0x1b, 0xd9, 0xb9, 0x71, 0xc9, 0x62, 0x09, 0xdc, 0xb8, 0x64, 0xb2, 0x80, 0xbc, 0xb8,
-	0xc4, 0xd9, 0x01, 0xfa, 0x41, 0x80, 0xd9, 0xc4, 0x03, 0x1a, 0x5a, 0xe6, 0xf8, 0xca, 0x7e, 0x9d,
-	0x13, 0xe5, 0x51, 0xc5, 0x19, 0xb8, 0x25, 0x0a, 0xee, 0x2c, 0x92, 0xd2, 0xe0, 0x92, 0x57, 0x0a,
-	0xfa, 0x52, 0x80, 0xc9, 0xe0, 0x21, 0x0d, 0xe5, 0x27, 0x6a, 0xf8, 0x1c, 0x26, 0x2e, 0x0e, 0x17,
-	0x64, 0x60, 0xce, 0x52, 0x30, 0x15, 0x34, 0xc7, 0xcb, 0x20, 0x55, 0xeb, 0x0e, 0x28, 0x8c, 0xe0,
-	0x11, 0x0d, 0xe5, 0xe6, 0xc5, 0x60, 0x04, 0x18, 0xa9, 0xf7, 0xb8, 0x3c, 0x18, 0x6c, 0xaa, 0x20,
-	0x30, 0x1e, 0x0a, 0x00, 0xe1, 0x93, 0x14, 0xe2, 0x99, 0x4f, 0x3d, 0x75, 0x89, 0xe7, 0x47, 0x90,
-	0x64, 0x48, 0xe6, 0x29, 0x92, 0x2a, 0x3a, 0x9d, 0x46, 0x12, 0x99, 0x20, 0xd0, 0x8f, 0x02, 0xcc,
-	0x26, 0x9e, 0xc8, 0xb8, 0x79, 0x93, 0xfd, 0xfe, 0xc6, 0xcd, 0x1b, 0xce, 0xcb, 0x5b, 0x5e, 0x03,
-	0xa6, 0x5d, 0x57, 0x8d, 0xe2, 0x23, 0xe5, 0x16, 0x63, 0x9e, 0xdc, 0x72, 0xcb, 0xa2, 0xb4, 0xdc,
-	0x72, 0xcb, 0x24, 0xb3, 0x79, 0xe5, 0xc6, 0x26, 0x11, 0xd5, 0xbb, 0xbd, 0xd0, 0xd7, 0x02, 0x40,
-	0x78, 0x6b, 0x73, 0x4f, 0x30, 0x35, 0x0d, 0x70, 0x4f, 0x30, 0x3d, 0x02, 0xe4, 0xe5, 0x52, 0x64,
-	0x92, 0x21, 0x85, 0x9f, 0x78, 0xd5, 0xe1, 0x1e, 0x60, 0xf6, 0x63, 0x12, 0xf7, 0x00, 0x39, 0x8f,
-	0x45, 0x79, 0x85, 0x9f, 0x7c, 0x44, 0x42, 0x8f, 0x04, 0x98, 0x8e, 0xcd, 0xd7, 0x4b, 0x1c, 0x67,
-	0x19, 0x2c, 0x59, 0xbc, 0x30, 0x92, 0x2c, 0x43, 0xb5, 0x40, 0x51, 0x9d, 0x41, 0xd5, 0x34, 0xaa,
-	0x18, 0x57, 0x40, 0xdf, 0x08, 0x30, 0x15, 0xa1, 0xae, 0xe8, 0x7c, 0x6e, 0x93, 0x89, 0x72, 0x62,
-	0x71, 0x69, 0x14, 0x51, 0x86, 0xe7, 0x1c, 0xc5, 0x53, 0x43, 0x15, 0x6e, 0x47, 0xa2, 0x0c, 0x19,
-	0xfd, 0x2a, 0x40, 0x29, 0x8b, 0x9b, 0xa2, 0x35, 0x8e, 0xb3, 0x1c, 0x1e, 0x2c, 0xae, 0xbf, 0x90,
-	0x0e, 0x43, 0xaa, 0x50, 0xa4, 0xe7, 0xd1, 0x42, 0x1a, 0x69, 0x26, 0x29, 0x46, 0x3f, 0x0b, 0x80,
-	0xd2, 0x14, 0x15, 0xad, 0x8c, 0xe0, 0x3c, 0xc6, 0x77, 0xc5, 0xd5, 0x17, 0xd0, 0x60, 0x60, 0x97,
-	0x29, 0xd8, 0x05, 0x34, 0x3f, 0x04, 0x2c, 0xc3, 0x44, 0xfa, 0x47, 0x8c, 0xdc, 0x72, 0xfb, 0x47,
-	0x16, 0x6d, 0xe6, 0xf6, 0x8f, 0x4c, 0xbe, 0x9c, 0xd7, 0x3f, 0xfc, 0x9e, 0xc6, 0x40, 0xfc, 0x44,
-	0xdb, 0x6e, 0x6c, 0xf4, 0xcf, 0x69, 0xbb, 0x59, 0xbc, 0x22, 0xa7, 0xed, 0x66, 0x32, 0x0a, 0x69,
-	0x8d, 0x82, 0xbb, 0x88, 0x96, 0xb2, 0xda, 0xae, 0xab, 0x19, 0x6a, 0x58, 0xbb, 0xca, 0x27, 0x94,
-	0x09, 0x7c, 0x4a, 0x9a, 0xcb, 0x4c, 0x8c, 0x06, 0x70, 0xa3, 0x97, 0xc5, 0x2f, 0xb8, 0xd1, 0xcb,
-	0x64, 0x16, 0xd2, 0x0a, 0x05, 0xb8, 0x84, 0x16, 0x79, 0x00, 0xfd, 0x51, 0xd0, 0x87, 0xb7, 0x79,
-	0xf5, 0xf1, 0xb3, 0x8a, 0xf0, 0xe4, 0x59, 0x45, 0xf8, 0xe7, 0x59, 0x45, 0x78, 0xf4, 0xbc, 0x32,
-	0xf6, 0xe4, 0x79, 0x65, 0xec, 0xcf, 0xe7, 0x95, 0xb1, 0xbb, 0x2b, 0x11, 0x36, 0x42, 0xac, 0x2d,
-	0x9b, 0xd8, 0xbd, 0x67, 0xd9, 0xbb, 0x9e, 0xe9, 0xfe, 0x9a, 0x72, 0x3f, 0xb4, 0x4f, 0xb9, 0x49,
-	0x63, 0x9c, 0xfe, 0xd7, 0xe6, 0xfa, 0x7f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xbc, 0xa2, 0xf6, 0x9a,
-	0x81, 0x1d, 0x00, 0x00,
+	// 1668 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0xcf, 0x6f, 0xdc, 0xc4,
+	0x17, 0x8f, 0xfb, 0x23, 0x4d, 0xde, 0x26, 0x4d, 0xbe, 0xf3, 0x4d, 0xc9, 0xd6, 0x4a, 0x77, 0x13,
+	0x37, 0xbf, 0x9b, 0xda, 0x4d, 0x2a, 0x90, 0x10, 0x07, 0x48, 0x5a, 0x2a, 0x51, 0x35, 0x90, 0x6e,
+	0x7f, 0x48, 0xe9, 0xc5, 0x78, 0x77, 0x87, 0x8d, 0x15, 0xaf, 0xbd, 0xb5, 0xbd, 0xdb, 0x6c, 0x51,
+	0xa5, 0x82, 0x04, 0x82, 0x03, 0x12, 0x12, 0x02, 0x89, 0x03, 0x07, 0x8e, 0x70, 0xe5, 0x3f, 0xe0,
+	0xd4, 0x63, 0x25, 0x2e, 0x88, 0x43, 0x41, 0x2d, 0x7f, 0x08, 0xf2, 0x78, 0x3c, 0xfe, 0xb5, 0xe3,
+	0xdd, 0x38, 0xe9, 0x29, 0xeb, 0x99, 0xcf, 0x7c, 0xde, 0xc7, 0xcf, 0x6f, 0xde, 0xbc, 0x37, 0x81,
+	0x99, 0x76, 0x13, 0x63, 0xc5, 0xc0, 0x1d, 0x6c, 0x6b, 0x0d, 0xac, 0x74, 0xd6, 0x95, 0x87, 0x6d,
+	0x6c, 0x77, 0xe5, 0x96, 0x6d, 0xb9, 0x16, 0x9a, 0xf4, 0x66, 0xe5, 0x60, 0x56, 0xee, 0xac, 0x8b,
+	0x33, 0x0d, 0xcb, 0x6a, 0x18, 0x58, 0xd1, 0x5a, 0xba, 0xa2, 0x99, 0xa6, 0xe5, 0x6a, 0xae, 0x6e,
+	0x99, 0x8e, 0x8f, 0x17, 0xcb, 0x29, 0x36, 0xb6, 0xd6, 0x07, 0x4c, 0x35, 0xac, 0x86, 0x45, 0x7e,
+	0x2a, 0xde, 0x2f, 0x3a, 0x5a, 0xaa, 0x59, 0x4e, 0xd3, 0x72, 0x94, 0xaa, 0xe6, 0x78, 0x8b, 0xaa,
+	0xd8, 0xd5, 0xd6, 0x95, 0x9a, 0xa5, 0x9b, 0xfe, 0xbc, 0x34, 0x0d, 0xe7, 0x6e, 0x7b, 0xaa, 0x2a,
+	0xb8, 0xa1, 0x3b, 0x2e, 0xb6, 0x71, 0xfd, 0xae, 0xb5, 0x8f, 0x4d, 0x47, 0x5a, 0x83, 0x29, 0x32,
+	0xb1, 0xd9, 0xd1, 0x74, 0x43, 0xab, 0x1a, 0x78, 0xcb, 0xb2, 0x6d, 0xeb, 0x11, 0x9a, 0x82, 0xd3,
+	0x75, 0x6c, 0x5a, 0xcd, 0xa2, 0x30, 0x2b, 0x2c, 0x8f, 0x56, 0xfc, 0x07, 0xe9, 0x13, 0x98, 0xe9,
+	0x85, 0xae, 0x60, 0xa7, 0x65, 0x99, 0x0e, 0x46, 0x37, 0x60, 0x58, 0x6b, 0x5a, 0x6d, 0xd3, 0xf5,
+	0x97, 0x6d, 0xc9, 0xcf, 0x5e, 0x94, 0x87, 0xfe, 0x7a, 0x51, 0x5e, 0x6c, 0xe8, 0xee, 0x5e, 0xbb,
+	0x2a, 0xd7, 0xac, 0xa6, 0x42, 0x95, 0xfa, 0x7f, 0x2e, 0x3b, 0xf5, 0x7d, 0xc5, 0xed, 0xb6, 0xb0,
+	0x23, 0x7f, 0x60, 0xba, 0x15, 0xba, 0x5a, 0x5a, 0x84, 0xb3, 0xc4, 0x8e, 0x4f, 0xbf, 0xb9, 0xb3,
+	0xcb, 0xd1, 0xf3, 0x00, 0xde, 0x88, 0xe3, 0x98, 0x92, 0xf7, 0xe0, 0xe4, 0xe6, 0xce, 0x6e, 0x0e,
+	0x19, 0xd7, 0x71, 0xad, 0xe2, 0x2d, 0x65, 0x1a, 0xee, 0xb4, 0x5b, 0x2d, 0xa3, 0xdb, 0x5f, 0x03,
+	0xc3, 0x1d, 0xa3, 0x86, 0x25, 0x98, 0x20, 0xdc, 0xdb, 0x9a, 0xbd, 0x8f, 0xdd, 0x3b, 0xfa, 0x63,
+	0xcc, 0x11, 0xf1, 0x10, 0xa6, 0x13, 0x40, 0xa6, 0xe2, 0x3e, 0x4c, 0x34, 0xc9, 0xa8, 0xea, 0xe8,
+	0x8f, 0xb1, 0xda, 0x76, 0xea, 0x39, 0x15, 0x8d, 0x37, 0x19, 0xf9, 0x3d, 0xa7, 0xce, 0x22, 0x87,
+	0x04, 0x52, 0x5f, 0x81, 0x16, 0x8d, 0x9c, 0x04, 0x9a, 0xa9, 0xfc, 0x08, 0x0a, 0x11, 0x95, 0x39,
+	0xc3, 0x07, 0x42, 0x85, 0xd2, 0x03, 0xb8, 0xd0, 0x33, 0xe2, 0x99, 0xc5, 0xb7, 0x61, 0xc4, 0x26,
+	0x73, 0x76, 0xb7, 0x28, 0xcc, 0x9e, 0x5c, 0x2e, 0x6c, 0x4c, 0xcb, 0xc9, 0xcd, 0x2a, 0x93, 0x35,
+	0x5b, 0xa7, 0x3c, 0x1d, 0x15, 0x06, 0x97, 0xc6, 0xa1, 0x40, 0xb8, 0x77, 0x34, 0x5b, 0x6b, 0x3a,
+	0xd2, 0x36, 0xfc, 0x3f, 0xf2, 0xc8, 0x0c, 0xbc, 0x05, 0xc3, 0x2d, 0x32, 0x42, 0xde, 0xa6, 0xb0,
+	0x51, 0x4c, 0xd3, 0xfb, 0x2b, 0x28, 0x3f, 0x45, 0x4b, 0xef, 0xc2, 0x78, 0x24, 0xa8, 0x71, 0x1d,
+	0x15, 0xe1, 0x8c, 0x56, 0xaf, 0xdb, 0xd8, 0x71, 0xa8, 0x4f, 0x83, 0xc7, 0xd0, 0xd7, 0x27, 0xa2,
+	0xbe, 0x7e, 0x2a, 0xd0, 0xdd, 0x1e, 0x30, 0x30, 0x49, 0x0d, 0x18, 0xa9, 0xd2, 0x31, 0xfa, 0xce,
+	0xe7, 0x65, 0xdf, 0x93, 0xb2, 0x97, 0x39, 0x64, 0x9a, 0x39, 0xe4, 0x6b, 0x96, 0x6e, 0x6e, 0x5d,
+	0xf1, 0x54, 0xfd, 0xfa, 0x77, 0x79, 0x79, 0x00, 0xef, 0x7b, 0x0b, 0x9c, 0x0a, 0x23, 0x97, 0xae,
+	0x03, 0x8a, 0x29, 0xb8, 0xaf, 0x19, 0x6d, 0x7c, 0xe8, 0x17, 0x71, 0x40, 0x4c, 0xb3, 0xb0, 0x97,
+	0xb9, 0x07, 0x67, 0x03, 0x7b, 0x6a, 0xc7, 0x9b, 0xc9, 0x1b, 0xd7, 0xd5, 0x28, 0xbd, 0x74, 0x83,
+	0xc6, 0xf5, 0x35, 0xcb, 0x30, 0x34, 0x17, 0xdb, 0x9a, 0x91, 0x4f, 0x7c, 0x97, 0x46, 0x7c, 0x82,
+	0x87, 0xc9, 0xdf, 0x85, 0xc9, 0x1a, 0x9b, 0x3a, 0xd2, 0x0b, 0x4c, 0xd4, 0xe2, 0x26, 0x58, 0x04,
+	0x91, 0x94, 0xa4, 0x1f, 0x25, 0x82, 0x02, 0x86, 0x68, 0x04, 0x39, 0x74, 0xec, 0xb5, 0x44, 0x50,
+	0x40, 0xce, 0x22, 0x28, 0x50, 0x70, 0xb4, 0x08, 0x8a, 0xb1, 0x44, 0x23, 0x28, 0xb0, 0x77, 0xb4,
+	0x08, 0x72, 0xa2, 0xf4, 0xd2, 0x2a, 0x95, 0x5e, 0xc1, 0x0e, 0xb6, 0x3b, 0x78, 0x93, 0x9c, 0x69,
+	0x9c, 0xbc, 0x58, 0xa7, 0x02, 0x63, 0xd8, 0x63, 0x3f, 0x4f, 0x37, 0xe9, 0x39, 0x12, 0xc6, 0xe2,
+	0xa1, 0x3d, 0xf9, 0xa5, 0x40, 0x8f, 0x98, 0x90, 0x83, 0xc9, 0xdc, 0x07, 0x08, 0x43, 0xf0, 0x75,
+	0x84, 0x45, 0x84, 0x5e, 0x5a, 0x81, 0xff, 0x11, 0x1d, 0xef, 0x1f, 0xd4, 0xf6, 0x34, 0xb3, 0x81,
+	0x2b, 0x9a, 0xcb, 0x3b, 0x74, 0x5a, 0x70, 0x3e, 0x05, 0x65, 0xa2, 0xef, 0xc0, 0x38, 0xa6, 0xe3,
+	0xaa, 0xad, 0xb9, 0x79, 0xbf, 0xfd, 0x18, 0x8e, 0x90, 0x4b, 0x6b, 0x30, 0x19, 0xc9, 0x58, 0xb7,
+	0xf4, 0xa6, 0xee, 0xf2, 0x3d, 0x2d, 0x35, 0xa1, 0x98, 0x44, 0x33, 0x79, 0xb7, 0x61, 0xcc, 0xcf,
+	0x4b, 0xaa, 0xe1, 0x8d, 0xe7, 0x54, 0x57, 0xa8, 0x86, 0xd4, 0xd2, 0x9b, 0xd4, 0x1d, 0xb7, 0xf4,
+	0x87, 0x6d, 0xbd, 0x4e, 0xca, 0xce, 0xbb, 0x7b, 0x36, 0x76, 0xf6, 0x2c, 0x23, 0x23, 0x45, 0x48,
+	0x5f, 0x09, 0x30, 0xc7, 0x5d, 0xc7, 0xf4, 0xd6, 0xe0, 0x9c, 0x11, 0xce, 0xab, 0x6e, 0x00, 0xc8,
+	0x29, 0x7c, 0xca, 0xe8, 0x61, 0x4c, 0x3a, 0x4f, 0x63, 0x30, 0xaa, 0x44, 0xb3, 0x1b, 0xd8, 0x75,
+	0xa4, 0x77, 0xa0, 0xcc, 0x99, 0x62, 0x12, 0x8b, 0x70, 0xc6, 0xf5, 0x87, 0x48, 0x8c, 0x8e, 0x56,
+	0x82, 0x47, 0xb6, 0x63, 0x69, 0x61, 0xd2, 0x6e, 0x36, 0x35, 0xbb, 0xcb, 0x09, 0xaa, 0xdf, 0x87,
+	0xe9, 0x96, 0x8d, 0x81, 0x99, 0x91, 0x39, 0x18, 0x73, 0xba, 0xcd, 0xaa, 0x65, 0xa8, 0xd1, 0xb5,
+	0x05, 0x7f, 0xec, 0xba, 0x37, 0x84, 0x44, 0x18, 0xc1, 0x07, 0x2d, 0xcb, 0xc4, 0xa6, 0x4b, 0xf6,
+	0xd8, 0x78, 0x85, 0x3d, 0x7b, 0x9f, 0xdd, 0xb2, 0xb5, 0x9a, 0x81, 0xd5, 0x96, 0xad, 0xd7, 0x70,
+	0xf1, 0x24, 0xf3, 0x9e, 0x70, 0x98, 0xcf, 0xee, 0x73, 0xec, 0x78, 0x14, 0xe8, 0x63, 0x98, 0x6a,
+	0x93, 0x3a, 0x46, 0x8d, 0xc7, 0xfb, 0xa9, 0x5c, 0x1f, 0x06, 0xf9, 0x5c, 0xb1, 0xdd, 0xb7, 0x0d,
+	0x40, 0x32, 0x60, 0x57, 0xf5, 0xea, 0xdd, 0xd3, 0xb9, 0x78, 0x47, 0x1d, 0x56, 0x67, 0x6f, 0x03,
+	0xd0, 0xd0, 0xf7, 0xe8, 0x86, 0xf3, 0xd1, 0x55, 0x59, 0xeb, 0x90, 0x28, 0x2d, 0xcf, 0x1c, 0xb5,
+	0xb4, 0xf4, 0x4e, 0x6e, 0x2d, 0x68, 0x80, 0x54, 0xdf, 0x4e, 0x71, 0x24, 0x17, 0xeb, 0x84, 0x96,
+	0x68, 0xbb, 0x6e, 0x7a, 0x45, 0x29, 0x39, 0x09, 0xea, 0xc5, 0xd1, 0x5c, 0x94, 0x6c, 0x3d, 0xfa,
+	0x30, 0x96, 0x95, 0x21, 0xdf, 0x6b, 0x87, 0x0c, 0x9e, 0x36, 0x56, 0x3c, 0x16, 0xf2, 0x69, 0x63,
+	0xf5, 0x61, 0xd8, 0x3c, 0xb8, 0x9a, 0x11, 0x39, 0x95, 0xb2, 0xdb, 0xce, 0x04, 0xfa, 0xd8, 0x8f,
+	0xc9, 0x20, 0x0d, 0x10, 0x3b, 0xac, 0xfc, 0xce, 0x3e, 0xb8, 0x63, 0xd8, 0xe3, 0x56, 0xb4, 0xf1,
+	0xdb, 0x34, 0x9c, 0x26, 0x66, 0xd0, 0x8f, 0x02, 0x4c, 0x26, 0x7b, 0x19, 0xb4, 0x94, 0x6e, 0x29,
+	0x7a, 0x36, 0x3d, 0xa2, 0x32, 0x20, 0x30, 0x78, 0x01, 0xe9, 0xd2, 0xe7, 0x7f, 0xfc, 0xfb, 0xdd,
+	0x89, 0x05, 0x74, 0x51, 0x49, 0x5d, 0x48, 0xd8, 0x6c, 0x8d, 0xea, 0xfa, 0x32, 0x5a, 0x30, 0xec,
+	0x77, 0x32, 0xe8, 0x02, 0xc7, 0x8e, 0x3f, 0x2d, 0x2e, 0x64, 0x4e, 0x33, 0xe3, 0xb3, 0xc4, 0xb8,
+	0x88, 0x8a, 0x69, 0xe3, 0x7e, 0x8f, 0x84, 0x0e, 0x60, 0x84, 0x7d, 0x9f, 0x32, 0x87, 0x34, 0x00,
+	0x88, 0x4b, 0x7d, 0x00, 0xcc, 0xae, 0x44, 0xec, 0xce, 0x20, 0x31, 0x6d, 0x37, 0x88, 0x5c, 0xf4,
+	0x8d, 0x00, 0xe3, 0xf1, 0xae, 0x66, 0xbe, 0x0f, 0x3d, 0x41, 0x89, 0x6b, 0x83, 0xa0, 0x98, 0x92,
+	0x65, 0xa2, 0x44, 0x42, 0xb3, 0x7c, 0x25, 0x7e, 0xc5, 0xea, 0x79, 0x82, 0x95, 0xf9, 0x3c, 0x4f,
+	0x04, 0x00, 0xae, 0x27, 0x92, 0x65, 0x7e, 0x96, 0x27, 0x82, 0x5a, 0x97, 0x78, 0x22, 0x5e, 0x9d,
+	0xcf, 0xf7, 0xa1, 0xcf, 0xf6, 0x44, 0xcf, 0x1a, 0x3d, 0xcb, 0x13, 0xf1, 0xda, 0x1d, 0x7d, 0x2f,
+	0xc0, 0x44, 0xf2, 0x1a, 0x6b, 0x91, 0x63, 0x2b, 0x81, 0x13, 0xe5, 0xc1, 0x70, 0x4c, 0xd5, 0x2a,
+	0x51, 0x35, 0x8f, 0xa4, 0xb4, 0xaa, 0xe4, 0xd1, 0x80, 0x9e, 0xc0, 0x68, 0x78, 0x8f, 0x35, 0x9b,
+	0x19, 0x06, 0x9b, 0x3b, 0xbb, 0xe2, 0x72, 0x3f, 0x04, 0x13, 0x31, 0x4f, 0x44, 0x94, 0xd0, 0x0c,
+	0x2f, 0x48, 0x54, 0xad, 0xd5, 0xf5, 0xcc, 0x87, 0x57, 0x58, 0xb3, 0x59, 0xbe, 0xef, 0x66, 0x99,
+	0x4f, 0x5d, 0x6f, 0x65, 0x99, 0xa7, 0xd5, 0x80, 0x67, 0xfe, 0x33, 0x01, 0x20, 0x72, 0x3b, 0x34,
+	0xc7, 0xa1, 0x0f, 0x21, 0xe2, 0x4a, 0x5f, 0x08, 0x93, 0xb0, 0x40, 0x24, 0x94, 0xd1, 0x85, 0xb4,
+	0x84, 0xc8, 0x91, 0x8f, 0x7e, 0x10, 0x60, 0x22, 0x79, 0x4d, 0xc5, 0x8b, 0x8c, 0x04, 0x8e, 0x1b,
+	0x19, 0x9c, 0x8b, 0xac, 0xac, 0xc4, 0x49, 0xb2, 0xa5, 0x1a, 0x15, 0xe6, 0x6d, 0xa1, 0x78, 0x97,
+	0x38, 0xcf, 0x4d, 0xd4, 0x11, 0x14, 0x77, 0x0b, 0xf5, 0xec, 0x22, 0xb3, 0xb6, 0x10, 0x2d, 0x16,
+	0x54, 0xff, 0xb8, 0x41, 0x4f, 0x05, 0x80, 0xc8, 0x69, 0xcc, 0xfb, 0x58, 0x21, 0x84, 0xfb, 0xb1,
+	0xd2, 0xa7, 0x74, 0x56, 0xbc, 0x44, 0xaa, 0x0c, 0x6f, 0x17, 0x27, 0xaf, 0x5e, 0x16, 0xfb, 0x1a,
+	0xf1, 0x33, 0x8b, 0x3c, 0x18, 0x6e, 0x90, 0x5d, 0x9c, 0xbc, 0x9a, 0x41, 0x5f, 0x0b, 0x30, 0x16,
+	0x2b, 0x7a, 0x2f, 0x72, 0x8c, 0x45, 0x41, 0xe2, 0xa5, 0x01, 0x40, 0x4c, 0xce, 0x12, 0x91, 0x33,
+	0x87, 0xca, 0x69, 0x39, 0xb1, 0xca, 0x1d, 0x7d, 0x21, 0x40, 0x21, 0xda, 0x61, 0x4a, 0x99, 0x29,
+	0x83, 0x60, 0xc4, 0xd5, 0xfe, 0x18, 0x26, 0x64, 0x91, 0x08, 0x99, 0x45, 0x25, 0x6e, 0x62, 0x21,
+	0x3d, 0x29, 0xfa, 0x45, 0x80, 0xa9, 0x9e, 0xcd, 0x24, 0xef, 0xb5, 0x7b, 0x81, 0xc5, 0xab, 0x87,
+	0x00, 0x33, 0x89, 0x0a, 0x91, 0xb8, 0x82, 0x96, 0xd2, 0x12, 0x7b, 0xb6, 0xa1, 0xe8, 0x67, 0x01,
+	0x50, 0xba, 0x37, 0x44, 0x2b, 0x03, 0x18, 0xf7, 0xa1, 0xe2, 0xfa, 0xc0, 0x50, 0xa6, 0xf2, 0x32,
+	0x51, 0xb9, 0x84, 0x16, 0xfa, 0xa8, 0xa4, 0x62, 0xbc, 0x74, 0x10, 0x6f, 0x41, 0xe7, 0xb3, 0x73,
+	0xa1, 0x8f, 0xe2, 0xa6, 0x83, 0x9e, 0x1d, 0x6a, 0x56, 0x3a, 0x08, 0x72, 0x13, 0xb5, 0xfe, 0x13,
+	0xc9, 0x9b, 0xf1, 0x0a, 0x9d, 0x9f, 0x37, 0x63, 0xb8, 0x8c, 0xbc, 0xd9, 0xb3, 0x86, 0x97, 0x36,
+	0x88, 0xaa, 0x35, 0xb4, 0xda, 0x2b, 0x6f, 0xba, 0x9a, 0xa1, 0x86, 0x3b, 0x52, 0xf9, 0x94, 0x94,
+	0xe0, 0x4f, 0xbc, 0x5c, 0x31, 0x1e, 0xaf, 0xd5, 0xe7, 0xb3, 0xac, 0xb2, 0x82, 0x70, 0x6d, 0x10,
+	0x14, 0x53, 0x76, 0x85, 0x28, 0x5b, 0x45, 0xcb, 0x3c, 0x65, 0x41, 0x45, 0x16, 0xe8, 0xda, 0xba,
+	0xf9, 0xec, 0x65, 0x49, 0x78, 0xfe, 0xb2, 0x24, 0xfc, 0xf3, 0xb2, 0x24, 0x7c, 0xfb, 0xaa, 0x34,
+	0xf4, 0xfc, 0x55, 0x69, 0xe8, 0xcf, 0x57, 0xa5, 0xa1, 0x07, 0x57, 0x22, 0xf5, 0xbf, 0xc7, 0x76,
+	0xd9, 0xc4, 0xee, 0x23, 0xcb, 0xde, 0xf7, 0xa9, 0x3b, 0x1b, 0xca, 0x41, 0xc8, 0x4f, 0xba, 0x81,
+	0xea, 0x30, 0xf9, 0x07, 0xde, 0xd5, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x87, 0x2f, 0x5b, 0xb7,
+	0x67, 0x1c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2079,68 +2077,68 @@ type QueryClient interface {
 	// RegisteredTokens queries for all the registered tokens.
 	RegisteredTokens(ctx context.Context, in *QueryRegisteredTokens, opts ...grpc.CallOption) (*QueryRegisteredTokensResponse, error)
 	// Params queries the parameters of the x/leverage module.
-	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	// Borrowed queries for the borrowed amount of a user by token denomination.
 	// If the denomination is not specified, the total for each borrowed token is
 	// returned.
-	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
+	Borrowed(ctx context.Context, in *QueryBorrowed, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
 	// by token denomination.  If the denomination is not specified, the sum across
 	// all borrowed tokens is returned.
-	BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error)
+	BorrowedValue(ctx context.Context, in *QueryBorrowedValue, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error)
 	// Supplied queries for the amount of tokens  by a user by denomination.
 	// If the denomination is not specified, the total for each supplied token is
 	// returned.
-	Supplied(ctx context.Context, in *QuerySuppliedRequest, opts ...grpc.CallOption) (*QuerySuppliedResponse, error)
+	Supplied(ctx context.Context, in *QuerySupplied, opts ...grpc.CallOption) (*QuerySuppliedResponse, error)
 	// SuppliedValue queries for the USD value supplied by a user by token
 	// denomination. If the denomination is not specified, the sum across all
 	// supplied tokens is returned.
-	SuppliedValue(ctx context.Context, in *QuerySuppliedValueRequest, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error)
+	SuppliedValue(ctx context.Context, in *QuerySuppliedValue, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error)
 	// AvailableBorrow queries for the available amount to borrow of a specified
 	// denomination.
-	AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error)
+	AvailableBorrow(ctx context.Context, in *QueryAvailableBorrow, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error)
 	// BorrowAPY queries for the borrow APY of a specified denomination.
-	BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error)
+	BorrowAPY(ctx context.Context, in *QueryBorrowAPY, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error)
 	// SupplyAPY queries for the supply APY of a specified denomination.
-	SupplyAPY(ctx context.Context, in *QuerySupplyAPYRequest, opts ...grpc.CallOption) (*QuerySupplyAPYResponse, error)
+	SupplyAPY(ctx context.Context, in *QuerySupplyAPY, opts ...grpc.CallOption) (*QuerySupplyAPYResponse, error)
 	// MarketSize queries for the Market Size in USD of a specified denomination,
 	// which is the USD value of total tokens supplied by all users plus borrow
 	// interest owed by all users.
-	MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error)
+	MarketSize(ctx context.Context, in *QueryMarketSize, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error)
 	// TokenMarketSize queries for the Market Size in base tokens of a specified
 	// denomination, which is the total tokens supplied by all users plus borrow
 	// interest owed by all users.
-	TokenMarketSize(ctx context.Context, in *QueryTokenMarketSizeRequest, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error)
+	TokenMarketSize(ctx context.Context, in *QueryTokenMarketSize, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
-	ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error)
+	ReserveAmount(ctx context.Context, in *QueryReserveAmount, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error)
 	// Collateral queries the collateral amount of a user by token denomination.
 	// If the denomination is not specified, all of the user's collateral tokens
 	// are returned.
-	Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
+	Collateral(ctx context.Context, in *QueryCollateral, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
 	// CollateralValue queries for the total USD value of a user's collateral, or
 	// the USD value held as a given base asset's associated uToken denomination.
-	CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error)
+	CollateralValue(ctx context.Context, in *QueryCollateralValue, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error)
 	// ExchangeRate queries the uToken exchange rate of a given uToken
 	// denomination.
-	ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error)
+	ExchangeRate(ctx context.Context, in *QueryExchangeRate, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error)
 	// BorrowLimit queries the borrow limit in USD of a given borrower.
-	BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error)
+	BorrowLimit(ctx context.Context, in *QueryBorrowLimit, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error)
 	// LiquidationThreshold returns a maximum borrow value in USD above which a
 	// given borrower is eligible for liquidation.
-	LiquidationThreshold(ctx context.Context, in *QueryLiquidationThresholdRequest, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error)
+	LiquidationThreshold(ctx context.Context, in *QueryLiquidationThreshold, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for
 	// liquidation.
-	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
+	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargets, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
 	// MarketSummary queries a base asset's current borrowing and supplying
 	// conditions.
-	MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
+	MarketSummary(ctx context.Context, in *QueryMarketSummary, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
 	// TotalCollateral returns the total collateral system-wide of a given
 	// uToken denomination.
-	TotalCollateral(ctx context.Context, in *QueryTotalCollateralRequest, opts ...grpc.CallOption) (*QueryTotalCollateralResponse, error)
+	TotalCollateral(ctx context.Context, in *QueryTotalCollateral, opts ...grpc.CallOption) (*QueryTotalCollateralResponse, error)
 	// TotalBorrowed returns the total borrowed system-wide of a given
 	// token denomination.
-	TotalBorrowed(ctx context.Context, in *QueryTotalBorrowedRequest, opts ...grpc.CallOption) (*QueryTotalBorrowedResponse, error)
+	TotalBorrowed(ctx context.Context, in *QueryTotalBorrowed, opts ...grpc.CallOption) (*QueryTotalBorrowedResponse, error)
 }
 
 type queryClient struct {
@@ -2160,7 +2158,7 @@ func (c *queryClient) RegisteredTokens(ctx context.Context, in *QueryRegisteredT
 	return out, nil
 }
 
-func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
+func (c *queryClient) Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
 	out := new(QueryParamsResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Params", in, out, opts...)
 	if err != nil {
@@ -2169,7 +2167,7 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
-func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
+func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowed, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
 	out := new(QueryBorrowedResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Borrowed", in, out, opts...)
 	if err != nil {
@@ -2178,7 +2176,7 @@ func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, op
 	return out, nil
 }
 
-func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error) {
+func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValue, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error) {
 	out := new(QueryBorrowedValueResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowedValue", in, out, opts...)
 	if err != nil {
@@ -2187,7 +2185,7 @@ func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueR
 	return out, nil
 }
 
-func (c *queryClient) Supplied(ctx context.Context, in *QuerySuppliedRequest, opts ...grpc.CallOption) (*QuerySuppliedResponse, error) {
+func (c *queryClient) Supplied(ctx context.Context, in *QuerySupplied, opts ...grpc.CallOption) (*QuerySuppliedResponse, error) {
 	out := new(QuerySuppliedResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Supplied", in, out, opts...)
 	if err != nil {
@@ -2196,7 +2194,7 @@ func (c *queryClient) Supplied(ctx context.Context, in *QuerySuppliedRequest, op
 	return out, nil
 }
 
-func (c *queryClient) SuppliedValue(ctx context.Context, in *QuerySuppliedValueRequest, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error) {
+func (c *queryClient) SuppliedValue(ctx context.Context, in *QuerySuppliedValue, opts ...grpc.CallOption) (*QuerySuppliedValueResponse, error) {
 	out := new(QuerySuppliedValueResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/SuppliedValue", in, out, opts...)
 	if err != nil {
@@ -2205,7 +2203,7 @@ func (c *queryClient) SuppliedValue(ctx context.Context, in *QuerySuppliedValueR
 	return out, nil
 }
 
-func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error) {
+func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBorrow, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error) {
 	out := new(QueryAvailableBorrowResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/AvailableBorrow", in, out, opts...)
 	if err != nil {
@@ -2214,7 +2212,7 @@ func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBor
 	return out, nil
 }
 
-func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error) {
+func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPY, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error) {
 	out := new(QueryBorrowAPYResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowAPY", in, out, opts...)
 	if err != nil {
@@ -2223,7 +2221,7 @@ func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, 
 	return out, nil
 }
 
-func (c *queryClient) SupplyAPY(ctx context.Context, in *QuerySupplyAPYRequest, opts ...grpc.CallOption) (*QuerySupplyAPYResponse, error) {
+func (c *queryClient) SupplyAPY(ctx context.Context, in *QuerySupplyAPY, opts ...grpc.CallOption) (*QuerySupplyAPYResponse, error) {
 	out := new(QuerySupplyAPYResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/SupplyAPY", in, out, opts...)
 	if err != nil {
@@ -2232,7 +2230,7 @@ func (c *queryClient) SupplyAPY(ctx context.Context, in *QuerySupplyAPYRequest, 
 	return out, nil
 }
 
-func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error) {
+func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSize, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error) {
 	out := new(QueryMarketSizeResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSize", in, out, opts...)
 	if err != nil {
@@ -2241,7 +2239,7 @@ func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSizeRequest
 	return out, nil
 }
 
-func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketSizeRequest, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error) {
+func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketSize, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error) {
 	out := new(QueryTokenMarketSizeResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/TokenMarketSize", in, out, opts...)
 	if err != nil {
@@ -2250,7 +2248,7 @@ func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketS
 	return out, nil
 }
 
-func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error) {
+func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmount, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error) {
 	out := new(QueryReserveAmountResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ReserveAmount", in, out, opts...)
 	if err != nil {
@@ -2259,7 +2257,7 @@ func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountR
 	return out, nil
 }
 
-func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error) {
+func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateral, opts ...grpc.CallOption) (*QueryCollateralResponse, error) {
 	out := new(QueryCollateralResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Collateral", in, out, opts...)
 	if err != nil {
@@ -2268,7 +2266,7 @@ func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest
 	return out, nil
 }
 
-func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error) {
+func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralValue, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error) {
 	out := new(QueryCollateralValueResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/CollateralValue", in, out, opts...)
 	if err != nil {
@@ -2277,7 +2275,7 @@ func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralVa
 	return out, nil
 }
 
-func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
+func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRate, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
 	out := new(QueryExchangeRateResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ExchangeRate", in, out, opts...)
 	if err != nil {
@@ -2286,7 +2284,7 @@ func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateReq
 	return out, nil
 }
 
-func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
+func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimit, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
 	out := new(QueryBorrowLimitResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowLimit", in, out, opts...)
 	if err != nil {
@@ -2295,7 +2293,7 @@ func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitReque
 	return out, nil
 }
 
-func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquidationThresholdRequest, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error) {
+func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquidationThreshold, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error) {
 	out := new(QueryLiquidationThresholdResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationThreshold", in, out, opts...)
 	if err != nil {
@@ -2304,7 +2302,7 @@ func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquida
 	return out, nil
 }
 
-func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
+func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargets, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
 	out := new(QueryLiquidationTargetsResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationTargets", in, out, opts...)
 	if err != nil {
@@ -2313,7 +2311,7 @@ func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidati
 	return out, nil
 }
 
-func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
+func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummary, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
 	out := new(QueryMarketSummaryResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSummary", in, out, opts...)
 	if err != nil {
@@ -2322,7 +2320,7 @@ func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryR
 	return out, nil
 }
 
-func (c *queryClient) TotalCollateral(ctx context.Context, in *QueryTotalCollateralRequest, opts ...grpc.CallOption) (*QueryTotalCollateralResponse, error) {
+func (c *queryClient) TotalCollateral(ctx context.Context, in *QueryTotalCollateral, opts ...grpc.CallOption) (*QueryTotalCollateralResponse, error) {
 	out := new(QueryTotalCollateralResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/TotalCollateral", in, out, opts...)
 	if err != nil {
@@ -2331,7 +2329,7 @@ func (c *queryClient) TotalCollateral(ctx context.Context, in *QueryTotalCollate
 	return out, nil
 }
 
-func (c *queryClient) TotalBorrowed(ctx context.Context, in *QueryTotalBorrowedRequest, opts ...grpc.CallOption) (*QueryTotalBorrowedResponse, error) {
+func (c *queryClient) TotalBorrowed(ctx context.Context, in *QueryTotalBorrowed, opts ...grpc.CallOption) (*QueryTotalBorrowedResponse, error) {
 	out := new(QueryTotalBorrowedResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/TotalBorrowed", in, out, opts...)
 	if err != nil {
@@ -2345,68 +2343,68 @@ type QueryServer interface {
 	// RegisteredTokens queries for all the registered tokens.
 	RegisteredTokens(context.Context, *QueryRegisteredTokens) (*QueryRegisteredTokensResponse, error)
 	// Params queries the parameters of the x/leverage module.
-	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	Params(context.Context, *QueryParams) (*QueryParamsResponse, error)
 	// Borrowed queries for the borrowed amount of a user by token denomination.
 	// If the denomination is not specified, the total for each borrowed token is
 	// returned.
-	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
+	Borrowed(context.Context, *QueryBorrowed) (*QueryBorrowedResponse, error)
 	// BorrowedValue queries for the usd value of the borrowed amount of a user
 	// by token denomination.  If the denomination is not specified, the sum across
 	// all borrowed tokens is returned.
-	BorrowedValue(context.Context, *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error)
+	BorrowedValue(context.Context, *QueryBorrowedValue) (*QueryBorrowedValueResponse, error)
 	// Supplied queries for the amount of tokens  by a user by denomination.
 	// If the denomination is not specified, the total for each supplied token is
 	// returned.
-	Supplied(context.Context, *QuerySuppliedRequest) (*QuerySuppliedResponse, error)
+	Supplied(context.Context, *QuerySupplied) (*QuerySuppliedResponse, error)
 	// SuppliedValue queries for the USD value supplied by a user by token
 	// denomination. If the denomination is not specified, the sum across all
 	// supplied tokens is returned.
-	SuppliedValue(context.Context, *QuerySuppliedValueRequest) (*QuerySuppliedValueResponse, error)
+	SuppliedValue(context.Context, *QuerySuppliedValue) (*QuerySuppliedValueResponse, error)
 	// AvailableBorrow queries for the available amount to borrow of a specified
 	// denomination.
-	AvailableBorrow(context.Context, *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error)
+	AvailableBorrow(context.Context, *QueryAvailableBorrow) (*QueryAvailableBorrowResponse, error)
 	// BorrowAPY queries for the borrow APY of a specified denomination.
-	BorrowAPY(context.Context, *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error)
+	BorrowAPY(context.Context, *QueryBorrowAPY) (*QueryBorrowAPYResponse, error)
 	// SupplyAPY queries for the supply APY of a specified denomination.
-	SupplyAPY(context.Context, *QuerySupplyAPYRequest) (*QuerySupplyAPYResponse, error)
+	SupplyAPY(context.Context, *QuerySupplyAPY) (*QuerySupplyAPYResponse, error)
 	// MarketSize queries for the Market Size in USD of a specified denomination,
 	// which is the USD value of total tokens supplied by all users plus borrow
 	// interest owed by all users.
-	MarketSize(context.Context, *QueryMarketSizeRequest) (*QueryMarketSizeResponse, error)
+	MarketSize(context.Context, *QueryMarketSize) (*QueryMarketSizeResponse, error)
 	// TokenMarketSize queries for the Market Size in base tokens of a specified
 	// denomination, which is the total tokens supplied by all users plus borrow
 	// interest owed by all users.
-	TokenMarketSize(context.Context, *QueryTokenMarketSizeRequest) (*QueryTokenMarketSizeResponse, error)
+	TokenMarketSize(context.Context, *QueryTokenMarketSize) (*QueryTokenMarketSizeResponse, error)
 	// ReserveAmount queries for the amount reserved of a specified denomination.
 	// If the token is not valid, the reserved amount is zero.
-	ReserveAmount(context.Context, *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error)
+	ReserveAmount(context.Context, *QueryReserveAmount) (*QueryReserveAmountResponse, error)
 	// Collateral queries the collateral amount of a user by token denomination.
 	// If the denomination is not specified, all of the user's collateral tokens
 	// are returned.
-	Collateral(context.Context, *QueryCollateralRequest) (*QueryCollateralResponse, error)
+	Collateral(context.Context, *QueryCollateral) (*QueryCollateralResponse, error)
 	// CollateralValue queries for the total USD value of a user's collateral, or
 	// the USD value held as a given base asset's associated uToken denomination.
-	CollateralValue(context.Context, *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error)
+	CollateralValue(context.Context, *QueryCollateralValue) (*QueryCollateralValueResponse, error)
 	// ExchangeRate queries the uToken exchange rate of a given uToken
 	// denomination.
-	ExchangeRate(context.Context, *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error)
+	ExchangeRate(context.Context, *QueryExchangeRate) (*QueryExchangeRateResponse, error)
 	// BorrowLimit queries the borrow limit in USD of a given borrower.
-	BorrowLimit(context.Context, *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error)
+	BorrowLimit(context.Context, *QueryBorrowLimit) (*QueryBorrowLimitResponse, error)
 	// LiquidationThreshold returns a maximum borrow value in USD above which a
 	// given borrower is eligible for liquidation.
-	LiquidationThreshold(context.Context, *QueryLiquidationThresholdRequest) (*QueryLiquidationThresholdResponse, error)
+	LiquidationThreshold(context.Context, *QueryLiquidationThreshold) (*QueryLiquidationThresholdResponse, error)
 	// LiquidationTargets queries a list of all borrower addresses eligible for
 	// liquidation.
-	LiquidationTargets(context.Context, *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error)
+	LiquidationTargets(context.Context, *QueryLiquidationTargets) (*QueryLiquidationTargetsResponse, error)
 	// MarketSummary queries a base asset's current borrowing and supplying
 	// conditions.
-	MarketSummary(context.Context, *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error)
+	MarketSummary(context.Context, *QueryMarketSummary) (*QueryMarketSummaryResponse, error)
 	// TotalCollateral returns the total collateral system-wide of a given
 	// uToken denomination.
-	TotalCollateral(context.Context, *QueryTotalCollateralRequest) (*QueryTotalCollateralResponse, error)
+	TotalCollateral(context.Context, *QueryTotalCollateral) (*QueryTotalCollateralResponse, error)
 	// TotalBorrowed returns the total borrowed system-wide of a given
 	// token denomination.
-	TotalBorrowed(context.Context, *QueryTotalBorrowedRequest) (*QueryTotalBorrowedResponse, error)
+	TotalBorrowed(context.Context, *QueryTotalBorrowed) (*QueryTotalBorrowedResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -2416,64 +2414,64 @@ type UnimplementedQueryServer struct {
 func (*UnimplementedQueryServer) RegisteredTokens(ctx context.Context, req *QueryRegisteredTokens) (*QueryRegisteredTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisteredTokens not implemented")
 }
-func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
+func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParams) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
 }
-func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowedRequest) (*QueryBorrowedResponse, error) {
+func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowed) (*QueryBorrowedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Borrowed not implemented")
 }
-func (*UnimplementedQueryServer) BorrowedValue(ctx context.Context, req *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error) {
+func (*UnimplementedQueryServer) BorrowedValue(ctx context.Context, req *QueryBorrowedValue) (*QueryBorrowedValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowedValue not implemented")
 }
-func (*UnimplementedQueryServer) Supplied(ctx context.Context, req *QuerySuppliedRequest) (*QuerySuppliedResponse, error) {
+func (*UnimplementedQueryServer) Supplied(ctx context.Context, req *QuerySupplied) (*QuerySuppliedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Supplied not implemented")
 }
-func (*UnimplementedQueryServer) SuppliedValue(ctx context.Context, req *QuerySuppliedValueRequest) (*QuerySuppliedValueResponse, error) {
+func (*UnimplementedQueryServer) SuppliedValue(ctx context.Context, req *QuerySuppliedValue) (*QuerySuppliedValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SuppliedValue not implemented")
 }
-func (*UnimplementedQueryServer) AvailableBorrow(ctx context.Context, req *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error) {
+func (*UnimplementedQueryServer) AvailableBorrow(ctx context.Context, req *QueryAvailableBorrow) (*QueryAvailableBorrowResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AvailableBorrow not implemented")
 }
-func (*UnimplementedQueryServer) BorrowAPY(ctx context.Context, req *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error) {
+func (*UnimplementedQueryServer) BorrowAPY(ctx context.Context, req *QueryBorrowAPY) (*QueryBorrowAPYResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowAPY not implemented")
 }
-func (*UnimplementedQueryServer) SupplyAPY(ctx context.Context, req *QuerySupplyAPYRequest) (*QuerySupplyAPYResponse, error) {
+func (*UnimplementedQueryServer) SupplyAPY(ctx context.Context, req *QuerySupplyAPY) (*QuerySupplyAPYResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SupplyAPY not implemented")
 }
-func (*UnimplementedQueryServer) MarketSize(ctx context.Context, req *QueryMarketSizeRequest) (*QueryMarketSizeResponse, error) {
+func (*UnimplementedQueryServer) MarketSize(ctx context.Context, req *QueryMarketSize) (*QueryMarketSizeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MarketSize not implemented")
 }
-func (*UnimplementedQueryServer) TokenMarketSize(ctx context.Context, req *QueryTokenMarketSizeRequest) (*QueryTokenMarketSizeResponse, error) {
+func (*UnimplementedQueryServer) TokenMarketSize(ctx context.Context, req *QueryTokenMarketSize) (*QueryTokenMarketSizeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TokenMarketSize not implemented")
 }
-func (*UnimplementedQueryServer) ReserveAmount(ctx context.Context, req *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error) {
+func (*UnimplementedQueryServer) ReserveAmount(ctx context.Context, req *QueryReserveAmount) (*QueryReserveAmountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReserveAmount not implemented")
 }
-func (*UnimplementedQueryServer) Collateral(ctx context.Context, req *QueryCollateralRequest) (*QueryCollateralResponse, error) {
+func (*UnimplementedQueryServer) Collateral(ctx context.Context, req *QueryCollateral) (*QueryCollateralResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Collateral not implemented")
 }
-func (*UnimplementedQueryServer) CollateralValue(ctx context.Context, req *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error) {
+func (*UnimplementedQueryServer) CollateralValue(ctx context.Context, req *QueryCollateralValue) (*QueryCollateralValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CollateralValue not implemented")
 }
-func (*UnimplementedQueryServer) ExchangeRate(ctx context.Context, req *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error) {
+func (*UnimplementedQueryServer) ExchangeRate(ctx context.Context, req *QueryExchangeRate) (*QueryExchangeRateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRate not implemented")
 }
-func (*UnimplementedQueryServer) BorrowLimit(ctx context.Context, req *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error) {
+func (*UnimplementedQueryServer) BorrowLimit(ctx context.Context, req *QueryBorrowLimit) (*QueryBorrowLimitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BorrowLimit not implemented")
 }
-func (*UnimplementedQueryServer) LiquidationThreshold(ctx context.Context, req *QueryLiquidationThresholdRequest) (*QueryLiquidationThresholdResponse, error) {
+func (*UnimplementedQueryServer) LiquidationThreshold(ctx context.Context, req *QueryLiquidationThreshold) (*QueryLiquidationThresholdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LiquidationThreshold not implemented")
 }
-func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error) {
+func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargets) (*QueryLiquidationTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LiquidationTargets not implemented")
 }
-func (*UnimplementedQueryServer) MarketSummary(ctx context.Context, req *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error) {
+func (*UnimplementedQueryServer) MarketSummary(ctx context.Context, req *QueryMarketSummary) (*QueryMarketSummaryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MarketSummary not implemented")
 }
-func (*UnimplementedQueryServer) TotalCollateral(ctx context.Context, req *QueryTotalCollateralRequest) (*QueryTotalCollateralResponse, error) {
+func (*UnimplementedQueryServer) TotalCollateral(ctx context.Context, req *QueryTotalCollateral) (*QueryTotalCollateralResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TotalCollateral not implemented")
 }
-func (*UnimplementedQueryServer) TotalBorrowed(ctx context.Context, req *QueryTotalBorrowedRequest) (*QueryTotalBorrowedResponse, error) {
+func (*UnimplementedQueryServer) TotalBorrowed(ctx context.Context, req *QueryTotalBorrowed) (*QueryTotalBorrowedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TotalBorrowed not implemented")
 }
 
@@ -2500,7 +2498,7 @@ func _Query_RegisteredTokens_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryParamsRequest)
+	in := new(QueryParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2512,13 +2510,13 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 		FullMethod: "/umee.leverage.v1.Query/Params",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Params(ctx, req.(*QueryParamsRequest))
+		return srv.(QueryServer).Params(ctx, req.(*QueryParams))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowedRequest)
+	in := new(QueryBorrowed)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2530,13 +2528,13 @@ func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/umee.leverage.v1.Query/Borrowed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowedRequest))
+		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowed))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_BorrowedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowedValueRequest)
+	in := new(QueryBorrowedValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2548,13 +2546,13 @@ func _Query_BorrowedValue_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/BorrowedValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowedValue(ctx, req.(*QueryBorrowedValueRequest))
+		return srv.(QueryServer).BorrowedValue(ctx, req.(*QueryBorrowedValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_Supplied_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuerySuppliedRequest)
+	in := new(QuerySupplied)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2566,13 +2564,13 @@ func _Query_Supplied_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/umee.leverage.v1.Query/Supplied",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Supplied(ctx, req.(*QuerySuppliedRequest))
+		return srv.(QueryServer).Supplied(ctx, req.(*QuerySupplied))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_SuppliedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuerySuppliedValueRequest)
+	in := new(QuerySuppliedValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2584,13 +2582,13 @@ func _Query_SuppliedValue_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/SuppliedValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).SuppliedValue(ctx, req.(*QuerySuppliedValueRequest))
+		return srv.(QueryServer).SuppliedValue(ctx, req.(*QuerySuppliedValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_AvailableBorrow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryAvailableBorrowRequest)
+	in := new(QueryAvailableBorrow)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2602,13 +2600,13 @@ func _Query_AvailableBorrow_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/umee.leverage.v1.Query/AvailableBorrow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).AvailableBorrow(ctx, req.(*QueryAvailableBorrowRequest))
+		return srv.(QueryServer).AvailableBorrow(ctx, req.(*QueryAvailableBorrow))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_BorrowAPY_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowAPYRequest)
+	in := new(QueryBorrowAPY)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2620,13 +2618,13 @@ func _Query_BorrowAPY_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/umee.leverage.v1.Query/BorrowAPY",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowAPY(ctx, req.(*QueryBorrowAPYRequest))
+		return srv.(QueryServer).BorrowAPY(ctx, req.(*QueryBorrowAPY))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_SupplyAPY_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuerySupplyAPYRequest)
+	in := new(QuerySupplyAPY)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2638,13 +2636,13 @@ func _Query_SupplyAPY_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/umee.leverage.v1.Query/SupplyAPY",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).SupplyAPY(ctx, req.(*QuerySupplyAPYRequest))
+		return srv.(QueryServer).SupplyAPY(ctx, req.(*QuerySupplyAPY))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_MarketSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryMarketSizeRequest)
+	in := new(QueryMarketSize)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2656,13 +2654,13 @@ func _Query_MarketSize_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/umee.leverage.v1.Query/MarketSize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).MarketSize(ctx, req.(*QueryMarketSizeRequest))
+		return srv.(QueryServer).MarketSize(ctx, req.(*QueryMarketSize))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_TokenMarketSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryTokenMarketSizeRequest)
+	in := new(QueryTokenMarketSize)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2674,13 +2672,13 @@ func _Query_TokenMarketSize_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/umee.leverage.v1.Query/TokenMarketSize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).TokenMarketSize(ctx, req.(*QueryTokenMarketSizeRequest))
+		return srv.(QueryServer).TokenMarketSize(ctx, req.(*QueryTokenMarketSize))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_ReserveAmount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryReserveAmountRequest)
+	in := new(QueryReserveAmount)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2692,13 +2690,13 @@ func _Query_ReserveAmount_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/ReserveAmount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ReserveAmount(ctx, req.(*QueryReserveAmountRequest))
+		return srv.(QueryServer).ReserveAmount(ctx, req.(*QueryReserveAmount))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCollateralRequest)
+	in := new(QueryCollateral)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2710,13 +2708,13 @@ func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/umee.leverage.v1.Query/Collateral",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Collateral(ctx, req.(*QueryCollateralRequest))
+		return srv.(QueryServer).Collateral(ctx, req.(*QueryCollateral))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_CollateralValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCollateralValueRequest)
+	in := new(QueryCollateralValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2728,13 +2726,13 @@ func _Query_CollateralValue_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/umee.leverage.v1.Query/CollateralValue",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).CollateralValue(ctx, req.(*QueryCollateralValueRequest))
+		return srv.(QueryServer).CollateralValue(ctx, req.(*QueryCollateralValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryExchangeRateRequest)
+	in := new(QueryExchangeRate)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2746,13 +2744,13 @@ func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/umee.leverage.v1.Query/ExchangeRate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ExchangeRate(ctx, req.(*QueryExchangeRateRequest))
+		return srv.(QueryServer).ExchangeRate(ctx, req.(*QueryExchangeRate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowLimitRequest)
+	in := new(QueryBorrowLimit)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2764,13 +2762,13 @@ func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/umee.leverage.v1.Query/BorrowLimit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimitRequest))
+		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimit))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_LiquidationThreshold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLiquidationThresholdRequest)
+	in := new(QueryLiquidationThreshold)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2782,13 +2780,13 @@ func _Query_LiquidationThreshold_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: "/umee.leverage.v1.Query/LiquidationThreshold",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LiquidationThreshold(ctx, req.(*QueryLiquidationThresholdRequest))
+		return srv.(QueryServer).LiquidationThreshold(ctx, req.(*QueryLiquidationThreshold))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLiquidationTargetsRequest)
+	in := new(QueryLiquidationTargets)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2800,13 +2798,13 @@ func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/umee.leverage.v1.Query/LiquidationTargets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargetsRequest))
+		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargets))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryMarketSummaryRequest)
+	in := new(QueryMarketSummary)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2818,13 +2816,13 @@ func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/MarketSummary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummaryRequest))
+		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummary))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_TotalCollateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryTotalCollateralRequest)
+	in := new(QueryTotalCollateral)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2836,13 +2834,13 @@ func _Query_TotalCollateral_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/umee.leverage.v1.Query/TotalCollateral",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).TotalCollateral(ctx, req.(*QueryTotalCollateralRequest))
+		return srv.(QueryServer).TotalCollateral(ctx, req.(*QueryTotalCollateral))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_TotalBorrowed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryTotalBorrowedRequest)
+	in := new(QueryTotalBorrowed)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2854,7 +2852,7 @@ func _Query_TotalBorrowed_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/TotalBorrowed",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).TotalBorrowed(ctx, req.(*QueryTotalBorrowedRequest))
+		return srv.(QueryServer).TotalBorrowed(ctx, req.(*QueryTotalBorrowed))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2975,7 +2973,7 @@ func (m *QueryRegisteredTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryAvailableBorrowRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryAvailableBorrow) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2985,12 +2983,12 @@ func (m *QueryAvailableBorrowRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryAvailableBorrowRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAvailableBorrow) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryAvailableBorrowRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAvailableBorrow) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3038,7 +3036,7 @@ func (m *QueryAvailableBorrowResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowAPYRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryBorrowAPY) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3048,12 +3046,12 @@ func (m *QueryBorrowAPYRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowAPYRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryBorrowAPY) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowAPYRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryBorrowAPY) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3101,7 +3099,7 @@ func (m *QueryBorrowAPYResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
-func (m *QuerySupplyAPYRequest) Marshal() (dAtA []byte, err error) {
+func (m *QuerySupplyAPY) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3111,12 +3109,12 @@ func (m *QuerySupplyAPYRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QuerySupplyAPYRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySupplyAPY) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QuerySupplyAPYRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySupplyAPY) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3164,7 +3162,7 @@ func (m *QuerySupplyAPYResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryMarketSizeRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryMarketSize) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3174,12 +3172,12 @@ func (m *QueryMarketSizeRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryMarketSizeRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryMarketSize) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryMarketSizeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryMarketSize) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3227,7 +3225,7 @@ func (m *QueryMarketSizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryTokenMarketSizeRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryTokenMarketSize) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3237,12 +3235,12 @@ func (m *QueryTokenMarketSizeRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryTokenMarketSizeRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryTokenMarketSize) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryTokenMarketSizeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryTokenMarketSize) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3327,7 +3325,7 @@ func (m *QueryRegisteredTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryParamsRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3337,12 +3335,12 @@ func (m *QueryParamsRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryParamsRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryParams) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryParamsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3383,7 +3381,7 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowedRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryBorrowed) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3393,12 +3391,12 @@ func (m *QueryBorrowedRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowedRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryBorrowed) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryBorrowed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3457,7 +3455,7 @@ func (m *QueryBorrowedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowedValueRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryBorrowedValue) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3467,12 +3465,12 @@ func (m *QueryBorrowedValueRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowedValueRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryBorrowedValue) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryBorrowedValue) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3527,7 +3525,7 @@ func (m *QueryBorrowedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryCollateralValueRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryCollateralValue) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3537,12 +3535,12 @@ func (m *QueryCollateralValueRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryCollateralValueRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryCollateralValue) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryCollateralValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryCollateralValue) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3597,7 +3595,7 @@ func (m *QueryCollateralValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QuerySuppliedRequest) Marshal() (dAtA []byte, err error) {
+func (m *QuerySupplied) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3607,12 +3605,12 @@ func (m *QuerySuppliedRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QuerySuppliedRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySupplied) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QuerySuppliedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySupplied) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3671,7 +3669,7 @@ func (m *QuerySuppliedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QuerySuppliedValueRequest) Marshal() (dAtA []byte, err error) {
+func (m *QuerySuppliedValue) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3681,12 +3679,12 @@ func (m *QuerySuppliedValueRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QuerySuppliedValueRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValue) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QuerySuppliedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QuerySuppliedValue) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3741,7 +3739,7 @@ func (m *QuerySuppliedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryReserveAmountRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryReserveAmount) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3751,12 +3749,12 @@ func (m *QueryReserveAmountRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryReserveAmountRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryReserveAmount) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryReserveAmountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryReserveAmount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3804,7 +3802,7 @@ func (m *QueryReserveAmountResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryCollateralRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryCollateral) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3814,12 +3812,12 @@ func (m *QueryCollateralRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryCollateralRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryCollateral) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryCollateralRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3878,7 +3876,7 @@ func (m *QueryCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryExchangeRateRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryExchangeRate) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3888,12 +3886,12 @@ func (m *QueryExchangeRateRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryExchangeRateRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryExchangeRate) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryExchangeRateRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryExchangeRate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3941,7 +3939,7 @@ func (m *QueryExchangeRateResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowLimitRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryBorrowLimit) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3951,12 +3949,12 @@ func (m *QueryBorrowLimitRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowLimitRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryBorrowLimit) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowLimitRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryBorrowLimit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4004,7 +4002,7 @@ func (m *QueryBorrowLimitResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLiquidationThresholdRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryLiquidationThreshold) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4014,12 +4012,12 @@ func (m *QueryLiquidationThresholdRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLiquidationThresholdRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryLiquidationThreshold) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLiquidationThresholdRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryLiquidationThreshold) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4067,7 +4065,7 @@ func (m *QueryLiquidationThresholdResponse) MarshalToSizedBuffer(dAtA []byte) (i
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryLiquidationTargetsRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryLiquidationTargets) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4077,12 +4075,12 @@ func (m *QueryLiquidationTargetsRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryLiquidationTargetsRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryLiquidationTargets) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryLiquidationTargetsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryLiquidationTargets) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4122,7 +4120,7 @@ func (m *QueryLiquidationTargetsResponse) MarshalToSizedBuffer(dAtA []byte) (int
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryMarketSummaryRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryMarketSummary) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4132,12 +4130,12 @@ func (m *QueryMarketSummaryRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryMarketSummaryRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryMarketSummary) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryMarketSummaryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryMarketSummary) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4279,7 +4277,7 @@ func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryTotalCollateralRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryTotalCollateral) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4289,12 +4287,12 @@ func (m *QueryTotalCollateralRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryTotalCollateralRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryTotalCollateral) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryTotalCollateralRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryTotalCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4342,7 +4340,7 @@ func (m *QueryTotalCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryTotalBorrowedRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryTotalBorrowed) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -4352,12 +4350,12 @@ func (m *QueryTotalBorrowedRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryTotalBorrowedRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryTotalBorrowed) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryTotalBorrowedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryTotalBorrowed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4425,7 +4423,7 @@ func (m *QueryRegisteredTokens) Size() (n int) {
 	return n
 }
 
-func (m *QueryAvailableBorrowRequest) Size() (n int) {
+func (m *QueryAvailableBorrow) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4449,7 +4447,7 @@ func (m *QueryAvailableBorrowResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowAPYRequest) Size() (n int) {
+func (m *QueryBorrowAPY) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4473,7 +4471,7 @@ func (m *QueryBorrowAPYResponse) Size() (n int) {
 	return n
 }
 
-func (m *QuerySupplyAPYRequest) Size() (n int) {
+func (m *QuerySupplyAPY) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4497,7 +4495,7 @@ func (m *QuerySupplyAPYResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryMarketSizeRequest) Size() (n int) {
+func (m *QueryMarketSize) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4521,7 +4519,7 @@ func (m *QueryMarketSizeResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryTokenMarketSizeRequest) Size() (n int) {
+func (m *QueryTokenMarketSize) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4560,7 +4558,7 @@ func (m *QueryRegisteredTokensResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryParamsRequest) Size() (n int) {
+func (m *QueryParams) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4580,7 +4578,7 @@ func (m *QueryParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowedRequest) Size() (n int) {
+func (m *QueryBorrowed) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4612,7 +4610,7 @@ func (m *QueryBorrowedResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowedValueRequest) Size() (n int) {
+func (m *QueryBorrowedValue) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4640,7 +4638,7 @@ func (m *QueryBorrowedValueResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryCollateralValueRequest) Size() (n int) {
+func (m *QueryCollateralValue) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4668,7 +4666,7 @@ func (m *QueryCollateralValueResponse) Size() (n int) {
 	return n
 }
 
-func (m *QuerySuppliedRequest) Size() (n int) {
+func (m *QuerySupplied) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4700,7 +4698,7 @@ func (m *QuerySuppliedResponse) Size() (n int) {
 	return n
 }
 
-func (m *QuerySuppliedValueRequest) Size() (n int) {
+func (m *QuerySuppliedValue) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4728,7 +4726,7 @@ func (m *QuerySuppliedValueResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryReserveAmountRequest) Size() (n int) {
+func (m *QueryReserveAmount) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4752,7 +4750,7 @@ func (m *QueryReserveAmountResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryCollateralRequest) Size() (n int) {
+func (m *QueryCollateral) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4784,7 +4782,7 @@ func (m *QueryCollateralResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryExchangeRateRequest) Size() (n int) {
+func (m *QueryExchangeRate) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4808,7 +4806,7 @@ func (m *QueryExchangeRateResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowLimitRequest) Size() (n int) {
+func (m *QueryBorrowLimit) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4832,7 +4830,7 @@ func (m *QueryBorrowLimitResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryLiquidationThresholdRequest) Size() (n int) {
+func (m *QueryLiquidationThreshold) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4856,7 +4854,7 @@ func (m *QueryLiquidationThresholdResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryLiquidationTargetsRequest) Size() (n int) {
+func (m *QueryLiquidationTargets) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4880,7 +4878,7 @@ func (m *QueryLiquidationTargetsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryMarketSummaryRequest) Size() (n int) {
+func (m *QueryMarketSummary) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4929,7 +4927,7 @@ func (m *QueryMarketSummaryResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryTotalCollateralRequest) Size() (n int) {
+func (m *QueryTotalCollateral) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4953,7 +4951,7 @@ func (m *QueryTotalCollateralResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryTotalBorrowedRequest) Size() (n int) {
+func (m *QueryTotalBorrowed) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -5033,7 +5031,7 @@ func (m *QueryRegisteredTokens) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryAvailableBorrowRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryAvailableBorrow) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5056,10 +5054,10 @@ func (m *QueryAvailableBorrowRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAvailableBorrowRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAvailableBorrow: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAvailableBorrowRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAvailableBorrow: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -5199,7 +5197,7 @@ func (m *QueryAvailableBorrowResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowAPYRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryBorrowAPY) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5222,10 +5220,10 @@ func (m *QueryBorrowAPYRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowAPYRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryBorrowAPY: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowAPYRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryBorrowAPY: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -5365,7 +5363,7 @@ func (m *QueryBorrowAPYResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QuerySupplyAPYRequest) Unmarshal(dAtA []byte) error {
+func (m *QuerySupplyAPY) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5388,10 +5386,10 @@ func (m *QuerySupplyAPYRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QuerySupplyAPYRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySupplyAPY: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QuerySupplyAPYRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySupplyAPY: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -5531,7 +5529,7 @@ func (m *QuerySupplyAPYResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryMarketSizeRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryMarketSize) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5554,10 +5552,10 @@ func (m *QueryMarketSizeRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMarketSizeRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryMarketSize: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMarketSizeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryMarketSize: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -5697,7 +5695,7 @@ func (m *QueryMarketSizeResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryTokenMarketSizeRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryTokenMarketSize) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5720,10 +5718,10 @@ func (m *QueryTokenMarketSizeRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryTokenMarketSize: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryTokenMarketSize: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -5947,7 +5945,7 @@ func (m *QueryRegisteredTokensResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryParamsRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5970,10 +5968,10 @@ func (m *QueryParamsRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryParamsRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryParams: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryParamsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryParams: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -6080,7 +6078,7 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryBorrowed) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6103,10 +6101,10 @@ func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryBorrowed: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryBorrowed: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6278,7 +6276,7 @@ func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowedValueRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryBorrowedValue) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6301,10 +6299,10 @@ func (m *QueryBorrowedValueRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedValueRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryBorrowedValue: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryBorrowedValue: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6476,7 +6474,7 @@ func (m *QueryBorrowedValueResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryCollateralValueRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryCollateralValue) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6499,10 +6497,10 @@ func (m *QueryCollateralValueRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralValueRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryCollateralValue: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryCollateralValue: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6674,7 +6672,7 @@ func (m *QueryCollateralValueResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QuerySuppliedRequest) Unmarshal(dAtA []byte) error {
+func (m *QuerySupplied) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6697,10 +6695,10 @@ func (m *QuerySuppliedRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QuerySuppliedRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySupplied: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QuerySuppliedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySupplied: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6872,7 +6870,7 @@ func (m *QuerySuppliedResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QuerySuppliedValueRequest) Unmarshal(dAtA []byte) error {
+func (m *QuerySuppliedValue) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6895,10 +6893,10 @@ func (m *QuerySuppliedValueRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QuerySuppliedValueRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySuppliedValue: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QuerySuppliedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySuppliedValue: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7070,7 +7068,7 @@ func (m *QuerySuppliedValueResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryReserveAmountRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryReserveAmount) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7093,10 +7091,10 @@ func (m *QueryReserveAmountRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryReserveAmountRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryReserveAmount: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryReserveAmountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryReserveAmount: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7236,7 +7234,7 @@ func (m *QueryReserveAmountResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryCollateralRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryCollateral) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7259,10 +7257,10 @@ func (m *QueryCollateralRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryCollateral: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryCollateral: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7434,7 +7432,7 @@ func (m *QueryCollateralResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryExchangeRateRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryExchangeRate) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7457,10 +7455,10 @@ func (m *QueryExchangeRateRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryExchangeRateRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryExchangeRate: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryExchangeRateRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryExchangeRate: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7600,7 +7598,7 @@ func (m *QueryExchangeRateResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowLimitRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryBorrowLimit) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7623,10 +7621,10 @@ func (m *QueryBorrowLimitRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowLimitRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryBorrowLimit: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowLimitRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryBorrowLimit: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7766,7 +7764,7 @@ func (m *QueryBorrowLimitResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLiquidationThresholdRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryLiquidationThreshold) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7789,10 +7787,10 @@ func (m *QueryLiquidationThresholdRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryLiquidationThreshold: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryLiquidationThreshold: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -7932,7 +7930,7 @@ func (m *QueryLiquidationThresholdResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryLiquidationTargetsRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryLiquidationTargets) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -7955,10 +7953,10 @@ func (m *QueryLiquidationTargetsRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryLiquidationTargets: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryLiquidationTargets: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -8064,7 +8062,7 @@ func (m *QueryLiquidationTargetsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryMarketSummaryRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryMarketSummary) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -8087,10 +8085,10 @@ func (m *QueryMarketSummaryRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMarketSummaryRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryMarketSummary: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMarketSummaryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryMarketSummary: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -8555,7 +8553,7 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryTotalCollateralRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryTotalCollateral) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -8578,10 +8576,10 @@ func (m *QueryTotalCollateralRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTotalCollateralRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryTotalCollateral: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTotalCollateralRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryTotalCollateral: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -8721,7 +8719,7 @@ func (m *QueryTotalCollateralResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryTotalBorrowedRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryTotalBorrowed) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -8744,10 +8742,10 @@ func (m *QueryTotalBorrowedRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTotalBorrowedRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryTotalBorrowed: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTotalBorrowedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryTotalBorrowed: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
