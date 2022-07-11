@@ -23,12 +23,12 @@ const (
 	DefaultWeightMsgDecollateralize   int = 0
 	DefaultWeightMsgRepay             int = 70
 	DefaultWeightMsgLiquidate         int = 75
-	OperationWeightMsgSupply              = "op_weight_msg_supply_asset"
-	OperationWeightMsgWithdraw            = "op_weight_msg_withdraw_asset"
-	OperationWeightMsgBorrow              = "op_weight_msg_borrow_asset"
-	OperationWeightMsgCollateralize       = "op_weight_msg_add_collateral"
-	OperationWeightMsgDecollateralize     = "op_weight_msg_remove_collateral"
-	OperationWeightMsgRepay               = "op_weight_msg_repay_asset"
+	OperationWeightMsgSupply              = "op_weight_msg_supply"
+	OperationWeightMsgWithdraw            = "op_weight_msg_withdraw"
+	OperationWeightMsgBorrow              = "op_weight_msg_borrow"
+	OperationWeightMsgCollateralize       = "op_weight_msg_collateralize"
+	OperationWeightMsgDecollateralize     = "op_weight_msg_decollateralize"
+	OperationWeightMsgRepay               = "op_weight_msg_repay"
 	OperationWeightMsgLiquidate           = "op_weight_msg_liquidate"
 )
 
