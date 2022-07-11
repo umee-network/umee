@@ -34,7 +34,7 @@ var _ = descriptor.ForMessage
 var _ = metadata.Join
 
 func request_Query_ExchangeRates_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryExchangeRatesRequest
+	var protoReq QueryExchangeRates
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -61,7 +61,7 @@ func request_Query_ExchangeRates_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_ExchangeRates_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryExchangeRatesRequest
+	var protoReq QueryExchangeRates
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -88,7 +88,7 @@ func local_request_Query_ExchangeRates_0(ctx context.Context, marshaler runtime.
 }
 
 func request_Query_ActiveExchangeRates_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryActiveExchangeRatesRequest
+	var protoReq QueryActiveExchangeRates
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.ActiveExchangeRates(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -97,7 +97,7 @@ func request_Query_ActiveExchangeRates_0(ctx context.Context, marshaler runtime.
 }
 
 func local_request_Query_ActiveExchangeRates_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryActiveExchangeRatesRequest
+	var protoReq QueryActiveExchangeRates
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.ActiveExchangeRates(ctx, &protoReq)
@@ -106,7 +106,7 @@ func local_request_Query_ActiveExchangeRates_0(ctx context.Context, marshaler ru
 }
 
 func request_Query_FeederDelegation_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryFeederDelegationRequest
+	var protoReq QueryFeederDelegation
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -133,7 +133,7 @@ func request_Query_FeederDelegation_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_Query_FeederDelegation_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryFeederDelegationRequest
+	var protoReq QueryFeederDelegation
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -160,7 +160,7 @@ func local_request_Query_FeederDelegation_0(ctx context.Context, marshaler runti
 }
 
 func request_Query_MissCounter_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMissCounterRequest
+	var protoReq QueryMissCounter
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -187,7 +187,7 @@ func request_Query_MissCounter_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_Query_MissCounter_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryMissCounterRequest
+	var protoReq QueryMissCounter
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -214,7 +214,7 @@ func local_request_Query_MissCounter_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func request_Query_AggregatePrevote_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregatePrevoteRequest
+	var protoReq QueryAggregatePrevote
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -241,7 +241,7 @@ func request_Query_AggregatePrevote_0(ctx context.Context, marshaler runtime.Mar
 }
 
 func local_request_Query_AggregatePrevote_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregatePrevoteRequest
+	var protoReq QueryAggregatePrevote
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -268,7 +268,7 @@ func local_request_Query_AggregatePrevote_0(ctx context.Context, marshaler runti
 }
 
 func request_Query_AggregatePrevotes_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregatePrevotesRequest
+	var protoReq QueryAggregatePrevotes
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.AggregatePrevotes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -277,7 +277,7 @@ func request_Query_AggregatePrevotes_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func local_request_Query_AggregatePrevotes_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregatePrevotesRequest
+	var protoReq QueryAggregatePrevotes
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.AggregatePrevotes(ctx, &protoReq)
@@ -286,7 +286,7 @@ func local_request_Query_AggregatePrevotes_0(ctx context.Context, marshaler runt
 }
 
 func request_Query_AggregateVote_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregateVoteRequest
+	var protoReq QueryAggregateVote
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -313,7 +313,7 @@ func request_Query_AggregateVote_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_Query_AggregateVote_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregateVoteRequest
+	var protoReq QueryAggregateVote
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -340,7 +340,7 @@ func local_request_Query_AggregateVote_0(ctx context.Context, marshaler runtime.
 }
 
 func request_Query_AggregateVotes_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregateVotesRequest
+	var protoReq QueryAggregateVotes
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.AggregateVotes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -349,7 +349,7 @@ func request_Query_AggregateVotes_0(ctx context.Context, marshaler runtime.Marsh
 }
 
 func local_request_Query_AggregateVotes_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAggregateVotesRequest
+	var protoReq QueryAggregateVotes
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.AggregateVotes(ctx, &protoReq)
@@ -358,7 +358,7 @@ func local_request_Query_AggregateVotes_0(ctx context.Context, marshaler runtime
 }
 
 func request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryParamsRequest
+	var protoReq QueryParams
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.Params(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -367,7 +367,7 @@ func request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, cl
 }
 
 func local_request_Query_Params_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryParamsRequest
+	var protoReq QueryParams
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.Params(ctx, &protoReq)
