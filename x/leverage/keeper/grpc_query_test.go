@@ -37,7 +37,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	resp, err := s.queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+	resp, err := s.queryClient.Params(context.Background(), &types.QueryParams{})
 	s.Require().NoError(err)
 	s.Require().NotZero(resp.Params.MinimumCloseFactor)
 }
@@ -61,7 +61,7 @@ func (s *IntegrationTestSuite) TestQuerier_ReserveAmount() {
 	//
 	// Ref: https://github.com/umee-network/umee/issues/93
 	s.Run("missing_denom", func() {
-		req := &types.QueryReserveAmountRequest{}
+		req := &types.QueryReserveAmount{}
 		_, err := s.queryClient.ReserveAmount(context.Background(), req)
 		s.Require().Error(err)
 	})

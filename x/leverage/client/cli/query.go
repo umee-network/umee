@@ -95,7 +95,7 @@ func GetCmdQueryParams() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			resp, err := queryClient.Params(cmd.Context(), &types.QueryParamsRequest{})
+			resp, err := queryClient.Params(cmd.Context(), &types.QueryParams{})
 			if err != nil {
 				return err
 			}
@@ -124,7 +124,7 @@ func GetCmdQueryBorrowed() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryBorrowedRequest{
+			req := &types.QueryBorrowed{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -161,7 +161,7 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryBorrowedValueRequest{
+			req := &types.QueryBorrowedValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -198,7 +198,7 @@ func GetCmdQuerySupplied() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QuerySuppliedRequest{
+			req := &types.QuerySupplied{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -235,7 +235,7 @@ func GetCmdQuerySuppliedValue() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QuerySuppliedValueRequest{
+			req := &types.QuerySuppliedValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -272,7 +272,7 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryReserveAmountRequest{
+			req := &types.QueryReserveAmount{
 				Denom: args[0],
 			}
 
@@ -305,7 +305,7 @@ func GetCmdQueryCollateral() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryCollateralRequest{
+			req := &types.QueryCollateral{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -342,7 +342,7 @@ func GetCmdQueryCollateralValue() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryCollateralValueRequest{
+			req := &types.QueryCollateralValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
@@ -379,7 +379,7 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryExchangeRateRequest{
+			req := &types.QueryExchangeRate{
 				Denom: args[0],
 			}
 
@@ -412,7 +412,7 @@ func GetCmdQueryAvailableBorrow() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryAvailableBorrowRequest{
+			req := &types.QueryAvailableBorrow{
 				Denom: args[0],
 			}
 
@@ -445,7 +445,7 @@ func GetCmdQuerySupplyAPY() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QuerySupplyAPYRequest{
+			req := &types.QuerySupplyAPY{
 				Denom: args[0],
 			}
 
@@ -478,7 +478,7 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryBorrowAPYRequest{
+			req := &types.QueryBorrowAPY{
 				Denom: args[0],
 			}
 
@@ -511,7 +511,7 @@ func GetCmdQueryMarketSize() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryMarketSizeRequest{
+			req := &types.QueryMarketSize{
 				Denom: args[0],
 			}
 
@@ -544,7 +544,7 @@ func GetCmdQueryTokenMarketSize() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryTokenMarketSizeRequest{
+			req := &types.QueryTokenMarketSize{
 				Denom: args[0],
 			}
 
@@ -577,7 +577,7 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryBorrowLimitRequest{
+			req := &types.QueryBorrowLimit{
 				Address: args[0],
 			}
 
@@ -610,7 +610,7 @@ func GetCmdQueryLiquidationThreshold() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLiquidationThresholdRequest{
+			req := &types.QueryLiquidationThreshold{
 				Address: args[0],
 			}
 
@@ -643,7 +643,7 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryMarketSummaryRequest{
+			req := &types.QueryMarketSummary{
 				Denom: args[0],
 			}
 
@@ -676,7 +676,7 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryLiquidationTargetsRequest{}
+			req := &types.QueryLiquidationTargets{}
 
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
 			if err != nil {
@@ -706,7 +706,7 @@ func GetCmdQueryTotalCollateral() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalCollateralRequest{
+			req := &types.QueryTotalCollateral{
 				Denom: args[0],
 			}
 			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
@@ -737,7 +737,7 @@ func GetCmdQueryTotalBorrowed() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalBorrowedRequest{
+			req := &types.QueryTotalBorrowed{
 				Denom: args[0],
 			}
 			resp, err := queryClient.TotalBorrowed(cmd.Context(), req)

@@ -44,7 +44,7 @@ func (q Querier) RegisteredTokens(
 
 func (q Querier) Params(
 	goCtx context.Context,
-	req *types.QueryParamsRequest,
+	req *types.QueryParams,
 ) (*types.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -58,7 +58,7 @@ func (q Querier) Params(
 
 func (q Querier) Borrowed(
 	goCtx context.Context,
-	req *types.QueryBorrowedRequest,
+	req *types.QueryBorrowed,
 ) (*types.QueryBorrowedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -90,7 +90,7 @@ func (q Querier) Borrowed(
 
 func (q Querier) BorrowedValue(
 	goCtx context.Context,
-	req *types.QueryBorrowedValueRequest,
+	req *types.QueryBorrowedValue,
 ) (*types.QueryBorrowedValueResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -128,7 +128,7 @@ func (q Querier) BorrowedValue(
 
 func (q Querier) Supplied(
 	goCtx context.Context,
-	req *types.QuerySuppliedRequest,
+	req *types.QuerySupplied,
 ) (*types.QuerySuppliedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -167,7 +167,7 @@ func (q Querier) Supplied(
 
 func (q Querier) SuppliedValue(
 	goCtx context.Context,
-	req *types.QuerySuppliedValueRequest,
+	req *types.QuerySuppliedValue,
 ) (*types.QuerySuppliedValueResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -213,7 +213,7 @@ func (q Querier) SuppliedValue(
 
 func (q Querier) AvailableBorrow(
 	goCtx context.Context,
-	req *types.QueryAvailableBorrowRequest,
+	req *types.QueryAvailableBorrow,
 ) (*types.QueryAvailableBorrowResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -234,7 +234,7 @@ func (q Querier) AvailableBorrow(
 
 func (q Querier) BorrowAPY(
 	goCtx context.Context,
-	req *types.QueryBorrowAPYRequest,
+	req *types.QueryBorrowAPY,
 ) (*types.QueryBorrowAPYResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -255,7 +255,7 @@ func (q Querier) BorrowAPY(
 
 func (q Querier) SupplyAPY(
 	goCtx context.Context,
-	req *types.QuerySupplyAPYRequest,
+	req *types.QuerySupplyAPY,
 ) (*types.QuerySupplyAPYResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -276,7 +276,7 @@ func (q Querier) SupplyAPY(
 
 func (q Querier) MarketSize(
 	goCtx context.Context,
-	req *types.QueryMarketSizeRequest,
+	req *types.QueryMarketSize,
 ) (*types.QueryMarketSizeResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -305,7 +305,7 @@ func (q Querier) MarketSize(
 
 func (q Querier) TokenMarketSize(
 	goCtx context.Context,
-	req *types.QueryTokenMarketSizeRequest,
+	req *types.QueryTokenMarketSize,
 ) (*types.QueryTokenMarketSizeResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -329,7 +329,7 @@ func (q Querier) TokenMarketSize(
 
 func (q Querier) ReserveAmount(
 	goCtx context.Context,
-	req *types.QueryReserveAmountRequest,
+	req *types.QueryReserveAmount,
 ) (*types.QueryReserveAmountResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -351,7 +351,7 @@ func (q Querier) ReserveAmount(
 
 func (q Querier) Collateral(
 	goCtx context.Context,
-	req *types.QueryCollateralRequest,
+	req *types.QueryCollateral,
 ) (*types.QueryCollateralResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -383,7 +383,7 @@ func (q Querier) Collateral(
 
 func (q Querier) CollateralValue(
 	goCtx context.Context,
-	req *types.QueryCollateralValueRequest,
+	req *types.QueryCollateralValue,
 ) (*types.QueryCollateralValueResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -427,7 +427,7 @@ func (q Querier) CollateralValue(
 
 func (q Querier) ExchangeRate(
 	goCtx context.Context,
-	req *types.QueryExchangeRateRequest,
+	req *types.QueryExchangeRate,
 ) (*types.QueryExchangeRateResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -449,7 +449,7 @@ func (q Querier) ExchangeRate(
 
 func (q Querier) BorrowLimit(
 	goCtx context.Context,
-	req *types.QueryBorrowLimitRequest,
+	req *types.QueryBorrowLimit,
 ) (*types.QueryBorrowLimitResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -477,7 +477,7 @@ func (q Querier) BorrowLimit(
 
 func (q Querier) LiquidationThreshold(
 	goCtx context.Context,
-	req *types.QueryLiquidationThresholdRequest,
+	req *types.QueryLiquidationThreshold,
 ) (*types.QueryLiquidationThresholdResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -505,7 +505,7 @@ func (q Querier) LiquidationThreshold(
 
 func (q Querier) LiquidationTargets(
 	goCtx context.Context,
-	req *types.QueryLiquidationTargetsRequest,
+	req *types.QueryLiquidationTargets,
 ) (*types.QueryLiquidationTargetsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -528,7 +528,7 @@ func (q Querier) LiquidationTargets(
 
 func (q Querier) MarketSummary(
 	goCtx context.Context,
-	req *types.QueryMarketSummaryRequest,
+	req *types.QueryMarketSummary,
 ) (*types.QueryMarketSummaryResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -572,7 +572,7 @@ func (q Querier) MarketSummary(
 
 func (q Querier) TotalCollateral(
 	goCtx context.Context,
-	req *types.QueryTotalCollateralRequest,
+	req *types.QueryTotalCollateral,
 ) (*types.QueryTotalCollateralResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -585,7 +585,7 @@ func (q Querier) TotalCollateral(
 
 func (q Querier) TotalBorrowed(
 	goCtx context.Context,
-	req *types.QueryTotalBorrowedRequest,
+	req *types.QueryTotalBorrowed,
 ) (*types.QueryTotalBorrowedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
