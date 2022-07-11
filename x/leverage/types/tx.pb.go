@@ -83,26 +83,26 @@ func (m *MsgSupply) GetAsset() types.Coin {
 	return types.Coin{}
 }
 
-// MsgWithdrawAsset represents a user's request to withdraw supplied assets.
+// MsgWithdraw represents a user's request to withdraw supplied assets.
 // Asset must be a uToken.
-type MsgWithdrawAsset struct {
+type MsgWithdraw struct {
 	// Supplier is the account address withdrawing assets and the signer of the message.
 	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
 	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
 }
 
-func (m *MsgWithdrawAsset) Reset()         { *m = MsgWithdrawAsset{} }
-func (m *MsgWithdrawAsset) String() string { return proto.CompactTextString(m) }
-func (*MsgWithdrawAsset) ProtoMessage()    {}
-func (*MsgWithdrawAsset) Descriptor() ([]byte, []int) {
+func (m *MsgWithdraw) Reset()         { *m = MsgWithdraw{} }
+func (m *MsgWithdraw) String() string { return proto.CompactTextString(m) }
+func (*MsgWithdraw) ProtoMessage()    {}
+func (*MsgWithdraw) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{1}
 }
-func (m *MsgWithdrawAsset) XXX_Unmarshal(b []byte) error {
+func (m *MsgWithdraw) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgWithdrawAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgWithdraw) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgWithdrawAsset.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgWithdraw.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -112,52 +112,52 @@ func (m *MsgWithdrawAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return b[:n], nil
 	}
 }
-func (m *MsgWithdrawAsset) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgWithdrawAsset.Merge(m, src)
+func (m *MsgWithdraw) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgWithdraw.Merge(m, src)
 }
-func (m *MsgWithdrawAsset) XXX_Size() int {
+func (m *MsgWithdraw) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgWithdrawAsset) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgWithdrawAsset.DiscardUnknown(m)
+func (m *MsgWithdraw) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgWithdraw.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgWithdrawAsset proto.InternalMessageInfo
+var xxx_messageInfo_MsgWithdraw proto.InternalMessageInfo
 
-func (m *MsgWithdrawAsset) GetSupplier() string {
+func (m *MsgWithdraw) GetSupplier() string {
 	if m != nil {
 		return m.Supplier
 	}
 	return ""
 }
 
-func (m *MsgWithdrawAsset) GetAsset() types.Coin {
+func (m *MsgWithdraw) GetAsset() types.Coin {
 	if m != nil {
 		return m.Asset
 	}
 	return types.Coin{}
 }
 
-// MsgAddCollateral represents a user's request to enable selected
+// MsgCollateralize represents a user's request to enable selected
 // uTokens as collateral.
-type MsgAddCollateral struct {
+type MsgCollateralize struct {
 	// Borrower is the account address adding collateral and the signer of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
-func (m *MsgAddCollateral) Reset()         { *m = MsgAddCollateral{} }
-func (m *MsgAddCollateral) String() string { return proto.CompactTextString(m) }
-func (*MsgAddCollateral) ProtoMessage()    {}
-func (*MsgAddCollateral) Descriptor() ([]byte, []int) {
+func (m *MsgCollateralize) Reset()         { *m = MsgCollateralize{} }
+func (m *MsgCollateralize) String() string { return proto.CompactTextString(m) }
+func (*MsgCollateralize) ProtoMessage()    {}
+func (*MsgCollateralize) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{2}
 }
-func (m *MsgAddCollateral) XXX_Unmarshal(b []byte) error {
+func (m *MsgCollateralize) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgAddCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgCollateralize) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgAddCollateral.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgCollateralize.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -167,52 +167,52 @@ func (m *MsgAddCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return b[:n], nil
 	}
 }
-func (m *MsgAddCollateral) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgAddCollateral.Merge(m, src)
+func (m *MsgCollateralize) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCollateralize.Merge(m, src)
 }
-func (m *MsgAddCollateral) XXX_Size() int {
+func (m *MsgCollateralize) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgAddCollateral) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgAddCollateral.DiscardUnknown(m)
+func (m *MsgCollateralize) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCollateralize.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgAddCollateral proto.InternalMessageInfo
+var xxx_messageInfo_MsgCollateralize proto.InternalMessageInfo
 
-func (m *MsgAddCollateral) GetBorrower() string {
+func (m *MsgCollateralize) GetBorrower() string {
 	if m != nil {
 		return m.Borrower
 	}
 	return ""
 }
 
-func (m *MsgAddCollateral) GetCoin() types.Coin {
+func (m *MsgCollateralize) GetCoin() types.Coin {
 	if m != nil {
 		return m.Coin
 	}
 	return types.Coin{}
 }
 
-// MsgRemoveCollateral represents a user's request to disable selected
+// MsgDecollateralize represents a user's request to disable selected
 // uTokens as collateral.
-type MsgRemoveCollateral struct {
+type MsgDecollateralize struct {
 	// Borrower is the account address removing collateral and the signer of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
-func (m *MsgRemoveCollateral) Reset()         { *m = MsgRemoveCollateral{} }
-func (m *MsgRemoveCollateral) String() string { return proto.CompactTextString(m) }
-func (*MsgRemoveCollateral) ProtoMessage()    {}
-func (*MsgRemoveCollateral) Descriptor() ([]byte, []int) {
+func (m *MsgDecollateralize) Reset()         { *m = MsgDecollateralize{} }
+func (m *MsgDecollateralize) String() string { return proto.CompactTextString(m) }
+func (*MsgDecollateralize) ProtoMessage()    {}
+func (*MsgDecollateralize) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{3}
 }
-func (m *MsgRemoveCollateral) XXX_Unmarshal(b []byte) error {
+func (m *MsgDecollateralize) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgRemoveCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgDecollateralize) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgRemoveCollateral.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgDecollateralize.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -222,53 +222,53 @@ func (m *MsgRemoveCollateral) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *MsgRemoveCollateral) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRemoveCollateral.Merge(m, src)
+func (m *MsgDecollateralize) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDecollateralize.Merge(m, src)
 }
-func (m *MsgRemoveCollateral) XXX_Size() int {
+func (m *MsgDecollateralize) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgRemoveCollateral) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRemoveCollateral.DiscardUnknown(m)
+func (m *MsgDecollateralize) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDecollateralize.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgRemoveCollateral proto.InternalMessageInfo
+var xxx_messageInfo_MsgDecollateralize proto.InternalMessageInfo
 
-func (m *MsgRemoveCollateral) GetBorrower() string {
+func (m *MsgDecollateralize) GetBorrower() string {
 	if m != nil {
 		return m.Borrower
 	}
 	return ""
 }
 
-func (m *MsgRemoveCollateral) GetCoin() types.Coin {
+func (m *MsgDecollateralize) GetCoin() types.Coin {
 	if m != nil {
 		return m.Coin
 	}
 	return types.Coin{}
 }
 
-// MsgBorrowAsset represents a user's request to borrow a base asset type
+// MsgBorrow represents a user's request to borrow a base asset type
 // from the module.
-type MsgBorrowAsset struct {
+type MsgBorrow struct {
 	// Borrower is the account address taking a loan and the signer
 	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
 }
 
-func (m *MsgBorrowAsset) Reset()         { *m = MsgBorrowAsset{} }
-func (m *MsgBorrowAsset) String() string { return proto.CompactTextString(m) }
-func (*MsgBorrowAsset) ProtoMessage()    {}
-func (*MsgBorrowAsset) Descriptor() ([]byte, []int) {
+func (m *MsgBorrow) Reset()         { *m = MsgBorrow{} }
+func (m *MsgBorrow) String() string { return proto.CompactTextString(m) }
+func (*MsgBorrow) ProtoMessage()    {}
+func (*MsgBorrow) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{4}
 }
-func (m *MsgBorrowAsset) XXX_Unmarshal(b []byte) error {
+func (m *MsgBorrow) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgBorrowAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgBorrow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgBorrowAsset.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgBorrow.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -278,53 +278,53 @@ func (m *MsgBorrowAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return b[:n], nil
 	}
 }
-func (m *MsgBorrowAsset) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgBorrowAsset.Merge(m, src)
+func (m *MsgBorrow) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBorrow.Merge(m, src)
 }
-func (m *MsgBorrowAsset) XXX_Size() int {
+func (m *MsgBorrow) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgBorrowAsset) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgBorrowAsset.DiscardUnknown(m)
+func (m *MsgBorrow) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBorrow.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgBorrowAsset proto.InternalMessageInfo
+var xxx_messageInfo_MsgBorrow proto.InternalMessageInfo
 
-func (m *MsgBorrowAsset) GetBorrower() string {
+func (m *MsgBorrow) GetBorrower() string {
 	if m != nil {
 		return m.Borrower
 	}
 	return ""
 }
 
-func (m *MsgBorrowAsset) GetAsset() types.Coin {
+func (m *MsgBorrow) GetAsset() types.Coin {
 	if m != nil {
 		return m.Asset
 	}
 	return types.Coin{}
 }
 
-// MsgRepayAsset represents a user's request to repay a borrowed base asset
+// MsgRepay represents a user's request to repay a borrowed base asset
 // type to the module.
-type MsgRepayAsset struct {
+type MsgRepay struct {
 	// Borrower is the account address repaying a loan and the signer
 	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
 	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
 }
 
-func (m *MsgRepayAsset) Reset()         { *m = MsgRepayAsset{} }
-func (m *MsgRepayAsset) String() string { return proto.CompactTextString(m) }
-func (*MsgRepayAsset) ProtoMessage()    {}
-func (*MsgRepayAsset) Descriptor() ([]byte, []int) {
+func (m *MsgRepay) Reset()         { *m = MsgRepay{} }
+func (m *MsgRepay) String() string { return proto.CompactTextString(m) }
+func (*MsgRepay) ProtoMessage()    {}
+func (*MsgRepay) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{5}
 }
-func (m *MsgRepayAsset) XXX_Unmarshal(b []byte) error {
+func (m *MsgRepay) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgRepayAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgRepay) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgRepayAsset.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgRepay.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -334,26 +334,26 @@ func (m *MsgRepayAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, error
 		return b[:n], nil
 	}
 }
-func (m *MsgRepayAsset) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRepayAsset.Merge(m, src)
+func (m *MsgRepay) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRepay.Merge(m, src)
 }
-func (m *MsgRepayAsset) XXX_Size() int {
+func (m *MsgRepay) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgRepayAsset) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRepayAsset.DiscardUnknown(m)
+func (m *MsgRepay) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRepay.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgRepayAsset proto.InternalMessageInfo
+var xxx_messageInfo_MsgRepay proto.InternalMessageInfo
 
-func (m *MsgRepayAsset) GetBorrower() string {
+func (m *MsgRepay) GetBorrower() string {
 	if m != nil {
 		return m.Borrower
 	}
 	return ""
 }
 
-func (m *MsgRepayAsset) GetAsset() types.Coin {
+func (m *MsgRepay) GetAsset() types.Coin {
 	if m != nil {
 		return m.Asset
 	}
@@ -469,22 +469,22 @@ func (m *MsgSupplyResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSupplyResponse proto.InternalMessageInfo
 
-// MsgWithdrawAssetResponse defines the Msg/WithdrawAsset response type.
-type MsgWithdrawAssetResponse struct {
+// MsgWithdrawResponse defines the Msg/Withdraw response type.
+type MsgWithdrawResponse struct {
 }
 
-func (m *MsgWithdrawAssetResponse) Reset()         { *m = MsgWithdrawAssetResponse{} }
-func (m *MsgWithdrawAssetResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgWithdrawAssetResponse) ProtoMessage()    {}
-func (*MsgWithdrawAssetResponse) Descriptor() ([]byte, []int) {
+func (m *MsgWithdrawResponse) Reset()         { *m = MsgWithdrawResponse{} }
+func (m *MsgWithdrawResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgWithdrawResponse) ProtoMessage()    {}
+func (*MsgWithdrawResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{8}
 }
-func (m *MsgWithdrawAssetResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgWithdrawResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgWithdrawAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgWithdrawResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgWithdrawAssetResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgWithdrawResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -494,34 +494,34 @@ func (m *MsgWithdrawAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *MsgWithdrawAssetResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgWithdrawAssetResponse.Merge(m, src)
+func (m *MsgWithdrawResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgWithdrawResponse.Merge(m, src)
 }
-func (m *MsgWithdrawAssetResponse) XXX_Size() int {
+func (m *MsgWithdrawResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgWithdrawAssetResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgWithdrawAssetResponse.DiscardUnknown(m)
+func (m *MsgWithdrawResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgWithdrawResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgWithdrawAssetResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgWithdrawResponse proto.InternalMessageInfo
 
-// MsgAddCollateralResponse defines the Msg/AddCollateral response type.
-type MsgAddCollateralResponse struct {
+// MsgCollateralizeResponse defines the Msg/Collateralize response type.
+type MsgCollateralizeResponse struct {
 }
 
-func (m *MsgAddCollateralResponse) Reset()         { *m = MsgAddCollateralResponse{} }
-func (m *MsgAddCollateralResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgAddCollateralResponse) ProtoMessage()    {}
-func (*MsgAddCollateralResponse) Descriptor() ([]byte, []int) {
+func (m *MsgCollateralizeResponse) Reset()         { *m = MsgCollateralizeResponse{} }
+func (m *MsgCollateralizeResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCollateralizeResponse) ProtoMessage()    {}
+func (*MsgCollateralizeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{9}
 }
-func (m *MsgAddCollateralResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgCollateralizeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgAddCollateralResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgCollateralizeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgAddCollateralResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgCollateralizeResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -531,34 +531,34 @@ func (m *MsgAddCollateralResponse) XXX_Marshal(b []byte, deterministic bool) ([]
 		return b[:n], nil
 	}
 }
-func (m *MsgAddCollateralResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgAddCollateralResponse.Merge(m, src)
+func (m *MsgCollateralizeResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCollateralizeResponse.Merge(m, src)
 }
-func (m *MsgAddCollateralResponse) XXX_Size() int {
+func (m *MsgCollateralizeResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgAddCollateralResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgAddCollateralResponse.DiscardUnknown(m)
+func (m *MsgCollateralizeResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCollateralizeResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgAddCollateralResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgCollateralizeResponse proto.InternalMessageInfo
 
-// MsgRemoveCollateralResponse defines the Msg/RemoveCollateral response type.
-type MsgRemoveCollateralResponse struct {
+// MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
+type MsgDecollateralizeResponse struct {
 }
 
-func (m *MsgRemoveCollateralResponse) Reset()         { *m = MsgRemoveCollateralResponse{} }
-func (m *MsgRemoveCollateralResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgRemoveCollateralResponse) ProtoMessage()    {}
-func (*MsgRemoveCollateralResponse) Descriptor() ([]byte, []int) {
+func (m *MsgDecollateralizeResponse) Reset()         { *m = MsgDecollateralizeResponse{} }
+func (m *MsgDecollateralizeResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgDecollateralizeResponse) ProtoMessage()    {}
+func (*MsgDecollateralizeResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{10}
 }
-func (m *MsgRemoveCollateralResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgDecollateralizeResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgRemoveCollateralResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgDecollateralizeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgRemoveCollateralResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgDecollateralizeResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -568,34 +568,34 @@ func (m *MsgRemoveCollateralResponse) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *MsgRemoveCollateralResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRemoveCollateralResponse.Merge(m, src)
+func (m *MsgDecollateralizeResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDecollateralizeResponse.Merge(m, src)
 }
-func (m *MsgRemoveCollateralResponse) XXX_Size() int {
+func (m *MsgDecollateralizeResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgRemoveCollateralResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRemoveCollateralResponse.DiscardUnknown(m)
+func (m *MsgDecollateralizeResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDecollateralizeResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgRemoveCollateralResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgDecollateralizeResponse proto.InternalMessageInfo
 
-// MsgBorrowAssetResponse defines the Msg/BorrowAsset response type.
-type MsgBorrowAssetResponse struct {
+// MsgBorrowResponse defines the Msg/Borrow response type.
+type MsgBorrowResponse struct {
 }
 
-func (m *MsgBorrowAssetResponse) Reset()         { *m = MsgBorrowAssetResponse{} }
-func (m *MsgBorrowAssetResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgBorrowAssetResponse) ProtoMessage()    {}
-func (*MsgBorrowAssetResponse) Descriptor() ([]byte, []int) {
+func (m *MsgBorrowResponse) Reset()         { *m = MsgBorrowResponse{} }
+func (m *MsgBorrowResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgBorrowResponse) ProtoMessage()    {}
+func (*MsgBorrowResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{11}
 }
-func (m *MsgBorrowAssetResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgBorrowResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgBorrowAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgBorrowResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgBorrowAssetResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgBorrowResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -605,35 +605,35 @@ func (m *MsgBorrowAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *MsgBorrowAssetResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgBorrowAssetResponse.Merge(m, src)
+func (m *MsgBorrowResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBorrowResponse.Merge(m, src)
 }
-func (m *MsgBorrowAssetResponse) XXX_Size() int {
+func (m *MsgBorrowResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgBorrowAssetResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgBorrowAssetResponse.DiscardUnknown(m)
+func (m *MsgBorrowResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBorrowResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgBorrowAssetResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgBorrowResponse proto.InternalMessageInfo
 
-// MsgRepayAssetResponse defines the Msg/RepayAsset response type.
-type MsgRepayAssetResponse struct {
+// MsgRepayResponse defines the Msg/Repay response type.
+type MsgRepayResponse struct {
 	Repaid types.Coin `protobuf:"bytes,1,opt,name=repaid,proto3" json:"repaid"`
 }
 
-func (m *MsgRepayAssetResponse) Reset()         { *m = MsgRepayAssetResponse{} }
-func (m *MsgRepayAssetResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgRepayAssetResponse) ProtoMessage()    {}
-func (*MsgRepayAssetResponse) Descriptor() ([]byte, []int) {
+func (m *MsgRepayResponse) Reset()         { *m = MsgRepayResponse{} }
+func (m *MsgRepayResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgRepayResponse) ProtoMessage()    {}
+func (*MsgRepayResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_72683128ee6e8843, []int{12}
 }
-func (m *MsgRepayAssetResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgRepayResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgRepayAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgRepayResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgRepayAssetResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgRepayResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -643,19 +643,19 @@ func (m *MsgRepayAssetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *MsgRepayAssetResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRepayAssetResponse.Merge(m, src)
+func (m *MsgRepayResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRepayResponse.Merge(m, src)
 }
-func (m *MsgRepayAssetResponse) XXX_Size() int {
+func (m *MsgRepayResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgRepayAssetResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRepayAssetResponse.DiscardUnknown(m)
+func (m *MsgRepayResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRepayResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgRepayAssetResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgRepayResponse proto.InternalMessageInfo
 
-func (m *MsgRepayAssetResponse) GetRepaid() types.Coin {
+func (m *MsgRepayResponse) GetRepaid() types.Coin {
 	if m != nil {
 		return m.Repaid
 	}
@@ -717,63 +717,63 @@ func (m *MsgLiquidateResponse) GetReward() types.Coin {
 
 func init() {
 	proto.RegisterType((*MsgSupply)(nil), "umee.leverage.v1.MsgSupply")
-	proto.RegisterType((*MsgWithdrawAsset)(nil), "umee.leverage.v1.MsgWithdrawAsset")
-	proto.RegisterType((*MsgAddCollateral)(nil), "umee.leverage.v1.MsgAddCollateral")
-	proto.RegisterType((*MsgRemoveCollateral)(nil), "umee.leverage.v1.MsgRemoveCollateral")
-	proto.RegisterType((*MsgBorrowAsset)(nil), "umee.leverage.v1.MsgBorrowAsset")
-	proto.RegisterType((*MsgRepayAsset)(nil), "umee.leverage.v1.MsgRepayAsset")
+	proto.RegisterType((*MsgWithdraw)(nil), "umee.leverage.v1.MsgWithdraw")
+	proto.RegisterType((*MsgCollateralize)(nil), "umee.leverage.v1.MsgCollateralize")
+	proto.RegisterType((*MsgDecollateralize)(nil), "umee.leverage.v1.MsgDecollateralize")
+	proto.RegisterType((*MsgBorrow)(nil), "umee.leverage.v1.MsgBorrow")
+	proto.RegisterType((*MsgRepay)(nil), "umee.leverage.v1.MsgRepay")
 	proto.RegisterType((*MsgLiquidate)(nil), "umee.leverage.v1.MsgLiquidate")
 	proto.RegisterType((*MsgSupplyResponse)(nil), "umee.leverage.v1.MsgSupplyResponse")
-	proto.RegisterType((*MsgWithdrawAssetResponse)(nil), "umee.leverage.v1.MsgWithdrawAssetResponse")
-	proto.RegisterType((*MsgAddCollateralResponse)(nil), "umee.leverage.v1.MsgAddCollateralResponse")
-	proto.RegisterType((*MsgRemoveCollateralResponse)(nil), "umee.leverage.v1.MsgRemoveCollateralResponse")
-	proto.RegisterType((*MsgBorrowAssetResponse)(nil), "umee.leverage.v1.MsgBorrowAssetResponse")
-	proto.RegisterType((*MsgRepayAssetResponse)(nil), "umee.leverage.v1.MsgRepayAssetResponse")
+	proto.RegisterType((*MsgWithdrawResponse)(nil), "umee.leverage.v1.MsgWithdrawResponse")
+	proto.RegisterType((*MsgCollateralizeResponse)(nil), "umee.leverage.v1.MsgCollateralizeResponse")
+	proto.RegisterType((*MsgDecollateralizeResponse)(nil), "umee.leverage.v1.MsgDecollateralizeResponse")
+	proto.RegisterType((*MsgBorrowResponse)(nil), "umee.leverage.v1.MsgBorrowResponse")
+	proto.RegisterType((*MsgRepayResponse)(nil), "umee.leverage.v1.MsgRepayResponse")
 	proto.RegisterType((*MsgLiquidateResponse)(nil), "umee.leverage.v1.MsgLiquidateResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1/tx.proto", fileDescriptor_72683128ee6e8843) }
 
 var fileDescriptor_72683128ee6e8843 = []byte{
-	// 596 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0x4f, 0x6f, 0xd3, 0x4e,
-	0x10, 0x8d, 0xfb, 0x27, 0xfa, 0x65, 0xfa, 0x2b, 0x0a, 0x6e, 0x41, 0xae, 0x2b, 0xdc, 0xc8, 0x08,
-	0x88, 0x90, 0x6a, 0x93, 0x54, 0x88, 0x13, 0x87, 0xa6, 0xb7, 0x0a, 0x4b, 0x28, 0x95, 0x40, 0x70,
-	0x00, 0xad, 0xe3, 0xc5, 0xb1, 0x70, 0xb2, 0x66, 0x77, 0x93, 0x34, 0x1f, 0x00, 0x89, 0x23, 0x9f,
-	0x89, 0x53, 0x8f, 0x3d, 0x72, 0x42, 0x28, 0xf9, 0x22, 0x68, 0x9d, 0x78, 0x63, 0x07, 0xa7, 0x09,
-	0xa0, 0xdc, 0x76, 0xf7, 0xbd, 0x99, 0x37, 0x3b, 0x3b, 0x7e, 0x86, 0x83, 0x5e, 0x07, 0x63, 0x3b,
-	0xc4, 0x7d, 0x4c, 0x91, 0x8f, 0xed, 0x7e, 0xcd, 0xe6, 0x97, 0x56, 0x44, 0x09, 0x27, 0x6a, 0x59,
-	0x40, 0x56, 0x02, 0x59, 0xfd, 0x9a, 0x6e, 0xb4, 0x08, 0xeb, 0x10, 0x66, 0xbb, 0x88, 0x09, 0xaa,
-	0x8b, 0x39, 0xaa, 0xd9, 0x2d, 0x12, 0x74, 0x27, 0x11, 0xfa, 0xbe, 0x4f, 0x7c, 0x12, 0x2f, 0x6d,
-	0xb1, 0x9a, 0x9c, 0x9a, 0xef, 0xa0, 0xe4, 0x30, 0xff, 0xa2, 0x17, 0x45, 0xe1, 0x50, 0xd5, 0xe1,
-	0x3f, 0x26, 0x56, 0x01, 0xa6, 0x9a, 0x52, 0x51, 0xaa, 0xa5, 0xa6, 0xdc, 0xab, 0x4f, 0x61, 0x1b,
-	0x31, 0x86, 0xb9, 0xb6, 0x51, 0x51, 0xaa, 0x3b, 0xf5, 0x03, 0x6b, 0x22, 0x67, 0x09, 0x39, 0x6b,
-	0x2a, 0x67, 0x9d, 0x91, 0xa0, 0xdb, 0xd8, 0xba, 0xfa, 0x71, 0x54, 0x68, 0x4e, 0xd8, 0x26, 0x86,
-	0xb2, 0xc3, 0xfc, 0xd7, 0x01, 0x6f, 0x7b, 0x14, 0x0d, 0x4e, 0xc5, 0xd9, 0x3a, 0x64, 0x5a, 0xb1,
-	0xcc, 0xa9, 0xe7, 0x9d, 0x91, 0x30, 0x44, 0x1c, 0x53, 0x14, 0x0a, 0x19, 0x97, 0x50, 0x4a, 0x06,
-	0x33, 0x99, 0x64, 0xaf, 0x9e, 0xc0, 0x96, 0x68, 0xcd, 0xaa, 0x2a, 0x31, 0xd9, 0xfc, 0x00, 0x7b,
-	0x0e, 0xf3, 0x9b, 0xb8, 0x43, 0xfa, 0x78, 0x9d, 0x3a, 0x2d, 0xb8, 0xe5, 0x30, 0xbf, 0x11, 0xe7,
-	0x90, 0x1d, 0x5b, 0x28, 0xf1, 0x97, 0x1d, 0x73, 0x61, 0x37, 0xbe, 0x4c, 0x84, 0x86, 0x6b, 0xd3,
-	0xf8, 0xa6, 0xc0, 0xff, 0x0e, 0xf3, 0x5f, 0x04, 0x9f, 0x7a, 0x81, 0x87, 0x38, 0x56, 0x0d, 0x80,
-	0x70, 0xba, 0x21, 0x89, 0x4a, 0xea, 0x24, 0x53, 0xc3, 0xc6, 0x5c, 0x0d, 0xcf, 0xa1, 0x44, 0x45,
-	0xb5, 0x1d, 0xdc, 0xe5, 0xda, 0xe6, 0x6a, 0x75, 0xcc, 0x22, 0xd4, 0x67, 0x50, 0xa4, 0x78, 0x80,
-	0xa8, 0xa7, 0x6d, 0xad, 0x16, 0x3b, 0xa5, 0x9b, 0x7b, 0x70, 0x5b, 0x7e, 0x21, 0x4d, 0xcc, 0x22,
-	0xd2, 0x65, 0xd8, 0xd4, 0x41, 0x9b, 0x1f, 0xeb, 0x39, 0x2c, 0x33, 0x8b, 0x12, 0xbb, 0x07, 0x87,
-	0x39, 0x23, 0x24, 0x61, 0x0d, 0xee, 0x66, 0x5f, 0x5e, 0x22, 0x2f, 0xe1, 0x4e, 0xe6, 0xb9, 0x12,
-	0x60, 0x72, 0xaf, 0x08, 0x05, 0x5e, 0xdc, 0xce, 0xd5, 0xee, 0x25, 0xe8, 0xe6, 0x17, 0x05, 0xf6,
-	0xd3, 0x8f, 0xf3, 0xcf, 0x19, 0x53, 0x2d, 0xde, 0xf8, 0xa3, 0x16, 0xd7, 0x3f, 0x6f, 0xc3, 0xa6,
-	0xc3, 0x7c, 0xf5, 0x1c, 0x8a, 0x53, 0x27, 0x3a, 0xb4, 0xe6, 0xfd, 0xcd, 0x92, 0x8f, 0xa0, 0xdf,
-	0xbf, 0x01, 0x94, 0xb7, 0x78, 0x0f, 0xbb, 0x59, 0xd7, 0x31, 0x73, 0xa3, 0x32, 0x1c, 0xfd, 0xf1,
-	0x72, 0x4e, 0x5a, 0x20, 0xeb, 0x37, 0xf9, 0x02, 0x19, 0xce, 0x02, 0x81, 0xdc, 0x59, 0x51, 0xdb,
-	0x50, 0xfe, 0xcd, 0x6b, 0x1e, 0xe4, 0xc6, 0xcf, 0xd3, 0xf4, 0xe3, 0x95, 0x68, 0x52, 0xe9, 0x0d,
-	0xec, 0xa4, 0xdd, 0xa6, 0x92, 0x1b, 0x9d, 0x62, 0xe8, 0xd5, 0x65, 0x0c, 0x99, 0xfa, 0x15, 0x40,
-	0xca, 0x63, 0x8e, 0x16, 0xd4, 0x95, 0x10, 0xf4, 0x47, 0x4b, 0x08, 0x32, 0xef, 0x05, 0x94, 0x52,
-	0xb6, 0x92, 0x1b, 0x25, 0x71, 0xfd, 0xe1, 0xcd, 0x78, 0x92, 0xb4, 0x71, 0x7e, 0x35, 0x32, 0x94,
-	0xeb, 0x91, 0xa1, 0xfc, 0x1c, 0x19, 0xca, 0xd7, 0xb1, 0x51, 0xb8, 0x1e, 0x1b, 0x85, 0xef, 0x63,
-	0xa3, 0xf0, 0xf6, 0x89, 0x1f, 0xf0, 0x76, 0xcf, 0xb5, 0x5a, 0xa4, 0x63, 0x8b, 0x5c, 0xc7, 0x5d,
-	0xcc, 0x07, 0x84, 0x7e, 0x8c, 0x37, 0x76, 0xbf, 0x6e, 0x5f, 0xce, 0x7e, 0xd3, 0x7c, 0x18, 0x61,
-	0xe6, 0x16, 0xe3, 0xff, 0xeb, 0xc9, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x8b, 0xb0, 0x2d, 0x83,
-	0xc4, 0x07, 0x00, 0x00,
+	// 593 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0x4b, 0x6f, 0xd3, 0x4c,
+	0x14, 0x8d, 0xd3, 0x34, 0x4a, 0x6e, 0xbf, 0x4f, 0x14, 0xb7, 0x48, 0xa9, 0x01, 0x53, 0x99, 0x87,
+	0x2a, 0x04, 0x36, 0x49, 0x85, 0x58, 0xb1, 0x49, 0x91, 0x90, 0x02, 0x96, 0x50, 0xba, 0x40, 0x42,
+	0xe2, 0x31, 0x49, 0xae, 0xa6, 0x16, 0x4e, 0xc6, 0xcc, 0x4c, 0x92, 0x86, 0x5f, 0xc0, 0x92, 0xdf,
+	0xc4, 0xaa, 0xcb, 0x6e, 0x90, 0x58, 0x21, 0x94, 0xfc, 0x11, 0xe4, 0xd7, 0xe4, 0x81, 0x1b, 0x02,
+	0x28, 0xbb, 0x99, 0x7b, 0xce, 0xbd, 0x67, 0xe6, 0xce, 0xf5, 0x31, 0xec, 0xf5, 0xbb, 0x88, 0x8e,
+	0x8f, 0x03, 0xe4, 0x84, 0xa2, 0x33, 0xa8, 0x3a, 0xf2, 0xd4, 0x0e, 0x38, 0x93, 0x4c, 0xdf, 0x0e,
+	0x21, 0x3b, 0x85, 0xec, 0x41, 0xd5, 0x30, 0xdb, 0x4c, 0x74, 0x99, 0x70, 0x5a, 0x44, 0x84, 0xd4,
+	0x16, 0x4a, 0x52, 0x75, 0xda, 0xcc, 0xeb, 0xc5, 0x19, 0xc6, 0x2e, 0x65, 0x94, 0x45, 0x4b, 0x27,
+	0x5c, 0xc5, 0x51, 0xeb, 0x0d, 0x94, 0x5d, 0x41, 0x8f, 0xfb, 0x41, 0xe0, 0x8f, 0x74, 0x03, 0x4a,
+	0x22, 0x5c, 0x79, 0xc8, 0x2b, 0xda, 0xbe, 0x76, 0x50, 0x6e, 0xaa, 0xbd, 0xfe, 0x10, 0x36, 0x89,
+	0x10, 0x28, 0x2b, 0xf9, 0x7d, 0xed, 0x60, 0xab, 0xb6, 0x67, 0xc7, 0x72, 0x76, 0x28, 0x67, 0x27,
+	0x72, 0xf6, 0x11, 0xf3, 0x7a, 0xf5, 0xc2, 0xd9, 0xf7, 0x1b, 0xb9, 0x66, 0xcc, 0xb6, 0xde, 0xc1,
+	0x96, 0x2b, 0xe8, 0x4b, 0x4f, 0x9e, 0x74, 0x38, 0x19, 0xae, 0x43, 0xa1, 0x0d, 0xdb, 0xae, 0xa0,
+	0x47, 0xcc, 0xf7, 0x89, 0x44, 0x4e, 0x7c, 0xef, 0x23, 0x86, 0x32, 0x2d, 0xc6, 0x39, 0x1b, 0x4e,
+	0x65, 0xd2, 0xbd, 0x7e, 0x08, 0x85, 0xb0, 0x2b, 0xab, 0xaa, 0x44, 0x64, 0x0b, 0x41, 0x77, 0x05,
+	0x7d, 0x82, 0xed, 0xf5, 0xca, 0xc4, 0xaf, 0x51, 0x8f, 0x6a, 0x2c, 0xad, 0xfe, 0x97, 0xbd, 0x7a,
+	0x0d, 0x25, 0x57, 0xd0, 0x26, 0x06, 0x64, 0xb4, 0x8e, 0xf2, 0x5f, 0x34, 0xf8, 0xcf, 0x15, 0xf4,
+	0xb9, 0xf7, 0xa1, 0xef, 0x75, 0x88, 0x44, 0xdd, 0x04, 0xf0, 0x93, 0x0d, 0x4b, 0x55, 0x66, 0x22,
+	0x73, 0x67, 0xc8, 0x2f, 0x9c, 0xe1, 0x31, 0x94, 0x79, 0x78, 0xd0, 0x2e, 0xf6, 0x64, 0x65, 0x63,
+	0xb5, 0x73, 0x4c, 0x33, 0xf4, 0x47, 0x50, 0xe4, 0x38, 0x24, 0xbc, 0x53, 0x29, 0xac, 0x96, 0x9b,
+	0xd0, 0xad, 0x1d, 0xb8, 0xac, 0xbe, 0x88, 0x26, 0x8a, 0x80, 0xf5, 0x04, 0x5a, 0x57, 0x60, 0x67,
+	0x66, 0x8c, 0x55, 0xd8, 0x80, 0xca, 0xe2, 0xec, 0x29, 0xec, 0x1a, 0x18, 0xbf, 0x8e, 0x8c, 0x42,
+	0x63, 0x95, 0xf8, 0xa5, 0x55, 0xf0, 0x59, 0x34, 0xca, 0xd1, 0xf3, 0xa4, 0xb1, 0xf8, 0x1e, 0x01,
+	0xf1, 0x3a, 0x51, 0xfb, 0x56, 0xbb, 0x47, 0x48, 0xb7, 0x3e, 0x69, 0xb0, 0x3b, 0xfb, 0x18, 0xff,
+	0x5c, 0x71, 0xa6, 0xa5, 0xf9, 0x3f, 0x6a, 0x69, 0xed, 0x6b, 0x01, 0x36, 0x5c, 0x41, 0xf5, 0x06,
+	0x14, 0x13, 0xa7, 0xb9, 0x6a, 0x2f, 0xfa, 0x97, 0xad, 0x9a, 0x6e, 0xdc, 0x5c, 0x02, 0xaa, 0x5b,
+	0xbc, 0x80, 0x92, 0x72, 0x95, 0xeb, 0x99, 0x09, 0x29, 0x6c, 0xdc, 0x5e, 0x0a, 0xab, 0x8a, 0x6f,
+	0xe1, 0xff, 0x79, 0x17, 0xb1, 0x32, 0xf3, 0xe6, 0x38, 0xc6, 0xdd, 0xdf, 0x73, 0x94, 0x00, 0xc2,
+	0xa5, 0x45, 0x07, 0xb9, 0x95, 0x99, 0xbe, 0xc0, 0x32, 0xee, 0xad, 0xc2, 0x52, 0x32, 0x0d, 0x28,
+	0x26, 0x0e, 0x92, 0xdd, 0xe5, 0x18, 0xbc, 0xa0, 0xcb, 0xf3, 0x13, 0xa9, 0x3f, 0x85, 0xcd, 0xc4,
+	0x2d, 0x32, 0xd9, 0x11, 0x66, 0x58, 0x17, 0x63, 0xaa, 0xd0, 0x31, 0x94, 0x67, 0x6c, 0x21, 0x33,
+	0x41, 0xe1, 0xc6, 0x9d, 0xe5, 0x78, 0x5a, 0xb4, 0xde, 0x38, 0x1b, 0x9b, 0xda, 0xf9, 0xd8, 0xd4,
+	0x7e, 0x8c, 0x4d, 0xed, 0xf3, 0xc4, 0xcc, 0x9d, 0x4f, 0xcc, 0xdc, 0xb7, 0x89, 0x99, 0x7b, 0xf5,
+	0x80, 0x7a, 0xf2, 0xa4, 0xdf, 0xb2, 0xdb, 0xac, 0xeb, 0x84, 0xb5, 0xee, 0xf7, 0x50, 0x0e, 0x19,
+	0x7f, 0x1f, 0x6d, 0x9c, 0x41, 0xcd, 0x39, 0x9d, 0xfe, 0x56, 0xe5, 0x28, 0x40, 0xd1, 0x2a, 0x46,
+	0xff, 0xc3, 0xc3, 0x9f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x6e, 0x19, 0x4a, 0x4c, 0x74, 0x07, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -788,24 +788,23 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// Supply moves tokens from user balance to the module balance for lending or collateral.
+	// Supply moves tokens from user balance to the module for lending or collateral.
+	// The user receives uTokens in return.
 	Supply(ctx context.Context, in *MsgSupply, opts ...grpc.CallOption) (*MsgSupplyResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously supplied coins from
-	// the capital facility.
-	WithdrawAsset(ctx context.Context, in *MsgWithdrawAsset, opts ...grpc.CallOption) (*MsgWithdrawAssetResponse, error)
-	// AddCollateral defines a method for users to enable selected uTokens
-	// as collateral.
-	AddCollateral(ctx context.Context, in *MsgAddCollateral, opts ...grpc.CallOption) (*MsgAddCollateralResponse, error)
-	// RemoveCollateral defines a method for users to disable selected uTokens
-	// as collateral.
-	RemoveCollateral(ctx context.Context, in *MsgRemoveCollateral, opts ...grpc.CallOption) (*MsgRemoveCollateralResponse, error)
-	// BorrowAsset defines a method for borrowing coins from the capital facility.
-	BorrowAsset(ctx context.Context, in *MsgBorrowAsset, opts ...grpc.CallOption) (*MsgBorrowAssetResponse, error)
-	// RepayAsset defines a method for repaying borrowed coins to the capital
-	// facility.
-	RepayAsset(ctx context.Context, in *MsgRepayAsset, opts ...grpc.CallOption) (*MsgRepayAssetResponse, error)
-	// Liquidate defines a method for repaying a different user's borrowed coins
-	// to the capital facility in exchange for some of their collateral.
+	// Withdraw moves previously supplied tokens from the module back to the user balance in
+	// exchange for burning uTokens.
+	Withdraw(ctx context.Context, in *MsgWithdraw, opts ...grpc.CallOption) (*MsgWithdrawResponse, error)
+	// Collateralize enables selected uTokens as collateral, which moves them to the module.
+	Collateralize(ctx context.Context, in *MsgCollateralize, opts ...grpc.CallOption) (*MsgCollateralizeResponse, error)
+	// Decollateralize disables selected uTokens as collateral. They are returned to the user's
+	// balance from the module.
+	Decollateralize(ctx context.Context, in *MsgDecollateralize, opts ...grpc.CallOption) (*MsgDecollateralizeResponse, error)
+	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
+	Borrow(ctx context.Context, in *MsgBorrow, opts ...grpc.CallOption) (*MsgBorrowResponse, error)
+	// Repay allows a user to repay previously borrowed tokens and interest.
+	Repay(ctx context.Context, in *MsgRepay, opts ...grpc.CallOption) (*MsgRepayResponse, error)
+	// Liquidate allows a user to repay a different user's borrowed coins in exchange for some
+	// of their collateral.
 	Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grpc.CallOption) (*MsgLiquidateResponse, error)
 }
 
@@ -826,45 +825,45 @@ func (c *msgClient) Supply(ctx context.Context, in *MsgSupply, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *msgClient) WithdrawAsset(ctx context.Context, in *MsgWithdrawAsset, opts ...grpc.CallOption) (*MsgWithdrawAssetResponse, error) {
-	out := new(MsgWithdrawAssetResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/WithdrawAsset", in, out, opts...)
+func (c *msgClient) Withdraw(ctx context.Context, in *MsgWithdraw, opts ...grpc.CallOption) (*MsgWithdrawResponse, error) {
+	out := new(MsgWithdrawResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Withdraw", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgClient) AddCollateral(ctx context.Context, in *MsgAddCollateral, opts ...grpc.CallOption) (*MsgAddCollateralResponse, error) {
-	out := new(MsgAddCollateralResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/AddCollateral", in, out, opts...)
+func (c *msgClient) Collateralize(ctx context.Context, in *MsgCollateralize, opts ...grpc.CallOption) (*MsgCollateralizeResponse, error) {
+	out := new(MsgCollateralizeResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Collateralize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgClient) RemoveCollateral(ctx context.Context, in *MsgRemoveCollateral, opts ...grpc.CallOption) (*MsgRemoveCollateralResponse, error) {
-	out := new(MsgRemoveCollateralResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/RemoveCollateral", in, out, opts...)
+func (c *msgClient) Decollateralize(ctx context.Context, in *MsgDecollateralize, opts ...grpc.CallOption) (*MsgDecollateralizeResponse, error) {
+	out := new(MsgDecollateralizeResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Decollateralize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgClient) BorrowAsset(ctx context.Context, in *MsgBorrowAsset, opts ...grpc.CallOption) (*MsgBorrowAssetResponse, error) {
-	out := new(MsgBorrowAssetResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/BorrowAsset", in, out, opts...)
+func (c *msgClient) Borrow(ctx context.Context, in *MsgBorrow, opts ...grpc.CallOption) (*MsgBorrowResponse, error) {
+	out := new(MsgBorrowResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Borrow", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgClient) RepayAsset(ctx context.Context, in *MsgRepayAsset, opts ...grpc.CallOption) (*MsgRepayAssetResponse, error) {
-	out := new(MsgRepayAssetResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/RepayAsset", in, out, opts...)
+func (c *msgClient) Repay(ctx context.Context, in *MsgRepay, opts ...grpc.CallOption) (*MsgRepayResponse, error) {
+	out := new(MsgRepayResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/Repay", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -882,24 +881,23 @@ func (c *msgClient) Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grp
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// Supply moves tokens from user balance to the module balance for lending or collateral.
+	// Supply moves tokens from user balance to the module for lending or collateral.
+	// The user receives uTokens in return.
 	Supply(context.Context, *MsgSupply) (*MsgSupplyResponse, error)
-	// WithdrawAsset defines a method for withdrawing previously supplied coins from
-	// the capital facility.
-	WithdrawAsset(context.Context, *MsgWithdrawAsset) (*MsgWithdrawAssetResponse, error)
-	// AddCollateral defines a method for users to enable selected uTokens
-	// as collateral.
-	AddCollateral(context.Context, *MsgAddCollateral) (*MsgAddCollateralResponse, error)
-	// RemoveCollateral defines a method for users to disable selected uTokens
-	// as collateral.
-	RemoveCollateral(context.Context, *MsgRemoveCollateral) (*MsgRemoveCollateralResponse, error)
-	// BorrowAsset defines a method for borrowing coins from the capital facility.
-	BorrowAsset(context.Context, *MsgBorrowAsset) (*MsgBorrowAssetResponse, error)
-	// RepayAsset defines a method for repaying borrowed coins to the capital
-	// facility.
-	RepayAsset(context.Context, *MsgRepayAsset) (*MsgRepayAssetResponse, error)
-	// Liquidate defines a method for repaying a different user's borrowed coins
-	// to the capital facility in exchange for some of their collateral.
+	// Withdraw moves previously supplied tokens from the module back to the user balance in
+	// exchange for burning uTokens.
+	Withdraw(context.Context, *MsgWithdraw) (*MsgWithdrawResponse, error)
+	// Collateralize enables selected uTokens as collateral, which moves them to the module.
+	Collateralize(context.Context, *MsgCollateralize) (*MsgCollateralizeResponse, error)
+	// Decollateralize disables selected uTokens as collateral. They are returned to the user's
+	// balance from the module.
+	Decollateralize(context.Context, *MsgDecollateralize) (*MsgDecollateralizeResponse, error)
+	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
+	Borrow(context.Context, *MsgBorrow) (*MsgBorrowResponse, error)
+	// Repay allows a user to repay previously borrowed tokens and interest.
+	Repay(context.Context, *MsgRepay) (*MsgRepayResponse, error)
+	// Liquidate allows a user to repay a different user's borrowed coins in exchange for some
+	// of their collateral.
 	Liquidate(context.Context, *MsgLiquidate) (*MsgLiquidateResponse, error)
 }
 
@@ -910,20 +908,20 @@ type UnimplementedMsgServer struct {
 func (*UnimplementedMsgServer) Supply(ctx context.Context, req *MsgSupply) (*MsgSupplyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Supply not implemented")
 }
-func (*UnimplementedMsgServer) WithdrawAsset(ctx context.Context, req *MsgWithdrawAsset) (*MsgWithdrawAssetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method WithdrawAsset not implemented")
+func (*UnimplementedMsgServer) Withdraw(ctx context.Context, req *MsgWithdraw) (*MsgWithdrawResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
 }
-func (*UnimplementedMsgServer) AddCollateral(ctx context.Context, req *MsgAddCollateral) (*MsgAddCollateralResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddCollateral not implemented")
+func (*UnimplementedMsgServer) Collateralize(ctx context.Context, req *MsgCollateralize) (*MsgCollateralizeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Collateralize not implemented")
 }
-func (*UnimplementedMsgServer) RemoveCollateral(ctx context.Context, req *MsgRemoveCollateral) (*MsgRemoveCollateralResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveCollateral not implemented")
+func (*UnimplementedMsgServer) Decollateralize(ctx context.Context, req *MsgDecollateralize) (*MsgDecollateralizeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Decollateralize not implemented")
 }
-func (*UnimplementedMsgServer) BorrowAsset(ctx context.Context, req *MsgBorrowAsset) (*MsgBorrowAssetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BorrowAsset not implemented")
+func (*UnimplementedMsgServer) Borrow(ctx context.Context, req *MsgBorrow) (*MsgBorrowResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Borrow not implemented")
 }
-func (*UnimplementedMsgServer) RepayAsset(ctx context.Context, req *MsgRepayAsset) (*MsgRepayAssetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RepayAsset not implemented")
+func (*UnimplementedMsgServer) Repay(ctx context.Context, req *MsgRepay) (*MsgRepayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Repay not implemented")
 }
 func (*UnimplementedMsgServer) Liquidate(ctx context.Context, req *MsgLiquidate) (*MsgLiquidateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Liquidate not implemented")
@@ -951,92 +949,92 @@ func _Msg_Supply_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_WithdrawAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgWithdrawAsset)
+func _Msg_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgWithdraw)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).WithdrawAsset(ctx, in)
+		return srv.(MsgServer).Withdraw(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Msg/WithdrawAsset",
+		FullMethod: "/umee.leverage.v1.Msg/Withdraw",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).WithdrawAsset(ctx, req.(*MsgWithdrawAsset))
+		return srv.(MsgServer).Withdraw(ctx, req.(*MsgWithdraw))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_AddCollateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgAddCollateral)
+func _Msg_Collateralize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCollateralize)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).AddCollateral(ctx, in)
+		return srv.(MsgServer).Collateralize(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Msg/AddCollateral",
+		FullMethod: "/umee.leverage.v1.Msg/Collateralize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).AddCollateral(ctx, req.(*MsgAddCollateral))
+		return srv.(MsgServer).Collateralize(ctx, req.(*MsgCollateralize))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_RemoveCollateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgRemoveCollateral)
+func _Msg_Decollateralize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgDecollateralize)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).RemoveCollateral(ctx, in)
+		return srv.(MsgServer).Decollateralize(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Msg/RemoveCollateral",
+		FullMethod: "/umee.leverage.v1.Msg/Decollateralize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).RemoveCollateral(ctx, req.(*MsgRemoveCollateral))
+		return srv.(MsgServer).Decollateralize(ctx, req.(*MsgDecollateralize))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_BorrowAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgBorrowAsset)
+func _Msg_Borrow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgBorrow)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).BorrowAsset(ctx, in)
+		return srv.(MsgServer).Borrow(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Msg/BorrowAsset",
+		FullMethod: "/umee.leverage.v1.Msg/Borrow",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).BorrowAsset(ctx, req.(*MsgBorrowAsset))
+		return srv.(MsgServer).Borrow(ctx, req.(*MsgBorrow))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_RepayAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgRepayAsset)
+func _Msg_Repay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRepay)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).RepayAsset(ctx, in)
+		return srv.(MsgServer).Repay(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Msg/RepayAsset",
+		FullMethod: "/umee.leverage.v1.Msg/Repay",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).RepayAsset(ctx, req.(*MsgRepayAsset))
+		return srv.(MsgServer).Repay(ctx, req.(*MsgRepay))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1068,24 +1066,24 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_Supply_Handler,
 		},
 		{
-			MethodName: "WithdrawAsset",
-			Handler:    _Msg_WithdrawAsset_Handler,
+			MethodName: "Withdraw",
+			Handler:    _Msg_Withdraw_Handler,
 		},
 		{
-			MethodName: "AddCollateral",
-			Handler:    _Msg_AddCollateral_Handler,
+			MethodName: "Collateralize",
+			Handler:    _Msg_Collateralize_Handler,
 		},
 		{
-			MethodName: "RemoveCollateral",
-			Handler:    _Msg_RemoveCollateral_Handler,
+			MethodName: "Decollateralize",
+			Handler:    _Msg_Decollateralize_Handler,
 		},
 		{
-			MethodName: "BorrowAsset",
-			Handler:    _Msg_BorrowAsset_Handler,
+			MethodName: "Borrow",
+			Handler:    _Msg_Borrow_Handler,
 		},
 		{
-			MethodName: "RepayAsset",
-			Handler:    _Msg_RepayAsset_Handler,
+			MethodName: "Repay",
+			Handler:    _Msg_Repay_Handler,
 		},
 		{
 			MethodName: "Liquidate",
@@ -1136,7 +1134,7 @@ func (m *MsgSupply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgWithdrawAsset) Marshal() (dAtA []byte, err error) {
+func (m *MsgWithdraw) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1146,12 +1144,12 @@ func (m *MsgWithdrawAsset) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgWithdrawAsset) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgWithdraw) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgWithdrawAsset) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgWithdraw) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1176,7 +1174,7 @@ func (m *MsgWithdrawAsset) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgAddCollateral) Marshal() (dAtA []byte, err error) {
+func (m *MsgCollateralize) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1186,12 +1184,12 @@ func (m *MsgAddCollateral) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgAddCollateral) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgCollateralize) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgAddCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgCollateralize) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1216,7 +1214,7 @@ func (m *MsgAddCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgRemoveCollateral) Marshal() (dAtA []byte, err error) {
+func (m *MsgDecollateralize) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1226,12 +1224,12 @@ func (m *MsgRemoveCollateral) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgRemoveCollateral) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgDecollateralize) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgRemoveCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgDecollateralize) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1256,7 +1254,7 @@ func (m *MsgRemoveCollateral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgBorrowAsset) Marshal() (dAtA []byte, err error) {
+func (m *MsgBorrow) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1266,12 +1264,12 @@ func (m *MsgBorrowAsset) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgBorrowAsset) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgBorrow) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgBorrowAsset) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgBorrow) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1296,7 +1294,7 @@ func (m *MsgBorrowAsset) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgRepayAsset) Marshal() (dAtA []byte, err error) {
+func (m *MsgRepay) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1306,12 +1304,12 @@ func (m *MsgRepayAsset) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgRepayAsset) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgRepay) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgRepayAsset) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgRepay) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1416,7 +1414,7 @@ func (m *MsgSupplyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgWithdrawAssetResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgWithdrawResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1426,12 +1424,12 @@ func (m *MsgWithdrawAssetResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgWithdrawAssetResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgWithdrawResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgWithdrawAssetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgWithdrawResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1439,7 +1437,7 @@ func (m *MsgWithdrawAssetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgAddCollateralResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgCollateralizeResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1449,12 +1447,12 @@ func (m *MsgAddCollateralResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgAddCollateralResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgCollateralizeResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgAddCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgCollateralizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1462,7 +1460,7 @@ func (m *MsgAddCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgRemoveCollateralResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgDecollateralizeResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1472,12 +1470,12 @@ func (m *MsgRemoveCollateralResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgRemoveCollateralResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgDecollateralizeResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgRemoveCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgDecollateralizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1485,7 +1483,7 @@ func (m *MsgRemoveCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, er
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgBorrowAssetResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgBorrowResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1495,12 +1493,12 @@ func (m *MsgBorrowAssetResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgBorrowAssetResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgBorrowResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgBorrowAssetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgBorrowResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1508,7 +1506,7 @@ func (m *MsgBorrowAssetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgRepayAssetResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgRepayResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1518,12 +1516,12 @@ func (m *MsgRepayAssetResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgRepayAssetResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgRepayResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgRepayAssetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgRepayResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1610,7 +1608,7 @@ func (m *MsgSupply) Size() (n int) {
 	return n
 }
 
-func (m *MsgWithdrawAsset) Size() (n int) {
+func (m *MsgWithdraw) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1625,7 +1623,7 @@ func (m *MsgWithdrawAsset) Size() (n int) {
 	return n
 }
 
-func (m *MsgAddCollateral) Size() (n int) {
+func (m *MsgCollateralize) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1640,7 +1638,7 @@ func (m *MsgAddCollateral) Size() (n int) {
 	return n
 }
 
-func (m *MsgRemoveCollateral) Size() (n int) {
+func (m *MsgDecollateralize) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1655,7 +1653,7 @@ func (m *MsgRemoveCollateral) Size() (n int) {
 	return n
 }
 
-func (m *MsgBorrowAsset) Size() (n int) {
+func (m *MsgBorrow) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1670,7 +1668,7 @@ func (m *MsgBorrowAsset) Size() (n int) {
 	return n
 }
 
-func (m *MsgRepayAsset) Size() (n int) {
+func (m *MsgRepay) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1715,7 +1713,7 @@ func (m *MsgSupplyResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgWithdrawAssetResponse) Size() (n int) {
+func (m *MsgWithdrawResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1724,7 +1722,7 @@ func (m *MsgWithdrawAssetResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgAddCollateralResponse) Size() (n int) {
+func (m *MsgCollateralizeResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1733,7 +1731,7 @@ func (m *MsgAddCollateralResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgRemoveCollateralResponse) Size() (n int) {
+func (m *MsgDecollateralizeResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1742,7 +1740,7 @@ func (m *MsgRemoveCollateralResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgBorrowAssetResponse) Size() (n int) {
+func (m *MsgBorrowResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1751,7 +1749,7 @@ func (m *MsgBorrowAssetResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgRepayAssetResponse) Size() (n int) {
+func (m *MsgRepayResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1896,7 +1894,7 @@ func (m *MsgSupply) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgWithdrawAsset) Unmarshal(dAtA []byte) error {
+func (m *MsgWithdraw) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1919,10 +1917,10 @@ func (m *MsgWithdrawAsset) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgWithdrawAsset: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgWithdraw: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgWithdrawAsset: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgWithdraw: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2011,7 +2009,7 @@ func (m *MsgWithdrawAsset) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgAddCollateral) Unmarshal(dAtA []byte) error {
+func (m *MsgCollateralize) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2034,10 +2032,10 @@ func (m *MsgAddCollateral) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgAddCollateral: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgCollateralize: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgAddCollateral: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgCollateralize: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2126,7 +2124,7 @@ func (m *MsgAddCollateral) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgRemoveCollateral) Unmarshal(dAtA []byte) error {
+func (m *MsgDecollateralize) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2149,10 +2147,10 @@ func (m *MsgRemoveCollateral) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRemoveCollateral: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgDecollateralize: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRemoveCollateral: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgDecollateralize: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2241,7 +2239,7 @@ func (m *MsgRemoveCollateral) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgBorrowAsset) Unmarshal(dAtA []byte) error {
+func (m *MsgBorrow) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2264,10 +2262,10 @@ func (m *MsgBorrowAsset) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgBorrowAsset: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgBorrow: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgBorrowAsset: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgBorrow: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2356,7 +2354,7 @@ func (m *MsgBorrowAsset) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgRepayAsset) Unmarshal(dAtA []byte) error {
+func (m *MsgRepay) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2379,10 +2377,10 @@ func (m *MsgRepayAsset) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRepayAsset: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgRepay: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRepayAsset: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgRepay: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2701,7 +2699,7 @@ func (m *MsgSupplyResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgWithdrawAssetResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgWithdrawResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2724,10 +2722,10 @@ func (m *MsgWithdrawAssetResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgWithdrawAssetResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgWithdrawResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgWithdrawAssetResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgWithdrawResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -2751,7 +2749,7 @@ func (m *MsgWithdrawAssetResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgAddCollateralResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgCollateralizeResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2774,10 +2772,10 @@ func (m *MsgAddCollateralResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgAddCollateralResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgCollateralizeResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgAddCollateralResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgCollateralizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -2801,7 +2799,7 @@ func (m *MsgAddCollateralResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgRemoveCollateralResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgDecollateralizeResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2824,10 +2822,10 @@ func (m *MsgRemoveCollateralResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRemoveCollateralResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgDecollateralizeResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRemoveCollateralResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgDecollateralizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -2851,7 +2849,7 @@ func (m *MsgRemoveCollateralResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgBorrowAssetResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgBorrowResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2874,10 +2872,10 @@ func (m *MsgBorrowAssetResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgBorrowAssetResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgBorrowResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgBorrowAssetResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgBorrowResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -2901,7 +2899,7 @@ func (m *MsgBorrowAssetResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgRepayAssetResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgRepayResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2924,10 +2922,10 @@ func (m *MsgRepayAssetResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRepayAssetResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgRepayResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRepayAssetResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgRepayResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
