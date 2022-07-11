@@ -117,67 +117,67 @@ type UmeeQuery struct {
 	// Mandatory field to determine which query to call.
 	AssignedQuery AssignedQuery `json:"assigned_query"`
 	// Used to query the Borrowed coins of an address.
-	Borrowed *lvtypes.QueryBorrowedRequest `json:"borrowed,omitempty"`
+	Borrowed *lvtypes.QueryBorrowed `json:"borrowed,omitempty"`
 	// Used to get the exchange rates of all denoms.
-	ExchangeRates *octypes.QueryExchangeRatesRequest `json:"exchange_rates,omitempty"`
+	ExchangeRates *octypes.QueryExchangeRates `json:"exchange_rates,omitempty"`
 	// Used to query all the registered tokens.
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to query the x/leverage module's parameters.
-	LeverageParams *lvtypes.QueryParamsRequest `json:"leverage_params,omitempty"`
+	LeverageParams *lvtypes.QueryParams `json:"leverage_params,omitempty"`
 	// Used to query an specific borrow address value in usd.
-	BorrowedValue *lvtypes.QueryBorrowedValueRequest `json:"borrowed_value,omitempty"`
+	BorrowedValue *lvtypes.QueryBorrowedValue `json:"borrowed_value,omitempty"`
 	// Used to query an the amount Supplied of an address.
-	Supplied *lvtypes.QuerySuppliedRequest `json:"supplied,omitempty"`
+	Supplied *lvtypes.QuerySupplied `json:"supplied,omitempty"`
 	// Used to query an the amount Supplied of an address in USD.
-	SuppliedValue *lvtypes.QuerySuppliedValueRequest `json:"supplied_value,omitempty"`
+	SuppliedValue *lvtypes.QuerySuppliedValue `json:"supplied_value,omitempty"`
 	// Used to query an the amount available to borrow.
-	AvailableBorrow *lvtypes.QueryAvailableBorrowRequest `json:"available_borrow,omitempty"`
+	AvailableBorrow *lvtypes.QueryAvailableBorrow `json:"available_borrow,omitempty"`
 	// Used to query an current borrow interest rate on a token denom.
-	BorrowAPY *lvtypes.QueryBorrowAPYRequest `json:"borrow_apy,omitempty"`
+	BorrowAPY *lvtypes.QueryBorrowAPY `json:"borrow_apy,omitempty"`
 	// Used to derives the current supply interest rate on a token denom.
-	SupplyAPY *lvtypes.QuerySupplyAPYRequest `json:"supply_apy,omitempty"`
+	SupplyAPY *lvtypes.QuerySupplyAPY `json:"supply_apy,omitempty"`
 	// Used to get the market size in USD of a token denom.
-	MarketSize *lvtypes.QueryMarketSizeRequest `json:"market_size,omitempty"`
+	MarketSize *lvtypes.QueryMarketSize `json:"market_size,omitempty"`
 	// Used to get the market size of a token denom.
-	TokenMarketSize *lvtypes.QueryTokenMarketSizeRequest `json:"token_market_size,omitempty"`
+	TokenMarketSize *lvtypes.QueryTokenMarketSize `json:"token_market_size,omitempty"`
 	// Used to gets the amount reserved of a specified token.
-	ReserveAmount *lvtypes.QueryReserveAmountRequest `json:"reserve_amount,omitempty"`
+	ReserveAmount *lvtypes.QueryReserveAmount `json:"reserve_amount,omitempty"`
 	// Used to gets the collateral amount of a user by token denomination.
 	// If the denomination is not supplied, all of the user's collateral tokens
 	// are returned.
-	Collateral *lvtypes.QueryCollateralRequest `json:"collateral,omitempty"`
+	Collateral *lvtypes.QueryCollateral `json:"collateral,omitempty"`
 	// Used to gets the total USD value of a user's collateral, or
 	// the USD value held as a given base asset's associated uToken denomination.
-	CollateralValue *lvtypes.QueryCollateralValueRequest `json:"collateral_value,omitempty"`
+	CollateralValue *lvtypes.QueryCollateralValue `json:"collateral_value,omitempty"`
 	// Used to calculate the token:uToken exchange rate of a base token denom.
-	ExchangeRate *lvtypes.QueryExchangeRateRequest `json:"exchange_rate,omitempty"`
+	ExchangeRate *lvtypes.QueryExchangeRate `json:"exchange_rate,omitempty"`
 	// Uses the price oracle to determine the borrow limit (in USD).
-	BorrowLimit *lvtypes.QueryBorrowLimitRequest `json:"borrow_limit,omitempty"`
+	BorrowLimit *lvtypes.QueryBorrowLimit `json:"borrow_limit,omitempty"`
 	// determines the maximum borrowed value (in USD) that a borrower with given
 	// collateral could reach before being eligible for liquidation.
-	LiquidationThreshold *lvtypes.QueryLiquidationThresholdRequest `json:"liquidation_threshold,omitempty"`
+	LiquidationThreshold *lvtypes.QueryLiquidationThreshold `json:"liquidation_threshold,omitempty"`
 	// request to return a list of borrower addresses eligible for liquidation.
-	LiquidationTargets *lvtypes.QueryLiquidationTargetsRequest `json:"liquidation_targets,omitempty"`
+	LiquidationTargets *lvtypes.QueryLiquidationTargets `json:"liquidation_targets,omitempty"`
 	// Used to get the summary data of an denom.
-	MarketSummary *lvtypes.QueryMarketSummaryRequest `json:"market_summary,omitempty"`
+	MarketSummary *lvtypes.QueryMarketSummary `json:"market_summary,omitempty"`
 	// Used to get the total collateral system-wide of a given uToken denomination.
-	TotalCollateral *lvtypes.QueryTotalCollateralRequest `json:"total_collateral,omitempty"`
+	TotalCollateral *lvtypes.QueryTotalCollateral `json:"total_collateral,omitempty"`
 	// Used to get the total borrowed system-wide of a given token denomination.
-	TotalBorrowed *lvtypes.QueryTotalBorrowedRequest `json:"total_borrowed,omitempty"`
+	TotalBorrowed *lvtypes.QueryTotalBorrowed `json:"total_borrowed,omitempty"`
 	// Used to get all active denoms.
-	ActiveExchangeRates *octypes.QueryActiveExchangeRatesRequest `json:"active_exchange_rates,omitempty"`
+	ActiveExchangeRates *octypes.QueryActiveExchangeRates `json:"active_exchange_rates,omitempty"`
 	// Used to get all feeder delegation of a validator.
-	FeederDelegation *octypes.QueryFeederDelegationRequest `json:"feeder_delegation,omitempty"`
+	FeederDelegation *octypes.QueryFeederDelegation `json:"feeder_delegation,omitempty"`
 	// Used to get all the oracle miss counter of a validator.
-	MissCounter *octypes.QueryMissCounterRequest `json:"miss_counter,omitempty"`
+	MissCounter *octypes.QueryMissCounter `json:"miss_counter,omitempty"`
 	// Used to get an aggregate prevote of a validator.
-	AggregatePrevote *octypes.QueryAggregatePrevoteRequest `json:"aggregate_prevote,omitempty"`
+	AggregatePrevote *octypes.QueryAggregatePrevote `json:"aggregate_prevote,omitempty"`
 	// Used to get an aggregate prevote of all validators.
-	AggregatePrevotes *octypes.QueryAggregatePrevotesRequest `json:"aggregate_prevotes,omitempty"`
+	AggregatePrevotes *octypes.QueryAggregatePrevotes `json:"aggregate_prevotes,omitempty"`
 	// Used to get an aggregate vote of a validator.
-	AggregateVote *octypes.QueryAggregateVoteRequest `json:"aggregate_vote,omitempty"`
+	AggregateVote *octypes.QueryAggregateVote `json:"aggregate_vote,omitempty"`
 	// Used to get an aggregate vote of all validators.
-	AggregateVotes *octypes.QueryAggregateVotesRequest `json:"aggregate_votes,omitempty"`
+	AggregateVotes *octypes.QueryAggregateVotes `json:"aggregate_votes,omitempty"`
 	// Used to query the x/oracle module's parameters.
-	OracleParams *octypes.QueryParamsRequest `json:"oracle_params,omitempty"`
+	OracleParams *octypes.QueryParams `json:"oracle_params,omitempty"`
 }

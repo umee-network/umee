@@ -39,7 +39,7 @@ func (q UmeeQuery) HandleLeverageParams(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.Params(sdk.WrapSDKContext(ctx), &lvtypes.QueryParamsRequest{})
+	resp, err := qs.Params(sdk.WrapSDKContext(ctx), &lvtypes.QueryParams{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Leverage Params", err)}
 	}
