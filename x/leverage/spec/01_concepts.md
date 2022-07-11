@@ -6,9 +6,9 @@ This document covers basic concepts and math that determine the `leverage` modul
 
 At the foundation of the `leverage` module is the [Token Registry](02_state.md#Token-Registry), which contains a list of accepted types.
 
-This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or lending.
+This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or supplying.
 
-Once added to the token registry, assets cannot be removed. In the rare case where an asset would need to be phased out, it can have lending or borrowing disabled, or in extreme cases, be ignored by collateral and borrowed value calculations using a blacklist.
+Once added to the token registry, assets cannot be removed. In the rare case where an asset would need to be phased out, it can have supplying or borrowing disabled, or in extreme cases, be ignored by collateral and borrowed value calculations using a blacklist.
 
 ### uTokens
 
@@ -16,19 +16,19 @@ Every base asset has an associated _uToken_ denomination.
 
 uTokens do not have parameters like the `Token` struct does, and they are always represented in account balances with a denom of `UTokenPrefix + token.BaseDenom`. For example, the base asset `uumee` is associated with the uToken denomination `u/uumee`.
 
-## Lending and Borrowing
+## Supplying and Borrowing
 
 Users have the following actions available to them:
 
-- [Lend](04_messages.md#MsgLendAsset) accepted asset types to the module, receiving _uTokens_ in exchange.
+- [Supply](04_messages.md#MsgSupply) accepted asset types to the module, receiving _uTokens_ in exchange.
 
-  Lenders earn interest at an effective rate of the asset's [Lending APY](01_concepts.md#Lending-APY) as the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) increases over time.
+  Suppliers earn interest at an effective rate of the asset's [Supplying APY](01_concepts.md#Supplying-APY) as the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) increases over time.
 
-  Additionally, for assets denominations already enabled as collateral, the lent assets immediately become collateral as well, causing their borrow limit to increase.
+  Additionally, for assets denominations already enabled as collateral, the supplied assets immediately become collateral as well, causing their borrow limit to increase.
 
-  If a lender is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
+  If a user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
 
-  Care should be taken by undercollateralized users when lending token amounts too small to restore the health of their borrows, as the newly lent assets will be eligible for liquidation immediately.
+  Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
 - [Enable or Disable](04_messages.md#MsgSetCollateral) a uToken denomination as collateral for borrowing.
 
@@ -36,7 +36,7 @@ Users have the following actions available to them:
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
-- [Withdraw](04_messages.md#MsgWithdrawAsset) lent assets by turning in uTokens of the associated denomination.
+- [Withdraw](04_messages.md#MsgWithdrawAsset) supplied assets by turning in uTokens of the associated denomination.
 
   Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
@@ -152,13 +152,13 @@ The `Token` struct stored in state for a given denomination defines three points
 
 When utilization is between two of the above values, borrow APY is determined by linear interpolation between the two points. The resulting graph looks like a straight line with a "kink" in it.
 
-### Lending APY
+### Supplying APY
 
-The interest accrued on borrows, after some of it is set aside for reserves, is distributed to all lenders (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
+The interest accrued on borrows, after some of it is set aside for reserves, is distributed to all suppliers (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
 
-While Lending APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
+While Supplying APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
 
-`LendAPY(token) = BorrowAPY(token) * SupplyUtilization(token) * [1.0 - ReserveFactor(token)]`
+`SupplyAPY(token) = BorrowAPY(token) * SupplyUtilization(token) * [1.0 - ReserveFactor(token)]`
 
 ### Close Factor
 
@@ -186,6 +186,6 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
 
 ### Market Size
 
-The `MarketSize` of a token denom is the USD value of all tokens loaned to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
+The `MarketSize` of a token denom is the USD value of all tokens supplied to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
 
 `MarketSize(denom) = oracle.Price(denom) * [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`

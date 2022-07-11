@@ -50,6 +50,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1029](https://github.com/umee-network/umee/pull/1029) Removed MsgSetCollateral(addr,denom,bool), and replaced with MsgAddCollateral(addr,coin) and MsgRemoveCollateral(addr,coin)
 - [1023](https://github.com/umee-network/umee/pull/1023) Restrict MsgWithdraw to only uToken input (no base token auto-convert)
+- [1106](https://github.com/umee-network/umee/pull/1106) Rename Lend to Supply, including MsgLendAsset, Token EnableLend, docs, and internal functions. Also QueryLoaned similar queries to QuerySupplied.
+- [1113](https://github.com/umee-network/umee/pull/1113) Rename Amount field to Asset when sdk.Coin type in Msg proto.
 
 ### Features
 
@@ -57,7 +59,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
 - [1068](https://github.com/umee-network/umee/pull/1068) Add a cache layer for token registry.
+- [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
+- [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 
 ### Improvements
 

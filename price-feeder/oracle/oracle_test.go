@@ -423,8 +423,8 @@ func TestSuccessSetProviderTickerPricesAndCandles(t *testing.T) {
 	)
 
 	require.True(t, success, "It should successfully set the prices")
-	require.Equal(t, providerPrices[config.ProviderGate][pair.Base].Price, atomPrice)
-	require.Equal(t, providerCandles[config.ProviderGate][pair.Base][0].Price, atomPrice)
+	require.Equal(t, atomPrice, providerPrices[config.ProviderGate][pair.Base].Price)
+	require.Equal(t, atomPrice, providerCandles[config.ProviderGate][pair.Base][0].Price)
 }
 
 func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
@@ -454,7 +454,7 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	candles := make(map[string][]provider.CandlePrice, 1)
-	candles[pair.String()] = []provider.CandlePrice{
+	candles[pair.Base] = []provider.CandlePrice{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -476,7 +476,7 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 	)
 
 	require.NoError(t, err, "It should successfully get computed candle prices")
-	require.Equal(t, prices[pair.String()], atomPrice)
+	require.Equal(t, prices[pair.Base], atomPrice)
 }
 
 func TestSuccessGetComputedPricesTickers(t *testing.T) {
@@ -490,7 +490,7 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	atomVolume := sdk.MustNewDecFromStr("894123.00")
 
 	tickerPrices := make(map[string]provider.TickerPrice, 1)
-	tickerPrices[pair.String()] = provider.TickerPrice{
+	tickerPrices[pair.Base] = provider.TickerPrice{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
@@ -509,5 +509,191 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	)
 
 	require.NoError(t, err, "It should successfully get computed ticker prices")
-	require.Equal(t, prices[pair.String()], atomPrice)
+	require.Equal(t, prices[pair.Base], atomPrice)
+}
+
+func TestGetComputedPricesCandlesConversion(t *testing.T) {
+	btcPair := types.CurrencyPair{
+		Base:  "BTC",
+		Quote: "ETH",
+	}
+	btcUSDPair := types.CurrencyPair{
+		Base:  "BTC",
+		Quote: "USD",
+	}
+	ethPair := types.CurrencyPair{
+		Base:  "ETH",
+		Quote: "USD",
+	}
+	btcEthPrice := sdk.MustNewDecFromStr("17.55")
+	btcUSDPrice := sdk.MustNewDecFromStr("20962.601")
+	ethUsdPrice := sdk.MustNewDecFromStr("1195.02")
+	volume := sdk.MustNewDecFromStr("894123.00")
+	providerCandles := make(provider.AggregatedProviderCandles, 4)
+
+	// normal rates
+	binanceCandles := make(map[string][]provider.CandlePrice, 2)
+	binanceCandles[btcPair.Base] = []provider.CandlePrice{
+		{
+			Price:     btcEthPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	binanceCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderBinance] = binanceCandles
+
+	// normal rates
+	gateCandles := make(map[string][]provider.CandlePrice, 1)
+	gateCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	gateCandles[btcPair.Base] = []provider.CandlePrice{
+		{
+			Price:     btcEthPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderGate] = gateCandles
+
+	// abnormal eth rate
+	okxCandles := make(map[string][]provider.CandlePrice, 1)
+	okxCandles[ethPair.Base] = []provider.CandlePrice{
+		{
+			Price:     sdk.MustNewDecFromStr("1.0"),
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderOkx] = okxCandles
+
+	// btc / usd rate
+	krakenCandles := make(map[string][]provider.CandlePrice, 1)
+	krakenCandles[btcUSDPair.Base] = []provider.CandlePrice{
+		{
+			Price:     btcUSDPrice,
+			Volume:    volume,
+			TimeStamp: provider.PastUnixTime(1 * time.Minute),
+		},
+	}
+	providerCandles[config.ProviderKraken] = krakenCandles
+
+	providerPair := map[string][]types.CurrencyPair{
+		config.ProviderBinance: {btcPair, ethPair},
+		config.ProviderGate:    {ethPair},
+		config.ProviderOkx:     {ethPair},
+		config.ProviderKraken:  {btcUSDPair},
+	}
+
+	prices, err := GetComputedPrices(
+		zerolog.Nop(),
+		providerCandles,
+		make(provider.AggregatedProviderPrices, 1),
+		providerPair,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(t, err,
+		"It should successfully filter out bad candles and convert everything to USD",
+	)
+	require.Equal(t,
+		ethUsdPrice.Mul(
+			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
+		prices[btcPair.Base],
+	)
+}
+
+func TestGetComputedPricesTickersConversion(t *testing.T) {
+	btcPair := types.CurrencyPair{
+		Base:  "BTC",
+		Quote: "ETH",
+	}
+	btcUSDPair := types.CurrencyPair{
+		Base:  "BTC",
+		Quote: "USD",
+	}
+	ethPair := types.CurrencyPair{
+		Base:  "ETH",
+		Quote: "USD",
+	}
+	volume := sdk.MustNewDecFromStr("881272.00")
+	btcEthPrice := sdk.MustNewDecFromStr("72.55")
+	ethUsdPrice := sdk.MustNewDecFromStr("9989.02")
+	btcUSDPrice := sdk.MustNewDecFromStr("724603.401")
+	providerPrices := make(provider.AggregatedProviderPrices, 1)
+
+	// normal rates
+	binanceTickerPrices := make(map[string]provider.TickerPrice, 2)
+	binanceTickerPrices[btcPair.Base] = provider.TickerPrice{
+		Price:  btcEthPrice,
+		Volume: volume,
+	}
+	binanceTickerPrices[ethPair.Base] = provider.TickerPrice{
+		Price:  ethUsdPrice,
+		Volume: volume,
+	}
+	providerPrices[config.ProviderBinance] = binanceTickerPrices
+
+	// normal rates
+	gateTickerPrices := make(map[string]provider.TickerPrice, 4)
+	gateTickerPrices[btcPair.Base] = provider.TickerPrice{
+		Price:  btcEthPrice,
+		Volume: volume,
+	}
+	gateTickerPrices[ethPair.Base] = provider.TickerPrice{
+		Price:  ethUsdPrice,
+		Volume: volume,
+	}
+	providerPrices[config.ProviderGate] = gateTickerPrices
+
+	// abnormal eth rate
+	okxTickerPrices := make(map[string]provider.TickerPrice, 1)
+	okxTickerPrices[ethPair.Base] = provider.TickerPrice{
+		Price:  sdk.MustNewDecFromStr("1.0"),
+		Volume: volume,
+	}
+	providerPrices[config.ProviderOkx] = okxTickerPrices
+
+	// btc / usd rate
+	krakenTickerPrices := make(map[string]provider.TickerPrice, 1)
+	krakenTickerPrices[btcUSDPair.Base] = provider.TickerPrice{
+		Price:  btcUSDPrice,
+		Volume: volume,
+	}
+	providerPrices[config.ProviderKraken] = krakenTickerPrices
+
+	providerPair := map[string][]types.CurrencyPair{
+		config.ProviderBinance: {ethPair, btcPair},
+		config.ProviderGate:    {ethPair},
+		config.ProviderOkx:     {ethPair},
+		config.ProviderKraken:  {btcUSDPair},
+	}
+
+	prices, err := GetComputedPrices(
+		zerolog.Nop(),
+		make(provider.AggregatedProviderCandles, 1),
+		providerPrices,
+		providerPair,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(t, err,
+		"It should successfully filter out bad tickers and convert everything to USD",
+	)
+	require.Equal(t,
+		ethUsdPrice.Mul(
+			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
+		prices[btcPair.Base],
+	)
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// validateLendAsset validates an sdk.Coin and ensures its Denom is a Token with EnableMsgLend
-func (k Keeper) validateLendAsset(ctx sdk.Context, loan sdk.Coin) error {
+// validateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
+func (k Keeper) validateSupply(ctx sdk.Context, loan sdk.Coin) error {
 	if !loan.IsValid() {
 		return types.ErrInvalidAsset.Wrap(loan.String())
 	}
@@ -15,7 +15,7 @@ func (k Keeper) validateLendAsset(ctx sdk.Context, loan sdk.Coin) error {
 	if err != nil {
 		return err
 	}
-	return token.AssertLendEnabled()
+	return token.AssertSupplyEnabled()
 }
 
 // validateBorrowAsset validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
@@ -31,7 +31,7 @@ func (k Keeper) validateBorrowAsset(ctx sdk.Context, borrow sdk.Coin) error {
 	return token.AssertBorrowEnabled()
 }
 
-// validateCollateralAsset validates an sdk.Coin and ensures its Denom is a Token with EnableMsgLend
+// validateCollateralAsset validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
 // and CollateralWeight > 0
 func (k Keeper) validateCollateralAsset(ctx sdk.Context, collateral sdk.Coin) error {
 	if !collateral.IsValid() {
@@ -46,5 +46,5 @@ func (k Keeper) validateCollateralAsset(ctx sdk.Context, collateral sdk.Coin) er
 	if token.CollateralWeight.IsZero() {
 		return types.ErrCollateralWeightZero
 	}
-	return token.AssertLendEnabled()
+	return token.AssertSupplyEnabled()
 }
