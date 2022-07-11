@@ -132,15 +132,15 @@ type MsgSetCollateral struct {
   Enable   bool
 }
 
-// MsgBorrowAsset - a user wishes to borrow assets of an allowed type
-type MsgBorrowAsset struct {
+// MsgBorrow - a user wishes to borrow assets of an allowed type
+type MsgBorrow struct {
   Borrower sdk.AccAddress
   // not a uToken
   Asset   sdk.Coin
 }
 
-// MsgRepayAsset - a user wishes to repay assets of a borrowed type
-type MsgRepayAsset struct {
+// MsgRepay - a user wishes to repay assets of a borrowed type
+type MsgRepay struct {
   Borrower sdk.AccAddress
   Asset    sdk.Coin
 }

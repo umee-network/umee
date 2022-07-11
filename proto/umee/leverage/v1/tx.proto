@@ -8,30 +8,29 @@ option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
 // Msg defines the x/leverage module's Msg service.
 service Msg {
-  // Supply moves tokens from user balance to the module balance for lending or collateral.
+  // Supply moves tokens from user balance to the module for lending or collateral.
+  // The user receives uTokens in return.
   rpc Supply(MsgSupply) returns (MsgSupplyResponse);
 
-  // WithdrawAsset defines a method for withdrawing previously supplied coins from
-  // the capital facility.
-  rpc WithdrawAsset(MsgWithdrawAsset) returns (MsgWithdrawAssetResponse);
+  // Withdraw moves previously supplied tokens from the module back to the user balance in
+  // exchange for burning uTokens.
+  rpc Withdraw(MsgWithdraw) returns (MsgWithdrawResponse);
 
-  // AddCollateral defines a method for users to enable selected uTokens
-  // as collateral.
-  rpc AddCollateral(MsgAddCollateral) returns (MsgAddCollateralResponse);
+  // Collateralize enables selected uTokens as collateral, which moves them to the module.
+  rpc Collateralize(MsgCollateralize) returns (MsgCollateralizeResponse);
 
-  // RemoveCollateral defines a method for users to disable selected uTokens
-  // as collateral.
-  rpc RemoveCollateral(MsgRemoveCollateral) returns (MsgRemoveCollateralResponse);
+  // Decollateralize disables selected uTokens as collateral. They are returned to the user's
+  // balance from the module.
+  rpc Decollateralize(MsgDecollateralize) returns (MsgDecollateralizeResponse);
 
-  // BorrowAsset defines a method for borrowing coins from the capital facility.
-  rpc BorrowAsset(MsgBorrowAsset) returns (MsgBorrowAssetResponse);
+  // Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
+  rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
 
-  // RepayAsset defines a method for repaying borrowed coins to the capital
-  // facility.
-  rpc RepayAsset(MsgRepayAsset) returns (MsgRepayAssetResponse);
+  // Repay allows a user to repay previously borrowed tokens and interest.
+  rpc Repay(MsgRepay) returns (MsgRepayResponse);
 
-  // Liquidate defines a method for repaying a different user's borrowed coins
-  // to the capital facility in exchange for some of their collateral.
+  // Liquidate allows a user to repay a different user's borrowed coins in exchange for some
+  // of their collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
@@ -42,42 +41,42 @@ message MsgSupply {
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawAsset represents a user's request to withdraw supplied assets.
+// MsgWithdraw represents a user's request to withdraw supplied assets.
 // Asset must be a uToken.
-message MsgWithdrawAsset {
+message MsgWithdraw {
   // Supplier is the account address withdrawing assets and the signer of the message.
   string                   supplier = 1;
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgAddCollateral represents a user's request to enable selected
+// MsgCollateralize represents a user's request to enable selected
 // uTokens as collateral.
-message MsgAddCollateral {
+message MsgCollateralize {
   // Borrower is the account address adding collateral and the signer of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgRemoveCollateral represents a user's request to disable selected
+// MsgDecollateralize represents a user's request to disable selected
 // uTokens as collateral.
-message MsgRemoveCollateral {
+message MsgDecollateralize {
   // Borrower is the account address removing collateral and the signer of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgBorrowAsset represents a user's request to borrow a base asset type
+// MsgBorrow represents a user's request to borrow a base asset type
 // from the module.
-message MsgBorrowAsset {
+message MsgBorrow {
   // Borrower is the account address taking a loan and the signer
   // of the message.
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgRepayAsset represents a user's request to repay a borrowed base asset
+// MsgRepay represents a user's request to repay a borrowed base asset
 // type to the module.
-message MsgRepayAsset {
+message MsgRepay {
   // Borrower is the account address repaying a loan and the signer
   // of the message.
   string                   borrower = 1;
@@ -98,20 +97,20 @@ message MsgLiquidate {
 // MsgSupplyResponse defines the Msg/Supply response type.
 message MsgSupplyResponse {}
 
-// MsgWithdrawAssetResponse defines the Msg/WithdrawAsset response type.
-message MsgWithdrawAssetResponse {}
+// MsgWithdrawResponse defines the Msg/Withdraw response type.
+message MsgWithdrawResponse {}
 
-// MsgAddCollateralResponse defines the Msg/AddCollateral response type.
-message MsgAddCollateralResponse {}
+// MsgCollateralizeResponse defines the Msg/Collateralize response type.
+message MsgCollateralizeResponse {}
 
-// MsgRemoveCollateralResponse defines the Msg/RemoveCollateral response type.
-message MsgRemoveCollateralResponse {}
+// MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
+message MsgDecollateralizeResponse {}
 
-// MsgBorrowAssetResponse defines the Msg/BorrowAsset response type.
-message MsgBorrowAssetResponse {}
+// MsgBorrowResponse defines the Msg/Borrow response type.
+message MsgBorrowResponse {}
 
-// MsgRepayAssetResponse defines the Msg/RepayAsset response type.
-message MsgRepayAssetResponse {
+// MsgRepayResponse defines the Msg/Repay response type.
+message MsgRepayResponse {
   cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
 }
 

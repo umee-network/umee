@@ -50,7 +50,7 @@ func GetCmdQueryParams() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			res, err := queryClient.Params(context.Background(), &types.QueryParamsRequest{})
+			res, err := queryClient.Params(context.Background(), &types.QueryParams{})
 			if err != nil {
 				return err
 			}
@@ -86,7 +86,7 @@ $ umeed query oracle aggregate-votes umeevaloper...
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			query := types.QueryAggregateVoteRequest{}
+			query := types.QueryAggregateVote{}
 
 			if len(args) > 0 {
 				valString := args[0]
@@ -135,7 +135,7 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			query := types.QueryAggregatePrevoteRequest{}
+			query := types.QueryAggregatePrevote{}
 
 			if len(args) > 0 {
 				valString := args[0]
@@ -182,7 +182,7 @@ $ umeed query oracle exchange-rates
 
 			res, err := queryClient.ExchangeRates(
 				context.Background(),
-				&types.QueryExchangeRatesRequest{},
+				&types.QueryExchangeRates{},
 			)
 			if err != nil {
 				return err
@@ -216,7 +216,7 @@ $ umeed query oracle exchange-rate ATOM
 
 			res, err := queryClient.ExchangeRates(
 				context.Background(),
-				&types.QueryExchangeRatesRequest{
+				&types.QueryExchangeRates{
 					Denom: args[0],
 				},
 			)
@@ -250,7 +250,7 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 				return err
 			}
 
-			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegationRequest{
+			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegation{
 				ValidatorAddr: args[0],
 			})
 			if err != nil {
@@ -283,7 +283,7 @@ func GetCmdQueryMissCounter() *cobra.Command {
 				return err
 			}
 
-			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounterRequest{
+			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounter{
 				ValidatorAddr: args[0],
 			})
 			if err != nil {
