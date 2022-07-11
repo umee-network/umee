@@ -171,7 +171,7 @@ The scenario above is not fatal to our model - Bob (supplier) continues to gain 
 
 The edge case above can only occur when the available lending pool (i.e. module account balance minus reserve requirements) for a specific token denomination, is less than `ReserveFactor` times the interest accrued on all open loans for that token in a single block. In practical terms, that means ~100% supply utilization.
 
-This is not a threatening scenario, as it resolves as soon as either a sufficient `Repay` or a `MsgSupply` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
+This is not a threatening scenario, as it resolves as soon as either a sufficient `MsgRepay` or a `MsgSupply` is made in the relevant asset type, both of which are **highly** incentivized by the extreme dynamic interest rates found near 100% utilization.
 
 ## Consequences
 
