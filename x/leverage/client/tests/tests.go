@@ -342,7 +342,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	addCollateral := testTransaction{
 		"add collateral",
-		cli.GetCmdAddCollateral(),
+		cli.GetCmdCollateralize(),
 		[]string{
 			val.Address.String(),
 			"1000u/uumee",
@@ -352,7 +352,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	borrow := testTransaction{
 		"borrow",
-		cli.GetCmdBorrowAsset(),
+		cli.GetCmdBorrow(),
 		[]string{
 			val.Address.String(),
 			"50uumee",
@@ -374,7 +374,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	repay := testTransaction{
 		"repay",
-		cli.GetCmdRepayAsset(),
+		cli.GetCmdRepay(),
 		[]string{
 			val.Address.String(),
 			"50uumee",
@@ -384,7 +384,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	removeCollateral := testTransaction{
 		"remove collateral",
-		cli.GetCmdRemoveCollateral(),
+		cli.GetCmdDecollateralize(),
 		[]string{
 			val.Address.String(),
 			"950u/uumee",
@@ -394,7 +394,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	withdraw := testTransaction{
 		"withdraw",
-		cli.GetCmdWithdrawAsset(),
+		cli.GetCmdWithdraw(),
 		[]string{
 			val.Address.String(),
 			"950u/uumee",
