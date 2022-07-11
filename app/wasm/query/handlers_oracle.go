@@ -9,11 +9,11 @@ import (
 )
 
 // HandleExchangeRates gets the exchange rates of all denoms.
-func (umeeQuery UmeeQuery) HandleExchangeRates(
+func (q UmeeQuery) HandleExchangeRates(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.ExchangeRates(sdk.WrapSDKContext(ctx), umeeQuery.ExchangeRates)
+	resp, err := qs.ExchangeRates(sdk.WrapSDKContext(ctx), q.ExchangeRates)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Exchange Rates", err)}
 	}
@@ -22,11 +22,11 @@ func (umeeQuery UmeeQuery) HandleExchangeRates(
 }
 
 // HandleActiveExchangeRates gets all active denoms.
-func (umeeQuery UmeeQuery) HandleActiveExchangeRates(
+func (q UmeeQuery) HandleActiveExchangeRates(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.ActiveExchangeRates(sdk.WrapSDKContext(ctx), umeeQuery.ActiveExchangeRates)
+	resp, err := qs.ActiveExchangeRates(sdk.WrapSDKContext(ctx), q.ActiveExchangeRates)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{
 			Kind: fmt.Sprintf("error %+v to assigned query Active Exchange Rates", err),
@@ -37,11 +37,11 @@ func (umeeQuery UmeeQuery) HandleActiveExchangeRates(
 }
 
 // HandleFeederDelegation gets all the feeder delegation of a validator.
-func (umeeQuery UmeeQuery) HandleFeederDelegation(
+func (q UmeeQuery) HandleFeederDelegation(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.FeederDelegation(sdk.WrapSDKContext(ctx), umeeQuery.FeederDelegation)
+	resp, err := qs.FeederDelegation(sdk.WrapSDKContext(ctx), q.FeederDelegation)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Feeder Delegation", err)}
 	}
@@ -50,11 +50,11 @@ func (umeeQuery UmeeQuery) HandleFeederDelegation(
 }
 
 // HandleMissCounter gets all the oracle miss counter of a validator.
-func (umeeQuery UmeeQuery) HandleMissCounter(
+func (q UmeeQuery) HandleMissCounter(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.MissCounter(sdk.WrapSDKContext(ctx), umeeQuery.MissCounter)
+	resp, err := qs.MissCounter(sdk.WrapSDKContext(ctx), q.MissCounter)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Miss Counter", err)}
 	}
@@ -63,11 +63,11 @@ func (umeeQuery UmeeQuery) HandleMissCounter(
 }
 
 // HandleAggregatePrevote gets an aggregate prevote of a validator.
-func (umeeQuery UmeeQuery) HandleAggregatePrevote(
+func (q UmeeQuery) HandleAggregatePrevote(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.AggregatePrevote(sdk.WrapSDKContext(ctx), umeeQuery.AggregatePrevote)
+	resp, err := qs.AggregatePrevote(sdk.WrapSDKContext(ctx), q.AggregatePrevote)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Prevote", err)}
 	}
@@ -76,11 +76,11 @@ func (umeeQuery UmeeQuery) HandleAggregatePrevote(
 }
 
 // HandleAggregatePrevotes gets an aggregate prevote of all validators.
-func (umeeQuery UmeeQuery) HandleAggregatePrevotes(
+func (q UmeeQuery) HandleAggregatePrevotes(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.AggregatePrevotes(sdk.WrapSDKContext(ctx), umeeQuery.AggregatePrevotes)
+	resp, err := qs.AggregatePrevotes(sdk.WrapSDKContext(ctx), q.AggregatePrevotes)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Prevote", err)}
 	}
@@ -89,11 +89,11 @@ func (umeeQuery UmeeQuery) HandleAggregatePrevotes(
 }
 
 // HandleAggregateVote gets an aggregate vote of a validator.
-func (umeeQuery UmeeQuery) HandleAggregateVote(
+func (q UmeeQuery) HandleAggregateVote(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.AggregateVote(sdk.WrapSDKContext(ctx), umeeQuery.AggregateVote)
+	resp, err := qs.AggregateVote(sdk.WrapSDKContext(ctx), q.AggregateVote)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Vote", err)}
 	}
@@ -102,11 +102,11 @@ func (umeeQuery UmeeQuery) HandleAggregateVote(
 }
 
 // HandleAggregateVotes gets an aggregate vote of all validators.
-func (umeeQuery UmeeQuery) HandleAggregateVotes(
+func (q UmeeQuery) HandleAggregateVotes(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.AggregateVotes(sdk.WrapSDKContext(ctx), umeeQuery.AggregateVotes)
+	resp, err := qs.AggregateVotes(sdk.WrapSDKContext(ctx), q.AggregateVotes)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Votes", err)}
 	}
@@ -115,11 +115,11 @@ func (umeeQuery UmeeQuery) HandleAggregateVotes(
 }
 
 // HandleOracleParams gets the x/oracle module's parameters.
-func (umeeQuery UmeeQuery) HandleOracleParams(
+func (q UmeeQuery) HandleOracleParams(
 	ctx sdk.Context,
-	queryServer octypes.QueryServer,
+	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.Params(sdk.WrapSDKContext(ctx), umeeQuery.OracleParams)
+	resp, err := qs.Params(sdk.WrapSDKContext(ctx), q.OracleParams)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Oracle Parameters", err)}
 	}

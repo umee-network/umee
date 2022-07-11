@@ -9,11 +9,11 @@ import (
 )
 
 // HandleBorrowed handles the get of every borrowed value of an address.
-func (umeeQuery UmeeQuery) HandleBorrowed(
+func (q UmeeQuery) HandleBorrowed(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.Borrowed(sdk.WrapSDKContext(ctx), umeeQuery.Borrowed)
+	resp, err := qs.Borrowed(sdk.WrapSDKContext(ctx), q.Borrowed)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrowed", err)}
 	}
@@ -22,11 +22,11 @@ func (umeeQuery UmeeQuery) HandleBorrowed(
 }
 
 // HandleRegisteredTokens handles the get all registered tokens query and response.
-func (umeeQuery UmeeQuery) HandleRegisteredTokens(
+func (q UmeeQuery) HandleRegisteredTokens(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.RegisteredTokens(sdk.WrapSDKContext(ctx), &lvtypes.QueryRegisteredTokens{})
+	resp, err := qs.RegisteredTokens(sdk.WrapSDKContext(ctx), &lvtypes.QueryRegisteredTokens{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Registered Tokens", err)}
 	}
@@ -35,11 +35,11 @@ func (umeeQuery UmeeQuery) HandleRegisteredTokens(
 }
 
 // HandleLeverageParams handles the get the x/leverage module's parameters.
-func (umeeQuery UmeeQuery) HandleLeverageParams(
+func (q UmeeQuery) HandleLeverageParams(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.Params(sdk.WrapSDKContext(ctx), &lvtypes.QueryParamsRequest{})
+	resp, err := qs.Params(sdk.WrapSDKContext(ctx), &lvtypes.QueryParamsRequest{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Leverage Params", err)}
 	}
@@ -48,11 +48,11 @@ func (umeeQuery UmeeQuery) HandleLeverageParams(
 }
 
 // HandleBorrowedValue handles the borrowed value of an specific denom and address.
-func (umeeQuery UmeeQuery) HandleBorrowedValue(
+func (q UmeeQuery) HandleBorrowedValue(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.BorrowedValue(sdk.WrapSDKContext(ctx), umeeQuery.BorrowedValue)
+	resp, err := qs.BorrowedValue(sdk.WrapSDKContext(ctx), q.BorrowedValue)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrowed Value", err)}
 	}
@@ -60,38 +60,38 @@ func (umeeQuery UmeeQuery) HandleBorrowedValue(
 	return MarshalResponse(resp)
 }
 
-// HandleLoaned handles the loaned amount of an address.
-func (umeeQuery UmeeQuery) HandleLoaned(
+// HandleSupplied handles the Supplied amount of an address.
+func (q UmeeQuery) HandleSupplied(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.Loaned(sdk.WrapSDKContext(ctx), umeeQuery.Loaned)
+	resp, err := qs.Supplied(sdk.WrapSDKContext(ctx), q.Supplied)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Loaned", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Supplied", err)}
 	}
 
 	return MarshalResponse(resp)
 }
 
-// HandleLoanedValue handles the loaned amount of an address in USD.
-func (umeeQuery UmeeQuery) HandleLoanedValue(
+// HandleSuppliedValue handles the Supplied amount of an address in USD.
+func (q UmeeQuery) HandleSuppliedValue(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.LoanedValue(sdk.WrapSDKContext(ctx), umeeQuery.LoanedValue)
+	resp, err := qs.SuppliedValue(sdk.WrapSDKContext(ctx), q.SuppliedValue)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Loaned Value", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Supplied Value", err)}
 	}
 
 	return MarshalResponse(resp)
 }
 
 // HandleAvailableBorrow retrieves the available borrow amount of an denom.
-func (umeeQuery UmeeQuery) HandleAvailableBorrow(
+func (q UmeeQuery) HandleAvailableBorrow(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.AvailableBorrow(sdk.WrapSDKContext(ctx), umeeQuery.AvailableBorrow)
+	resp, err := qs.AvailableBorrow(sdk.WrapSDKContext(ctx), q.AvailableBorrow)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Available Borrow", err)}
 	}
@@ -100,11 +100,11 @@ func (umeeQuery UmeeQuery) HandleAvailableBorrow(
 }
 
 // HandleBorrowAPY retrieves the current borrow interest rate on a token denom.
-func (umeeQuery UmeeQuery) HandleBorrowAPY(
+func (q UmeeQuery) HandleBorrowAPY(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.BorrowAPY(sdk.WrapSDKContext(ctx), umeeQuery.BorrowAPY)
+	resp, err := qs.BorrowAPY(sdk.WrapSDKContext(ctx), q.BorrowAPY)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow APY", err)}
 	}
@@ -112,25 +112,25 @@ func (umeeQuery UmeeQuery) HandleBorrowAPY(
 	return MarshalResponse(resp)
 }
 
-// HandleLendAPY derives the current lend interest rate on a token denom.
-func (umeeQuery UmeeQuery) HandleLendAPY(
+// HandleSupplyAPY derives the current Supply interest rate on a token denom.
+func (q UmeeQuery) HandleSupplyAPY(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.LendAPY(sdk.WrapSDKContext(ctx), umeeQuery.LendAPY)
+	resp, err := qs.SupplyAPY(sdk.WrapSDKContext(ctx), q.SupplyAPY)
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Lend APY", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Supply APY", err)}
 	}
 
 	return MarshalResponse(resp)
 }
 
 // HandleMarketSize get the market size in USD of a token denom.
-func (umeeQuery UmeeQuery) HandleMarketSize(
+func (q UmeeQuery) HandleMarketSize(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.MarketSize(sdk.WrapSDKContext(ctx), umeeQuery.MarketSize)
+	resp, err := qs.MarketSize(sdk.WrapSDKContext(ctx), q.MarketSize)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Size", err)}
 	}
@@ -139,11 +139,11 @@ func (umeeQuery UmeeQuery) HandleMarketSize(
 }
 
 // HandleTokenMarketSize handles the market size of an token.
-func (umeeQuery UmeeQuery) HandleTokenMarketSize(
+func (q UmeeQuery) HandleTokenMarketSize(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.TokenMarketSize(sdk.WrapSDKContext(ctx), umeeQuery.TokenMarketSize)
+	resp, err := qs.TokenMarketSize(sdk.WrapSDKContext(ctx), q.TokenMarketSize)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Token Market Size", err)}
 	}
@@ -152,11 +152,11 @@ func (umeeQuery UmeeQuery) HandleTokenMarketSize(
 }
 
 // HandleReserveAmount gets the amount reserved of a specified token.
-func (umeeQuery UmeeQuery) HandleReserveAmount(
+func (q UmeeQuery) HandleReserveAmount(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.ReserveAmount(sdk.WrapSDKContext(ctx), umeeQuery.ReserveAmount)
+	resp, err := qs.ReserveAmount(sdk.WrapSDKContext(ctx), q.ReserveAmount)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Reserve Amount Size", err)}
 	}
@@ -167,11 +167,11 @@ func (umeeQuery UmeeQuery) HandleReserveAmount(
 // HandleCollateral gets the collateral amount of a user by token denomination.
 // If the denomination is not supplied, all of the user's collateral tokens
 // are returned.
-func (umeeQuery UmeeQuery) HandleCollateral(
+func (q UmeeQuery) HandleCollateral(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.Collateral(sdk.WrapSDKContext(ctx), umeeQuery.Collateral)
+	resp, err := qs.Collateral(sdk.WrapSDKContext(ctx), q.Collateral)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Collateral", err)}
 	}
@@ -181,11 +181,11 @@ func (umeeQuery UmeeQuery) HandleCollateral(
 
 // HandleCollateralValue gets the total USD value of a user's collateral, or
 // the USD value held as a given base asset's associated uToken denomination.
-func (umeeQuery UmeeQuery) HandleCollateralValue(
+func (q UmeeQuery) HandleCollateralValue(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.CollateralValue(sdk.WrapSDKContext(ctx), umeeQuery.CollateralValue)
+	resp, err := qs.CollateralValue(sdk.WrapSDKContext(ctx), q.CollateralValue)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Collateral Value", err)}
 	}
@@ -195,11 +195,11 @@ func (umeeQuery UmeeQuery) HandleCollateralValue(
 
 // HandleExchangeRate gets calculated the token:uToken exchange
 // rate of a base token denom.
-func (umeeQuery UmeeQuery) HandleExchangeRate(
+func (q UmeeQuery) HandleExchangeRate(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.ExchangeRate(sdk.WrapSDKContext(ctx), umeeQuery.ExchangeRate)
+	resp, err := qs.ExchangeRate(sdk.WrapSDKContext(ctx), q.ExchangeRate)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Exchange Rate", err)}
 	}
@@ -209,11 +209,11 @@ func (umeeQuery UmeeQuery) HandleExchangeRate(
 
 // HandleBorrowLimit uses the price oracle to determine the borrow limit
 // (in USD) provided by collateral sdk.Coins.
-func (umeeQuery UmeeQuery) HandleBorrowLimit(
+func (q UmeeQuery) HandleBorrowLimit(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.BorrowLimit(sdk.WrapSDKContext(ctx), umeeQuery.BorrowLimit)
+	resp, err := qs.BorrowLimit(sdk.WrapSDKContext(ctx), q.BorrowLimit)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Borrow Limit", err)}
 	}
@@ -223,11 +223,11 @@ func (umeeQuery UmeeQuery) HandleBorrowLimit(
 
 // HandleLiquidationThreshold determines the maximum borrowed value (in USD) that a borrower with given
 // collateral could reach before being eligible for liquidation.
-func (umeeQuery UmeeQuery) HandleLiquidationThreshold(
+func (q UmeeQuery) HandleLiquidationThreshold(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.LiquidationThreshold(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationThreshold)
+	resp, err := qs.LiquidationThreshold(sdk.WrapSDKContext(ctx), q.LiquidationThreshold)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{
 			Kind: fmt.Sprintf("error %+v to assigned query Liquidation Threshold", err),
@@ -238,11 +238,11 @@ func (umeeQuery UmeeQuery) HandleLiquidationThreshold(
 }
 
 // HandleLiquidationTargets determines an list of borrower addresses eligible for liquidation.
-func (umeeQuery UmeeQuery) HandleLiquidationTargets(
+func (q UmeeQuery) HandleLiquidationTargets(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.LiquidationTargets(sdk.WrapSDKContext(ctx), umeeQuery.LiquidationTargets)
+	resp, err := qs.LiquidationTargets(sdk.WrapSDKContext(ctx), q.LiquidationTargets)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Liquidation Targets", err)}
 	}
@@ -251,11 +251,11 @@ func (umeeQuery UmeeQuery) HandleLiquidationTargets(
 }
 
 // HandleMarketSummary gets the summary data of an denom.
-func (umeeQuery UmeeQuery) HandleMarketSummary(
+func (q UmeeQuery) HandleMarketSummary(
 	ctx sdk.Context,
-	queryServer lvtypes.QueryServer,
+	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := queryServer.MarketSummary(sdk.WrapSDKContext(ctx), umeeQuery.MarketSummary)
+	resp, err := qs.MarketSummary(sdk.WrapSDKContext(ctx), q.MarketSummary)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Summary", err)}
 	}

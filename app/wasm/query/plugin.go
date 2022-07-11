@@ -49,16 +49,16 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			return smartcontractQuery.HandleLeverageParams(ctx, plugin.leverageQueryServer)
 		case AssignedQueryBorrowedValue:
 			return smartcontractQuery.HandleBorrowedValue(ctx, plugin.leverageQueryServer)
-		case AssignedQueryLoaned:
-			return smartcontractQuery.HandleLoaned(ctx, plugin.leverageQueryServer)
-		case AssignedQueryLoanedValue:
-			return smartcontractQuery.HandleLoanedValue(ctx, plugin.leverageQueryServer)
+		case AssignedQuerySupplied:
+			return smartcontractQuery.HandleSupplied(ctx, plugin.leverageQueryServer)
+		case AssignedQuerySuppliedValue:
+			return smartcontractQuery.HandleSuppliedValue(ctx, plugin.leverageQueryServer)
 		case AssignedQueryAvailableBorrow:
 			return smartcontractQuery.HandleAvailableBorrow(ctx, plugin.leverageQueryServer)
 		case AssignedQueryBorrowAPY:
 			return smartcontractQuery.HandleBorrowAPY(ctx, plugin.leverageQueryServer)
-		case AssignedQueryLendAPY:
-			return smartcontractQuery.HandleLendAPY(ctx, plugin.leverageQueryServer)
+		case AssignedQuerySupplyAPY:
+			return smartcontractQuery.HandleSupplyAPY(ctx, plugin.leverageQueryServer)
 		case AssignedQueryMarketSize:
 			return smartcontractQuery.HandleMarketSize(ctx, plugin.leverageQueryServer)
 		case AssignedQueryTokenMarketSize:

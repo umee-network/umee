@@ -35,8 +35,8 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 	}
 
 	switch smartcontractMessage.AssignedMsg {
-	case AssignedMsgLend:
-		return smartcontractMessage.HandleLendAsset(ctx, plugin.leverageMsgServer)
+	case AssignedMsgSupply:
+		return smartcontractMessage.HandleSupply(ctx, plugin.leverageMsgServer)
 	case AssignedMsgWithdraw:
 		return smartcontractMessage.HandleWithdrawAsset(ctx, plugin.leverageMsgServer)
 	case AssignedMsgAddCollateral:

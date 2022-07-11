@@ -8,25 +8,25 @@ import (
 	lvtypes "github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// HandleLendAsset handles the LendAsset value of an address.
-func (umeeMsg UmeeMsg) HandleLendAsset(
+// HandleSupply handles the Supply value of an address.
+func (m UmeeMsg) HandleSupply(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.LendAsset(sdk.WrapSDKContext(ctx), umeeMsg.LendAsset)
+	_, err := s.Supply(sdk.WrapSDKContext(ctx), m.Supply)
 	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Lend Asset", err)}
+		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Supply", err)}
 	}
 
 	return nil
 }
 
 // HandleWithdrawAsset handles the WithdrawAsset value of an address.
-func (umeeMsg UmeeMsg) HandleWithdrawAsset(
+func (m UmeeMsg) HandleWithdrawAsset(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.WithdrawAsset(sdk.WrapSDKContext(ctx), umeeMsg.WithdrawAsset)
+	_, err := s.WithdrawAsset(sdk.WrapSDKContext(ctx), m.WithdrawAsset)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Withdraw Asset", err)}
 	}
@@ -35,11 +35,11 @@ func (umeeMsg UmeeMsg) HandleWithdrawAsset(
 }
 
 // HandleAddCollateral handles the enable selected uTokens as collateral.
-func (umeeMsg UmeeMsg) HandleAddCollateral(
+func (m UmeeMsg) HandleAddCollateral(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.AddCollateral(sdk.WrapSDKContext(ctx), umeeMsg.AddCollateral)
+	_, err := s.AddCollateral(sdk.WrapSDKContext(ctx), m.AddCollateral)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Add Collateral", err)}
 	}
@@ -49,11 +49,11 @@ func (umeeMsg UmeeMsg) HandleAddCollateral(
 
 // HandleRemoveCollateral handles the disable amount of an selected uTokens
 // as collateral.
-func (umeeMsg UmeeMsg) HandleRemoveCollateral(
+func (m UmeeMsg) HandleRemoveCollateral(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.RemoveCollateral(sdk.WrapSDKContext(ctx), umeeMsg.RemoveCollateral)
+	_, err := s.RemoveCollateral(sdk.WrapSDKContext(ctx), m.RemoveCollateral)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Remove Collateral", err)}
 	}
@@ -62,11 +62,11 @@ func (umeeMsg UmeeMsg) HandleRemoveCollateral(
 }
 
 // HandleBorrowAsset handles the borrowing coins from the capital facility.
-func (umeeMsg UmeeMsg) HandleBorrowAsset(
+func (m UmeeMsg) HandleBorrowAsset(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.BorrowAsset(sdk.WrapSDKContext(ctx), umeeMsg.BorrowAsset)
+	_, err := s.BorrowAsset(sdk.WrapSDKContext(ctx), m.BorrowAsset)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Borrow Asset", err)}
 	}
@@ -75,11 +75,11 @@ func (umeeMsg UmeeMsg) HandleBorrowAsset(
 }
 
 // HandleRepayAsset handles repaying borrowed coins to the capital facility.
-func (umeeMsg UmeeMsg) HandleRepayAsset(
+func (m UmeeMsg) HandleRepayAsset(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.RepayAsset(sdk.WrapSDKContext(ctx), umeeMsg.RepayAsset)
+	_, err := s.RepayAsset(sdk.WrapSDKContext(ctx), m.RepayAsset)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Repay Asset", err)}
 	}
@@ -89,11 +89,11 @@ func (umeeMsg UmeeMsg) HandleRepayAsset(
 
 // HandleLiquidate handles the repaying a different user's borrowed coins
 // to the capital facility in exchange for some of their collateral.
-func (umeeMsg UmeeMsg) HandleLiquidate(
+func (m UmeeMsg) HandleLiquidate(
 	ctx sdk.Context,
-	msgServer lvtypes.MsgServer,
+	s lvtypes.MsgServer,
 ) error {
-	_, err := msgServer.Liquidate(sdk.WrapSDKContext(ctx), umeeMsg.Liquidate)
+	_, err := s.Liquidate(sdk.WrapSDKContext(ctx), m.Liquidate)
 	if err != nil {
 		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Liquidate", err)}
 	}

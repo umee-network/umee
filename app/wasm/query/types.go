@@ -25,20 +25,20 @@ const (
 	// AssignedQueryBorrowedValue represents the call to query the Borrowed amount of an
 	// specific coin of an address.
 	AssignedQueryBorrowedValue
-	// AssignedQueryLoaned represents the call to query the Loaned amoun of an address.
-	AssignedQueryLoaned
-	// AssignedQueryLoaned represents the call to query the Loaned amount of an
+	// AssignedQuerySupplied represents the call to query the Supplied amount of an address.
+	AssignedQuerySupplied
+	// AssignedQuerySuppliedValue represents the call to query the Supplied amount of an
 	// address in USD.
-	AssignedQueryLoanedValue
+	AssignedQuerySuppliedValue
 	// AssignedQueryAvailableBorrow represents the call to query the Available
 	// amount of an denom.
 	AssignedQueryAvailableBorrow
 	// AssignedQueryBorrowAPY represents the call to query the current borrow interest
 	// rate on a token denom.
 	AssignedQueryBorrowAPY
-	// AssignedQueryLendAPY represents the call to query and derives the current lend
+	// AssignedQuerySupplyAPY represents the call to query and derives the current supply
 	// interest rate on a token denom.
-	AssignedQueryLendAPY
+	AssignedQuerySupplyAPY
 	// AssignedQueryMarketSize represents the call to query the market size of
 	// an token denom in USD.
 	AssignedQueryMarketSize
@@ -120,16 +120,16 @@ type UmeeQuery struct {
 	LeverageParams *lvtypes.QueryParamsRequest `json:"leverage_params,omitempty"`
 	// Used to query an specific borrow address value in usd.
 	BorrowedValue *lvtypes.QueryBorrowedValueRequest `json:"borrowed_value,omitempty"`
-	// Used to query an the amount loaned of an address.
-	Loaned *lvtypes.QueryLoanedRequest `json:"loaned,omitempty"`
-	// Used to query an the amount loaned of an address in USD.
-	LoanedValue *lvtypes.QueryLoanedValueRequest `json:"loaned_value,omitempty"`
+	// Used to query an the amount Supplied of an address.
+	Supplied *lvtypes.QuerySuppliedRequest `json:"supplied,omitempty"`
+	// Used to query an the amount Supplied of an address in USD.
+	SuppliedValue *lvtypes.QuerySuppliedValueRequest `json:"supplied_value,omitempty"`
 	// Used to query an the amount available to borrow.
 	AvailableBorrow *lvtypes.QueryAvailableBorrowRequest `json:"available_borrow,omitempty"`
 	// Used to query an current borrow interest rate on a token denom.
 	BorrowAPY *lvtypes.QueryBorrowAPYRequest `json:"borrow_apy,omitempty"`
-	// Used to derives the current lend interest rate on a token denom.
-	LendAPY *lvtypes.QueryLendAPYRequest `json:"lend_apy,omitempty"`
+	// Used to derives the current supply interest rate on a token denom.
+	SupplyAPY *lvtypes.QuerySupplyAPYRequest `json:"supply_apy,omitempty"`
 	// Used to get the market size in USD of a token denom.
 	MarketSize *lvtypes.QueryMarketSizeRequest `json:"market_size,omitempty"`
 	// Used to get the market size of a token denom.
