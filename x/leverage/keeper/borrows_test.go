@@ -134,7 +134,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	s.Require().Equal(sdk.ZeroDec(), utilization)
 
 	// user borrows 200 uumee, reducing module account to 800 uumee
-	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
+	s.Require().NoError(s.tk.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
 
 	// 20% utilization (200 / 200+800-0)
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
@@ -155,7 +155,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
 
 	// user borrows 600 uumee, reducing module account to 0 uumee
-	s.Require().NoError(s.tk.BorrowAsset(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))
+	s.Require().NoError(s.tk.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))
 
 	// 100% utilization (800 / 800+200-200))
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)

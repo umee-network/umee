@@ -36,15 +36,15 @@ Users have the following actions available to them:
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
-- [Withdraw](04_messages.md#MsgWithdrawAsset) supplied assets by turning in uTokens of the associated denomination.
+- [Withdraw](04_messages.md#MsgWithdraw) supplied assets by turning in uTokens of the associated denomination.
 
   Withdraw respects the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](01_concepts.md#Borrow-Limit) below their total borrowed value.
 
-- [Borrow](04_messages.md#MsgBorrowAsset) assets of an accepted type, up to their [Borrow Limit](01_concepts.md#Borrow-Limit).
+- [Borrow](04_messages.md#MsgBorrow) assets of an accepted type, up to their [Borrow Limit](01_concepts.md#Borrow-Limit).
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](01_concepts.md#Borrow-APY).
 
-- [Repay](04_messages.md#MsgRepayAsset) assets of a borrowed type, directly reducing the amount owed.
+- [Repay](04_messages.md#MsgRepay) assets of a borrowed type, directly reducing the amount owed.
 
   Repayments that exceed a borrower's amount owed in the selected denomination succeed at paying the reduced amount rather than failing outright.
 

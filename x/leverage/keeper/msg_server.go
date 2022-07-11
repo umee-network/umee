@@ -57,10 +57,10 @@ func (s msgServer) Supply(
 	return &types.MsgSupplyResponse{}, nil
 }
 
-func (s msgServer) WithdrawAsset(
+func (s msgServer) Withdraw(
 	goCtx context.Context,
-	msg *types.MsgWithdrawAsset,
-) (*types.MsgWithdrawAssetResponse, error) {
+	msg *types.MsgWithdraw,
+) (*types.MsgWithdrawResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
@@ -68,7 +68,7 @@ func (s msgServer) WithdrawAsset(
 		return nil, err
 	}
 
-	if err := s.keeper.WithdrawAsset(ctx, supplierAddr, msg.Asset); err != nil {
+	if err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
@@ -80,7 +80,7 @@ func (s msgServer) WithdrawAsset(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeWithdrawAsset,
+			types.EventTypeWithdraw,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),
@@ -91,13 +91,13 @@ func (s msgServer) WithdrawAsset(
 		),
 	})
 
-	return &types.MsgWithdrawAssetResponse{}, nil
+	return &types.MsgWithdrawResponse{}, nil
 }
 
-func (s msgServer) AddCollateral(
+func (s msgServer) Collateralize(
 	goCtx context.Context,
-	msg *types.MsgAddCollateral,
-) (*types.MsgAddCollateralResponse, error) {
+	msg *types.MsgCollateralize,
+) (*types.MsgCollateralizeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -105,7 +105,7 @@ func (s msgServer) AddCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.AddCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
+	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Coin); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +117,7 @@ func (s msgServer) AddCollateral(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeAddCollateral,
+			types.EventTypeCollateralize,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
 		),
@@ -128,13 +128,13 @@ func (s msgServer) AddCollateral(
 		),
 	})
 
-	return &types.MsgAddCollateralResponse{}, nil
+	return &types.MsgCollateralizeResponse{}, nil
 }
 
-func (s msgServer) RemoveCollateral(
+func (s msgServer) Decollateralize(
 	goCtx context.Context,
-	msg *types.MsgRemoveCollateral,
-) (*types.MsgRemoveCollateralResponse, error) {
+	msg *types.MsgDecollateralize,
+) (*types.MsgDecollateralizeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -142,7 +142,7 @@ func (s msgServer) RemoveCollateral(
 		return nil, err
 	}
 
-	if err := s.keeper.RemoveCollateral(ctx, borrowerAddr, msg.Coin); err != nil {
+	if err := s.keeper.Decollateralize(ctx, borrowerAddr, msg.Coin); err != nil {
 		return nil, err
 	}
 
@@ -154,7 +154,7 @@ func (s msgServer) RemoveCollateral(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeRemoveCollateral,
+			types.EventTypeDecollateralize,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
 		),
@@ -165,13 +165,13 @@ func (s msgServer) RemoveCollateral(
 		),
 	})
 
-	return &types.MsgRemoveCollateralResponse{}, nil
+	return &types.MsgDecollateralizeResponse{}, nil
 }
 
-func (s msgServer) BorrowAsset(
+func (s msgServer) Borrow(
 	goCtx context.Context,
-	msg *types.MsgBorrowAsset,
-) (*types.MsgBorrowAssetResponse, error) {
+	msg *types.MsgBorrow,
+) (*types.MsgBorrowResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -179,7 +179,7 @@ func (s msgServer) BorrowAsset(
 		return nil, err
 	}
 
-	if err := s.keeper.BorrowAsset(ctx, borrowerAddr, msg.Asset); err != nil {
+	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
@@ -191,7 +191,7 @@ func (s msgServer) BorrowAsset(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeBorrowAsset,
+			types.EventTypeBorrow,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),
@@ -202,13 +202,13 @@ func (s msgServer) BorrowAsset(
 		),
 	})
 
-	return &types.MsgBorrowAssetResponse{}, nil
+	return &types.MsgBorrowResponse{}, nil
 }
 
-func (s msgServer) RepayAsset(
+func (s msgServer) Repay(
 	goCtx context.Context,
-	msg *types.MsgRepayAsset,
-) (*types.MsgRepayAssetResponse, error) {
+	msg *types.MsgRepay,
+) (*types.MsgRepayResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
@@ -216,7 +216,7 @@ func (s msgServer) RepayAsset(
 		return nil, err
 	}
 
-	repaid, err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Asset)
+	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (s msgServer) RepayAsset(
 		),
 	})
 
-	return &types.MsgRepayAssetResponse{
+	return &types.MsgRepayResponse{
 		Repaid: repaidCoin,
 	}, nil
 }

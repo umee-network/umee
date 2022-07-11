@@ -15,12 +15,12 @@ The message will fail under the following conditions:
 - `amount` is not a valid amount of an accepted asset
 - `supplier` balance is insufficient
 
-## MsgWithdrawAsset
+## MsgWithdraw
 
 A user withdraws supplied assets.
 
 ```protobuf
-message MsgWithdrawAsset {
+message MsgWithdraw {
   string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
@@ -34,12 +34,12 @@ The following additional failures are only possible for collateral-enabled _uTok
 - Withdrawing the required uToken collateral would reduce `supplier`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
-## MsgAddCollateral
+## MsgCollateralize
 
 A user adds some uTokens from their balance to the module as collateral.
 
 ```protobuf
-message MsgAddCollateral {
+message MsgCollateralize {
   string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
@@ -48,12 +48,12 @@ message MsgAddCollateral {
 The message will fail under the following conditions:
 - Insufficient uTokens in wallet
 
-## MsgRemoveCollateral
+## MsgDecollateralize
 
 A user moves some uTokens from their collateral back to their balance.
 
 ```protobuf
-message MsgRemoveCollateral {
+message MsgDecollateralize {
   string                   supplier = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
@@ -64,12 +64,12 @@ The message will fail under the following conditions:
 - Disabling the required _uTokens_ as collateral would reduce `borrower`'s `BorrowLimit` below their total borrowed value
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
-## MsgBorrowAsset
+## MsgBorrow
 
 A user borrows base assets from the module.
 
 ```protobuf
-message MsgBorrowAsset {
+message MsgBorrow {
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }
@@ -80,12 +80,12 @@ The message will fail under the following conditions:
 - Borrowing the requested amount would cause `borrower` to exceed their `BorrowLimit`
 - Borrow value or borrow limit cannot be computed due to a missing `x/oracle` price
 
-## MsgRepayAsset
+## MsgRepay
 
 A user fully or partially repays one of their borrows. If the requested amount would overpay, it is reduced to the full repayment amount before attempting.
 
 ```protobuf
-message MsgRepayAsset {
+message MsgRepay {
   string                   borrower = 1;
   cosmos.base.v1beta1.Coin amount = 2;
 }

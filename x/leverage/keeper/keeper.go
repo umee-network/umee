@@ -110,10 +110,10 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 	return nil
 }
 
-// WithdrawAsset attempts to deposit uTokens into the leverage module in exchange
+// Withdraw attempts to deposit uTokens into the leverage module in exchange
 // for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
 // If the uToken denom is invalid or account or module balance insufficient, returns error.
-func (k Keeper) WithdrawAsset(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
+func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
 	if !k.IsAcceptedUToken(ctx, coin.Denom) {
 		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
 	}
@@ -193,11 +193,11 @@ func (k Keeper) WithdrawAsset(ctx sdk.Context, supplierAddr sdk.AccAddress, coin
 	return nil
 }
 
-// BorrowAsset attempts to borrow tokens from the leverage module account using
+// Borrow attempts to borrow tokens from the leverage module account using
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
-func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
-	if err := k.validateBorrowAsset(ctx, borrow); err != nil {
+func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
+	if err := k.validateBorrow(ctx, borrow); err != nil {
 		return err
 	}
 
@@ -243,12 +243,12 @@ func (k Keeper) BorrowAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow
 	return nil
 }
 
-// RepayAsset attempts to repay a borrow position. If asset type is invalid, account balance
+// Repay attempts to repay a borrow position. If asset type is invalid, account balance
 // is insufficient, or borrower has no borrows in payment denom to repay, we return an error.
 // Additionally, if the amount provided is greater than the full repayment amount, only the
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
-// RepayAsset returns the actual amount repaid.
-func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
+// Repay returns the actual amount repaid.
+func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
 	if !payment.IsValid() {
 		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())
 	}
@@ -283,8 +283,8 @@ func (k Keeper) RepayAsset(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment
 	return payment.Amount, nil
 }
 
-// AddCollateral enables selected uTokens for use as collateral by a single borrower.
-func (k Keeper) AddCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
+// Collateralize enables selected uTokens for use as collateral by a single borrower.
+func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
 	if err := k.validateCollateralAsset(ctx, coin); err != nil {
 		return err
 	}
@@ -302,8 +302,8 @@ func (k Keeper) AddCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin
 	return nil
 }
 
-// RemoveCollateral disables selected uTokens for use as collateral by a single borrower.
-func (k Keeper) RemoveCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
+// Decollateralize disables selected uTokens for use as collateral by a single borrower.
+func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
 	if err := coin.Validate(); err != nil {
 		return err
 	}

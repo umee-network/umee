@@ -39,17 +39,17 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdrawAsset(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdrawAsset {
-	return &MsgWithdrawAsset{
+func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
+	return &MsgWithdraw{
 		Supplier: supplier.String(),
 		Asset:    asset,
 	}
 }
 
-func (msg MsgWithdrawAsset) Route() string { return ModuleName }
-func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawAsset }
+func (msg MsgWithdraw) Route() string { return ModuleName }
+func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
-func (msg *MsgWithdrawAsset) ValidateBasic() error {
+func (msg *MsgWithdraw) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())
 	if err != nil {
 		return err
@@ -62,28 +62,28 @@ func (msg *MsgWithdrawAsset) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgWithdrawAsset) GetSigners() []sdk.AccAddress {
+func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
 	supplier, _ := sdk.AccAddressFromBech32(msg.GetSupplier())
 	return []sdk.AccAddress{supplier}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgWithdrawAsset) GetSignBytes() []byte {
+func (msg *MsgWithdraw) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgAddCollateral(borrower sdk.AccAddress, coin sdk.Coin) *MsgAddCollateral {
-	return &MsgAddCollateral{
+func NewMsgCollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgCollateralize {
+	return &MsgCollateralize{
 		Borrower: borrower.String(),
 		Coin:     coin,
 	}
 }
 
-func (msg MsgAddCollateral) Route() string { return ModuleName }
-func (msg MsgAddCollateral) Type() string  { return EventTypeAddCollateral }
+func (msg MsgCollateralize) Route() string { return ModuleName }
+func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
-func (msg *MsgAddCollateral) ValidateBasic() error {
+func (msg *MsgCollateralize) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
@@ -91,28 +91,28 @@ func (msg *MsgAddCollateral) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgAddCollateral) GetSigners() []sdk.AccAddress {
+func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgAddCollateral) GetSignBytes() []byte {
+func (msg *MsgCollateralize) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRemoveCollateral(borrower sdk.AccAddress, coin sdk.Coin) *MsgRemoveCollateral {
-	return &MsgRemoveCollateral{
+func NewMsgDecollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgDecollateralize {
+	return &MsgDecollateralize{
 		Borrower: borrower.String(),
 		Coin:     coin,
 	}
 }
 
-func (msg MsgRemoveCollateral) Route() string { return ModuleName }
-func (msg MsgRemoveCollateral) Type() string  { return EventTypeRemoveCollateral }
+func (msg MsgDecollateralize) Route() string { return ModuleName }
+func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
-func (msg *MsgRemoveCollateral) ValidateBasic() error {
+func (msg *MsgDecollateralize) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
@@ -120,28 +120,28 @@ func (msg *MsgRemoveCollateral) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgRemoveCollateral) GetSigners() []sdk.AccAddress {
+func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgRemoveCollateral) GetSignBytes() []byte {
+func (msg *MsgDecollateralize) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrowAsset(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrowAsset {
-	return &MsgBorrowAsset{
+func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
+	return &MsgBorrow{
 		Borrower: borrower.String(),
 		Asset:    asset,
 	}
 }
 
-func (msg MsgBorrowAsset) Route() string { return ModuleName }
-func (msg MsgBorrowAsset) Type() string  { return EventTypeBorrowAsset }
+func (msg MsgBorrow) Route() string { return ModuleName }
+func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
-func (msg *MsgBorrowAsset) ValidateBasic() error {
+func (msg *MsgBorrow) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
@@ -154,28 +154,28 @@ func (msg *MsgBorrowAsset) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgBorrowAsset) GetSigners() []sdk.AccAddress {
+func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBorrowAsset) GetSignBytes() []byte {
+func (msg *MsgBorrow) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRepayAsset(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepayAsset {
-	return &MsgRepayAsset{
+func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
+	return &MsgRepay{
 		Borrower: borrower.String(),
 		Asset:    asset,
 	}
 }
 
-func (msg MsgRepayAsset) Route() string { return ModuleName }
-func (msg MsgRepayAsset) Type() string  { return EventTypeRepayBorrowedAsset }
+func (msg MsgRepay) Route() string { return ModuleName }
+func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
 
-func (msg *MsgRepayAsset) ValidateBasic() error {
+func (msg *MsgRepay) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
 	if err != nil {
 		return err
@@ -188,13 +188,13 @@ func (msg *MsgRepayAsset) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgRepayAsset) GetSigners() []sdk.AccAddress {
+func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
 	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgRepayAsset) GetSignBytes() []byte {
+func (msg *MsgRepay) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

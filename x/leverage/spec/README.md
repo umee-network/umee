@@ -30,11 +30,11 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 3. **[Queries](03_queries.md)**
 4. **[Messages](04_messages.md)**
     - [MsgSupply](04_messages.md#MsgSupply)
-    - [MsgWithdrawAsset](04_messages.md#MsgWithdrawAsset)
-    - [MsgAddCollateral](04_messages.md#MsgAddCollateral)
-    - [MsgRemoveCollateral](04_messages.md#MsgRemoveCollateral)
-    - [MsgBorrowAsset](04_messages.md#MsgBorrowAsset)
-    - [MsgRepayAsset](04_messages.md#MsgRepayAsset)
+    - [MsgWithdraw](04_messages.md#MsgWithdraw)
+    - [MsgCollateralize](04_messages.md#MsgCollateralize)
+    - [MsgDecollateralize](04_messages.md#MsgDecollateralize)
+    - [MsgBorrow](04_messages.md#MsgBorrow)
+    - [MsgRepay](04_messages.md#MsgRepay)
     - [MsgLiquidate](04_messages.md#MsgLiquidate)
 5. **[EndBlock](05_endblock.md)**
     - [Bad Debt Sweeping](05_endblock.md#Sweep-Bad-Debt)
