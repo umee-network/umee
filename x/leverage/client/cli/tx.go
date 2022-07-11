@@ -41,7 +41,7 @@ func GetTxCmd() *cobra.Command {
 // transaction with a MsgSupply message.
 func GetCmdSupply() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "supply-asset [supplier] [amount]",
+		Use:   "supply [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Supply a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -74,7 +74,7 @@ func GetCmdSupply() *cobra.Command {
 // transaction with a MsgWithdraw message.
 func GetCmdWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw-asset [supplier] [amount]",
+		Use:   "withdraw [supplier] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Withdraw a specified amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -107,7 +107,7 @@ func GetCmdWithdraw() *cobra.Command {
 // transaction with a MsgCollateralize message.
 func GetCmdCollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-collateral [borrower] [coin]",
+		Use:   "collateralize [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Add uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -142,7 +142,7 @@ func GetCmdCollateralize() *cobra.Command {
 // transaction with a MsgDecollateralize message.
 func GetCmdDecollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove-collateral [borrower] [coin]",
+		Use:   "decollateralize [borrower] [coin]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Remove uTokens from collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -177,7 +177,7 @@ func GetCmdDecollateralize() *cobra.Command {
 // transaction with a MsgBorrow message.
 func GetCmdBorrow() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrow-asset [borrower] [amount]",
+		Use:   "borrow [borrower] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Borrow a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -210,7 +210,7 @@ func GetCmdBorrow() *cobra.Command {
 // transaction with a MsgRepay message.
 func GetCmdRepay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "repay-asset [borrower] [amount]",
+		Use:   "repay [borrower] [amount]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Repay a specified amount of a borrowed asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
