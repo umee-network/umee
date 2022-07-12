@@ -6,6 +6,8 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Msg defines the x/leverage module's Msg service.
 service Msg {
   // Supply moves tokens from user balance to the module for lending or collateral.
