@@ -6,6 +6,8 @@ import "umee/oracle/v1/oracle.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // GenesisState defines the oracle module's genesis state.
 message GenesisState {
   Params                    params             = 1 [(gogoproto.nullable) = false];
