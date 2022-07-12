@@ -403,7 +403,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
+	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParams{})
 	if err != nil {
 		return oracletypes.Params{}, fmt.Errorf("failed to get x/oracle params: %w", err)
 	}

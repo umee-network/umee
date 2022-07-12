@@ -23,7 +23,7 @@ func (s *IntegrationTestSuite) TestGetCollateralAmount() {
 	s.Require().Equal(sdk.NewInt64Coin(uDenom, 0), collateral)
 
 	// enable u/umee as collateral
-	s.Require().NoError(s.tk.AddCollateral(s.ctx, addr, sdk.NewInt64Coin(uDenom, 1000)))
+	s.Require().NoError(s.tk.Collateralize(s.ctx, addr, sdk.NewInt64Coin(uDenom, 1000)))
 
 	// confirm collateral amount is 1000 u/uumee
 	collateral = s.tk.GetCollateralAmount(s.ctx, addr, uDenom)
@@ -38,7 +38,7 @@ func (s *IntegrationTestSuite) TestGetCollateralAmount() {
 	s.Require().Equal(sdk.NewInt64Coin("abcd", 0), collateral)
 
 	// disable u/umee as collateral
-	s.Require().NoError(s.tk.RemoveCollateral(s.ctx, addr, sdk.NewInt64Coin(uDenom, 1000)))
+	s.Require().NoError(s.tk.Decollateralize(s.ctx, addr, sdk.NewInt64Coin(uDenom, 1000)))
 
 	// confirm collateral amount is 0 u/uumee
 	collateral = s.tk.GetCollateralAmount(s.ctx, addr, uDenom)
