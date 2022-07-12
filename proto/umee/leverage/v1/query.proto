@@ -183,7 +183,8 @@ message QueryBorrowAPY {
 message QueryBorrowAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
@@ -198,7 +199,8 @@ message QuerySupplyAPY {
 message QuerySupplyAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
