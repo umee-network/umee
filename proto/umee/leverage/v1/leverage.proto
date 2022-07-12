@@ -148,4 +148,12 @@ message Token {
   uint32 max_collateral_share = 15 [
     (gogoproto.moretags) = "yaml:\"max_collateral_share\""
   ];
+
+  // Maximum collateral utilization allowed in the system as per cent. See
+  // ADR-003 `collateral_utilization` definition for more details.
+  // Valid values: 0-10000. 150 means 150%.
+  // Expected value is between 100-400.
+  uint32 max_collateral_utilization = 16 [
+    (gogoproto.moretags) = "yaml:\"max_collateral_utilization\""
+  ];
 }
