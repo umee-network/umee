@@ -179,9 +179,10 @@ message QueryBorrowAPY {
 // QueryBorrowAPYResponse defines the response structure for the BorrowAPY
 // gRPC service handler.
 message QueryBorrowAPYResponse {
-  string apy = 1 [
+  string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
@@ -194,9 +195,10 @@ message QuerySupplyAPY {
 // QuerySupplyAPYResponse defines the response structure for the SupplyAPY
 // gRPC service handler.
 message QuerySupplyAPYResponse {
-  string apy = 1 [
+  string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
