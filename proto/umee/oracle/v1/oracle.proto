@@ -5,6 +5,8 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Params defines the parameters for the oracle module.
 message Params {
   option (gogoproto.equal)            = true;
