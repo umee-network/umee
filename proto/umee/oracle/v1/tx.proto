@@ -5,6 +5,8 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Msg defines the oracle Msg service.
 service Msg {
   // AggregateExchangeRatePrevote defines a method for submitting an aggregate
