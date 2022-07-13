@@ -53,8 +53,13 @@ func TestReduceProportional(t *testing.T) {
 	}
 
 	// No-op tests
-	testCase(2, 1, 40, 40) // a/b > 0
-	testCase(1, 0, 50, 50) // b == 0
+	testCase(2, 1, 40, 40)           // a/b > 0
+	testCase(1, 0, 50, 50)           // b == 0
+	testCase(3, 3, 1, 1)             // a/b == 1
+	testCase(3, 3, 1000, 1000)       // a/b == 1
+	testCase(1000, 1000, 3, 3)       // a/b == 1
+	testCase(3333, 3333, 1000, 1000) // a/b == 1
+	testCase(1000, 1000, 3333, 3333) // a/b == 1
 
 	// Zero result tests
 	testCase(1, 2, 0, 0)  // (1/2)0 = 0
