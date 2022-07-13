@@ -16,7 +16,7 @@ func (msg MsgSupply) Route() string { return ModuleName }
 func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())
+	_, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func (msg *MsgSupply) ValidateBasic() error {
 }
 
 func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
-	supplier, _ := sdk.AccAddressFromBech32(msg.GetSupplier())
+	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
 	return []sdk.AccAddress{supplier}
 }
 
@@ -50,7 +50,7 @@ func (msg MsgWithdraw) Route() string { return ModuleName }
 func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetSupplier())
+	_, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (msg *MsgWithdraw) ValidateBasic() error {
 }
 
 func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
-	supplier, _ := sdk.AccAddressFromBech32(msg.GetSupplier())
+	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
 	return []sdk.AccAddress{supplier}
 }
 
@@ -84,7 +84,7 @@ func (msg MsgCollateralize) Route() string { return ModuleName }
 func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (msg *MsgCollateralize) ValidateBasic() error {
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
@@ -113,7 +113,7 @@ func (msg MsgDecollateralize) Route() string { return ModuleName }
 func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (msg *MsgDecollateralize) ValidateBasic() error {
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
@@ -142,7 +142,7 @@ func (msg MsgBorrow) Route() string { return ModuleName }
 func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (msg *MsgBorrow) ValidateBasic() error {
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
@@ -176,7 +176,7 @@ func (msg MsgRepay) Route() string { return ModuleName }
 func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func (msg *MsgRepay) ValidateBasic() error {
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
@@ -212,10 +212,12 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.GetLiquidator()); err != nil {
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
 		return err
 	}
-	if _, err := sdk.AccAddressFromBech32(msg.GetBorrower()); err != nil {
+	_, err = sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
 		return err
 	}
 	if err := msg.Repayment.Validate(); err != nil {
@@ -228,7 +230,7 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 }
 
 func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
-	liquidator, _ := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	liquidator, _ := sdk.AccAddressFromBech32(msg.Liquidator)
 	return []sdk.AccAddress{liquidator}
 }
 

@@ -69,20 +69,6 @@ func (m *MsgSupply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSupply proto.InternalMessageInfo
 
-func (m *MsgSupply) GetSupplier() string {
-	if m != nil {
-		return m.Supplier
-	}
-	return ""
-}
-
-func (m *MsgSupply) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
-	}
-	return types.Coin{}
-}
-
 // MsgWithdraw represents a user's request to withdraw supplied assets.
 // Asset must be a uToken.
 type MsgWithdraw struct {
@@ -123,20 +109,6 @@ func (m *MsgWithdraw) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_MsgWithdraw proto.InternalMessageInfo
-
-func (m *MsgWithdraw) GetSupplier() string {
-	if m != nil {
-		return m.Supplier
-	}
-	return ""
-}
-
-func (m *MsgWithdraw) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
-	}
-	return types.Coin{}
-}
 
 // MsgCollateralize represents a user's request to enable selected
 // uTokens as collateral.
@@ -179,20 +151,6 @@ func (m *MsgCollateralize) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCollateralize proto.InternalMessageInfo
 
-func (m *MsgCollateralize) GetBorrower() string {
-	if m != nil {
-		return m.Borrower
-	}
-	return ""
-}
-
-func (m *MsgCollateralize) GetCoin() types.Coin {
-	if m != nil {
-		return m.Coin
-	}
-	return types.Coin{}
-}
-
 // MsgDecollateralize represents a user's request to disable selected
 // uTokens as collateral.
 type MsgDecollateralize struct {
@@ -233,20 +191,6 @@ func (m *MsgDecollateralize) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_MsgDecollateralize proto.InternalMessageInfo
-
-func (m *MsgDecollateralize) GetBorrower() string {
-	if m != nil {
-		return m.Borrower
-	}
-	return ""
-}
-
-func (m *MsgDecollateralize) GetCoin() types.Coin {
-	if m != nil {
-		return m.Coin
-	}
-	return types.Coin{}
-}
 
 // MsgBorrow represents a user's request to borrow a base asset type
 // from the module.
@@ -290,20 +234,6 @@ func (m *MsgBorrow) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgBorrow proto.InternalMessageInfo
 
-func (m *MsgBorrow) GetBorrower() string {
-	if m != nil {
-		return m.Borrower
-	}
-	return ""
-}
-
-func (m *MsgBorrow) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
-	}
-	return types.Coin{}
-}
-
 // MsgRepay represents a user's request to repay a borrowed base asset
 // type to the module.
 type MsgRepay struct {
@@ -345,20 +275,6 @@ func (m *MsgRepay) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_MsgRepay proto.InternalMessageInfo
-
-func (m *MsgRepay) GetBorrower() string {
-	if m != nil {
-		return m.Borrower
-	}
-	return ""
-}
-
-func (m *MsgRepay) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
-	}
-	return types.Coin{}
-}
 
 // MsgLiquidate is the request structure for the Liquidate RPC.
 type MsgLiquidate struct {
@@ -402,34 +318,6 @@ func (m *MsgLiquidate) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_MsgLiquidate proto.InternalMessageInfo
-
-func (m *MsgLiquidate) GetLiquidator() string {
-	if m != nil {
-		return m.Liquidator
-	}
-	return ""
-}
-
-func (m *MsgLiquidate) GetBorrower() string {
-	if m != nil {
-		return m.Borrower
-	}
-	return ""
-}
-
-func (m *MsgLiquidate) GetRepayment() types.Coin {
-	if m != nil {
-		return m.Repayment
-	}
-	return types.Coin{}
-}
-
-func (m *MsgLiquidate) GetRewardDenom() string {
-	if m != nil {
-		return m.RewardDenom
-	}
-	return ""
-}
 
 // MsgSupplyResponse defines the Msg/Supply response type.
 type MsgSupplyResponse struct {
@@ -654,13 +542,6 @@ func (m *MsgRepayResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRepayResponse proto.InternalMessageInfo
 
-func (m *MsgRepayResponse) GetRepaid() types.Coin {
-	if m != nil {
-		return m.Repaid
-	}
-	return types.Coin{}
-}
-
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 type MsgLiquidateResponse struct {
 	Repaid     types.Coin `protobuf:"bytes,1,opt,name=repaid,proto3" json:"repaid"`
@@ -700,27 +581,6 @@ func (m *MsgLiquidateResponse) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_MsgLiquidateResponse proto.InternalMessageInfo
-
-func (m *MsgLiquidateResponse) GetRepaid() types.Coin {
-	if m != nil {
-		return m.Repaid
-	}
-	return types.Coin{}
-}
-
-func (m *MsgLiquidateResponse) GetCollateral() types.Coin {
-	if m != nil {
-		return m.Collateral
-	}
-	return types.Coin{}
-}
-
-func (m *MsgLiquidateResponse) GetReward() types.Coin {
-	if m != nil {
-		return m.Reward
-	}
-	return types.Coin{}
-}
 
 func init() {
 	proto.RegisterType((*MsgSupply)(nil), "umee.leverage.v1.MsgSupply")

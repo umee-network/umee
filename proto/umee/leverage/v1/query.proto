@@ -8,6 +8,8 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Query defines the gRPC querier service.
 service Query {
   // RegisteredTokens queries for all the registered tokens.
@@ -181,7 +183,8 @@ message QueryBorrowAPY {
 message QueryBorrowAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
@@ -196,7 +199,8 @@ message QuerySupplyAPY {
 message QuerySupplyAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
