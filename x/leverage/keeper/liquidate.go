@@ -37,11 +37,6 @@ func (k Keeper) liquidationOutcome(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if liquidationThreshold.GTE(borrowedValue) {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible.Wrapf(
-			"%s borrowed value %s is below the liquidation threshold %s",
-			targetAddr, borrowedValue, liquidationThreshold)
-	}
 
 	// get dynamic close factor and liquidation incentive
 	liquidationIncentive, closeFactor, err := k.liquidationParams(ctx, rewardDenom, borrowedValue, liquidationThreshold)
@@ -121,6 +116,12 @@ func (k Keeper) liquidationParams(
 	}
 	if liquidationThreshold.IsNegative() {
 		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, liquidationThreshold.String())
+	}
+
+	if liquidationThreshold.GTE(borrowedValue) {
+		return sdk.ZeroDec(), sdk.ZeroDec(), types.ErrLiquidationIneligible.Wrapf(
+			"borrowed value %s is below the liquidation threshold %s",
+			borrowedValue, liquidationThreshold)
 	}
 
 	ts, err := k.GetTokenSettings(ctx, rewardDenom)
