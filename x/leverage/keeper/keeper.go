@@ -352,7 +352,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 // an error is returned. If the attempted repayment is greater than the amount owed or the maximum that
 // can be repaid due to parameters or available balances, then a partial liquidation, equal to the maximum
 // valid amount, is performed. Because partial liquidation is possible and exchange rates vary, Liquidate
-// returns the actual amount of tokens repaid, uTokens consumed, and base tokens rewarded (in that order).
+// returns the actual amount of tokens repaid, uTokens consumed, and base tokens rewarded.
 func (k Keeper) Liquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepay sdk.Coin, rewardDenom string,
 ) (baseRepay sdk.Coin, collateralReward sdk.Coin, baseReward sdk.Coin, err error) {
