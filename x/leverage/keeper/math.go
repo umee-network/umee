@@ -42,7 +42,7 @@ func ReduceProportionally(a, b sdk.Int, nums ...*sdk.Int) {
 }
 
 // ReduceProportionallyDec accepts two sdk.Dec to be interpreted as a fraction (a/b), and
-// any number of pointers to sdk.Int which will be multiplied by (a/b) if a < b, then
+// any number of pointers to sdk.Int which will be multiplied (and updated) by (a/b) if a < b, then
 // rounded up. If a >= b or b == 0 this is a no-op.
 func ReduceProportionallyDec(a, b sdk.Dec, nums ...*sdk.Int) {
 	if a.GTE(b) || b.IsZero() {
