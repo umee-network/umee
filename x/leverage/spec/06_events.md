@@ -4,25 +4,25 @@ The leverage module emits the following events:
 
 ## Handlers
 
-### MsgLendAsset
+### MsgSupply
 
 | Type     | Attribute Key | Attribute Value                                 |
 | -------- | ------------- | ----------------------------------------------- |
-| lend     | sender        | {lenderAddress}                                 |
-| lend     | amount        | {amount}                                        |
+| supply   | sender        | {supplierAddress}                               |
+| supply   | amount        | {amount}                                        |
 | message  | module        | leverage                                        |
-| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgLendAsset |
-| message  | sender        | {lenderAddress}                                 |
+| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgSupply    |
+| message  | sender        | {supplierAddress}                               |
 
-### MsgWithdrawAsset
+### MsgWithdraw
 
 | Type     | Attribute Key | Attribute Value                                     |
 | -------- | ------------- | --------------------------------------------------- |
-| withdraw | sender        | {lenderAddress}                                     |
+| withdraw | sender        | {supplierAddress}                                   |
 | withdraw | amount        | {amount}                                            |
 | message  | module        | leverage                                            |
-| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgWithdrawAsset |
-| message  | sender        | {lenderAddress}                                     |
+| message  | action        | /umeenetwork.umee.leverage.v1beta1.MsgWithdraw |
+| message  | sender        | {supplierAddress}                                   |
 
 ### MsgSetCollateral
 
@@ -35,24 +35,24 @@ The leverage module emits the following events:
 | message        | action        | /umeenetwork.umee.leverage.v1beta1.MsgSetCollateral |
 | message        | sender        | {borrowerAddress}                                   |
 
-### MsgBorrowAsset
+### MsgBorrow
 
 | Type    | Attribute Key | Attribute Value                                   |
 | ------- | ------------- | ------------------------------------------------- |
 | borrow  | sender        | {borrowerAddress}                                 |
 | borrow  | amount        | {amount}                                          |
 | message | module        | leverage                                          |
-| message | action        | /umeenetwork.umee.leverage.v1beta1.MsgBorrowAsset |
+| message | action        | /umeenetwork.umee.leverage.v1beta1.MsgBorrow |
 | message | sender        | {borrowerAddress}                                 |
 
-### MsgRepayAsset
+### MsgRepay
 
 | Type    | Attribute Key | Attribute Value                                  |
 | ------- | ------------- | ------------------------------------------------ |
 | repay   | sender        | {borrowerAddress}                                |
 | repay   | amount        | {amount}*                                        |
 | message | module        | leverage                                         |
-| message | action        | /umeenetwork.umee.leverage.v1beta1.MsgRepayAsset |
+| message | action        | /umeenetwork.umee.leverage.v1beta1.MsgRepay |
 | message | sender        | {borrowerAddress}                                |
 
 * Amount successfully repaid may be lower than the amount requested in the message if the original amount would exceed full repayment.

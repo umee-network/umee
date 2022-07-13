@@ -13,7 +13,6 @@ func NewGenesisState(
 	params Params,
 	tokens []Token,
 	adjustedBorrows []AdjustedBorrow,
-	collateralSettings []CollateralSetting,
 	collateral []Collateral,
 	reserves sdk.Coins,
 	lastInterestTime int64,
@@ -22,15 +21,14 @@ func NewGenesisState(
 	uTokenSupply sdk.Coins,
 ) *GenesisState {
 	return &GenesisState{
-		Params:             params,
-		Registry:           tokens,
-		AdjustedBorrows:    adjustedBorrows,
-		CollateralSettings: collateralSettings,
-		Collateral:         collateral,
-		LastInterestTime:   lastInterestTime,
-		BadDebts:           badDebts,
-		InterestScalars:    interestScalars,
-		UtokenSupply:       uTokenSupply,
+		Params:           params,
+		Registry:         tokens,
+		AdjustedBorrows:  adjustedBorrows,
+		Collateral:       collateral,
+		LastInterestTime: lastInterestTime,
+		BadDebts:         badDebts,
+		InterestScalars:  interestScalars,
+		UtokenSupply:     uTokenSupply,
 	}
 }
 
@@ -62,16 +60,6 @@ func (gs GenesisState) Validate() error {
 		}
 
 		if err := borrow.Amount.Validate(); err != nil {
-			return err
-		}
-	}
-
-	for _, setting := range gs.CollateralSettings {
-		if _, err := sdk.AccAddressFromBech32(setting.Address); err != nil {
-			return err
-		}
-
-		if err := sdk.ValidateDenom(setting.Denom); err != nil {
 			return err
 		}
 	}
@@ -142,14 +130,6 @@ func NewCollateral(addr string, amount sdk.Coin) Collateral {
 	return Collateral{
 		Address: addr,
 		Amount:  amount,
-	}
-}
-
-// NewCollateralSetting creates the CollateralSetting struct used in GenesisState
-func NewCollateralSetting(addr, denom string) CollateralSetting {
-	return CollateralSetting{
-		Address: addr,
-		Denom:   denom,
 	}
 }
 

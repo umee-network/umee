@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom
-// using its borrow utilization and token-specific params. Returns zero on
+// using its supply utilization and token-specific params. Returns zero on
 // invalid asset.
 func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}
@@ -24,64 +23,67 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
-	utilization := k.DeriveBorrowUtilization(ctx, denom)
+	utilization := k.SupplyUtilization(ctx, denom)
 
-	if utilization.GTE(token.KinkUtilizationRate) {
+	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,               // x
-			token.KinkUtilizationRate, // x1
-			token.KinkBorrowRate,      // y1
-			sdk.OneDec(),              // x2
-			token.MaxBorrowRate,       // y2
+			utilization,           // x
+			token.KinkUtilization, // x1
+			token.KinkBorrowRate,  // y1
+			sdk.OneDec(),          // x2
+			token.MaxBorrowRate,   // y2
 		)
 	}
 
 	// utilization is between 0% and kink value
 	return Interpolate(
-		utilization,               // x
-		sdk.ZeroDec(),             // x1
-		token.BaseBorrowRate,      // y1
-		token.KinkUtilizationRate, // x2
-		token.KinkBorrowRate,      // y2
+		utilization,           // x
+		sdk.ZeroDec(),         // x1
+		token.BaseBorrowRate,  // y1
+		token.KinkUtilization, // x2
+		token.KinkBorrowRate,  // y2
 	)
 }
 
-// DeriveLendAPY derives the current lend interest rate on a token denom
-// using its borrow utilization borrow APY. Returns zero on invalid asset.
-func (k Keeper) DeriveLendAPY(ctx sdk.Context, denom string) sdk.Dec {
-	token, err := k.GetRegisteredToken(ctx, denom)
+// DeriveSupplyAPY derives the current supply interest rate on a token denom
+// using its supply utilization borrow APY. Returns zero on invalid asset.
+func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroDec()
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
-	borrowUtilization := k.DeriveBorrowUtilization(ctx, denom)
+	utilization := k.SupplyUtilization(ctx, denom)
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
-	// lend APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
-	return borrowRate.Mul(borrowUtilization).Mul(sdk.OneDec().Sub(reduction))
+	// supply APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
+	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
 }
 
-// AccrueAllInterest is called by EndBlock when BlockHeight % InterestEpoch == 0.
-// It should accrue interest on all open borrows, increase reserves, and set
-// LastInterestTime to BlockTime.
+// AccrueAllInterest is called by EndBlock to update borrow positions.
+// It accrues interest on all open borrows, increase reserves, funds
+// oracle rewards, and sets LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
-	// get current unix time in seconds
 	currentTime := ctx.BlockTime().Unix()
-
-	// get last time at which interest was accrued
 	prevInterestTime := k.GetLastInterestTime(ctx)
 	if prevInterestTime == 0 {
-		// on first ever interest epoch, ignore stored value
 		prevInterestTime = currentTime
 	}
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
-	secondsElapsed := currentTime - prevInterestTime
-	if secondsElapsed < 0 {
-		return sdkerrors.Wrap(types.ErrNegativeTimeElapsed, fmt.Sprintf("%d seconds", secondsElapsed))
+	if currentTime < prevInterestTime {
+		// @todo fix this when tendermint solves #8773
+		// https://github.com/tendermint/tendermint/issues/8773
+		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
+			types.ErrNegativeTimeElapsed.Error(),
+			"current", currentTime,
+			"prev", prevInterestTime,
+		)
+
+		return nil
 	}
-	yearsElapsed := sdk.NewDec(secondsElapsed).QuoInt64(types.SecondsPerYear)
+	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)
@@ -159,6 +161,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"reserved", newReserves.String(),
 	)
 
+	// TODO: use typed events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeInterestAccrual,
@@ -186,14 +189,17 @@ func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error 
 	return nil
 }
 
-// GetLastInterestTime gets last time at which interest was accrued
+// GetLastInterestTime returns unix timestamp (in seconds) when the last interest was accrued.
+// Returns 0 if the value if the value is absent.
 func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
 	bz := store.Get(timeKey)
+	if bz == nil {
+		return 0
+	}
 
 	val := gogotypes.Int64Value{}
-
 	if err := k.cdc.Unmarshal(bz, &val); err != nil {
 		panic(err)
 	}

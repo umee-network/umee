@@ -5,168 +5,196 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewMsgLendAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgLendAsset {
-	return &MsgLendAsset{
-		Lender: lender.String(),
-		Amount: amount,
+func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
+	return &MsgSupply{
+		Supplier: supplier.String(),
+		Asset:    asset,
 	}
 }
 
-func (msg MsgLendAsset) Route() string { return ModuleName }
-func (msg MsgLendAsset) Type() string  { return EventTypeLoanAsset }
+func (msg MsgSupply) Route() string { return ModuleName }
+func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
-func (msg *MsgLendAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLender())
+func (msg *MsgSupply) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
 }
 
-func (msg *MsgLendAsset) GetSigners() []sdk.AccAddress {
-	lender, _ := sdk.AccAddressFromBech32(msg.GetLender())
-	return []sdk.AccAddress{lender}
+func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
+	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
+	return []sdk.AccAddress{supplier}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgLendAsset) GetSignBytes() []byte {
+func (msg *MsgSupply) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdrawAsset(lender sdk.AccAddress, amount sdk.Coin) *MsgWithdrawAsset {
-	return &MsgWithdrawAsset{
-		Lender: lender.String(),
-		Amount: amount,
+func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
+	return &MsgWithdraw{
+		Supplier: supplier.String(),
+		Asset:    asset,
 	}
 }
 
-func (msg MsgWithdrawAsset) Route() string { return ModuleName }
-func (msg MsgWithdrawAsset) Type() string  { return EventTypeWithdrawLoanedAsset }
+func (msg MsgWithdraw) Route() string { return ModuleName }
+func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
-func (msg *MsgWithdrawAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLender())
+func (msg *MsgWithdraw) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Supplier)
 	if err != nil {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
 }
 
-func (msg *MsgWithdrawAsset) GetSigners() []sdk.AccAddress {
-	lender, _ := sdk.AccAddressFromBech32(msg.GetLender())
-	return []sdk.AccAddress{lender}
+func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
+	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
+	return []sdk.AccAddress{supplier}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgWithdrawAsset) GetSignBytes() []byte {
+func (msg *MsgWithdraw) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgSetCollateral(borrower sdk.AccAddress, denom string, enable bool) *MsgSetCollateral {
-	return &MsgSetCollateral{
+func NewMsgCollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgCollateralize {
+	return &MsgCollateralize{
 		Borrower: borrower.String(),
-		Denom:    denom,
-		Enable:   enable,
+		Coin:     coin,
 	}
 }
 
-func (msg MsgSetCollateral) Route() string { return ModuleName }
-func (msg MsgSetCollateral) Type() string  { return EventTypeSetCollateralSetting }
+func (msg MsgCollateralize) Route() string { return ModuleName }
+func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
-func (msg *MsgSetCollateral) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgCollateralize) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (msg *MsgSetCollateral) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSetCollateral) GetSignBytes() []byte {
+func (msg *MsgCollateralize) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrowAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgBorrowAsset {
-	return &MsgBorrowAsset{
+func NewMsgDecollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgDecollateralize {
+	return &MsgDecollateralize{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Coin:     coin,
 	}
 }
 
-func (msg MsgBorrowAsset) Route() string { return ModuleName }
-func (msg MsgBorrowAsset) Type() string  { return EventTypeBorrowAsset }
+func (msg MsgDecollateralize) Route() string { return ModuleName }
+func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
-func (msg *MsgBorrowAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgDecollateralize) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
+	return []sdk.AccAddress{borrower}
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgDecollateralize) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
+	return &MsgBorrow{
+		Borrower: borrower.String(),
+		Asset:    asset,
+	}
+}
+
+func (msg MsgBorrow) Route() string { return ModuleName }
+func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
+
+func (msg *MsgBorrow) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
 }
 
-func (msg *MsgBorrowAsset) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBorrowAsset) GetSignBytes() []byte {
+func (msg *MsgBorrow) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRepayAsset(borrower sdk.AccAddress, amount sdk.Coin) *MsgRepayAsset {
-	return &MsgRepayAsset{
+func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
+	return &MsgRepay{
 		Borrower: borrower.String(),
-		Amount:   amount,
+		Asset:    asset,
 	}
 }
 
-func (msg MsgRepayAsset) Route() string { return ModuleName }
-func (msg MsgRepayAsset) Type() string  { return EventTypeRepayBorrowedAsset }
+func (msg MsgRepay) Route() string { return ModuleName }
+func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
 
-func (msg *MsgRepayAsset) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgRepay) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
 
-	if asset := msg.GetAmount(); !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if !msg.Asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
 	}
 
 	return nil
 }
 
-func (msg *MsgRepayAsset) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.GetBorrower())
+func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
+	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
 	return []sdk.AccAddress{borrower}
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgRepayAsset) GetSignBytes() []byte {
+func (msg *MsgRepay) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
@@ -184,20 +212,20 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
 	if err != nil {
 		return err
 	}
-	_, err = sdk.AccAddressFromBech32(msg.GetBorrower())
+	_, err = sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return err
 	}
 
-	if asset := msg.GetRepayment(); !asset.IsValid() {
+	if asset := msg.Repayment; !asset.IsValid() {
 		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 
-	if asset := msg.GetReward(); !asset.IsValid() {
+	if asset := msg.Reward; !asset.IsValid() {
 		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 
@@ -205,7 +233,7 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 }
 
 func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
-	liquidator, _ := sdk.AccAddressFromBech32(msg.GetLiquidator())
+	liquidator, _ := sdk.AccAddressFromBech32(msg.Liquidator)
 	return []sdk.AccAddress{liquidator}
 }
 

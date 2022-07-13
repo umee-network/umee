@@ -34,7 +34,6 @@ func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	iterator := func(key, val []byte) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
-
 		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
 
 		return nil
@@ -64,7 +63,8 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 		return nil
 	}
 
-	if err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator); err != nil {
+	err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator)
+	if err != nil {
 		panic(err)
 	}
 
@@ -111,7 +111,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		var adjustedAmount sdk.Dec
 		if err := adjustedAmount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
-			panic(err)
+			return err
 		}
 
 		// apply interest scalar
@@ -122,7 +122,10 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		return nil
 	}
 
-	_ = k.iterate(ctx, prefix, iterator)
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
 
 	return totalBorrowed
 }
@@ -140,7 +143,7 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		var amount sdk.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled amount should never happen
-			panic(err)
+			return err
 		}
 
 		// add to totalBorrowed
@@ -148,7 +151,10 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		return nil
 	}
 
-	_ = k.iterate(ctx, prefix, iterator)
+	err := k.iterate(ctx, prefix, iterator)
+	if err != nil {
+		panic(err)
+	}
 
 	return totalCollateral
 }

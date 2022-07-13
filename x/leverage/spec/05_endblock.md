@@ -15,7 +15,7 @@ Borrowers whose entire balance of collateral has been liquidated but still owe d
 
 ## Accrue Interest
 
-At every epoch, the module recalculates [Borrow APY](01_concepts.md#Borrow-APY) and [Lending APY](01_concepts.md#Lending-APY) for each accepted asset type, storing them in state for easier query.
+At every epoch, the module recalculates [Borrow APY](01_concepts.md#Borrow-APY) and [Supplying APY](01_concepts.md#Supplying-APY) for each accepted asset type, storing them in state for easier query.
 
 Borrow APY is then used to accrue interest on all open borrows.
 

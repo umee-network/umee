@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	binanceHost          = "stream.binance.com:9443"
-	binancePath          = "/ws/umeestream"
-	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
+	binanceWSHost   = "stream.binance.com:9443"
+	binanceWSPath   = "/ws/umeestream"
+	binanceRestHost = "https://api1.binance.com"
+	binanceRestPath = "/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -36,6 +37,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -80,11 +82,24 @@ type (
 	}
 )
 
-func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*BinanceProvider, error) {
+func NewBinanceProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*BinanceProvider, error) {
+	if (endpoints.Name) != config.ProviderBinance {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderBinance,
+			Rest:      binanceRestHost,
+			Websocket: binanceWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   binanceHost,
-		Path:   binancePath,
+		Host:   endpoints.Websocket,
+		Path:   binanceWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -96,6 +111,7 @@ func NewBinanceProvider(ctx context.Context, logger zerolog.Logger, pairs ...typ
 		wsURL:           wsURL,
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "binance").Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -374,13 +390,13 @@ func (p *BinanceProvider) keepReconnecting() {
 	for time := range reconnectTicker.C {
 		if err := p.reconnect(); err != nil {
 			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
+			connectionTries++
 			continue
 		}
 
 		if connectionTries > maxReconnectionTries {
 			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
 		}
-		connectionTries++
 		return
 	}
 }
@@ -404,7 +420,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 // ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(binancePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + binanceRestPath)
 	if err != nil {
 		return nil, err
 	}

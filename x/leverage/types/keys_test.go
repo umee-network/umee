@@ -34,8 +34,8 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 	require.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
-	key = types.CreateCollateralSettingKey(address, uDenom)
-	expectedDenom = types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralSetting)
+	key = types.CreateCollateralAmountKey(address, uDenom)
+	expectedDenom = types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 
 	require.Equal(t, uDenom, expectedDenom)
 }

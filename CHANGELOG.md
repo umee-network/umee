@@ -46,11 +46,26 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### API Breaking
+
+- [1029](https://github.com/umee-network/umee/pull/1029) Removed MsgSetCollateral(addr,denom,bool), and replaced with MsgAddCollateral(addr,coin) and MsgRemoveCollateral(addr,coin)
+- [1023](https://github.com/umee-network/umee/pull/1023) Restrict MsgWithdraw to only uToken input (no base token auto-convert)
+- [1106](https://github.com/umee-network/umee/pull/1106) Rename Lend to Supply, including MsgLendAsset, Token EnableLend, docs, and internal functions. Also QueryLoaned similar queries to QuerySupplied.
+- [1113](https://github.com/umee-network/umee/pull/1113) Rename Amount field to Asset when sdk.Coin type in Msg proto.
+- [1122](https://github.com/umee-network/umee/pull/1122) Rename MsgWithdrawAsset, MsgBorrowAsset, MsgRepayAsset, MsgAddCollateral, and MsgRemoveCollateral to MsgWithdraw, MsgBorrow, MsgRepay, MsgCollateralize, MsgDecollateralize.
+- [1123](https://github.com/umee-network/umee/pull/1123) Shorten all leverage and oracle query structs by removing the Request suffix.
+- [1125](https://github.com/umee-network/umee/pull/1125) Refactor: remove proto getters in x/leverage and x/oracle proto types.
+- [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
+
 ### Features
 
 - [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
-- [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI
+- [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
+- [1068](https://github.com/umee-network/umee/pull/1068) Add a cache layer for token registry.
+- [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
+- [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
+- [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 
 ### Improvements
 
@@ -59,6 +74,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [962](https://github.com/umee-network/umee/pull/962) Streamline AccrueAllInterest
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
+- [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
+
+### Bug Fixes
+
+- [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+
+### API Breaking
+
+- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

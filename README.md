@@ -3,7 +3,7 @@
 
 ![Logo!](assets/umee-logo.png)
 
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#wip)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue?style=flat-square&logo=go)](https://godoc.org/github.com/umee-network/umee)
 [![Go Report Card](https://goreportcard.com/badge/github.com/umee-network/umee?style=flat-square)](https://goreportcard.com/report/github.com/umee-network/umee)
 [![Version](https://img.shields.io/github/tag/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/releases/latest)
@@ -23,12 +23,13 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Releases](#releases)
+  - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
   - [Private](#private)
 - [Install](#install)
-- [Contributing](CONTRIBUTING.md)
 
 ## Releases
 
@@ -40,13 +41,14 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 | :-----: | :-----: | :----------: | :---------: | :---------: | :-----------: | :------------------: |
 | v0.8.x  |    ✗    |      ✓       |   v0.45.x   |   v2.0.x    |    v0.2.x     |        v0.1.x        |
 | v1.x.x  |    ✓    |      ✗       |   v0.45.x   |   v2.0.x    |    v0.2.x     |         N/A          |
-| v2.x.x  |    ✗    |      ✓       |   v0.45.x   |   v2.2.x    |    v0.2.x     |        v0.2.x        |
+| v2.x.x  |    ✗    |      ✓       |   v0.45.x   |   v2.3.x    |    v0.2.x     |        v0.2.x        |
 
 ## Active Networks
 
-### Mainnet
+### Public
 
-[umee-1](networks/umee-1)
+- [umee-1](networks/umee-1)
+- [umeemania-1](networks/umeemania-1)
 
 ### Private
 

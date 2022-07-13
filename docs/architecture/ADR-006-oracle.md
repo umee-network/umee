@@ -12,8 +12,7 @@ Proposed
 
 Umee needs an oracle to determine the price of assets. From section 5.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
 
-> Oracle reads asset price and updates the state to the Asset Facility Coordination
-Protocol
+> Oracle reads asset price and updates the state to the Asset Facility Coordination Protocol
 
 We've already decided to import a large chunk of this from [Terra's oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html), although a few parts of this are specific to Terra's protocol and do not need to be implemented with respect to Umee.
 
@@ -39,10 +38,10 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.
 ### API
 
 The `x/oracle` module will provide the following method on its keeper, to be used by `x/leverage`:
+
 ```go
     GetExchangeRate(base string) (sdk.Dec, error) // get the USD value of an input base denomination
 ```
-
 
 ## Consequences
 

@@ -42,12 +42,13 @@ type Token struct {
     BaseBorrowRate       sdk.Dec
     KinkBorrowRate       sdk.Dec
     MaxBorrowRate        sdk.Dec
-    KinkUtilizationRate  sdk.Dec
+    KinkUtilization      sdk.Dec
     LiquidationIncentive sdk.Dec
     SymbolDenom          string
     Exponent             uint32
-    EnableMsgLend           bool
-    EnableMsgBorrow         bool
+    EnableMsgSupply      bool
+    EnableMsgBorrow      bool
     Blacklist            bool
+    MaxCollateralShare   uint32
 }
 ```

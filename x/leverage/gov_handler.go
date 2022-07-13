@@ -23,7 +23,7 @@ func NewUpdateRegistryProposalHandler(k keeper.Keeper) govtypes.Handler {
 
 func handleUpdateRegistryProposalHandler(ctx sdk.Context, k keeper.Keeper, p *types.UpdateRegistryProposal) error {
 	for _, token := range p.Registry {
-		if err := k.SetRegisteredToken(ctx, token); err != nil {
+		if err := k.SetTokenSettings(ctx, token); err != nil {
 			return err
 		}
 	}

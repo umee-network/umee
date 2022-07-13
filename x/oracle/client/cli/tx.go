@@ -29,7 +29,7 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
-// GetCmdDelegateFeedConsent returns a CLI command handler to generate or
+// GetCmdDelegateFeedConsent creates a Cobra command to generate or
 // broadcast a transaction with a MsgDelegateFeedConsent message.
 func GetCmdDelegateFeedConsent() *cobra.Command {
 	cmd := &cobra.Command{

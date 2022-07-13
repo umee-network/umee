@@ -11,16 +11,19 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
+        if: env.GIT_DIFF
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.18
       - name: Get Go Cache
+        if: env.GIT_DIFF
         uses: actions/cache@v3
         with:
           path: |
@@ -29,8 +32,8 @@ jobs:
             ~/.cache/go-build
           key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
       - name: Run golangci-lint
-        run: make lint
         if: env.GIT_DIFF
+        run: make lint
 
   super-linter:
     name: Run super-linter
@@ -49,3 +52,31 @@ jobs:
           VALIDATE_MARKDOWN: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  golangci-price-feeder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.0
+        with:
+          PATTERNS: |
+            **/**.go
+            price-feeder/go.mod
+            price-feeder/go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.18
+      - name: Get Go Cache
+        if: env.GIT_DIFF
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/golangci-lint
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+      - name: Lint price-feeder
+        if: env.GIT_DIFF
+        run: |
+          cd price-feeder && make lint

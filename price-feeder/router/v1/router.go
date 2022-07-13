@@ -51,7 +51,10 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		}
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+		w.Header().Set(
+			"Access-Control-Allow-Headers",
+			"Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With",
+		)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.WriteHeader(http.StatusOK)
 	})

@@ -12,7 +12,7 @@ An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Lev
 
 ## FeederDelegation
 
-An `sdk.AccAddress` (`umee-` account) address of `operator`'s delegated price feeder.
+An `sdk.AccAddress` (`umee-` account) address for `operator` price feeder rewards.
 
 - FeederDelegation: `0x02 | byte(valAddress length) | byte(valAddress) -> sdk.AccAddress`
 

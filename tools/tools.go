@@ -9,5 +9,5 @@ package tools
 
 import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "github.com/tendermint/starport/starport/cmd"
+	_ "github.com/ignite/cli/ignite/cmd"
 )

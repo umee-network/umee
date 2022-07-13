@@ -17,6 +17,7 @@
 - https://snapshots.weakhand.xyz/umee
 - http://singularity-services.xyz/umee
 - https://bitszn.com/snapshots.html
+- https://snapshot.testnet.run/mainnet/umee/
 
 ## Umee Archival Nodes
 

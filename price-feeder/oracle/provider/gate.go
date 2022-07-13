@@ -19,10 +19,11 @@ import (
 )
 
 const (
-	gateHost          = "ws.gate.io"
-	gatePath          = "/v3"
-	gatePingCheck     = time.Second * 28 // should be < 30
-	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
+	gateWSHost    = "ws.gate.io"
+	gateWSPath    = "/v3"
+	gatePingCheck = time.Second * 28 // should be < 30
+	gateRestHost  = "https://api.gateio.ws"
+	gateRestPath  = "/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -38,6 +39,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       config.ProviderEndpoint
 		tickers         map[string]GateTicker         // Symbol => GateTicker
 		candles         map[string][]GateCandle       // Symbol => GateCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -103,11 +105,24 @@ type (
 )
 
 // NewGateProvider creates a new GateProvider.
-func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*GateProvider, error) {
+func NewGateProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints config.ProviderEndpoint,
+	pairs ...types.CurrencyPair,
+) (*GateProvider, error) {
+	if endpoints.Name != config.ProviderGate {
+		endpoints = config.ProviderEndpoint{
+			Name:      config.ProviderGate,
+			Rest:      gateRestHost,
+			Websocket: gateWSHost,
+		}
+	}
+
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   gateHost,
-		Path:   gatePath,
+		Host:   endpoints.Websocket,
+		Path:   gateWSPath,
 	}
 
 	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
@@ -120,6 +135,7 @@ func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "gate").Logger(),
 		reconnectTimer:  time.NewTicker(gatePingCheck),
+		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
 		candles:         map[string][]GateCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -267,9 +283,9 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	gp := currencyPairToGatePair(cp)
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
-	} else {
-		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 	}
+
+	return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
@@ -323,7 +339,14 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "":
 			break
 		default:
-			p.reconnect()
+			err := p.reconnect()
+			if err != nil {
+				p.logger.Error().
+					AnErr("ticker", tickerErr).
+					AnErr("candle", candleErr).
+					AnErr("event", err).
+					Msg("Error on reconnecting")
+			}
 			return
 		}
 	}
@@ -393,7 +416,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 
 // UnmarshalParams is a helper function which unmarshals the 2d slice of interfaces
 // from a GateCandleResponse into the GateCandle.
-func (gc *GateCandle) UnmarshalParams(params [][]interface{}) error {
+func (candle *GateCandle) UnmarshalParams(params [][]interface{}) error {
 	var tmp []interface{}
 
 	if len(params) == 0 {
@@ -410,25 +433,25 @@ func (gc *GateCandle) UnmarshalParams(params [][]interface{}) error {
 	if time == 0 {
 		return fmt.Errorf("time field must be a float")
 	}
-	gc.TimeStamp = time
+	candle.TimeStamp = time
 
 	close, ok := tmp[1].(string)
 	if !ok {
 		return fmt.Errorf("close field must be a string")
 	}
-	gc.Close = close
+	candle.Close = close
 
 	volume, ok := tmp[5].(string)
 	if !ok {
 		return fmt.Errorf("volume field must be a string")
 	}
-	gc.Volume = volume
+	candle.Volume = volume
 
 	symbol, ok := tmp[7].(string)
 	if !ok {
 		return fmt.Errorf("symbol field must be a string")
 	}
-	gc.Symbol = symbol
+	candle.Symbol = symbol
 
 	return nil
 }
@@ -475,7 +498,7 @@ func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert gate timestamp seconds -> milliseconds
-	candle.TimeStamp = candle.TimeStamp * int64(time.Second/time.Millisecond)
+	candle.TimeStamp *= int64(time.Second / time.Millisecond)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []GateCandle{}
 
@@ -557,7 +580,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(gatePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + gateRestPath)
 	if err != nil {
 		return nil, err
 	}

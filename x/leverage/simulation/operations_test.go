@@ -39,11 +39,11 @@ func (s *SimTestSuite) SetupTest() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.8"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          umeeapp.DisplayDenom,
 		Exponent:             6,
-		EnableMsgLend:        true,
+		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
@@ -55,27 +55,27 @@ func (s *SimTestSuite) SetupTest() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.05"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.3"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("0.9"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.75"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.11"),
 		SymbolDenom:          "ATOM",
 		Exponent:             6,
-		EnableMsgLend:        true,
+		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
 	uabc := types.Token{
 		BaseDenom:            "uabc",
 		ReserveFactor:        sdk.MustNewDecFromStr("0"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0"),
+		CollateralWeight:     sdk.MustNewDecFromStr("0.1"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.1"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.87"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.87"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
 		SymbolDenom:          "ABC",
 		Exponent:             6,
-		EnableMsgLend:        true,
+		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
 	}
@@ -85,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	for _, token := range tokens {
-		s.Require().NoError(app.LeverageKeeper.SetRegisteredToken(ctx, token))
+		s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
 	}
 
@@ -136,169 +136,184 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		opMsgRoute string
 		opMsgName  string
 	}{
-		{simulation.DefaultWeightMsgLendAsset, types.ModuleName, types.EventTypeLoanAsset},
-		{simulation.DefaultWeightMsgWithdrawAsset, types.ModuleName, types.EventTypeWithdrawLoanedAsset},
-		{simulation.DefaultWeightMsgBorrowAsset, types.ModuleName, types.EventTypeBorrowAsset},
-		{simulation.DefaultWeightMsgSetCollateral, types.ModuleName, types.EventTypeSetCollateralSetting},
-		{simulation.DefaultWeightMsgRepayAsset, types.ModuleName, types.EventTypeRepayBorrowedAsset},
+		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeSupply},
+		{simulation.DefaultWeightMsgWithdraw, types.ModuleName, types.EventTypeWithdraw},
+		{simulation.DefaultWeightMsgBorrow, types.ModuleName, types.EventTypeBorrow},
+		{simulation.DefaultWeightMsgCollateralize, types.ModuleName, types.EventTypeCollateralize},
+		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName, types.EventTypeDecollateralize},
+		{simulation.DefaultWeightMsgRepay, types.ModuleName, types.EventTypeRepayBorrowedAsset},
 		{simulation.DefaultWeightMsgLiquidate, types.ModuleName, types.EventTypeLiquidate},
 	}
 
 	for i, w := range weightesOps {
 		operationMsg, _, _ := w.Op()(r, s.app.BaseApp, s.ctx, accs, "")
-		// 	// the following checks are very much dependent from the ordering of the output given
-		// 	// by WeightedOperations. if the ordering in WeightedOperations changes some tests
-		// 	// will fail
+		// the following checks are very much dependent from the ordering of the output given
+		// by WeightedOperations. if the ordering in WeightedOperations changes some tests
+		// will fail
 		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
 		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
 	}
 }
 
-func (s *SimTestSuite) TestSimulateMsgLendAsset() {
+func (s *SimTestSuite) TestSimulateMsgSupply() {
 	r := rand.New(rand.NewSource(1))
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgLendAsset(s.app.AccountKeeper, s.app.BankKeeper)
+	op := simulation.SimulateMsgSupply(s.app.AccountKeeper, s.app.BankKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 
-	var msg types.MsgLendAsset
+	var msg types.MsgSupply
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
-	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
-	s.Require().Equal(types.EventTypeLoanAsset, msg.Type())
-	s.Require().Equal("185121068uumee", msg.Amount.String())
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
+	s.Require().Equal(types.EventTypeSupply, msg.Type())
+	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
-func (s *SimTestSuite) TestSimulateMsgWithdrawAsset() {
+func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	r := rand.New(rand.NewSource(1))
-	lendToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, lendToken)
-		if err != nil {
-			s.Require().NoError(err)
-		}
-
-		s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true)
-		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken)
+		s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgWithdrawAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	op := simulation.SimulateMsgWithdraw(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 
-	var msg types.MsgWithdrawAsset
+	var msg types.MsgWithdraw
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
-	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Lender)
-	s.Require().Equal(types.EventTypeWithdrawLoanedAsset, msg.Type())
-	s.Require().Equal("73u/uumee", msg.Amount.String())
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
+	s.Require().Equal(types.EventTypeWithdraw, msg.Type())
+	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
-func (s *SimTestSuite) TestSimulateMsgBorrowAsset() {
+func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	r := rand.New(rand.NewSource(8))
-	lendToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(1000))
+	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(1000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, lendToken)
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, supplyToken)
 		if err != nil {
 			s.Require().NoError(err)
 		}
 
-		s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true)
-		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken)
+		s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken)
+		s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgBorrowAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	op := simulation.SimulateMsgBorrow(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 
-	var msg types.MsgBorrowAsset
+	var msg types.MsgBorrow
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
-	s.Require().Equal(types.EventTypeBorrowAsset, msg.Type())
-	s.Require().Equal("67uumee", msg.Amount.String())
+	s.Require().Equal(types.EventTypeBorrow, msg.Type())
+	s.Require().Equal("67uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
-func (s *SimTestSuite) TestSimulateMsgSetCollateralSetting() {
+func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	r := rand.New(rand.NewSource(1))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgSetCollateralSetting(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	op := simulation.SimulateMsgCollateralize(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 
-	var msg types.MsgSetCollateral
+	var msg types.MsgCollateralize
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeSetCollateralSetting, msg.Type())
-	s.Require().Equal(true, msg.Enable)
+	s.Require().Equal(types.EventTypeCollateralize, msg.Type())
+	s.Require().Equal("0u/uabc", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
-func (s *SimTestSuite) TestSimulateMsgRepayAsset() {
+func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	r := rand.New(rand.NewSource(1))
-	lendToken := sdk.NewInt64Coin(umeeapp.BondDenom, 100)
+
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
+
+	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+
+	op := simulation.SimulateMsgDecollateralize(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
+	s.Require().NoError(err)
+
+	var msg types.MsgDecollateralize
+	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	s.Require().True(operationMsg.OK)
+	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
+	s.Require().Equal(types.EventTypeDecollateralize, msg.Type())
+	s.Require().Equal("0u/uabc", msg.Coin.String())
+	s.Require().Len(futureOperations, 0)
+}
+
+func (s *SimTestSuite) TestSimulateMsgRepay() {
+	r := rand.New(rand.NewSource(1))
+	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 100)
 	borrowToken := sdk.NewInt64Coin(umeeapp.BondDenom, 20)
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, borrowToken)
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, supplyToken)
 		if err != nil {
 			s.Require().NoError(err)
 		}
 
-		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uToken.Denom, true))
-		s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken)
-		s.Require().NoError(s.app.LeverageKeeper.BorrowAsset(s.ctx, fundedAccount.Address, borrowToken))
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
+		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgRepayAsset(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	op := simulation.SimulateMsgRepay(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 
-	var msg types.MsgRepayAsset
+	var msg types.MsgRepay
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeRepayBorrowedAsset, msg.Type())
-	s.Require().Equal("9uumee", msg.Amount.String())
+	s.Require().Equal("9uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
 func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	r := rand.New(rand.NewSource(1))
-	lendToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
+	uToken := sdk.NewCoin("u/"+umeeapp.BondDenom, sdk.NewInt(100))
 	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		uDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, borrowToken.Denom)
-
-		s.Require().NoError(s.app.LeverageKeeper.LendAsset(s.ctx, fundedAccount.Address, lendToken))
-		s.Require().NoError(s.app.LeverageKeeper.SetCollateralSetting(s.ctx, fundedAccount.Address, uDenom, true))
-		s.Require().NoError(s.app.LeverageKeeper.BorrowAsset(s.ctx, fundedAccount.Address, borrowToken))
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
+		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})

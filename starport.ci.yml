@@ -18,7 +18,7 @@ genesis:
           base_borrow_rate: "0.020000000000000000"
           kink_borrow_rate: "0.200000000000000000"
           max_borrow_rate: "1.50000000000000000"
-          kink_utilization_rate: "0.200000000000000000"
+          kink_utilization: "0.200000000000000000"
           liquidation_incentive: "0.180000000000000000"
         - base_denom: "ibc/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
           symbol_denom: "ATOM"
@@ -29,7 +29,7 @@ genesis:
           base_borrow_rate: "0.020000000000000000"
           kink_borrow_rate: "0.200000000000000000"
           max_borrow_rate: "1.50000000000000000"
-          kink_utilization_rate: "0.200000000000000000"
+          kink_utilization: "0.200000000000000000"
           liquidation_incentive: "0.180000000000000000"
     gravity:
       delegate_keys:

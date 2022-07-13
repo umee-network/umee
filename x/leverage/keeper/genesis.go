@@ -11,7 +11,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
 	for _, token := range genState.Registry {
-		if err := k.SetRegisteredToken(ctx, token); err != nil {
+		if err := k.SetTokenSettings(ctx, token); err != nil {
 			panic(err)
 		}
 	}
@@ -23,17 +23,6 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 		}
 
 		if err = k.setAdjustedBorrow(ctx, borrower, borrow.Amount); err != nil {
-			panic(err)
-		}
-	}
-
-	for _, setting := range genState.CollateralSettings {
-		borrower, err := sdk.AccAddressFromBech32(setting.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err = k.setCollateralSetting(ctx, borrower, setting.Denom, true); err != nil {
 			panic(err)
 		}
 	}
@@ -83,7 +72,6 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.GetParams(ctx),
 		k.GetAllRegisteredTokens(ctx),
 		k.getAllAdjustedBorrows(ctx),
-		k.getAllCollateralSettings(ctx),
 		k.getAllCollateral(ctx),
 		k.GetAllReserves(ctx),
 		k.GetLastInterestTime(ctx),
@@ -119,29 +107,6 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 	}
 
 	return borrows
-}
-
-// getAllCollateralSettings returns collateral settings for all borrowers. Uses the
-// CollateralSetting struct found in GenesisState, which stores borrower address as a string.
-func (k Keeper) getAllCollateralSettings(ctx sdk.Context) []types.CollateralSetting {
-	prefix := types.KeyPrefixCollateralSetting
-	collateralSettings := []types.CollateralSetting{}
-
-	iterator := func(key, val []byte) error {
-		addr := types.AddressFromKey(key, prefix)
-		denom := types.DenomFromKeyWithAddress(key, prefix)
-
-		collateralSettings = append(collateralSettings, types.NewCollateralSetting(addr.String(), denom))
-
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return collateralSettings
 }
 
 // getAllCollateral returns all collateral across all borrowers and asset types. Uses the
