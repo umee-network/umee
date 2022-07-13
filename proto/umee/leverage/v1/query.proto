@@ -433,15 +433,18 @@ message QueryMarketSummaryResponse {
   ];
   string uToken_exchange_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "utoken_exchange_rate"
   ];
   string supply_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-  string borrow_APY = 6 [
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "supply_apy"
+    ];
+    string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "borrow_apy"
   ];
   string market_size = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
