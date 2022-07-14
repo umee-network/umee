@@ -263,10 +263,6 @@ func GetComputedPrices(
 	providerPrices provider.AggregatedProviderPrices,
 	providerPairs map[string][]types.CurrencyPair,
 ) (prices map[string]sdk.Dec, err error) {
-<<<<<<< HEAD
-	// filter out any erroneous candles
-	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
-=======
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := convertCandlesToUSD(
 		logger,
@@ -274,7 +270,6 @@ func GetComputedPrices(
 		providerPairs,
 		deviations,
 	)
->>>>>>> a85f6dd (feat: multi-quote deviation logic (#1110))
 	if err != nil {
 		return nil, err
 	}
@@ -298,16 +293,12 @@ func GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-<<<<<<< HEAD
-		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
-=======
 		convertedTickers, err := convertTickersToUSD(
 			logger,
 			providerPrices,
 			providerPairs,
 			deviations,
 		)
->>>>>>> a85f6dd (feat: multi-quote deviation logic (#1110))
 		if err != nil {
 			return nil, err
 		}
