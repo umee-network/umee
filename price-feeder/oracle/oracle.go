@@ -96,11 +96,8 @@ func New(
 		priceProviders:  make(map[string]provider.Provider),
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
-<<<<<<< HEAD
 		paramCache:      ParamCache{},
-=======
 		deviations:      deviations,
->>>>>>> 5fc1a6a (feat!: price-feeder: add the ability to configure asset deviation thresholds (#998))
 	}
 }
 
