@@ -117,32 +117,32 @@ type (
 	// Telemetry defines the configuration options for application telemetry.
 	Telemetry struct {
 		// Prefixed with keys to separate services
-		ServiceName string `toml:"service_name"`
+		ServiceName string `toml:"service_name" mapstructure:"service-name"`
 
 		// Enabled enables the application telemetry functionality. When enabled,
 		// an in-memory sink is also enabled by default. Operators may also enabled
 		// other sinks such as Prometheus.
-		Enabled bool `toml:"enabled"`
+		Enabled bool `toml:"enabled" mapstructure:"enabled"`
 
 		// Enable prefixing gauge values with hostname
-		EnableHostname bool `toml:"enable_hostname"`
+		EnableHostname bool `toml:"enable_hostname" mapstructure:"enable-hostname"`
 
 		// Enable adding hostname to labels
-		EnableHostnameLabel bool `toml:"enable_hostname_label"`
+		EnableHostnameLabel bool `toml:"enable_hostname_label" mapstructure:"enable-hostname-label"`
 
 		// Enable adding service to labels
-		EnableServiceLabel bool `toml:"enable_service_label"`
+		EnableServiceLabel bool `toml:"enable_service_label" mapstructure:"enable-service-label"`
 
 		// GlobalLabels defines a global set of name/value label tuples applied to all
 		// metrics emitted using the wrapper functions defined in telemetry package.
 		//
 		// Example:
 		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels"`
+		GlobalLabels [][]string `toml:"global_labels" mapstructure:"global-labels"`
 
-		// Type determines which type of telemetry to use
-		// Valid values are "prometheus" or "generic"
-		Type string `toml:"type"`
+		// PrometheusRetentionTime, when positive, enables a Prometheus metrics sink.
+		// It defines the retention duration in seconds.
+		PrometheusRetentionTime int64 `toml:"prometheus_retention" mapstructure:"prometheus-retention-time"`
 	}
 
 	// ProviderEndpoint defines an override setting in our config for the
@@ -163,13 +163,8 @@ type (
 func telemetryValidation(sl validator.StructLevel) {
 	tel := sl.Current().Interface().(Telemetry)
 
-	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0 ||
-		len(tel.Type) == 0) {
+	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0) {
 		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
-	} else if tel.Enabled &&
-		(len(tel.Type) == 0 ||
-			(tel.Type != "prometheus" && tel.Type != "generic")) {
-		sl.ReportError(tel.Enabled, "type", "Type", "unsupportedTelemetryType", "")
 	}
 }
 
