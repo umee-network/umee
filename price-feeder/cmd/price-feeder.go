@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
@@ -145,7 +146,22 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to parse provider timeout: %w", err)
 	}
 
-	oracle := oracle.New(logger, oracleClient, cfg.CurrencyPairs, providerTimeout)
+	deviations := make(map[string]sdk.Dec, len(cfg.Deviations))
+	for _, deviation := range cfg.Deviations {
+		threshold, err := sdk.NewDecFromStr(deviation.Threshold)
+		if err != nil {
+			return err
+		}
+		deviations[deviation.Base] = threshold
+	}
+
+	oracle := oracle.New(
+		logger,
+		oracleClient,
+		cfg.CurrencyPairs,
+		providerTimeout,
+		deviations,
+	)
 
 	metrics, err := telemetry.New(cfg.Telemetry)
 	if err != nil {

@@ -62,6 +62,7 @@ type Oracle struct {
 	previousVotePeriod float64
 	priceProviders     map[string]provider.Provider
 	oracleClient       client.OracleClient
+	deviations         map[string]sdk.Dec
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
@@ -74,6 +75,7 @@ func New(
 	oc client.OracleClient,
 	currencyPairs []config.CurrencyPair,
 	providerTimeout time.Duration,
+	deviations map[string]sdk.Dec,
 ) *Oracle {
 	providerPairs := make(map[string][]types.CurrencyPair)
 
@@ -95,6 +97,7 @@ func New(
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		paramCache:      ParamCache{},
+		deviations:      deviations,
 	}
 }
 
@@ -235,7 +238,13 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	computedPrices, err := GetComputedPrices(o.logger, providerCandles, providerPrices, o.providerPairs)
+	computedPrices, err := GetComputedPrices(
+		o.logger,
+		providerCandles,
+		providerPrices,
+		o.providerPairs,
+		o.deviations,
+	)
 	if err != nil {
 		return err
 	}
@@ -262,9 +271,14 @@ func GetComputedPrices(
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
 	providerPairs map[string][]types.CurrencyPair,
+	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
 	// filter out any erroneous candles
-	filteredCandles, err := FilterCandleDeviations(logger, providerCandles)
+	filteredCandles, err := FilterCandleDeviations(
+		logger,
+		providerCandles,
+		deviations,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +298,11 @@ func GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		filteredProviderPrices, err := FilterTickerDeviations(logger, providerPrices)
+		filteredProviderPrices, err := FilterTickerDeviations(
+			logger,
+			providerPrices,
+			deviations,
+		)
 		if err != nil {
 			return nil, err
 		}

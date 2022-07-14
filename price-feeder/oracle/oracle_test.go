@@ -106,6 +106,7 @@ func (ots *OracleTestSuite) SetupSuite() {
 			},
 		},
 		time.Millisecond*100,
+		make(map[string]sdk.Dec),
 	)
 }
 
@@ -470,6 +471,7 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 		providerCandles,
 		make(provider.AggregatedProviderPrices, 1),
 		providerPair,
+		make(map[string]sdk.Dec),
 	)
 
 	require.NoError(t, err, "It should successfully get computed candle prices")
@@ -502,6 +504,7 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 		make(provider.AggregatedProviderCandles, 1),
 		providerPrices,
 		providerPair,
+		make(map[string]sdk.Dec),
 	)
 
 	require.NoError(t, err, "It should successfully get computed ticker prices")
