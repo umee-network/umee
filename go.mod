@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07
-	github.com/cosmos/cosmos-sdk v0.46.0-rc2
+	github.com/cosmos/cosmos-sdk v0.46.0-rc2.0.20220713161545-a5f85c30be6a
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v3 v3.0.0
+	github.com/cosmos/ibc-go/v3 v3.1.0
 	github.com/ethereum/go-ethereum v1.10.19
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
@@ -23,7 +23,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
-	github.com/tendermint/tendermint v0.34.20-rc0
+	github.com/tendermint/tendermint v0.34.20-rc1
 	github.com/tendermint/tm-db v0.6.7
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
 	google.golang.org/grpc v1.47.0
@@ -382,10 +382,9 @@ require (
 	nhooyr.io/websocket v1.8.6 // indirect
 )
 
+// github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge-umee/module
 replace (
-	// TODO: update to v3
-	// github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge-umee/module
-	// github.com/cosmos/ibc-go/v2 => ../ibc-go
-	// github.com/cosmos/ibc-go/v3 => ../ibc-go
+	github.com/cosmos/ibc-go/v2 => ../ibc-go
+	github.com/cosmos/ibc-go/v3 => ../ibc-go
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 )
