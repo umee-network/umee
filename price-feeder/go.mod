@@ -4,14 +4,22 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v1.1.0
+<<<<<<< HEAD
 	github.com/armon/go-metrics v0.3.11
 	github.com/cosmos/cosmos-sdk v0.45.4
+=======
+	github.com/cosmos/cosmos-sdk v0.45.6
+>>>>>>> d7396b4 (build(deps): Bump github.com/prometheus/common from 0.36.0 to 0.37.0 in /price-feeder (#1137))
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
+<<<<<<< HEAD
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
+=======
+	github.com/mitchellh/mapstructure v1.5.0
+>>>>>>> d7396b4 (build(deps): Bump github.com/prometheus/common from 0.36.0 to 0.37.0 in /price-feeder (#1137))
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.26.1
 	github.com/sirkon/goproxy v1.4.8
@@ -31,6 +39,13 @@ require (
 	github.com/DataDog/zstd v1.4.5 // indirect
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220517191451-8d660b559b07 // indirect
 	github.com/Workiva/go-datastructures v1.0.53 // indirect
+<<<<<<< HEAD
+=======
+	github.com/alexkohler/prealloc v1.0.0 // indirect
+	github.com/armon/go-metrics v0.4.0 // indirect
+	github.com/ashanbrown/forbidigo v1.3.0 // indirect
+	github.com/ashanbrown/makezero v1.1.1 // indirect
+>>>>>>> d7396b4 (build(deps): Bump github.com/prometheus/common from 0.36.0 to 0.37.0 in /price-feeder (#1137))
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
@@ -92,7 +107,12 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20181016162300-f8f6d4d2b643 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
+<<<<<<< HEAD
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+=======
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/moricho/tparallel v0.2.1 // indirect
+>>>>>>> d7396b4 (build(deps): Bump github.com/prometheus/common from 0.36.0 to 0.37.0 in /price-feeder (#1137))
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/onsi/gomega v1.18.1 // indirect
 	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2 // indirect
@@ -101,7 +121,13 @@ require (
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+<<<<<<< HEAD
+=======
+	github.com/polyfloyd/go-errorlint v1.0.0 // indirect
+	github.com/prometheus/client_golang v1.12.2 // indirect
+>>>>>>> d7396b4 (build(deps): Bump github.com/prometheus/common from 0.36.0 to 0.37.0 in /price-feeder (#1137))
 	github.com/prometheus/client_model v0.2.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
