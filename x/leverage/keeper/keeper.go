@@ -406,9 +406,16 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
+	// get remaining collateral, ignoring blacklisted
+	remainingCollateral := filterCoins(
+		k.GetBorrowerCollateral(ctx, borrowerAddr),
+		func(c sdk.Coin) bool {
+			return k.validateAcceptedAsset(ctx, c) == nil
+		},
+	)
+
 	// detect bad debt if collateral is completely exhausted
-	if k.GetBorrowerCollateral(ctx, borrowerAddr).IsZero() {
-		// TODO: exclude blacklisted collateral
+	if remainingCollateral.IsZero() {
 		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
 			// set a bad debt flag for each borrowed denom
 			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
@@ -418,4 +425,15 @@ func (k Keeper) Liquidate(
 	}
 
 	return baseRepay, collateralReward, baseReward, nil
+}
+
+// filterCoins returns the subset of an sdk.Coins that meet a given condition
+func filterCoins(coins sdk.Coins, accept func(sdk.Coin) bool) sdk.Coins {
+	filtered := sdk.Coins{}
+	for _, c := range coins {
+		if accept(c) {
+			filtered = append(filtered, c)
+		}
+	}
+	return filtered
 }
