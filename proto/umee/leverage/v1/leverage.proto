@@ -10,7 +10,7 @@ option (gogoproto.goproto_getters_all) = false;
 // Params defines the parameters for the leverage module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
-  // The complete_liquidation_threshold determines how far over their borrow
+  // Complete Liquidation Threshold determines how far over their borrow
   // limit a borrower must be in order for their positions to be liquidated
   // fully in a single event.
   string complete_liquidation_threshold = 2 [
@@ -18,7 +18,7 @@ message Params {
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"complete_liquidation_threshold\""
   ];
-  // The minimum_close_factor determines the portion of a borrower's position
+  // Minimum Close Factor determines the portion of a borrower's position
   // that can be liquidated in a single event, when the borrower is just barely
   // over their borrow limit.
   string minimum_close_factor = 3 [
@@ -26,14 +26,14 @@ message Params {
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"minimum_close_factor\""
   ];
-  // The oracle_reward_factor determines the portion of interest accrued on
+  // Oracle Reward Factor determines the portion of interest accrued on
   // borrows that is sent to the oracle module to fund its reward pool.
   string oracle_reward_factor = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"oracle_reward_factor\""
   ];
-  // The small_liquidation_size determines the USD value at which a borrow is
+  // Small Liquidation Size determines the USD value at which a borrow is
   // considered small enough to be liquidated in a single transaction, bypassing
   // dynamic close factor.
   string small_liquidation_size = 5 [
@@ -43,24 +43,24 @@ message Params {
   ];
 }
 
-// Token defines a token, along with its capital metadata, in the Umee capital
-// facility that can be supplied and borrowed.
+// Token defines a token, along with its metadata and parameters, in the Umee
+// capital facility that can be supplied and borrowed.
 message Token {
   option (gogoproto.equal) = true;
 
-  // The base_denom defines the denomination of the underlying base token.
+  // Base Denom is the denomination of the underlying base token.
   string base_denom = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
 
-  // The reserve factor defines what portion of accrued interest of the asset
-  // type goes to reserves.
+  // Reserve Factor defines what portion of accrued interest goes to reserves
+  // when this token is borrowed.
   string reserve_factor = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"reserve_factor\""
   ];
 
-  // The collateral_weight defines what amount of the total value of the asset
-  // can contribute to a users borrowing power. If the collateral_weight is
+  // Collateral Weight defines what portion of the total value of the asset
+  // can contribute to a users borrowing power. If the collateral weight is
   // zero, using this asset as collateral against borrowing will be disabled.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -68,7 +68,7 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"collateral_weight\""
   ];
 
-  // The liquidation_threshold defines what amount of the total value of the
+  // Liquidation Threshold defines what amount of the total value of the
   // asset can contribute to a user's liquidation threshold (above which they
   // become eligible for liquidation).
   string liquidation_threshold = 4 [
@@ -77,7 +77,7 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"liquidation_threshold\""
   ];
 
-  // The base_borrow_rate defines the minimum interest rate for borrowing this
+  // Base Borrow Rate defines the minimum interest rate for borrowing this
   // asset.
   string base_borrow_rate = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -85,31 +85,31 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"base_borrow_rate\""
   ];
 
-  // The kink_borrow_rate defines the interest rate for borrowing this
-  // asset when utilization equals to 'kink_utilization'.
+  // Kink Borrow Rate defines the interest rate for borrowing this
+  // asset when borrow utilization is equal to 'kink_utilization'.
   string kink_borrow_rate = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_borrow_rate\""
   ];
 
-  // The max_borrow_rate defines the interest rate for borrowing this
-  // asset (seen when supply utilization is 100%).
+  // Max Borrow Rate defines the interest rate for borrowing this
+  // asset when borrow utilization is at its maximum.
   string max_borrow_rate = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_borrow_rate\""
   ];
 
-  // The kink_utilization defines the value where the kink rate kicks off for
-  // borrow rates.
+  // Kink Utilization defines the borrow utilization value where
+  // the kink in the borrow interest rate function occurs.
   string kink_utilization = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_utilization\""
   ];
 
-  // The liquidation_incentive determines the portion of bonus collateral of
+  // Liquidation Incentive determines the portion of bonus collateral of
   // a token type liquidators receive as a liquidation reward.
   string liquidation_incentive = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -117,24 +117,27 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"liquidation_incentive\""
   ];
 
-  // The symbol_denom and exponent are solely used to update the oracle's accept
-  // list of allowed tokens.
+  // Symbol Denom is the human readable denomination of this token.
   string symbol_denom = 10 [(gogoproto.moretags) = "yaml:\"symbol_denom\""];
+
+  // Exponent is the power of ten by which to multiply, in order to convert
+  // an amount of the token denoted in its symbol denom to the actual amount
+  // of its base denom.
   uint32 exponent     = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
 
-  // Allows supplying for lending or collateral using this token. Note that
-  // withdrawing is always enabled. Disabling supplying would be one step in
-  // phasing out an asset type.
+  // EnableMsgSupply allows supplying for lending or collateral using this
+  // token. Note that withdrawing is always enabled. Disabling supplying would
+  // be one step in phasing out an asset type.
   bool enable_msg_supply = 12 [(gogoproto.moretags) = "yaml:\"enable_msg_supply\""];
 
-  // Allows borrowing of this token. Note that repaying is always enabled.
-  // Disabling borrowing would be one step in phasing out an asset type, but
-  // could also be used from the start for asset types meant to be collateral
-  // only, like meTokens.
+  // EnableMsgBorrow allows borrowing of this token. Note that repaying is
+  // always enabled. Disabling borrowing would be one step in phasing out an
+  // asset type, but could also be used from the start for asset types meant
+  // to be collateral only, like meTokens.
   bool enable_msg_borrow = 13
       [(gogoproto.moretags) = "yaml:\"enable_msg_borrow\""];
 
-  // This should only be used to eliminate an asset completely. A blacklisted
+  // Blacklist should only be used to eliminate an asset completely. A blacklisted
   // asset is treated as though its oracle price is zero, and thus ignored by
   // calculations such as collateral value and borrow limit. Can still be repaid
   // or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
@@ -142,12 +145,31 @@ message Token {
   // oracle and price feeder as well.
   bool blacklist = 14;
 
-  // Maximum collateral share specifies how much of the
-  // system's overall collateral be provided by a single token.
-  // Value is a percent; allowed values are in [0, 100] range.
-  // 100 means that the token has no restriction. 10 means maximum 10% of total
-  // collateral value can provided by this token.
-  uint32 max_collateral_share = 15 [
-    (gogoproto.moretags) = "yaml:\"max_collateral_share\""
+  // Max Collateral Share specifies how much of the system's overall collateral
+  // can be provided by a given token. 1.0 means that the token has no restriction.
+  // 0.1 means maximum 10% of system's total collateral value can provided by this token.
+  string max_collateral_share = 15 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"max_collateral_share\""
+  ];
+
+  // Max Borrow Utilization specifies the maximum borrow utilization a token is
+  // allowed to reach as a direct result of user borrowing. It can still be exceeded
+  // due to withdrawals, interest, and liquidations.
+  string max_borrow_utilization = 16 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"max_borrow_utilization\""
+  ];
+
+  // Min Collateral Liquidity specifies the minimum collateral liquidity a token is
+  // allowed to reach as a direct result of users borrowing, collateralizing, or
+  // withdrawing assets. Liquidity can only drop below this value due to interest
+  // or liquidations.
+  string min_collateral_liquidity = 17 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"min_collateral_liquidity\""
   ];
 }
