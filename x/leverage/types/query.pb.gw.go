@@ -1549,9 +1549,9 @@ var (
 
 	pattern_Query_SupplyAPY_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supply_apy"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_TotalSuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "market_size"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalSuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "total_supplied_value"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_TotalSupplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "token_market_size"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalSupplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "total_supplied"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_Query_ReserveAmount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "reserve_amount"}, "", runtime.AssumeColonVerbOpt(true)))
 
