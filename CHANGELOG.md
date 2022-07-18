@@ -57,6 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1125](https://github.com/umee-network/umee/pull/1125) Refactor: remove proto getters in x/leverage and x/oracle proto types.
 - [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
 - [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
+- [11XX](https://github.com/umee-network/umee/pull/11XX) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 
 ### Features
 

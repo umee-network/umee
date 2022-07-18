@@ -274,10 +274,10 @@ func (q Querier) SupplyAPY(
 	return &types.QuerySupplyAPYResponse{APY: supplyAPY}, nil
 }
 
-func (q Querier) MarketSize(
+func (q Querier) TotalSuppliedValue(
 	goCtx context.Context,
-	req *types.QueryMarketSize,
-) (*types.QueryMarketSizeResponse, error) {
+	req *types.QueryTotalSuppliedValue,
+) (*types.QueryTotalSuppliedValueResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -290,23 +290,23 @@ func (q Querier) MarketSize(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	marketSizeCoin, err := q.Keeper.GetTotalSupply(ctx, req.Denom)
+	totalSupply, err := q.Keeper.GetTotalSupply(ctx, req.Denom)
 	if err != nil {
 		return nil, err
 	}
 
-	marketSizeUSD, err := q.Keeper.TokenValue(ctx, marketSizeCoin)
+	value, err := q.Keeper.TokenValue(ctx, totalSupply)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryMarketSizeResponse{MarketSizeUsd: marketSizeUSD}, nil
+	return &types.QueryTotalSuppliedValueResponse{TotalSuppliedValue: value}, nil
 }
 
-func (q Querier) TokenMarketSize(
+func (q Querier) TotalSupplied(
 	goCtx context.Context,
-	req *types.QueryTokenMarketSize,
-) (*types.QueryTokenMarketSizeResponse, error) {
+	req *types.QueryTotalSupplied,
+) (*types.QueryTotalSuppliedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -319,12 +319,12 @@ func (q Querier) TokenMarketSize(
 		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
-	marketSizeCoin, err := q.Keeper.GetTotalSupply(ctx, req.Denom)
+	totalSupply, err := q.Keeper.GetTotalSupply(ctx, req.Denom)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryTokenMarketSizeResponse{MarketSize: marketSizeCoin.Amount}, nil
+	return &types.QueryTotalSuppliedResponse{TotalSupplied: totalSupply.Amount}, nil
 }
 
 func (q Querier) ReserveAmount(
@@ -546,7 +546,7 @@ func (q Querier) MarketSummary(
 	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
 	supplyAPY := q.Keeper.DeriveSupplyAPY(ctx, req.Denom)
 	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
-	marketSizeCoin, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
+	totalSupply, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
 	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 	collateral := q.Keeper.GetTotalCollateral(ctx, req.Denom)
@@ -557,7 +557,7 @@ func (q Querier) MarketSummary(
 		UTokenExchangeRate: rate,
 		Supply_APY:         supplyAPY,
 		Borrow_APY:         borrowAPY,
-		MarketSize:         marketSizeCoin.Amount,
+		TotalSupplied:      totalSupply.Amount,
 		AvailableBorrow:    availableBorrow,
 		Reserved:           reserved,
 		Collateral:         collateral,
