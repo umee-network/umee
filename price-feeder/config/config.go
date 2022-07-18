@@ -52,6 +52,16 @@ var (
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
 	// deviations which validators are able to set for a given asset.
 	maxDeviationThreshold = sdk.MustNewDecFromStr("3.0")
+
+	// SupportedQuotes defines a lookup table for which assets we support
+	// using as quotes.
+	SupportedQuotes = map[string]struct{}{
+		DenomUSD: {},
+		"USDC":   {},
+		"USDT":   {},
+		"BTC":    {},
+		"ETH":    {},
+	}
 )
 
 type (
@@ -226,6 +236,9 @@ func ParseConfig(configPath string) (Config, error) {
 		}
 		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
+		}
+		if _, ok := SupportedQuotes[strings.ToUpper(cp.Quote)]; !ok {
+			return cfg, fmt.Errorf("unsupported quote: %s", cp.Quote)
 		}
 
 		for _, provider := range cp.Providers {
