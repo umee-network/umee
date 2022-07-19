@@ -354,9 +354,9 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 // valid amount, is performed. Because partial liquidation is possible and exchange rates vary, Liquidate
 // returns the actual amount of tokens repaid, uTokens consumed, and base tokens rewarded.
 func (k Keeper) Liquidate(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, desiredRepay sdk.Coin, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, maxRepay sdk.Coin, rewardDenom string,
 ) (baseRepay sdk.Coin, collateralReward sdk.Coin, baseReward sdk.Coin, err error) {
-	if err := k.validateAcceptedAsset(ctx, desiredRepay); err != nil {
+	if err := k.validateAcceptedAsset(ctx, maxRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
@@ -364,11 +364,11 @@ func (k Keeper) Liquidate(
 	}
 
 	// calculate Token repay, and uToken and Token reward amounts allowed by liquidation rules and available balances
-	baseRepay, collateralReward, baseReward, err = k.liquidationOutcome(
+	baseRepay, collateralReward, baseReward, err = k.computeLiquidation(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
-		desiredRepay,
+		maxRepay,
 		rewardDenom,
 	)
 	if err != nil {
@@ -407,12 +407,7 @@ func (k Keeper) Liquidate(
 	}
 
 	// get remaining collateral, ignoring blacklisted
-	remainingCollateral := filterCoins(
-		k.GetBorrowerCollateral(ctx, borrowerAddr),
-		func(c sdk.Coin) bool {
-			return k.validateAcceptedAsset(ctx, c) == nil
-		},
-	)
+	remainingCollateral := k.filterAcceptedCoins(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
 
 	// detect bad debt if collateral is completely exhausted
 	if remainingCollateral.IsZero() {
@@ -425,15 +420,4 @@ func (k Keeper) Liquidate(
 	}
 
 	return baseRepay, collateralReward, baseReward, nil
-}
-
-// filterCoins returns the subset of an sdk.Coins that meet a given condition
-func filterCoins(coins sdk.Coins, accept func(sdk.Coin) bool) sdk.Coins {
-	filtered := sdk.Coins{}
-	for _, c := range coins {
-		if accept(c) {
-			filtered = append(filtered, c)
-		}
-	}
-	return filtered
 }

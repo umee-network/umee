@@ -13,9 +13,7 @@ import (
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
 // the base and display/symbol denominations for each exchange pair. E.g. it must
 // know about the UMEE/USD exchange rate along with the uumee base denomination
-// and the exponent.
-// This function will only return positive exchange rates or errors, unless a
-// token is blacklisted, in which case it will return zero.
+// and the exponent. When error is nil, price is guaranteed to be positive.
 func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	t, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
@@ -23,7 +21,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	}
 
 	if t.Blacklist {
-		return sdk.ZeroDec(), nil
+		return sdk.ZeroDec(), types.ErrBlacklisted
 	}
 
 	price, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
@@ -50,11 +48,14 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is
-// equivalent to calling GetTokenValue on each coin individually.
+// equivalent to the sum of TokenValue on each coin individually, except it
+// ignores unregistered and blacklisted coins instead of returning an error.
 func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
-	for _, c := range coins {
+	accepted := k.filterAcceptedCoins(ctx, coins)
+
+	for _, c := range accepted {
 		v, err := k.TokenValue(ctx, c)
 		if err != nil {
 			return sdk.ZeroDec(), err
