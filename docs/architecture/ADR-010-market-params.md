@@ -138,12 +138,12 @@ Let's draw the following scenario to picture the liquidators risk:
 > | Bob | - | $1.5M LUNA | $1M BTC |
 > | Charlie | - | $2M BTC | $1.4M LUNA |
 >
-> 1. Charlie predicts Luna collapse and sells the Luna.
-> 2. Luna is sinking and Bob's position has to be liquidated. However:
->   - Liquidators can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
->   - Charlie will not pay off her borrow position - she will wait for the final collapse and buy Luna cheaply.
->   - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
-> 3. In case of the big crash, knowledgeable liquidators won't liquidate Bob, Bob will run away with $1M of BTC, and the system will end up with a bad debt and obligation to pay Alice.
+> - Charlie predicts Luna collapse and sells the Luna.
+> - Luna is sinking and Bob's position has to be liquidated. However:
+> - Liquidators can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
+> - Charlie will not pay off her borrow position - she will wait for the final collapse and buy Luna cheaply.
+> - Liquidators will not take the risk of obtaining and holding `u/Luna` when there is a risk of Luna sinking deep.
+> - In case of the big crash, knowledgeable liquidators won't liquidate Bob, Bob will run away with $1M of BTC, and the system will end up with a bad debt and obligation to pay Alice.
 
 ## Consequences
 
