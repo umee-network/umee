@@ -38,7 +38,7 @@ func reduceLiquidation(
 	// Determine the collateral burn amount that corresponds to base reward amount
 	collateral := reward.Quo(uTokenExchangeRate)
 
-	// After computing all limiting conditions, all three values will be reduced by the same ratio
+	// We will track limiting factors by the ratio by which the max repayment would need to be reduced to comply
 	ratio := sdk.OneDec()
 	// Repaid value cannot exceed borrowed value times close factor
 	ratio = sdk.MinDec(ratio,
@@ -52,13 +52,20 @@ func reduceLiquidation(
 	ratio = sdk.MinDec(ratio,
 		availableReward.ToDec().Quo(reward),
 	)
+	// Catch edge cases
+	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
+
+	// Reduce all three values by the most severe limiting factor encountered
+	repay = repay.Mul(ratio)
+	collateral = collateral.Mul(ratio)
+	reward = reward.Mul(ratio)
 
 	// The amount of borrowed token the liquidator will repay is rounded up after reduction
-	tokenRepay = repay.Mul(ratio).Ceil().RoundInt()
+	tokenRepay = repay.Ceil().RoundInt()
 	// The amount of collateral uToken the borrower will lose is rounded up after reduction
-	collateralBurn = collateral.Mul(ratio).Ceil().RoundInt()
+	collateralBurn = collateral.Ceil().RoundInt()
 	// The amount of reward token the liquidator will receive is rounded down after reduction
-	tokenReward = reward.Mul(ratio).TruncateInt()
+	tokenReward = reward.TruncateInt()
 
 	return tokenRepay, collateralBurn, tokenReward
 }
