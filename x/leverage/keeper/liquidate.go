@@ -60,11 +60,11 @@ func reduceLiquidation(
 	collateral = collateral.Mul(ratio)
 	reward = reward.Mul(ratio)
 
-	// The amount of borrowed token the liquidator will repay is rounded up after reduction
+	// The amount of borrowed token the liquidator will repay is rounded up
 	tokenRepay = repay.Ceil().RoundInt()
-	// The amount of collateral uToken the borrower will lose is rounded up after reduction
+	// The amount of collateral uToken the borrower will lose is rounded up
 	collateralBurn = collateral.Ceil().RoundInt()
-	// The amount of reward token the liquidator will receive is rounded down after reduction
+	// The amount of reward token the liquidator will receive is rounded down
 	tokenReward = reward.TruncateInt()
 
 	return tokenRepay, collateralBurn, tokenReward
