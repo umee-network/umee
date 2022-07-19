@@ -38,8 +38,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRate(),
 		GetCmdQuerySupplyAPY(),
 		GetCmdQueryBorrowAPY(),
-		GetCmdQueryMarketSize(),
-		GetCmdQueryTokenMarketSize(),
+		GetCmdQueryTotalSuppliedValue(),
+		GetCmdQueryTotalSupplied(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
@@ -496,13 +496,13 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMarketSize creates a Cobra command to query for the
-// Market Size of a specific token.
-func GetCmdQueryMarketSize() *cobra.Command {
+// GetCmdQueryTotalSuppliedValue creates a Cobra command to query for the
+// total supply of a specific token.
+func GetCmdQueryTotalSuppliedValue() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "market-size [denom]",
+		Use:   "total-supplied-value [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD market size of a specified denomination",
+		Short: "Query for the USD value of the total supply of a specified denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -511,11 +511,11 @@ func GetCmdQueryMarketSize() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryMarketSize{
+			req := &types.QueryTotalSuppliedValue{
 				Denom: args[0],
 			}
 
-			resp, err := queryClient.MarketSize(cmd.Context(), req)
+			resp, err := queryClient.TotalSuppliedValue(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
@@ -529,13 +529,13 @@ func GetCmdQueryMarketSize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryTokenMarketSize creates a Cobra command to query for the
-// Market Size of a specific token, in token denomination instead of USD.
-func GetCmdQueryTokenMarketSize() *cobra.Command {
+// GetCmdQueryTotalSupplied creates a Cobra command to query for the
+// Total Supplied of a specific token, measured in base tokens.
+func GetCmdQueryTotalSupplied() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token-market-size [denom]",
+		Use:   "total-supplied [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the market size of a specified denomination measured in base tokens",
+		Short: "Query for the total supply of a specified denomination measured in base tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -544,11 +544,11 @@ func GetCmdQueryTokenMarketSize() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := &types.QueryTokenMarketSize{
+			req := &types.QueryTotalSupplied{
 				Denom: args[0],
 			}
 
-			resp, err := queryClient.TokenMarketSize(cmd.Context(), req)
+			resp, err := queryClient.TotalSupplied(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
