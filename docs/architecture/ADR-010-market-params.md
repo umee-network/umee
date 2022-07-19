@@ -80,7 +80,7 @@ total_collateral_value(token) = total_collateral(token) * oracle_price_usd(token
 collateral_share(token) = total_collateral_value(token) / Sum_All_Tokens(total_collateral_value) // ranges 0 - 1
 ```
 
-Implementing `MaxCollateralShare` would restrict `MsgAddCollateral` from increasing `total_collateral` above a desired level.
+Implementing `MaxCollateralShare` would restrict `MsgCollateralize` from increasing `total_collateral` above a desired level.
 
 `MaxCollateralShare` could still be indirectly exceeded by fluctuating oracle prices, `MsgDecollateralize` or `MsgLiquidate` of other tokens, or interest accruing in one denom faster than another.
 
