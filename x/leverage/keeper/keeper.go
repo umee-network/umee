@@ -201,11 +201,19 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 		return err
 	}
 
-	// Ensure module account has sufficient unreserved tokens to loan out
-	reservedAmount := k.GetReserveAmount(ctx, borrow.Denom)
-	availableAmount := k.ModuleBalance(ctx, borrow.Denom)
-	if borrow.Amount.GT(availableAmount.Sub(reservedAmount)) {
+	token, err := k.GetTokenSettings(ctx, borrow.Denom)
+	if err != nil {
+		return err
+	}
+
+	su := k.supplyUtilizationAfterBorrow(ctx, borrow)
+	if su.GT(sdk.OneDec()) {
+		// Ensure module account has sufficient unreserved tokens to loan out
 		return types.ErrLendingPoolInsufficient.Wrap(borrow.String())
+	}
+	if su.GT(token.MaxSupplyUtilization) {
+		// Ensure max supply utilization is not exceeded
+		return types.ErrMaxSupplyUtilization
 	}
 
 	// Determine amount of all tokens currently borrowed

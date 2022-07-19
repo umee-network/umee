@@ -84,7 +84,7 @@ func TestToken_Validate(t *testing.T) {
 			EnableMsgBorrow:        true,
 			Blacklist:              false,
 			MaxCollateralShare:     sdk.MustNewDecFromStr("1.0"),
-			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.0"),
+			MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 			MinCollateralLiquidity: sdk.MustNewDecFromStr("1.0"),
 		}
 	}
@@ -132,7 +132,7 @@ func TestToken_Validate(t *testing.T) {
 	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
 
 	invalidMaxSupplyUtilization := validToken()
-	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdk.MustNewDecFromStr("-0.05")
+	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdk.MustNewDecFromStr("1.05")
 
 	invalidMinCollateralLiquidity := validToken()
 	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")

@@ -59,19 +59,37 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 
 // SupplyUtilization calculates the current supply utilization of a token denom.
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
+	// Current utilization is calculated using a hypothetical zero-amount borrow
+	return k.supplyUtilizationAfterBorrow(ctx, sdk.NewCoin(denom, sdk.ZeroInt()))
+}
+
+// supplyUtilizationAfterBorrow calculates the resulting supply utilization of a token
+// denom if a proposed borrow were to execute.
+func (k Keeper) supplyUtilizationAfterBorrow(ctx sdk.Context, borrow sdk.Coin) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
-	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
-	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount.ToDec()
+	moduleBalance := k.ModuleBalance(ctx, borrow.Denom)
+	reserveAmount := k.GetReserveAmount(ctx, borrow.Denom)
+	totalBorrowed := k.GetTotalBorrowed(ctx, borrow.Denom).Amount
 	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
 
-	// This edge case can be safely interpreted as 100% utilization.
-	if totalBorrowed.GTE(tokenSupply) {
-		return sdk.OneDec()
+	// Adjust based on the proposed borrow. Note that token supply is unchanged because
+	// module balance would decrease by the same amount total borrows increase.
+	totalBorrowed = totalBorrowed.Add(borrow.Amount)
+
+	// This case is impossible to reach in practice
+	if tokenSupply.IsNegative() {
+		return sdk.MaxSortableDec
 	}
 
-	return totalBorrowed.Quo(tokenSupply)
+	if tokenSupply.IsZero() {
+		return sdk.ZeroDec()
+	}
+
+	// Utilization ranges 0 to 1 generally, or > 1 when reserves exceed module balance.
+	// In this calculation, utilization will exceed 1 only if the proposed borrow is greater
+	// than unreserved module balance.
+	return totalBorrowed.ToDec().Quo(tokenSupply.ToDec())
 }
 
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by

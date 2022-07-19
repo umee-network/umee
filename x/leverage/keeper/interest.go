@@ -46,7 +46,7 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 }
 
 // DeriveSupplyAPY derives the current supply interest rate on a token denom
-// using its supply utilization borrow APY. Returns zero on invalid asset.
+// using its supply utilization and borrow APY. Returns zero on invalid asset.
 func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {

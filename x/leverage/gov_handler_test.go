@@ -31,9 +31,9 @@ func newTestToken(base, symbol, reserveFactor string) types.Token {
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1.0"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.0"),
 	}
 }
 
