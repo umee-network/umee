@@ -95,12 +95,12 @@ type Token struct {
 	// asset.
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
 	// Kink Borrow Rate defines the interest rate for borrowing this
-	// asset when borrow utilization is equal to 'kink_utilization'.
+	// asset when supply utilization is equal to 'kink_utilization'.
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
 	// Max Borrow Rate defines the interest rate for borrowing this
-	// asset when borrow utilization is at its maximum.
+	// asset when supply utilization is at its maximum.
 	MaxBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_rate" yaml:"max_borrow_rate"`
-	// Kink Utilization defines the borrow utilization value where
+	// Kink Utilization defines the supply utilization value where
 	// the kink in the borrow interest rate function occurs.
 	KinkUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization,json=kinkUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization" yaml:"kink_utilization"`
 	// Liquidation Incentive determines the portion of bonus collateral of
@@ -132,10 +132,10 @@ type Token struct {
 	// can be provided by a given token. 1.0 means that the token has no restriction.
 	// 0.1 means maximum 10% of system's total collateral value can provided by this token.
 	MaxCollateralShare github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_collateral_share" yaml:"max_collateral_share"`
-	// Max Borrow Utilization specifies the maximum borrow utilization a token is
+	// Max Supply Utilization specifies the maximum supply utilization a token is
 	// allowed to reach as a direct result of user borrowing. It can still be exceeded
 	// due to withdrawals, interest, and liquidations.
-	MaxBorrowUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_borrow_utilization,json=maxBorrowUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_utilization" yaml:"max_borrow_utilization"`
+	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
 	// Min Collateral Liquidity specifies the minimum collateral liquidity a token is
 	// allowed to reach as a direct result of users borrowing, collateralizing, or
 	// withdrawing assets. Liquidity can only drop below this value due to interest
@@ -304,7 +304,7 @@ func (this *Token) Equal(that interface{}) bool {
 	if !this.MaxCollateralShare.Equal(that1.MaxCollateralShare) {
 		return false
 	}
-	if !this.MaxBorrowUtilization.Equal(that1.MaxBorrowUtilization) {
+	if !this.MaxSupplyUtilization.Equal(that1.MaxSupplyUtilization) {
 		return false
 	}
 	if !this.MinCollateralLiquidity.Equal(that1.MinCollateralLiquidity) {
@@ -408,9 +408,9 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i--
 	dAtA[i] = 0x8a
 	{
-		size := m.MaxBorrowUtilization.Size()
+		size := m.MaxSupplyUtilization.Size()
 		i -= size
-		if _, err := m.MaxBorrowUtilization.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.MaxSupplyUtilization.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintLeverage(dAtA, i, uint64(size))
@@ -633,7 +633,7 @@ func (m *Token) Size() (n int) {
 	}
 	l = m.MaxCollateralShare.Size()
 	n += 1 + l + sovLeverage(uint64(l))
-	l = m.MaxBorrowUtilization.Size()
+	l = m.MaxSupplyUtilization.Size()
 	n += 2 + l + sovLeverage(uint64(l))
 	l = m.MinCollateralLiquidity.Size()
 	n += 2 + l + sovLeverage(uint64(l))
@@ -1312,7 +1312,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 16:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MaxBorrowUtilization", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxSupplyUtilization", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1340,7 +1340,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.MaxBorrowUtilization.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.MaxSupplyUtilization.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

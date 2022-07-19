@@ -37,7 +37,7 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				EnableMsgBorrow:        true,
 				Blacklist:              false,
 				MaxCollateralShare:     sdk.MustNewDecFromStr("0.1"),
-				MaxBorrowUtilization:   sdk.MustNewDecFromStr("0.5"),
+				MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.5"),
 				MinCollateralLiquidity: sdk.MustNewDecFromStr("0.75"),
 			},
 		},
@@ -60,7 +60,7 @@ registry:
       enable_msg_borrow: true
       blacklist: false
       max_collateral_share: "0.100000000000000000"
-      max_borrow_utilization: "0.500000000000000000"
+      max_supply_utilization: "0.500000000000000000"
       min_collateral_liquidity: "0.750000000000000000"
 `
 	require.Equal(t, expected, p.String())
@@ -84,7 +84,7 @@ func TestToken_Validate(t *testing.T) {
 			EnableMsgBorrow:        true,
 			Blacklist:              false,
 			MaxCollateralShare:     sdk.MustNewDecFromStr("1.0"),
-			MaxBorrowUtilization:   sdk.MustNewDecFromStr("1.0"),
+			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.0"),
 			MinCollateralLiquidity: sdk.MustNewDecFromStr("1.0"),
 		}
 	}
@@ -131,8 +131,8 @@ func TestToken_Validate(t *testing.T) {
 	invalidMaxCollateralShare := validToken()
 	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
 
-	invalidMaxBorrowUtilization := validToken()
-	invalidMaxBorrowUtilization.MaxBorrowUtilization = sdk.MustNewDecFromStr("-0.05")
+	invalidMaxSupplyUtilization := validToken()
+	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdk.MustNewDecFromStr("-0.05")
 
 	invalidMinCollateralLiquidity := validToken()
 	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
@@ -196,8 +196,8 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidMaxCollateralShare,
 			expectErr: true,
 		},
-		"invalid max borrow utilization": {
-			input:     invalidMaxBorrowUtilization,
+		"invalid max supply utilization": {
+			input:     invalidMaxSupplyUtilization,
 			expectErr: true,
 		},
 		"invalid min collateral liquidity": {

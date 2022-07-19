@@ -19,7 +19,7 @@ Several new parameters and alternatives are being proposed.
 
 Parameters we decide to use will be listed below in subsections:
 - Max Collateral Share
-- Max Borrow Utilization
+- Max Supply Utilization
 - Min Collateral Liquidity
 
 Rejected or alternative implementations will appear in the alternatives section:
@@ -45,15 +45,15 @@ total_supply(token) = total_borrowed(token) + available(token)
 uToken_exchange_rate(token) = total_supply(token) / total_supply(utoken)
 ```
 
-### Maximum Borrow Utilization
+### Maximum Supply Utilization
 
-One proposed parameter is `MaxBorrowUtilization`, to be defined per token.
+One proposed parameter is `MaxSupplyUtilization`, to be defined per token.
 
 ```go
-borrow_utilization(token) = total_borrowed(token) / total_supply(token) // ranges 0 - 1
+supply_utilization(token) = total_borrowed(token) / total_supply(token) // ranges 0 - 1
 ```
 
-Implementing `MaxBorrowUtilization` would restrict `MsgBorrow` from increasing `total_borrowed` above a desired level.
+Implementing `MaxSupplyUtilization` would restrict `MsgBorrow` from increasing `total_borrowed` above a desired level.
 
 It may or may not restrict `MsgWithdraw` from decreasing `total_supply(token)` below a desired level - adding this restriction might trap suppliers in a liquidity crisis in exchange for keeping more supply available for `MsgLiquidate`.
 
@@ -63,13 +63,13 @@ It may or may not restrict `MsgWithdraw` from decreasing `total_supply(token)` b
 | `MsgWithdraw` | Allow |
 | `MsgLiquidate` | Allow |
 
-`MaxBorrowUtilization` could still be indirectly exceeded by borrow interest accruing.
+`MaxSupplyUtilization` could still be indirectly exceeded by borrow interest accruing.
 
-Additionally, dynamic interest rates, which functioned as borrow utilization ranged from `0` to `1`, would instead be adjusted expect values from `0` to `MaxBorrowUtilization`.
+Additionally, dynamic interest rates, which functioned as supply utilization ranged from `0` to `1`, would instead be adjusted expect values from `0` to `MaxSupplyUtilization`.
 
-The motivation for restricting borrow utilization is to reduce the likelihood of situations where suppliers cannot use `MsgWithdraw` due to borrowers borrowing all available supply.
+The motivation for restricting supply utilization is to reduce the likelihood of situations where suppliers cannot use `MsgWithdraw` due to borrowers borrowing all available supply.
 
-This parameter overlaps in function with `MinCollateralLiquidity`. By lowering `MaxBorrowUtilization`, we create a buffer zone where `MsgBorrow` cannot reduce liquidity any further, but `MsgWithdraw` is still available. This helps protect suppliers and makes it more difficult to reach `MinCollateralLiquidity` overall.
+This parameter overlaps in function with `MinCollateralLiquidity`. By lowering `MaxSupplyUtilization`, we create a buffer zone where `MsgBorrow` cannot reduce liquidity any further, but `MsgWithdraw` is still available. This helps protect suppliers and makes it more difficult to reach `MinCollateralLiquidity` overall.
 
 ### Maximum Collateral Share
 
@@ -108,7 +108,7 @@ It may or may not allow `MsgLiquidate` to decrease `available_supply` under the 
 
 `MinCollateralLiquidity` could still be indirectly exceeded by supply interest accruing on a collateral denom's uToken exchange rate.
 
-It has also been proposed separately to factor `collateral_liquidity` (or `collateral_utilization`) into dynamic interest rates, to enhance the current model which uses `borrow_utilization` (see ADR-004).
+It has also been proposed separately to factor `collateral_liquidity` (or `collateral_utilization`) into dynamic interest rates, to enhance the current model which uses `supply_utilization` (see ADR-004).
 
 ## Alternatives
 

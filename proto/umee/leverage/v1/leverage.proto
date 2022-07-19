@@ -86,7 +86,7 @@ message Token {
   ];
 
   // Kink Borrow Rate defines the interest rate for borrowing this
-  // asset when borrow utilization is equal to 'kink_utilization'.
+  // asset when supply utilization is equal to 'kink_utilization'.
   string kink_borrow_rate = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -94,14 +94,14 @@ message Token {
   ];
 
   // Max Borrow Rate defines the interest rate for borrowing this
-  // asset when borrow utilization is at its maximum.
+  // asset when supply utilization is at its maximum.
   string max_borrow_rate = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_borrow_rate\""
   ];
 
-  // Kink Utilization defines the borrow utilization value where
+  // Kink Utilization defines the supply utilization value where
   // the kink in the borrow interest rate function occurs.
   string kink_utilization = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -154,13 +154,13 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"max_collateral_share\""
   ];
 
-  // Max Borrow Utilization specifies the maximum borrow utilization a token is
+  // Max Supply Utilization specifies the maximum supply utilization a token is
   // allowed to reach as a direct result of user borrowing. It can still be exceeded
   // due to withdrawals, interest, and liquidations.
-  string max_borrow_utilization = 16 [
+  string max_supply_utilization = 16 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"max_borrow_utilization\""
+    (gogoproto.moretags)   = "yaml:\"max_supply_utilization\""
   ];
 
   // Min Collateral Liquidity specifies the minimum collateral liquidity a token is

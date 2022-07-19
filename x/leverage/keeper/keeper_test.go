@@ -48,7 +48,7 @@ func newToken(base, symbol string) types.Token {
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxBorrowUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
 	}
 }

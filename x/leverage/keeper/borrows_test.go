@@ -118,7 +118,7 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	// we do not test empty denom, as that will cause a panic
 }
 
-func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
+func (s *IntegrationTestSuite) TestDeriveSupplyUtilization() {
 	// unregistered denom (0 borrowed and 0 lending pool is considered 100%)
 	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
 	s.Require().Equal(sdk.OneDec(), utilization)

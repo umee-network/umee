@@ -50,7 +50,7 @@ type Token struct {
     EnableMsgBorrow        bool
     Blacklist              bool
     MaxCollateralShare     sdk.Dec
-    MaxBorrowUtilization   sdk.Dec
+    MaxSupplyUtilization   sdk.Dec
     MinCollateralLiquidity sdk.Dec
 }
 ```

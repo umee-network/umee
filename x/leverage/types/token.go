@@ -88,8 +88,8 @@ func (t Token) Validate() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be between 0 and 1")
 	}
 
-	if t.MaxBorrowUtilization.IsNegative() || t.MaxBorrowUtilization.GT(sdk.OneDec()) {
-		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxBorrowUtilization must be between 0 and 1")
+	if t.MaxSupplyUtilization.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupplyUtilization must be between 0 and 1")
 	}
 
 	if t.MinCollateralLiquidity.IsNegative() {

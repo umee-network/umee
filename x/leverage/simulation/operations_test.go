@@ -47,7 +47,7 @@ func (s *SimTestSuite) SetupTest() {
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxBorrowUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
 	}
 	atomIBCToken := types.Token{
@@ -66,7 +66,7 @@ func (s *SimTestSuite) SetupTest() {
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxBorrowUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
 	}
 	uabc := types.Token{
@@ -85,7 +85,7 @@ func (s *SimTestSuite) SetupTest() {
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxBorrowUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
 	}
 
