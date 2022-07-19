@@ -84,11 +84,11 @@ func (t Token) Validate() error {
 		}
 	}
 
-	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GTE(sdk.OneDec()) {
+	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GT(sdk.OneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be between 0 and 1")
 	}
 
-	if t.MaxBorrowUtilization.IsNegative() || t.MaxBorrowUtilization.GTE(sdk.OneDec()) {
+	if t.MaxBorrowUtilization.IsNegative() || t.MaxBorrowUtilization.GT(sdk.OneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxBorrowUtilization must be between 0 and 1")
 	}
 
