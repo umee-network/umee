@@ -236,10 +236,11 @@ func startPriceFeeder(
 
 	srvErrCh := make(chan error, 1)
 	srv := &http.Server{
-		Handler:      rtr,
-		Addr:         cfg.Server.ListenAddr,
-		WriteTimeout: writeTimeout,
-		ReadTimeout:  readTimeout,
+		Handler:           rtr,
+		Addr:              cfg.Server.ListenAddr,
+		WriteTimeout:      writeTimeout,
+		ReadTimeout:       readTimeout,
+		ReadHeaderTimeout: readTimeout,
 	}
 
 	go func() {
