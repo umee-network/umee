@@ -184,8 +184,8 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
 }
 ```
 
-### Market Size
+### Total Supplied
 
-The `MarketSize` of a token denom is the USD value of all tokens supplied to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
+The `TotalSupplied` of a token denom is the sum of all tokens supplied to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
 
-`MarketSize(denom) = oracle.Price(denom) * [ ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom) ]`
+`TotalSupplied(denom) = ModuleBalance(denom) - ReservedAmount(denom) + TotalBorrowed(denom)`

@@ -58,6 +58,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
 - [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate now has reward denom instead of full coin
 - [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
+- [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 
 ### Features
 

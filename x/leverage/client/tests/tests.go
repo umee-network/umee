@@ -25,8 +25,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query token market size - invalid denom",
-			cli.GetCmdQueryTokenMarketSize(),
+			"query total supplied - invalid denom",
+			cli.GetCmdQueryTotalSupplied(),
 			[]string{
 				"abcd",
 			},
@@ -55,8 +55,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query market size - invalid denom",
-			cli.GetCmdQueryMarketSize(),
+			"query total supplied value - invalid denom",
+			cli.GetCmdQueryTotalSuppliedValue(),
 			[]string{
 				"abcd",
 			},
@@ -404,14 +404,14 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	nonzeroQueries := []TestCase{
 		testQuery{
-			"query token market size",
-			cli.GetCmdQueryTokenMarketSize(),
+			"query token total supplied",
+			cli.GetCmdQueryTotalSupplied(),
 			[]string{
 				umeeapp.BondDenom,
 			},
 			false,
-			&types.QueryTokenMarketSizeResponse{},
-			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.NewInt(1000)},
+			&types.QueryTotalSuppliedResponse{},
+			&types.QueryTotalSuppliedResponse{TotalSupplied: sdk.NewInt(1000)},
 		},
 
 		testQuery{
@@ -425,14 +425,14 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(950)},
 		},
 		testQuery{
-			"query market size",
-			cli.GetCmdQueryMarketSize(),
+			"query total supplied value",
+			cli.GetCmdQueryTotalSuppliedValue(),
 			[]string{
 				umeeapp.BondDenom,
 			},
 			false,
-			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("0.03421")},
+			&types.QueryTotalSuppliedValueResponse{},
+			&types.QueryTotalSuppliedValueResponse{TotalSuppliedValue: sdk.MustNewDecFromStr("0.03421")},
 		},
 		testQuery{
 			"query supplied - all",

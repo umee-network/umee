@@ -14,8 +14,8 @@ Queries on accepted asset types:
 - **Total Borrowed** queries for the total borrowed amount of a specified token denomination.
 - **Total Collateral** queries for the total collateral amount of a specified uToken denomination.
 - **Exchange Rate** queries the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) of a given uToken denomination.
-- **Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination.
-- **Token Market Size** queries the [Market Size](01_concepts.md#Market-Size) of a specified denomination, but denominated in base tokens instead of USD. This amounts to _total supplied by all suppliers + interest accrued._
+- **Total Supplied** queries the [Total Supplied](01_concepts.md#Total-Supplied) of a specified denomination.
+- **Total Supplied Value** queries the equivalent USD value of [Total Supplied](01_concepts.md#Total-Supplied) of a specified denomination.
 - **Market Summary** combines several asset-specifying queries for more efficient frontend access.
 
 Queries on account addresses:
