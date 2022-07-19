@@ -132,11 +132,11 @@ High collateral utilization is dangerous for the system: When collateral utiliza
 
 Let's draw the following scenario to picture the liquidators risk:
 
-> | - | Supply | Collateral | Borrowed |
-> | Alice| $1.2M BTC | - | - |
-> | Bob | - | $1.5M LUNA | $1M BTC |
-> | Charlie | - | $2M BTC | $1.4M LUNA |
->
+| - | Supply | Collateral | Borrowed |
+| Alice| $1.2M BTC | - | - |
+| Bob | - | $1.5M LUNA | $1M BTC |
+| Charlie | - | $2M BTC | $1.4M LUNA |
+
 > 1. Charlie predicts Luna collapse and sells the Luna.
 > 2. Luna is sinking and Bob's position has to be liquidated. However:
 >   - Liquidators can liquidate Bob, but they can only redeem up to 6.6% of `u/Luna` because the rest is not available (Charlie borrowed it).
