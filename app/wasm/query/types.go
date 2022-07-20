@@ -39,12 +39,12 @@ const (
 	// AssignedQuerySupplyAPY represents the call to query and derives the current supply
 	// interest rate on a token denom.
 	AssignedQuerySupplyAPY
-	// AssignedQueryMarketSize represents the call to query the market size of
+	// AssignedQueryTotalSuppliedValue represents the call to query the market size of
 	// an token denom in USD.
-	AssignedQueryMarketSize
-	// AssignedQueryTokenMarketSize represents the call to query the market size of
+	AssignedQueryTotalSuppliedValue
+	// AssignedQueryTotalSupplied represents the call to query the market size of
 	// an token denom.
-	AssignedQueryTokenMarketSize
+	AssignedQueryTotalSupplied
 	// AssignedQueryReserveAmount represents the call to query the gets the amount
 	// reserved of a specified token.
 	AssignedQueryReserveAmount
@@ -137,9 +137,9 @@ type UmeeQuery struct {
 	// Used to derives the current supply interest rate on a token denom.
 	SupplyAPY *lvtypes.QuerySupplyAPY `json:"supply_apy,omitempty"`
 	// Used to get the market size in USD of a token denom.
-	MarketSize *lvtypes.QueryMarketSize `json:"market_size,omitempty"`
+	TotalSuppliedValue *lvtypes.QueryTotalSuppliedValue `json:"total_supplied_value,omitempty"`
 	// Used to get the market size of a token denom.
-	TokenMarketSize *lvtypes.QueryTokenMarketSize `json:"token_market_size,omitempty"`
+	TotalSupplied *lvtypes.QueryTotalSupplied `json:"total_supplied,omitempty"`
 	// Used to gets the amount reserved of a specified token.
 	ReserveAmount *lvtypes.QueryReserveAmount `json:"reserve_amount,omitempty"`
 	// Used to gets the collateral amount of a user by token denomination.

@@ -125,12 +125,12 @@ func (q UmeeQuery) HandleSupplyAPY(
 	return MarshalResponse(resp)
 }
 
-// HandleMarketSize get the market size in USD of a token denom.
-func (q UmeeQuery) HandleMarketSize(
+// HandleTotalSuppliedValue get the market size in USD of a token denom.
+func (q UmeeQuery) HandleTotalSuppliedValue(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.MarketSize(sdk.WrapSDKContext(ctx), q.MarketSize)
+	resp, err := qs.TotalSuppliedValue(sdk.WrapSDKContext(ctx), q.TotalSuppliedValue)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Size", err)}
 	}
@@ -138,12 +138,12 @@ func (q UmeeQuery) HandleMarketSize(
 	return MarshalResponse(resp)
 }
 
-// HandleTokenMarketSize handles the market size of an token.
-func (q UmeeQuery) HandleTokenMarketSize(
+// HandleTotalSupplied handles the market size of an token.
+func (q UmeeQuery) HandleTotalSupplied(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.TokenMarketSize(sdk.WrapSDKContext(ctx), q.TokenMarketSize)
+	resp, err := qs.TotalSupplied(sdk.WrapSDKContext(ctx), q.TotalSupplied)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Token Market Size", err)}
 	}

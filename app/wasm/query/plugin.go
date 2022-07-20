@@ -59,10 +59,10 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			return smartcontractQuery.HandleBorrowAPY(ctx, plugin.lvQueryServer)
 		case AssignedQuerySupplyAPY:
 			return smartcontractQuery.HandleSupplyAPY(ctx, plugin.lvQueryServer)
-		case AssignedQueryMarketSize:
-			return smartcontractQuery.HandleMarketSize(ctx, plugin.lvQueryServer)
-		case AssignedQueryTokenMarketSize:
-			return smartcontractQuery.HandleTokenMarketSize(ctx, plugin.lvQueryServer)
+		case AssignedQueryTotalSuppliedValue:
+			return smartcontractQuery.HandleTotalSuppliedValue(ctx, plugin.lvQueryServer)
+		case AssignedQueryTotalSupplied:
+			return smartcontractQuery.HandleTotalSupplied(ctx, plugin.lvQueryServer)
 		case AssignedQueryReserveAmount:
 			return smartcontractQuery.HandleReserveAmount(ctx, plugin.lvQueryServer)
 		case AssignedQueryCollateral:
