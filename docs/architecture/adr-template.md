@@ -1,21 +1,17 @@
-# ADR {ADR-NUMBER}: {TITLE}
-
-## Changelog
-
-- {Month} {Day}, {Year}: {Changelog} {@User}
+# Task Spec {NUMBER}: {TITLE}
 
 ## Status
 
-> A decision may be "proposed" if it hasn't been agreed upon yet, or "accepted"
-> once it is agreed upon. Once the ADR has been implemented mark the ADR as
-> "implemented". If a later ADR changes or reverses a decision, it may be marked
-> as "deprecated" or "superseded" with a reference to its replacement.
+> A Status may be Draft if we want to break discussion in few PRs to break down a longer process in few steps.
+> At the end of the process each task has to be either Accepted or Declined.
+> If a later task significantly changes or reverses a decision, it may be marked
+> as superseded" with a reference to its replacement.
 
-{Deprecated|Proposed|Accepted|Declined|Implemented}
+{Draft|Accepted|Declined|Superseded}
 
 ## Abstract
 
-> "If you can't explain it simply, you don't understand it well enough." Provide a simplified and layman-accessible explanation of the ADR.
+> "If you can't explain it simply, you don't understand it well enough." Provide a simplified and layman-accessible explanation of the task.
 > A short (~200 word) description of the issue being addressed.
 
 ## Context
@@ -24,50 +20,50 @@
 > and why there is a problem. It should be as succinct as possible and introduce
 > the high level idea behind the solution.
 
-## Decision
+## Specification
 
-> This section records the decision that was made.
+> This section records the decision that was made and how it should work.
 > It is best to record as much info as possible from the discussion that happened.
-> This aids in not having to go back to the Pull Request to get the needed information.
+> This aids in not having to go back to the Pull Request and comments to get the needed information.
+> You can include diagrams.
 
-## Detailed Design
+> - What new data structures are needed, what data structures will be changed?
+> - What are the efficiency considerations (time/space)?
+> - What are the expected access patterns (load/throughput)?
+> - Are there any privacy considerations?
+> - If the change is large, how will the changes be broken up for ease of review?
 
-> This section does not need to be filled in at the start of the ADR, but must
+### User requirements
+
+> Specify expected user behavior
+
+### Proposed API
+
+> Describe new API or changed API
+
+### Outcomes
+
+> This section does not need to be filled in at the beginning, but must
 > be completed prior to the merging of the implementation.
 >
 > Here are some common questions that get answered as part of the detailed design:
 >
-> - What are the user requirements?
->
 > - What systems will be affected?
->
-> - What new data structures are needed, what data structures will be changed?
->
-> - What new APIs will be needed, what APIs will be changed?
->
-> - What are the efficiency considerations (time/space)?
->
-> - What are the expected access patterns (load/throughput)?
->
 > - Are there any logging, monitoring or observability needs?
->
 > - Are there any security considerations?
->
-> - Are there any privacy considerations?
->
-> - How will the changes be tested?
->
-> - If the change is large, how will the changes be broken up for ease of review?
->
 > - Will these changes require a breaking (major) release?
->
-> - Does this change require coordination with the SDK or other?
+> - Does this change require coordination with other teams?
 
 ## Alternative Approaches
 
 > This section contains information around alternative options that are considered
 > before making a decision. It should contain a explanation on why the alternative
 > approach(es) were not chosen.
+
+## Test Cases [optional]
+
+> How will the changes be tested?
+> Test cases for an implementation are mandatory for tasks that are affecting important parts of the system functionality. Tasks can choose to include links to test cases if applicable.
 
 ## Consequences
 
@@ -76,7 +72,7 @@
 
 ### Backwards Compatibility
 
-> All ADRs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The ADR must explain how the author proposes to deal with these incompatibilities. ADR submissions without a sufficient backwards compatibility treatise may be rejected outright.
+> All Tasks that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The Task must explain how the author proposes to deal with these incompatibilities. Task submissions without a sufficient backwards compatibility treatise may be rejected outright.
 
 ### Positive
 
@@ -86,12 +82,12 @@
 
 ## Further Discussions
 
-> While an ADR is in the DRAFT or PROPOSED stage, this section should contain a summary of issues to be solved in future iterations (usually referencing comments from a pull-request discussion).
-> Later, this section can optionally list ideas or improvements the author or reviewers found during the analysis of this ADR.
+> This section should contain potential followups or issues to be solved in future iterations (usually referencing comments from a pull-request discussion).
 
-## Test Cases [optional]
+## Comments
 
-> Test cases for an implementation are mandatory for ADRs that are affecting consensus changes. Other ADRs can choose to include links to test cases if applicable.
+> Optional. Provide additional important comments.
+> If the proposal is rejected, document why it was rejected.
 
 ## References
 
