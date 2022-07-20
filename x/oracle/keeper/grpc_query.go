@@ -136,6 +136,31 @@ func (q querier) MissCounter(
 	}, nil
 }
 
+// SlashWindow queries the current slash window progress of the oracle.
+func (q querier) SlashWindow(
+	goCtx context.Context,
+	req *types.QuerySlashWindow,
+) (*types.QuerySlashWindowResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := q.GetParams(ctx)
+
+	slashWindow := params.SlashWindow
+	votePeriod := params.VotePeriod
+	currentBlock := ctx.BlockHeight()
+	votingPeriodsPerSlashWindow := slashWindow / votePeriod
+
+	currentSlashWindow := uint64(currentBlock) / votingPeriodsPerSlashWindow
+	blocksIntoSlashWindow := uint64(currentBlock) - (currentSlashWindow * slashWindow)
+
+	return &types.QuerySlashWindowResponse{
+		WindowProgress: blocksIntoSlashWindow / votePeriod,
+	}, nil
+}
+
 // AggregatePrevote queries an aggregate prevote of a validator.
 func (q querier) AggregatePrevote(
 	goCtx context.Context,
