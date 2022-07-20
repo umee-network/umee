@@ -9,6 +9,7 @@ import (
 )
 
 func TestFixedQuo(t *testing.T) {
+	t.Parallel()
 	tcs := []struct {
 		name string
 		a    uint64
@@ -41,6 +42,33 @@ func TestFixedQuo(t *testing.T) {
 	for _, tc := range tcs {
 		a, b := sdk.NewIntFromUint64(tc.a), sdk.NewIntFromUint64(tc.b)
 		o := FixedQuo(a, b, tc.r)
-		require.Equal(int(tc.exp), int(o), fmt.Sprint("test", tc.name))
+		require.Equal(int(tc.exp), int(o), fmt.Sprint("test ", tc.name))
+	}
+}
+
+func TestFixedMul(t *testing.T) {
+	t.Parallel()
+	tcs := []struct {
+		name string
+		a    uint64
+		b    FixedBP
+		exp  uint64
+	}{
+		{"t1", 20, 0, 0},
+		{"t2", 20, 1, 0},
+		{"t3", 20, ONE, 20},
+		{"t4", 20000, 0, 0},
+		{"t5", 20000, 1, 2},
+		{"t6", 20000, 2, 4},
+		{"t7", 20000, half, 10000},
+		{"t8", 2000, 4, 0},
+		{"t9", 2000, 5, 1},
+		{"t10", 2000, half, 1000},
+	}
+	require := require.New(t)
+	for _, tc := range tcs {
+		a := sdk.NewIntFromUint64(tc.a)
+		o := FixedMul(a, tc.b)
+		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
 	}
 }
