@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v2/math/bpmath"
 )
 
 const (
@@ -70,8 +71,8 @@ func (t Token) Validate() error {
 	}
 
 	// Liquidation incentive is non-negative
-	if t.LiquidationIncentive.IsNegative() {
-		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
+	if t.LiquidationIncentive > bpmath.ONE {
+		return fmt.Errorf("invalid liquidation incentive: %s - must be in [0; 10000]", t.LiquidationIncentive)
 	}
 
 	// Blacklisted assets cannot have borrow or supply enabled

@@ -13,6 +13,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
+	"github.com/umee-network/umee/v2/math/bpmath"
 	"github.com/umee-network/umee/v2/x/leverage"
 	"github.com/umee-network/umee/v2/x/leverage/keeper"
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -43,7 +44,7 @@ func newToken(base, symbol string) types.Token {
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
 		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.1"),
+		LiquidationIncentive: 1000,
 		EnableMsgSupply:      true,
 		EnableMsgBorrow:      true,
 		Blacklist:            false,
@@ -257,7 +258,7 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	s.Require().Equal(t.KinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
 	s.Require().Equal(t.MaxBorrowRate, sdk.MustNewDecFromStr("1.52"))
 	s.Require().Equal(t.KinkUtilization, sdk.MustNewDecFromStr("0.8"))
-	s.Require().Equal(t.LiquidationIncentive, sdk.MustNewDecFromStr("0.1"))
+	s.Require().Equal(t.LiquidationIncentive, bpmath.FixedBP(1000))
 
 	s.Require().NoError(t.AssertBorrowEnabled())
 	s.Require().NoError(t.AssertSupplyEnabled())

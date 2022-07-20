@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v2/math/bpmath"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -432,7 +433,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// apply liquidation incentive
-	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
+	reward.Amount = bpmath.FixedMul(reward.Amount, liquidationIncentive).Add(reward.Amount)
 
 	maxReward := collateral.AmountOf(reward.Denom)
 	if maxReward.IsZero() {
@@ -519,17 +520,17 @@ func (k Keeper) LiquidationParams(
 	rewardDenom string,
 	borrowed sdk.Dec,
 	limit sdk.Dec,
-) (sdk.Dec, sdk.Dec, error) {
+) (bpmath.FixedBP, sdk.Dec, error) {
 	if borrowed.IsNegative() {
-		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
+		return 0, sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, borrowed.String())
 	}
 	if limit.IsNegative() {
-		return sdk.ZeroDec(), sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
+		return 0, sdk.ZeroDec(), sdkerrors.Wrap(types.ErrBadValue, limit.String())
 	}
 
 	ts, err := k.GetTokenSettings(ctx, rewardDenom)
 	if err != nil {
-		return sdk.ZeroDec(), sdk.ZeroDec(), err
+		return 0, sdk.ZeroDec(), err
 	}
 
 	// special case: If liquidation threshold is zero, close factor is always 1
