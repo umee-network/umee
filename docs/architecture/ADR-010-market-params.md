@@ -53,6 +53,8 @@ One proposed parameter is `MaxSupplyUtilization`, to be defined per token.
 supply_utilization(token) = total_borrowed(token) / total_supply(token) // ranges 0 - 1
 ```
 
+For example, if `1000 ATOM` are supplied and `200 ATOM` are borrowed, `supply_utilization` is `0.2`.
+
 Implementing `MaxSupplyUtilization` would restrict `MsgBorrow` from increasing `total_borrowed` above a desired level.
 
 It may or may not restrict `MsgWithdraw` from decreasing `total_supply(token)` below a desired level - adding this restriction might trap suppliers in a liquidity crisis in exchange for keeping more supply available for `MsgLiquidate`.
@@ -80,6 +82,8 @@ total_collateral_value(token) = total_collateral(token) * oracle_price_usd(token
 collateral_share(token) = total_collateral_value(token) / Sum_All_Tokens(total_collateral_value) // ranges 0 - 1
 ```
 
+For example, if `10 ATOM` collateral exists at a price of `$20` alongside `100 OSMO` collateral at a price of `$1`, then `collateral_share(ATOM)` is `10 * $20 / $300 = 0.66` and `collateral_share(OSMO)` is `$100 / $300 = 0.33`.
+
 Implementing `MaxCollateralShare` would restrict `MsgCollateralize` from increasing `total_collateral` above a desired level.
 
 `MaxCollateralShare` could still be indirectly exceeded by fluctuating oracle prices, `MsgDecollateralize` or `MsgLiquidate` of other tokens, or interest accruing in one denom faster than another.
@@ -93,6 +97,8 @@ It is the reciprocal of `MaxCollateralUtilization`, functionally equivalent in w
 ```go
 collateral_liquidity(token) = available(token) / total_collateral(token) // ranges 0 - ∞
 ```
+
+For example if `200 ATOM` of collateral exists and the `x/leverage` module only has `40 ATOM` available (with the rest of supply being borrowed out), then `collateral_liquidity(ATOM) = 0.2`.
 
 Stable assets can have low `MinCollateralLiquidity` (as low as `0.02`, but more likely around `0.15`). Volatile assets should have significantly safer values, for example `0.5` or `1`.
 
@@ -121,6 +127,8 @@ It is the reciprocal of `MinCollateralLiquidity`, so the motivation and tradeoff
 ```go
 collateral_utilization(token) = total_collateral(token) / available(token) // ranges 0 - ∞
 ```
+
+For example if `200 ATOM` of collateral exists and the `x/leverage` module only has `40 ATOM` available (with the rest of supply being borrowed out), then `collateral_utilization(ATOM) = 5`.
 
 This quantity has the property of increasing rapidly (as 1/N -> 0) when available supply is under stress.
 
