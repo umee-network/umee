@@ -10,6 +10,76 @@ import (
 )
 
 func TestValidate(t *testing.T) {
+	validConfig := func() config.Config {
+		return config.Config{
+			Server: config.Server{
+				ListenAddr:     "0.0.0.0:7171",
+				VerboseCORS:    false,
+				AllowedOrigins: []string{},
+			},
+			CurrencyPairs: []config.CurrencyPair{
+				{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
+			},
+			Account: config.Account{
+				Address:   "fromaddr",
+				Validator: "valaddr",
+				ChainID:   "chain-id",
+			},
+			Keyring: config.Keyring{
+				Backend: "test",
+				Dir:     "/Users/username/.umee",
+			},
+			RPC: config.RPC{
+				TMRPCEndpoint: "http://localhost:26657",
+				GRPCEndpoint:  "localhost:9090",
+				RPCTimeout:    "100ms",
+			},
+			Telemetry: config.Telemetry{
+				ServiceName:             "price-feeder",
+				Enabled:                 true,
+				EnableHostname:          true,
+				EnableHostnameLabel:     true,
+				EnableServiceLabel:      true,
+				GlobalLabels:            make([][]string, 1),
+				PrometheusRetentionTime: 120,
+			},
+			GasAdjustment: 1.5,
+		}
+	}
+	emptyPairs := validConfig()
+	emptyPairs.CurrencyPairs = []config.CurrencyPair{}
+
+	invalidBase := validConfig()
+	invalidBase.CurrencyPairs = []config.CurrencyPair{
+		{Base: "", Quote: "USDT", Providers: []string{"kraken"}},
+	}
+
+	invalidQuote := validConfig()
+	invalidQuote.CurrencyPairs = []config.CurrencyPair{
+		{Base: "ATOM", Quote: "", Providers: []string{"kraken"}},
+	}
+
+	emptyProviders := validConfig()
+	emptyProviders.CurrencyPairs = []config.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT", Providers: []string{}},
+	}
+
+	invalidEndpoints := validConfig()
+	invalidEndpoints.ProviderEndpoints = []config.ProviderEndpoint{
+		{
+			Name: "binance",
+		},
+	}
+
+	invalidEndpointsProvider := validConfig()
+	invalidEndpointsProvider.ProviderEndpoints = []config.ProviderEndpoint{
+		{
+			Name:      "foo",
+			Rest:      "bar",
+			Websocket: "baz",
+		},
+	}
+
 	testCases := []struct {
 		name      string
 		cfg       config.Config
@@ -17,182 +87,37 @@ func TestValidate(t *testing.T) {
 	}{
 		{
 			"valid config",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
-				},
-				Account: config.Account{
-					Address:   "fromaddr",
-					Validator: "valaddr",
-					ChainID:   "chain-id",
-				},
-				Keyring: config.Keyring{
-					Backend: "test",
-					Dir:     "/Users/username/.umee",
-				},
-				RPC: config.RPC{
-					TMRPCEndpoint: "http://localhost:26657",
-					GRPCEndpoint:  "localhost:9090",
-					RPCTimeout:    "100ms",
-				},
-				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
-				},
-				GasAdjustment: 1.5,
-			},
+			validConfig(),
 			false,
 		},
 		{
 			"empty pairs",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{},
-			},
+			emptyPairs,
 			true,
 		},
 		{
 			"invalid base",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "", Quote: "USDT", Providers: []string{"kraken"}},
-				},
-			},
+			invalidBase,
 			true,
 		},
 		{
 			"invalid quote",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "ATOM", Quote: "", Providers: []string{"kraken"}},
-				},
-			},
+			invalidQuote,
 			true,
 		},
 		{
 			"empty providers",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "ATOM", Quote: "USDT", Providers: []string{}},
-				},
-			},
+			emptyProviders,
 			true,
 		},
 		{
 			"invalid endpoints",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
-				},
-				Account: config.Account{
-					Address:   "fromaddr",
-					Validator: "valaddr",
-					ChainID:   "chain-id",
-				},
-				Keyring: config.Keyring{
-					Backend: "test",
-					Dir:     "/Users/username/.umee",
-				},
-				RPC: config.RPC{
-					TMRPCEndpoint: "http://localhost:26657",
-					GRPCEndpoint:  "localhost:9090",
-					RPCTimeout:    "100ms",
-				},
-				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
-				},
-				GasAdjustment: 1.5,
-				ProviderEndpoints: []config.ProviderEndpoint{
-					{
-						Name: "binance",
-					},
-				},
-			},
+			invalidEndpoints,
 			true,
 		},
 		{
 			"invalid endpoint provider",
-			config.Config{
-				Server: config.Server{
-					ListenAddr:     "0.0.0.0:7171",
-					VerboseCORS:    false,
-					AllowedOrigins: []string{},
-				},
-				CurrencyPairs: []config.CurrencyPair{
-					{Base: "ATOM", Quote: "USDT", Providers: []string{"kraken"}},
-				},
-				Account: config.Account{
-					Address:   "fromaddr",
-					Validator: "valaddr",
-					ChainID:   "chain-id",
-				},
-				Keyring: config.Keyring{
-					Backend: "test",
-					Dir:     "/Users/username/.umee",
-				},
-				RPC: config.RPC{
-					TMRPCEndpoint: "http://localhost:26657",
-					GRPCEndpoint:  "localhost:9090",
-					RPCTimeout:    "100ms",
-				},
-				Telemetry: config.Telemetry{
-					ServiceName:         "price-feeder",
-					Enabled:             true,
-					EnableHostname:      true,
-					EnableHostnameLabel: true,
-					EnableServiceLabel:  true,
-					GlobalLabels:        make([][]string, 1),
-					Type:                "generic",
-				},
-				GasAdjustment: 1.5,
-				ProviderEndpoints: []config.ProviderEndpoint{
-					{
-						Name:      "foo",
-						Rest:      "bar",
-						Websocket: "baz",
-					},
-				},
-			},
+			invalidEndpointsProvider,
 			true,
 		},
 	}
@@ -266,7 +191,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
@@ -497,7 +422,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
@@ -592,7 +517,7 @@ enabled = true
 enable_hostname = true
 enable_hostname_label = true
 enable_service_label = true
-type = "prometheus"
+prometheus_retention = 120
 global_labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
