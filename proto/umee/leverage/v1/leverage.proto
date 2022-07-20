@@ -102,11 +102,9 @@ message Token {
   ];
 
   // The kink_utilization defines the value where the kink rate kicks off for
-  // borrow rates.
-  string kink_utilization = 8 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"kink_utilization\""
+  // borrow rates. Value is in basis points; allowed values are in [0, 100] range.
+  uint32 kink_utilization = 8 [
+    (gogoproto.moretags) = "yaml:\"kink_utilization\""
   ];
 
   // The liquidation_incentive determines the portion of bonus collateral of
