@@ -102,17 +102,19 @@ message Token {
   ];
 
   // The kink_utilization defines the value where the kink rate kicks off for
-  // borrow rates. Value is in basis points; allowed values are in [0, 100] range.
-  uint32 kink_utilization = 8 [
-    (gogoproto.moretags) = "yaml:\"kink_utilization\""
+  // borrow rates.
+  string kink_utilization = 8 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"kink_utilization\""
   ];
 
   // The liquidation_incentive determines the portion of bonus collateral of
   // a token type liquidators receive as a liquidation reward.
-  string liquidation_incentive = 9 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"liquidation_incentive\""
+  // Value is in basis points; allowed values are in [0, 10000] range.
+  uint32 liquidation_incentive = 9 [
+    (gogoproto.moretags) = "yaml:\"liquidation_incentive\"",
+    (gogoproto.casttype) = "github.com/umee-network/umee/v2/math/bpmath.FixedBP"
   ];
 
   // The symbol_denom and exponent are solely used to update the oracle's accept
