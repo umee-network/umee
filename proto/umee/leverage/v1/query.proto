@@ -69,19 +69,17 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/supply_apy";
   }
 
-  // MarketSize queries for the Market Size in USD of a specified denomination,
-  // which is the USD value of total tokens supplied by all users plus borrow
-  // interest owed by all users.
-  rpc MarketSize(QueryMarketSize) returns (QueryMarketSizeResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/market_size";
+  // TotalSuppliedValue queries the total value of a given token
+  // currently supplied by all users, plus outstanding interest.
+  rpc TotalSuppliedValue(QueryTotalSuppliedValue) returns (QueryTotalSuppliedValueResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/total_supplied_value/{denom}";
   }
 
-  // TokenMarketSize queries for the Market Size in base tokens of a specified
-  // denomination, which is the total tokens supplied by all users plus borrow
-  // interest owed by all users.
-  rpc TokenMarketSize(QueryTokenMarketSize)
-      returns (QueryTokenMarketSizeResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/token_market_size";
+  // TotalSupplied queries the total amount of a given token
+  // currently supplied by all users, plus outstanding interest.
+  rpc TotalSupplied(QueryTotalSupplied)
+      returns (QueryTotalSuppliedResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/total_supplied/{denom}";
   }
 
   // ReserveAmount queries for the amount reserved of a specified denomination.
@@ -183,7 +181,8 @@ message QueryBorrowAPY {
 message QueryBorrowAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
@@ -198,35 +197,36 @@ message QuerySupplyAPY {
 message QuerySupplyAPYResponse {
   string APY = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "apy"
   ];
 }
 
-// QueryMarketSize defines the request structure for the Market Size in
-// USD gRPC service handler.
-message QueryMarketSize {
+// QueryTotalSuppliedValue defines the request structure for the Total Supplied
+// Value gRPC service handler.
+message QueryTotalSuppliedValue {
   string denom = 1;
 }
 
-// QueryMarketSizeResponse defines the response structure for the Market Size in
-// USD gRPC service handler.
-message QueryMarketSizeResponse {
-  string market_size_usd = 1 [
+// QueryTotalSuppliedValueResponse defines the response structure for the Total
+// Supplied Value gRPC service handler.
+message QueryTotalSuppliedValueResponse {
+  string total_supplied_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
 }
 
-// QueryTokenMarketSize defines the request structure for the Token
-// Market Size gRPC service handler.
-message QueryTokenMarketSize {
+// QueryTotalSupplied defines the request structure for the Total Supplied
+// gRPC service handler.
+message QueryTotalSupplied {
   string denom = 1;
 }
 
-// QueryTokenMarketSizeResponse defines the response structure for the Token
-// Market Size gRPC service handler.
-message QueryTokenMarketSizeResponse {
-  string market_size = 1 [
+// QueryTotalSuppliedResponse defines the response structure for the
+// Total Supplied gRPC service handler.
+message QueryTotalSuppliedResponse {
+  string total_supplied = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
@@ -431,17 +431,20 @@ message QueryMarketSummaryResponse {
   ];
   string uToken_exchange_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "utoken_exchange_rate"
   ];
   string supply_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-  string borrow_APY = 6 [
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "supply_apy"
+    ];
+    string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "borrow_apy"
   ];
-  string market_size = 7 [
+  string total_supplied = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];

@@ -51,14 +51,20 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- [#1121](https://github.com/umee-network/umee/pull/1121) Use the cosmos-sdk telemetry package instead of our own.
 - [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 
 ### Features
 
-- [1110](https://github.com/umee-network/umee/pull/1110) Add the ability to detect deviations with multi-quoted prices, ex. using BTC/USD and BTC/ETH at the same time.
 - [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
+
+## [v0.2.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.4) - 2022-07-14
+
+### Features
+
+- [1110](https://github.com/umee-network/umee/pull/1110) Add the ability to detect deviations with multi-quoted prices, ex. using BTC/USD and BTC/ETH at the same time.
 - [#998](https://github.com/umee-network/umee/pull/998) Make deviation thresholds configurable for stablecoin support.
 
 ## [v0.2.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.3) - 2022-06-30
