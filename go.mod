@@ -384,7 +384,6 @@ require (
 
 // github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge-umee/module
 replace (
-	github.com/cosmos/ibc-go/v2 => ../ibc-go
 	github.com/cosmos/ibc-go/v3 => ../ibc-go
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 )
