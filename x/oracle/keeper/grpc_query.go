@@ -151,9 +151,9 @@ func (q querier) SlashWindow(
 	slashWindow := params.SlashWindow
 	votePeriod := params.VotePeriod
 	currentBlock := ctx.BlockHeight()
-	votingPeriodsPerSlashWindow := slashWindow / votePeriod
+	votePeriodsPerSlashWindow := slashWindow / votePeriod
 
-	currentSlashWindow := uint64(currentBlock) / votingPeriodsPerSlashWindow
+	currentSlashWindow := uint64(currentBlock) / votePeriodsPerSlashWindow
 	blocksIntoSlashWindow := uint64(currentBlock) - (currentSlashWindow * slashWindow)
 
 	return &types.QuerySlashWindowResponse{
