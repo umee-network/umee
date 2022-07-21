@@ -303,7 +303,7 @@ func GetCmdQueryMissCounter() *cobra.Command {
 func GetCmdQuerySlashWindow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "slash-window",
-		Short: "Query the current slash window and slash window index",
+		Short: "Query the current slash window progress",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
