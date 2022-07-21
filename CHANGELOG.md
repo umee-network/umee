@@ -61,7 +61,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [1147])(https://github.com/umee-network/umee/pull/1147) Add SlashWindow oracle query.
+- [1147](https://github.com/umee-network/umee/pull/1147) Add SlashWindow oracle query.
 - [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
