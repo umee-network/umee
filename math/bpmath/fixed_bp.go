@@ -32,3 +32,7 @@ func FixedMul(a sdk.Int, b FixedBP) sdk.Int {
 	}
 	return a.MulRaw(int64(b)).Quo(oneBigInt)
 }
+
+func (bp FixedBP) ToDec() sdk.Dec {
+	return sdk.NewDecWithPrec(int64(bp), 4)
+}

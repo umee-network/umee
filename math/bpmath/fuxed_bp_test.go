@@ -72,3 +72,23 @@ func TestFixedMul(t *testing.T) {
 		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
 	}
 }
+
+func TestFixedToDec(t *testing.T) {
+	t.Parallel()
+	tcs := []struct {
+		name string
+		a    FixedBP
+		exp  sdk.Dec
+	}{
+		{"t1", 0, sdk.ZeroDec()},
+		{"t2", 1, sdk.MustNewDecFromStr("0.0001")},
+		{"t3", 20, sdk.MustNewDecFromStr("0.002")},
+		{"t4", 9999, sdk.MustNewDecFromStr("0.9999")},
+		{"t5", ONE, sdk.NewDec(1)},
+	}
+	require := require.New(t)
+	for _, tc := range tcs {
+		o := tc.a.ToDec()
+		require.Equal(tc.exp.String(), o.String(), fmt.Sprint("test ", tc.name))
+	}
+}
