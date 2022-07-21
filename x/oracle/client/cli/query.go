@@ -31,6 +31,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRate(),
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
+		GetCmdQuerySlashWindow(),
 	)
 
 	return cmd
@@ -286,6 +287,31 @@ func GetCmdQueryMissCounter() *cobra.Command {
 			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounter{
 				ValidatorAddr: args[0],
 			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQuerySlashWindow implements the slash window query command.
+func GetCmdQuerySlashWindow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "slash-window",
+		Short: "Query the current slash window progress",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.SlashWindow(context.Background(), &types.QuerySlashWindow{})
 			if err != nil {
 				return err
 			}
