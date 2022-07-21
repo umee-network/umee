@@ -433,7 +433,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// apply liquidation incentive
-	reward.Amount = bpmath.FixedMul(reward.Amount, liquidationIncentive).Add(reward.Amount)
+	reward.Amount = bpmath.Mul(reward.Amount, liquidationIncentive).Add(reward.Amount)
 
 	maxReward := collateral.AmountOf(reward.Denom)
 	if maxReward.IsZero() {
