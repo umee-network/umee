@@ -171,7 +171,6 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustUp.rewardTokenPrice = sdk.MustNewDecFromStr("40.1")
 	expensiveCollateralDustUp.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDustUp, 21, 1, 1, "expensive collateral dust with price up")
-	// is this a potential module drain? (discount repay)
 
 	// collateral dust case, with high collateral token value and no rounding
 	expensiveCollateralDustDown := baseCase()
@@ -180,7 +179,6 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustDown.rewardTokenPrice = sdk.MustNewDecFromStr("39.9")
 	expensiveCollateralDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDustDown, 20, 1, 1, "expensive collateral dust with price down")
-	// is this a potential module drain? (discount repay)
 
 	// TODO: more rounding and dust scenarios.
 	// borrowed/collat/reward high/low price and maybe high/low utoken
