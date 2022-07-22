@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
+	"github.com/umee-network/umee/v2/util/cli"
 	"github.com/umee-network/umee/v2/x/oracle/types"
 )
 
@@ -52,11 +53,7 @@ func GetCmdQueryParams() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(context.Background(), &types.QueryParams{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -101,11 +98,7 @@ $ umeed query oracle aggregate-votes umeevaloper...
 			}
 
 			res, err := queryClient.AggregateVote(context.Background(), &query)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -150,11 +143,7 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 			}
 
 			res, err := queryClient.AggregatePrevote(context.Background(), &query)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -185,11 +174,7 @@ $ umeed query oracle exchange-rates
 				context.Background(),
 				&types.QueryExchangeRates{},
 			)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -221,11 +206,7 @@ $ umeed query oracle exchange-rate ATOM
 					Denom: args[0],
 				},
 			)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -254,11 +235,7 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegation{
 				ValidatorAddr: args[0],
 			})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -287,11 +264,7 @@ func GetCmdQueryMissCounter() *cobra.Command {
 			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounter{
 				ValidatorAddr: args[0],
 			})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
@@ -312,11 +285,7 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.SlashWindow(context.Background(), &types.QuerySlashWindow{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
+			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
 
