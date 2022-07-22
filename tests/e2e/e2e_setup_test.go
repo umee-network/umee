@@ -455,7 +455,6 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
-
 	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
