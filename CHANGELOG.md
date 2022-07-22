@@ -69,6 +69,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
+- [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
 
 ### Improvements
 
