@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
+	"github.com/umee-network/umee/v2/math/bpmath"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -30,9 +31,9 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				LiquidationThreshold: sdk.NewDec(66),
 				BaseBorrowRate:       sdk.NewDec(32),
 				KinkBorrowRate:       sdk.NewDec(26),
-				MaxBorrowRate:        sdk.NewDec(21),
+				MaxBorrowRate:        21 * bpmath.ONE,
 				KinkUtilization:      sdk.MustNewDecFromStr("0.25"),
-				LiquidationIncentive: sdk.NewDec(88),
+				LiquidationIncentive: 880,
 				EnableMsgSupply:      true,
 				EnableMsgBorrow:      true,
 				Blacklist:            false,
@@ -49,9 +50,9 @@ registry:
       liquidation_threshold: "66.000000000000000000"
       base_borrow_rate: "32.000000000000000000"
       kink_borrow_rate: "26.000000000000000000"
-      max_borrow_rate: "21.000000000000000000"
+      max_borrow_rate: 210000
       kink_utilization: "0.250000000000000000"
-      liquidation_incentive: "88.000000000000000000"
+      liquidation_incentive: 880
       symbol_denom: umee
       exponent: 6
       enable_msg_supply: true
@@ -73,9 +74,9 @@ func TestToken_Validate(t *testing.T) {
 			LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
 			BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
 			KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-			MaxBorrowRate:        sdk.MustNewDecFromStr("1.0"),
+			MaxBorrowRate:        10000,
 			KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-			LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
+			LiquidationIncentive: 500,
 			EnableMsgSupply:      true,
 			EnableMsgBorrow:      true,
 			Blacklist:            false,
@@ -106,13 +107,13 @@ func TestToken_Validate(t *testing.T) {
 	invalidKinkBorrowRate.KinkBorrowRate = sdk.MustNewDecFromStr("-0.05")
 
 	invalidMaxBorrowRate := validToken()
-	invalidMaxBorrowRate.MaxBorrowRate = sdk.MustNewDecFromStr("-1.0")
+	invalidMaxBorrowRate.MaxBorrowRate = bpmath.ONE * 20_000
 
 	invalidKinkUtilization := validToken()
 	invalidKinkUtilization.KinkUtilization = sdk.ZeroDec()
 
 	invalidLiquidationIncentive := validToken()
-	invalidLiquidationIncentive.LiquidationIncentive = sdk.MustNewDecFromStr("-0.05")
+	invalidLiquidationIncentive.LiquidationIncentive = bpmath.ONE + 1
 
 	invalidBlacklistedBorrow := validToken()
 	invalidBlacklistedBorrow.EnableMsgBorrow = false

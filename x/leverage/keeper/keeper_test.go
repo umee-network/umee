@@ -42,7 +42,7 @@ func newToken(base, symbol string) types.Token {
 		LiquidationThreshold: sdk.MustNewDecFromStr("0.25"),
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.52"),
+		MaxBorrowRate:        15200,
 		KinkUtilization:      sdk.MustNewDecFromStr("0.8"),
 		LiquidationIncentive: 1000,
 		EnableMsgSupply:      true,
@@ -256,7 +256,7 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	s.Require().Equal(t.LiquidationThreshold, sdk.MustNewDecFromStr("0.25"))
 	s.Require().Equal(t.BaseBorrowRate, sdk.MustNewDecFromStr("0.02"))
 	s.Require().Equal(t.KinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
-	s.Require().Equal(t.MaxBorrowRate, sdk.MustNewDecFromStr("1.52"))
+	s.Require().Equal(t.MaxBorrowRate, bpmath.BP(15200))
 	s.Require().Equal(t.KinkUtilization, sdk.MustNewDecFromStr("0.8"))
 	s.Require().Equal(t.LiquidationIncentive, bpmath.FixedBP(1000))
 
