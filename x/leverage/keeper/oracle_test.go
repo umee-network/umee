@@ -84,6 +84,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("195.19"), v)
 
+	// same result, as unregistered token is ignored
 	v, err = s.app.LeverageKeeper.TotalTokenValue(
 		s.ctx,
 		sdk.NewCoins(
@@ -92,8 +93,8 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 			sdk.NewInt64Coin("foo", 4700000),
 		),
 	)
-	s.Require().Error(err)
-	s.Require().Equal(sdk.ZeroDec(), v)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("195.19"), v)
 }
 
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {

@@ -43,13 +43,12 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-
 	return p.Mul(coin.Amount.ToDec()), nil
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is
 // equivalent to the sum of TokenValue on each coin individually, except it
-// ignores unregistered and blacklisted coins instead of returning an error.
+// ignores unregistered and blacklisted tokens instead of returning an error.
 func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 

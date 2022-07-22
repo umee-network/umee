@@ -134,6 +134,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
+
 			// add each collateral coin's weighted value to liquidation threshold
 			totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
 		}

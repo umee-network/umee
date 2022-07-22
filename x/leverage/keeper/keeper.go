@@ -374,6 +374,11 @@ func (k Keeper) Liquidate(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
+	if baseRepay.IsZero() {
+		// Zero repay amount returned from liquidation computation means the target was eligible for liquidation
+		// but the proposed reward and repayment would have zero effect.
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationInvalid
+	}
 
 	// send repayment from liquidator to leverage module account
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, liquidatorAddr, types.ModuleName, sdk.NewCoins(baseRepay))
