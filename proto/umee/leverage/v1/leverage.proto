@@ -97,7 +97,7 @@ message Token {
   // asset (seen when supply utilization is 100%).
   // Value is in basis points; allowed values are in [0, 100'000'000] range.
   uint32 max_borrow_rate = 7 [
-    (gogoproto.casttype) = "github.com/umee-network/umee/v2/math/bpmath.FixedBP",
+    (gogoproto.casttype) = "github.com/umee-network/umee/v2/math/bpmath.BP",
     (gogoproto.moretags) = "yaml:\"max_borrow_rate\""
   ];
 
