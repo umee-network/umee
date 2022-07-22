@@ -79,6 +79,12 @@ func (s *IntegrationTestSuite) TestQuerier_MissCounter() {
 	s.Require().Equal(res.MissCounter, missCounter)
 }
 
+func (s *IntegrationTestSuite) TestQuerier_SlashWindow() {
+	res, err := s.queryClient.SlashWindow(s.ctx.Context(), &types.QuerySlashWindow{})
+	s.Require().NoError(err)
+	s.Require().Equal(uint64(1), res.WindowProgress)
+}
+
 func (s *IntegrationTestSuite) TestQuerier_AggregatePrevote() {
 	prevote := types.AggregateExchangeRatePrevote{
 		Hash:        "hash",
