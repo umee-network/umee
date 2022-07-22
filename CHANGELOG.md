@@ -82,6 +82,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+- [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 
 ### API Breaking
 
