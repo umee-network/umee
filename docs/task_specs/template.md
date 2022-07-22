@@ -26,7 +26,7 @@
 > It is best to record as much info as possible from the discussion that happened.
 > This aids in not having to go back to the Pull Request and comments to get the needed information.
 > You can include diagrams.
-
+>
 > - What new data structures are needed, what data structures will be changed?
 > - What are the efficiency considerations (time/space)?
 > - What are the expected access patterns (load/throughput)?
