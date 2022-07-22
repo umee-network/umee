@@ -50,8 +50,7 @@ func GetCmdQueryParams() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.Params(context.Background(), &types.QueryParams{})
+			res, err := queryClient.Params(cmd.Context(), &types.QueryParams{})
 			if err != nil {
 				return err
 			}
@@ -90,17 +89,14 @@ $ umeed query oracle aggregate-votes umeevaloper...
 			query := types.QueryAggregateVote{}
 
 			if len(args) > 0 {
-				valString := args[0]
-
-				validator, err := sdk.ValAddressFromBech32(valString)
+				validator, err := sdk.ValAddressFromBech32(args[0])
 				if err != nil {
 					return err
 				}
-
 				query.ValidatorAddr = validator.String()
 			}
 
-			res, err := queryClient.AggregateVote(context.Background(), &query)
+			res, err := queryClient.AggregateVote(cmd.Context(), &query)
 			if err != nil {
 				return err
 			}
@@ -139,17 +135,14 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 			query := types.QueryAggregatePrevote{}
 
 			if len(args) > 0 {
-				valString := args[0]
-
-				validator, err := sdk.ValAddressFromBech32(valString)
+				validator, err := sdk.ValAddressFromBech32(args[0])
 				if err != nil {
 					return err
 				}
-
 				query.ValidatorAddr = validator.String()
 			}
 
-			res, err := queryClient.AggregatePrevote(context.Background(), &query)
+			res, err := queryClient.AggregatePrevote(cmd.Context(), &query)
 			if err != nil {
 				return err
 			}
@@ -180,11 +173,7 @@ $ umeed query oracle exchange-rates
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.ExchangeRates(
-				context.Background(),
-				&types.QueryExchangeRates{},
-			)
+			res, err := queryClient.ExchangeRates(cmd.Context(), &types.QueryExchangeRates{})
 			if err != nil {
 				return err
 			}
@@ -214,9 +203,8 @@ $ umeed query oracle exchange-rate ATOM
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
-
 			res, err := queryClient.ExchangeRates(
-				context.Background(),
+				cmd.Context(),
 				&types.QueryExchangeRates{
 					Denom: args[0],
 				},
@@ -246,12 +234,10 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			_, err = sdk.ValAddressFromBech32(args[0])
-			if err != nil {
+			if _, err = sdk.ValAddressFromBech32(args[0]); err != nil {
 				return err
 			}
-
-			res, err := queryClient.FeederDelegation(context.Background(), &types.QueryFeederDelegation{
+			res, err := queryClient.FeederDelegation(cmd.Context(), &types.QueryFeederDelegation{
 				ValidatorAddr: args[0],
 			})
 			if err != nil {
@@ -279,12 +265,10 @@ func GetCmdQueryMissCounter() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			_, err = sdk.ValAddressFromBech32(args[0])
-			if err != nil {
+			if _, err = sdk.ValAddressFromBech32(args[0]); err != nil {
 				return err
 			}
-
-			res, err := queryClient.MissCounter(context.Background(), &types.QueryMissCounter{
+			res, err := queryClient.MissCounter(cmd.Context(), &types.QueryMissCounter{
 				ValidatorAddr: args[0],
 			})
 			if err != nil {
@@ -310,8 +294,7 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.SlashWindow(context.Background(), &types.QuerySlashWindow{})
+			res, err := queryClient.SlashWindow(cmd.Context(), &types.QuerySlashWindow{})
 			if err != nil {
 				return err
 			}
