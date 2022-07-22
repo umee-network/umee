@@ -77,6 +77,11 @@ func TestFixedMul(t *testing.T) {
 		a := sdk.NewIntFromUint64(tc.a)
 		o := Mul(a, tc.b)
 		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
+
+		// must work with both FixedBP and BP
+		o = Mul(a, FixedBP(tc.b))
+		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
+
 	}
 }
 

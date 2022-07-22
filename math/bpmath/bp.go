@@ -34,7 +34,7 @@ func quo(a, b sdk.Int, rounding Rounding, max uint64) uint64 {
 
 // Mul returns a * b_in_basis_points
 // Contract: b \in [0; MatxUint32]
-func Mul(a sdk.Int, b BP) sdk.Int {
+func Mul[T BP | FixedBP](a sdk.Int, b T) sdk.Int {
 	if b == 0 {
 		return sdk.ZeroInt()
 	}
