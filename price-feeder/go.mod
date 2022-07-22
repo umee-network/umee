@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.2.0
 	github.com/cosmos/cosmos-sdk v0.45.6
 	github.com/go-playground/validator/v10 v10.11.0
-	github.com/golangci/golangci-lint v1.47.1
+	github.com/golangci/golangci-lint v1.47.2
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
