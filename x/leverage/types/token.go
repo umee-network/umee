@@ -11,7 +11,8 @@ import (
 
 const (
 	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix = "u/"
+	UTokenPrefix       = "u/"
+	maxBorrowRateLimit = bpmath.ONE * 10_000
 )
 
 // UTokenFromTokenDenom returns the uToken denom given a token denom.
@@ -66,13 +67,13 @@ func (t Token) Validate() error {
 	if t.KinkBorrowRate.IsNegative() {
 		return fmt.Errorf("invalid kink borrow rate: %s", t.KinkBorrowRate)
 	}
-	if t.MaxBorrowRate.IsNegative() {
-		return fmt.Errorf("invalid max borrow rate: %s", t.MaxBorrowRate)
+	if t.MaxBorrowRate > maxBorrowRateLimit {
+		return fmt.Errorf("invalid max borrow rate: %d - must be in [0; %d] (value in basis points)", t.LiquidationIncentive, maxBorrowRateLimit)
 	}
 
 	// Liquidation incentive is non-negative
 	if t.LiquidationIncentive > bpmath.ONE {
-		return fmt.Errorf("invalid liquidation incentive: %s - must be in [0; 10000]", t.LiquidationIncentive)
+		return fmt.Errorf("invalid liquidation incentive: %d - must be in [0; 10000]", t.LiquidationIncentive)
 	}
 
 	// Blacklisted assets cannot have borrow or supply enabled

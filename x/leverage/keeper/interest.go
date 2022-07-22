@@ -27,11 +27,11 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 
 	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,           // x
-			token.KinkUtilization, // x1
-			token.KinkBorrowRate,  // y1
-			sdk.OneDec(),          // x2
-			token.MaxBorrowRate,   // y2
+			utilization,                 // x
+			token.KinkUtilization,       // x1
+			token.KinkBorrowRate,        // y1
+			sdk.OneDec(),                // x2
+			token.MaxBorrowRate.ToDec(), // y2
 		)
 	}
 
