@@ -122,7 +122,7 @@ func IntegrationTestNetworkConfig() network.Config {
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.0"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
 	})
 
