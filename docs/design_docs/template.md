@@ -1,4 +1,4 @@
-# Task Spec {NUMBER}: {TITLE}
+# Design Doc {NUMBER}: {TITLE}
 
 ## Status
 
@@ -45,7 +45,6 @@
 
 > This section does not need to be filled in at the beginning, but must
 > be completed prior to the merging of the implementation.
->
 > Here are some common questions that get answered as part of the detailed design:
 >
 > - What systems will be affected?
