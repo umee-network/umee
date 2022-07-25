@@ -20,6 +20,12 @@ genesis:
           max_borrow_rate: "1.50000000000000000"
           kink_utilization: "0.200000000000000000"
           liquidation_incentive: "0.180000000000000000"
+          enable_msg_supply: true
+          enable_msg_borrow: true
+          blacklist: false
+          max_collateral_share: "1.00000000000000000"
+          max_supply_utilization: "1.00000000000000000"
+          min_collateral_liquidity: "0.000000000000000000"
         - base_denom: "ibc/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
           symbol_denom: "ATOM"
           exponent: 6
@@ -31,6 +37,12 @@ genesis:
           max_borrow_rate: "1.50000000000000000"
           kink_utilization: "0.200000000000000000"
           liquidation_incentive: "0.180000000000000000"
+          enable_msg_supply: true
+          enable_msg_borrow: true
+          blacklist: false
+          max_collateral_share: "1.00000000000000000"
+          max_supply_utilization: "1.00000000000000000"
+          min_collateral_liquidity: "0.000000000000000000"
     gravity:
       delegate_keys:
         - validator: "umeevaloper1zypqa76je7pxsdwkfah6mu9a583sju6xjettez"
