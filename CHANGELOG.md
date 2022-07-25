@@ -61,6 +61,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [1147](https://github.com/umee-network/umee/pull/1147) Add SlashWindow oracle query.
 - [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
@@ -68,7 +69,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
-- [1141](https://github.com/umee-network/umee/pull/1141) Add `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
+- [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.- [1141](https://github.com/umee-network/umee/pull/1141) Add `max_collateral_share`, `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
+
 
 ### Improvements
 
@@ -82,6 +84,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+- [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 
 ### API Breaking
 
