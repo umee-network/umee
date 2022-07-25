@@ -92,8 +92,8 @@ func (t Token) Validate() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupplyUtilization must be between 0 and 1")
 	}
 
-	if t.MinCollateralLiquidity.IsNegative() {
-		return sdkerrors.ErrInvalidRequest.Wrap("Token.MinCollateralLiquidity must not be negative")
+	if t.MinCollateralLiquidity.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MinCollateralLiquidity be between 0 and 1")
 	}
 
 	return nil
