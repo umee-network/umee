@@ -11,8 +11,8 @@
 
 ## Abstract
 
-> "If you can't explain it simply, you don't understand it well enough." Provide a simplified and layman-accessible explanation of the task.
-> A short (~200 word) description of the issue being addressed.
+> "If you can't explain it simply, you don't understand it well enough." Provide a simplified and layman-accessible explanation of the problem or feature.
+> Keep it short. Max 200 words.
 
 ## Context
 
