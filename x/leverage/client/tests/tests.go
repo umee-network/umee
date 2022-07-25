@@ -313,8 +313,9 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 			false,
 			&types.QuerySupplyAPYResponse{},
-			// Supply utilization is zero, so supply APY is 0%
-			&types.QuerySupplyAPYResponse{APY: sdk.MustNewDecFromStr("0")},
+			// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
+			// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
+			&types.QuerySupplyAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
 		},
 		testQuery{
 			"query borrow APY",
@@ -324,8 +325,10 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 			false,
 			&types.QueryBorrowAPYResponse{},
-			// Supply utilization is 0% so base borrow rate (2% APY) is used.
-			&types.QueryBorrowAPYResponse{APY: sdk.MustNewDecFromStr("0.02")},
+			// This is an edge case technically - when effective supply, meaning
+			// module balance + total borrows, is zero, utilization (0/0) is
+			// interpreted as 100% so max borrow rate (150% APY) is used.
+			&types.QueryBorrowAPYResponse{APY: sdk.MustNewDecFromStr("1.50")},
 		},
 	}
 
