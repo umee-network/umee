@@ -36,7 +36,7 @@ func newToken(base, symbol string) types.Token {
 		BaseDenom:              base,
 		SymbolDenom:            symbol,
 		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.20"),
+		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
 		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
 		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
@@ -47,9 +47,9 @@ func newToken(base, symbol string) types.Token {
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00000000000000000"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1.00000000000000000"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.00000000000000000"),
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
 	}
 }
 
