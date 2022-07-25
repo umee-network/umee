@@ -3,8 +3,8 @@
 ## Status
 
 > A Status may be Draft if we want to break discussion in few PRs to break down a longer process in few steps.
-> At the end of the process each task has to be either Accepted or Declined.
-> If a later task significantly changes or reverses a decision, it may be marked
+> At the end of the process each design has to be either Accepted or Declined.
+> If a later design doc significantly changes or reverses a decision, it may be marked
 > as superseded" with a reference to its replacement.
 
 {Draft|Accepted|Declined|Superseded}
@@ -62,7 +62,7 @@
 ## Test Cases [optional]
 
 > How will the changes be tested?
-> Test cases for an implementation are mandatory for tasks that are affecting important parts of the system functionality. Tasks can choose to include links to test cases if applicable.
+> Test cases in the form of example scenarios for an implementation are mandatory for designs that are affecting important parts of the system functionality. Design docs can include links to test cases if applicable.
 
 ## Consequences
 
@@ -71,7 +71,7 @@
 
 ### Backwards Compatibility
 
-> All Tasks that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The Task must explain how the author proposes to deal with these incompatibilities. Task submissions without a sufficient backwards compatibility treatise may be rejected outright.
+> All design docs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The doc must explain how the author proposes to deal with these incompatibilities. Submissions without a sufficient backwards compatibility treatise may be rejected outright.
 
 ### Positive
 
