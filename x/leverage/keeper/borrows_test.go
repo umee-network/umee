@@ -118,10 +118,10 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	// we do not test empty denom, as that will cause a panic
 }
 
-func (s *IntegrationTestSuite) TestDeriveSupplyUtilization() {
-	// unregistered denom (0% utilization)
+func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
+	// unregistered denom (0 borrowed and 0 lending pool is considered 100%)
 	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
-	s.Require().Equal(sdk.ZeroDec(), utilization)
+	s.Require().Equal(sdk.OneDec(), utilization)
 
 	// creates account which has supplied 1000 uumee, and borrowed 0 uumee
 	addr := s.setupAccount(umeeDenom, 1000, 1000, 0, true)
@@ -171,16 +171,16 @@ func (s *IntegrationTestSuite) TestDeriveSupplyUtilization() {
 	// artificially set reserves to 800 uumee
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 800)))
 
-	// edge case interpreted as 200% utilization (1200 / 1200+200-800)
+	// edge case interpreted as 100% utilization (1200 / 1200+200-800)
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("2.0"), utilization)
+	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 4000 uumee
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 4000)))
 
-	// impossible case interpreted as near-infinite utilization (1200 / 1200+200-4000)
+	// impossible case interpreted as 100% utilization (1200 / 1200+200-4000)
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MaxSortableDec, utilization)
+	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 }
 
 func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
