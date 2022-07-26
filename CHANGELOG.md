@@ -56,9 +56,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1123](https://github.com/umee-network/umee/pull/1123) Shorten all leverage and oracle query structs by removing the Request suffix.
 - [1125](https://github.com/umee-network/umee/pull/1125) Refactor: remove proto getters in x/leverage and x/oracle proto types.
 - [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
+- [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
+- [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 
 ### Features
 
+- [1147](https://github.com/umee-network/umee/pull/1147) Add SlashWindow oracle query.
 - [913](https://github.com/umee-network/umee/pull/913) Add LendEnabled, BorrowEnabled, and Blacklist to Token struct.
 - [913](https://github.com/umee-network/umee/pull/913) Changed update registry gov proposal to add and update tokens, but never delete them.
 - [918](https://github.com/umee-network/umee/pull/918) Add MarketSummary query to CLI.
@@ -66,6 +69,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1096](https://github.com/umee-network/umee/pull/1096) Add `max_collateral_share` to the x/leverage token registry.
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
+- [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
 
 ### Improvements
 
@@ -79,6 +83,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
+- [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 
 ### API Breaking
 

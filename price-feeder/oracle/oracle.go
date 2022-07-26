@@ -16,12 +16,12 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
@@ -369,24 +369,23 @@ func SetProviderTickerPricesAndCandles(
 
 // GetParamCache returns the last updated parameters of the x/oracle module
 // if the current ParamCache is outdated, we will query it again.
-func (o *Oracle) GetParamCache(currentBlockHeigh int64) (oracletypes.Params, error) {
+func (o *Oracle) GetParamCache(ctx context.Context, currentBlockHeigh int64) (oracletypes.Params, error) {
 	if !o.paramCache.IsOutdated(currentBlockHeigh) {
 		return *o.paramCache.params, nil
 	}
 
-	params, err := o.GetParams()
+	params, err := o.GetParams(ctx)
 	if err != nil {
 		return oracletypes.Params{}, err
 	}
 
 	o.checkAcceptList(params)
-
 	o.paramCache.Update(currentBlockHeigh, params)
 	return params, nil
 }
 
 // GetParams returns the current on-chain parameters of the x/oracle module.
-func (o *Oracle) GetParams() (oracletypes.Params, error) {
+func (o *Oracle) GetParams(ctx context.Context) (oracletypes.Params, error) {
 	grpcConn, err := grpc.Dial(
 		o.oracleClient.GRPCEndpoint,
 		// the Cosmos SDK doesn't support any transport security mechanism
@@ -400,7 +399,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	defer grpcConn.Close()
 	queryClient := oracletypes.NewQueryClient(grpcConn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
 	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParams{})
@@ -493,7 +492,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 		return fmt.Errorf("expected positive block height")
 	}
 
-	oracleParams, err := o.GetParamCache(blockHeight)
+	oracleParams, err := o.GetParamCache(ctx, blockHeight)
 	if err != nil {
 		return err
 	}

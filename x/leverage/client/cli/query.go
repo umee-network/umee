@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
+	"github.com/umee-network/umee/v2/util/cli"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -38,8 +39,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryExchangeRate(),
 		GetCmdQuerySupplyAPY(),
 		GetCmdQueryBorrowAPY(),
-		GetCmdQueryMarketSize(),
-		GetCmdQueryTokenMarketSize(),
+		GetCmdQueryTotalSuppliedValue(),
+		GetCmdQueryTotalSupplied(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
@@ -65,13 +66,8 @@ func GetCmdQueryAllRegisteredTokens() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.RegisteredTokens(cmd.Context(), &types.QueryRegisteredTokens{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -94,13 +90,8 @@ func GetCmdQueryParams() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.Params(cmd.Context(), &types.QueryParams{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -123,20 +114,14 @@ func GetCmdQueryBorrowed() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryBorrowed{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.Borrowed(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -160,20 +145,14 @@ func GetCmdQueryBorrowedValue() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryBorrowedValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.BorrowedValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -197,20 +176,14 @@ func GetCmdQuerySupplied() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QuerySupplied{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.Supplied(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -234,20 +207,14 @@ func GetCmdQuerySuppliedValue() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QuerySuppliedValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.SuppliedValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -271,17 +238,11 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryReserveAmount{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.ReserveAmount(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -304,20 +265,14 @@ func GetCmdQueryCollateral() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryCollateral{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.Collateral(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -341,20 +296,14 @@ func GetCmdQueryCollateralValue() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryCollateralValue{
 				Address: args[0],
 			}
 			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
 				req.Denom = d
 			}
-
 			resp, err := queryClient.CollateralValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -378,17 +327,11 @@ func GetCmdQueryExchangeRate() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryExchangeRate{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.ExchangeRate(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -411,17 +354,11 @@ func GetCmdQueryAvailableBorrow() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryAvailableBorrow{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.AvailableBorrow(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -444,17 +381,11 @@ func GetCmdQuerySupplyAPY() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QuerySupplyAPY{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.SupplyAPY(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -477,17 +408,11 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryBorrowAPY{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -496,13 +421,13 @@ func GetCmdQueryBorrowAPY() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMarketSize creates a Cobra command to query for the
-// Market Size of a specific token.
-func GetCmdQueryMarketSize() *cobra.Command {
+// GetCmdQueryTotalSuppliedValue creates a Cobra command to query for the
+// total supply of a specific token.
+func GetCmdQueryTotalSuppliedValue() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "market-size [denom]",
+		Use:   "total-supplied-value [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD market size of a specified denomination",
+		Short: "Query for the USD value of the total supply of a specified denomination",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -510,17 +435,11 @@ func GetCmdQueryMarketSize() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryMarketSize{
+			req := &types.QueryTotalSuppliedValue{
 				Denom: args[0],
 			}
-
-			resp, err := queryClient.MarketSize(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			resp, err := queryClient.TotalSuppliedValue(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -529,13 +448,13 @@ func GetCmdQueryMarketSize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryTokenMarketSize creates a Cobra command to query for the
-// Market Size of a specific token, in token denomination instead of USD.
-func GetCmdQueryTokenMarketSize() *cobra.Command {
+// GetCmdQueryTotalSupplied creates a Cobra command to query for the
+// Total Supplied of a specific token, measured in base tokens.
+func GetCmdQueryTotalSupplied() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token-market-size [denom]",
+		Use:   "total-supplied [denom]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the market size of a specified denomination measured in base tokens",
+		Short: "Query for the total supply of a specified denomination measured in base tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -543,17 +462,11 @@ func GetCmdQueryTokenMarketSize() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryTokenMarketSize{
+			req := &types.QueryTotalSupplied{
 				Denom: args[0],
 			}
-
-			resp, err := queryClient.TokenMarketSize(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			resp, err := queryClient.TotalSupplied(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -576,17 +489,11 @@ func GetCmdQueryBorrowLimit() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryBorrowLimit{
 				Address: args[0],
 			}
-
 			resp, err := queryClient.BorrowLimit(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -609,17 +516,11 @@ func GetCmdQueryLiquidationThreshold() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryLiquidationThreshold{
 				Address: args[0],
 			}
-
 			resp, err := queryClient.LiquidationThreshold(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -642,17 +543,11 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryMarketSummary{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.MarketSummary(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -675,15 +570,9 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
 			req := &types.QueryLiquidationTargets{}
-
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -710,11 +599,7 @@ func GetCmdQueryTotalCollateral() *cobra.Command {
 				Denom: args[0],
 			}
 			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -741,11 +626,7 @@ func GetCmdQueryTotalBorrowed() *cobra.Command {
 				Denom: args[0],
 			}
 			resp, err := queryClient.TotalBorrowed(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
