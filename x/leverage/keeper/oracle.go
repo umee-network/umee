@@ -73,15 +73,9 @@ func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec,
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	if p1.IsZero() {
-		return sdk.ZeroDec(), types.ErrZeroValuePriceRatio.Wrap(fromDenom)
-	}
 	p2, err := k.TokenPrice(ctx, toDenom)
 	if err != nil {
 		return sdk.ZeroDec(), err
-	}
-	if p2.IsZero() {
-		return sdk.ZeroDec(), types.ErrZeroValuePriceRatio.Wrap(toDenom)
 	}
 	// Price ratio > 1 if fromDenom is worth more than toDenom.
 	return p1.Quo(p2), nil
