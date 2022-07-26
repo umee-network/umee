@@ -364,7 +364,7 @@ func (k Keeper) Liquidate(
 	}
 
 	// calculate Token repay, and uToken and Token reward amounts allowed by liquidation rules and available balances
-	baseRepay, collateralReward, baseReward, err = k.computeLiquidation(
+	baseRepay, collateralReward, baseReward, err = k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,

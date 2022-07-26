@@ -26,7 +26,7 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	utilization := k.SupplyUtilization(ctx, denom)
 
 	if utilization.GTE(token.KinkUtilization) {
-		return types.Interpolate(
+		return Interpolate(
 			utilization,           // x
 			token.KinkUtilization, // x1
 			token.KinkBorrowRate,  // y1
@@ -36,7 +36,7 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
 	}
 
 	// utilization is between 0% and kink value
-	return types.Interpolate(
+	return Interpolate(
 		utilization,           // x
 		sdk.ZeroDec(),         // x1
 		token.BaseBorrowRate,  // y1
@@ -104,7 +104,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		// interest is accrued by continuous compound interest on each denom's Interest Scalar
 		scalar := k.getInterestScalar(ctx, token.BaseDenom)
 		// calculate e^(APY*time)
-		exponential := types.ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
+		exponential := ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
 		// multiply interest scalar by e^(APY*time)
 		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
 			return err
