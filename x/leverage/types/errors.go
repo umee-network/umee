@@ -31,5 +31,4 @@ var (
 	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
 	ErrCollateralWeightZero    = sdkerrors.Register(ModuleName, 1122, "token collateral weight is zero")
 	ErrLiquidationInvalid      = sdkerrors.Register(ModuleName, 1123, "liquidation invalid")
-	ErrZeroValuePriceRatio     = sdkerrors.Register(ModuleName, 1124, "price ratio attempted with zero value token")
 )
