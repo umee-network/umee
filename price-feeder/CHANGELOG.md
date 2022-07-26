@@ -59,6 +59,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
+- [#1170](https://github.com/umee-network/umee/pull/1170) Restrict price feeder quotes to USD, USDT, USDC, ETH, and BTC.
 
 ## [v0.2.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.4) - 2022-07-14
 
