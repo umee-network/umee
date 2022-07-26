@@ -31,7 +31,7 @@ const (
 )
 
 var (
-	validate *validator.Validate = validator.New()
+	validate = validator.New()
 
 	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
 	ErrEmptyConfigPath = errors.New("empty configuration file path")
