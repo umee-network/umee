@@ -34,14 +34,14 @@ func ComputeLiquidation(
 	}
 
 	// Start with the maximum possible repayment amount, as a decimal
-	repayDec := availableRepay.ToDec()
-	// Determine the base rewardDec amount that would result from maximum repayment
-	rewardDec := repayDec.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
-	// Determine the collateralDec burn amount that corresponds to base reward amount
-	collateralDec := rewardDec.Quo(uTokenExchangeRate)
+	maxRepay := availableRepay.ToDec()
+	// Determine the base maxReward amount that would result from maximum repayment
+	maxReward := maxRepay.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
+	// Determine the maxCollateral burn amount that corresponds to base reward amount
+	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
 	// Catch no-ops early
-	if repayDec.IsZero() || rewardDec.IsZero() || collateralDec.IsZero() || closeFactor.IsZero() || borrowedValue.IsZero() {
+	if maxRepay.IsZero() || maxReward.IsZero() || maxCollateral.IsZero() || closeFactor.IsZero() || borrowedValue.IsZero() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
 	}
 
@@ -49,41 +49,49 @@ func ComputeLiquidation(
 	ratio := sdk.OneDec()
 	// Repaid value cannot exceed borrowed value times close factor
 	ratio = sdk.MinDec(ratio,
-		borrowedValue.Mul(closeFactor).Quo(repayDec.Mul(repayTokenPrice)),
+		borrowedValue.Mul(closeFactor).Quo(maxRepay.Mul(repayTokenPrice)),
 	)
 	// Collateral burned cannot exceed borrower's collateral
 	ratio = sdk.MinDec(ratio,
-		availableCollateral.ToDec().Quo(collateralDec),
+		availableCollateral.ToDec().Quo(maxCollateral),
 	)
 	// Base token reward cannot exceed available unreserved module balance
 	ratio = sdk.MinDec(ratio,
-		availableReward.ToDec().Quo(rewardDec),
+		availableReward.ToDec().Quo(maxReward),
 	)
 	// Catch edge cases
 	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
 
-	// Reduce all three values by the most severe limiting factor encountered
-	repayDec = repayDec.Mul(ratio)
-	collateralDec = collateralDec.Mul(ratio)
-	rewardDec = rewardDec.Mul(ratio)
+	// Reduce repay and collateral limits by the most severe limiting factor encountered
+	maxRepay = maxRepay.Mul(ratio)
+	maxCollateral = maxCollateral.Mul(ratio)
 
-	// No rounding has occurred yet. In dust scenarios, the limiting factor will be a clean integer
-	// and the other two will need rounding. Otherwise, all three outputs will need rounding.
+	// No rounding has occurred yet, but both values are now within the
+	// limits defined by available balances and module parameters.
 
-	// REQUIREMENTS:
-	// - Prevent REPAY VALUE > COLLATERAL VALUE rounding attacks
-	// - Prevent REWARD VALUE > COLLATERAL VALUE rounding attacks
-	// - Eliminate COLLATERAL DUST (required for bad debt flag)
+	// First, the amount of borrowed token the liquidator must repay is rounded up.
+	// This is a slight disadvantage to the liquidator in favor of the borrower and
+	// the module. It also ensures borrow dust is always eliminated when encountered.
+	tokenRepay = maxRepay.Ceil().RoundInt()
 
-	// TODO: Satisfy these requirements
+	// Next, the amount of collateral uToken the borrower will lose is rounded down.
+	// This is favors the borrower over the liquidator, and also protects the module.
+	collateralBurn = maxCollateral.TruncateInt()
 
-	// The amount of borrowed token the liquidator will repay is rounded up
-	tokenRepay = repayDec.Ceil().RoundInt()
-	// The amount of collateral uToken the borrower will lose is rounded down
-	collateralBurn = collateralDec.TruncateInt()
+	// One danger to rounding collateral burn down is that of collateral dust. This
+	// can be considered in two scenarios:
+	// 1) If collateral was the limiting factor above, then it will have already been
+	// an integer amount and truncating is a no-op.
+	// 2) If collateral was not the limiting factor, then there will be a non-dust
+	// quantity left over anyway. In the rare case that borrow dust and collateral
+	// dust co-occur and repay amount is the limiting factor, repay will round up,
+	// thus eliminating the borrow dust and creating a simpler scenario.
 
-	// Liquidator base token reward is derived from collateral burn then rounded down
+	// Finally, the base token reward amount is derived directly from the collateral
+	// to burn. This will round down identically to MsgWithdraw, favoring the module
+	// over the liquidator.
 	tokenReward = collateralBurn.ToDec().Mul(uTokenExchangeRate).TruncateInt()
+
 	return tokenRepay, collateralBurn, tokenReward
 }
 

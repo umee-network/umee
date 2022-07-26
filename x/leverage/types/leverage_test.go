@@ -180,6 +180,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDustDown, 20, 1, 1, "expensive collateral dust with price down")
 
-	// TODO: more rounding and dust scenarios.
+	// TODO: more rounding and dust scenarios, especially troublesome collateral dust
+	// and co-occurring dust
 	// borrowed/collat/reward high/low price and maybe high/low utoken
 }
