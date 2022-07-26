@@ -164,7 +164,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDust, 20, 1, 1, "expensive collateral dust")
 
-	// collateral dust case, with high collateral token value and no rounding
+	// collateral dust case, with high collateral token value rounds required repayment up
 	expensiveCollateralDustUp := baseCase()
 	expensiveCollateralDustUp.availableCollateral = sdk.NewInt(1)
 	expensiveCollateralDustUp.repayTokenPrice = sdk.MustNewDecFromStr("2")
@@ -172,7 +172,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustUp.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDustUp, 21, 1, 1, "expensive collateral dust with price up")
 
-	// collateral dust case, with high collateral token value and no rounding
+	// collateral dust case, with high collateral token value rounds required repayment up
 	expensiveCollateralDustDown := baseCase()
 	expensiveCollateralDustDown.availableCollateral = sdk.NewInt(1)
 	expensiveCollateralDustDown.repayTokenPrice = sdk.MustNewDecFromStr("2")
@@ -180,7 +180,21 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(expensiveCollateralDustDown, 20, 1, 1, "expensive collateral dust with price down")
 
-	// TODO: more rounding and dust scenarios, especially troublesome collateral dust
-	// and co-occurring dust
-	// borrowed/collat/reward high/low price and maybe high/low utoken
+	// collateral dust case, with low collateral token value rounds required repayment up
+	cheapCollateralDust := baseCase()
+	cheapCollateralDust.availableCollateral = sdk.NewInt(1)
+	cheapCollateralDust.repayTokenPrice = sdk.MustNewDecFromStr("40")
+	cheapCollateralDust.rewardTokenPrice = sdk.MustNewDecFromStr("2")
+	cheapCollateralDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
+	runTestCase(cheapCollateralDust, 1, 1, 1, "cheap collateral dust")
+
+	// exotic case with cheap collateral base tokens but a very high uToken exchange rate
+	// rounds required repayment up and base reward down
+	uDust := baseCase()
+	uDust.availableCollateral = sdk.NewInt(1)
+	uDust.repayTokenPrice = sdk.MustNewDecFromStr("40")
+	uDust.rewardTokenPrice = sdk.MustNewDecFromStr("2")
+	uDust.uTokenExchangeRate = sdk.MustNewDecFromStr("29.5")
+	uDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
+	runTestCase(uDust, 2, 1, 29, "high exchange rate collateral dust")
 }

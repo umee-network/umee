@@ -83,9 +83,7 @@ func ComputeLiquidation(
 	// 1) If collateral was the limiting factor above, then it will have already been
 	// an integer amount and truncating is a no-op.
 	// 2) If collateral was not the limiting factor, then there will be a non-dust
-	// quantity left over anyway. In the rare case that borrow dust and collateral
-	// dust co-occur and repay amount is the limiting factor, repay will round up,
-	// thus eliminating the borrow dust and creating a simpler scenario.
+	// quantity left over anyway.
 
 	// Finally, the base token reward amount is derived directly from the collateral
 	// to burn. This will round down identically to MsgWithdraw, favoring the module
