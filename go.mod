@@ -410,8 +410,8 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge/module
 	github.com/cosmos/ibc-go/v3 => ../ibc-go
-	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc => ../bech32-ibc
 )
