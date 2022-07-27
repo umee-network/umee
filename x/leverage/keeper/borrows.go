@@ -30,7 +30,7 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
 	// Apply interest scalar to determine adjusted amount
-	newAdjustedAmount := borrow.Amount.ToDec().Quo(k.getInterestScalar(ctx, borrow.Denom))
+	newAdjustedAmount := toDec(borrow.Amount).Quo(k.getInterestScalar(ctx, borrow.Denom))
 
 	// Set new borrow value
 	if err := k.setAdjustedBorrow(ctx, borrowerAddr, sdk.NewDecCoinFromDec(borrow.Denom, newAdjustedAmount)); err != nil {
@@ -61,9 +61,9 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
-	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
-	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount.ToDec()
+	moduleBalance := toDec(k.ModuleBalance(ctx, denom))
+	reserveAmount := toDec(k.GetReserveAmount(ctx, denom))
+	totalBorrowed := toDec(k.GetTotalBorrowed(ctx, denom).Amount)
 	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
 
 	// This edge case can be safely interpreted as 100% utilization.

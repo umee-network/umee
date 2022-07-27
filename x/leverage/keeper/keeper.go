@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -16,7 +17,7 @@ import (
 
 type Keeper struct {
 	cdc          codec.Codec
-	storeKey     sdk.StoreKey
+	storeKey     storetypes.StoreKey
 	paramSpace   paramtypes.Subspace
 	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
@@ -27,7 +28,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.Codec,
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
@@ -151,7 +152,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 		}
 
 		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromCollateral))
+		collateralToWithdraw := sdk.NewCoin(coin.Denom, amountFromCollateral)
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
 		if err != nil {
 			return err
@@ -315,7 +316,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 	}
 
 	// Determine what borrow limit would be AFTER disabling this denom as collateral
-	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(sdk.NewCoins(coin)))
+	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(coin))
 	if err != nil {
 		return err
 	}
@@ -416,7 +417,7 @@ func (k Keeper) LiquidateBorrow(
 
 	if repayValue.GT(maxRepayValue) {
 		// repayment *= (maxRepayValue / repayValue)
-		repayment.Amount = repayment.Amount.ToDec().Mul(maxRepayValue).Quo(repayValue).TruncateInt()
+		repayment.Amount = toDec(repayment.Amount).Mul(maxRepayValue).Quo(repayValue).TruncateInt()
 	}
 
 	// Given repay denom and amount, use oracle to find equivalent amount of rewardDenom.
@@ -432,7 +433,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// apply liquidation incentive
-	reward.Amount = reward.Amount.ToDec().Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
+	reward.Amount = toDec(reward.Amount).Mul(sdk.OneDec().Add(liquidationIncentive)).TruncateInt()
 
 	maxReward := collateral.AmountOf(reward.Denom)
 	if maxReward.IsZero() {
@@ -494,7 +495,7 @@ func (k Keeper) LiquidateBorrow(
 	}
 
 	// Detect bad debt (collateral == 0 after reward) for repayment by protocol reserves (see ADR-004)
-	if collateral.Sub(sdk.NewCoins(reward)).IsZero() {
+	if collateral.Sub(reward).IsZero() {
 		for _, coin := range borrowed {
 			// Mark repayment denom as bad debt only if some debt remains after
 			// this liquidation. All other borrowed denoms were definitely not

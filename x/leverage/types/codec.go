@@ -6,7 +6,7 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
 var (
@@ -51,7 +51,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	)
 
 	registry.RegisterImplementations(
-		(*govtypes.Content)(nil),
+		(*gov1b1.Content)(nil),
 		&UpdateRegistryProposal{},
 	)
 

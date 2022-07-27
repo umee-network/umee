@@ -46,7 +46,7 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 		return sdk.ZeroDec(), err
 	}
 
-	return p.Mul(coin.Amount.ToDec()), nil
+	return p.Mul(toDec(coin.Amount)), nil
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is
@@ -92,7 +92,7 @@ func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom
 	// then return the amount corrected by the price ratio
 	return sdk.NewCoin(
 		toDenom,
-		fromCoin.Amount.ToDec().Mul(p1).Quo(p2).TruncateInt(),
+		toDec(fromCoin.Amount).Mul(p1).Quo(p2).TruncateInt(),
 	), nil
 }
 

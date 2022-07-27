@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -20,7 +21,7 @@ var ten = sdk.MustNewDecFromStr("10")
 // Keeper of the oracle store
 type Keeper struct {
 	cdc        codec.BinaryCodec
-	storeKey   sdk.StoreKey
+	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
 	accountKeeper types.AccountKeeper
@@ -34,7 +35,7 @@ type Keeper struct {
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramspace paramstypes.Subspace,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
