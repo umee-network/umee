@@ -31,4 +31,7 @@ var (
 	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
 	ErrCollateralWeightZero    = sdkerrors.Register(ModuleName, 1122, "token collateral weight is zero")
 	ErrLiquidationInvalid      = sdkerrors.Register(ModuleName, 1123, "liquidation invalid")
+	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 1124, "market would exceed MaxSupplyUtilization")
+	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 1125, "market would fall below MinCollateralLiquidity")
+	ErrMaxCollateralShare      = sdkerrors.Register(ModuleName, 1126, "market total collateral would exceed MaxCollateralShare")
 )

@@ -245,20 +245,23 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:            umeeapp.BondDenom,
-		SymbolDenom:          umeeapp.DisplayDenom,
-		Exponent:             6,
-		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
-		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.050000000000000000"),
-		BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
-		KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
-		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
-		KinkUtilization:      sdk.MustNewDecFromStr("0.200000000000000000"),
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
-		EnableMsgSupply:      true,
-		EnableMsgBorrow:      true,
-		Blacklist:            false,
+		BaseDenom:              umeeapp.BondDenom,
+		SymbolDenom:            umeeapp.DisplayDenom,
+		Exponent:               6,
+		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
+		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
+		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
+		MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
+		KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
+		LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
+		EnableMsgSupply:        true,
+		EnableMsgBorrow:        true,
+		Blacklist:              false,
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
 	})
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)

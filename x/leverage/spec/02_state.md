@@ -35,20 +35,22 @@ The `0x01` prefix above allows a governance-controlled `Token Registry` to be st
 
 ```go
 type Token struct {
-    BaseDenom            string
-    ReserveFactor        sdk.Dec
-    CollateralWeight     sdk.Dec
-    LiquidationThreshold sdk.Dec
-    BaseBorrowRate       sdk.Dec
-    KinkBorrowRate       sdk.Dec
-    MaxBorrowRate        sdk.Dec
-    KinkUtilization      sdk.Dec
-    LiquidationIncentive sdk.Dec
-    SymbolDenom          string
-    Exponent             uint32
-    EnableMsgSupply      bool
-    EnableMsgBorrow      bool
-    Blacklist            bool
-    MaxCollateralShare   uint32
+    BaseDenom              string
+    ReserveFactor          sdk.Dec
+    CollateralWeight       sdk.Dec
+    LiquidationThreshold   sdk.Dec
+    BaseBorrowRate         sdk.Dec
+    KinkBorrowRate         sdk.Dec
+    MaxBorrowRate          sdk.Dec
+    KinkUtilization        sdk.Dec
+    LiquidationIncentive   sdk.Dec
+    SymbolDenom            string
+    Exponent               uint32
+    EnableMsgSupply        bool
+    EnableMsgBorrow        bool
+    Blacklist              bool
+    MaxCollateralShare     sdk.Dec
+    MaxSupplyUtilization   sdk.Dec
+    MinCollateralLiquidity sdk.Dec
 }
 ```
