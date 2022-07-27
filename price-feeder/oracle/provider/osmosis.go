@@ -62,7 +62,7 @@ type (
 )
 
 func NewOsmosisProvider(endpoint config.ProviderEndpoint) *OsmosisProvider {
-	if endpoint.Name == config.ProviderOsmosis {
+	if endpoint.Name == types.ProviderOsmosis {
 		return &OsmosisProvider{
 			baseURL: endpoint.Rest,
 			client:  newDefaultHTTPClient(),

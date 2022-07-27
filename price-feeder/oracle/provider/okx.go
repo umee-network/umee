@@ -109,9 +109,9 @@ func NewOkxProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
-	if endpoints.Name != config.ProviderOkx {
+	if endpoints.Name != types.ProviderOkx {
 		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderOkx,
+			Name:      types.ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,
 		}
@@ -131,7 +131,7 @@ func NewOkxProvider(
 	provider := &OkxProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "okx").Logger(),
+		logger:          logger.With().Str("provider", types.ProviderOkx.String()).Logger(),
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]OkxTickerPair{},
@@ -198,7 +198,7 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderOkx,
+		types.ProviderOkx.String(),
 	)
 	return nil
 }
@@ -331,7 +331,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"ticker",
 				"provider",
-				config.ProviderOkx,
+				types.ProviderOkx.String(),
 			)
 		}
 		return
@@ -348,7 +348,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"candle",
 				"provider",
-				config.ProviderOkx,
+				types.ProviderOkx.String(),
 			)
 		}
 		return
@@ -442,7 +442,7 @@ func (p *OkxProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderOkx,
+		types.ProviderOkx.String(),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -491,11 +491,11 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Okx", ticker.InstID, ticker.Last, ticker.Vol24h)
+	return newTickerPrice(types.ProviderOkx.String(), ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
 func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice("Okx", candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
+	return newCandlePrice(types.ProviderOkx.String(), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // currencyPairToOkxPair returns the expected pair instrument ID for Okx

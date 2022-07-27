@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -19,15 +20,6 @@ const (
 	defaultSrvWriteTimeout = 15 * time.Second
 	defaultSrvReadTimeout  = 15 * time.Second
 	defaultProviderTimeout = 100 * time.Millisecond
-
-	ProviderKraken   = "kraken"
-	ProviderBinance  = "binance"
-	ProviderOsmosis  = "osmosis"
-	ProviderHuobi    = "huobi"
-	ProviderOkx      = "okx"
-	ProviderGate     = "gate"
-	ProviderCoinbase = "coinbase"
-	ProviderMock     = "mock"
 )
 
 var (
@@ -38,15 +30,15 @@ var (
 
 	// SupportedProviders defines a lookup table of all the supported currency API
 	// providers.
-	SupportedProviders = map[string]struct{}{
-		ProviderKraken:   {},
-		ProviderBinance:  {},
-		ProviderOsmosis:  {},
-		ProviderOkx:      {},
-		ProviderHuobi:    {},
-		ProviderGate:     {},
-		ProviderCoinbase: {},
-		ProviderMock:     {},
+	SupportedProviders = map[types.ProviderName]struct{}{
+		types.ProviderKraken:   {},
+		types.ProviderBinance:  {},
+		types.ProviderOsmosis:  {},
+		types.ProviderOkx:      {},
+		types.ProviderHuobi:    {},
+		types.ProviderGate:     {},
+		types.ProviderCoinbase: {},
+		types.ProviderMock:     {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
@@ -92,9 +84,9 @@ type (
 	// CurrencyPair defines a price quote of the exchange rate for two different
 	// currencies and the supported providers for getting the exchange rate.
 	CurrencyPair struct {
-		Base      string   `toml:"base" validate:"required"`
-		Quote     string   `toml:"quote" validate:"required"`
-		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+		Base      string               `toml:"base" validate:"required"`
+		Quote     string               `toml:"quote" validate:"required"`
+		Providers []types.ProviderName `toml:"providers" validate:"required,gt=0,dive,required"`
 	}
 
 	// Deviation defines a maximum amount of standard deviations that a given asset can
@@ -160,7 +152,7 @@ type (
 	// hardcoded rest and websocket api endpoints.
 	ProviderEndpoint struct {
 		// Name of the provider, ex. "binance"
-		Name string `toml:"name"`
+		Name types.ProviderName `toml:"name"`
 
 		// Rest endpoint for the provider, ex. "https://api1.binance.com"
 		Rest string `toml:"rest"`
@@ -186,7 +178,7 @@ func endpointValidation(sl validator.StructLevel) {
 	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
 		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
 	}
-	if _, ok := SupportedProviders[endpoint.Name]; !ok {
+	if _, ok := SupportedProviders[types.ProviderName(endpoint.Name)]; !ok {
 		sl.ReportError(endpoint.Name, "name", "Name", "unsupportedEndpointProvider", "")
 	}
 }
@@ -229,11 +221,11 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.ProviderTimeout = defaultProviderTimeout.String()
 	}
 
-	pairs := make(map[string]map[string]struct{})
+	pairs := make(map[string]map[types.ProviderName]struct{})
 	coinQuotes := make(map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
 		if _, ok := pairs[cp.Base]; !ok {
-			pairs[cp.Base] = make(map[string]struct{})
+			pairs[cp.Base] = make(map[types.ProviderName]struct{})
 		}
 		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
@@ -263,14 +255,14 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for base, providers := range pairs {
-		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
+		if _, ok := pairs[base][types.ProviderMock]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
 	gatePairs := []string{}
 	for base, providers := range pairs {
-		if _, ok := providers["gate"]; ok {
+		if _, ok := providers[types.ProviderGate]; ok {
 			gatePairs = append(gatePairs, base)
 		}
 	}

@@ -99,9 +99,9 @@ func NewCoinbaseProvider(
 	endpoints config.ProviderEndpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
-	if endpoints.Name != config.ProviderCoinbase {
+	if endpoints.Name != types.ProviderCoinbase {
 		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderCoinbase,
+			Name:      types.ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,
 		}
@@ -119,7 +119,7 @@ func NewCoinbaseProvider(
 	provider := &CoinbaseProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "coinbase").Logger(),
+		logger:          logger.With().Str("provider", types.ProviderCoinbase.String()).Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
 		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
@@ -240,7 +240,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderCoinbase,
+		types.ProviderCoinbase.String(),
 	)
 	return nil
 }
@@ -390,7 +390,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			config.ProviderCoinbase,
+			types.ProviderCoinbase.String(),
 		)
 		return
 	}
@@ -401,7 +401,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		"type",
 		"trade",
 		"provider",
-		config.ProviderCoinbase,
+		types.ProviderCoinbase.String(),
 	)
 	p.setTradePair(coinbaseTrade)
 }
@@ -497,7 +497,7 @@ func (p *CoinbaseProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderCoinbase,
+		types.ProviderCoinbase.String(),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -514,7 +514,7 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 
 func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		"Coinbase",
+		types.ProviderCoinbase.String(),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,
 		ticker.Volume,

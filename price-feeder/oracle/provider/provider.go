@@ -44,7 +44,7 @@ type TickerPrice struct {
 
 // AggregatedProviderPrices defines a type alias for a map
 // of provider -> asset -> TickerPrice
-type AggregatedProviderPrices map[string]map[string]TickerPrice
+type AggregatedProviderPrices map[types.ProviderName]map[string]TickerPrice
 
 // CandlePrice defines price, volume, and time information for an
 // exchange rate.
@@ -56,7 +56,7 @@ type CandlePrice struct {
 
 // AggregatedProviderCandles defines a type alias for a map
 // of provider -> asset -> []CandlePrice
-type AggregatedProviderCandles map[string]map[string][]CandlePrice
+type AggregatedProviderCandles map[types.ProviderName]map[string][]CandlePrice
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
