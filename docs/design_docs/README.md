@@ -42,4 +42,4 @@ Meanwhile the _spec_ folder of each module should be a living document that is k
 ### Accepted
 
 - [009: Liquidity Mining](./009-liquidity-mining.md)
-- [010: Market health parameters](./009-market-params.md)
+- [010: Market health parameters](./010-market-params.md)
