@@ -59,6 +59,7 @@ var (
 		DenomUSD: {},
 		"USDC":   {},
 		"USDT":   {},
+		"DAI":    {},
 		"BTC":    {},
 		"ETH":    {},
 	}
