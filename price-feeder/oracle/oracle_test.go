@@ -497,7 +497,7 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 	providerPrices[config.ProviderBinance] = tickerPrices
 
 	providerPair := map[string][]types.CurrencyPair{
-		"binance": {pair},
+		config.ProviderBinance: {pair},
 	}
 
 	prices, err := GetComputedPrices(
