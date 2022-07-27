@@ -1,4 +1,4 @@
-# ADR 008: Borrow Tracking
+# Design Doc 008: Borrow Tracking
 
 ## Changelog
 
@@ -112,7 +112,7 @@ This design change should address our lingering tradeoff between performance and
 
 ## References
 
-The implementations discussed in some previous ADRs are partially superseded by this decision:
+The implementations discussed in some previous design docs are partially superseded by this decision:
 
-- [ADR-003: Borrow Assets](./ADR-003-borrow-assets.md)
-- [ADR-004: Interest and Reserves](./ADR-004-interest-and-reserves.md)
+- [003: Borrow Assets](./003-borrow-assets.md)
+- [004: Interest and Reserves](./004-interest-and-reserves.md)
