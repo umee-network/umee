@@ -102,7 +102,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cmd.Context())
 	g, ctx := errgroup.WithContext(ctx)
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
@@ -251,7 +251,7 @@ func startPriceFeeder(
 	for {
 		select {
 		case <-ctx.Done():
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 			defer cancel()
 
 			logger.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")

@@ -1,4 +1,4 @@
-# ADR 004: Borrow interest implementation and reserves
+# Design Doc 004: Borrow interest implementation and reserves
 
 ## Changelog
 
@@ -15,7 +15,7 @@ Accepted
 Borrow positions on Umee accrue interest over time.
 When interest accrues, the sum of all assets owed by all users increases for each borrowed token denomination. The amount of that increase serves to benefit suppliers (by increasing the token:uToken exchange rate), and also to increase the amount of base assets the Umee system holds in reserve.
 
-The mechanism by which interest is calculated, and then split between incentivizing suppliers as per [ADR-001](./ADR-001-interest-stream.md) and reserves as defined in this ADR, will follow.
+The mechanism by which interest is calculated, and then split between incentivizing suppliers as per [design doc 001](./001-interest-stream.md) and reserves as defined in this design doc, will follow.
 
 ## Decision
 
@@ -31,7 +31,7 @@ This timing of reserve increases, matches the behavior of the [Compound cToken s
 
 ## Detailed Design
 
-As noted in [ADR-003](./ADR-003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdk.Int`.
+As noted in [design doc 003](./003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdk.Int`.
 
 When accruing interest, the borrowed amount (`sdk.Int`) must be increased for each open borrow position. The increase should be calculated as follows...
 
@@ -96,7 +96,7 @@ In the codebase, the function above will be written more efficiently with regard
 
 ### Protocol Reserve (insurance treasury)
 
-The leverage module will build reserves to secure the protocol and act as insurance. These reserves are used during bad debt repayment, which is discussed in ADR 007.
+The leverage module will build reserves to secure the protocol and act as insurance. These reserves are used during bad debt repayment, which is discussed in design doc 007.
 
 The portion of accrued interest set for reserve is determined per-token as a governance parameter called `ReserveFactor`, and will be managed by the `Token` registry.
 
@@ -107,7 +107,7 @@ Reserve amount is stored for each denom using the following format:
 KeyPrefixReserveAmount | denom | 0 -> sdk.Int
 ```
 
-Reserves are part of the module account's balance, but may not leave the module account as the result of `MsgBorrow` or `MsgWithdraw`. Only governance actions (outside the scope of this ADR) may release or transfer reserves.
+Reserves are part of the module account's balance, but may not leave the module account as the result of `MsgBorrow` or `MsgWithdraw`. Only governance actions (outside the scope of this design doc) may release or transfer reserves.
 
 Reserve balance is updated in the `AccrueAllInterest` function:
 
