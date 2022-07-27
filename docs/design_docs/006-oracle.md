@@ -1,4 +1,4 @@
-# ADR 006: Oracle
+# Design Doc 006: Oracle
 
 ## Changelog
 
