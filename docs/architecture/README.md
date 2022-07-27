@@ -40,3 +40,4 @@ Note the context/background should be written in the present tense.
 ### Accepted
 
 - [ADR-009: Liquidity Mining](./ADR-009-liquidity-mining.md)
+- [ADR-010: Market health parameters](./ADR-009-market-params.md)
