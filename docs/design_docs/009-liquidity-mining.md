@@ -1,4 +1,4 @@
-# ADR 009: Liquidity Mining
+# Design Doc 009: Liquidity Mining
 
 ## Changelog
 

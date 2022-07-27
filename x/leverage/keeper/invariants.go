@@ -202,7 +202,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms of registered tokens in the
 		// keeper, ensuring none have a negative borrow APY.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
 			borrowAPY := k.DeriveBorrowAPY(ctx, denom)
@@ -238,7 +238,7 @@ func SupplyAPYInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms of registered tokens in the
 		// keeper, ensuring none have a negative supply APY.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
 			supplyAPY := k.DeriveSupplyAPY(ctx, denom)
@@ -274,7 +274,7 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms of registered tokens in the
 		// keeper, ensuring none have an interest scalar less than one.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
 			scalar := k.getInterestScalar(ctx, denom)
