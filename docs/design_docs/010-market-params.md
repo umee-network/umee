@@ -1,9 +1,9 @@
-# ADR 010: Market Parameters
+# Design Doc 010: Market Parameters
 
 ## Changelog
 
-- Jul 4, 2022: Max collateral utilization added to ADR-003 (@robert-zaremba)
-- Jul 18, 2022: Initial draft moved discussion to ADR-101 (@toteki)
+- Jul 4, 2022: Max collateral utilization added to 003 (@robert-zaremba)
+- Jul 18, 2022: Initial draft and moved discussion to 010 (@toteki)
 
 ## Status
 
@@ -114,7 +114,7 @@ It may or may not allow `MsgLiquidate` to decrease `available_supply` under the 
 
 `MinCollateralLiquidity` could still be indirectly exceeded by supply interest accruing on a collateral denom's uToken exchange rate.
 
-It has also been proposed separately to factor `collateral_liquidity` (or `collateral_utilization`) into dynamic interest rates, to enhance the current model which uses `supply_utilization` (see ADR-004).
+It has also been proposed separately to factor `collateral_liquidity` (or `collateral_utilization`) into dynamic interest rates, to enhance the current model which uses `supply_utilization` (see [004: Interest and Reserves](./004-interest-and-reserves.md)).
 
 ## Alternatives
 

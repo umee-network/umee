@@ -1,4 +1,4 @@
-# ADR 005: Liquidation
+# Design Doc 005: Liquidation
 
 ## Changelog
 

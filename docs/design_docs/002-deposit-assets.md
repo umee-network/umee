@@ -1,4 +1,4 @@
-# ADR 002: Deposit Assets
+# Design Doc 002: Deposit Assets
 
 ## Changelog
 
