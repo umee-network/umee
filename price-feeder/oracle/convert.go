@@ -13,7 +13,10 @@ import (
 
 // getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,
 // given the asset and the map of providers to currency pairs.
-func getUSDBasedProviders(asset string, providerPairs map[types.ProviderName][]types.CurrencyPair) (map[types.ProviderName]struct{}, error) {
+func getUSDBasedProviders(
+	asset string,
+	providerPairs map[types.ProviderName][]types.CurrencyPair,
+) (map[types.ProviderName]struct{}, error) {
 	conversionProviders := make(map[types.ProviderName]struct{})
 
 	for provider, pairs := range providerPairs {
