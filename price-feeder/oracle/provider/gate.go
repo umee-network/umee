@@ -268,13 +268,8 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
 	} else {
-		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
+		return TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 	}
-<<<<<<< HEAD
-=======
-
-	return TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
->>>>>>> cd007d2 (chore(price-feeder): improve provider logs (#1179))
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
