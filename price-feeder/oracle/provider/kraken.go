@@ -155,7 +155,7 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		key := cp.String()
 		tickerPrice, ok := p.tickers[key]
 		if !ok {
-			return nil, fmt.Errorf("kraken provider failed to get ticker price for %s", key)
+			return nil, fmt.Errorf("kraken failed to get ticker price for %s", key)
 		}
 		tickerPrices[key] = tickerPrice
 	}
