@@ -1,4 +1,4 @@
-# ADR 007: Bad debt
+# Design Doc 007: Bad debt
 
 ## Changelog
 

@@ -27,18 +27,18 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
 type Params struct {
-	// The complete_liquidation_threshold determines how far over their borrow
+	// Complete Liquidation Threshold determines how far over their borrow
 	// limit a borrower must be in order for their positions to be liquidated
 	// fully in a single event.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
-	// The minimum_close_factor determines the portion of a borrower's position
+	// Minimum Close Factor determines the portion of a borrower's position
 	// that can be liquidated in a single event, when the borrower is just barely
 	// over their borrow limit.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`
-	// The oracle_reward_factor determines the portion of interest accrued on
+	// Oracle Reward Factor determines the portion of interest accrued on
 	// borrows that is sent to the oracle module to fund its reward pool.
 	OracleRewardFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=oracle_reward_factor,json=oracleRewardFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_reward_factor" yaml:"oracle_reward_factor"`
-	// The small_liquidation_size determines the USD value at which a borrow is
+	// Small Liquidation Size determines the USD value at which a borrow is
 	// considered small enough to be liquidated in a single transaction, bypassing
 	// dynamic close factor.
 	SmallLiquidationSize github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=small_liquidation_size,json=smallLiquidationSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"small_liquidation_size" yaml:"small_liquidation_size"`
@@ -76,65 +76,73 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
-// Token defines a token, along with its capital metadata, in the Umee capital
-// facility that can be supplied and borrowed.
+// Token defines a token, along with its metadata and parameters, in the Umee
+// capital facility that can be supplied and borrowed.
 type Token struct {
-	// The base_denom defines the denomination of the underlying base token.
+	// Base Denom is the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
-	// The reserve factor defines what portion of accrued interest of the asset
-	// type goes to reserves.
+	// Reserve Factor defines what portion of accrued interest goes to reserves
+	// when this token is borrowed.
 	ReserveFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=reserve_factor,json=reserveFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reserve_factor" yaml:"reserve_factor"`
-	// The collateral_weight defines what amount of the total value of the asset
-	// can contribute to a users borrowing power. If the collateral_weight is
+	// Collateral Weight defines what portion of the total value of the asset
+	// can contribute to a users borrowing power. If the collateral weight is
 	// zero, using this asset as collateral against borrowing will be disabled.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
-	// The liquidation_threshold defines what amount of the total value of the
+	// Liquidation Threshold defines what amount of the total value of the
 	// asset can contribute to a user's liquidation threshold (above which they
 	// become eligible for liquidation).
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
-	// The base_borrow_rate defines the minimum interest rate for borrowing this
+	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
-	// The kink_borrow_rate defines the interest rate for borrowing this
-	// asset when utilization equals to 'kink_utilization'.
+	// Kink Borrow Rate defines the interest rate for borrowing this
+	// asset when supply utilization is equal to 'kink_utilization'.
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
-	// The max_borrow_rate defines the interest rate for borrowing this
-	// asset (seen when supply utilization is 100%).
-	// Value is in basis points; allowed values are in [0, 100'000'000] range.
+	// Max Borrow Rate defines the interest rate in basis points for borrowing
+	// this asset when supply utilization is at its maximum.
 	MaxBorrowRate github_com_umee_network_umee_v2_math_bpmath.BP `protobuf:"varint,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,casttype=github.com/umee-network/umee/v2/math/bpmath.BP" json:"max_borrow_rate,omitempty" yaml:"max_borrow_rate"`
-	// The kink_utilization defines the value where the kink rate kicks off for
-	// borrow rates.
+	// Kink Utilization defines the supply utilization value where
+	// the kink in the borrow interest rate function occurs.
 	KinkUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization,json=kinkUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization" yaml:"kink_utilization"`
-	// The liquidation_incentive determines the portion of bonus collateral of
+	// Liquidation Incentive determines the portion of bonus collateral of
 	// a token type liquidators receive as a liquidation reward.
 	// Value is in basis points; allowed values are in [0, 10000] range.
 	LiquidationIncentive github_com_umee_network_umee_v2_math_bpmath.FixedBP `protobuf:"varint,9,opt,name=liquidation_incentive,json=liquidationIncentive,proto3,casttype=github.com/umee-network/umee/v2/math/bpmath.FixedBP" json:"liquidation_incentive,omitempty" yaml:"liquidation_incentive"`
-	// The symbol_denom and exponent are solely used to update the oracle's accept
-	// list of allowed tokens.
+	// Symbol Denom is the human readable denomination of this token.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
-	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows supplying for lending or collateral using this token. Note that
-	// withdrawing is always enabled. Disabling supplying would be one step in
-	// phasing out an asset type.
+	// Exponent is the power of ten by which to multiply, in order to convert
+	// an amount of the token denoted in its symbol denom to the actual amount
+	// of its base denom.
+	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
+	// EnableMsgSupply allows supplying for lending or collateral using this
+	// token. Note that withdrawing is always enabled. Disabling supplying would
+	// be one step in phasing out an asset type.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
-	// Allows borrowing of this token. Note that repaying is always enabled.
-	// Disabling borrowing would be one step in phasing out an asset type, but
-	// could also be used from the start for asset types meant to be collateral
-	// only, like meTokens.
+	// EnableMsgBorrow allows borrowing of this token. Note that repaying is
+	// always enabled. Disabling borrowing would be one step in phasing out an
+	// asset type, but could also be used from the start for asset types meant
+	// to be collateral only, like meTokens.
 	EnableMsgBorrow bool `protobuf:"varint,13,opt,name=enable_msg_borrow,json=enableMsgBorrow,proto3" json:"enable_msg_borrow,omitempty" yaml:"enable_msg_borrow"`
-	// This should only be used to eliminate an asset completely. A blacklisted
+	// Blacklist should only be used to eliminate an asset completely. A blacklisted
 	// asset is treated as though its oracle price is zero, and thus ignored by
 	// calculations such as collateral value and borrow limit. Can still be repaid
 	// or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
 	// and enable_msg_borrow set to false. Such tokens can be safely removed from the
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
-	// Maximum collateral share specifies how much of the
-	// system's overall collateral be provided by a single token.
-	// Value is a percent; allowed values are in [0, 100] range.
-	// 100 means that the token has no restriction. 10 means maximum 10% of total
-	// collateral value can provided by this token.
-	MaxCollateralShare uint32 `protobuf:"varint,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3" json:"max_collateral_share,omitempty" yaml:"max_collateral_share"`
+	// Max Collateral Share specifies how much of the system's overall collateral
+	// can be provided by a given token. 1.0 means that the token has no restriction.
+	// 0.1 means maximum 10% of system's total collateral value can provided by this token.
+	MaxCollateralShare github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_collateral_share" yaml:"max_collateral_share"`
+	// Max Supply Utilization specifies the maximum supply utilization a token is
+	// allowed to reach as a direct result of user borrowing. It can still be exceeded
+	// due to withdrawals, interest, and liquidations.
+	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
+	// Min Collateral Liquidity specifies the minimum collateral liquidity a token is
+	// allowed to reach as a direct result of users borrowing, collateralizing, or
+	// withdrawing assets. Liquidity can only drop below this value due to interest
+	// or liquidations.
+	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
 }
 
 func (m *Token) Reset()         { *m = Token{} }
@@ -294,7 +302,13 @@ func (this *Token) Equal(that interface{}) bool {
 	if this.Blacklist != that1.Blacklist {
 		return false
 	}
-	if this.MaxCollateralShare != that1.MaxCollateralShare {
+	if !this.MaxCollateralShare.Equal(that1.MaxCollateralShare) {
+		return false
+	}
+	if !this.MaxSupplyUtilization.Equal(that1.MaxSupplyUtilization) {
+		return false
+	}
+	if !this.MinCollateralLiquidity.Equal(that1.MinCollateralLiquidity) {
 		return false
 	}
 	return true
@@ -382,11 +396,40 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.MaxCollateralShare != 0 {
-		i = encodeVarintLeverage(dAtA, i, uint64(m.MaxCollateralShare))
-		i--
-		dAtA[i] = 0x78
+	{
+		size := m.MinCollateralLiquidity.Size()
+		i -= size
+		if _, err := m.MinCollateralLiquidity.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
 	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x8a
+	{
+		size := m.MaxSupplyUtilization.Size()
+		i -= size
+		if _, err := m.MaxSupplyUtilization.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x82
+	{
+		size := m.MaxCollateralShare.Size()
+		i -= size
+		if _, err := m.MaxCollateralShare.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x7a
 	if m.Blacklist {
 		i--
 		if m.Blacklist {
@@ -581,9 +624,12 @@ func (m *Token) Size() (n int) {
 	if m.Blacklist {
 		n += 2
 	}
-	if m.MaxCollateralShare != 0 {
-		n += 1 + sovLeverage(uint64(m.MaxCollateralShare))
-	}
+	l = m.MaxCollateralShare.Size()
+	n += 1 + l + sovLeverage(uint64(l))
+	l = m.MaxSupplyUtilization.Size()
+	n += 2 + l + sovLeverage(uint64(l))
+	l = m.MinCollateralLiquidity.Size()
+	n += 2 + l + sovLeverage(uint64(l))
 	return n
 }
 
@@ -1194,10 +1240,10 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			}
 			m.Blacklist = bool(v != 0)
 		case 15:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field MaxCollateralShare", wireType)
 			}
-			m.MaxCollateralShare = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowLeverage
@@ -1207,11 +1253,94 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MaxCollateralShare |= uint32(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxCollateralShare.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxSupplyUtilization", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxSupplyUtilization.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 17:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinCollateralLiquidity", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinCollateralLiquidity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipLeverage(dAtA[iNdEx:])

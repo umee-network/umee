@@ -23,21 +23,23 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 		Description: "test",
 		Registry: []types.Token{
 			{
-				BaseDenom:            "uumee",
-				SymbolDenom:          "umee",
-				Exponent:             6,
-				ReserveFactor:        sdk.NewDec(40),
-				CollateralWeight:     sdk.NewDec(43),
-				LiquidationThreshold: sdk.NewDec(66),
-				BaseBorrowRate:       sdk.NewDec(32),
-				KinkBorrowRate:       sdk.NewDec(26),
-				MaxBorrowRate:        21 * bpmath.ONE,
-				KinkUtilization:      sdk.MustNewDecFromStr("0.25"),
-				LiquidationIncentive: 880,
-				EnableMsgSupply:      true,
-				EnableMsgBorrow:      true,
-				Blacklist:            false,
-				MaxCollateralShare:   10,
+				BaseDenom:              "uumee",
+				SymbolDenom:            "umee",
+				Exponent:               6,
+				ReserveFactor:          sdk.NewDec(40),
+				CollateralWeight:       sdk.NewDec(43),
+				LiquidationThreshold:   sdk.NewDec(66),
+				BaseBorrowRate:         sdk.NewDec(32),
+				KinkBorrowRate:         sdk.NewDec(26),
+				MaxBorrowRate:          21000,
+				KinkUtilization:        sdk.MustNewDecFromStr("0.25"),
+				LiquidationIncentive:   88000,
+				EnableMsgSupply:        true,
+				EnableMsgBorrow:        true,
+				Blacklist:              false,
+				MaxCollateralShare:     sdk.MustNewDecFromStr("0.1"),
+				MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.5"),
+				MinCollateralLiquidity: sdk.MustNewDecFromStr("0.75"),
 			},
 		},
 	}
@@ -52,13 +54,15 @@ registry:
       kink_borrow_rate: "26.000000000000000000"
       max_borrow_rate: 210000
       kink_utilization: "0.250000000000000000"
-      liquidation_incentive: 880
+      liquidation_incentive: 88000
       symbol_denom: umee
       exponent: 6
       enable_msg_supply: true
       enable_msg_borrow: true
       blacklist: false
-      max_collateral_share: 10
+      max_collateral_share: "0.100000000000000000"
+      max_supply_utilization: "0.500000000000000000"
+      min_collateral_liquidity: "0.750000000000000000"
 `
 	require.Equal(t, expected, p.String())
 }
@@ -66,21 +70,23 @@ registry:
 func TestToken_Validate(t *testing.T) {
 	validToken := func() types.Token {
 		return types.Token{
-			BaseDenom:            "uumee",
-			SymbolDenom:          "umee",
-			Exponent:             6,
-			ReserveFactor:        sdk.MustNewDecFromStr("0.25"),
-			CollateralWeight:     sdk.MustNewDecFromStr("0.50"),
-			LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
-			BaseBorrowRate:       sdk.MustNewDecFromStr("0.01"),
-			KinkBorrowRate:       sdk.MustNewDecFromStr("0.05"),
-			MaxBorrowRate:        10000,
-			KinkUtilization:      sdk.MustNewDecFromStr("0.75"),
-			LiquidationIncentive: 500,
-			EnableMsgSupply:      true,
-			EnableMsgBorrow:      true,
-			Blacklist:            false,
-			MaxCollateralShare:   0,
+			BaseDenom:              "uumee",
+			SymbolDenom:            "umee",
+			Exponent:               6,
+			ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
+			CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
+			LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
+			BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
+			KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
+			MaxBorrowRate:          10000,
+			KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
+			LiquidationIncentive:   500,
+			EnableMsgSupply:        true,
+			EnableMsgBorrow:        true,
+			Blacklist:              false,
+			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+			MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
 		}
 	}
 	invalidBaseToken := validToken()
@@ -124,10 +130,13 @@ func TestToken_Validate(t *testing.T) {
 	invalidBlacklistedSupply.Blacklist = true
 
 	invalidMaxCollateralShare := validToken()
-	invalidMaxCollateralShare.MaxCollateralShare = 101
+	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
 
-	validMaxCollateralShare := validToken()
-	validMaxCollateralShare.MaxCollateralShare = 100
+	invalidMaxSupplyUtilization := validToken()
+	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdk.MustNewDecFromStr("1.05")
+
+	invalidMinCollateralLiquidity := validToken()
+	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -188,9 +197,13 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidMaxCollateralShare,
 			expectErr: true,
 		},
-		"valid max collateral share": {
-			input:     validMaxCollateralShare,
-			expectErr: false,
+		"invalid max supply utilization": {
+			input:     invalidMaxSupplyUtilization,
+			expectErr: true,
+		},
+		"invalid min collateral liquidity": {
+			input:     invalidMinCollateralLiquidity,
+			expectErr: true,
 		},
 	}
 
