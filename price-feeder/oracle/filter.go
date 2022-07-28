@@ -62,7 +62,7 @@ func FilterTickerDeviations(
 				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName.String()).
+					Str("provider", string(providerName)).
 					Str("price", tp.Price.String()).
 					Msg("provider deviating from other prices")
 			}
@@ -136,7 +136,7 @@ func FilterCandleDeviations(
 				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName.String()).
+					Str("provider", string(providerName)).
 					Str("price", price.String()).
 					Msg("provider deviating from other candles")
 			}

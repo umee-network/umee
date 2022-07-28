@@ -15,8 +15,3 @@ const (
 // but this can be any provider name that can give token prices
 // examples.: "binance", "osmosis", "kraken".
 type ProviderName string
-
-// String returns the provider name as string.
-func (pn ProviderName) String() string {
-	return string(pn)
-}

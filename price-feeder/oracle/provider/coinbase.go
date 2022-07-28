@@ -119,7 +119,7 @@ func NewCoinbaseProvider(
 	provider := &CoinbaseProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", types.ProviderCoinbase.String()).Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderCoinbase)).Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
 		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
@@ -240,7 +240,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		types.ProviderCoinbase.String(),
+		string(types.ProviderCoinbase),
 	)
 	return nil
 }
@@ -390,7 +390,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			types.ProviderCoinbase.String(),
+			string(types.ProviderCoinbase),
 		)
 		return
 	}
@@ -401,7 +401,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		"type",
 		"trade",
 		"provider",
-		types.ProviderCoinbase.String(),
+		string(types.ProviderCoinbase),
 	)
 	p.setTradePair(coinbaseTrade)
 }
@@ -497,7 +497,7 @@ func (p *CoinbaseProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		types.ProviderCoinbase.String(),
+		string(types.ProviderCoinbase),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -514,7 +514,7 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 
 func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		types.ProviderCoinbase.String(),
+		string(types.ProviderCoinbase),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,
 		ticker.Volume,

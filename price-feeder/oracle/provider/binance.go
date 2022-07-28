@@ -110,7 +110,7 @@ func NewBinanceProvider(
 	provider := &BinanceProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", types.ProviderBinance.String()).Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderBinance)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
@@ -265,7 +265,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			types.ProviderBinance.String(),
+			string(types.ProviderBinance),
 		)
 		return
 	}
@@ -280,7 +280,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"candle",
 			"provider",
-			types.ProviderBinance.String(),
+			string(types.ProviderBinance),
 		)
 		return
 	}
@@ -314,11 +314,11 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(types.ProviderBinance.String(), ticker.Symbol, ticker.LastPrice, ticker.Volume)
+	return newTickerPrice(string(types.ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
 func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(types.ProviderBinance.String(), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+	return newCandlePrice(string(types.ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
 		candle.Metadata.TimeStamp)
 }
 
@@ -376,7 +376,7 @@ func (p *BinanceProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		types.ProviderBinance.String(),
+		string(types.ProviderBinance),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
