@@ -48,17 +48,31 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bugs
 
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
-- [1177](https://github.com/umee-network/umee/pull/1177) Update a deprecated osmosis api endpoint.
 
 ### Improvements
 
+<<<<<<< HEAD
 - [#1179](https://github.com/umee-network/umee/pull/1179) Improve logs when unable to find prices.
+=======
+- [#1121](https://github.com/umee-network/umee/pull/1121) Use the cosmos-sdk telemetry package instead of our own.
+- [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
+>>>>>>> 9ba9b87 (chore: pfcl++ (#1184))
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 
 ### Features
 
 - [#1038](https://github.com/umee-network/umee/pull/1038) Adds the option for validators to override API endpoints in our config.
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
+
+## [v0.2.5](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.5) - 2022-07-28
+
+### Bugs
+
+- [1177](https://github.com/umee-network/umee/pull/1177) Update a deprecated osmosis api endpoint.
+
+### Improvements
+
+- [#1179](https://github.com/umee-network/umee/pull/1179) Improve logs when unable to find prices.
 
 ## [v0.2.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.4) - 2022-07-14
 
