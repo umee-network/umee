@@ -14,13 +14,8 @@ import (
 )
 
 const (
-<<<<<<< HEAD
-	osmosisBaseURL        = "https://api-osmosis.imperator.co"
-	osmosisTokenEndpoint  = "/tokens/v1"
-=======
 	osmosisRestURL        = "https://api-osmosis.imperator.co"
 	osmosisTokenEndpoint  = "/tokens/v2"
->>>>>>> 482cfdb (fix: update deprecated osmosis api endpoint (#1177))
 	osmosisCandleEndpoint = "/tokens/v2/historical"
 	osmosisPairsEndpoint  = "/pairs/v1/summary"
 )
