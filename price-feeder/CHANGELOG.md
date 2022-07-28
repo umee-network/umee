@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- [#1179](https://github.com/umee-network/umee/pull/1179) Improve logs when unable to find prices.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 
 ### Features

@@ -201,7 +201,7 @@ func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
 
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("binance provider failed to get ticker price for %s", key)
+		return TickerPrice{}, fmt.Errorf("binance failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
@@ -213,7 +213,7 @@ func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []CandlePrice{}, fmt.Errorf("binance failed to get candle prices for %s", key)
 	}
 
 	candleList := []CandlePrice{}

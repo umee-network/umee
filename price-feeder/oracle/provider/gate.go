@@ -174,7 +174,7 @@ func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
 	}
 
 	candleList := []CandlePrice{}
@@ -268,7 +268,7 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	if tickerPair, ok := p.tickers[gp]; ok {
 		return tickerPair.toTickerPrice()
 	} else {
-		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
+		return TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 	}
 }
 

@@ -139,7 +139,7 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		key := cp.String()
 		tickerPrice, ok := p.tickers[key]
 		if !ok {
-			return nil, fmt.Errorf("failed to get ticker price for %s", key)
+			return nil, fmt.Errorf("kraken failed to get ticker price for %s", key)
 		}
 		tickerPrices[key] = tickerPrice
 	}
@@ -224,7 +224,7 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []CandlePrice{}, fmt.Errorf("kraken failed to get candle prices for %s", key)
 	}
 
 	candleList := []CandlePrice{}
