@@ -8,7 +8,7 @@ DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
-PROJECT_NAME   = $(shell git remote get-url origin | xargs basename -s .git)
+PROJECT_NAME   = umee
 HTTPS_GIT 		 := https://github.com/umee-network/umee.git
 
 ###############################################################################
@@ -191,9 +191,8 @@ DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bu
 
 containerProtoVer=v0.7
 containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
-containerProtoGen=cosmos-sdk-proto-gen-$(containerProtoVer)
-containerProtoFmt=cosmos-sdk-proto-fmt-$(containerProtoVer)
-
+containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
+containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
 
 proto-all: proto-gen proto-lint proto-check-breaking proto-format
 .PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format
