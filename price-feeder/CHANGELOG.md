@@ -45,6 +45,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bugs
+
+- [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
+- [1177](https://github.com/umee-network/umee/pull/1177) Update a deprecated osmosis api endpoint.
+
 ### Improvements
 
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.

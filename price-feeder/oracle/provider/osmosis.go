@@ -15,7 +15,7 @@ import (
 
 const (
 	osmosisBaseURL        = "https://api-osmosis.imperator.co"
-	osmosisTokenEndpoint  = "/tokens/v1"
+	osmosisTokenEndpoint  = "/tokens/v2"
 	osmosisCandleEndpoint = "/tokens/v2/historical"
 	osmosisPairsEndpoint  = "/pairs/v1/summary"
 )
@@ -81,6 +81,10 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	resp, err := p.client.Get(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make Osmosis request: %w", err)
+	}
+	err = checkHTTPStatus(resp)
+	if err != nil {
+		return nil, err
 	}
 
 	defer resp.Body.Close()
@@ -151,6 +155,10 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 		if err != nil {
 			return nil, fmt.Errorf("failed to make Osmosis request: %w", err)
 		}
+		err = checkHTTPStatus(resp)
+		if err != nil {
+			return nil, err
+		}
 
 		defer resp.Body.Close()
 
@@ -188,6 +196,10 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = checkHTTPStatus(resp)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var pairsSummary OsmosisPairsSummary
@@ -209,5 +221,12 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 // SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
 func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}
+
+func checkHTTPStatus(resp *http.Response) error {
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("unexpected status: %s", resp.Status)
+	}
 	return nil
 }
