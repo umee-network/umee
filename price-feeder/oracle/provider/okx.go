@@ -233,7 +233,7 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error)
 	instrumentId := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentId]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
+		return TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentId)
 	}
 
 	return tickerPair.toTickerPrice()
