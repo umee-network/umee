@@ -51,12 +51,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-<<<<<<< HEAD
-- [#1179](https://github.com/umee-network/umee/pull/1179) Improve logs when unable to find prices.
-=======
-- [#1121](https://github.com/umee-network/umee/pull/1121) Use the cosmos-sdk telemetry package instead of our own.
-- [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
->>>>>>> 9ba9b87 (chore: pfcl++ (#1184))
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 
 ### Features
