@@ -174,7 +174,7 @@ func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
 	}
 
 	candleList := []CandlePrice{}
@@ -270,6 +270,11 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 	} else {
 		return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
 	}
+<<<<<<< HEAD
+=======
+
+	return TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
+>>>>>>> cd007d2 (chore(price-feeder): improve provider logs (#1179))
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
