@@ -198,17 +198,12 @@ func (s msgServer) Borrow(
 		"borrower", borrowerAddr.String(),
 		"amount", msg.Asset.String(),
 	)
-
+	ctx.EventManager().EmitTypedEvent()
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeBorrow,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
 		),
 	})
 
