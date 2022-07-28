@@ -15,7 +15,7 @@ import (
 
 const (
 	osmosisRestURL        = "https://api-osmosis.imperator.co"
-	osmosisTokenEndpoint  = "/tokens/v1"
+	osmosisTokenEndpoint  = "/tokens/v2"
 	osmosisCandleEndpoint = "/tokens/v2/historical"
 	osmosisPairsEndpoint  = "/pairs/v1/summary"
 )
