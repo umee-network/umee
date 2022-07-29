@@ -8,7 +8,7 @@ DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
-PROJECT_NAME   = umee
+PROJECT_NAME   := umee
 HTTPS_GIT 		 := https://github.com/umee-network/umee.git
 
 ###############################################################################
