@@ -209,26 +209,26 @@ type UmeeApp struct {
 	memKeys map[string]*sdk.MemoryStoreKey
 
 	// keepers
-	AccountKeeper    authkeeper.AccountKeeper
-	BankKeeper       bankkeeper.Keeper
-	CapabilityKeeper *capabilitykeeper.Keeper
-	StakingKeeper    stakingkeeper.Keeper
-	SlashingKeeper   slashingkeeper.Keeper
-	MintKeeper       mintkeeper.Keeper
-	DistrKeeper      distrkeeper.Keeper
-	GovKeeper        govkeeper.Keeper
-	CrisisKeeper     crisiskeeper.Keeper
-	UpgradeKeeper    upgradekeeper.Keeper
-	ParamsKeeper     paramskeeper.Keeper
-	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	EvidenceKeeper   evidencekeeper.Keeper
-	TransferKeeper   uibctransferkeeper.Keeper
-	FeeGrantKeeper   feegrantkeeper.Keeper
-	AuthzKeeper      authzkeeper.Keeper
-	GravityKeeper    gravitykeeper.Keeper
-	LeverageKeeper   leveragekeeper.Keeper
-	OracleKeeper     oraclekeeper.Keeper
-	bech32IbcKeeper  bech32ibckeeper.Keeper
+	AccountKeeper      authkeeper.AccountKeeper
+	BankKeeper         bankkeeper.Keeper
+	CapabilityKeeper   *capabilitykeeper.Keeper
+	StakingKeeper      stakingkeeper.Keeper
+	SlashingKeeper     slashingkeeper.Keeper
+	MintKeeper         mintkeeper.Keeper
+	DistrKeeper        distrkeeper.Keeper
+	GovKeeper          govkeeper.Keeper
+	CrisisKeeper       crisiskeeper.Keeper
+	UpgradeKeeper      upgradekeeper.Keeper
+	ParamsKeeper       paramskeeper.Keeper
+	IBCKeeper          *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	UIBCTransferKeeper uibctransferkeeper.Keeper
+	EvidenceKeeper     evidencekeeper.Keeper
+	FeeGrantKeeper     feegrantkeeper.Keeper
+	AuthzKeeper        authzkeeper.Keeper
+	GravityKeeper      gravitykeeper.Keeper
+	LeverageKeeper     leveragekeeper.Keeper
+	OracleKeeper       oraclekeeper.Keeper
+	bech32IbcKeeper    bech32ibckeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -432,14 +432,15 @@ func New(
 		app.BankKeeper,
 		app.ScopedTransferKeeper,
 	)
-	app.TransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	transferModule := uibctransfer.NewAppModule(ibctransfer.NewAppModule(ibcTransferKeeper), app.TransferKeeper)
+	app.UIBCTransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
+	ibcTransferModule := ibctransfer.NewAppModule(ibcTransferKeeper)
+	uibcTransferIBCModule := uibctransfer.NewIBCModule(ibctransfer.NewIBCModule(ibcTransferKeeper), app.UIBCTransferKeeper)
 
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.TransferKeeper,
+		app.UIBCTransferKeeper,
 	)
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
@@ -451,7 +452,7 @@ func New(
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
 		&app.AccountKeeper,
-		&app.TransferKeeper.Keeper,
+		&app.UIBCTransferKeeper.Keeper,
 		&app.bech32IbcKeeper,
 	)
 
@@ -469,7 +470,7 @@ func New(
 
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, uibcTransferIBCModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// register the proposal types
@@ -533,7 +534,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
-		transferModule,
+		ibcTransferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
@@ -648,7 +649,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
-		transferModule,
+		ibcTransferModule,
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		// TODO: Ensure x/leverage implements simulator and then uncomment.
 		// leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),

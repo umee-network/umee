@@ -103,7 +103,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	umeeApp := s.GetUmeeApp(s.chainA)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(s.chainA.GetContext(), umeeApp.InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, umeeApp.TransferKeeper)
+	types.RegisterQueryServer(queryHelper, umeeApp.UIBCTransferKeeper)
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
@@ -120,7 +120,7 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (s *KeeperTestSuite) TestGetTransferAccount() {
 	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
-	macc := s.GetUmeeApp(s.chainA).TransferKeeper.GetTransferAccount(s.chainA.GetContext())
+	macc := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.GetTransferAccount(s.chainA.GetContext())
 
 	s.Require().NotNil(macc)
 	s.Require().Equal(types.ModuleName, macc.GetName())
@@ -156,7 +156,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			0,
 		)
 
-		err := s.GetUmeeApp(s.chainA).TransferKeeper.OnRecvPacket(s.chainA.GetContext(), packet, data)
+		err := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.OnRecvPacket(s.chainA.GetContext(), packet, data)
 		s.Require().NoError(err)
 	})
 
@@ -185,7 +185,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			0,
 		)
 
-		err := s.GetUmeeApp(s.chainB).TransferKeeper.OnRecvPacket(s.chainB.GetContext(), packet, data)
+		err := s.GetUmeeApp(s.chainB).UIBCTransferKeeper.OnRecvPacket(s.chainB.GetContext(), packet, data)
 		s.Require().NoError(err)
 	})
 
@@ -225,8 +225,8 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		registerDenom := func() {
 			denomTrace := types.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
-			if !s.GetUmeeApp(s.chainB).TransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
-				s.GetUmeeApp(s.chainB).TransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
+			if !s.GetUmeeApp(s.chainB).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
+				s.GetUmeeApp(s.chainB).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
 			}
 		}
 
@@ -235,7 +235,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		amount, err := strconv.Atoi(data.Amount)
 		s.Require().NoError(err)
 
-		err = s.GetUmeeApp(s.chainB).TransferKeeper.SendTransfer(
+		err = s.GetUmeeApp(s.chainB).UIBCTransferKeeper.SendTransfer(
 			s.chainB.GetContext(),
 			packet.SourcePort,
 			packet.SourceChannel,
