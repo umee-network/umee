@@ -1761,47 +1761,47 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_RegisteredTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "registered_tokens"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_RegisteredTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "registered_tokens"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "params"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Borrowed_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrowed"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Borrowed_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrowed"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_BorrowedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrowed_value"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_BorrowedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrowed_value"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Supplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supplied"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Supplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supplied"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_SuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supplied_value"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_SuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supplied_value"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AvailableBorrow_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "available_borrow"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_AvailableBorrow_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "available_borrow"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_BorrowAPY_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrow_apy"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_BorrowAPY_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrow_apy"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_SupplyAPY_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supply_apy"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_SupplyAPY_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "supply_apy"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalSuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_supplied_value", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalSuppliedValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_supplied_value", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalSupplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_supplied", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalSupplied_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_supplied", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ReserveAmount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "reserve_amount"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ReserveAmount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "reserve_amount"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Collateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "collateral"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Collateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "collateral"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_CollateralValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "collateral_value"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_CollateralValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "collateral_value"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ExchangeRate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "exchange_rate"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ExchangeRate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "exchange_rate"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_BorrowLimit_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrow_limit"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_BorrowLimit_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "borrow_limit"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_LiquidationThreshold_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "liquidation_threshold"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_LiquidationThreshold_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "liquidation_threshold"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_LiquidationTargets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "liquidation_targets"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_LiquidationTargets_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "liquidation_targets"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_MarketSummary_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "market_summary"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_MarketSummary_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "market_summary"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalCollateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_collateral", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalCollateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_collateral", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalBorrowed_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_borrowed", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TotalBorrowed_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "total_borrowed", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

@@ -16,7 +16,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/tokens/v1/all", req.URL.String())
+			require.Equal(t, "/tokens/v2/all", req.URL.String())
 			resp := `[
 				{
 					"price": 100.22,
@@ -52,7 +52,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/tokens/v1/all", req.URL.String())
+			require.Equal(t, "/tokens/v2/all", req.URL.String())
 			resp := `[
 				{
 					"price": 100.22,
@@ -93,7 +93,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_bad_response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/tokens/v1/all", req.URL.String())
+			require.Equal(t, "/tokens/v2/all", req.URL.String())
 			rw.Write([]byte(`FOO`))
 		}))
 		defer server.Close()
@@ -108,7 +108,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			require.Equal(t, "/tokens/v1/all", req.URL.String())
+			require.Equal(t, "/tokens/v2/all", req.URL.String())
 			resp := `[
 				{
 					"price": 100.22,
