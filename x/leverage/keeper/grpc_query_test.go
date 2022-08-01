@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -56,13 +58,40 @@ func (s *IntegrationTestSuite) TestQuerier_Borrowed() {
 	})
 }
 
-func (s *IntegrationTestSuite) TestQuerier_ReserveAmount() {
-	// TODO: We need to setup borrowing first prior to testing this out.
-	//
-	// Ref: https://github.com/umee-network/umee/issues/93
+func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	s.Run("missing_denom", func() {
-		req := &types.QueryReserveAmount{}
-		_, err := s.queryClient.ReserveAmount(context.Background(), req)
+		req := &types.QueryMarketSummary{}
+		_, err := s.queryClient.MarketSummary(context.Background(), req)
 		s.Require().Error(err)
+	})
+
+	s.Run("valid denom", func() {
+		req := &types.QueryMarketSummary{Denom: "uumee"}
+		summ, err := s.queryClient.MarketSummary(context.Background(), req)
+		s.Require().NoError(err)
+
+		oraclePrice := sdk.MustNewDecFromStr("0.00000421")
+
+		expected := types.QueryMarketSummaryResponse{
+			SymbolDenom:            "UMEE",
+			Exponent:               6,
+			OraclePrice:            &oraclePrice,
+			UTokenExchangeRate:     sdk.OneDec(),
+			Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
+			Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
+			Supplied:               sdk.ZeroInt(),
+			Reserved:               sdk.ZeroInt(),
+			Collateral:             sdk.ZeroInt(),
+			Borrowed:               sdk.ZeroInt(),
+			Liquidity:              sdk.ZeroInt(),
+			MaximumBorrow:          sdk.ZeroInt(),
+			MaximumCollateral:      sdk.ZeroInt(),
+			MinimumLiquidity:       sdk.ZeroInt(),
+			UTokenSupply:           sdk.ZeroInt(),
+			AvailableBorrow:        sdk.ZeroInt(),
+			AvailableWithdraw:      sdk.ZeroInt(),
+			AvailableCollateralize: sdk.ZeroInt(),
+		}
+		s.Require().Equal(expected, *summ)
 	})
 }
