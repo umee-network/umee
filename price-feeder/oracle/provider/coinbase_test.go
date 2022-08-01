@@ -70,8 +70,7 @@ func TestCoinbaseProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.Error(t, err)
-		require.Equal(t, "failed to get ticker price for FOO-BAR", err.Error())
+		require.EqualError(t, err, "coinbase failed to get ticker price for FOO-BAR")
 		require.Nil(t, prices)
 	})
 }

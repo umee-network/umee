@@ -305,7 +305,7 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 		return tickerPair.toTickerPrice()
 	}
 
-	return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", gp)
+	return TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {

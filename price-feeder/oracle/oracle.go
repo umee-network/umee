@@ -238,7 +238,7 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 	}
 
 	if err := g.Wait(); err != nil {
-		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
+		o.logger.Err(err).Msg("failed to get ticker prices from provider")
 	}
 
 	computedPrices, err := GetComputedPrices(
