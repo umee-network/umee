@@ -308,9 +308,10 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-  // Collateral is the total amount of uTokens collateralized by all borrowers. Collateral has
-  // already been converted from uTokens to base tokens, but exponent must also be applied to
-  // convert to symbol denom.
+  // Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is
+  // denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to
+  // convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exhange rate
+  // is 1.2, then 5 UMEE have been collateralized.
   string collateral = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
@@ -339,9 +340,9 @@ message QueryMarketSummaryResponse {
   ];
   // Maximum Collateral is the amount of a token that can be collateralized, including that which is
   // already collateral. This amount is less than total supply due to safety limits. It is denominated
-  // in base tokens, so exponent must be applied to convert to symbol denom. For example, if collateral
-  // is 5000000 uumee and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is
-  // permitted to be collateralized.
+  // in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom.
+  // For example, if collateral is 4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow
+  // is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
   string maximum_collateral = 13 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,
@@ -372,17 +373,13 @@ message QueryMarketSummaryResponse {
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "available_borrow"
   ];
-  // Available Withdraw is the maximum additional amount of base tokens than can be withdrawn based
-  // on current liquidity and system safety limits. It can also be calculated by (liquidity -
-  // minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert
-  // to symbol denom. A negative availability means safety limits have been exceeded and withdrawal
-  // is temporarily unavailable.
+  // Available Withdraw is the maximum amount of uTokens than can currently be withdrawn based on liquidity and system safety limits. It can also be calculated by (liquidity - minimum_liquidity). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and withdrawal is temporarily unavailable.
   string available_withdraw = 17 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "available_withdraw"
   ];
-  // Available Collateralize is the maximum additional amount of base tokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
+  // Available Collateralize is the maximum additional amount of uTokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
   string available_collateralize = 18 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,

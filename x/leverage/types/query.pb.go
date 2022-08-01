@@ -962,9 +962,10 @@ type QueryMarketSummaryResponse struct {
 	// are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are
 	// denominated in base tokens, so exponent must be applied to convert to symbol denom.
 	Reserved github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,8,opt,name=reserved,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"reserved"`
-	// Collateral is the total amount of uTokens collateralized by all borrowers. Collateral has
-	// already been converted from uTokens to base tokens, but exponent must also be applied to
-	// convert to symbol denom.
+	// Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is
+	// denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to
+	// convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exhange rate
+	// is 1.2, then 5 UMEE have been collateralized.
 	Collateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,9,opt,name=collateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"collateral"`
 	// Borrowed is the total amount of debt in this token held across all borrowers. It is denominated
 	// in base tokens, so exponent must be applied to convert to symbol denom.
@@ -980,9 +981,9 @@ type QueryMarketSummaryResponse struct {
 	MaximumBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,12,opt,name=maximum_borrow,json=maximumBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_borrow"`
 	// Maximum Collateral is the amount of a token that can be collateralized, including that which is
 	// already collateral. This amount is less than total supply due to safety limits. It is denominated
-	// in base tokens, so exponent must be applied to convert to symbol denom. For example, if collateral
-	// is 5000000 uumee and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is
-	// permitted to be collateralized.
+	// in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom.
+	// For example, if collateral is 4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow
+	// is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
 	MaximumCollateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,13,opt,name=maximum_collateral,json=maximumCollateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_collateral"`
 	// Mimimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based
 	// on the current collateral. It is denominated in base tokens, so exponent must be applied to convert
@@ -997,13 +998,9 @@ type QueryMarketSummaryResponse struct {
 	// be applied to convert to symbol denom. A negative availability means safety limits have been
 	// exceeded and borrowing is temporarily unavailable.
 	AvailableBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,16,opt,name=available_borrow,json=availableBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_borrow"`
-	// Available Withdraw is the maximum additional amount of base tokens than can be withdrawn based
-	// on current liquidity and system safety limits. It can also be calculated by (liquidity -
-	// minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert
-	// to symbol denom. A negative availability means safety limits have been exceeded and withdrawal
-	// is temporarily unavailable.
+	// Available Withdraw is the maximum amount of uTokens than can currently be withdrawn based on liquidity and system safety limits. It can also be calculated by (liquidity - minimum_liquidity). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and withdrawal is temporarily unavailable.
 	AvailableWithdraw github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,17,opt,name=available_withdraw,json=availableWithdraw,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_withdraw"`
-	// Available Collateralize is the maximum additional amount of base tokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
+	// Available Collateralize is the maximum additional amount of uTokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
 	AvailableCollateralize github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=available_collateralize,json=availableCollateralize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_collateralize"`
 }
 
