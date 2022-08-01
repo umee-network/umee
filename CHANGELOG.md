@@ -59,7 +59,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_health`.
+- [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_health`.
 
 ### Features
 
