@@ -9,89 +9,103 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
-	testCases := []struct {
-		name         string
-		req          *types.QueryRegisteredTokens
-		registrySize int
-		expectErr    bool
-	}{
-		{
-			name:         "valid request",
-			req:          &types.QueryRegisteredTokens{},
-			registrySize: 2,
-			expectErr:    false,
-		},
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-
-		s.Run(tc.name, func() {
-			resp, err := s.queryClient.RegisteredTokens(context.Background(), tc.req)
-			if tc.expectErr {
-				s.Require().Error(err)
-			} else {
-				s.Require().NoError(err)
-				s.Require().Len(resp.Registry, tc.registrySize)
-			}
-		})
-	}
+	resp, err := s.queryClient.RegisteredTokens(s.ctx.Context(), &types.QueryRegisteredTokens{})
+	s.Require().NoError(err)
+	s.Require().Len(resp.Registry, 2, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	resp, err := s.queryClient.Params(context.Background(), &types.QueryParams{})
+	resp, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParams{})
 	s.Require().NoError(err)
-	s.Require().NotZero(resp.Params.MinimumCloseFactor)
-}
-
-func (s *IntegrationTestSuite) TestQuerier_Borrowed() {
-	s.Run("get_all_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/93
-	})
-
-	s.Run("get_denom_borrowed", func() {
-		// TODO: We need to setup borrowing first prior to testing this out.
-		//
-		// Ref: https://github.com/umee-network/umee/issues/93
-	})
+	s.Require().Equal(types.DefaultParams(), resp.Params)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
-	s.Run("missing_denom", func() {
-		req := &types.QueryMarketSummary{}
-		_, err := s.queryClient.MarketSummary(context.Background(), req)
-		s.Require().Error(err)
-	})
+	req := &types.QueryMarketSummary{}
+	_, err := s.queryClient.MarketSummary(context.Background(), req)
+	s.Require().Error(err)
 
-	s.Run("valid denom", func() {
-		req := &types.QueryMarketSummary{Denom: "uumee"}
-		summ, err := s.queryClient.MarketSummary(context.Background(), req)
-		s.Require().NoError(err)
+	req = &types.QueryMarketSummary{Denom: "uumee"}
+	resp, err := s.queryClient.MarketSummary(context.Background(), req)
+	s.Require().NoError(err)
 
-		oraclePrice := sdk.MustNewDecFromStr("0.00000421")
+	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
 
-		expected := types.QueryMarketSummaryResponse{
-			SymbolDenom:            "UMEE",
-			Exponent:               6,
-			OraclePrice:            &oraclePrice,
-			UTokenExchangeRate:     sdk.OneDec(),
-			Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
-			Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
-			Supplied:               sdk.ZeroInt(),
-			Reserved:               sdk.ZeroInt(),
-			Collateral:             sdk.ZeroInt(),
-			Borrowed:               sdk.ZeroInt(),
-			Liquidity:              sdk.ZeroInt(),
-			MaximumBorrow:          sdk.ZeroInt(),
-			MaximumCollateral:      sdk.ZeroInt(),
-			MinimumLiquidity:       sdk.ZeroInt(),
-			UTokenSupply:           sdk.ZeroInt(),
-			AvailableBorrow:        sdk.ZeroInt(),
-			AvailableWithdraw:      sdk.ZeroInt(),
-			AvailableCollateralize: sdk.ZeroInt(),
-		}
-		s.Require().Equal(expected, *summ)
-	})
+	expected := types.QueryMarketSummaryResponse{
+		SymbolDenom:            "UMEE",
+		Exponent:               6,
+		OraclePrice:            &oraclePrice,
+		UTokenExchangeRate:     sdk.OneDec(),
+		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
+		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
+		Supplied:               sdk.ZeroInt(),
+		Reserved:               sdk.ZeroInt(),
+		Collateral:             sdk.ZeroInt(),
+		Borrowed:               sdk.ZeroInt(),
+		Liquidity:              sdk.ZeroInt(),
+		MaximumBorrow:          sdk.ZeroInt(),
+		MaximumCollateral:      sdk.ZeroInt(),
+		MinimumLiquidity:       sdk.ZeroInt(),
+		UTokenSupply:           sdk.ZeroInt(),
+		AvailableBorrow:        sdk.ZeroInt(),
+		AvailableWithdraw:      sdk.ZeroInt(),
+		AvailableCollateralize: sdk.ZeroInt(),
+	}
+	s.Require().Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
+	addr, _ := s.initBorrowScenario()
+
+	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
+	s.Require().NoError(err)
+
+	expected := types.QueryAccountSummaryResponse{
+		Supplied: sdk.NewCoins(
+			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
+		),
+		Collateral: sdk.NewCoins(
+			sdk.NewCoin(types.UTokenFromTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
+		),
+		Borrowed: nil,
+	}
+
+	s.Require().Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_AccountHealth() {
+	addr, _ := s.initBorrowScenario()
+
+	resp, err := s.queryClient.AccountHealth(s.ctx.Context(), &types.QueryAccountHealth{Address: addr.String()})
+	s.Require().NoError(err)
+
+	expected := types.QueryAccountHealthResponse{
+		// This result is umee's oracle exchange rate from
+		// from .Reset() in x/leverage/keeper/oracle_test.go
+		// times the amount of umee, then sometimes times params
+		// from newToken in x/leverage/keeper/keeper_test.go
+		// (1000 / 1000000) * 4.21 = 4210
+		SuppliedValue: sdk.MustNewDecFromStr("4210"),
+		// (1000 / 1000000) * 4.21 = 4210
+		CollateralValue: sdk.MustNewDecFromStr("4210"),
+		// Nothing borrowed
+		BorrowedValue: sdk.ZeroDec(),
+		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
+		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
+	}
+
+	s.Require().Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
+	resp, err := s.queryClient.LiquidationTargets(s.ctx.Context(), &types.QueryLiquidationTargets{})
+	s.Require().NoError(err)
+
+	expected := types.QueryLiquidationTargetsResponse{
+		Targets: nil,
+	}
+
+	s.Require().Equal(expected, *resp)
 }

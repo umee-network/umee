@@ -65,3 +65,29 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Int {
 	// uTokens in the module account are always from collateral
 	return k.ModuleBalance(ctx, denom)
 }
+
+// CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
+// collateral sdk.Coins, using each token's uToken exchange rate.
+// An error is returned if any input coins are not uTokens or if value calculation fails.
+func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+	limit := sdk.ZeroDec()
+
+	for _, coin := range collateral {
+		// convert uToken collateral to base assets
+		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		// get USD value of base assets
+		v, err := k.TokenValue(ctx, baseAsset)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		// add each collateral coin's weighted value to borrow limit
+		limit = limit.Add(v)
+	}
+
+	return limit, nil
+}
