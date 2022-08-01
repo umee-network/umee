@@ -8,15 +8,7 @@ General queries:
 - **Liquidation Targets** queries a list of all borrowers eligible for liquidation
 
 Queries on accepted asset types:
-- **Borrow APY** queries for the [Borrow APY](01_concepts.md#Borrow-APY) of a specified denomination.
-- **Supply APY** queries for the [Supplying APY](01_concepts.md#Supplying-APY) of a specified denomination.
-- **Reserve Amount** queries for the amount reserved of a specified denomination.
-- **Total Borrowed** queries for the total borrowed amount of a specified token denomination.
-- **Total Collateral** queries for the total collateral amount of a specified uToken denomination.
-- **Exchange Rate** queries the [uToken Exchange Rate](01_concepts.md#uToken-Exchange-Rate) of a given uToken denomination.
-- **Total Supplied** queries the [Total Supplied](01_concepts.md#Total-Supplied) of a specified denomination.
-- **Total Supplied Value** queries the equivalent USD value of [Total Supplied](01_concepts.md#Total-Supplied) of a specified denomination.
-- **Market Summary** combines several asset-specifying queries for more efficient frontend access.
+- **Market Summary** collects data on a given `Token` denomination. A description of each response field can be found in the [QueryMarketSummaryResponse proto definition](../../../proto/umee/leverage/v1/query.proto)
 
 Queries on account addresses:
 - **Borrowed** queries for the amount of a given token denomination borrowed by a user. If a denomination is not specified, the total for each borrowed token is returned.
