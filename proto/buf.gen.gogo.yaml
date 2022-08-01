@@ -3,3 +3,6 @@ plugins:
   - name: gocosmos
     out: ..
     opt: plugins=grpc,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types
+  - name: grpc-gateway
+    out: ..
+    opt: logtostderr=true,allow_colon_final_segments=true

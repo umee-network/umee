@@ -122,7 +122,7 @@ message Token {
   // Exponent is the power of ten by which to multiply, in order to convert
   // an amount of the token denoted in its symbol denom to the actual amount
   // of its base denom.
-  uint32 exponent     = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
+  uint32 exponent = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
 
   // Enable Msg Supply allows supplying for lending or collateral using this
   // token. Note that withdrawing is always enabled. Disabling supplying would
@@ -155,7 +155,7 @@ message Token {
   ];
 
   // Max Supply Utilization specifies the maximum supply utilization a token is
-  // allowed to reach as a direct result of user borrowing. New borrows are not allowed when 
+  // allowed to reach as a direct result of user borrowing. New borrows are not allowed when
   // the supply utilization is above `max_supply_utilization`.
   // Valid values: 0-1.
   string max_supply_utilization = 16 [

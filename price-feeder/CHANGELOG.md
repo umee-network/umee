@@ -61,6 +61,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1002](https://github.com/umee-network/umee/pull/1002) Add linting to the price feeder CI.
 - [#1170](https://github.com/umee-network/umee/pull/1170) Restrict price feeder quotes to USD, USDT, USDC, ETH, DAI, and BTC.
 
+## [v0.2.5](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.5) - 2022-07-28
+
+### Bugs
+
+- [1177](https://github.com/umee-network/umee/pull/1177) Update a deprecated osmosis api endpoint.
+
+### Improvements
+
+- [#1179](https://github.com/umee-network/umee/pull/1179) Improve logs when unable to find prices.
+
 ## [v0.2.4](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.4) - 2022-07-14
 
 ### Features

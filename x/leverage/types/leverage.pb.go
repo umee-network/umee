@@ -114,11 +114,11 @@ type Token struct {
 	// an amount of the token denoted in its symbol denom to the actual amount
 	// of its base denom.
 	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// EnableMsgSupply allows supplying for lending or collateral using this
+	// Enable Msg Supply allows supplying for lending or collateral using this
 	// token. Note that withdrawing is always enabled. Disabling supplying would
 	// be one step in phasing out an asset type.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
-	// EnableMsgBorrow allows borrowing of this token. Note that repaying is
+	// Enable Msg Borrow allows borrowing of this token. Note that repaying is
 	// always enabled. Disabling borrowing would be one step in phasing out an
 	// asset type, but could also be used from the start for asset types meant
 	// to be collateral only, like meTokens.
@@ -132,11 +132,13 @@ type Token struct {
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
 	// Max Collateral Share specifies how much of the system's overall collateral
 	// can be provided by a given token. 1.0 means that the token has no restriction.
-	// 0.1 means maximum 10% of system's total collateral value can provided by this token.
+	// 0.1 means maximum 10% of system's total collateral value can be provided by this token.
+	// Valid values: 0-1.
 	MaxCollateralShare github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_collateral_share" yaml:"max_collateral_share"`
 	// Max Supply Utilization specifies the maximum supply utilization a token is
-	// allowed to reach as a direct result of user borrowing. It can still be exceeded
-	// due to withdrawals, interest, and liquidations.
+	// allowed to reach as a direct result of user borrowing. New borrows are not allowed when
+	// the supply utilization is above `max_supply_utilization`.
+	// Valid values: 0-1.
 	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
 	// Min Collateral Liquidity specifies the minimum collateral liquidity a token is
 	// allowed to reach as a direct result of users borrowing, collateralizing, or
