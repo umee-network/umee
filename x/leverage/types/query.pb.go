@@ -892,8 +892,7 @@ func (m *QueryLiquidationTargetsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryLiquidationTargetsResponse proto.InternalMessageInfo
 
-// QueryMarketSummary defines the request structure for the
-// MarketSummary gRPC service handler.
+// QueryMarketSummary defines the request structure for the MarketSummary gRPC service handler.
 type QueryMarketSummary struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -931,72 +930,39 @@ func (m *QueryMarketSummary) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMarketSummary proto.InternalMessageInfo
 
-// QueryMarketSummaryResponse defines the response structure for the
-// MarketSummary gRPC service handler.
+// QueryMarketSummaryResponse defines the response structure for the MarketSummary gRPC service handler.
 type QueryMarketSummaryResponse struct {
 	// Symbol Denom is the human-readable representation of a token denom, for example "UMEE" or "ATOM".
 	SymbolDenom string `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`
-	// Exponent is the power of ten required to get from base denom to symbol denom. For example,
-	// an exponent of 6 means 10^6 uumee = 1 UMEE.
+	// Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
 	Exponent uint32 `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
-	// Oracle Price is the current USD value of a base token. Exponent must be applied to reach
-	// the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to
-	// $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+	// Oracle Price is the current USD value of a base token. Exponent must be applied to reach the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
 	OraclePrice *github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price"`
-	// uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example,
-	// a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish
-	// to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
+	// uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example, a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
 	UTokenExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"utoken_exchange_rate"`
-	// Supply APY is the current interest rate suppliers are receiving for their deposits. For example,
-	// 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
+	// Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
 	Supply_APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=supply_APY,json=supplyAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"supply_apy"`
-	// Borrow APY is the current interest rate borrowers are being charged on their loans. For example,
-	// 0.2 would mean 20% APY.
+	// Borrow APY is the current interest rate borrowers are being charged on their loans. For example, 0.2 would mean 20% APY.
 	Borrow_APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=borrow_APY,json=borrowAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_apy"`
-	// Supplied is the total amount of tokens supplied to the the system by all suppliers, including
-	// any interest earned. This includes that tokens which have been borrowed out or enabled as
-	// collateral, but excludes reserves. Supplied is denominated in base tokens, so exponent must be
-	// applied to convert to symbol denom.
+	// Supplied is the total amount of tokens supplied to the the system by all suppliers, including any interest earned. This includes that tokens which have been borrowed out or enabled as collateral, but excludes reserves. Supplied is denominated in base tokens, so exponent must be applied to convert to symbol denom.
 	Supplied github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,7,opt,name=supplied,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"supplied"`
-	// Reserved is the total amount of tokens held in reserve by the module for emergencies. Reserves
-	// are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are
-	// denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	// Reserved is the total amount of tokens held in reserve by the module for emergencies. Reserves are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are denominated in base tokens, so exponent must be applied to convert to symbol denom.
 	Reserved github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,8,opt,name=reserved,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"reserved"`
-	// Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is
-	// denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to
-	// convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exhange rate
-	// is 1.2, then 5 UMEE have been collateralized.
+	// Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exhange rate is 1.2, then 5 UMEE have been collateralized.
 	Collateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,9,opt,name=collateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"collateral"`
-	// Borrowed is the total amount of debt in this token held across all borrowers. It is denominated
-	// in base tokens, so exponent must be applied to convert to symbol denom.
+	// Borrowed is the total amount of debt in this token held across all borrowers. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
 	Borrowed github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,10,opt,name=borrowed,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"borrowed"`
-	// Liquidity is the amount of a token that has been supplied but not yet borrowed or reserved.
-	// It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	// Liquidity is the amount of a token that has been supplied but not yet borrowed or reserved. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
 	Liquidity github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,11,opt,name=liquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"liquidity"`
-	// Maximum Borrow is the amount of a token that is available for borrowing, including that which
-	// has already been borrowed out. This amount is less than total supply due to safety limits.
-	// It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
-	// For example, if borrowed is 3000000 uumee and maximum borrow is 4000000 uumee, then 1 UMEE
-	// is currently available for borrowing.
+	// Maximum Borrow is the amount of a token that is available for borrowing, including that which has already been borrowed out. This amount is less than total supply due to safety limits. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if borrowed is 3000000 uumee and maximum borrow is 4000000 uumee, then 1 UMEE is currently available for borrowing.
 	MaximumBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,12,opt,name=maximum_borrow,json=maximumBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_borrow"`
-	// Maximum Collateral is the amount of a token that can be collateralized, including that which is
-	// already collateral. This amount is less than total supply due to safety limits. It is denominated
-	// in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom.
-	// For example, if collateral is 4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow
-	// is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
+	// Maximum Collateral is the amount of a token that can be collateralized, including that which is already collateral. This amount is less than total supply due to safety limits. It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
 	MaximumCollateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,13,opt,name=maximum_collateral,json=maximumCollateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_collateral"`
-	// Mimimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based
-	// on the current collateral. It is denominated in base tokens, so exponent must be applied to convert
-	// to symbol denom. For example, if liquidity is 9000000 uumee and minimum liquidity is 8000000 uumee,
-	// then a maximum of 1 additional UMEE is currently available for borrowing or withdrawal.
+	// Mimimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based on the current collateral. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if liquidity is 9000000 uumee and minimum liquidity is 8000000 uumee, then a maximum of 1 additional UMEE is currently available for borrowing or withdrawal.
 	MinimumLiquidity github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,14,opt,name=minimum_liquidity,json=minimumLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"minimum_supply"`
 	// uToken Supply is the total amount of a base token's associated uToken in circulation.
 	UTokenSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,15,opt,name=uToken_supply,json=uTokenSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"utoken_supply"`
-	// Available Borrow is the maximum additional amount of base tokens than can be borrowed based on
-	// current liquidity and system safety limits. It can also be calculated by MIN(maximum_borrow -
-	// borrowed, liquidity - minimum_liquidity). It is denominated in base tokens, so exponent must
-	// be applied to convert to symbol denom. A negative availability means safety limits have been
-	// exceeded and borrowing is temporarily unavailable.
+	// Available Borrow is the maximum additional amount of base tokens than can be borrowed based on current liquidity and system safety limits. It can also be calculated by MIN(maximum_borrow - borrowed, liquidity - minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and borrowing is temporarily unavailable.
 	AvailableBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,16,opt,name=available_borrow,json=availableBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_borrow"`
 	// Available Withdraw is the maximum amount of uTokens than can currently be withdrawn based on liquidity and system safety limits. It can also be calculated by (liquidity - minimum_liquidity). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and withdrawal is temporarily unavailable.
 	AvailableWithdraw github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,17,opt,name=available_withdraw,json=availableWithdraw,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_withdraw"`
@@ -1207,8 +1173,7 @@ type QueryClient interface {
 	// LiquidationTargets queries a list of all borrower addresses eligible for
 	// liquidation.
 	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargets, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
-	// MarketSummary queries a base asset's current borrowing and supplying
-	// conditions.
+	// MarketSummary queries a base asset's current borrowing and supplying conditions.
 	MarketSummary(ctx context.Context, in *QueryMarketSummary, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
 }
 
@@ -1365,8 +1330,7 @@ type QueryServer interface {
 	// LiquidationTargets queries a list of all borrower addresses eligible for
 	// liquidation.
 	LiquidationTargets(context.Context, *QueryLiquidationTargets) (*QueryLiquidationTargetsResponse, error)
-	// MarketSummary queries a base asset's current borrowing and supplying
-	// conditions.
+	// MarketSummary queries a base asset's current borrowing and supplying conditions.
 	MarketSummary(context.Context, *QueryMarketSummary) (*QueryMarketSummaryResponse, error)
 }
 
