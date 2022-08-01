@@ -33,20 +33,12 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryBorrowedValue(),
 		GetCmdQuerySupplied(),
 		GetCmdQuerySuppliedValue(),
-		GetCmdQueryReserveAmount(),
 		GetCmdQueryCollateral(),
 		GetCmdQueryCollateralValue(),
-		GetCmdQueryExchangeRate(),
-		GetCmdQuerySupplyAPY(),
-		GetCmdQueryBorrowAPY(),
-		GetCmdQueryTotalSuppliedValue(),
-		GetCmdQueryTotalSupplied(),
 		GetCmdQueryBorrowLimit(),
 		GetCmdQueryLiquidationThreshold(),
 		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryMarketSummary(),
-		GetCmdQueryTotalCollateral(),
-		GetCmdQueryTotalBorrowed(),
 	)
 
 	return cmd
@@ -224,33 +216,6 @@ func GetCmdQuerySuppliedValue() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryReserveAmount creates a Cobra command to query for the
-// reserved amount of a specific token.
-func GetCmdQueryReserveAmount() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "reserved [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the amount reserved of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryReserveAmount{
-				Denom: args[0],
-			}
-			resp, err := queryClient.ReserveAmount(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
 // GetCmdQueryCollateral creates a Cobra command to query for the amount of
 // total collateral tokens for a given address.
 func GetCmdQueryCollateral() *cobra.Command {
@@ -308,168 +273,6 @@ func GetCmdQueryCollateralValue() *cobra.Command {
 	}
 
 	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryExchangeRate creates a Cobra command to query for the
-// exchange rate of a specific uToken.
-func GetCmdQueryExchangeRate() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "exchange-rate [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the exchange rate of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryExchangeRate{
-				Denom: args[0],
-			}
-			resp, err := queryClient.ExchangeRate(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryAvailableBorrow creates a Cobra command to query for the
-// available amount to borrow of a specific denom.
-func GetCmdQueryAvailableBorrow() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "available-borrow [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the available amount to borrow of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryAvailableBorrow{
-				Denom: args[0],
-			}
-			resp, err := queryClient.AvailableBorrow(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQuerySupplyAPY creates a Cobra command to query for the
-// supply APY of a specific uToken.
-func GetCmdQuerySupplyAPY() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "supply-apy [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the supply APY of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QuerySupplyAPY{
-				Denom: args[0],
-			}
-			resp, err := queryClient.SupplyAPY(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryBorrowAPY creates a Cobra command to query for the
-// borrow APY of a specific token.
-func GetCmdQueryBorrowAPY() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "borrow-apy [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the borrow APY of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryBorrowAPY{
-				Denom: args[0],
-			}
-			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryTotalSuppliedValue creates a Cobra command to query for the
-// total supply of a specific token.
-func GetCmdQueryTotalSuppliedValue() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "total-supplied-value [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD value of the total supply of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalSuppliedValue{
-				Denom: args[0],
-			}
-			resp, err := queryClient.TotalSuppliedValue(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryTotalSupplied creates a Cobra command to query for the
-// Total Supplied of a specific token, measured in base tokens.
-func GetCmdQueryTotalSupplied() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "total-supplied [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total supply of a specified denomination measured in base tokens",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalSupplied{
-				Denom: args[0],
-			}
-			resp, err := queryClient.TotalSupplied(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
 	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
@@ -572,60 +375,6 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryLiquidationTargets{}
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryTotalCollateral creates a Cobra command to query for the
-// total collateral amount of a specific token.
-func GetCmdQueryTotalCollateral() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "total-collateral [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of collateral of a uToken denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalCollateral{
-				Denom: args[0],
-			}
-			resp, err := queryClient.TotalCollateral(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryTotalBorrowed creates a Cobra command to query for the
-// total borrowed amount of a specific token.
-func GetCmdQueryTotalBorrowed() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "total-borrowed [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount borrowed of a token denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryTotalBorrowed{
-				Denom: args[0],
-			}
-			resp, err := queryClient.TotalBorrowed(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

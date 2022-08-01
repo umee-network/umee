@@ -52,43 +52,6 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/supplied_value";
   }
 
-  // AvailableBorrow queries for the available amount to borrow of a specified
-  // denomination.
-  rpc AvailableBorrow(QueryAvailableBorrow)
-      returns (QueryAvailableBorrowResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/available_borrow";
-  }
-
-  // BorrowAPY queries for the borrow APY of a specified denomination.
-  rpc BorrowAPY(QueryBorrowAPY) returns (QueryBorrowAPYResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/borrow_apy";
-  }
-
-  // SupplyAPY queries for the supply APY of a specified denomination.
-  rpc SupplyAPY(QuerySupplyAPY) returns (QuerySupplyAPYResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/supply_apy";
-  }
-
-  // TotalSuppliedValue queries the total value of a given token
-  // currently supplied by all users, plus outstanding interest.
-  rpc TotalSuppliedValue(QueryTotalSuppliedValue) returns (QueryTotalSuppliedValueResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/total_supplied_value/{denom}";
-  }
-
-  // TotalSupplied queries the total amount of a given token
-  // currently supplied by all users, plus outstanding interest.
-  rpc TotalSupplied(QueryTotalSupplied)
-      returns (QueryTotalSuppliedResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/total_supplied/{denom}";
-  }
-
-  // ReserveAmount queries for the amount reserved of a specified denomination.
-  // If the token is not valid, the reserved amount is zero.
-  rpc ReserveAmount(QueryReserveAmount)
-      returns (QueryReserveAmountResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/reserve_amount";
-  }
-
   // Collateral queries the collateral amount of a user by token denomination.
   // If the denomination is not specified, all of the user's collateral tokens
   // are returned.
@@ -101,13 +64,6 @@ service Query {
   rpc CollateralValue(QueryCollateralValue)
       returns (QueryCollateralValueResponse) {
     option (google.api.http).get = "/umee/leverage/v1/collateral_value";
-  }
-
-  // ExchangeRate queries the uToken exchange rate of a given uToken
-  // denomination.
-  rpc ExchangeRate(QueryExchangeRate)
-      returns (QueryExchangeRateResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/exchange_rate";
   }
 
   // BorrowLimit queries the borrow limit in USD of a given borrower.
@@ -135,102 +91,11 @@ service Query {
       returns (QueryMarketSummaryResponse) {
     option (google.api.http).get = "/umee/leverage/v1/market_summary";
   }
-
-  // TotalCollateral returns the total collateral system-wide of a given
-  // uToken denomination.
-  rpc TotalCollateral(QueryTotalCollateral)
-      returns (QueryTotalCollateralResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/total_collateral/{denom}";
-  }
-
-  // TotalBorrowed returns the total borrowed system-wide of a given
-  // token denomination.
-  rpc TotalBorrowed(QueryTotalBorrowed)
-      returns (QueryTotalBorrowedResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/total_borrowed/{denom}";
-  }
 }
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
 // gRPC service handler.
 message QueryRegisteredTokens {}
-
-// QueryAvailableBorrow defines the request structure for the
-// AvailableBorrow gRPC service handler.
-message QueryAvailableBorrow {
-  string denom = 1;
-}
-
-// QueryAvailableBorrowResponse defines the response structure for the
-// AvailableBorrow gRPC service handler.
-message QueryAvailableBorrowResponse {
-  string amount = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
-  ];
-}
-
-// QueryBorrowAPY defines the request structure for the BorrowAPY
-// gRPC service handler.
-message QueryBorrowAPY {
-  string denom = 1;
-}
-
-// QueryBorrowAPYResponse defines the response structure for the BorrowAPY
-// gRPC service handler.
-message QueryBorrowAPYResponse {
-  string APY = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.jsontag)    = "apy"
-  ];
-}
-
-// QuerySupplyAPY defines the request structure for the SupplyAPY
-// gRPC service handler.
-message QuerySupplyAPY {
-  string denom = 1;
-}
-
-// QuerySupplyAPYResponse defines the response structure for the SupplyAPY
-// gRPC service handler.
-message QuerySupplyAPYResponse {
-  string APY = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.jsontag)    = "apy"
-  ];
-}
-
-// QueryTotalSuppliedValue defines the request structure for the Total Supplied
-// Value gRPC service handler.
-message QueryTotalSuppliedValue {
-  string denom = 1;
-}
-
-// QueryTotalSuppliedValueResponse defines the response structure for the Total
-// Supplied Value gRPC service handler.
-message QueryTotalSuppliedValueResponse {
-  string total_supplied_value = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-}
-
-// QueryTotalSupplied defines the request structure for the Total Supplied
-// gRPC service handler.
-message QueryTotalSupplied {
-  string denom = 1;
-}
-
-// QueryTotalSuppliedResponse defines the response structure for the
-// Total Supplied gRPC service handler.
-message QueryTotalSuppliedResponse {
-  string total_supplied = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
-  ];
-}
 
 // QueryRegisteredTokensResponse defines the response structure for the
 // RegisteredTokens gRPC service handler.
@@ -328,21 +193,6 @@ message QuerySuppliedValueResponse {
   ];
 }
 
-// QueryReserveAmount defines the request structure for the ReserveAmount
-// gRPC service handler.
-message QueryReserveAmount {
-  string denom = 1;
-}
-
-// QueryReserveAmountResponse defines the response structure for the
-// ReserveAmount gRPC service handler.
-message QueryReserveAmountResponse {
-  string amount = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
-  ];
-}
-
 // QueryCollateral defines the request structure for the Collateral gRPC
 // service handler.
 message QueryCollateral {
@@ -356,21 +206,6 @@ message QueryCollateralResponse {
   repeated cosmos.base.v1beta1.Coin collateral = 1 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
-  ];
-}
-
-// QueryExchangeRate defines the request structure for the ExchangeRate
-// gRPC service handler.
-message QueryExchangeRate {
-  string denom = 1;
-}
-
-// QueryExchangeRateResponse defines the response structure for the ExchangeRate
-// gRPC service handler.
-message QueryExchangeRateResponse {
-  string exchange_rate = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
   ];
 }
 
@@ -423,75 +258,99 @@ message QueryMarketSummary {
 // QueryMarketSummaryResponse defines the response structure for the
 // MarketSummary gRPC service handler.
 message QueryMarketSummaryResponse {
+  // Symbol Denom is the human-readable representation of a token denom, for example "UMEE" or "ATOM".
   string symbol_denom = 1;
+  // Exponent is the power of ten required to get from base denom to symbol denom. For example,
+  // an exponent of 6 means 10^6 uumee = 1 UMEE.
   uint32 exponent     = 2;
+  // Oracle Price is the current USD value of a base token. Exponent must be applied to reach
+  // the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to
+  // $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
   string oracle_price = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = true
+    (gogoproto.nullable)   = true,
+    (gogoproto.jsontag)    = "oracle_price"
   ];
+  // uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example,
+  // a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish
+  // to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
   string uToken_exchange_rate = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "utoken_exchange_rate"
   ];
+  // Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 
+  // 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
   string supply_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "supply_apy"
-    ];
-    string borrow_APY = 6 [
+  ];
+  // Borrow APY is the current interest rate borrowers are being charged on their loans. For example, 
+  // 0.2 would mean 20% APY.
+  string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "borrow_apy"
   ];
-  string total_supplied = 7 [
+  // Supplied is the total amount of tokens supplied to the the system by all suppliers, including
+  // any interest earned. This includes that tokens which have been borrowed out or enabled as
+  // collateral, but excludes reserves. Supplied is denominated in base tokens, so exponent must be
+  // applied to convert to symbol denom.
+  string supplied = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-  string available_borrow = 8 [
+  // Reserved is the total amount of tokens held in reserve by the module for emergencies. Reserves
+  // are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are
+  // denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string reserved = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-  string reserved = 9 [
+  // Collateral is the total amount of uTokens collateralized by all borrowers. Collateral has
+  // already been converted from uTokens to base tokens, but exponent must also be applied to
+  // convert to symbol denom.
+  string collateral = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-  string collateral = 10 [
+  // Borrowed is the total amount of debt in this token held across all borrowers. It is denominated
+  // in base tokens, so exponent must be applied to convert to symbol denom.
+  string borrowed = 10 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-  string borrowed = 11 [
+  // Liquidity is the amount of a token that has been supplied but not yet borrowed or reserved.
+  // It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string liquidity = 11 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
-}
-
-// QueryTotalCollateral defines the request structure for the
-// TotalCollateral gRPC service handler.
-message QueryTotalCollateral {
-  string denom = 1;
-}
-
-// QueryTotalCollateralResponse defines the response structure for the
-// TotalCollateral gRPC service handler.
-message QueryTotalCollateralResponse {
-  string amount = 1 [
+  // Maximum Borrow is the amount of a token that is available for borrowing, including that which
+  // has already been borrowed out. This amount is less than total supply due to safety limits.
+  // It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  // For example, if borrowed is 3000000 uumee and maximum borrow is 4000000 uumee, then 1 UMEE
+  // is currently available for borrowing.
+  string maximum_borrow = 12 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "maximum_borrow"
   ];
-}
-
-// QueryTotalBorrowed defines the request structure for the
-// TotalBorrowed gRPC service handler.
-message QueryTotalBorrowed {
-  string denom = 1;
-}
-
-// QueryTotalBorrowedResponse defines the response structure for the
-// TotalBorrowed gRPC service handler.
-message QueryTotalBorrowedResponse {
-  string amount = 1 [
+  // Maximum Collateral is the amount of a token that can be collateralized, including that which is
+  // already collateral. This amount is less than total supply due to safety limits. It is denominated
+  // in base tokens, so exponent must be applied to convert to symbol denom. For example, if collateral
+  // is 5000000 uumee and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is
+  // permitted to be collateralized.
+  string maximum_collateral = 13 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "maximum_collateral"
+  ];
+  // uToken Supply is the total amount of a base token's associated uToken in circulation.
+  string uToken_supply = 14 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "utoken_supply"
   ];
 }
