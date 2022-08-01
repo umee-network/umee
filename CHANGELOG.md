@@ -60,7 +60,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove all individual queries which duplicate market_summary fields.
 - [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove `available_borrow` field in `market_summary` in favor of calculating it from `max_borrow - borrowed`.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Updated `market_summary` url pattern to end with `/{denom}`
 
 ### Features
 
