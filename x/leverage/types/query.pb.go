@@ -336,11 +336,11 @@ var xxx_messageInfo_QueryAccountSummary proto.InternalMessageInfo
 
 // QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
 type QueryAccountSummaryResponse struct {
-	// Supplied contains all tokens the user has supplied, including interest earned. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+	// Supplied contains all tokens the account has supplied, including interest earned. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
 	Supplied github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=supplied,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"supplied"`
-	// Collateral contains all uTokens the user has collateralized. It is denominated in uTokens, so both exponent and uToken exchange rate from each coin's market_summary must be applied to convert to base token symbol denom.
+	// Collateral contains all uTokens the account has collateralized. It is denominated in uTokens, so both exponent and uToken exchange rate from each coin's market_summary must be applied to convert to base token symbol denom.
 	Collateral github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=collateral,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"collateral"`
-	// Borrowed contains all tokens the user has borrowed, including interest owed. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+	// Borrowed contains all tokens the account has borrowed, including interest owed. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
 	Borrowed github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
 }
 
