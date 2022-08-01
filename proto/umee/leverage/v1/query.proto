@@ -262,7 +262,7 @@ message QueryMarketSummaryResponse {
   string symbol_denom = 1;
   // Exponent is the power of ten required to get from base denom to symbol denom. For example,
   // an exponent of 6 means 10^6 uumee = 1 UMEE.
-  uint32 exponent     = 2;
+  uint32 exponent = 2;
   // Oracle Price is the current USD value of a base token. Exponent must be applied to reach
   // the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to
   // $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
@@ -279,14 +279,14 @@ message QueryMarketSummaryResponse {
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "utoken_exchange_rate"
   ];
-  // Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 
+  // Supply APY is the current interest rate suppliers are receiving for their deposits. For example,
   // 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
   string supply_APY = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "supply_apy"
   ];
-  // Borrow APY is the current interest rate borrowers are being charged on their loans. For example, 
+  // Borrow APY is the current interest rate borrowers are being charged on their loans. For example,
   // 0.2 would mean 20% APY.
   string borrow_APY = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -361,5 +361,31 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "utoken_supply"
+  ];
+  // Available Borrow is the maximum additional amount of base tokens than can be borrowed based on
+  // current liquidity and system safety limits. It can also be calculated by MIN(maximum_borrow -
+  // borrowed, liquidity - minimum_liquidity). It is denominated in base tokens, so exponent must
+  // be applied to convert to symbol denom. A negative availability means safety limits have been
+  // exceeded and borrowing is temporarily unavailable.
+  string available_borrow = 16 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "available_borrow"
+  ];
+  // Available Withdraw is the maximum additional amount of base tokens than can be withdrawn based
+  // on current liquidity and system safety limits. It can also be calculated by (liquidity -
+  // minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert
+  // to symbol denom. A negative availability means safety limits have been exceeded and withdrawal
+  // is temporarily unavailable.
+  string available_withdraw = 17 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "available_withdraw"
+  ];
+  // Available Collateralize is the maximum additional amount of base tokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
+  string available_collateralize = 18 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "available_collateralize"
   ];
 }
