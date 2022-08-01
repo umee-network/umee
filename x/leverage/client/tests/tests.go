@@ -15,68 +15,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 
 	invalidQueries := []TestCase{
 		testQuery{
-			"query reserved - invalid denom",
-			cli.GetCmdQueryReserveAmount(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query total supplied - invalid denom",
-			cli.GetCmdQueryTotalSupplied(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query available to borrow - invalid denom",
-			cli.GetCmdQueryAvailableBorrow(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query exchange rate - invalid denom",
-			cli.GetCmdQueryExchangeRate(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query total supplied value - invalid denom",
-			cli.GetCmdQueryTotalSuppliedValue(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query supply APY - invalid denom",
-			cli.GetCmdQuerySupplyAPY(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrow APY - invalid denom",
-			cli.GetCmdQueryBorrowAPY(),
+			"query market summary - invalid denom",
+			cli.GetCmdQueryMarketSummary(),
 			[]string{
 				"abcd",
 			},
@@ -239,6 +179,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
+	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
+
 	initialQueries := []TestCase{
 		testQuery{
 			"query params",
@@ -282,53 +224,38 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		testQuery{
-			"query reserve amount",
-			cli.GetCmdQueryReserveAmount(),
+			"query market summary - zero supply",
+			cli.GetCmdQueryMarketSummary(),
 			[]string{
 				umeeapp.BondDenom,
 			},
 			false,
-			&types.QueryReserveAmountResponse{},
-			&types.QueryReserveAmountResponse{
-				Amount: sdk.ZeroInt(),
+			&types.QueryMarketSummaryResponse{},
+			&types.QueryMarketSummaryResponse{
+				SymbolDenom:        "UMEE",
+				Exponent:           6,
+				OraclePrice:        &oraclePrice,
+				UTokenExchangeRate: sdk.OneDec(),
+				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
+				// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
+				Supply_APY: sdk.MustNewDecFromStr("1.335"),
+				// This is an edge case technically - when effective supply, meaning
+				// module balance + total borrows, is zero, utilization (0/0) is
+				// interpreted as 100% so max borrow rate (150% APY) is used.
+				Borrow_APY:             sdk.MustNewDecFromStr("1.50"),
+				Supplied:               sdk.ZeroInt(),
+				Reserved:               sdk.ZeroInt(),
+				Collateral:             sdk.ZeroInt(),
+				Borrowed:               sdk.ZeroInt(),
+				Liquidity:              sdk.ZeroInt(),
+				MaximumBorrow:          sdk.ZeroInt(),
+				MaximumCollateral:      sdk.ZeroInt(),
+				MinimumLiquidity:       sdk.ZeroInt(),
+				UTokenSupply:           sdk.ZeroInt(),
+				AvailableBorrow:        sdk.ZeroInt(),
+				AvailableWithdraw:      sdk.ZeroInt(),
+				AvailableCollateralize: sdk.ZeroInt(),
 			},
-		},
-		testQuery{
-			"query exchange rate",
-			cli.GetCmdQueryExchangeRate(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryExchangeRateResponse{},
-			&types.QueryExchangeRateResponse{
-				ExchangeRate: sdk.OneDec(),
-			},
-		},
-		testQuery{
-			"query supply APY",
-			cli.GetCmdQuerySupplyAPY(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QuerySupplyAPYResponse{},
-			// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
-			// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
-			&types.QuerySupplyAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
-		},
-		testQuery{
-			"query borrow APY",
-			cli.GetCmdQueryBorrowAPY(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryBorrowAPYResponse{},
-			// This is an edge case technically - when effective supply, meaning
-			// module balance + total borrows, is zero, utilization (0/0) is
-			// interpreted as 100% so max borrow rate (150% APY) is used.
-			&types.QueryBorrowAPYResponse{APY: sdk.MustNewDecFromStr("1.50")},
 		},
 	}
 
@@ -406,37 +333,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	nonzeroQueries := []TestCase{
 		testQuery{
-			"query token total supplied",
-			cli.GetCmdQueryTotalSupplied(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryTotalSuppliedResponse{},
-			&types.QueryTotalSuppliedResponse{TotalSupplied: sdk.NewInt(1000)},
-		},
-
-		testQuery{
-			"query available to borrow",
-			cli.GetCmdQueryAvailableBorrow(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryAvailableBorrowResponse{},
-			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(950)},
-		},
-		testQuery{
-			"query total supplied value",
-			cli.GetCmdQueryTotalSuppliedValue(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryTotalSuppliedValueResponse{},
-			&types.QueryTotalSuppliedValueResponse{TotalSuppliedValue: sdk.MustNewDecFromStr("0.03421")},
-		},
-		testQuery{
 			"query supplied - all",
 			cli.GetCmdQuerySupplied(),
 			[]string{
@@ -495,18 +391,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		testQuery{
-			"query total borrowed - denom",
-			cli.GetCmdQueryTotalBorrowed(),
-			[]string{
-				"uumee",
-			},
-			false,
-			&types.QueryTotalBorrowedResponse{},
-			&types.QueryTotalBorrowedResponse{
-				Amount: sdk.NewInt(51),
-			},
-		},
-		testQuery{
 			"query collateral - all",
 			cli.GetCmdQueryCollateral(),
 			[]string{
@@ -533,18 +417,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Collateral: sdk.NewCoins(
 					sdk.NewInt64Coin("u/uumee", 1000),
 				),
-			},
-		},
-		testQuery{
-			"query total collateral - denom",
-			cli.GetCmdQueryTotalCollateral(),
-			[]string{
-				"u/uumee",
-			},
-			false,
-			&types.QueryTotalCollateralResponse{},
-			&types.QueryTotalCollateralResponse{
-				Amount: sdk.NewInt(1000),
 			},
 		},
 		testQuery{
