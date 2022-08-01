@@ -60,6 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove all individual queries which duplicate market_summary fields.
 - [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove `available_borrow` field in `market_summary` in favor of calculating it from `max_borrow - borrowed`.
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Updated `market_summary` url pattern to end with `/{denom}`
 
 ### Features
 
@@ -73,7 +74,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 - [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
 - [1159](https://github.com/umee-network/umee/pull/1159) Add `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Add `liquidity`, `max_borrow`, and `max_collateral` fields to market summary.
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Add `liquidity`, `max_borrow`, `max_collateral`, and `utoken_supply` fields to market summary.
 
 ### Improvements
 

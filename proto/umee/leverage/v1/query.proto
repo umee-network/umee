@@ -89,7 +89,7 @@ service Query {
   // conditions.
   rpc MarketSummary(QueryMarketSummary)
       returns (QueryMarketSummaryResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/market_summary";
+    option (google.api.http).get = "/umee/leverage/v1/market_summary/{denom}";
   }
 }
 
