@@ -414,6 +414,7 @@ func (q Querier) MarketSummary(
 		Liquidity:          balance.Sub(reserved),
 		MaximumBorrow:      supplied.Amount, // TODO #1162 #1163 - implement limits
 		MaximumCollateral:  supplied.Amount, // TODO #1163 - implement limits
+		MinimumLiquidity:   sdk.ZeroInt(),   // TODO #1163 - implement limits
 		UTokenSupply:       uSupply.Amount,
 	}
 

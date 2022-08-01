@@ -86,6 +86,7 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 			Liquidity:          sdk.ZeroInt(),
 			MaximumBorrow:      sdk.ZeroInt(),
 			MaximumCollateral:  sdk.ZeroInt(),
+			MinimumLiquidity:   sdk.ZeroInt(),
 			UTokenSupply:       sdk.ZeroInt(),
 		}
 		s.Require().Equal(expected, *summ)

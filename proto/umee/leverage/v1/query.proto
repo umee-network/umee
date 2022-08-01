@@ -347,8 +347,17 @@ message QueryMarketSummaryResponse {
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "maximum_collateral"
   ];
+  // Mimimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based
+  // on the current collateral. It is denominated in base tokens, so exponent must be applied to convert
+  // to symbol denom. For example, if liquidity is 9000000 uumee and minimum liquidity is 8000000 uumee,
+  // then a maximum of 1 additional UMEE is currently available for borrowing or withdrawal.
+  string minimum_liquidity = 14 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "minimum_supply"
+  ];
   // uToken Supply is the total amount of a base token's associated uToken in circulation.
-  string uToken_supply = 14 [
+  string uToken_supply = 15 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,
     (gogoproto.jsontag)    = "utoken_supply"

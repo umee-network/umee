@@ -250,6 +250,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Liquidity:         sdk.ZeroInt(),
 				MaximumBorrow:     sdk.ZeroInt(),
 				MaximumCollateral: sdk.ZeroInt(),
+				MinimumLiquidity:  sdk.ZeroInt(),
 				UTokenSupply:      sdk.ZeroInt(),
 			},
 		},

@@ -58,8 +58,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
 - [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove all individual queries which duplicate market_summary fields.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Remove `available_borrow` field in `market_summary` in favor of calculating it from `max_borrow - borrowed`.
+- [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
+- [1188](https://github.com/umee-network/umee/pull/1188) Remove `available_borrow` field in `market_summary` in favor of calculating it from `MIN(maximum_borrow - borrowed, liquidity - minimum_liquidity)`.
 
 ### Features
 
@@ -73,7 +73,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 - [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
 - [1159](https://github.com/umee-network/umee/pull/1159) Add `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Add `liquidity`, `max_borrow`, `max_collateral`, and `utoken_supply` fields to market summary.
+- [1188](https://github.com/umee-network/umee/pull/1188) Add `liquidity`, `maximum_borrow`, `maximum_collateral`, `minimum_liquidity`, and `utoken_supply` fields to market summary.
 
 ### Improvements
 
@@ -83,7 +83,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Change `collateral` field in `market_summary` to denominate equivalent base tokens, instead of actual amount of uTokens.
+- [1188](https://github.com/umee-network/umee/pull/1188) Change `collateral` field in `market_summary` to denominate equivalent base tokens, instead of actual amount of uTokens.
 
 ### Bug Fixes
 
