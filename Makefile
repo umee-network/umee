@@ -73,12 +73,16 @@ build: go.sum
 	@echo "--> Building..."
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
-install: go.sum
-	@echo "--> Installing..."
-	go install -mod=readonly $(BUILD_FLAGS) ./...
+build-no_cgo:
+	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
+	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
+
+install: go.sum
+	@echo "--> Installing..."
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 go-mod-cache: go.sum
 	@echo "--> Download go modules to local cache"
