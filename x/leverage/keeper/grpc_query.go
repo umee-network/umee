@@ -117,10 +117,10 @@ func (q Querier) MarketSummary(
 	return &resp, nil
 }
 
-func (q Querier) AccountSummary(
+func (q Querier) AccountBalances(
 	goCtx context.Context,
-	req *types.QueryAccountSummary,
-) (*types.QueryAccountSummaryResponse, error) {
+	req *types.QueryAccountBalances,
+) (*types.QueryAccountBalancesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -142,17 +142,17 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	return &types.QueryAccountSummaryResponse{
+	return &types.QueryAccountBalancesResponse{
 		Supplied:   supplied,
 		Collateral: collateral,
 		Borrowed:   borrowed,
 	}, nil
 }
 
-func (q Querier) AccountHealth(
+func (q Querier) AccountSummary(
 	goCtx context.Context,
-	req *types.QueryAccountHealth,
-) (*types.QueryAccountHealthResponse, error) {
+	req *types.QueryAccountSummary,
+) (*types.QueryAccountSummaryResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -195,7 +195,7 @@ func (q Querier) AccountHealth(
 		return nil, err
 	}
 
-	return &types.QueryAccountHealthResponse{
+	return &types.QueryAccountSummaryResponse{
 		SuppliedValue:        suppliedValue,
 		CollateralValue:      collateralValue,
 		BorrowedValue:        borrowedValue,

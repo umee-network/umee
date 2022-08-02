@@ -29,16 +29,16 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/market_summary";
   }
 
-  // AccountSummary queries an account's current supply, collateral, and borrow positions.
+  // AccountBalances queries an account's current supply, collateral, and borrow positions.
+  rpc AccountBalances(QueryAccountBalances)
+      returns (QueryAccountBalancesResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/account_balances";
+  }
+
+  // AccountSummary queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
   rpc AccountSummary(QueryAccountSummary)
       returns (QueryAccountSummaryResponse) {
     option (google.api.http).get = "/umee/leverage/v1/account_summary";
-  }
-
-  // AccountHealth queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
-  rpc AccountHealth(QueryAccountHealth)
-      returns (QueryAccountHealthResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/account_health";
   }
 
   // LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
@@ -165,13 +165,13 @@ message QueryMarketSummaryResponse {
   ];
 }
 
-// QueryAccountSummary defines the request structure for the AccountSummary gRPC service handler.
-message QueryAccountSummary {
+// QueryAccountBalances defines the request structure for the AccountBalances gRPC service handler.
+message QueryAccountBalances {
   string address = 1;
 }
 
-// QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
-message QueryAccountSummaryResponse {
+// QueryAccountBalancesResponse defines the response structure for the AccountBalances gRPC service handler.
+message QueryAccountBalancesResponse {
   // Supplied contains all tokens the account has supplied, including interest earned. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
   repeated cosmos.base.v1beta1.Coin supplied = 1 [
     (gogoproto.nullable)     = false,
@@ -189,13 +189,13 @@ message QueryAccountSummaryResponse {
   ];
 }
 
-// QueryAccountHealth defines the request structure for the AccountHealth gRPC service handler.
-message QueryAccountHealth {
+// QueryAccountSummary defines the request structure for the AccountSummary gRPC service handler.
+message QueryAccountSummary {
   string address = 1;
 }
 
-// QueryAccountHealthResponse defines the response structure for the AccountHealth gRPC service handler.
-message QueryAccountHealthResponse {
+// QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
+message QueryAccountSummaryResponse {
   // Supplied Value is the sum of the USD value of all tokens the account has supplied, includng interest earned.
   string supplied_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -230,5 +230,6 @@ message QueryLiquidationTargets {}
 // QueryLiquidationTargetsResponse defines the response structure for the
 // LiquidationTargets gRPC service handler.
 message QueryLiquidationTargetsResponse {
+  // Targets are the addresses of borrowers eligible for liquidation.
   repeated string targets = 1;
 }

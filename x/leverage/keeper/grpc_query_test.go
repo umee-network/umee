@@ -54,13 +54,13 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	s.Require().Equal(expected, *resp)
 }
 
-func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
+func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 	addr, _ := s.initBorrowScenario()
 
-	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
+	resp, err := s.queryClient.AccountBalances(s.ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
 	s.Require().NoError(err)
 
-	expected := types.QueryAccountSummaryResponse{
+	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
 			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
 		),
@@ -73,13 +73,13 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	s.Require().Equal(expected, *resp)
 }
 
-func (s *IntegrationTestSuite) TestQuerier_AccountHealth() {
+func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	addr, _ := s.initBorrowScenario()
 
-	resp, err := s.queryClient.AccountHealth(s.ctx.Context(), &types.QueryAccountHealth{Address: addr.String()})
+	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
 	s.Require().NoError(err)
 
-	expected := types.QueryAccountHealthResponse{
+	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
 		// from .Reset() in x/leverage/keeper/oracle_test.go
 		// times the amount of umee, then sometimes times params

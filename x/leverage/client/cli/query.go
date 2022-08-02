@@ -30,8 +30,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryRegisteredTokens(),
 		GetCmdQueryMarketSummary(),
+		GetCmdQueryAccountBalances(),
 		GetCmdQueryAccountSummary(),
-		GetCmdQueryAccountHealth(),
 		GetCmdQueryLiquidationTargets(),
 	)
 
@@ -113,13 +113,40 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAccountSummary creates a Cobra command to query for the
+// GetCmdQueryAccountBalances creates a Cobra command to query for the
 // supply, collateral, and borrow positions of an account.
+func GetCmdQueryAccountBalances() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "account-balances [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total supplied, collateral, and borrowed tokens for an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryAccountBalances{
+				Address: args[0],
+			}
+			resp, err := queryClient.AccountBalances(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryAccountSummary creates a Cobra command to query for USD
+// values representing an account's positions and borrowing limits.
 func GetCmdQueryAccountSummary() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "account-summary [addr]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total supplied, collateral, and borrowed tokens for an address",
+		Short: "Query for position USD values and borrowing limits for an address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -131,33 +158,6 @@ func GetCmdQueryAccountSummary() *cobra.Command {
 				Address: args[0],
 			}
 			resp, err := queryClient.AccountSummary(cmd.Context(), req)
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryAccountHealth creates a Cobra command to query for USD
-// values representing an account's positions and borrowing limits.
-func GetCmdQueryAccountHealth() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "account-health [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for position USD values and borrowing limits for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryAccountHealth{
-				Address: args[0],
-			}
-			resp, err := queryClient.AccountHealth(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

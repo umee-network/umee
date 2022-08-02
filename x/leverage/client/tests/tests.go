@@ -21,8 +21,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query account summary - invalid address",
-			cli.GetCmdQueryAccountSummary(),
+			"query account balances - invalid address",
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				"xyz",
 			},
@@ -31,8 +31,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query account health - invalid address",
-			cli.GetCmdQueryAccountHealth(),
+			"query account summary - invalid address",
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				"xyz",
 			},
@@ -214,13 +214,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	nonzeroQueries := []TestCase{
 		testQuery{
 			"query account summary",
-			cli.GetCmdQueryAccountSummary(),
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryAccountSummaryResponse{},
-			&types.QueryAccountSummaryResponse{
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
 				),
@@ -234,13 +234,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		},
 		testQuery{
 			"query account health",
-			cli.GetCmdQueryAccountHealth(),
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryAccountHealthResponse{},
-			&types.QueryAccountHealthResponse{
+			&types.QueryAccountSummaryResponse{},
+			&types.QueryAccountSummaryResponse{
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
