@@ -114,7 +114,8 @@ func NewHuobiProvider(
 		Path:   huobiWSPath,
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Huobi websocket: %w", err)
 	}
@@ -385,7 +386,8 @@ func (p *HuobiProvider) reconnect() error {
 	p.wsClient.Close()
 
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Huobi websocket: %w", err)
 	}
