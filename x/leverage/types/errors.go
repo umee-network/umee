@@ -33,5 +33,9 @@ var (
 	ErrLiquidationInvalid      = sdkerrors.Register(ModuleName, 1123, "liquidation invalid")
 	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 1124, "market would exceed MaxSupplyUtilization")
 	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 1125, "market would fall below MinCollateralLiquidity")
-	ErrMaxCollateralShare      = sdkerrors.Register(ModuleName, 1126, "market total collateral would exceed MaxCollateralShare")
+	ErrMaxCollateralShare      = sdkerrors.Register(
+		ModuleName,
+		1126,
+		"market total collateral would exceed MaxCollateralShare",
+	)
 )

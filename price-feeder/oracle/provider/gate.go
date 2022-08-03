@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -39,7 +38,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		tickers         map[string]GateTicker         // Symbol => GateTicker
 		candles         map[string][]GateCandle       // Symbol => GateCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -108,12 +107,12 @@ type (
 func NewGateProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*GateProvider, error) {
-	if endpoints.Name != config.ProviderGate {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderGate,
+	if endpoints.Name != types.ProviderGate {
+		endpoints = Endpoint{
+			Name:      types.ProviderGate,
 			Rest:      gateRestHost,
 			Websocket: gateWSHost,
 		}
@@ -134,7 +133,7 @@ func NewGateProvider(
 	provider := &GateProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "gate").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderGate)).Logger(),
 		reconnectTimer:  time.NewTicker(gatePingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
@@ -226,7 +225,7 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderGate,
+		string(types.ProviderGate),
 	)
 	return nil
 }
@@ -410,7 +409,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 		"type",
 		"ticker",
 		"provider",
-		config.ProviderGate,
+		string(types.ProviderGate),
 	)
 	return nil
 }
@@ -484,7 +483,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 		"type",
 		"candle",
 		"provider",
-		config.ProviderGate,
+		string(types.ProviderGate),
 	)
 	return nil
 }
@@ -565,7 +564,7 @@ func (p *GateProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderGate,
+		string(types.ProviderGate),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -606,12 +605,12 @@ func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Gate", ticker.Symbol, ticker.Last, ticker.Vol)
+	return newTickerPrice(string(types.ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
 }
 
 func (candle GateCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		"Gate",
+		string(types.ProviderGate),
 		candle.Symbol,
 		candle.Close,
 		candle.Volume,

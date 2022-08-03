@@ -15,7 +15,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -40,7 +39,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -106,12 +105,12 @@ type (
 func NewOkxProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
-	if endpoints.Name != config.ProviderOkx {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderOkx,
+	if endpoints.Name != types.ProviderOkx {
+		endpoints = Endpoint{
+			Name:      types.ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,
 		}
@@ -132,7 +131,7 @@ func NewOkxProvider(
 	provider := &OkxProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "okx").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderOkx)).Logger(),
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]OkxTickerPair{},
@@ -199,7 +198,7 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderOkx,
+		string(types.ProviderOkx),
 	)
 	return nil
 }
@@ -332,7 +331,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"ticker",
 				"provider",
-				config.ProviderOkx,
+				string(types.ProviderOkx),
 			)
 		}
 		return
@@ -349,7 +348,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"candle",
 				"provider",
-				config.ProviderOkx,
+				string(types.ProviderOkx),
 			)
 		}
 		return
@@ -444,7 +443,7 @@ func (p *OkxProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderOkx,
+		string(types.ProviderOkx),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -493,11 +492,11 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Okx", ticker.InstID, ticker.Last, ticker.Vol24h)
+	return newTickerPrice(string(types.ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
 func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice("Okx", candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
+	return newCandlePrice(string(types.ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // currencyPairToOkxPair returns the expected pair instrument ID for Okx
