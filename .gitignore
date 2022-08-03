@@ -21,6 +21,5 @@ secret.yml
 
 # Build
 build
-tools-stamp
 
 dist/
