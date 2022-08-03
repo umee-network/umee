@@ -16,7 +16,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -42,7 +41,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -96,12 +95,12 @@ type (
 func NewCoinbaseProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
-	if endpoints.Name != config.ProviderCoinbase {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderCoinbase,
+	if endpoints.Name != types.ProviderCoinbase {
+		endpoints = Endpoint{
+			Name:      types.ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,
 		}
@@ -120,7 +119,7 @@ func NewCoinbaseProvider(
 	provider := &CoinbaseProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "coinbase").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderCoinbase)).Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
 		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
@@ -241,7 +240,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderCoinbase,
+		string(types.ProviderCoinbase),
 	)
 	return nil
 }
@@ -391,7 +390,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			config.ProviderCoinbase,
+			string(types.ProviderCoinbase),
 		)
 		return
 	}
@@ -402,7 +401,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		"type",
 		"trade",
 		"provider",
-		config.ProviderCoinbase,
+		string(types.ProviderCoinbase),
 	)
 	p.setTradePair(coinbaseTrade)
 }
@@ -499,7 +498,7 @@ func (p *CoinbaseProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderCoinbase,
+		string(types.ProviderCoinbase),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -516,7 +515,7 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 
 func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		"Coinbase",
+		string(types.ProviderCoinbase),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,
 		ticker.Volume,
