@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -88,8 +87,6 @@ import (
 	ibcporttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
 	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
-	"github.com/gorilla/mux"
-	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 	"github.com/spf13/cast"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
@@ -850,15 +847,8 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	if apiConfig.Swagger {
-		RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router)
+		swagger.RegisterSwaggerAPI(apiSvr.Router)
 	}
-}
-
-// RegisterSwaggerAPI registers swagger route with API Server
-func RegisterSwaggerAPI(_ client.Context, rtr *mux.Router) {
-	// register app's OpenAPI routes.
-	rtr.Handle("/swagger.yaml", http.FileServer(http.FS(swagger.Docs)))
-	rtr.HandleFunc("/swagger/", openapiconsole.Handler(Name, "/swagger.yaml"))
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
