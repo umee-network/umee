@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -38,7 +37,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -104,11 +103,11 @@ type (
 func NewKrakenProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
 	if endpoints.Name != types.ProviderKraken {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderKraken,
 			Rest:      KrakenRestHost,
 			Websocket: krakenWSHost,

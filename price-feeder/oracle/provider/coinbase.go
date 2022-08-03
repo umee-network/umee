@@ -16,7 +16,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -42,7 +41,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -96,11 +95,11 @@ type (
 func NewCoinbaseProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
 	if endpoints.Name != types.ProviderCoinbase {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,

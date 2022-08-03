@@ -15,7 +15,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -40,7 +39,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -106,11 +105,11 @@ type (
 func NewOkxProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
 	if endpoints.Name != types.ProviderOkx {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,

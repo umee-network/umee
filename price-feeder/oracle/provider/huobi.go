@@ -17,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -42,7 +41,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -97,11 +96,11 @@ type (
 func NewHuobiProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*HuobiProvider, error) {
 	if endpoints.Name != types.ProviderHuobi {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderHuobi,
 			Rest:      huobiRestHost,
 			Websocket: huobiWSHost,

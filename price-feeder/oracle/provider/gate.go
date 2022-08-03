@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -39,7 +38,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		tickers         map[string]GateTicker         // Symbol => GateTicker
 		candles         map[string][]GateCandle       // Symbol => GateCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -108,11 +107,11 @@ type (
 func NewGateProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*GateProvider, error) {
 	if endpoints.Name != types.ProviderGate {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderGate,
 			Rest:      gateRestHost,
 			Websocket: gateWSHost,

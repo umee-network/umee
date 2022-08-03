@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -37,7 +36,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.Endpoint
+		endpoints       Endpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -85,11 +84,11 @@ type (
 func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.Endpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
 	if (endpoints.Name) != types.ProviderBinance {
-		endpoints = config.Endpoint{
+		endpoints = Endpoint{
 			Name:      types.ProviderBinance,
 			Rest:      binanceRestHost,
 			Websocket: binanceWSHost,

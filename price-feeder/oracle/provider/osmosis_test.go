@@ -7,12 +7,11 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
-	p := NewOsmosisProvider(config.Endpoint{})
+	p := NewOsmosisProvider(Endpoint{})
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -157,7 +156,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 }
 
 func TestOsmosisProvider_GetAvailablePairs(t *testing.T) {
-	p := NewOsmosisProvider(config.Endpoint{})
+	p := NewOsmosisProvider(Endpoint{})
 	p.GetAvailablePairs()
 
 	t.Run("valid_available_pair", func(t *testing.T) {

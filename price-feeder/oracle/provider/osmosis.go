@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -61,7 +60,7 @@ type (
 	}
 )
 
-func NewOsmosisProvider(endpoint config.Endpoint) *OsmosisProvider {
+func NewOsmosisProvider(endpoint Endpoint) *OsmosisProvider {
 	if endpoint.Name == types.ProviderOsmosis {
 		return &OsmosisProvider{
 			baseURL: endpoint.Rest,
