@@ -557,7 +557,7 @@ type MsgLiquidateResponse struct {
 	// to the module on behalf of the borrower.
 	Repaid types.Coin `protobuf:"bytes,1,opt,name=repaid,proto3" json:"repaid"`
 	// Collateral is the amount of the borrower's uToken collateral that
-	// was burned as a result of liquidation.
+	// was converted to the reward tokens as a result of liquidation.
 	Collateral types.Coin `protobuf:"bytes,2,opt,name=collateral,proto3" json:"collateral"`
 	// Reward is the amount of base tokens that the liquidator received from
 	// the module as reward for the liquidation.
