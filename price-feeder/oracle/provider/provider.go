@@ -20,43 +20,58 @@ const (
 
 var ping = []byte("ping")
 
-// Provider defines an interface an exchange price provider must implement.
-type Provider interface {
-	// GetTickerPrices returns the tickerPrices based on the provided pairs.
-	GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
+type (
+	// Provider defines an interface an exchange price provider must implement.
+	Provider interface {
+		// GetTickerPrices returns the tickerPrices based on the provided pairs.
+		GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
 
-	// GetCandlePrices returns the candlePrices based on the provided pairs.
-	GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+		// GetCandlePrices returns the candlePrices based on the provided pairs.
+		GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
 
-	// GetAvailablePairs return all available pairs symbol to susbscribe.
-	GetAvailablePairs() (map[string]struct{}, error)
+		// GetAvailablePairs return all available pairs symbol to susbscribe.
+		GetAvailablePairs() (map[string]struct{}, error)
 
-	// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
-	SubscribeCurrencyPairs(...types.CurrencyPair) error
-}
+		// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
+		SubscribeCurrencyPairs(...types.CurrencyPair) error
+	}
 
-// TickerPrice defines price and volume information for a symbol or ticker
-// exchange rate.
-type TickerPrice struct {
-	Price  sdk.Dec // last trade price
-	Volume sdk.Dec // 24h volume
-}
+	// TickerPrice defines price and volume information for a symbol or ticker
+	// exchange rate.
+	TickerPrice struct {
+		Price  sdk.Dec // last trade price
+		Volume sdk.Dec // 24h volume
+	}
 
-// AggregatedProviderPrices defines a type alias for a map
-// of provider -> asset -> TickerPrice
-type AggregatedProviderPrices map[string]map[string]TickerPrice
+	// AggregatedProviderPrices defines a type alias for a map
+	// of provider -> asset -> TickerPrice
+	AggregatedProviderPrices map[types.ProviderName]map[string]TickerPrice
 
-// CandlePrice defines price, volume, and time information for an
-// exchange rate.
-type CandlePrice struct {
-	Price     sdk.Dec // last trade price
-	Volume    sdk.Dec // volume
-	TimeStamp int64   // timestamp
-}
+	// AggregatedProviderCandles defines a type alias for a map
+	// of provider -> asset -> []CandlePrice
+	AggregatedProviderCandles map[types.ProviderName]map[string][]CandlePrice
 
-// AggregatedProviderCandles defines a type alias for a map
-// of provider -> asset -> []CandlePrice
-type AggregatedProviderCandles map[string]map[string][]CandlePrice
+	// CandlePrice defines price, volume, and time information for an
+	// exchange rate.
+	CandlePrice struct {
+		Price     sdk.Dec // last trade price
+		Volume    sdk.Dec // volume
+		TimeStamp int64   // timestamp
+	}
+
+	// Endpoint defines an override setting in our config for the
+	// hardcoded rest and websocket api endpoints.
+	Endpoint struct {
+		// Name of the provider, ex. "binance"
+		Name types.ProviderName `toml:"name"`
+
+		// Rest endpoint for the provider, ex. "https://api1.binance.com"
+		Rest string `toml:"rest"`
+
+		// Websocket endpoint for the provider, ex. "stream.binance.com:9443"
+		Websocket string `toml:"websocket"`
+	}
+)
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
