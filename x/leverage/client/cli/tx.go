@@ -246,6 +246,17 @@ func GetCmdLiquidate() *cobra.Command {
 		Use:   "liquidate [liquidator] [borrower] [amount] [reward-denom]",
 		Args:  cobra.ExactArgs(4),
 		Short: "Liquidate a specified amount of a borrower's debt for a chosen reward denomination",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`
+Liquidate up to a specified amount of a borrower's debt for a chosen reward denomination.
+
+Example:
+$ umeed tx leverage liquidate %s %s  50000000uumee u/uumee --from mykey`,
+				"umee16jgsjqp7h0mpahlkw3p6vp90vd3jhn5tz6lcex",
+				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
+			),
+		),
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
 				return err
