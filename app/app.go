@@ -89,7 +89,7 @@ import (
 	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
 	"github.com/gorilla/mux"
-	"github.com/rakyll/statik/fs"
+	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 	"github.com/spf13/cast"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
@@ -104,6 +104,7 @@ import (
 	appparams "github.com/umee-network/umee/v2/app/params"
 	"github.com/umee-network/umee/v2/app/upgrades"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	"github.com/umee-network/umee/v2/client/swagger"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
@@ -113,9 +114,6 @@ import (
 	"github.com/umee-network/umee/v2/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v2/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
-
-	// unnamed import of statik for swagger UI support
-	_ "github.com/umee-network/umee/v2/client/docs/statik"
 )
 
 const (
@@ -858,13 +856,9 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 
 // RegisterSwaggerAPI registers swagger route with API Server
 func RegisterSwaggerAPI(_ client.Context, rtr *mux.Router) {
-	statikFS, err := fs.New()
-	if err != nil {
-		panic(err)
-	}
-
-	staticServer := http.FileServer(statikFS)
-	rtr.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", staticServer))
+	// register app's OpenAPI routes.
+	rtr.Handle("/swagger.yaml", http.FileServer(http.FS(swagger.Docs)))
+	rtr.HandleFunc("/swagger/", openapiconsole.Handler(Name, "/swagger.yaml"))
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
