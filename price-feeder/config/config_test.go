@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -66,14 +67,14 @@ func TestValidate(t *testing.T) {
 	}
 
 	invalidEndpoints := validConfig()
-	invalidEndpoints.ProviderEndpoints = []config.Endpoint{
+	invalidEndpoints.ProviderEndpoints = []provider.Endpoint{
 		{
 			Name: types.ProviderBinance,
 		},
 	}
 
 	invalidEndpointsProvider := validConfig()
-	invalidEndpointsProvider.ProviderEndpoints = []config.Endpoint{
+	invalidEndpointsProvider.ProviderEndpoints = []provider.Endpoint{
 		{
 			Name:      "foo",
 			Rest:      "bar",
