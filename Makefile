@@ -229,15 +229,7 @@ proto-check-breaking:
 ###                                 Tools                                   ###
 ###############################################################################
 
-PREFIX ?= /usr/local
-BIN ?= $(PREFIX)/bin
-UNAME_S ?= $(shell uname -s)
-UNAME_M ?= $(shell uname -m)
-
 GOPATH ?= $(shell $(GO) env GOPATH)
-GITHUBDIR := $(GOPATH)$(FS)src$(FS)github.com
-
-BUF_VERSION ?= 0.11.0
 
 TOOLS_DESTDIR  ?= $(GOPATH)/bin
 STATIK         = $(TOOLS_DESTDIR)/statik
