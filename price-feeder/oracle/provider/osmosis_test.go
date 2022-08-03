@@ -12,7 +12,7 @@ import (
 )
 
 func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
-	p := NewOsmosisProvider(config.ProviderEndpoint{})
+	p := NewOsmosisProvider(config.Endpoint{})
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -157,7 +157,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 }
 
 func TestOsmosisProvider_GetAvailablePairs(t *testing.T) {
-	p := NewOsmosisProvider(config.ProviderEndpoint{})
+	p := NewOsmosisProvider(config.Endpoint{})
 	p.GetAvailablePairs()
 
 	t.Run("valid_available_pair", func(t *testing.T) {

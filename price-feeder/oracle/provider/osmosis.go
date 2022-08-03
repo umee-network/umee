@@ -61,7 +61,7 @@ type (
 	}
 )
 
-func NewOsmosisProvider(endpoint config.ProviderEndpoint) *OsmosisProvider {
+func NewOsmosisProvider(endpoint config.Endpoint) *OsmosisProvider {
 	if endpoint.Name == types.ProviderOsmosis {
 		return &OsmosisProvider{
 			baseURL: endpoint.Rest,

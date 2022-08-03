@@ -15,7 +15,7 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewKrakenProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -79,7 +79,7 @@ func TestKrakenProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewKrakenProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)

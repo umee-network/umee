@@ -42,7 +42,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       config.Endpoint
 		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -96,11 +96,11 @@ type (
 func NewCoinbaseProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints config.Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
 	if endpoints.Name != types.ProviderCoinbase {
-		endpoints = config.ProviderEndpoint{
+		endpoints = config.Endpoint{
 			Name:      types.ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,

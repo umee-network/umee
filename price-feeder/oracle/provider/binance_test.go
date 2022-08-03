@@ -15,7 +15,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewBinanceProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestBinanceProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewBinanceProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)

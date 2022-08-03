@@ -63,7 +63,7 @@ type Oracle struct {
 	priceProviders     map[types.ProviderName]provider.Provider
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
-	endpoints          map[types.ProviderName]config.ProviderEndpoint
+	endpoints          map[types.ProviderName]config.Endpoint
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
@@ -77,7 +77,7 @@ func New(
 	currencyPairs []config.CurrencyPair,
 	providerTimeout time.Duration,
 	deviations map[string]sdk.Dec,
-	endpoints map[types.ProviderName]config.ProviderEndpoint,
+	endpoints map[types.ProviderName]config.Endpoint,
 ) *Oracle {
 	providerPairs := make(map[types.ProviderName][]types.CurrencyPair)
 
@@ -440,7 +440,7 @@ func NewProvider(
 	ctx context.Context,
 	providerName types.ProviderName,
 	logger zerolog.Logger,
-	endpoint config.ProviderEndpoint,
+	endpoint config.Endpoint,
 	providerPairs ...types.CurrencyPair,
 ) (provider.Provider, error) {
 	switch providerName {

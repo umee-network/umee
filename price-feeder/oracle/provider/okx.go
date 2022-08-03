@@ -40,7 +40,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       config.Endpoint
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -106,11 +106,11 @@ type (
 func NewOkxProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints config.Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
 	if endpoints.Name != types.ProviderOkx {
-		endpoints = config.ProviderEndpoint{
+		endpoints = config.Endpoint{
 			Name:      types.ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,

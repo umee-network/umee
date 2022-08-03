@@ -15,7 +15,7 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewGateProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestGateProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewGateProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)

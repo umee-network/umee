@@ -38,7 +38,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       config.Endpoint
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -104,11 +104,11 @@ type (
 func NewKrakenProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints config.Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
 	if endpoints.Name != types.ProviderKraken {
-		endpoints = config.ProviderEndpoint{
+		endpoints = config.Endpoint{
 			Name:      types.ProviderKraken,
 			Rest:      KrakenRestHost,
 			Websocket: krakenWSHost,

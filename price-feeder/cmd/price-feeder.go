@@ -152,7 +152,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		deviations[deviation.Base] = threshold
 	}
 
-	endpoints := make(map[types.ProviderName]config.ProviderEndpoint, len(cfg.ProviderEndpoints))
+	endpoints := make(map[types.ProviderName]config.Endpoint, len(cfg.ProviderEndpoints))
 	for _, endpoint := range cfg.ProviderEndpoints {
 		endpoints[endpoint.Name] = endpoint
 	}

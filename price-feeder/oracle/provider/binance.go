@@ -37,7 +37,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       config.Endpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -85,11 +85,11 @@ type (
 func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints config.Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
 	if (endpoints.Name) != types.ProviderBinance {
-		endpoints = config.ProviderEndpoint{
+		endpoints = config.Endpoint{
 			Name:      types.ProviderBinance,
 			Rest:      binanceRestHost,
 			Websocket: binanceWSHost,

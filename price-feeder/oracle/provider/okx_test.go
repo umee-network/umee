@@ -15,7 +15,7 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewOkxProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewOkxProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		config.Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)

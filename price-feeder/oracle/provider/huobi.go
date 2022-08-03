@@ -42,7 +42,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       config.Endpoint
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -97,11 +97,11 @@ type (
 func NewHuobiProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints config.Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*HuobiProvider, error) {
 	if endpoints.Name != types.ProviderHuobi {
-		endpoints = config.ProviderEndpoint{
+		endpoints = config.Endpoint{
 			Name:      types.ProviderHuobi,
 			Rest:      huobiRestHost,
 			Websocket: huobiWSHost,
