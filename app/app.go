@@ -104,7 +104,7 @@ import (
 	appparams "github.com/umee-network/umee/v2/app/params"
 	"github.com/umee-network/umee/v2/app/upgrades"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
-	"github.com/umee-network/umee/v2/client/swagger"
+	"github.com/umee-network/umee/v2/swagger"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
