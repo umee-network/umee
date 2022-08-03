@@ -22,40 +22,30 @@ type HandlerOptions struct {
 // signer.
 func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
+		return nil, sdkerrors.ErrLogic.Wrap("account keeper is required for ante builder")
 	}
-
 	if options.BankKeeper == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "bank keeper is required for ante builder")
+		return nil, sdkerrors.ErrLogic.Wrap("bank keeper is required for ante builder")
 	}
-
 	if options.OracleKeeper == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "oracle keeper is required for ante builder")
+		return nil, sdkerrors.ErrLogic.Wrap("oracle keeper is required for ante builder")
 	}
-
 	if options.SignModeHandler == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "sign mode handler is required for ante builder")
-	}
-
-	sigGasConsumer := options.SigGasConsumer
-	if sigGasConsumer == nil {
-		sigGasConsumer = cosmosante.DefaultSigVerificationGasConsumer
+		return nil, sdkerrors.ErrLogic.Wrap("sign mode handler is required for ante builder")
 	}
 
 	return sdk.ChainAnteDecorators(
-		cosmosante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
-		cosmosante.NewRejectExtensionOptionsDecorator(),
-		NewMempoolFeeDecorator(),                         // mempool fee validation
+		cosmosante.NewSetUpContextDecorator(),            // outermost AnteDecorator. SetUpContext must be called first
+		cosmosante.NewExtensionOptionsDecorator(nil),     // nil=reject extensions
 		NewSpamPreventionDecorator(options.OracleKeeper), // spam prevention
 		cosmosante.NewValidateBasicDecorator(),
 		cosmosante.NewTxTimeoutHeightDecorator(),
 		cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
 		cosmosante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-		cosmosante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper),
-		// SetPubKeyDecorator must be called before all signature verification decorators
-		cosmosante.NewSetPubKeyDecorator(options.AccountKeeper),
+		cosmosante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper, feeAndPriority),
+		cosmosante.NewSetPubKeyDecorator(options.AccountKeeper), // SetPubKeyDecorator must be called before all signature verification decorators
 		cosmosante.NewValidateSigCountDecorator(options.AccountKeeper),
-		cosmosante.NewSigGasConsumeDecorator(options.AccountKeeper, sigGasConsumer),
+		cosmosante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
 		cosmosante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
 		cosmosante.NewIncrementSequenceDecorator(options.AccountKeeper),
 	), nil

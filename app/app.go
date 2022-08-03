@@ -666,10 +666,10 @@ func New(
 		customante.HandlerOptions{
 			AccountKeeper:   app.AccountKeeper,
 			BankKeeper:      app.BankKeeper,
-			FeegrantKeeper:  app.FeeGrantKeeper,
-			OracleKeeper:    app.OracleKeeper,
-			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
+			FeegrantKeeper:  app.FeeGrantKeeper,
+			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			OracleKeeper:    app.OracleKeeper,
 		},
 	)
 	if err != nil {

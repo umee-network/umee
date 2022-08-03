@@ -10,39 +10,24 @@ import (
 // MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
 const MaxOracleMsgGasUsage = uint64(100000)
 
-// MempoolFeeDecorator defines a custom Umee AnteHandler decorator that is
-// responsible for allowing oracle transactions from oracle feeders to bypass
-// the minimum fee CheckTx check. However, if an oracle transaction's gas limit
-// is beyond the accepted threshold, the minimum fee check is still applied.
-//
-// For non-oracle transactions, the minimum fee check is applied.
-type MempoolFeeDecorator struct{}
-
-func NewMempoolFeeDecorator() MempoolFeeDecorator {
-	return MempoolFeeDecorator{}
-}
-
-func (mfd MempoolFeeDecorator) AnteHandle(
-	ctx sdk.Context,
-	tx sdk.Tx,
-	simulate bool,
-	next sdk.AnteHandler,
-) (newCtx sdk.Context, err error) {
+// feeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
+// to early remove transactions from the mempool without enough attached fee.
+// The validator min fee check is ignored if the tx contains only oracle messages and
+// tx gas limit is <= MaxOracleMsgGasUsage. Essentially, validators can provide price
+// transactison for free as long as the gas per message is in the MaxOracleMsgGasUsage limit.
+func feeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+		return nil, 0, sdkerrors.ErrTxDecode.Wrap("Tx must be a FeeTx")
 	}
 
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
+	isOracle := isOracleTx(msgs)
+	chargeForOracle := !isOracle || gas > uint64(len(msgs))*MaxOracleMsgGasUsage
 
-	// Only check for minimum fees if the execution mode is CheckTx and the tx does
-	// not contain oracle messages. If the tx does contain oracle messages, it's
-	// total gas must be less than or equal to a constant, otherwise minimum fees
-	// are checked.
-	if ctx.IsCheckTx() && !simulate &&
-		!(isOracleTx(msgs) && gas <= uint64(len(msgs))*MaxOracleMsgGasUsage) {
+	if ctx.IsCheckTx() && chargeForOracle {
 		minGasPrices := ctx.MinGasPrices()
 		if !minGasPrices.IsZero() {
 			requiredFees := make(sdk.Coins, len(minGasPrices))
@@ -56,19 +41,17 @@ func (mfd MempoolFeeDecorator) AnteHandle(
 			}
 
 			if !feeCoins.IsAnyGTE(requiredFees) {
-				return ctx, sdkerrors.Wrapf(
-					sdkerrors.ErrInsufficientFee,
-					"insufficient fees; got: %s required: %s",
-					feeCoins,
-					requiredFees,
-				)
+				return nil, 0, sdkerrors.ErrInsufficientFee.Wrapf(
+					"insufficient fees; got: %s required: %s", feeCoins, requiredFees)
 			}
 		}
 	}
 
-	return next(ctx, tx, simulate)
+	priority := getTxPriority(feeCoins, isOracle)
+	return feeCoins, priority, nil
 }
 
+// isOracleTx checks if all messages are oracle messages
 func isOracleTx(msgs []sdk.Msg) bool {
 	for _, msg := range msgs {
 		switch msg.(type) {
@@ -84,4 +67,25 @@ func isOracleTx(msgs []sdk.Msg) bool {
 	}
 
 	return true
+}
+
+// getTxPriority returns naive tx priority based on the fee amount and oracle tx check.
+func getTxPriority(fee sdk.Coins, isOracle bool) int64 {
+	var priority int64
+	for _, c := range fee {
+		// TODO: we should better compare amounts
+		p := int64(math.MaxInt64)
+		if c.Amount.IsInt64() {
+			p = c.Amount.Int64()
+		}
+		if priority == 0 || p < priority {
+			priority = p
+		}
+	}
+	if isOracle {
+		// TODO: this is a naive version.
+		// Proper solution will be implemented in https://github.com/umee-network/umee/issues/510
+		priority += 100000
+	}
+	return priority
 }
