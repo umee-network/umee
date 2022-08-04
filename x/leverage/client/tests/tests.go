@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
@@ -11,8 +9,6 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestInvalidQueries() {
-	val := s.network.Validators[0]
-
 	invalidQueries := []TestCase{
 		testQuery{
 			"query market summary - invalid denom",
@@ -25,8 +21,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query supplied - invalid address",
-			cli.GetCmdQuerySupplied(),
+			"query account balances - invalid address",
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				"xyz",
 			},
@@ -35,134 +31,8 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 		},
 		testQuery{
-			"query supplied - invalid denom",
-			cli.GetCmdQuerySupplied(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed - invalid address",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed - invalid denom",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral - invalid address",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral - invalid denom",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query supplied value - invalid address",
-			cli.GetCmdQuerySuppliedValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query supplied value - invalid denom",
-			cli.GetCmdQuerySuppliedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral value - invalid address",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral value - invalid denom",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=u/abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed value - invalid address",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed value - invalid denom",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrow limit - invalid address",
-			cli.GetCmdQueryBorrowLimit(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query liquidation threshold - invalid address",
-			cli.GetCmdQueryLiquidationThreshold(),
+			"query account summary - invalid address",
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				"xyz",
 			},
@@ -194,7 +64,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		},
 		testQuery{
 			"query registered tokens",
-			cli.GetCmdQueryAllRegisteredTokens(),
+			cli.GetCmdQueryRegisteredTokens(),
 			[]string{},
 			false,
 			&types.QueryRegisteredTokensResponse{},
@@ -343,206 +213,47 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	nonzeroQueries := []TestCase{
 		testQuery{
-			"query supplied - all",
-			cli.GetCmdQuerySupplied(),
+			"query account summary",
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QuerySuppliedResponse{},
-			&types.QuerySuppliedResponse{
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
 				),
-			},
-		},
-		testQuery{
-			"query supplied - denom",
-			cli.GetCmdQuerySupplied(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QuerySuppliedResponse{},
-			&types.QuerySuppliedResponse{
-				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
+				Collateral: sdk.NewCoins(
+					sdk.NewInt64Coin(types.UTokenFromTokenDenom(umeeapp.BondDenom), 1000),
 				),
-			},
-		},
-		testQuery{
-			"query borrowed - all",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowedResponse{},
-			&types.QueryBorrowedResponse{
 				Borrowed: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
 				),
 			},
 		},
 		testQuery{
-			"query borrowed - denom",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryBorrowedResponse{},
-			&types.QueryBorrowedResponse{
-				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
-				),
-			},
-		},
-		testQuery{
-			"query collateral - all",
-			cli.GetCmdQueryCollateral(),
+			"query account health",
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryCollateralResponse{},
-			&types.QueryCollateralResponse{
-				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin("u/uumee", 1000),
-				),
-			},
-		},
-		testQuery{
-			"query collateral - denom",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryCollateralResponse{},
-			&types.QueryCollateralResponse{
-				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin("u/uumee", 1000),
-				),
-			},
-		},
-		testQuery{
-			"query supplied value - all",
-			cli.GetCmdQuerySuppliedValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QuerySuppliedValueResponse{},
-			&types.QuerySuppliedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				// This result is umee's oracle exchange rate times the
-				// amount supplied.
+			&types.QueryAccountSummaryResponse{},
+			&types.QueryAccountSummaryResponse{
+				// This result is umee's oracle exchange rate from
+				// app/test_helpers.go/IntegrationTestNetworkConfig
+				// times the amount of umee, and then times params
+				// (1001 / 1000000) * 34.21 = 0.03424421
 				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query supplied value - denom",
-			cli.GetCmdQuerySuppliedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QuerySuppliedValueResponse{},
-			&types.QuerySuppliedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query collateral value - all",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryCollateralValueResponse{},
-			&types.QueryCollateralValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				// (1001 / 1000000) * 34.21 = 0.03424421
 				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query collateral value - denom",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryCollateralValueResponse{},
-			&types.QueryCollateralValueResponse{
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query borrowed value - all",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowedValueResponse{},
-			&types.QueryBorrowedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				// (47 / 1000000) * 34.21 = 0.00160787
 				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
-			},
-		},
-		testQuery{
-			"query borrowed value - denom",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryBorrowedValueResponse{},
-			&types.QueryBorrowedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
-			},
-		},
-		testQuery{
-			"query borrow limit",
-			cli.GetCmdQueryBorrowLimit(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowLimitResponse{},
-			&types.QueryBorrowLimitResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
+				// (1001 / 1000000) * 34.21 * 0.05 = 0.0017122105
 				BorrowLimit: sdk.MustNewDecFromStr("0.0017122105"),
 				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
-			},
-		},
-		testQuery{
-			"query liquidation threshold",
-			cli.GetCmdQueryLiquidationThreshold(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryLiquidationThresholdResponse{},
-			&types.QueryLiquidationThresholdResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
 				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
 			},
 		},
 	}
