@@ -234,16 +234,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
-				// (1001 / 1000000) * 34.21 = 0.03424421
-				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) * 34.21 = 0.03424421
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (47 / 1000000) * 34.21 = 0.00160787
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (1001 / 1000000) * 34.21 * 0.05 = 0.0017122105
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017122105"),
+				// (1000 / 1000000) * 34.21 = 0.03421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) * 34.21 = 0.03421
+				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
+				// (51 / 1000000) * 34.21 = 0.00174471
+				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
+				// (1000 / 1000000) * 34.21 * 0.05 = 0.0017105
+				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
+				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
 			},
 		},
 	}
