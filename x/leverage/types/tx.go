@@ -170,7 +170,8 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
 		return err
 	}
-	return validateSenderAndAsset(msg.Liquidator, &msg.Repayment)
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	return err
 }
 
 func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
