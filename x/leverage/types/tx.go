@@ -151,12 +151,12 @@ func (msg *MsgRepay) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment, reward sdk.Coin) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
 	return &MsgLiquidate{
-		Liquidator: liquidator.String(),
-		Borrower:   borrower.String(),
-		Repayment:  repayment,
-		Reward:     reward,
+		Liquidator:  liquidator.String(),
+		Borrower:    borrower.String(),
+		Repayment:   repayment,
+		RewardDenom: rewardDenom,
 	}
 }
 
@@ -167,7 +167,11 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
 		return err
 	}
-	return validateSenderAndAsset(msg.Liquidator, &msg.Reward)
+	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
+		return err
+	}
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	return err
 }
 
 func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {

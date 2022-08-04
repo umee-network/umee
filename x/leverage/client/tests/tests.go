@@ -166,17 +166,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			val.Address.String(),
 			val.Address.String(),
 			"5uumee",
-			"4uumee",
-		},
-		nil,
-	}
-
-	fixCollateral := testTransaction{
-		"add back collateral received from liquidation",
-		cli.GetCmdCollateralize(),
-		[]string{
-			val.Address.String(),
-			"4u/uumee",
+			"uumee",
 		},
 		nil,
 	}
@@ -186,7 +176,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdRepay(),
 		[]string{
 			val.Address.String(),
-			"51uumee",
+			"50uumee",
 		},
 		nil,
 	}
@@ -196,7 +186,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdDecollateralize(),
 		[]string{
 			val.Address.String(),
-			"1000u/uumee",
+			"950u/uumee",
 		},
 		nil,
 	}
@@ -206,14 +196,14 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdWithdraw(),
 		[]string{
 			val.Address.String(),
-			"1000u/uumee",
+			"950u/uumee",
 		},
 		nil,
 	}
 
 	nonzeroQueries := []TestCase{
 		testQuery{
-			"query account summary",
+			"query account balances",
 			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				val.Address.String(),
@@ -222,18 +212,18 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAccountBalancesResponse{},
 			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 				Collateral: sdk.NewCoins(
 					sdk.NewInt64Coin(types.UTokenFromTokenDenom(umeeapp.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
+					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
 				),
 			},
 		},
 		testQuery{
-			"query account health",
+			"query account summary",
 			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				val.Address.String(),
@@ -244,16 +234,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
-				// (1001 / 1000000) * 34.21 = 0.03424421
-				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) * 34.21 = 0.03424421
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (47 / 1000000) * 34.21 = 0.00160787
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (1001 / 1000000) * 34.21 * 0.05 = 0.0017122105
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017122105"),
+				// (1000 / 1000000) * 34.21 = 0.03421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) * 34.21 = 0.03421
+				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
+				// (51 / 1000000) * 34.21 = 0.00174471
+				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
+				// (1000 / 1000000) * 34.21 * 0.05 = 0.0017105
+				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
+				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
 			},
 		},
 	}
@@ -266,17 +256,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		supply,
 		addCollateral,
 		borrow,
-		liquidate,
-		fixCollateral,
-	)
-
-	// These transactions are deferred to run after nonzero queries are finished
-	defer s.runTestCases(
-		repay,
-		removeCollateral,
-		withdraw,
 	)
 
 	// These queries run while the supplying and borrowing is active to produce nonzero output
 	s.runTestCases(nonzeroQueries...)
+
+	// These transactions run after nonzero queries are finished
+	s.runTestCases(
+		liquidate,
+		repay,
+		removeCollateral,
+		withdraw,
+	)
 }
