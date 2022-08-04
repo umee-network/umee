@@ -1,4 +1,4 @@
-# ADR 001: Interest Stream
+# Design Doc 001: Interest Stream
 
 ## Changelog
 

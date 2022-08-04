@@ -31,7 +31,7 @@ func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	prefix := types.KeyPrefixBadDebt
 	badDebts := []types.BadDebt{}
 
-	iterator := func(key, val []byte) error {
+	iterator := func(key, _ []byte) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
@@ -52,7 +52,7 @@ func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
 func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 	tokens := []types.Token{}
 
-	iterator := func(key, val []byte) error {
+	iterator := func(_, val []byte) error {
 		var t types.Token
 		if err := t.Unmarshal(val); err != nil {
 			// improperly marshaled Token should never happen
@@ -180,7 +180,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	liquidationTargets := []sdk.AccAddress{}
 	checkedAddrs := map[string]struct{}{}
 
-	iterator := func(key, val []byte) error {
+	iterator := func(key, _ []byte) error {
 		// get borrower address from key
 		addr := types.AddressFromKey(key, prefix)
 
@@ -228,7 +228,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 	prefix := types.KeyPrefixBadDebt
 
-	iterator := func(key, value []byte) error {
+	iterator := func(key, _ []byte) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 

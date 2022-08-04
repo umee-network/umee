@@ -143,7 +143,7 @@ func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	prefix := types.KeyPrefixBadDebt
 	badDebts := []types.BadDebt{}
 
-	iterator := func(key, val []byte) error {
+	iterator := func(key, _ []byte) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
