@@ -62,3 +62,9 @@ To install the `umeed` binary:
 ```shell
 $ make install
 ```
+
+### Swagger
+
+- To enable it, modify the node config at `$UMEE_HOME/config/app.toml` to `api.swagger` `true`
+- Run the node normally `umeed start`
+- Enter the swagger docs `http://localhost:1317/swagger/`
