@@ -26,7 +26,7 @@ func SetupTestingApp() (ibctesting.TestingApp, map[string]json.RawMessage) {
 		encConfig,
 		umeeapp.EmptyAppOptions{},
 	)
-	genesisState := umeeapp.NewDefaultGenesisState(encConfig.Marshaler)
+	genesisState := umeeapp.NewDefaultGenesisState(encConfig.Codec)
 
 	return app, genesisState
 }

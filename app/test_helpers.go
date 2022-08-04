@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -83,7 +84,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		EmptyAppOptions{},
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(encCdc.Marshaler)
+		return app, NewDefaultGenesisState(encCdc.Codec)
 	}
 
 	return app, GenesisState{}
@@ -94,10 +95,10 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 func IntegrationTestNetworkConfig() network.Config {
 	cfg := network.DefaultConfig()
 	encCfg := MakeEncodingConfig()
-	cdc := encCfg.Marshaler
+	cdc := encCfg.Codec
 
 	// Start with the default genesis state
-	appGenState := ModuleBasics.DefaultGenesis(encCfg.Marshaler)
+	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
 
 	// Extract the x/leverage part of the genesis state to be modified
 	var leverageGenState leveragetypes.GenesisState
@@ -152,12 +153,13 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 	appGenState[oracletypes.ModuleName] = bz
 
-	var govGenState govtypes.GenesisState
+	var govGenState govv1.GenesisState
 	if err := cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState); err != nil {
 		panic(err)
 	}
 
-	govGenState.VotingParams.VotingPeriod = time.Minute
+	votingPeriod := time.Minute
+	govGenState.VotingParams.VotingPeriod = &votingPeriod
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	if err != nil {
@@ -165,7 +167,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 	appGenState[govtypes.ModuleName] = bz
 
-	cfg.Codec = encCfg.Marshaler
+	cfg.Codec = encCfg.Codec
 	cfg.TxConfig = encCfg.TxConfig
 	cfg.LegacyAmino = encCfg.Amino
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
@@ -183,7 +185,7 @@ func IntegrationTestNetworkConfig() network.Config {
 			0,
 			encCfg,
 			EmptyAppOptions{},
-			baseapp.SetPruning(storetypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
+			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
 		)
 	}

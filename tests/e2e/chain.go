@@ -39,7 +39,7 @@ func init() {
 		&ed25519.PubKey{},
 	)
 
-	cdc = encodingConfig.Marshaler
+	cdc = encodingConfig.Codec
 }
 
 type chain struct {
