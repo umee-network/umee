@@ -69,7 +69,7 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 	return nil
 }
 
-func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator string, cache map[string]int64, curHeight int64, errMsg string) error {
+func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator string, cache map[string]int64, curHeight int64, txType string) error {
 	feederAddr, err := sdk.AccAddressFromBech32(feeder)
 	if err != nil {
 		return err
