@@ -5,7 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 // defaultDeviationThreshold defines how many 𝜎 a provider can be away
@@ -22,7 +21,7 @@ func FilterTickerDeviations(
 ) (provider.AggregatedProviderPrices, error) {
 	var (
 		filteredPrices = make(provider.AggregatedProviderPrices)
-		priceMap       = make(map[types.ProviderName]map[string]sdk.Dec)
+		priceMap       = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceTickers := range prices {
@@ -81,7 +80,7 @@ func FilterCandleDeviations(
 ) (provider.AggregatedProviderCandles, error) {
 	var (
 		filteredCandles = make(provider.AggregatedProviderCandles)
-		tvwaps          = make(map[types.ProviderName]map[string]sdk.Dec)
+		tvwaps          = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceCandles := range candles {

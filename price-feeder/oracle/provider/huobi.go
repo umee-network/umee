@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -99,9 +99,9 @@ func NewHuobiProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*HuobiProvider, error) {
-	if endpoints.Name != types.ProviderHuobi {
+	if endpoints.Name != ProviderHuobi {
 		endpoints = Endpoint{
-			Name:      types.ProviderHuobi,
+			Name:      ProviderHuobi,
 			Rest:      huobiRestHost,
 			Websocket: huobiWSHost,
 		}
@@ -122,7 +122,7 @@ func NewHuobiProvider(
 	provider := &HuobiProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderHuobi)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderHuobi)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]HuobiTicker{},
 		candles:         map[string][]HuobiCandle{},
@@ -185,7 +185,7 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		string(types.ProviderHuobi),
+		string(ProviderHuobi),
 	)
 	return nil
 }
@@ -301,7 +301,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"type",
 			"ticker",
 			"provider",
-			string(types.ProviderHuobi),
+			string(ProviderHuobi),
 		)
 		return
 	}
@@ -316,7 +316,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"type",
 			"candle",
 			"provider",
-			string(types.ProviderHuobi),
+			string(ProviderHuobi),
 		)
 		return
 	}
@@ -399,7 +399,7 @@ func (p *HuobiProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderHuobi),
+		string(ProviderHuobi),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -487,13 +487,13 @@ func decompressGzip(bz []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(r)
+	return io.ReadAll(r)
 }
 
 // toTickerPrice converts current HuobiTicker to TickerPrice.
 func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		string(types.ProviderHuobi),
+		string(ProviderHuobi),
 		ticker.CH,
 		strconv.FormatFloat(ticker.Tick.LastPrice, 'f', -1, 64),
 		strconv.FormatFloat(ticker.Tick.Vol, 'f', -1, 64),
@@ -502,7 +502,7 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 
 func (candle HuobiCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		string(types.ProviderHuobi),
+		string(ProviderHuobi),
 		candle.CH,
 		strconv.FormatFloat(candle.Tick.Close, 'f', -1, 64),
 		strconv.FormatFloat(candle.Tick.Volume, 'f', -1, 64),
