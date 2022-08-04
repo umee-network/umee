@@ -4,11 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
@@ -33,7 +28,7 @@ func RegisterUpgradeHandlers(
 
 			err := setupBech32ibcKeeper(bech32IbcKeeper, ctx)
 			if err != nil {
-				return sdkerrors.Wrap(err, "Calypso Upgrade: Unable to upgrade, bech32ibc module not initialized")
+				return nil, sdkerrors.Wrap(err, "Calypso Upgrade: Unable to upgrade, bech32ibc module not initialized")
 			}
 
 			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)

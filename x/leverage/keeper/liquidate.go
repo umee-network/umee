@@ -113,7 +113,7 @@ func ComputeLiquidation(
 	}
 
 	// Start with the maximum possible repayment amount, as a decimal
-	maxRepay := availableRepay.ToDec()
+	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
 	maxReward := maxRepay.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
@@ -132,11 +132,11 @@ func ComputeLiquidation(
 	)
 	// Collateral burned cannot exceed borrower's collateral
 	ratio = sdk.MinDec(ratio,
-		availableCollateral.ToDec().Quo(maxCollateral),
+		toDec(availableCollateral).Quo(maxCollateral),
 	)
 	// Base token reward cannot exceed available unreserved module balance
 	ratio = sdk.MinDec(ratio,
-		availableReward.ToDec().Quo(maxReward),
+		toDec(availableReward).Quo(maxReward),
 	)
 	// Catch edge cases
 	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
@@ -167,7 +167,7 @@ func ComputeLiquidation(
 	// Finally, the base token reward amount is derived directly from the collateral
 	// to burn. This will round down identically to MsgWithdraw, favoring the module
 	// over the liquidator.
-	tokenReward = collateralBurn.ToDec().Mul(uTokenExchangeRate).TruncateInt()
+	tokenReward = toDec(collateralBurn).Mul(uTokenExchangeRate).TruncateInt()
 
 	return tokenRepay, collateralBurn, tokenReward
 }
