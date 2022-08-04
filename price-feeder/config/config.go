@@ -3,13 +3,14 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
 const (
@@ -19,15 +20,6 @@ const (
 	defaultSrvWriteTimeout = 15 * time.Second
 	defaultSrvReadTimeout  = 15 * time.Second
 	defaultProviderTimeout = 100 * time.Millisecond
-
-	ProviderKraken   = "kraken"
-	ProviderBinance  = "binance"
-	ProviderOsmosis  = "osmosis"
-	ProviderHuobi    = "huobi"
-	ProviderOkx      = "okx"
-	ProviderGate     = "gate"
-	ProviderCoinbase = "coinbase"
-	ProviderMock     = "mock"
 )
 
 var (
@@ -38,15 +30,15 @@ var (
 
 	// SupportedProviders defines a lookup table of all the supported currency API
 	// providers.
-	SupportedProviders = map[string]struct{}{
-		ProviderKraken:   {},
-		ProviderBinance:  {},
-		ProviderOsmosis:  {},
-		ProviderOkx:      {},
-		ProviderHuobi:    {},
-		ProviderGate:     {},
-		ProviderCoinbase: {},
-		ProviderMock:     {},
+	SupportedProviders = map[provider.Name]struct{}{
+		provider.ProviderKraken:   {},
+		provider.ProviderBinance:  {},
+		provider.ProviderOsmosis:  {},
+		provider.ProviderOkx:      {},
+		provider.ProviderHuobi:    {},
+		provider.ProviderGate:     {},
+		provider.ProviderCoinbase: {},
+		provider.ProviderMock:     {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
@@ -68,16 +60,16 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server            Server             `toml:"server"`
-		CurrencyPairs     []CurrencyPair     `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Deviations        []Deviation        `toml:"deviation_thresholds"`
-		Account           Account            `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring           Keyring            `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC               RPC                `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry         Telemetry          `toml:"telemetry"`
-		GasAdjustment     float64            `toml:"gas_adjustment" validate:"required"`
-		ProviderTimeout   string             `toml:"provider_timeout"`
-		ProviderEndpoints []ProviderEndpoint `toml:"provider_endpoints" validate:"dive"`
+		Server            Server              `toml:"server"`
+		CurrencyPairs     []CurrencyPair      `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations        []Deviation         `toml:"deviation_thresholds"`
+		Account           Account             `toml:"account" validate:"required,gt=0,dive,required"`
+		Keyring           Keyring             `toml:"keyring" validate:"required,gt=0,dive,required"`
+		RPC               RPC                 `toml:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry         Telemetry           `toml:"telemetry"`
+		GasAdjustment     float64             `toml:"gas_adjustment" validate:"required"`
+		ProviderTimeout   string              `toml:"provider_timeout"`
+		ProviderEndpoints []provider.Endpoint `toml:"provider_endpoints" validate:"dive"`
 	}
 
 	// Server defines the API server configuration.
@@ -92,9 +84,9 @@ type (
 	// CurrencyPair defines a price quote of the exchange rate for two different
 	// currencies and the supported providers for getting the exchange rate.
 	CurrencyPair struct {
-		Base      string   `toml:"base" validate:"required"`
-		Quote     string   `toml:"quote" validate:"required"`
-		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+		Base      string          `toml:"base" validate:"required"`
+		Quote     string          `toml:"quote" validate:"required"`
+		Providers []provider.Name `toml:"providers" validate:"required,gt=0,dive,required"`
 	}
 
 	// Deviation defines a maximum amount of standard deviations that a given asset can
@@ -155,19 +147,6 @@ type (
 		// It defines the retention duration in seconds.
 		PrometheusRetentionTime int64 `toml:"prometheus_retention" mapstructure:"prometheus-retention-time"`
 	}
-
-	// ProviderEndpoint defines an override setting in our config for the
-	// hardcoded rest and websocket api endpoints.
-	ProviderEndpoint struct {
-		// Name of the provider, ex. "binance"
-		Name string `toml:"name"`
-
-		// Rest endpoint for the provider, ex. "https://api1.binance.com"
-		Rest string `toml:"rest"`
-
-		// Websocket endpoint for the provider, ex. "stream.binance.com:9443"
-		Websocket string `toml:"websocket"`
-	}
 )
 
 // telemetryValidation is custom validation for the Telemetry struct.
@@ -181,7 +160,7 @@ func telemetryValidation(sl validator.StructLevel) {
 
 // endpointValidation is custom validation for the ProviderEndpoint struct.
 func endpointValidation(sl validator.StructLevel) {
-	endpoint := sl.Current().Interface().(ProviderEndpoint)
+	endpoint := sl.Current().Interface().(provider.Endpoint)
 
 	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
 		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
@@ -194,7 +173,7 @@ func endpointValidation(sl validator.StructLevel) {
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
 	validate.RegisterStructValidation(telemetryValidation, Telemetry{})
-	validate.RegisterStructValidation(endpointValidation, ProviderEndpoint{})
+	validate.RegisterStructValidation(endpointValidation, provider.Endpoint{})
 	return validate.Struct(c)
 }
 
@@ -207,7 +186,7 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, ErrEmptyConfigPath
 	}
 
-	configData, err := ioutil.ReadFile(configPath)
+	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		return cfg, fmt.Errorf("failed to read config: %w", err)
 	}
@@ -229,11 +208,11 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.ProviderTimeout = defaultProviderTimeout.String()
 	}
 
-	pairs := make(map[string]map[string]struct{})
+	pairs := make(map[string]map[provider.Name]struct{})
 	coinQuotes := make(map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
 		if _, ok := pairs[cp.Base]; !ok {
-			pairs[cp.Base] = make(map[string]struct{})
+			pairs[cp.Base] = make(map[provider.Name]struct{})
 		}
 		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
@@ -263,14 +242,14 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for base, providers := range pairs {
-		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
 	gatePairs := []string{}
 	for base, providers := range pairs {
-		if _, ok := providers["gate"]; ok {
+		if _, ok := providers[provider.ProviderGate]; ok {
 			gatePairs = append(gatePairs, base)
 		}
 	}

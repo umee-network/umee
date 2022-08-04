@@ -13,9 +13,7 @@ import (
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
 // the base and display/symbol denominations for each exchange pair. E.g. it must
 // know about the UMEE/USD exchange rate along with the uumee base denomination
-// and the exponent.
-// This function will only return positive exchange rates or errors, unless a
-// token is blacklisted, in which case it will return zero.
+// and the exponent. When error is nil, price is guaranteed to be positive.
 func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	t, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
@@ -23,7 +21,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	}
 
 	if t.Blacklist {
-		return sdk.ZeroDec(), nil
+		return sdk.ZeroDec(), types.ErrBlacklisted
 	}
 
 	price, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
@@ -45,16 +43,18 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-
 	return p.Mul(coin.Amount.ToDec()), nil
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is
-// equivalent to calling GetTokenValue on each coin individually.
+// equivalent to the sum of TokenValue on each coin individually, except it
+// ignores unregistered and blacklisted tokens instead of returning an error.
 func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
-	for _, c := range coins {
+	accepted := k.filterAcceptedCoins(ctx, coins)
+
+	for _, c := range accepted {
 		v, err := k.TokenValue(ctx, c)
 		if err != nil {
 			return sdk.ZeroDec(), err
@@ -66,34 +66,19 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	return total, nil
 }
 
-// EquivalentValue returns the amount of a selected denom which would have equal
-// USD value to a provided sdk.Coin
-func (k Keeper) EquivalentTokenValue(ctx sdk.Context, fromCoin sdk.Coin, toDenom string) (sdk.Coin, error) {
-	// get USD price of input (fromCoin) denomination
-	p1, err := k.TokenPrice(ctx, fromCoin.Denom)
+// PriceRatio computed the ratio of the USD prices of two tokens, as sdk.Dec(fromPrice/toPrice).
+// Will return an error if either token price is not positive, and guarantees a positive output.
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec, error) {
+	p1, err := k.TokenPrice(ctx, fromDenom)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.ZeroDec(), err
 	}
-
-	// return immediately on zero input value
-	if p1.IsZero() {
-		return sdk.NewCoin(toDenom, sdk.ZeroInt()), nil
-	}
-
-	// get USD price of output denomination
 	p2, err := k.TokenPrice(ctx, toDenom)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.ZeroDec(), err
 	}
-	if !p2.IsPositive() {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrBadValue, p2.String())
-	}
-
-	// then return the amount corrected by the price ratio
-	return sdk.NewCoin(
-		toDenom,
-		fromCoin.Amount.ToDec().Mul(p1).Quo(p2).TruncateInt(),
-	), nil
+	// Price ratio > 1 if fromDenom is worth more than toDenom.
+	return p1.Quo(p2), nil
 }
 
 // FundOracle transfers requested coins to the oracle module account, as

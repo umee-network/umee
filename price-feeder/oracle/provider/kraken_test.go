@@ -7,7 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -15,7 +14,7 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewKrakenProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		Endpoint{},
 		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -70,8 +69,7 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.Error(t, err)
-		require.Equal(t, "failed to get ticker price for FOOBAR", err.Error())
+		require.EqualError(t, err, "kraken failed to get ticker price for FOOBAR")
 		require.Nil(t, prices)
 	})
 }
@@ -80,7 +78,7 @@ func TestKrakenProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewKrakenProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)
