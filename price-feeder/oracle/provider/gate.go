@@ -110,9 +110,9 @@ func NewGateProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*GateProvider, error) {
-	if endpoints.Name != types.ProviderGate {
+	if endpoints.Name != ProviderGate {
 		endpoints = Endpoint{
-			Name:      types.ProviderGate,
+			Name:      ProviderGate,
 			Rest:      gateRestHost,
 			Websocket: gateWSHost,
 		}
@@ -133,7 +133,7 @@ func NewGateProvider(
 	provider := &GateProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderGate)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderGate)).Logger(),
 		reconnectTimer:  time.NewTicker(gatePingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
@@ -225,7 +225,7 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		string(types.ProviderGate),
+		string(ProviderGate),
 	)
 	return nil
 }
@@ -409,7 +409,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 		"type",
 		"ticker",
 		"provider",
-		string(types.ProviderGate),
+		string(ProviderGate),
 	)
 	return nil
 }
@@ -483,7 +483,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 		"type",
 		"candle",
 		"provider",
-		string(types.ProviderGate),
+		string(ProviderGate),
 	)
 	return nil
 }
@@ -564,7 +564,7 @@ func (p *GateProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderGate),
+		string(ProviderGate),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -605,12 +605,12 @@ func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(types.ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
+	return newTickerPrice(string(ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
 }
 
 func (candle GateCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		string(types.ProviderGate),
+		string(ProviderGate),
 		candle.Symbol,
 		candle.Close,
 		candle.Volume,

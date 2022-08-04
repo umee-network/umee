@@ -108,9 +108,9 @@ func NewOkxProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*OkxProvider, error) {
-	if endpoints.Name != types.ProviderOkx {
+	if endpoints.Name != ProviderOkx {
 		endpoints = Endpoint{
-			Name:      types.ProviderOkx,
+			Name:      ProviderOkx,
 			Rest:      okxRestHost,
 			Websocket: okxWSHost,
 		}
@@ -131,7 +131,7 @@ func NewOkxProvider(
 	provider := &OkxProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderOkx)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderOkx)).Logger(),
 		reconnectTimer:  time.NewTicker(okxPingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]OkxTickerPair{},
@@ -198,7 +198,7 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		string(types.ProviderOkx),
+		string(ProviderOkx),
 	)
 	return nil
 }
@@ -331,7 +331,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"ticker",
 				"provider",
-				string(types.ProviderOkx),
+				string(ProviderOkx),
 			)
 		}
 		return
@@ -348,7 +348,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 				"type",
 				"candle",
 				"provider",
-				string(types.ProviderOkx),
+				string(ProviderOkx),
 			)
 		}
 		return
@@ -443,7 +443,7 @@ func (p *OkxProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderOkx),
+		string(ProviderOkx),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -492,11 +492,11 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(types.ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
+	return newTickerPrice(string(ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
 func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(string(types.ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
+	return newCandlePrice(string(ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // currencyPairToOkxPair returns the expected pair instrument ID for Okx

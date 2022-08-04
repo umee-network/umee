@@ -56,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1123](https://github.com/umee-network/umee/pull/1123) Shorten all leverage and oracle query structs by removing the Request suffix.
 - [1125](https://github.com/umee-network/umee/pull/1125) Refactor: remove proto getters in x/leverage and x/oracle proto types.
 - [1126](https://github.com/umee-network/umee/pull/1126) Update proto json tag from `APY` to `apy`.
+- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate now has reward denom instead of full coin
 - [1130](https://github.com/umee-network/umee/pull/1130) Update proto json tag to lower case.
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
@@ -72,9 +73,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 - [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
+- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate rewards base assets instead of requiring an addtional MsgWithdraw
 - [1159](https://github.com/umee-network/umee/pull/1159) Add `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
 - [1188](https://github.com/umee-network/umee/pull/1188) Add `liquidity`, `maximum_borrow`, `maximum_collateral`, `minimum_liquidity`, `available_withdraw`, `available_collateralize`, and `utoken_supply` fields to market summary.
 - [1203](https://github.com/umee-network/umee/pull/1203) Add Swagger docs.
+- [1212](https://github.com/umee-network/umee/pull/1212) Add `util/checkers` utility package providing common check / validation functions.
 
 ### Improvements
 

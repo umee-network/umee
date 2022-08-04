@@ -7,7 +7,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
@@ -126,7 +125,7 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
-	prices map[types.ProviderName]map[string]sdk.Dec,
+	prices map[provider.Name]map[string]sdk.Dec,
 ) (map[string]sdk.Dec, map[string]sdk.Dec, error) {
 	var (
 		deviations = make(map[string]sdk.Dec)

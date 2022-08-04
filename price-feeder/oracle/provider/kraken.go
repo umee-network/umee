@@ -106,9 +106,9 @@ func NewKrakenProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
-	if endpoints.Name != types.ProviderKraken {
+	if endpoints.Name != ProviderKraken {
 		endpoints = Endpoint{
-			Name:      types.ProviderKraken,
+			Name:      ProviderKraken,
 			Rest:      KrakenRestHost,
 			Websocket: krakenWSHost,
 		}
@@ -128,7 +128,7 @@ func NewKrakenProvider(
 	provider := &KrakenProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderKraken)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderKraken)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]TickerPrice{},
 		candles:         map[string][]KrakenCandle{},
@@ -196,7 +196,7 @@ func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		string(types.ProviderKraken),
+		string(ProviderKraken),
 	)
 	return nil
 }
@@ -226,7 +226,7 @@ func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
 
 func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		string(types.ProviderKraken),
+		string(ProviderKraken),
 		candle.Symbol,
 		candle.Close,
 		candle.Volume,
@@ -394,7 +394,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		"type",
 		"ticker",
 		"provider",
-		string(types.ProviderKraken),
+		string(ProviderKraken),
 	)
 	return nil
 }
@@ -478,7 +478,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 		"type",
 		"candle",
 		"provider",
-		string(types.ProviderKraken),
+		string(ProviderKraken),
 	)
 	p.setCandlePair(krakenCandle)
 	return nil
@@ -503,7 +503,7 @@ func (p *KrakenProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderKraken),
+		string(ProviderKraken),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -663,7 +663,7 @@ func (ticker KrakenTicker) toTickerPrice(symbol string) (TickerPrice, error) {
 	}
 	// ticker.C has the Price in the first position.
 	// ticker.V has the totla	Value over last 24 hours in the second position.
-	return newTickerPrice(string(types.ProviderKraken), symbol, ticker.C[0], ticker.V[1])
+	return newTickerPrice(string(ProviderKraken), symbol, ticker.C[0], ticker.V[1])
 }
 
 // newKrakenTickerSubscriptionMsg returns a new subscription Msg.
