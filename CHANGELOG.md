@@ -78,6 +78,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1188](https://github.com/umee-network/umee/pull/1188) Add `liquidity`, `maximum_borrow`, `maximum_collateral`, `minimum_liquidity`, `available_withdraw`, `available_collateralize`, and `utoken_supply` fields to market summary.
 - [1203](https://github.com/umee-network/umee/pull/1203) Add Swagger docs.
 - [1212](https://github.com/umee-network/umee/pull/1212) Add `util/checkers` utility package providing common check / validation functions.
+- [xxx]() Integrated Cosmos SDK v0.46
+  - Adding Cosmos SDK x/group module.
+  - increased Gov `MaxMetadataLen` from 255 to 800 characters.
 
 ### Improvements
 
