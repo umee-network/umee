@@ -97,14 +97,14 @@ func (k Keeper) getLiquidationAmounts(
 // - closeFactor: The dynamic close factor computed from the borrower's borrowed value and liquidation threshold
 // - borrowedValue: The borrower's borrowed value in USD
 func ComputeLiquidation(
-	availableRepay sdk.Int,
-	availableCollateral sdk.Int,
+	availableRepay,
+	availableCollateral,
 	availableReward sdk.Int,
-	repayTokenPrice sdk.Dec,
-	rewardTokenPrice sdk.Dec,
-	uTokenExchangeRate sdk.Dec,
-	liquidationIncentive sdk.Dec,
-	closeFactor sdk.Dec,
+	repayTokenPrice,
+	rewardTokenPrice,
+	uTokenExchangeRate,
+	liquidationIncentive,
+	closeFactor,
 	borrowedValue sdk.Dec,
 ) (tokenRepay sdk.Int, collateralBurn sdk.Int, tokenReward sdk.Int) {
 	// Prevent division by zero
