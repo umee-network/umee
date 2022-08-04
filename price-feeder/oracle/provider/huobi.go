@@ -17,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -42,7 +41,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -97,12 +96,12 @@ type (
 func NewHuobiProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*HuobiProvider, error) {
-	if endpoints.Name != config.ProviderHuobi {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderHuobi,
+	if endpoints.Name != types.ProviderHuobi {
+		endpoints = Endpoint{
+			Name:      types.ProviderHuobi,
 			Rest:      huobiRestHost,
 			Websocket: huobiWSHost,
 		}
@@ -114,7 +113,8 @@ func NewHuobiProvider(
 		Path:   huobiWSPath,
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Huobi websocket: %w", err)
 	}
@@ -122,7 +122,7 @@ func NewHuobiProvider(
 	provider := &HuobiProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "huobi").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderHuobi)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]HuobiTicker{},
 		candles:         map[string][]HuobiCandle{},
@@ -185,7 +185,7 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderHuobi,
+		string(types.ProviderHuobi),
 	)
 	return nil
 }
@@ -301,7 +301,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"type",
 			"ticker",
 			"provider",
-			config.ProviderHuobi,
+			string(types.ProviderHuobi),
 		)
 		return
 	}
@@ -316,7 +316,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 			"type",
 			"candle",
 			"provider",
-			config.ProviderHuobi,
+			string(types.ProviderHuobi),
 		)
 		return
 	}
@@ -385,7 +385,8 @@ func (p *HuobiProvider) reconnect() error {
 	p.wsClient.Close()
 
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Huobi websocket: %w", err)
 	}
@@ -398,7 +399,7 @@ func (p *HuobiProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderHuobi,
+		string(types.ProviderHuobi),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -492,7 +493,7 @@ func decompressGzip(bz []byte) ([]byte, error) {
 // toTickerPrice converts current HuobiTicker to TickerPrice.
 func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		"Huobi",
+		string(types.ProviderHuobi),
 		ticker.CH,
 		strconv.FormatFloat(ticker.Tick.LastPrice, 'f', -1, 64),
 		strconv.FormatFloat(ticker.Tick.Vol, 'f', -1, 64),
@@ -501,7 +502,7 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 
 func (candle HuobiCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		"Huobi",
+		string(types.ProviderHuobi),
 		candle.CH,
 		strconv.FormatFloat(candle.Tick.Close, 'f', -1, 64),
 		strconv.FormatFloat(candle.Tick.Volume, 'f', -1, 64),

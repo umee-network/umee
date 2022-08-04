@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -37,7 +36,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -85,12 +84,12 @@ type (
 func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
-	if (endpoints.Name) != config.ProviderBinance {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderBinance,
+	if (endpoints.Name) != types.ProviderBinance {
+		endpoints = Endpoint{
+			Name:      types.ProviderBinance,
 			Rest:      binanceRestHost,
 			Websocket: binanceWSHost,
 		}
@@ -102,7 +101,8 @@ func NewBinanceProvider(
 		Path:   binanceWSPath,
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Binance websocket: %w", err)
 	}
@@ -110,7 +110,7 @@ func NewBinanceProvider(
 	provider := &BinanceProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "binance").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderBinance)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
@@ -265,7 +265,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			config.ProviderBinance,
+			string(types.ProviderBinance),
 		)
 		return
 	}
@@ -280,7 +280,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"candle",
 			"provider",
-			config.ProviderBinance,
+			string(types.ProviderBinance),
 		)
 		return
 	}
@@ -314,11 +314,11 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+	return newTickerPrice(string(types.ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
 func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice("Binance", candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+	return newCandlePrice(string(types.ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
 		candle.Metadata.TimeStamp)
 }
 
@@ -363,7 +363,8 @@ func (p *BinanceProvider) reconnect() error {
 	p.wsClient.Close()
 
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnect to binance websocket: %w", err)
 	}
@@ -376,7 +377,7 @@ func (p *BinanceProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderBinance,
+		string(types.ProviderBinance),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }

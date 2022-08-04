@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -38,7 +37,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
-		endpoints       config.ProviderEndpoint
+		endpoints       Endpoint
 		tickers         map[string]TickerPrice        // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -104,12 +103,12 @@ type (
 func NewKrakenProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
-	endpoints config.ProviderEndpoint,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*KrakenProvider, error) {
-	if endpoints.Name != config.ProviderKraken {
-		endpoints = config.ProviderEndpoint{
-			Name:      config.ProviderKraken,
+	if endpoints.Name != types.ProviderKraken {
+		endpoints = Endpoint{
+			Name:      types.ProviderKraken,
 			Rest:      KrakenRestHost,
 			Websocket: krakenWSHost,
 		}
@@ -120,7 +119,8 @@ func NewKrakenProvider(
 		Host:   endpoints.Websocket,
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to websocket: %w", err)
 	}
@@ -128,7 +128,7 @@ func NewKrakenProvider(
 	provider := &KrakenProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "kraken").Logger(),
+		logger:          logger.With().Str("provider", string(types.ProviderKraken)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]TickerPrice{},
 		candles:         map[string][]KrakenCandle{},
@@ -196,7 +196,7 @@ func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		config.ProviderKraken,
+		string(types.ProviderKraken),
 	)
 	return nil
 }
@@ -226,7 +226,7 @@ func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
 
 func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 	return newCandlePrice(
-		"Kraken",
+		string(types.ProviderKraken),
 		candle.Symbol,
 		candle.Close,
 		candle.Volume,
@@ -394,7 +394,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 		"type",
 		"ticker",
 		"provider",
-		config.ProviderKraken,
+		string(types.ProviderKraken),
 	)
 	return nil
 }
@@ -478,7 +478,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 		"type",
 		"candle",
 		"provider",
-		config.ProviderKraken,
+		string(types.ProviderKraken),
 	)
 	p.setCandlePair(krakenCandle)
 	return nil
@@ -489,7 +489,8 @@ func (p *KrakenProvider) reconnect() error {
 	p.wsClient.Close()
 	p.logger.Debug().Msg("trying to reconnect")
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error connecting to Kraken websocket: %w", err)
 	}
@@ -502,7 +503,7 @@ func (p *KrakenProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		config.ProviderKraken,
+		string(types.ProviderKraken),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }
@@ -662,7 +663,7 @@ func (ticker KrakenTicker) toTickerPrice(symbol string) (TickerPrice, error) {
 	}
 	// ticker.C has the Price in the first position.
 	// ticker.V has the totla	Value over last 24 hours in the second position.
-	return newTickerPrice("Kraken", symbol, ticker.C[0], ticker.V[1])
+	return newTickerPrice(string(types.ProviderKraken), symbol, ticker.C[0], ticker.V[1])
 }
 
 // newKrakenTickerSubscriptionMsg returns a new subscription Msg.

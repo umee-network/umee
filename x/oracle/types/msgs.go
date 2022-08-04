@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/tendermint/tendermint/crypto/tmhash"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+
+	"github.com/umee-network/umee/v2/util/checkers"
 )
 
 var (
@@ -45,8 +46,7 @@ func (msg MsgAggregateExchangeRatePrevote) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
-	feeder, _ := sdk.AccAddressFromBech32(msg.Feeder)
-	return []sdk.AccAddress{feeder}
+	return checkers.Signers(msg.Feeder)
 }
 
 // ValidateBasic Implements sdk.Msg
@@ -101,8 +101,7 @@ func (msg MsgAggregateExchangeRateVote) GetSignBytes() []byte {
 
 // GetSigners implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) GetSigners() []sdk.AccAddress {
-	feeder, _ := sdk.AccAddressFromBech32(msg.Feeder)
-	return []sdk.AccAddress{feeder}
+	return checkers.Signers(msg.Feeder)
 }
 
 // ValidateBasic implements sdk.Msg
