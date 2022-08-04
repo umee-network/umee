@@ -87,9 +87,9 @@ func NewBinanceProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
-	if (endpoints.Name) != types.ProviderBinance {
+	if (endpoints.Name) != ProviderBinance {
 		endpoints = Endpoint{
-			Name:      types.ProviderBinance,
+			Name:      ProviderBinance,
 			Rest:      binanceRestHost,
 			Websocket: binanceWSHost,
 		}
@@ -110,7 +110,7 @@ func NewBinanceProvider(
 	provider := &BinanceProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderBinance)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderBinance)).Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
@@ -265,7 +265,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			string(types.ProviderBinance),
+			string(ProviderBinance),
 		)
 		return
 	}
@@ -280,7 +280,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"candle",
 			"provider",
-			string(types.ProviderBinance),
+			string(ProviderBinance),
 		)
 		return
 	}
@@ -314,11 +314,11 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 }
 
 func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(types.ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
+	return newTickerPrice(string(ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
 func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(string(types.ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+	return newCandlePrice(string(ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
 		candle.Metadata.TimeStamp)
 }
 
@@ -377,7 +377,7 @@ func (p *BinanceProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderBinance),
+		string(ProviderBinance),
 	)
 	return p.subscribeChannels(currencyPairs...)
 }

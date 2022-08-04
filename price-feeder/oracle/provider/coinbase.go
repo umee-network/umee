@@ -98,9 +98,9 @@ func NewCoinbaseProvider(
 	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
-	if endpoints.Name != types.ProviderCoinbase {
+	if endpoints.Name != ProviderCoinbase {
 		endpoints = Endpoint{
-			Name:      types.ProviderCoinbase,
+			Name:      ProviderCoinbase,
 			Rest:      coinbaseRestHost,
 			Websocket: coinbaseWSHost,
 		}
@@ -119,7 +119,7 @@ func NewCoinbaseProvider(
 	provider := &CoinbaseProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(types.ProviderCoinbase)).Logger(),
+		logger:          logger.With().Str("provider", string(ProviderCoinbase)).Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
 		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
@@ -240,7 +240,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 		"subscribe",
 		"currency_pairs",
 		"provider",
-		string(types.ProviderCoinbase),
+		string(ProviderCoinbase),
 	)
 	return nil
 }
@@ -390,7 +390,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 			"type",
 			"ticker",
 			"provider",
-			string(types.ProviderCoinbase),
+			string(ProviderCoinbase),
 		)
 		return
 	}
@@ -401,7 +401,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		"type",
 		"trade",
 		"provider",
-		string(types.ProviderCoinbase),
+		string(ProviderCoinbase),
 	)
 	p.setTradePair(coinbaseTrade)
 }
@@ -498,7 +498,7 @@ func (p *CoinbaseProvider) reconnect() error {
 		"websocket",
 		"reconnect",
 		"provider",
-		string(types.ProviderCoinbase),
+		string(ProviderCoinbase),
 	)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
@@ -515,7 +515,7 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 
 func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
 	return newTickerPrice(
-		string(types.ProviderCoinbase),
+		string(ProviderCoinbase),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,
 		ticker.Volume,
