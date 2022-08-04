@@ -16,7 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
@@ -112,8 +112,8 @@ type GovModule struct {
 
 // DefaultGenesis returns custom Umee x/gov module genesis state.
 func (GovModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	minDeposit := sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens))
-	genState := govtypes.DefaultGenesisState()
+	minDeposit := sdk.NewCoins(sdk.NewCoin(BondDenom, govv1.DefaultMinDepositTokens))
+	genState := govv1.DefaultGenesisState()
 	genState.DepositParams.MinDeposit = minDeposit
 
 	return cdc.MustMarshalJSON(genState)
