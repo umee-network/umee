@@ -58,61 +58,33 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 	for _, msg := range msgs {
 		switch msg := msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote:
-			feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
-			if err != nil {
-				return err
-			}
-
-			valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
-			if err != nil {
-				return err
-			}
-
-			err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
-			if err != nil {
-				return err
-			}
-
-			if lastSubmittedHeight, ok := spd.oraclePrevoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(
-					sdkerrors.ErrInvalidRequest,
-					"validator has already submitted a pre-vote message at the current height",
-				)
-			}
-
-			spd.oraclePrevoteMap[msg.Validator] = curHeight
-			continue
-
+			return spd.validate(ctx, msg.Feeder, msg.Validator, spd.oraclePrevoteMap, curHeight, "pre-vote")
 		case *oracletypes.MsgAggregateExchangeRateVote:
-			feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
-			if err != nil {
-				return err
-			}
-
-			valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
-			if err != nil {
-				return err
-			}
-
-			err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
-			if err != nil {
-				return err
-			}
-
-			if lastSubmittedHeight, ok := spd.oracleVoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(
-					sdkerrors.ErrInvalidRequest,
-					"validator has already submitted a vote message at the current height",
-				)
-			}
-
-			spd.oracleVoteMap[msg.Validator] = curHeight
-			continue
-
+			return spd.validate(ctx, msg.Feeder, msg.Validator, spd.oracleVoteMap, curHeight, "vote")
 		default:
 			return nil
 		}
 	}
 
+	return nil
+}
+
+func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator string, cache map[string]int64, curHeight int64, errMsg string) error {
+	feederAddr, err := sdk.AccAddressFromBech32(feeder)
+	if err != nil {
+		return err
+	}
+	valAddr, err := sdk.ValAddressFromBech32(validator)
+	if err != nil {
+		return err
+	}
+	if spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
+		return err
+	}
+	if lastSubmitted, ok := cache[validator]; ok && lastSubmitted == curHeight {
+		return sdkerrors.ErrInvalidRequest.Wrapf(
+			"validator has already submitted a %s message at the current height", errMsg)
+	}
+	cache[validator] = curHeight
 	return nil
 }
