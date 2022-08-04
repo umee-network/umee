@@ -56,13 +56,18 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 
 	curHeight := ctx.BlockHeight()
 	for _, msg := range msgs {
+		var err error
 		switch msg := msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote:
-			return spd.validate(ctx, msg.Feeder, msg.Validator, spd.oraclePrevoteMap, curHeight, "pre-vote")
+			err = spd.validate(ctx, msg.Feeder, msg.Validator, spd.oraclePrevoteMap, curHeight, "pre-vote")
 		case *oracletypes.MsgAggregateExchangeRateVote:
-			return spd.validate(ctx, msg.Feeder, msg.Validator, spd.oracleVoteMap, curHeight, "vote")
+			err = spd.validate(ctx, msg.Feeder, msg.Validator, spd.oracleVoteMap, curHeight, "vote")
 		default:
+			// non oracle msg: stop validation!
 			return nil
+		}
+		if err != nil {
+			return err
 		}
 	}
 
@@ -78,7 +83,7 @@ func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator 
 	if err != nil {
 		return err
 	}
-	if spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
+	if err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
 		return err
 	}
 	if lastSubmitted, ok := cache[validator]; ok && lastSubmitted == curHeight {
