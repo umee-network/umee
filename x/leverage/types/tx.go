@@ -3,6 +3,8 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/umee-network/umee/v2/util/checkers"
 )
 
 func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
@@ -16,21 +18,11 @@ func (msg MsgSupply) Route() string { return ModuleName }
 func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Supplier)
-	if err != nil {
-		return err
-	}
-
-	if !msg.Asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
-	}
-
-	return nil
+	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
-	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
-	return []sdk.AccAddress{supplier}
+	return checkers.Signers(msg.Supplier)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -50,21 +42,11 @@ func (msg MsgWithdraw) Route() string { return ModuleName }
 func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Supplier)
-	if err != nil {
-		return err
-	}
-
-	if !msg.Asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
-	}
-
-	return nil
+	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
-	supplier, _ := sdk.AccAddressFromBech32(msg.Supplier)
-	return []sdk.AccAddress{supplier}
+	return checkers.Signers(msg.Supplier)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -84,16 +66,11 @@ func (msg MsgCollateralize) Route() string { return ModuleName }
 func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateSenderAndAsset(msg.Borrower, nil)
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
-	return []sdk.AccAddress{borrower}
+	return checkers.Signers(msg.Borrower)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -113,16 +90,11 @@ func (msg MsgDecollateralize) Route() string { return ModuleName }
 func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateSenderAndAsset(msg.Borrower, nil)
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
-	return []sdk.AccAddress{borrower}
+	return checkers.Signers(msg.Borrower)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -142,21 +114,11 @@ func (msg MsgBorrow) Route() string { return ModuleName }
 func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return err
-	}
-
-	if !msg.Asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
-	}
-
-	return nil
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
-	return []sdk.AccAddress{borrower}
+	return checkers.Signers(msg.Borrower)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -176,21 +138,11 @@ func (msg MsgRepay) Route() string { return ModuleName }
 func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return err
-	}
-
-	if !msg.Asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, msg.Asset.String())
-	}
-
-	return nil
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
-	borrower, _ := sdk.AccAddressFromBech32(msg.Borrower)
-	return []sdk.AccAddress{borrower}
+	return checkers.Signers(msg.Borrower)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -212,33 +164,29 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
-	if err != nil {
+	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
 		return err
 	}
-	_, err = sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return err
-	}
-
-	if asset := msg.Repayment; !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
-	}
-
-	if asset := msg.Reward; !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
-	}
-
-	return nil
+	return validateSenderAndAsset(msg.Liquidator, &msg.Reward)
 }
 
 func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
-	liquidator, _ := sdk.AccAddressFromBech32(msg.Liquidator)
-	return []sdk.AccAddress{liquidator}
+	return checkers.Signers(msg.Liquidator)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
 func (msg *MsgLiquidate) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
+}
+
+func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
+	_, err := sdk.AccAddressFromBech32(sender)
+	if err != nil {
+		return err
+	}
+	if asset != nil && !asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	}
+	return nil
 }
