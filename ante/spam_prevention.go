@@ -83,7 +83,7 @@ func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator 
 	}
 	if lastSubmitted, ok := cache[validator]; ok && lastSubmitted == curHeight {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
-			"validator has already submitted a %s message at the current height", errMsg)
+			"validator has already submitted a %s message at the current height", txType)
 	}
 	cache[validator] = curHeight
 	return nil
