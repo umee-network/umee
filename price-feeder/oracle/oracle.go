@@ -57,13 +57,13 @@ type Oracle struct {
 	closer *pfsync.Closer
 
 	providerTimeout    time.Duration
-	providerPairs      map[types.ProviderName][]types.CurrencyPair
+	providerPairs      map[provider.Name][]types.CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
-	priceProviders     map[types.ProviderName]provider.Provider
+	priceProviders     map[provider.Name]provider.Provider
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
-	endpoints          map[types.ProviderName]provider.Endpoint
+	endpoints          map[provider.Name]provider.Endpoint
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
@@ -77,9 +77,9 @@ func New(
 	currencyPairs []config.CurrencyPair,
 	providerTimeout time.Duration,
 	deviations map[string]sdk.Dec,
-	endpoints map[types.ProviderName]provider.Endpoint,
+	endpoints map[provider.Name]provider.Endpoint,
 ) *Oracle {
-	providerPairs := make(map[types.ProviderName][]types.CurrencyPair)
+	providerPairs := make(map[provider.Name][]types.CurrencyPair)
 
 	for _, pair := range currencyPairs {
 		for _, provider := range pair.Providers {
@@ -95,7 +95,7 @@ func New(
 		closer:          pfsync.NewCloser(),
 		oracleClient:    oc,
 		providerPairs:   providerPairs,
-		priceProviders:  make(map[types.ProviderName]provider.Provider),
+		priceProviders:  make(map[provider.Name]provider.Provider),
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
@@ -273,7 +273,7 @@ func GetComputedPrices(
 	logger zerolog.Logger,
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
-	providerPairs map[types.ProviderName][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
 	// convert any non-USD denominated candles into USD
@@ -340,7 +340,7 @@ func GetComputedPrices(
 // candles and tickers based on the base currency per provider.
 // Returns true if at least one of price or candle exists.
 func SetProviderTickerPricesAndCandles(
-	providerName types.ProviderName,
+	providerName provider.Name,
 	providerPrices provider.AggregatedProviderPrices,
 	providerCandles provider.AggregatedProviderCandles,
 	prices map[string]provider.TickerPrice,
@@ -410,7 +410,7 @@ func (o *Oracle) GetParams(ctx context.Context) (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) getOrSetProvider(ctx context.Context, providerName types.ProviderName) (provider.Provider, error) {
+func (o *Oracle) getOrSetProvider(ctx context.Context, providerName provider.Name) (provider.Provider, error) {
 	var (
 		priceProvider provider.Provider
 		ok            bool
@@ -438,34 +438,34 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName types.Provid
 
 func NewProvider(
 	ctx context.Context,
-	providerName types.ProviderName,
+	providerName provider.Name,
 	logger zerolog.Logger,
 	endpoint provider.Endpoint,
 	providerPairs ...types.CurrencyPair,
 ) (provider.Provider, error) {
 	switch providerName {
-	case types.ProviderBinance:
+	case provider.ProviderBinance:
 		return provider.NewBinanceProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderKraken:
+	case provider.ProviderKraken:
 		return provider.NewKrakenProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderOsmosis:
+	case provider.ProviderOsmosis:
 		return provider.NewOsmosisProvider(endpoint), nil
 
-	case types.ProviderHuobi:
+	case provider.ProviderHuobi:
 		return provider.NewHuobiProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderCoinbase:
+	case provider.ProviderCoinbase:
 		return provider.NewCoinbaseProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderOkx:
+	case provider.ProviderOkx:
 		return provider.NewOkxProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderGate:
+	case provider.ProviderGate:
 		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
 
-	case types.ProviderMock:
+	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil
 	}
 
