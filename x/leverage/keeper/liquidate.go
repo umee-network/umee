@@ -172,8 +172,8 @@ func ComputeLiquidation(
 	return tokenRepay, collateralBurn, tokenReward
 }
 
-// ComputeCloseFactor uses a borrower's borrowed value and liquidation threshold and
-// some leverage module parameters to derive a dynamic close factor for liquidation.
+// ComputeCloseFactor derives the maximum portion of a borrower's current
+// borrowed value can currently be repaid in a single liquidate transaction.
 func ComputeCloseFactor(
 	borrowedValue sdk.Dec,
 	liquidationThreshold sdk.Dec,
