@@ -1,0 +1,26 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Umee SDK - gRPC Gateway docs",
+    "description": "A REST interface for state queries",
+    "version": "1.0.0"
+  },
+  "apis": [
+    {
+      "url": "./tmp-swagger-gen/umee/leverage/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "LeverageParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/umee/oracle/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "OracleParams"
+        }
+      }
+    }
+  ]
+}

@@ -84,14 +84,22 @@ func (t Token) Validate() error {
 		}
 	}
 
-	if t.MaxCollateralShare > 100 {
-		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be in [0; 100] range")
+	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be between 0 and 1")
+	}
+
+	if t.MaxSupplyUtilization.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupplyUtilization must be between 0 and 1")
+	}
+
+	if t.MinCollateralLiquidity.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MinCollateralLiquidity be between 0 and 1")
 	}
 
 	return nil
 }
 
-// AssertSupplyEnabled returns an error if a token does not exist or cannot be supplied.
+// AssertSupplyEnabled returns an error if a Token cannot be supplied.
 func (t Token) AssertSupplyEnabled() error {
 	if !t.EnableMsgSupply {
 		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)
@@ -99,10 +107,18 @@ func (t Token) AssertSupplyEnabled() error {
 	return nil
 }
 
-// AssertBorrowEnabled returns an error if a token does not exist or cannot be borrowed.
+// AssertBorrowEnabled returns an error if a Token cannot be borrowed.
 func (t Token) AssertBorrowEnabled() error {
 	if !t.EnableMsgBorrow {
 		return sdkerrors.Wrap(ErrBorrowNotAllowed, t.BaseDenom)
+	}
+	return nil
+}
+
+// AssertNotBlacklisted returns an error if a Token is blacklisted.
+func (t Token) AssertNotBlacklisted() error {
+	if t.Blacklist {
+		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
 	}
 	return nil
 }

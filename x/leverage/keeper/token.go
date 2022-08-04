@@ -81,16 +81,3 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 	err := k.cdc.Unmarshal(bz, &token)
 	return token, err
 }
-
-// AssertNotBlacklisted returns an error if a token does not exist or is blacklisted.
-func (k Keeper) AssertNotBlacklisted(ctx sdk.Context, denom string) error {
-	token, err := k.GetTokenSettings(ctx, denom)
-	if err != nil {
-		return err
-	}
-	if token.Blacklist {
-		return sdkerrors.Wrap(types.ErrBlacklisted, denom)
-	}
-
-	return nil
-}

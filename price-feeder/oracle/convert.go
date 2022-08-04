@@ -13,8 +13,11 @@ import (
 
 // getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,
 // given the asset and the map of providers to currency pairs.
-func getUSDBasedProviders(asset string, providerPairs map[string][]types.CurrencyPair) (map[string]struct{}, error) {
-	conversionProviders := make(map[string]struct{})
+func getUSDBasedProviders(
+	asset string,
+	providerPairs map[provider.Name][]types.CurrencyPair,
+) (map[provider.Name]struct{}, error) {
+	conversionProviders := make(map[provider.Name]struct{})
 
 	for provider, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -38,7 +41,7 @@ func getUSDBasedProviders(asset string, providerPairs map[string][]types.Currenc
 func convertCandlesToUSD(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
-	providerPairs map[string][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderCandles, error) {
 	if len(candles) == 0 {
@@ -46,7 +49,7 @@ func convertCandlesToUSD(
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
-	requiredConversions := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[provider.Name]types.CurrencyPair)
 
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -122,7 +125,7 @@ func convertCandlesToUSD(
 func convertTickersToUSD(
 	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,
-	providerPairs map[string][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderPrices, error) {
 	if len(tickers) == 0 {
@@ -130,7 +133,7 @@ func convertTickersToUSD(
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
-	requiredConversions := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[provider.Name]types.CurrencyPair)
 
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {

@@ -1,10 +1,10 @@
 package oracle
 
 import (
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 // defaultDeviationThreshold defines how many 𝜎 a provider can be away
@@ -21,7 +21,7 @@ func FilterTickerDeviations(
 ) (provider.AggregatedProviderPrices, error) {
 	var (
 		filteredPrices = make(provider.AggregatedProviderPrices)
-		priceMap       = make(map[string]map[string]sdk.Dec)
+		priceMap       = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceTickers := range prices {
@@ -61,7 +61,7 @@ func FilterTickerDeviations(
 				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName).
+					Str("provider", string(providerName)).
 					Str("price", tp.Price.String()).
 					Msg("provider deviating from other prices")
 			}
@@ -80,7 +80,7 @@ func FilterCandleDeviations(
 ) (provider.AggregatedProviderCandles, error) {
 	var (
 		filteredCandles = make(provider.AggregatedProviderCandles)
-		tvwaps          = make(map[string]map[string]sdk.Dec)
+		tvwaps          = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceCandles := range candles {
@@ -135,7 +135,7 @@ func FilterCandleDeviations(
 				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName).
+					Str("provider", string(providerName)).
 					Str("price", price.String()).
 					Msg("provider deviating from other candles")
 			}

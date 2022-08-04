@@ -7,7 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -30,16 +29,16 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 		},
 	}
 
-	providerCandles[config.ProviderBinance] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderBinance] = map[string][]provider.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[config.ProviderHuobi] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderHuobi] = map[string][]provider.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[config.ProviderKraken] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderKraken] = map[string][]provider.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[config.ProviderCoinbase] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderCoinbase] = map[string][]provider.CandlePrice{
 		pair.Base: {
 			{
 				Price:     sdk.MustNewDecFromStr("27.1"),
@@ -55,7 +54,7 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 		make(map[string]sdk.Dec),
 	)
 
-	_, ok := pricesFiltered[config.ProviderCoinbase]
+	_, ok := pricesFiltered[provider.ProviderCoinbase]
 	require.NoError(t, err, "It should successfully filter out the provider using candles")
 	require.False(t, ok, "The filtered candle deviation price at coinbase should be empty")
 
@@ -68,7 +67,7 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 		customDeviations,
 	)
 
-	_, ok = pricesFilteredCustom[config.ProviderCoinbase]
+	_, ok = pricesFilteredCustom[provider.ProviderCoinbase]
 	require.NoError(t, err, "It should successfully not filter out coinbase")
 	require.True(t, ok, "The filtered candle deviation price of coinbase should remain")
 }
@@ -88,16 +87,16 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 		Volume: atomVolume,
 	}
 
-	providerTickers[config.ProviderBinance] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderBinance] = map[string]provider.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[config.ProviderHuobi] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderHuobi] = map[string]provider.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[config.ProviderKraken] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderKraken] = map[string]provider.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[config.ProviderCoinbase] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderCoinbase] = map[string]provider.TickerPrice{
 		pair.Base: {
 			Price:  sdk.MustNewDecFromStr("27.1"),
 			Volume: atomVolume,
@@ -110,7 +109,7 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 		make(map[string]sdk.Dec),
 	)
 
-	_, ok := pricesFiltered[config.ProviderCoinbase]
+	_, ok := pricesFiltered[provider.ProviderCoinbase]
 	require.NoError(t, err, "It should successfully filter out the provider using tickers")
 	require.False(t, ok, "The filtered ticker deviation price at coinbase should be empty")
 
@@ -123,7 +122,7 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 		customDeviations,
 	)
 
-	_, ok = pricesFilteredCustom[config.ProviderCoinbase]
+	_, ok = pricesFilteredCustom[provider.ProviderCoinbase]
 	require.NoError(t, err, "It should successfully not filter out coinbase")
 	require.True(t, ok, "The filtered candle deviation price of coinbase should remain")
 }

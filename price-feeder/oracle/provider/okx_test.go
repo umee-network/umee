@@ -7,7 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -15,7 +14,7 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewOkxProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		Endpoint{},
 		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -79,8 +78,7 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.Error(t, err)
-		require.Equal(t, "okx provider failed to get ticker price for FOO-BAR", err.Error())
+		require.EqualError(t, err, "okx failed to get ticker price for FOO-BAR")
 		require.Nil(t, prices)
 	})
 }
@@ -89,7 +87,7 @@ func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewOkxProvider(
 		context.TODO(),
 		zerolog.Nop(),
-		config.ProviderEndpoint{},
+		Endpoint{},
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)

@@ -87,19 +87,21 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
 		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		// add each collateral coin's weighted value to borrow limit
-		limit = limit.Add(v.Mul(ts.CollateralWeight))
+		// ignore blacklisted tokens
+		if !ts.Blacklist {
+			// get USD value of base assets
+			v, err := k.TokenValue(ctx, baseAsset)
+			if err != nil {
+				return sdk.ZeroDec(), err
+			}
+			// add each collateral coin's weighted value to borrow limit
+			limit = limit.Add(v.Mul(ts.CollateralWeight))
+		}
 	}
 
 	return limit, nil
@@ -120,18 +122,22 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 			return sdk.ZeroDec(), err
 		}
 
-		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
 		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
+		// ignore blacklisted tokens
+		if !ts.Blacklist {
+			// get USD value of base assets
+			v, err := k.TokenValue(ctx, baseAsset)
+			if err != nil {
+				return sdk.ZeroDec(), err
+			}
+
+			// add each collateral coin's weighted value to liquidation threshold
+			totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
+		}
 	}
 
 	return totalThreshold, nil

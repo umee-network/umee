@@ -25,7 +25,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [Borrow APY](01_concepts.md#Borrow-APY)
      - [Supplying APY](01_concepts.md#Supplying-APY)
      - [Close Factor](01_concepts.md#Close-Factor)
-     - [Market Size](01_concepts.md#Market-Size)
+     - [Total Supplied](01_concepts.md#Total-Supplied)
 2. **[State](02_state.md)**
 3. **[Queries](03_queries.md)**
 4. **[Messages](04_messages.md)**

@@ -84,6 +84,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("195.19"), v)
 
+	// same result, as unregistered token is ignored
 	v, err = s.app.LeverageKeeper.TotalTokenValue(
 		s.ctx,
 		sdk.NewCoins(
@@ -92,20 +93,19 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 			sdk.NewInt64Coin("foo", 4700000),
 		),
 	)
-	s.Require().Error(err)
-	s.Require().Equal(sdk.ZeroDec(), v)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.MustNewDecFromStr("195.19"), v)
 }
 
-func (s *IntegrationTestSuite) TestOracle_EquivalentTokenValue() {
-	c, err := s.app.LeverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), atomIBCDenom)
+func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
+	r, err := s.app.LeverageKeeper.PriceRatio(s.ctx, umeeapp.BondDenom, atomIBCDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64Coin(atomIBCDenom, 256576), c)
+	// $4.21 / $39.38
+	s.Require().Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
 
-	c, err = s.app.LeverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin("foo", 2400000), atomIBCDenom)
+	_, err = s.app.LeverageKeeper.PriceRatio(s.ctx, "foo", atomIBCDenom)
 	s.Require().Error(err)
-	s.Require().Equal(sdk.Coin{}, c)
 
-	c, err = s.app.LeverageKeeper.EquivalentTokenValue(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000), "foo")
+	_, err = s.app.LeverageKeeper.PriceRatio(s.ctx, umeeapp.BondDenom, "foo")
 	s.Require().Error(err)
-	s.Require().Equal(sdk.Coin{}, c)
 }

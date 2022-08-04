@@ -9,7 +9,7 @@ import (
 var (
 	ErrInvalidAsset            = sdkerrors.Register(ModuleName, 1100, "invalid asset")
 	ErrInsufficientBalance     = sdkerrors.Register(ModuleName, 1101, "insufficient balance")
-	ErrUndercollaterized       = sdkerrors.Register(ModuleName, 1102, "Borrow positions are undercollaterized")
+	ErrUndercollaterized       = sdkerrors.Register(ModuleName, 1102, "borrow positions are undercollaterized")
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 1103, "lending pool insufficient")
 	ErrInvalidRepayment        = sdkerrors.Register(ModuleName, 1104, "invalid repayment")
 	ErrInvalidAddress          = sdkerrors.Register(ModuleName, 1105, "invalid address")
@@ -30,4 +30,12 @@ var (
 	ErrBorrowNotAllowed        = sdkerrors.Register(ModuleName, 1120, "borrowing of asset disabled")
 	ErrBlacklisted             = sdkerrors.Register(ModuleName, 1121, "base denom blacklisted")
 	ErrCollateralWeightZero    = sdkerrors.Register(ModuleName, 1122, "token collateral weight is zero")
+	ErrLiquidationInvalid      = sdkerrors.Register(ModuleName, 1123, "liquidation invalid")
+	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 1124, "market would exceed MaxSupplyUtilization")
+	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 1125, "market would fall below MinCollateralLiquidity")
+	ErrMaxCollateralShare      = sdkerrors.Register(
+		ModuleName,
+		1126,
+		"market total collateral would exceed MaxCollateralShare",
+	)
 )
