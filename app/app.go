@@ -101,6 +101,7 @@ import (
 	appparams "github.com/umee-network/umee/v2/app/params"
 	"github.com/umee-network/umee/v2/app/upgrades"
 	"github.com/umee-network/umee/v2/app/upgrades/calypso"
+	"github.com/umee-network/umee/v2/swagger"
 	uibctransfer "github.com/umee-network/umee/v2/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v2/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v2/x/leverage"
@@ -844,6 +845,10 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 	// register legacy and grpc-gateway routes for all modules
 	ModuleBasics.RegisterRESTRoutes(clientCtx, apiSvr.Router)
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+
+	if apiConfig.Swagger {
+		swagger.RegisterSwaggerAPI(apiSvr.Router)
+	}
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
