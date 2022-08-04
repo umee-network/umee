@@ -7,16 +7,15 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestComputeVWAP(t *testing.T) {
 	testCases := map[string]struct {
-		prices   map[types.ProviderName]map[string]provider.TickerPrice
+		prices   map[provider.Name]map[string]provider.TickerPrice
 		expected map[string]sdk.Dec
 	}{
 		"empty prices": {
-			prices:   make(map[types.ProviderName]map[string]provider.TickerPrice),
+			prices:   make(map[provider.Name]map[string]provider.TickerPrice),
 			expected: make(map[string]sdk.Dec),
 		},
 		"nil prices": {
@@ -24,8 +23,8 @@ func TestComputeVWAP(t *testing.T) {
 			expected: make(map[string]sdk.Dec),
 		},
 		"non empty prices": {
-			prices: map[types.ProviderName]map[string]provider.TickerPrice{
-				types.ProviderBinance: {
+			prices: map[provider.Name]map[string]provider.TickerPrice{
+				provider.ProviderBinance: {
 					"ATOM": provider.TickerPrice{
 						Price:  sdk.MustNewDecFromStr("28.21000000"),
 						Volume: sdk.MustNewDecFromStr("2749102.78000000"),
@@ -39,7 +38,7 @@ func TestComputeVWAP(t *testing.T) {
 						Volume: sdk.MustNewDecFromStr("7854934.69000000"),
 					},
 				},
-				types.ProviderKraken: {
+				provider.ProviderKraken: {
 					"ATOM": provider.TickerPrice{
 						Price:  sdk.MustNewDecFromStr("28.268700"),
 						Volume: sdk.MustNewDecFromStr("178277.53314385"),
@@ -85,11 +84,11 @@ func TestStandardDeviation(t *testing.T) {
 		deviation sdk.Dec
 	}
 	testCases := map[string]struct {
-		prices   map[types.ProviderName]map[string]sdk.Dec
+		prices   map[provider.Name]map[string]sdk.Dec
 		expected map[string]deviation
 	}{
 		"empty prices": {
-			prices:   make(map[types.ProviderName]map[string]sdk.Dec),
+			prices:   make(map[provider.Name]map[string]sdk.Dec),
 			expected: map[string]deviation{},
 		},
 		"nil prices": {
@@ -97,13 +96,13 @@ func TestStandardDeviation(t *testing.T) {
 			expected: map[string]deviation{},
 		},
 		"not enough prices": {
-			prices: map[types.ProviderName]map[string]sdk.Dec{
-				types.ProviderBinance: {
+			prices: map[provider.Name]map[string]sdk.Dec{
+				provider.ProviderBinance: {
 					"ATOM": sdk.MustNewDecFromStr("28.21000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13000000"),
 					"LUNA": sdk.MustNewDecFromStr("64.87000000"),
 				},
-				types.ProviderKraken: {
+				provider.ProviderKraken: {
 					"ATOM": sdk.MustNewDecFromStr("28.23000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13050000"),
 					"LUNA": sdk.MustNewDecFromStr("64.85000000"),
@@ -112,17 +111,17 @@ func TestStandardDeviation(t *testing.T) {
 			expected: map[string]deviation{},
 		},
 		"some prices": {
-			prices: map[types.ProviderName]map[string]sdk.Dec{
-				types.ProviderBinance: {
+			prices: map[provider.Name]map[string]sdk.Dec{
+				provider.ProviderBinance: {
 					"ATOM": sdk.MustNewDecFromStr("28.21000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13000000"),
 					"LUNA": sdk.MustNewDecFromStr("64.87000000"),
 				},
-				types.ProviderKraken: {
+				provider.ProviderKraken: {
 					"ATOM": sdk.MustNewDecFromStr("28.23000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13050000"),
 				},
-				types.ProviderOsmosis: {
+				provider.ProviderOsmosis: {
 					"ATOM": sdk.MustNewDecFromStr("28.40000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.14000000"),
 					"LUNA": sdk.MustNewDecFromStr("64.10000000"),
@@ -141,18 +140,18 @@ func TestStandardDeviation(t *testing.T) {
 		},
 
 		"non empty prices": {
-			prices: map[types.ProviderName]map[string]sdk.Dec{
-				types.ProviderBinance: {
+			prices: map[provider.Name]map[string]sdk.Dec{
+				provider.ProviderBinance: {
 					"ATOM": sdk.MustNewDecFromStr("28.21000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13000000"),
 					"LUNA": sdk.MustNewDecFromStr("64.87000000"),
 				},
-				types.ProviderKraken: {
+				provider.ProviderKraken: {
 					"ATOM": sdk.MustNewDecFromStr("28.23000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.13050000"),
 					"LUNA": sdk.MustNewDecFromStr("64.85000000"),
 				},
-				types.ProviderOsmosis: {
+				provider.ProviderOsmosis: {
 					"ATOM": sdk.MustNewDecFromStr("28.40000000"),
 					"UMEE": sdk.MustNewDecFromStr("1.14000000"),
 					"LUNA": sdk.MustNewDecFromStr("64.10000000"),

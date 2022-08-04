@@ -16,6 +16,15 @@ const (
 	defaultReconnectTime     = time.Minute * 20
 	maxReconnectionTries     = 3
 	providerCandlePeriod     = 10 * time.Minute
+
+	ProviderKraken   Name = "kraken"
+	ProviderBinance  Name = "binance"
+	ProviderOsmosis  Name = "osmosis"
+	ProviderHuobi    Name = "huobi"
+	ProviderOkx      Name = "okx"
+	ProviderGate     Name = "gate"
+	ProviderCoinbase Name = "coinbase"
+	ProviderMock     Name = "mock"
 )
 
 var ping = []byte("ping")
@@ -43,13 +52,18 @@ type (
 		Volume sdk.Dec // 24h volume
 	}
 
+	// Name name of an oracle provider. Usually it is an exchange
+	// but this can be any provider name that can give token prices
+	// examples.: "binance", "osmosis", "kraken".
+	Name string
+
 	// AggregatedProviderPrices defines a type alias for a map
 	// of provider -> asset -> TickerPrice
-	AggregatedProviderPrices map[types.ProviderName]map[string]TickerPrice
+	AggregatedProviderPrices map[Name]map[string]TickerPrice
 
 	// AggregatedProviderCandles defines a type alias for a map
 	// of provider -> asset -> []CandlePrice
-	AggregatedProviderCandles map[types.ProviderName]map[string][]CandlePrice
+	AggregatedProviderCandles map[Name]map[string][]CandlePrice
 
 	// CandlePrice defines price, volume, and time information for an
 	// exchange rate.
@@ -63,7 +77,7 @@ type (
 	// hardcoded rest and websocket api endpoints.
 	Endpoint struct {
 		// Name of the provider, ex. "binance"
-		Name types.ProviderName `toml:"name"`
+		Name Name `toml:"name"`
 
 		// Rest endpoint for the provider, ex. "https://api1.binance.com"
 		Rest string `toml:"rest"`

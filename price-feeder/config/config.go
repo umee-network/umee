@@ -3,7 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -11,7 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
@@ -31,15 +30,15 @@ var (
 
 	// SupportedProviders defines a lookup table of all the supported currency API
 	// providers.
-	SupportedProviders = map[types.ProviderName]struct{}{
-		types.ProviderKraken:   {},
-		types.ProviderBinance:  {},
-		types.ProviderOsmosis:  {},
-		types.ProviderOkx:      {},
-		types.ProviderHuobi:    {},
-		types.ProviderGate:     {},
-		types.ProviderCoinbase: {},
-		types.ProviderMock:     {},
+	SupportedProviders = map[provider.Name]struct{}{
+		provider.ProviderKraken:   {},
+		provider.ProviderBinance:  {},
+		provider.ProviderOsmosis:  {},
+		provider.ProviderOkx:      {},
+		provider.ProviderHuobi:    {},
+		provider.ProviderGate:     {},
+		provider.ProviderCoinbase: {},
+		provider.ProviderMock:     {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
@@ -85,9 +84,9 @@ type (
 	// CurrencyPair defines a price quote of the exchange rate for two different
 	// currencies and the supported providers for getting the exchange rate.
 	CurrencyPair struct {
-		Base      string               `toml:"base" validate:"required"`
-		Quote     string               `toml:"quote" validate:"required"`
-		Providers []types.ProviderName `toml:"providers" validate:"required,gt=0,dive,required"`
+		Base      string          `toml:"base" validate:"required"`
+		Quote     string          `toml:"quote" validate:"required"`
+		Providers []provider.Name `toml:"providers" validate:"required,gt=0,dive,required"`
 	}
 
 	// Deviation defines a maximum amount of standard deviations that a given asset can
@@ -187,7 +186,7 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, ErrEmptyConfigPath
 	}
 
-	configData, err := ioutil.ReadFile(configPath)
+	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		return cfg, fmt.Errorf("failed to read config: %w", err)
 	}
@@ -209,11 +208,11 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.ProviderTimeout = defaultProviderTimeout.String()
 	}
 
-	pairs := make(map[string]map[types.ProviderName]struct{})
+	pairs := make(map[string]map[provider.Name]struct{})
 	coinQuotes := make(map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
 		if _, ok := pairs[cp.Base]; !ok {
-			pairs[cp.Base] = make(map[types.ProviderName]struct{})
+			pairs[cp.Base] = make(map[provider.Name]struct{})
 		}
 		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
@@ -243,14 +242,14 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for base, providers := range pairs {
-		if _, ok := pairs[base][types.ProviderMock]; !ok && len(providers) < 3 {
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
 	gatePairs := []string{}
 	for base, providers := range pairs {
-		if _, ok := providers[types.ProviderGate]; ok {
+		if _, ok := providers[provider.ProviderGate]; ok {
 			gatePairs = append(gatePairs, base)
 		}
 	}

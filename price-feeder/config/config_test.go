@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 func TestValidate(t *testing.T) {
@@ -20,7 +19,7 @@ func TestValidate(t *testing.T) {
 				AllowedOrigins: []string{},
 			},
 			CurrencyPairs: []config.CurrencyPair{
-				{Base: "ATOM", Quote: "USDT", Providers: []types.ProviderName{types.ProviderKraken}},
+				{Base: "ATOM", Quote: "USDT", Providers: []provider.Name{provider.ProviderKraken}},
 			},
 			Account: config.Account{
 				Address:   "fromaddr",
@@ -53,23 +52,23 @@ func TestValidate(t *testing.T) {
 
 	invalidBase := validConfig()
 	invalidBase.CurrencyPairs = []config.CurrencyPair{
-		{Base: "", Quote: "USDT", Providers: []types.ProviderName{types.ProviderKraken}},
+		{Base: "", Quote: "USDT", Providers: []provider.Name{provider.ProviderKraken}},
 	}
 
 	invalidQuote := validConfig()
 	invalidQuote.CurrencyPairs = []config.CurrencyPair{
-		{Base: "ATOM", Quote: "", Providers: []types.ProviderName{types.ProviderKraken}},
+		{Base: "ATOM", Quote: "", Providers: []provider.Name{provider.ProviderKraken}},
 	}
 
 	emptyProviders := validConfig()
 	emptyProviders.CurrencyPairs = []config.CurrencyPair{
-		{Base: "ATOM", Quote: "USDT", Providers: []types.ProviderName{}},
+		{Base: "ATOM", Quote: "USDT", Providers: []provider.Name{}},
 	}
 
 	invalidEndpoints := validConfig()
 	invalidEndpoints.ProviderEndpoints = []provider.Endpoint{
 		{
-			Name: types.ProviderBinance,
+			Name: provider.ProviderBinance,
 		},
 	}
 
@@ -210,8 +209,8 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
-	require.Equal(t, types.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
-	require.Equal(t, types.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
+	require.Equal(t, provider.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
+	require.Equal(t, provider.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
 }
 
 func TestParseConfig_Valid_NoTelemetry(t *testing.T) {
@@ -287,8 +286,8 @@ enabled = false
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
-	require.Equal(t, types.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
-	require.Equal(t, types.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
+	require.Equal(t, provider.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
+	require.Equal(t, provider.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
 	require.Equal(t, cfg.Telemetry.Enabled, false)
 }
 
@@ -441,8 +440,8 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
 	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
-	require.Equal(t, types.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
-	require.Equal(t, types.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
+	require.Equal(t, provider.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
+	require.Equal(t, provider.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
 	require.Equal(t, "2", cfg.Deviations[0].Threshold)
 	require.Equal(t, "USDT", cfg.Deviations[0].Base)
 	require.Equal(t, "1.5", cfg.Deviations[1].Threshold)
