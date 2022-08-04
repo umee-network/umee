@@ -12,7 +12,7 @@ import (
 type StakingKeeper interface {
 	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI
 	TotalBondedTokens(sdk.Context) sdk.Int
-	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)
+	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec) sdk.Int
 	Jail(sdk.Context, sdk.ConsAddress)
 	ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator
 	MaxValidators(sdk.Context) uint32
