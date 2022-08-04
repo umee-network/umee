@@ -167,7 +167,7 @@ func (msg *MsgLiquidate) ValidateBasic() error {
 	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
 		return err
 	}
-	return sdk.ValidateDenom(msg.RewardDenom); err != nil {
+	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
 		return err
 	}
 	return validateSenderAndAsset(msg.Liquidator, &msg.Repayment)
