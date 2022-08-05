@@ -18,6 +18,7 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
@@ -50,7 +51,8 @@ towards borrowing assets on another blockchain.`,
 				return err
 			}
 
-			return server.InterceptConfigsPreRunHandler(cmd, "", nil)
+			cfg := tmcfg.DefaultConfig()
+			return server.InterceptConfigsPreRunHandler(cmd, "", nil, cfg)
 		},
 	}
 
