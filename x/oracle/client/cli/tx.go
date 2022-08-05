@@ -75,7 +75,8 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 		Use:   "exchange-rate-prevote [hash]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Submit an exchange rate prevote with a hash",
-		Long: fmt.Sprintf(`Submit an exchange rate prevote with a hash as a byte array.
+		Long: fmt.Sprintf(`Submit an exchange rate prevote with a hash as a hex string
+			representation of a byte array.
 			Ex: umeed tx oracle exchange-rate-prevote %s --from alice`,
 			"19c30cf9ea8aa0e0b03904162cadec0f2024a76d"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -84,8 +85,13 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 				return err
 			}
 
+			hash, err := types.AggregateVoteHashFromHexString(args[0])
+			if err != nil {
+				return err
+			}
+
 			msg := types.NewMsgAggregateExchangeRatePrevote(
-				[]byte(args[0]),
+				hash,
 				clientCtx.GetFromAddress(),
 				sdk.ValAddress(clientCtx.GetFromAddress()),
 			)
