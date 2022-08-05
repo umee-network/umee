@@ -55,6 +55,10 @@ func GetCmdDelegateFeedConsent() *cobra.Command {
 
 			msg := types.NewMsgDelegateFeedConsent(sdk.ValAddress(clientCtx.GetFromAddress()), feederAddr)
 
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
@@ -68,25 +72,27 @@ func GetCmdDelegateFeedConsent() *cobra.Command {
 // broadcast a transaction with a MsgAggregateExchangeRatePrevote message.
 func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "exchange-rate-prevote [hash] [feeder]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "exchange-rate-prevote [hash]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Submit an exchange rate prevote with a hash",
+		Long: fmt.Sprintf(`Submit an exchange rate prevote with a hash as a byte array.
+			Ex: umeed tx oracle exchange-rate-prevote %s --from alice`,
+			"19c30cf9ea8aa0e0b03904162cadec0f2024a76d"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			feederAddr, err := sdk.AccAddressFromBech32(args[1])
-			if err != nil {
-				return err
-			}
-
 			msg := types.NewMsgAggregateExchangeRatePrevote(
 				[]byte(args[0]),
-				feederAddr,
+				clientCtx.GetFromAddress(),
 				sdk.ValAddress(clientCtx.GetFromAddress()),
 			)
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -101,16 +107,17 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 // broadcast a transaction with a NewMsgAggregateExchangeRateVote message.
 func GetCmdAggregateExchangeRateVote() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "exchange-rate-vote [salt] [exchange-rates] [feeder]",
-		Args:  cobra.ExactArgs(3),
+		Use:   "exchange-rate-vote [salt] [exchange-rates]",
+		Args:  cobra.ExactArgs(2),
 		Short: "Submit an exchange rate vote with the salt and exchange rate string",
+		Long: fmt.Sprintf(`Submit an exchange rate vote with the salt of the previous hash, and the
+			exchange rate string previously used in the hash.
+			Ex: umeed tx oracle exchange-rate-vote %s %s --from alice`,
+			"0cf33fb528b388660c3a42c3f3250e983395290b75fef255050fb5bc48a6025f",
+			"foo:1.0,bar:1232.123",
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			feederAddr, err := sdk.AccAddressFromBech32(args[2])
 			if err != nil {
 				return err
 			}
@@ -118,9 +125,13 @@ func GetCmdAggregateExchangeRateVote() *cobra.Command {
 			msg := types.NewMsgAggregateExchangeRateVote(
 				args[0],
 				args[1],
-				feederAddr,
+				clientCtx.GetFromAddress(),
 				sdk.ValAddress(clientCtx.GetFromAddress()),
 			)
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
