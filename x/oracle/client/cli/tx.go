@@ -24,6 +24,8 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdDelegateFeedConsent(),
+		GetCmdAggregateExchangeRatePrevote(),
+		GetCmdAggregateExchangeRateVote(),
 	)
 
 	return cmd
@@ -68,12 +70,8 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "exchange-rate-prevote [hash] [feeder]",
 		Args:  cobra.ExactArgs(2),
-		Short: "Submit an exchange rate prevote msg.",
+		Short: "Submit an exchange rate prevote with a hash",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -103,14 +101,10 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 // broadcast a transaction with a NewMsgAggregateExchangeRateVote message.
 func GetCmdAggregateExchangeRateVote() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "exchange-rate-prevote [salt] [exchangeRates] [feeder]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Submit an exchange rate vote msg.",
+		Use:   "exchange-rate-vote [salt] [exchange-rates] [feeder]",
+		Args:  cobra.ExactArgs(3),
+		Short: "Submit an exchange rate vote with the salt and exchange rate string",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
