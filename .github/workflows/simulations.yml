@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: install-dependencies
     steps:
+      - name: see files
+        run: ls -la
       - uses: actions/setup-go@v3
         with:
           go-version: 1.18
