@@ -27,12 +27,14 @@ jobs:
         if: env.GIT_DIFF
         with:
           version: latest
+          args: --timeout 8m
       - name: golangci-lint pricefeeder
         uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
         with:
           version: latest
           working-directory: price-feeder
+          args: --timeout 8m
 
   super-linter:
     name: Run super-linter
