@@ -71,7 +71,8 @@ func isOracleTx(msgs []sdk.Msg) bool {
 	return true
 }
 
-// getTxPriority returns naive tx priority based on the fee amount and oracle tx check.
+// getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
+// denom) and oracle tx check.
 func getTxPriority(fee sdk.Coins, isOracle bool) int64 {
 	var priority int64
 	for _, c := range fee {
