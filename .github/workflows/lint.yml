@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - release/**
+
 jobs:
   golangci:
     name: Run golangci-lint
