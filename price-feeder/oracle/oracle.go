@@ -265,7 +265,7 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 	return nil
 }
 
-// GetComputedPrices gets the candle and ticker prices and computes it.
+// GetComputedPricesXXX gets the candle and ticker prices and computes it.
 // It returns candles' TVWAP if possible, if not possible (not available
 // or due to some staleness) it will use the most recent ticker prices
 // and the VWAP formula instead.
@@ -276,6 +276,9 @@ func GetComputedPrices(
 	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
+
+
+
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := convertCandlesToUSD(
 		logger,
