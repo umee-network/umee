@@ -55,8 +55,8 @@ jobs:
           PATTERNS: |
             **/**.proto
       - uses: bufbuild/buf-setup-action@v1
-        if: env.GIT_DIFF
+        # if: env.GIT_DIFF
       - uses: bufbuild/buf-lint-action@v1
-        if: env.GIT_DIFF
+        # if: env.GIT_DIFF
         with:
           input: "proto"
