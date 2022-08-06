@@ -28,7 +28,7 @@ type appCreator struct {
 	moduleManager module.BasicManager
 }
 
-func (ac appCreator) newApp(
+func (a appCreator) newApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -51,7 +51,7 @@ func (ac appCreator) newApp(
 	}
 
 	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
+	snapshotDB, err := dbm.NewDB("metadata", server.GetAppDBBackend(appOpts), snapshotDir)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create LevelDB database: %s", err))
 	}
@@ -65,7 +65,12 @@ func (ac appCreator) newApp(
 		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
 	)
 
-	baseAppOpts := []func(*baseapp.BaseApp){
+	return umeeapp.New(
+		logger, db, traceStore, true, skipUpgradeHeights,
+		cast.ToString(appOpts.Get(flags.FlagHome)),
+		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+		a.encCfg,
+		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
@@ -75,24 +80,11 @@ func (ac appCreator) newApp(
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
 		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
-	}
-
-	return umeeapp.New(
-		logger,
-		db,
-		traceStore,
-		true,
-		skipUpgradeHeights,
-		cast.ToString(appOpts.Get(flags.FlagHome)),
-		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		ac.encCfg,
-		appOpts,
-		baseAppOpts...,
 	)
 }
 
 // appExport creates a new simapp, optionally at a given height.
-func (ac appCreator) appExport(
+func (a appCreator) appExport(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -119,7 +111,7 @@ func (ac appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		ac.encCfg,
+		a.encCfg,
 		appOpts,
 	)
 

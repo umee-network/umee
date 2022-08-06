@@ -6,13 +6,13 @@ import (
 
 	bridgecmd "github.com/Gravity-Bridge/Gravity-Bridge/module/cmd/gravity/cmd"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	vestingcli "github.com/cosmos/cosmos-sdk/x/auth/vesting/client/cli"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
@@ -38,7 +38,8 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
-		WithHomeDir(umeeapp.DefaultNodeHome)
+		WithHomeDir(umeeapp.DefaultNodeHome).
+		WithViper(umeeapp.Name)
 
 	rootCmd := &cobra.Command{
 		Use:   umeeapp.Name + "d",
@@ -47,12 +48,25 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 Universal Capital Facility that can collateralize assets on one blockchain
 towards borrowing assets on another blockchain.`,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			// set the default command outputs
+			cmd.SetOut(cmd.OutOrStdout())
+			cmd.SetErr(cmd.ErrOrStderr())
+
+			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
+			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
+			if err != nil {
+				return err
+			}
+
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
-			cfg := tmcfg.DefaultConfig()
-			return server.InterceptConfigsPreRunHandler(cmd, "", nil, cfg)
+			tmConfig := initTendermintConfig()
+			return server.InterceptConfigsPreRunHandler(cmd, "", nil, tmConfig)
 		},
 	}
 
@@ -66,7 +80,19 @@ towards borrowing assets on another blockchain.`,
 	return rootCmd, encodingConfig
 }
 
-func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
+// initTendermintConfig helps to override default Tendermint Config values.
+// return tmcfg.DefaultConfig if no custom configuration is required for the application.
+func initTendermintConfig() *tmcfg.Config {
+	cfg := tmcfg.DefaultConfig()
+
+	// these values put a higher strain on node memory
+	// cfg.P2P.MaxNumInboundPeers = 100
+	// cfg.P2P.MaxNumOutboundPeers = 40
+
+	return cfg
+}
+
+func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 	// We allow two variants of the gentx command:
 	//
 	// 1. The standard one provided by the SDK, mainly motivated for testing
@@ -74,39 +100,43 @@ func initRootCmd(rootCmd *cobra.Command, ac appCreator) {
 	// 2. The Gravity Bridge variant which allows validators to provide key
 	// delegation material.
 	bridgeGenTxCmd := bridgecmd.GenTxCmd(
-		ac.moduleManager,
-		ac.encCfg.TxConfig,
+		a.moduleManager,
+		a.encCfg.TxConfig,
 		banktypes.GenesisBalancesIterator{},
 		umeeapp.DefaultNodeHome,
 	)
 	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
 
 	rootCmd.AddCommand(
-		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
-		genutilcli.InitCmd(ac.moduleManager, umeeapp.DefaultNodeHome),
+		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
-		genutilcli.ValidateGenesisCmd(ac.moduleManager),
 		genutilcli.GenTxCmd(
-			ac.moduleManager,
-			ac.encCfg.TxConfig,
+			a.moduleManager,
+			a.encCfg.TxConfig,
 			banktypes.GenesisBalancesIterator{},
 			umeeapp.DefaultNodeHome,
 		),
 		bridgeGenTxCmd,
+		genutilcli.ValidateGenesisCmd(a.moduleManager),
+		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
+		config.Cmd(),
 	)
 
-	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, ac.newApp, ac.appExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, a.newApp, a.appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
-		queryCommand(ac),
-		txCommand(ac),
+		queryCommand(a),
+		txCommand(a),
 		keys.Commands(umeeapp.DefaultNodeHome),
 	)
+
+	// add rosetta
+	rootCmd.AddCommand(server.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {
@@ -117,8 +147,8 @@ func queryCommand(ac appCreator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "query",
 		Aliases:                    []string{"q"},
-		Short:                      "Querying sub-commands",
-		DisableFlagParsing:         true,
+		Short:                      "Querying subcommands",
+		DisableFlagParsing:         false,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
@@ -141,7 +171,7 @@ func txCommand(ac appCreator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "tx",
 		Short:                      "Transactions sub-commands",
-		DisableFlagParsing:         true,
+		DisableFlagParsing:         false,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
@@ -150,13 +180,12 @@ func txCommand(ac appCreator) *cobra.Command {
 		authcmd.GetSignCommand(),
 		authcmd.GetSignBatchCommand(),
 		authcmd.GetMultiSignCommand(),
+		authcmd.GetMultiSignBatchCmd(),
 		authcmd.GetValidateSignaturesCommand(),
-		flags.LineBreak,
 		authcmd.GetBroadcastCommand(),
 		authcmd.GetEncodeCommand(),
 		authcmd.GetDecodeCommand(),
-		flags.LineBreak,
-		vestingcli.GetTxCmd(),
+		authcmd.GetAuxToFeeCommand(),
 	)
 
 	ac.moduleManager.AddTxCommands(cmd)

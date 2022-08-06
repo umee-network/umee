@@ -29,6 +29,7 @@ func debugCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(debug.PubkeyCmd())
+	cmd.AddCommand(debug.PubkeyRawCmd())
 	cmd.AddCommand(debugAddrCmd())
 	cmd.AddCommand(debug.RawBytesCmd())
 
