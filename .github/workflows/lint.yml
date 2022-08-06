@@ -27,13 +27,11 @@ jobs:
         if: env.GIT_DIFF
         with:
           version: latest
-          args: --out-format=tab
       - name: golangci-lint pricefeeder
         uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
         with:
           version: latest
-          args: --out-format=tab
           working-directory: price-feeder
 
   super-linter:
