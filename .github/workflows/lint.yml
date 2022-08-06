@@ -23,12 +23,19 @@ jobs:
         with:
           go-version: 1.18
           cache: true
-      - name: golangci-lint
+      - name: golangci-lint main
         uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
         with:
           version: latest
           args: --out-format=tab
+      - name: golangci-lint pricefeeder
+        uses: golangci/golangci-lint-action@v3
+        if: env.GIT_DIFF
+        with:
+          version: latest
+          args: --out-format=tab
+          working-directory: price-feeder
 
   super-linter:
     name: Run super-linter
@@ -58,8 +65,8 @@ jobs:
           PATTERNS: |
             **/**.proto
       - uses: bufbuild/buf-setup-action@v1
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
       - uses: bufbuild/buf-lint-action@v1
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
         with:
           input: "proto"
