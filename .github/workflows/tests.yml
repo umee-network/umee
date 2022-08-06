@@ -47,15 +47,7 @@ jobs:
         if: env.GIT_DIFF
         with:
           go-version: 1.18
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+          cache: true
       - name: Test and Create Coverage Report
         if: env.GIT_DIFF
         run: |
@@ -81,15 +73,7 @@ jobs:
         if: env.GIT_DIFF
         with:
           go-version: 1.18
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+          cache: true
       - name: Build Docker Image
         if: env.GIT_DIFF
         run: |
@@ -113,15 +97,8 @@ jobs:
         if: env.GIT_DIFF
         with:
           go-version: 1.18
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+          cache: true
+          cache-dependency-path: price-feeder/go.sum
       - name: Test price-feeder
         if: env.GIT_DIFF
         run: |
@@ -143,15 +120,7 @@ jobs:
         if: env.GIT_DIFF
         with:
           go-version: 1.18
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
+          cache: true
       - name: Install Starport
         if: env.GIT_DIFF
         run: |
