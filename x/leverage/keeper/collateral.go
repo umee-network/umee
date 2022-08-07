@@ -9,39 +9,36 @@ import (
 
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
 // during liquidations.
-func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
+func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Coin) error {
 	// reduce account's collateral
-	oldCollateral := k.GetCollateralAmount(ctx, addr, collateral.Denom)
-	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
-	if err := k.setCollateralAmount(ctx, addr, newCollateral); err != nil {
+	err := k.setCollateralAmount(ctx, addr, k.GetCollateral(ctx, addr, coin.Denom).Sub(coin))
+	if err != nil {
 		return err
 	}
 	// burn the uTokens
-	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(collateral)); err != nil {
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
 		return err
 	}
 	// set the new total uToken supply
-	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, collateral.Denom).Sub(collateral))
+	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin))
 }
 
 // removeCollateral removes some uTokens in fromAddr's collateral and sends them to toAddr. This
 // occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the same) as well as
 // during liquidations, where toAddr is the liquidator.
-func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, collateral sdk.Coin) error {
+func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
 	// reduce fromAddr's collateral
-	oldCollateral := k.GetCollateralAmount(ctx, fromAddr, collateral.Denom)
-	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
-	if err := k.setCollateralAmount(ctx, fromAddr, newCollateral); err != nil {
+	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, coin.Denom).Sub(coin))
+	if err != nil {
 		return err
 	}
-
 	// send the uTokens to toAddr
-	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(collateral))
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(coin))
 }
 
-// GetCollateralAmount returns an sdk.Coin representing how much of a given denom the
+// GetCollateral returns an sdk.Coin representing how much of a given denom the
 // x/leverage module account currently holds as collateral for a given borrower.
-func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
+func (k Keeper) GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
 	store := ctx.KVStore(k.storeKey)
 	collateral := sdk.NewCoin(denom, sdk.ZeroInt())
 	key := types.CreateCollateralAmountKey(borrowerAddr, denom)
