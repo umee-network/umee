@@ -13,9 +13,22 @@ const (
 	UTokenPrefix = "u/"
 )
 
-// UTokenFromTokenDenom returns the uToken denom given a token denom.
-func UTokenFromTokenDenom(tokenDenom string) string {
-	return UTokenPrefix + tokenDenom
+// HasUTokenPrefix detects the uToken prefix on a denom.
+func HasUTokenPrefix(denom string) bool {
+	return strings.HasPrefix(denom, UTokenPrefix)
+}
+
+// ToUTokenDenom adds the uToken prefix to a denom if not already present.
+func ToUTokenDenom(denom string) string {
+	if HasUTokenPrefix(denom) {
+		return denom
+	}
+	return UTokenPrefix + denom
+}
+
+// ToTokenDenom strips the uToken prefix from a denom if present.
+func ToTokenDenom(denom string) string {
+	return strings.TrimPrefix(denom, UTokenPrefix)
 }
 
 // Validate performs validation on an Token type returning an error if the Token
@@ -24,7 +37,7 @@ func (t Token) Validate() error {
 	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
 		return err
 	}
-	if strings.HasPrefix(t.BaseDenom, UTokenPrefix) {
+	if HasUTokenPrefix(t.BaseDenom) {
 		// prevent base asset denoms that start with "u/"
 		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
 	}
@@ -32,8 +45,8 @@ func (t Token) Validate() error {
 	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
 		return err
 	}
-	if strings.HasPrefix(t.SymbolDenom, UTokenPrefix) {
-		// prevent symbol (ticker) denoms that start with "u/"
+	if HasUTokenPrefix(t.SymbolDenom) {
+		// prevent symbol denoms that start with "u/"
 		return sdkerrors.Wrap(ErrInvalidAsset, t.SymbolDenom)
 	}
 

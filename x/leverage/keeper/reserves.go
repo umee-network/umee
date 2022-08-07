@@ -46,9 +46,28 @@ func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	return nil
 }
 
-// RepayBadDebt uses reserves to repay borrower's debts of a given denom.
+// checkBadDebt detects if a borrower has zero non-blacklisted collateral,
+// and marks any remaining borrowed tokens as bad debt.
+func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+	// get remaining collateral, ignoring blacklisted
+	remainingCollateral := k.filterAcceptedCoins(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
+
+	// detect bad debt if collateral is completely exhausted
+	if remainingCollateral.IsZero() {
+		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
+			// set a bad debt flag for each borrowed denom
+			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// repayBadDebt uses reserves to repay borrower's debts of a given denom.
 // It returns a boolean representing whether full repayment was achieved.
-func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
+func (k Keeper) repayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
 	reserved := k.GetReserveAmount(ctx, denom)
 

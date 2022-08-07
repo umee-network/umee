@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -227,7 +228,7 @@ func SimulateMsgCollateralize(
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeCollateralize, "skip all transfers"), nil, nil
 		}
 
-		uDenom := lk.FromTokenToUTokenDenom(ctx, token.Denom)
+		uDenom := types.ToUTokenDenom(token.Denom)
 		coin := sdk.NewCoin(uDenom, token.Amount)
 		msg := types.NewMsgCollateralize(from.Address, coin)
 
@@ -265,7 +266,7 @@ func SimulateMsgDecollateralize(
 			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeDecollateralize, "skip all transfers"), nil, nil
 		}
 
-		uDenom := lk.FromTokenToUTokenDenom(ctx, token.Denom)
+		uDenom := types.ToUTokenDenom(token.Denom)
 		coin := sdk.NewCoin(uDenom, token.Amount)
 		msg := types.NewMsgDecollateralize(from.Address, coin)
 
@@ -407,13 +408,19 @@ func randomWithdrawFields(
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
 	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
 
-	uTokens = simtypes.RandSubsetCoins(r, uTokens)
-
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	return acc, randomCoin(r, uTokens), false
+	info := fmt.Sprintf(
+		"\n  spendable: %s\n  addr: %s\n\n",
+		bk.SpendableCoins(ctx, acc.Address).String(),
+		acc.Address.String(),
+	)
+	fmt.Println(info)
+
+	subset := randomCoin(r, simtypes.RandSubsetCoins(r, uTokens))
+	return acc, subset, false
 }
 
 // getSpendableUTokens returns all uTokens from an account's spendable coins.
@@ -423,7 +430,7 @@ func getSpendableUTokens(
 ) sdk.Coins {
 	uTokens := sdk.NewCoins()
 	for _, coin := range bk.SpendableCoins(ctx, addr) {
-		if lk.IsAcceptedUToken(ctx, coin.Denom) {
+		if lk.ValidateAcceptedUTokenDenom(ctx, coin.Denom) == nil {
 			uTokens = uTokens.Add(coin)
 		}
 	}
@@ -476,7 +483,7 @@ func randomLiquidateFields(
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	rewardDenom = lk.FromUTokenToTokenDenom(ctx, randomCoin(r, collateral).Denom)
+	rewardDenom = types.ToTokenDenom(randomCoin(r, collateral).Denom)
 
 	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
 }

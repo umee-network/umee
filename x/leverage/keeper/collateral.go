@@ -7,6 +7,46 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
+// burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
+// during liquidations.
+func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
+	if !types.HasUTokenPrefix(collateral.Denom) {
+		return types.ErrNotUToken.Wrap(collateral.Denom)
+	}
+
+	// reduce account's collateral
+	oldCollateral := k.GetCollateralAmount(ctx, addr, collateral.Denom)
+	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
+	if err := k.setCollateralAmount(ctx, addr, newCollateral); err != nil {
+		return err
+	}
+	// burn the uTokens
+	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(collateral)); err != nil {
+		return err
+	}
+	// set the new total uToken supply
+	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, collateral.Denom).Sub(collateral))
+}
+
+// removeCollateral removes some uTokens in fromAddr's collateral and sends them to toAddr. This
+// occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the same) as well as
+// during liquidations where the liquidator receives uToken rewards from the borrower's collateral.
+func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, collateral sdk.Coin) error {
+	if !types.HasUTokenPrefix(collateral.Denom) {
+		return types.ErrNotUToken.Wrap(collateral.Denom)
+	}
+
+	// reduce fromAddr's collateral
+	oldCollateral := k.GetCollateralAmount(ctx, fromAddr, collateral.Denom)
+	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
+	if err := k.setCollateralAmount(ctx, fromAddr, newCollateral); err != nil {
+		return err
+	}
+
+	// send the uTokens to toAddr
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(collateral))
+}
+
 // GetCollateralAmount returns an sdk.Coin representing how much of a given denom the
 // x/leverage module account currently holds as collateral for a given borrower.
 func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
@@ -57,7 +97,7 @@ func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 // the x/leverage module account currently holds as collateral. Non-uTokens and invalid
 // assets return zero.
 func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Int {
-	if !k.IsAcceptedUToken(ctx, denom) {
+	if k.ValidateAcceptedUTokenDenom(ctx, denom) != nil {
 		// non-uTokens cannot be collateral
 		return sdk.ZeroInt()
 	}

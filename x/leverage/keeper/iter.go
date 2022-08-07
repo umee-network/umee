@@ -238,7 +238,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		// if collateral is still zero, attempt to repay a single address's debt in this denom
 		if !done {
 			var err error
-			done, err = k.RepayBadDebt(ctx, addr, denom)
+			done, err = k.repayBadDebt(ctx, addr, denom)
 			if err != nil {
 				return err
 			}

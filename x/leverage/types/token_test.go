@@ -9,11 +9,29 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-func TestUTokenFromTokenDenom(t *testing.T) {
-	tokenDenom := "uumee"
-	uTokenDenom := types.UTokenFromTokenDenom(tokenDenom)
-	require.Equal(t, "u/"+tokenDenom, uTokenDenom)
-	require.NoError(t, sdk.ValidateDenom(uTokenDenom))
+func TestToTokenDenom(t *testing.T) {
+	// Used as intended
+	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
+	require.Equal(t, "uumee", types.ToTokenDenom("uumee"))
+	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
+	require.Equal(t, "ibc/abcd", types.ToTokenDenom("ibc/abcd"))
+
+	// Does not ensure a valid output
+	require.Equal(t, "", types.ToTokenDenom("u/"))
+	require.Equal(t, "", types.ToTokenDenom(""))
+	require.Equal(t, "u/", types.ToTokenDenom("u/u/"))
+}
+
+func TestToUTokenDenom(t *testing.T) {
+	// Used as intended
+	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
+	require.Equal(t, "u/uumee", types.ToUTokenDenom("u/uumee"))
+	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
+	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("u/ibc/abcd"))
+
+	// Does not ensure a valid output
+	require.Equal(t, "u/", types.ToUTokenDenom(""))
+	require.Equal(t, "u/", types.ToUTokenDenom("u/"))
 }
 
 func TestUpdateRegistryProposal_String(t *testing.T) {
