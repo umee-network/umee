@@ -720,8 +720,7 @@
         "complete_liquidation_threshold": "0.100000000000000000",
         "minimum_close_factor": "0.010000000000000000",
         "oracle_reward_factor": "0.010000000000000000",
-        "small_liquidation_size": "100.000000000000000000",
-        "direct_liquidation_fee": "0.100000000000000000"
+        "small_liquidation_size": "100.000000000000000000"
       },
       "registry": [
         {
