@@ -287,7 +287,7 @@ type MsgLiquidate struct {
 	// Repayment is the maximum amount of base tokens that the liquidator is willing
 	// to repay.
 	Repayment types.Coin `protobuf:"bytes,3,opt,name=repayment,proto3" json:"repayment"`
-	// RewardDenom is the denom that the liquidator will receive liquidation reward.
+	// RewardDenom is the denom that the liquidator will receive as a liquidation reward.
 	// If it is a uToken, the liquidator will receive uTokens from the borrower's
 	// collateral. If it is a base token, the uTokens will be redeemed directly at
 	// a reduced Liquidation Incentive, and the liquidator will receive base tokens.
