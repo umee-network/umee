@@ -10,10 +10,12 @@ import (
 )
 
 func TestToTokenDenom(t *testing.T) {
-	// Used as intended
+	// Turns uToken denoms into base tokens
 	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
-	require.Equal(t, "uumee", types.ToTokenDenom("uumee"))
 	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
+
+	// Does not alter base tokens
+	require.Equal(t, "uumee", types.ToTokenDenom("uumee"))
 	require.Equal(t, "ibc/abcd", types.ToTokenDenom("ibc/abcd"))
 
 	// Does not ensure a valid output
@@ -23,15 +25,18 @@ func TestToTokenDenom(t *testing.T) {
 }
 
 func TestToUTokenDenom(t *testing.T) {
-	// Used as intended
+	// Turns base token denoms into base uTokens
 	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
-	require.Equal(t, "u/uumee", types.ToUTokenDenom("u/uumee"))
 	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
+
+	// Does not alter uTokens
+	require.Equal(t, "u/uumee", types.ToUTokenDenom("u/uumee"))
 	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("u/ibc/abcd"))
 
 	// Does not ensure a valid output
 	require.Equal(t, "u/", types.ToUTokenDenom(""))
 	require.Equal(t, "u/", types.ToUTokenDenom("u/"))
+	require.Equal(t, "u/u/", types.ToUTokenDenom("u/u/"))
 }
 
 func TestUpdateRegistryProposal_String(t *testing.T) {
