@@ -11,7 +11,7 @@ import (
 // during liquidations.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Coin) error {
 	// reduce account's collateral
-	err := k.setCollateralAmount(ctx, addr, k.GetCollateral(ctx, addr, coin.Denom).Sub(coin))
+	err := k.setCollateralAmount(ctx, addr, k.GetCollateralAmount(ctx, addr, coin.Denom).Sub(coin))
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Co
 // during liquidations, where toAddr is the liquidator.
 func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
 	// reduce fromAddr's collateral
-	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, coin.Denom).Sub(coin))
+	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, coin.Denom).Sub(coin))
 	if err != nil {
 		return err
 	}
@@ -36,9 +36,9 @@ func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddres
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(coin))
 }
 
-// GetCollateral returns an sdk.Coin representing how much of a given denom the
+// GetCollateralAmount returns an sdk.Coin representing how much of a given denom the
 // x/leverage module account currently holds as collateral for a given borrower.
-func (k Keeper) GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
+func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
 	store := ctx.KVStore(k.storeKey)
 	collateral := sdk.NewCoin(denom, sdk.ZeroInt())
 	key := types.CreateCollateralAmountKey(borrowerAddr, denom)

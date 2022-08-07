@@ -280,7 +280,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin
 		return err
 	}
 
-	currentCollateral := k.GetCollateral(ctx, borrowerAddr, coin.Denom)
+	currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, coin.Denom)
 	if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(coin)); err != nil {
 		return err
 	}

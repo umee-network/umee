@@ -16,7 +16,7 @@ func (k Keeper) GetSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress, denom 
 	// sum wallet-held and collateral-enabled uTokens in the associated uToken denom
 	uDenom := types.ToUTokenDenom(denom)
 	balance := k.bankKeeper.GetBalance(ctx, supplierAddr, uDenom)
-	collateral := k.GetCollateral(ctx, supplierAddr, uDenom)
+	collateral := k.GetCollateralAmount(ctx, supplierAddr, uDenom)
 
 	// convert uTokens to tokens
 	return k.ExchangeUToken(ctx, balance.Add(collateral))
