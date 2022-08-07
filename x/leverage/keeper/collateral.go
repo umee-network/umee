@@ -10,10 +10,6 @@ import (
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
 // during liquidations.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
-	if !types.HasUTokenPrefix(collateral.Denom) {
-		return types.ErrNotUToken.Wrap(collateral.Denom)
-	}
-
 	// reduce account's collateral
 	oldCollateral := k.GetCollateralAmount(ctx, addr, collateral.Denom)
 	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
@@ -30,12 +26,8 @@ func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral 
 
 // removeCollateral removes some uTokens in fromAddr's collateral and sends them to toAddr. This
 // occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the same) as well as
-// during liquidations where the liquidator receives uToken rewards from the borrower's collateral.
+// during liquidations, where toAddr is the liquidator.
 func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, collateral sdk.Coin) error {
-	if !types.HasUTokenPrefix(collateral.Denom) {
-		return types.ErrNotUToken.Wrap(collateral.Denom)
-	}
-
 	// reduce fromAddr's collateral
 	oldCollateral := k.GetCollateralAmount(ctx, fromAddr, collateral.Denom)
 	newCollateral := sdk.NewCoin(collateral.Denom, oldCollateral.Amount.Sub(collateral.Amount))
