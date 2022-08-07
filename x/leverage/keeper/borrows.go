@@ -36,8 +36,7 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 		return err
 	}
 	// update borrower's remaining borrowed amount
-	newBorrow := k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay)
-	return k.setBorrow(ctx, borrowAddr, newBorrow)
+	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
 }
 
 // setBorrow sets the amount borrowed by an address in a given denom.
