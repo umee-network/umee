@@ -110,9 +110,10 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 	return nil
 }
 
-// Withdraw attempts to deposit uTokens into the leverage module in exchange
-// for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
-// If the uToken denom is invalid or account or module balance insufficient, returns error.
+// Withdraw attempts to deposit uTokens into the leverage module in exchange for base tokens.
+// If there are not enough uTokens in balance, Withdraw will attempt to withdraw uToken collateral
+// to make up the difference (as long as borrow limit allows). If the uToken denom is invalid or
+// balances are insufficient to withdraw the full amount requested, returns an error.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) error {
 	if err := k.validateAcceptedUToken(ctx, uToken); err != nil {
 		return err
