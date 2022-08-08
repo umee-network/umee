@@ -407,12 +407,13 @@ func randomWithdrawFields(
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk, lk)
 	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
 
+	uTokens = simtypes.RandSubsetCoins(r, uTokens)
+
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
 
-	subset := randomCoin(r, simtypes.RandSubsetCoins(r, uTokens))
-	return acc, subset, false
+	return acc, randomCoin(r, uTokens), false
 }
 
 // getSpendableUTokens returns all uTokens from an account's spendable coins.
