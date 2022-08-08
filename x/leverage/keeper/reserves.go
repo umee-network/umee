@@ -65,9 +65,9 @@ func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error
 	return nil
 }
 
-// repayBadDebt uses reserves to repay borrower's debts of a given denom.
+// RepayBadDebt uses reserves to repay borrower's debts of a given denom.
 // It returns a boolean representing whether full repayment was achieved.
-func (k Keeper) repayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
+func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
 	reserved := k.GetReserveAmount(ctx, denom)
 
