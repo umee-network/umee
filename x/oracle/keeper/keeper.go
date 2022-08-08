@@ -386,7 +386,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	}
 }
 
-// ValidateFeeder returns error if the given feeder is allowed to feed the message.
+// ValidateFeeder returns error if the given feeder is not allowed to feed the message.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	delegate, err := k.GetFeederDelegation(ctx, valAddr)
 	if err != nil {
