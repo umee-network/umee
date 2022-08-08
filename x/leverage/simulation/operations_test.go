@@ -147,7 +147,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
@@ -158,6 +158,8 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 
 	var msg types.MsgWithdraw
 	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
+
+	// todo: message order execution?
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
