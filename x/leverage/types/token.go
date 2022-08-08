@@ -18,17 +18,28 @@ func HasUTokenPrefix(denom string) bool {
 	return strings.HasPrefix(denom, UTokenPrefix)
 }
 
-// ToUTokenDenom adds the uToken prefix to a denom if not already present.
+// ToUTokenDenom adds the uToken prefix to a denom. Returns an empty string
+// instead if the prefix was already present.
 func ToUTokenDenom(denom string) string {
 	if HasUTokenPrefix(denom) {
-		return denom
+		return ""
 	}
 	return UTokenPrefix + denom
 }
 
-// ToTokenDenom strips the uToken prefix from a denom if present.
+// ToTokenDenom strips the uToken prefix from a denom, or returns an empty
+// string if it was not present. Also returns an empty string if the prefix
+// was repeated multiple times.
 func ToTokenDenom(denom string) string {
-	return strings.TrimPrefix(denom, UTokenPrefix)
+	if !HasUTokenPrefix(denom) {
+		return ""
+	}
+	s := strings.TrimPrefix(denom, UTokenPrefix)
+	if HasUTokenPrefix(s) {
+		// denom started with "u/u/"
+		return ""
+	}
+	return s
 }
 
 // Validate performs validation on an Token type returning an error if the Token

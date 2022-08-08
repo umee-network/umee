@@ -14,14 +14,16 @@ func TestToTokenDenom(t *testing.T) {
 	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
 	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
 
-	// Does not alter base tokens
-	require.Equal(t, "uumee", types.ToTokenDenom("uumee"))
-	require.Equal(t, "ibc/abcd", types.ToTokenDenom("ibc/abcd"))
+	// Empty return for base tokens
+	require.Equal(t, "", types.ToTokenDenom("uumee"))
+	require.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
 
-	// Does not ensure a valid output
+	// Empty return on repreated prefix
+	require.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
+
+	// Edge cases
 	require.Equal(t, "", types.ToTokenDenom("u/"))
 	require.Equal(t, "", types.ToTokenDenom(""))
-	require.Equal(t, "u/", types.ToTokenDenom("u/u/"))
 }
 
 func TestToUTokenDenom(t *testing.T) {
@@ -29,14 +31,12 @@ func TestToUTokenDenom(t *testing.T) {
 	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
 	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
 
-	// Does not alter uTokens
-	require.Equal(t, "u/uumee", types.ToUTokenDenom("u/uumee"))
-	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("u/ibc/abcd"))
+	// Empty return for uTokens
+	require.Equal(t, "", types.ToUTokenDenom("u/uumee"))
+	require.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
 
-	// Does not ensure a valid output
+	// Edge cases
 	require.Equal(t, "u/", types.ToUTokenDenom(""))
-	require.Equal(t, "u/", types.ToUTokenDenom("u/"))
-	require.Equal(t, "u/u/", types.ToUTokenDenom("u/u/"))
 }
 
 func TestUpdateRegistryProposal_String(t *testing.T) {
