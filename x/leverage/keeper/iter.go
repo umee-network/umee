@@ -146,7 +146,6 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 			return err
 		}
 
-		// add to totalBorrowed
 		totalCollateral = totalCollateral.Add(sdk.NewCoin(denom, amount))
 		return nil
 	}

@@ -49,8 +49,8 @@ func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 // checkBadDebt detects if a borrower has zero non-blacklisted collateral,
 // and marks any remaining borrowed tokens as bad debt.
 func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
-	// get remaining collateral, ignoring blacklisted
-	remainingCollateral := k.filterAcceptedCoins(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
+	// get remaining collateral uTokens, ignoring blacklisted
+	remainingCollateral := k.filterAcceptedUTokens(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
 
 	// detect bad debt if collateral is completely exhausted
 	if remainingCollateral.IsZero() {

@@ -171,7 +171,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 		}
 	}
 
-	// transfer uTokensFromWallet to the module account
+	// transfer amountFromWallet uTokens to the module account
 	uTokens := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromWallet))
 	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, uTokens); err != nil {
 		return err
