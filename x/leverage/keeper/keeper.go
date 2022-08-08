@@ -114,13 +114,13 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 // If there are not enough uTokens in balance, Withdraw will attempt to withdraw uToken collateral
 // to make up the difference (as long as borrow limit allows). If the uToken denom is invalid or
 // balances are insufficient to withdraw the full amount requested, returns an error.
-func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) error {
-	if err := k.validateAcceptedUToken(ctx, uToken); err != nil {
+func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
+	if err := k.validateAcceptedUToken(ctx, coin); err != nil {
 		return err
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, uToken)
+	token, err := k.ExchangeUToken(ctx, coin)
 	if err != nil {
 		return err
 	}
@@ -133,9 +133,9 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// Withdraw will first attempt to use any uTokens in the supplier's wallet
-	uTokensFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom), uToken.Amount)
+	uTokensFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(coin.Denom), coin.Amount)
 	// Any additional uTokens must come from the supplier's collateral
-	uTokensFromCollateral := uToken.Amount.Sub(uTokensFromWallet)
+	uTokensFromCollateral := coin.Amount.Sub(uTokensFromWallet)
 
 	if uTokensFromCollateral.IsPositive() {
 		// Calculate current borrowed value
@@ -147,17 +147,17 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
-		if collateral.AmountOf(uToken.Denom).LT(uTokensFromCollateral) {
+		if collateral.AmountOf(coin.Denom).LT(uTokensFromCollateral) {
 			info := fmt.Sprintf(
 				"\n  spendable: %s\n  addr: %s\n\n",
 				k.bankKeeper.SpendableCoins(ctx, supplierAddr).String(),
 				supplierAddr.String(),
 			)
-			return sdkerrors.Wrap(types.ErrInsufficientBalance, uToken.String()+info)
+			return sdkerrors.Wrap(types.ErrInsufficientBalance, coin.String()+info)
 		}
 
 		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(uToken.Denom, uTokensFromCollateral))
+		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(coin.Denom, uTokensFromCollateral))
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
 		if err != nil {
 			return err
@@ -170,14 +170,14 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
-		newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(uTokensFromCollateral))
+		newCollateral := sdk.NewCoin(coin.Denom, collateral.AmountOf(coin.Denom).Sub(uTokensFromCollateral))
 		if err = k.setCollateralAmount(ctx, supplierAddr, newCollateral); err != nil {
 			return err
 		}
 	}
 
 	// transfer uTokensFromWallet to the module account
-	uTokens := sdk.NewCoins(sdk.NewCoin(uToken.Denom, uTokensFromWallet))
+	uTokens := sdk.NewCoins(sdk.NewCoin(coin.Denom, uTokensFromWallet))
 	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
@@ -189,10 +189,10 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// burn the uTokens and set the new total uToken supply
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
 		return err
 	}
-	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken)); err != nil {
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin)); err != nil {
 		return err
 	}
 
