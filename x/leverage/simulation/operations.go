@@ -430,7 +430,7 @@ func getSpendableUTokens(
 ) sdk.Coins {
 	uTokens := sdk.NewCoins()
 	for _, coin := range bk.SpendableCoins(ctx, addr) {
-		if lk.ValidateAcceptedUTokenDenom(ctx, coin.Denom) == nil {
+		if types.HasUTokenPrefix(coin.Denom) {
 			uTokens = uTokens.Add(coin)
 		}
 	}

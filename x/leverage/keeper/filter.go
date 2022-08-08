@@ -20,7 +20,7 @@ func (k Keeper) filterAcceptedCoins(ctx sdk.Context, coins sdk.Coins) sdk.Coins 
 	return k.filterCoins(
 		coins,
 		func(c sdk.Coin) bool {
-			return k.ValidateAcceptedAsset(ctx, c) == nil
+			return k.validateAcceptedAsset(ctx, c) == nil
 		},
 	)
 }

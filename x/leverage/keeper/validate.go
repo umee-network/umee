@@ -6,9 +6,9 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// ValidateAcceptedDenom validates an sdk.Coin and ensures it is a registered Token
+// validateAcceptedDenom validates an sdk.Coin and ensures it is a registered Token
 // with Blacklisted == false
-func (k Keeper) ValidateAcceptedDenom(ctx sdk.Context, denom string) error {
+func (k Keeper) validateAcceptedDenom(ctx sdk.Context, denom string) error {
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return err
@@ -16,35 +16,35 @@ func (k Keeper) ValidateAcceptedDenom(ctx sdk.Context, denom string) error {
 	return token.AssertNotBlacklisted()
 }
 
-// ValidateAcceptedUTokenDenom validates an sdk.Coin and ensures it is a uToken
+// validateAcceptedUTokenDenom validates an sdk.Coin and ensures it is a uToken
 // associated with a registered Token with Blacklisted == false
-func (k Keeper) ValidateAcceptedUTokenDenom(ctx sdk.Context, udenom string) error {
+func (k Keeper) validateAcceptedUTokenDenom(ctx sdk.Context, udenom string) error {
 	if !types.HasUTokenPrefix(udenom) {
 		return types.ErrNotUToken.Wrap(udenom)
 	}
-	return k.ValidateAcceptedDenom(ctx, types.ToTokenDenom(udenom))
+	return k.validateAcceptedDenom(ctx, types.ToTokenDenom(udenom))
 }
 
-// ValidateAcceptedAsset validates an sdk.Coin and ensures it is a registered Token
+// validateAcceptedAsset validates an sdk.Coin and ensures it is a registered Token
 // with Blacklisted == false
-func (k Keeper) ValidateAcceptedAsset(ctx sdk.Context, coin sdk.Coin) error {
+func (k Keeper) validateAcceptedAsset(ctx sdk.Context, coin sdk.Coin) error {
 	if err := coin.Validate(); err != nil {
 		return err
 	}
-	return k.ValidateAcceptedDenom(ctx, coin.Denom)
+	return k.validateAcceptedDenom(ctx, coin.Denom)
 }
 
-// ValidateAcceptedUToken validates an sdk.Coin and ensures it is a uToken
+// validateAcceptedUToken validates an sdk.Coin and ensures it is a uToken
 // associated with a registered Token with Blacklisted == false
-func (k Keeper) ValidateAcceptedUToken(ctx sdk.Context, coin sdk.Coin) error {
+func (k Keeper) validateAcceptedUToken(ctx sdk.Context, coin sdk.Coin) error {
 	if err := coin.Validate(); err != nil {
 		return err
 	}
-	return k.ValidateAcceptedUTokenDenom(ctx, coin.Denom)
+	return k.validateAcceptedUTokenDenom(ctx, coin.Denom)
 }
 
-// ValidateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
-func (k Keeper) ValidateSupply(ctx sdk.Context, loan sdk.Coin) error {
+// validateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
+func (k Keeper) validateSupply(ctx sdk.Context, loan sdk.Coin) error {
 	if err := loan.Validate(); err != nil {
 		return err
 	}
@@ -55,8 +55,8 @@ func (k Keeper) ValidateSupply(ctx sdk.Context, loan sdk.Coin) error {
 	return token.AssertSupplyEnabled()
 }
 
-// ValidateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
-func (k Keeper) ValidateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
+// validateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
+func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	if err := borrow.Validate(); err != nil {
 		return err
 	}
@@ -67,9 +67,9 @@ func (k Keeper) ValidateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	return token.AssertBorrowEnabled()
 }
 
-// ValidateCollateralize validates an sdk.Coin and ensures it is a uToken of an accepted
+// validateCollateral validates an sdk.Coin and ensures it is a uToken of an accepted
 // Token with EnableMsgSupply and CollateralWeight > 0
-func (k Keeper) ValidateCollateralize(ctx sdk.Context, collateral sdk.Coin) error {
+func (k Keeper) validateCollateral(ctx sdk.Context, collateral sdk.Coin) error {
 	if err := collateral.Validate(); err != nil {
 		return err
 	}

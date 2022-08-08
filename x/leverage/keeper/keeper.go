@@ -77,7 +77,7 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
 // exchange for uTokens. If asset type is invalid or account balance is
 // insufficient, we return an error.
 func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Coin) error {
-	if err := k.ValidateSupply(ctx, loan); err != nil {
+	if err := k.validateSupply(ctx, loan); err != nil {
 		return err
 	}
 
@@ -114,7 +114,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 // for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
 // If the uToken denom is invalid or account or module balance insufficient, returns error.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) error {
-	if err := k.ValidateAcceptedUToken(ctx, uToken); err != nil {
+	if err := k.validateAcceptedUToken(ctx, uToken); err != nil {
 		return err
 	}
 
@@ -202,7 +202,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 // collateral uTokens. If asset type is invalid, collateral is insufficient,
 // or module balance is insufficient, we return an error.
 func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
-	if err := k.ValidateBorrow(ctx, borrow); err != nil {
+	if err := k.validateBorrow(ctx, borrow); err != nil {
 		return err
 	}
 
@@ -276,7 +276,7 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 
 // Collateralize enables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
-	if err := k.ValidateCollateralize(ctx, coin); err != nil {
+	if err := k.validateCollateral(ctx, coin); err != nil {
 		return err
 	}
 
@@ -347,7 +347,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 func (k Keeper) Liquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, maxRepay sdk.Coin, rewardDenom string,
 ) (repaid sdk.Coin, liquidated sdk.Coin, reward sdk.Coin, err error) {
-	if err := k.ValidateAcceptedAsset(ctx, maxRepay); err != nil {
+	if err := k.validateAcceptedAsset(ctx, maxRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
@@ -358,7 +358,7 @@ func (k Keeper) Liquidate(
 		rewardDenom = types.ToTokenDenom(rewardDenom)
 	}
 	// ensure that base reward is a registered token
-	if err := k.ValidateAcceptedDenom(ctx, rewardDenom); err != nil {
+	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 

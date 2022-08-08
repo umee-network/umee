@@ -9,7 +9,7 @@ import (
 // GetSupplied returns an sdk.Coin representing how much of a given denom a
 // user has supplied, including interest accrued.
 func (k Keeper) GetSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdk.Coin, error) {
-	if err := k.ValidateAcceptedDenom(ctx, denom); err != nil {
+	if err := k.validateAcceptedDenom(ctx, denom); err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -32,7 +32,7 @@ func (k Keeper) GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sd
 	uTokens := sdk.Coins{}
 	balance := k.bankKeeper.GetAllBalances(ctx, supplierAddr)
 	for _, coin := range balance {
-		if k.ValidateAcceptedUTokenDenom(ctx, coin.Denom) == nil {
+		if k.validateAcceptedUTokenDenom(ctx, coin.Denom) == nil {
 			uTokens = uTokens.Add(coin)
 		}
 	}
@@ -44,7 +44,7 @@ func (k Keeper) GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sd
 // GetTotalSupply returns the total supplied by all suppliers in a given denom,
 // including any interest accrued.
 func (k Keeper) GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error) {
-	if err := k.ValidateAcceptedDenom(ctx, denom); err != nil {
+	if err := k.validateAcceptedDenom(ctx, denom); err != nil {
 		return sdk.Coin{}, err
 	}
 
