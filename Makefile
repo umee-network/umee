@@ -152,7 +152,7 @@ endif
 
 lint:
 	@echo "--> Running linter"
-	@find -name go.mod -execdir go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m \;
+	@find -name go.mod -execdir go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=8m \;
 
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
