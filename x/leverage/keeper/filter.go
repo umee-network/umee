@@ -25,7 +25,7 @@ func (k Keeper) filterAcceptedCoins(ctx sdk.Context, coins sdk.Coins) sdk.Coins 
 	)
 }
 
-// filterAcceptedCoins returns the subset of an sdk.Coins that are accepted, non-blacklisted uTokens
+// filterAcceptedUTokens returns the subset of an sdk.Coins that are accepted, non-blacklisted uTokens
 func (k Keeper) filterAcceptedUTokens(ctx sdk.Context, coins sdk.Coins) sdk.Coins {
 	return k.filterCoins(
 		coins,
