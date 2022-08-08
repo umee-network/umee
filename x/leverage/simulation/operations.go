@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -411,13 +410,6 @@ func randomWithdrawFields(
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
-
-	info := fmt.Sprintf(
-		"\n  spendable: %s\n  addr: %s\n\n",
-		bk.SpendableCoins(ctx, acc.Address).String(),
-		acc.Address.String(),
-	)
-	fmt.Println(info)
 
 	subset := randomCoin(r, simtypes.RandSubsetCoins(r, uTokens))
 	return acc, subset, false
