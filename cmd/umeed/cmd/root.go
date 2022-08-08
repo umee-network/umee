@@ -162,21 +162,3 @@ func txCommand(ac appCreator) *cobra.Command {
 
 	return cmd
 }
-
-func _overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
-	set := func(s *pflag.FlagSet, key, val string) {
-		if f := s.Lookup(key); f != nil {
-			f.DefValue = val
-			_ = f.Value.Set(val)
-		}
-	}
-
-	for key, val := range defaults {
-		set(c.Flags(), key, val)
-		set(c.PersistentFlags(), key, val)
-	}
-
-	for _, c := range c.Commands() {
-		_overwriteFlagDefaults(c, defaults)
-	}
-}
