@@ -38,5 +38,6 @@ var (
 		1126,
 		"market total collateral would exceed MaxCollateralShare",
 	)
-	ErrNotUToken = sdkerrors.Register(ModuleName, 1127, "not a uToken denom")
+	ErrNotUToken = sdkerrors.Register(ModuleName, 1127, "denom is not a uToken")
+	ErrUToken    = sdkerrors.Register(ModuleName, 1128, "denom is a uToken")
 )
