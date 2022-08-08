@@ -67,9 +67,9 @@ func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	return token.AssertBorrowEnabled()
 }
 
-// validateCollateral validates an sdk.Coin and ensures it is a uToken of an accepted
+// validateCollateralAsset validates an sdk.Coin and ensures it is a uToken of an accepted
 // Token with EnableMsgSupply and CollateralWeight > 0
-func (k Keeper) validateCollateral(ctx sdk.Context, collateral sdk.Coin) error {
+func (k Keeper) validateCollateralAsset(ctx sdk.Context, collateral sdk.Coin) error {
 	if err := collateral.Validate(); err != nil {
 		return err
 	}
