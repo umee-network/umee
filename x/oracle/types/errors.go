@@ -8,7 +8,7 @@ import (
 )
 
 // Oracle sentinel errors
-// nolint: lll
+//nolint: lll
 var (
 	ErrInvalidExchangeRate   = sdkerrors.Register(ModuleName, 1, "invalid exchange rate")
 	ErrNoPrevote             = sdkerrors.Register(ModuleName, 2, "no prevote")
