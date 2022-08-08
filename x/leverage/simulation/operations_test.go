@@ -50,10 +50,51 @@ func (s *SimTestSuite) SetupTest() {
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
 	}
+	atomIBCToken := types.Token{
+		BaseDenom:              "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
+		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:       sdk.MustNewDecFromStr("0.8"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.8"),
+		BaseBorrowRate:         sdk.MustNewDecFromStr("0.05"),
+		KinkBorrowRate:         sdk.MustNewDecFromStr("0.3"),
+		MaxBorrowRate:          sdk.MustNewDecFromStr("0.9"),
+		KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
+		LiquidationIncentive:   sdk.MustNewDecFromStr("0.11"),
+		SymbolDenom:            "ATOM",
+		Exponent:               6,
+		EnableMsgSupply:        true,
+		EnableMsgBorrow:        true,
+		Blacklist:              false,
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+	}
+	uabc := types.Token{
+		BaseDenom:              "uabc",
+		ReserveFactor:          sdk.MustNewDecFromStr("0"),
+		CollateralWeight:       sdk.MustNewDecFromStr("0.1"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.1"),
+		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
+		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
+		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
+		KinkUtilization:        sdk.MustNewDecFromStr("0.87"),
+		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
+		SymbolDenom:            "ABC",
+		Exponent:               6,
+		EnableMsgSupply:        true,
+		EnableMsgBorrow:        true,
+		Blacklist:              false,
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+	}
 
+	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
-	app.OracleKeeper.SetExchangeRate(ctx, umeeToken.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
+	for _, token := range tokens {
+		s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, token))
+		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
+	}
 
 	s.app = app
 	s.ctx = ctx
@@ -138,7 +179,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal(types.EventTypeSupply, msg.Type())
-	s.Require().Equal("4896096uumee", msg.Asset.String())
+	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
