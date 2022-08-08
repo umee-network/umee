@@ -233,7 +233,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 		// first check if the borrower has gained collateral since the bad debt was identified
 		done := k.HasCollateral(ctx, addr)
-		// TODO: Non-blacklisted collateral only
+		// TODO #1223: Decollateralize any blacklisted collateral and proceed
 
 		// if collateral is still zero, attempt to repay a single address's debt in this denom
 		if !done {
