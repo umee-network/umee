@@ -39,7 +39,7 @@ func TestUpdateRegistryProposal_String(t *testing.T) {
 				MaxCollateralShare:     sdk.MustNewDecFromStr("0.1"),
 				MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.5"),
 				MinCollateralLiquidity: sdk.MustNewDecFromStr("0.75"),
-				MaxSupply:              sdk.NewUint(1000),
+				MaxSupply:              sdk.NewInt(1000),
 			},
 		},
 	}
@@ -88,7 +88,7 @@ func TestToken_Validate(t *testing.T) {
 			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 			MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
-			MaxSupply:              sdk.NewUint(1000),
+			MaxSupply:              sdk.NewInt(1000),
 		}
 	}
 	invalidBaseToken := validToken()
@@ -140,8 +140,11 @@ func TestToken_Validate(t *testing.T) {
 	invalidMinCollateralLiquidity := validToken()
 	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
 
-	invalidMaxSupply := validToken()
-	invalidMaxSupply.MaxSupply = sdk.NewUint(0)
+	invalidMaxSupply1 := validToken()
+	invalidMaxSupply1.MaxSupply = sdk.NewInt(0)
+
+	invalidMaxSupply2 := validToken()
+	invalidMaxSupply2.MaxSupply = sdk.NewInt(-1)
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -210,8 +213,12 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidMinCollateralLiquidity,
 			expectErr: true,
 		},
-		"invalid max supply": {
-			input:     invalidMaxSupply,
+		"invalid max supply (0)": {
+			input:     invalidMaxSupply1,
+			expectErr: true,
+		},
+		"invalid max supply (negative)": {
+			input:     invalidMaxSupply2,
 			expectErr: true,
 		},
 	}
