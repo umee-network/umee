@@ -59,6 +59,8 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			return smartcontractQuery.HandleFeederDelegation(ctx, plugin.ocQueryServer)
 		case AssignedQueryMissCounter:
 			return smartcontractQuery.HandleMissCounter(ctx, plugin.ocQueryServer)
+		case AssignedQuerySlashWindow:
+			return smartcontractQuery.HandleSlashWindow(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregatePrevote:
 			return smartcontractQuery.HandleAggregatePrevote(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregatePrevotes:

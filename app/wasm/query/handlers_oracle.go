@@ -62,6 +62,19 @@ func (q UmeeQuery) HandleMissCounter(
 	return MarshalResponse(resp)
 }
 
+// HandleSlashWindow gets slash window information.
+func (q UmeeQuery) HandleSlashWindow(
+	ctx sdk.Context,
+	qs octypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.SlashWindow(sdk.WrapSDKContext(ctx), q.SlashWindow)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Slash Window", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
 // HandleAggregatePrevote gets an aggregate prevote of a validator.
 func (q UmeeQuery) HandleAggregatePrevote(
 	ctx sdk.Context,

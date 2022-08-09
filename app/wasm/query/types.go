@@ -40,6 +40,8 @@ const (
 	// AssignedQueryMissCounter represents the call to query all the oracle
 	// miss counter of a validator.
 	AssignedQueryMissCounter
+	// AssignedQuerySlashWindow represents the call to query the validator slash window.
+	AssignedQuerySlashWindow
 	// AssignedQueryAggregatePrevote represents the call to query an aggregate prevote of
 	// a validator.
 	AssignedQueryAggregatePrevote
@@ -90,6 +92,8 @@ type UmeeQuery struct {
 	FeederDelegation *octypes.QueryFeederDelegation `json:"feeder_delegation,omitempty"`
 	// Used to get all the oracle miss counter of a validator.
 	MissCounter *octypes.QueryMissCounter `json:"miss_counter,omitempty"`
+	// Used to get information of an slash window.
+	SlashWindow *octypes.QuerySlashWindow `json:"slash_window,omitempty"`
 	// Used to get an aggregate prevote of a validator.
 	AggregatePrevote *octypes.QueryAggregatePrevote `json:"aggregate_prevote,omitempty"`
 	// Used to get an aggregate prevote of all validators.
