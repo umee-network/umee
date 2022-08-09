@@ -265,7 +265,7 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 	return nil
 }
 
-// GetComputedPricesXXX gets the candle and ticker prices and computes it.
+// GetComputedPrices gets the candle and ticker prices and computes it.
 // It returns candles' TVWAP if possible, if not possible (not available
 // or due to some staleness) it will use the most recent ticker prices
 // and the VWAP formula instead.
