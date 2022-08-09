@@ -41,14 +41,18 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 		switch smartcontractQuery.AssignedQuery {
 		case AssignedQueryExchangeRates:
 			return smartcontractQuery.HandleExchangeRates(ctx, plugin.ocQueryServer)
-		case AssignedQueryRegisteredTokens:
-			return smartcontractQuery.HandleRegisteredTokens(ctx, plugin.lvQueryServer)
 		case AssignedQueryLeverageParams:
 			return smartcontractQuery.HandleLeverageParams(ctx, plugin.lvQueryServer)
-		case AssignedQueryLiquidationTargets:
-			return smartcontractQuery.HandleLiquidationTargets(ctx, plugin.lvQueryServer)
+		case AssignedQueryRegisteredTokens:
+			return smartcontractQuery.HandleRegisteredTokens(ctx, plugin.lvQueryServer)
 		case AssignedQueryMarketSummary:
 			return smartcontractQuery.HandleMarketSummary(ctx, plugin.lvQueryServer)
+		case AssignedQueryAccountBalances:
+			return smartcontractQuery.HandleAccountBalances(ctx, plugin.lvQueryServer)
+		case AssignedQueryAccountSummary:
+			return smartcontractQuery.HandleAccountSummary(ctx, plugin.lvQueryServer)
+		case AssignedQueryLiquidationTargets:
+			return smartcontractQuery.HandleLiquidationTargets(ctx, plugin.lvQueryServer)
 		case AssignedQueryActiveExchangeRates:
 			return smartcontractQuery.HandleActiveExchangeRates(ctx, plugin.ocQueryServer)
 		case AssignedQueryActiveFeederDelegation:

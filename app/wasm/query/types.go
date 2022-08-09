@@ -16,16 +16,22 @@ const (
 	// AssignedQueryExchangeRates represents the call to query the exchange rates
 	// of all denoms.
 	AssignedQueryExchangeRates AssignedQuery = iota + 1
-	// AssignedQueryRegisteredTokens represents the call of leverage get all registered tokens.
-	AssignedQueryRegisteredTokens
 	// AssignedQueryLeverageParams represents the call of the x/leverage module's parameters.
 	AssignedQueryLeverageParams
-	// AssignedQueryLiquidationTargets represents the call to query the list of
-	// borrower addresses eligible for liquidation.
-	AssignedQueryLiquidationTargets
+	// AssignedQueryRegisteredTokens represents the call of leverage get all registered tokens.
+	AssignedQueryRegisteredTokens
 	// AssignedQueryMarketSummary represents the call to query the market
 	// summary data of an denom.
 	AssignedQueryMarketSummary
+	// AssignedQueryAccountBalances represents the call to query an account's current
+	// supply, collateral, and borrow positions.
+	AssignedQueryAccountBalances
+	// AssignedQueryAccountSummary represents the call to query the USD value representing
+	// an account's total positions and borrowing limits.
+	AssignedQueryAccountSummary
+	// AssignedQueryLiquidationTargets represents the call to query the list of
+	// borrower addresses eligible for liquidation.
+	AssignedQueryLiquidationTargets
 	// AssignedQueryActiveExchangeRates represents the call to query all active denoms.
 	AssignedQueryActiveExchangeRates
 	// AssignedQueryActiveFeederDelegation represents the call to query all the feeder
@@ -66,14 +72,18 @@ type UmeeQuery struct {
 	AssignedQuery AssignedQuery `json:"assigned_query"`
 	// Used to get the exchange rates of all denoms.
 	ExchangeRates *octypes.QueryExchangeRates `json:"exchange_rates,omitempty"`
-	// Used to query all the registered tokens.
-	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to query the x/leverage module's parameters.
 	LeverageParams *lvtypes.QueryParams `json:"leverage_params,omitempty"`
-	// request to return a list of borrower addresses eligible for liquidation.
-	LiquidationTargets *lvtypes.QueryLiquidationTargets `json:"liquidation_targets,omitempty"`
+	// Used to query all the registered tokens.
+	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to get the summary data of an denom.
 	MarketSummary *lvtypes.QueryMarketSummary `json:"market_summary,omitempty"`
+	// Used to get an account's current supply, collateral, and borrow positions.
+	AccountBalances *lvtypes.QueryAccountBalances `json:"account_balances,omitempty"`
+	// Used to queries USD values representing an account's total positions and borrowing limits.
+	AccountSummary *lvtypes.QueryAccountSummary `json:"account_summary,omitempty"`
+	// request to return a list of borrower addresses eligible for liquidation.
+	LiquidationTargets *lvtypes.QueryLiquidationTargets `json:"liquidation_targets,omitempty"`
 	// Used to get all active denoms.
 	ActiveExchangeRates *octypes.QueryActiveExchangeRates `json:"active_exchange_rates,omitempty"`
 	// Used to get all feeder delegation of a validator.

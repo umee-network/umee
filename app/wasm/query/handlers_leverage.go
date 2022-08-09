@@ -8,19 +8,6 @@ import (
 	lvtypes "github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// HandleRegisteredTokens handles the get all registered tokens query and response.
-func (q UmeeQuery) HandleRegisteredTokens(
-	ctx sdk.Context,
-	qs lvtypes.QueryServer,
-) ([]byte, error) {
-	resp, err := qs.RegisteredTokens(sdk.WrapSDKContext(ctx), &lvtypes.QueryRegisteredTokens{})
-	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Registered Tokens", err)}
-	}
-
-	return MarshalResponse(resp)
-}
-
 // HandleLeverageParams handles the get the x/leverage module's parameters.
 func (q UmeeQuery) HandleLeverageParams(
 	ctx sdk.Context,
@@ -34,20 +21,20 @@ func (q UmeeQuery) HandleLeverageParams(
 	return MarshalResponse(resp)
 }
 
-// HandleLiquidationTargets determines an list of borrower addresses eligible for liquidation.
-func (q UmeeQuery) HandleLiquidationTargets(
+// HandleRegisteredTokens handles the get all registered tokens query and response.
+func (q UmeeQuery) HandleRegisteredTokens(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.LiquidationTargets(sdk.WrapSDKContext(ctx), q.LiquidationTargets)
+	resp, err := qs.RegisteredTokens(sdk.WrapSDKContext(ctx), &lvtypes.QueryRegisteredTokens{})
 	if err != nil {
-		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Liquidation Targets", err)}
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Registered Tokens", err)}
 	}
 
 	return MarshalResponse(resp)
 }
 
-// HandleMarketSummary gets the summary data of an denom.
+// HandleMarketSummary queries a base asset's current borrowing and supplying conditions.
 func (q UmeeQuery) HandleMarketSummary(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
@@ -55,6 +42,46 @@ func (q UmeeQuery) HandleMarketSummary(
 	resp, err := qs.MarketSummary(sdk.WrapSDKContext(ctx), q.MarketSummary)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Summary", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleAccountBalances queries an account's current supply, collateral, and borrow positions.
+func (q UmeeQuery) HandleAccountBalances(
+	ctx sdk.Context,
+	qs lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.AccountBalances(sdk.WrapSDKContext(ctx), q.AccountBalances)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Account Balances", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleAccountSummary queries USD values representing an account's total
+// positions and borrowing limits. It requires oracle prices to return successfully.
+func (q UmeeQuery) HandleAccountSummary(
+	ctx sdk.Context,
+	qs lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.AccountSummary(sdk.WrapSDKContext(ctx), q.AccountSummary)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Account Summary", err)}
+	}
+
+	return MarshalResponse(resp)
+}
+
+// HandleLiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
+func (q UmeeQuery) HandleLiquidationTargets(
+	ctx sdk.Context,
+	qs lvtypes.QueryServer,
+) ([]byte, error) {
+	resp, err := qs.LiquidationTargets(sdk.WrapSDKContext(ctx), q.LiquidationTargets)
+	if err != nil {
+		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Liquidation Targets", err)}
 	}
 
 	return MarshalResponse(resp)
