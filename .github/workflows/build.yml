@@ -23,26 +23,15 @@ jobs:
             **/**.go
             go.mod
             go.sum
-
       - name: Setup go
         if: env.GIT_DIFF
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
+          cache: true
         env:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
-
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-
       - name: Compile
         if: env.GIT_DIFF
         run: |
@@ -50,6 +39,7 @@ jobs:
           cd cmd/umeed
           go build .
       - uses: actions/upload-artifact@v3
+        if: env.GIT_DIFF
         with:
           name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
           path: cmd/umeed/umeed

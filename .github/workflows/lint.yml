@@ -4,36 +4,37 @@ on:
   push:
     branches:
       - main
+      - release/**
+
 jobs:
   golangci:
     name: Run golangci-lint
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.0
-        if: env.GIT_DIFF
         with:
           PATTERNS: |
             **/**.go
-            go.mod
-            go.sum
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
           go-version: 1.18
-      - name: Get Go Cache
+          cache: true
+      - name: golangci-lint main
+        uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
-        uses: actions/cache@v3
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-      - name: Run golangci-lint
+          version: latest
+          args: --timeout 8m
+      - name: golangci-lint pricefeeder
+        uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
-        run: make lint
+        with:
+          version: latest
+          working-directory: price-feeder
+          args: --timeout 8m
 
   super-linter:
     name: Run super-linter
@@ -53,30 +54,18 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  golangci-price-feeder:
+  buf-lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: actions/checkout@v2
+      - uses: technote-space/get-diff-action@v6
         with:
           PATTERNS: |
-            **/**.go
-            price-feeder/go.mod
-            price-feeder/go.sum
-      - uses: actions/setup-go@v3
+            **/**.proto
+      - uses: bufbuild/buf-setup-action@v1
+        if: env.GIT_DIFF
+      - uses: bufbuild/buf-lint-action@v1
         if: env.GIT_DIFF
         with:
-          go-version: 1.18
-      - name: Get Go Cache
-        if: env.GIT_DIFF
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-      - name: Lint price-feeder
-        if: env.GIT_DIFF
-        run: |
-          cd price-feeder && make lint
+          input: "proto"
