@@ -13,25 +13,33 @@ run:
 
 linters:
   enable:
+    # - dupl
+    # - nestif
+    # - rowserrcheck -- enable when it will support generics
+    # - whitespace
+    # - wsl
+    - asciicheck
     - bodyclose
     - deadcode
     - depguard
     - dogsled
     - errcheck
+    - exportloopref
     - goconst
     - gocritic
     - gofmt
     - goimports
-    - revive
     - gosec
     - gosimple
     - govet
+    - grouper
     - ineffassign
     - lll
     - misspell
     - nakedret
+    - nolintlint
     - prealloc
-    - exportloopref
+    - revive
     - staticcheck
     - structcheck
     - stylecheck
@@ -39,11 +47,8 @@ linters:
     - unconvert
     - unparam
     - unused
+    - usestdlibvars
     - varcheck
-    - nolintlint
-    - asciicheck
-    # - whitespace
-    # - wsl
 
 issues:
   exclude-rules:
@@ -58,8 +63,6 @@ issues:
 linters-settings:
   dogsled:
     max-blank-identifiers: 3
-  golint:
-    min-confidence: 0
   revive:
     # Sets the default failure confidence.
     # This means that linting errors with less than 0.8 confidence will be ignored.
@@ -71,4 +74,3 @@ linters-settings:
     allow-unused: false
     allow-leading-space: true
     require-explanation: false
-    require-specific: false

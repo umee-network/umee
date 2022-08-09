@@ -15,15 +15,8 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.18
-      - name: Get Go Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-        if: env.GIT_DIFF
+          cache: true
+          cache-dependency-path: price-feeder/go.sum
       # Parse 'v*.*.*' semantic version from 'price-feeder/v*.*.*' and save to
       # the $GITHUB_ENV environment variable.
       - name: Set env
