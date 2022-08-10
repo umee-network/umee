@@ -362,7 +362,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 func (p *BinanceProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return fmt.Errorf("error closing binance websocket connection: %s", err)
+		return fmt.Errorf("error closing binance websocket connection: %w", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
