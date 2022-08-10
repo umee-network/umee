@@ -49,6 +49,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
+	maxSupply, _ := sdk.NewIntFromString("100000000000000000000")
 	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
 
 	initialQueries := []TestCase{
@@ -89,6 +90,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+						MaxSupply:              maxSupply,
 					},
 				},
 			},

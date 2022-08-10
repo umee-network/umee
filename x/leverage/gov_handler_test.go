@@ -34,6 +34,7 @@ func newTestToken(base, symbol, reserveFactor string) types.Token {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 }
 
