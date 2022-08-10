@@ -384,7 +384,7 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 func (p *HuobiProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return fmt.Errorf("error closing Huobi websocket connection: %s", err)
+		return fmt.Errorf("error closing Huobi websocket connection: %w", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
