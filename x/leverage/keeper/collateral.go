@@ -20,7 +20,7 @@ func (k Keeper) redeemCollateral(ctx sdk.Context, owner, recipient sdk.AccAddres
 	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin))
 }
 
-// decollateralize removes fromAddrs' uTokens from circualtion and redeems it for the underlying
+// decollateralize removes fromAddrs' uTokens from circulation and redeems it for the underlying
 // token, sending it to the toAddr. It occurs when decollateralizing uTokens (in which case
 // fromAddr and toAddr are the same) as well as during liquidations, where toAddr is the liquidator.
 func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
