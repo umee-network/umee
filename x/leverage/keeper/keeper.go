@@ -151,7 +151,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 		if collateral.AmountOf(uToken.Denom).LT(amountFromCollateral) {
-			return types.ErrInsufficientBalance.Wrapf("%s balance + %s collateral / %s withdraw",
+			return types.ErrInsufficientBalance.Wrapf("%s uToken balance + %s from collateral is less than %s to withdraw",
 				amountFromWallet.String(),
 				collateral.AmountOf(uToken.Denom).String(),
 				uToken.String())

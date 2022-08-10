@@ -924,7 +924,9 @@ func (s *IntegrationTestSuite) TestWithdraw_InsufficientCollateral() {
 	// withdraw more collateral than available
 	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
 	err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
-	s.Require().EqualError(err, "0 balance + 1000000 collateral / 1000001u/uumee withdraw: insufficient balance")
+	s.Require().EqualError(err,
+		"0 uToken balance + 1000000 from collateral is less than 1000001u/uumee to withdraw: insufficient balance",
+	)
 }
 
 func (s *IntegrationTestSuite) TestTotalCollateral() {
