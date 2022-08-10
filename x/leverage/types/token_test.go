@@ -9,11 +9,34 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-func TestUTokenFromTokenDenom(t *testing.T) {
-	tokenDenom := "uumee"
-	uTokenDenom := types.UTokenFromTokenDenom(tokenDenom)
-	require.Equal(t, "u/"+tokenDenom, uTokenDenom)
-	require.NoError(t, sdk.ValidateDenom(uTokenDenom))
+func TestToTokenDenom(t *testing.T) {
+	// Turns uToken denoms into base tokens
+	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
+	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
+
+	// Empty return for base tokens
+	require.Equal(t, "", types.ToTokenDenom("uumee"))
+	require.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
+
+	// Empty return on repreated prefix
+	require.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
+
+	// Edge cases
+	require.Equal(t, "", types.ToTokenDenom("u/"))
+	require.Equal(t, "", types.ToTokenDenom(""))
+}
+
+func TestToUTokenDenom(t *testing.T) {
+	// Turns base token denoms into base uTokens
+	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
+	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
+
+	// Empty return for uTokens
+	require.Equal(t, "", types.ToUTokenDenom("u/uumee"))
+	require.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
+
+	// Edge cases
+	require.Equal(t, "u/", types.ToUTokenDenom(""))
 }
 
 func validToken() types.Token {

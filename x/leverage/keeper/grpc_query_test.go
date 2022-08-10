@@ -65,7 +65,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
 		),
 		Collateral: sdk.NewCoins(
-			sdk.NewCoin(types.UTokenFromTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
+			sdk.NewCoin(types.ToUTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
 		),
 		Borrowed: nil,
 	}

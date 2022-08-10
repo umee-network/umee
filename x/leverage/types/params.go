@@ -15,6 +15,7 @@ var (
 	KeyMinimumCloseFactor           = []byte("MinimumCloseFactor")
 	KeyOracleRewardFactor           = []byte("OracleRewardFactor")
 	KeySmallLiquidationSize         = []byte("SmallLiquidationSize")
+	KeyDirectLiquidationFee         = []byte("DirectLiquidationFee")
 )
 
 var (
@@ -22,6 +23,7 @@ var (
 	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
 	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
 	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("100.00")
+	defaultDirectLiquidationFee         = sdk.MustNewDecFromStr("0.1")
 )
 
 func NewParams() Params {
@@ -52,6 +54,11 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			&p.SmallLiquidationSize,
 			validateSmallLiquidationSize,
 		),
+		paramtypes.NewParamSetPair(
+			KeyDirectLiquidationFee,
+			&p.DirectLiquidationFee,
+			validateDirectLiquidationFee,
+		),
 	}
 }
 
@@ -74,6 +81,7 @@ func DefaultParams() Params {
 		MinimumCloseFactor:           defaultMinimumCloseFactor,
 		OracleRewardFactor:           defaultOracleRewardFactor,
 		SmallLiquidationSize:         defaultSmallLiquidationSize,
+		DirectLiquidationFee:         defaultDirectLiquidationFee,
 	}
 }
 
@@ -89,6 +97,9 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateSmallLiquidationSize(p.SmallLiquidationSize); err != nil {
+		return err
+	}
+	if err := validateDirectLiquidationFee(p.DirectLiquidationFee); err != nil {
 		return err
 	}
 	return nil
@@ -147,6 +158,22 @@ func validateSmallLiquidationSize(i interface{}) error {
 
 	if v.IsNegative() {
 		return fmt.Errorf("small liquidation size cannot be negative: %d", v)
+	}
+
+	return nil
+}
+
+func validateDirectLiquidationFee(i interface{}) error {
+	v, ok := i.(sdk.Dec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNegative() {
+		return fmt.Errorf("direct liquidation fee cannot be negative: %d", v)
+	}
+	if v.GTE(sdk.OneDec()) {
+		return fmt.Errorf("direct liquidation fee must be less than 1: %d", v)
 	}
 
 	return nil

@@ -110,16 +110,20 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, loan sdk.Co
 	return nil
 }
 
-// Withdraw attempts to deposit uTokens into the leverage module in exchange
-// for the original tokens supplied. Accepts a uToken amount to exchange for base tokens.
-// If the uToken denom is invalid or account or module balance insufficient, returns error.
-func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) error {
-	if !k.IsAcceptedUToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+// Withdraw attempts to deposit uTokens into the leverage module in exchange for base tokens.
+// If there are not enough uTokens in balance, Withdraw will attempt to withdraw uToken collateral
+// to make up the difference (as long as borrow limit allows). If the uToken denom is invalid or
+// balances are insufficient to withdraw the full amount requested, returns an error.
+func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) error {
+	if err := uToken.Validate(); err != nil {
+		return err
+	}
+	if !types.HasUTokenPrefix(uToken.Denom) {
+		return types.ErrNotUToken.Wrap(uToken.Denom)
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, coin)
+	token, err := k.ExchangeUToken(ctx, uToken)
 	if err != nil {
 		return err
 	}
@@ -132,9 +136,9 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 	}
 
 	// Withdraw will first attempt to use any uTokens in the supplier's wallet
-	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(coin.Denom), coin.Amount)
+	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom), uToken.Amount)
 	// Any additional uTokens must come from the supplier's collateral
-	amountFromCollateral := coin.Amount.Sub(amountFromWallet)
+	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 
 	if amountFromCollateral.IsPositive() {
 		// Calculate current borrowed value
@@ -146,12 +150,15 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
-		if collateral.AmountOf(coin.Denom).LT(amountFromCollateral) {
-			return sdkerrors.Wrap(types.ErrInsufficientBalance, coin.String())
+		if collateral.AmountOf(uToken.Denom).LT(amountFromCollateral) {
+			return types.ErrInsufficientBalance.Wrapf("%s uToken balance + %s from collateral is less than %s to withdraw",
+				amountFromWallet.String(),
+				collateral.AmountOf(uToken.Denom).String(),
+				uToken.String())
 		}
 
 		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromCollateral))
+		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromCollateral))
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
 		if err != nil {
 			return err
@@ -164,14 +171,14 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
-		newCollateral := sdk.NewCoin(coin.Denom, collateral.AmountOf(coin.Denom).Sub(amountFromCollateral))
+		newCollateral := sdk.NewCoin(uToken.Denom, collateral.AmountOf(uToken.Denom).Sub(amountFromCollateral))
 		if err = k.setCollateralAmount(ctx, supplierAddr, newCollateral); err != nil {
 			return err
 		}
 	}
 
 	// transfer amountFromWallet uTokens to the module account
-	uTokens := sdk.NewCoins(sdk.NewCoin(coin.Denom, amountFromWallet))
+	uTokens := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromWallet))
 	if err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, uTokens); err != nil {
 		return err
 	}
@@ -183,10 +190,10 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.
 	}
 
 	// burn the uTokens and set the new total uToken supply
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
 		return err
 	}
-	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin)); err != nil {
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken)); err != nil {
 		return err
 	}
 
@@ -249,35 +256,21 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // Repay returns the actual amount repaid.
 func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
-	if !payment.IsValid() {
-		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())
-	}
-
-	// Determine amount of selected denom currently owed
-	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
-	if owed.IsZero() {
-		// Borrower has no open borrows in the denom presented as payment
-		return sdk.ZeroInt(), types.ErrInvalidRepayment.Wrap(
-			"Borrower doesn't have active position in " + payment.Denom)
-	}
-
-	// Prevent overpaying
-	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
 	if err := payment.Validate(); err != nil {
-		return sdk.ZeroInt(), types.ErrInvalidRepayment.Wrap(err.Error())
-	}
-
-	// send payment to leverage module account
-	if err := k.bankKeeper.SendCoinsFromAccountToModule(
-		ctx, borrowerAddr,
-		types.ModuleName,
-		sdk.NewCoins(payment),
-	); err != nil {
 		return sdk.ZeroInt(), err
 	}
 
-	owed.Amount = owed.Amount.Sub(payment.Amount)
-	if err := k.setBorrow(ctx, borrowerAddr, owed); err != nil {
+	// determine amount of selected denom currently owed
+	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
+	if owed.IsZero() {
+		return sdk.ZeroInt(), types.ErrInvalidRepayment.Wrapf("No %s borrowed ", payment.Denom)
+	}
+
+	// prevent overpaying
+	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
+
+	// send payment to leverage module account
+	if err := k.repayBorrow(ctx, borrowerAddr, borrowerAddr, payment); err != nil {
 		return sdk.ZeroInt(), err
 	}
 	return payment.Amount, nil
@@ -346,31 +339,40 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 	return nil
 }
 
-// Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange
-// for a the base token equivalent of selected denomination of the borrower's uToken collateral. If the
-// borrower is not over their liquidation limit, or the repayment or reward denominations are invalid,
-// an error is returned. If the attempted repayment is greater than the amount owed or the maximum that
-// can be repaid due to parameters or available balances, then a partial liquidation, equal to the maximum
-// valid amount, is performed. Because partial liquidation is possible and exchange rates vary, Liquidate
-// returns the actual amount of tokens repaid, uTokens consumed, and base tokens rewarded.
+// Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange for
+// some of the borrower's uToken collateral or associated base tokens. If the borrower is not over their
+// liquidation limit, or the repayment or reward denominations are invalid, an error is returned. If the
+// attempted repayment is greater than the amount owed or the maximum that can be repaid due to parameters
+// or available balances, then a partial liquidation, equal to the maximum valid amount, is performed.
+// Because partial liquidation is possible and exchange rates vary, Liquidate returns the actual amount of
+// tokens repaid, collateral liquidated, and base tokens or uTokens rewarded.
 func (k Keeper) Liquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, maxRepay sdk.Coin, rewardDenom string,
-) (baseRepay sdk.Coin, collateralReward sdk.Coin, baseReward sdk.Coin, err error) {
+) (repaid sdk.Coin, liquidated sdk.Coin, reward sdk.Coin, err error) {
 	if err := k.validateAcceptedAsset(ctx, maxRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
+
+	// detect if the user selected a base token reward instead of a uToken
+	directLiquidation := !types.HasUTokenPrefix(rewardDenom)
+	if !directLiquidation {
+		// convert rewardDenom to base token
+		rewardDenom = types.ToTokenDenom(rewardDenom)
+	}
+	// ensure that base reward is a registered token
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// calculate borrowed Token repay, uToken collateral, and Token reward amounts allowed by
+	// calculate borrowed Token repay, uToken liquidate, and Token reward amounts allowed by
 	// liquidation rules and available balances
-	baseRepay, collateralReward, baseReward, err = k.getLiquidationAmounts(
+	baseRepay, collateralLiquidate, baseReward, err := k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
 		maxRepay,
 		rewardDenom,
+		directLiquidation,
 	)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
@@ -381,49 +383,38 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationInvalid
 	}
 
-	// send repayment from liquidator to leverage module account
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, liquidatorAddr, types.ModuleName, sdk.NewCoins(baseRepay))
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-	// update borrower's remaining borrowed amount
-	newBorrow := k.GetBorrow(ctx, borrowerAddr, baseRepay.Denom).Amount.Sub(baseRepay.Amount)
-	if err = k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(baseRepay.Denom, newBorrow)); err != nil {
+	// repay some of the borrower's debt using the liquidator's balance
+	if err = k.repayBorrow(ctx, liquidatorAddr, borrowerAddr, baseRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// reduce borrower's collateral by collateral reward amount
-	oldCollateral := k.GetCollateralAmount(ctx, borrowerAddr, collateralReward.Denom)
-	newCollateral := sdk.NewCoin(collateralReward.Denom, oldCollateral.Amount.Sub(collateralReward.Amount))
-	if err = k.setCollateralAmount(ctx, borrowerAddr, newCollateral); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-	// burn the collateral reward uTokens and set the new total uToken supply
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(collateralReward)); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, collateralReward.Denom).Sub(collateralReward)); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
+	if directLiquidation {
+		// burn the uToken reward from borrower's collateral
+		if err = k.burnCollateral(ctx, borrowerAddr, collateralLiquidate); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
 
-	// send base rewards from module to liquidator's account
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(baseReward))
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-
-	// get remaining collateral, ignoring blacklisted
-	remainingCollateral := k.filterAcceptedCoins(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
-
-	// detect bad debt if collateral is completely exhausted
-	if remainingCollateral.IsZero() {
-		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
-			// set a bad debt flag for each borrowed denom
-			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
-				return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-			}
+		// send base rewards from module to liquidator's account
+		if err = k.bankKeeper.SendCoinsFromModuleToAccount(
+			ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(baseReward),
+		); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+	} else {
+		// send uToken rewards from borrower collateral to liquidator's account
+		if err = k.removeCollateral(ctx, borrowerAddr, liquidatorAddr, collateralLiquidate); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 		}
 	}
 
-	return baseRepay, collateralReward, baseReward, nil
+	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
+	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// the last return value is the liquidator's selected reward
+	if directLiquidation {
+		return baseRepay, collateralLiquidate, baseReward, nil
+	}
+	return baseRepay, collateralLiquidate, collateralLiquidate, nil
 }

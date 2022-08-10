@@ -82,7 +82,7 @@ func (q Querier) MarketSummary(
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
 
-	uDenom := q.Keeper.FromTokenToUTokenDenom(ctx, req.Denom)
+	uDenom := types.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
 
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
