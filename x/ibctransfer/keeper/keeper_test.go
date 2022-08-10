@@ -56,6 +56,8 @@ func (s *KeeperTestSuite) SetupTest() {
 			[]authtypes.GenesisAccount{
 				chain.SenderAccount.(authtypes.GenesisAccount),
 			},
+			chainID,
+			sdk.DefaultPowerReduction,
 			balance,
 		)
 
