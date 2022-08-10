@@ -73,8 +73,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	if currentTime < prevInterestTime {
-		// @todo fix this when tendermint solves #8773
-		// https://github.com/tendermint/tendermint/issues/8773
+		// TODO fix this when tendermint solves https://github.com/tendermint/tendermint/issues/8773
 		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
 			types.ErrNegativeTimeElapsed.Error(),
 			"current", currentTime,
@@ -161,7 +160,6 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"reserved", newReserves.String(),
 	)
 
-	// TODO: use typed events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeInterestAccrual,

@@ -26,6 +26,7 @@ var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
 	// TODO: Ensure x/leverage implements simulator and then uncomment.
+	// https://github.com/umee-network/umee/issues/644
 	// _ module.AppModuleSimulation = AppModule{}
 )
 
