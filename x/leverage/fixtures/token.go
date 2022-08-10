@@ -7,12 +7,12 @@ import (
 )
 
 // Token returns a valid token
-func Token(base, symbol, reserveFactor string) types.Token {
+func Token(base, symbol string) types.Token {
 	return types.Token{
 		BaseDenom:              base,
 		SymbolDenom:            symbol,
 		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr(reserveFactor),
+		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
 		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
 		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
