@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramsproposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/stretchr/testify/require"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
@@ -12,31 +11,9 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/x/leverage"
+	"github.com/umee-network/umee/v2/x/leverage/fixtures"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
-
-func newTestToken(base, symbol, reserveFactor string) types.Token {
-	return types.Token{
-		BaseDenom:              base,
-		SymbolDenom:            symbol,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr(reserveFactor),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100000000000),
-	}
-}
 
 func TestUpdateRegistryProposalHandler(t *testing.T) {
 	app := umeeapp.Setup(t, false, 1)
@@ -57,7 +34,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				newTestToken("uosmo", "", "0.2"), // empty denom is invalid
+				fixtures.NewToken("uosmo", "", "0.2"), // empty denom is invalid
 			},
 		}
 		require.Error(t, h(ctx, p))
@@ -65,18 +42,18 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 	t.Run("valid proposal", func(t *testing.T) {
 		require.NoError(t, k.SetTokenSettings(ctx,
-			newTestToken("uosmo", "OSMO", "0.2"),
+			fixtures.NewToken("uosmo", "OSMO", "0.2"),
 		))
 		require.NoError(t, k.SetTokenSettings(ctx,
-			newTestToken("uatom", "ATOM", "0.2"),
+			fixtures.NewToken("uatom", "ATOM", "0.2"),
 		))
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				newTestToken("uumee", "UMEE", "0.2"),
-				newTestToken("uosmo", "OSMO", "0.3"),
+				fixtures.NewToken("uumee", "UMEE", "0.2"),
+				fixtures.NewToken("uosmo", "OSMO", "0.3"),
 			},
 		}
 		require.NoError(t, h(ctx, p))

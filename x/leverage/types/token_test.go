@@ -16,6 +16,29 @@ func TestUTokenFromTokenDenom(t *testing.T) {
 	require.NoError(t, sdk.ValidateDenom(uTokenDenom))
 }
 
+func validToken() types.Token {
+	return types.Token{
+		BaseDenom:              "uumee",
+		SymbolDenom:            "umee",
+		Exponent:               6,
+		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
+		BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
+		KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
+		MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
+		KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
+		LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
+		EnableMsgSupply:        true,
+		EnableMsgBorrow:        true,
+		Blacklist:              false,
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
+		MaxSupply:              sdk.NewInt(1000),
+	}
+}
+
 func TestUpdateRegistryProposal_String(t *testing.T) {
 	p := types.UpdateRegistryProposal{
 		Title:       "test",
@@ -69,28 +92,6 @@ registry:
 }
 
 func TestToken_Validate(t *testing.T) {
-	validToken := func() types.Token {
-		return types.Token{
-			BaseDenom:              "uumee",
-			SymbolDenom:            "umee",
-			Exponent:               6,
-			ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
-			CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
-			LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
-			BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
-			KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
-			MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
-			KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
-			LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
-			EnableMsgSupply:        true,
-			EnableMsgBorrow:        true,
-			Blacklist:              false,
-			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-			MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
-			MaxSupply:              sdk.NewInt(1000),
-		}
-	}
 	invalidBaseToken := validToken()
 	invalidBaseToken.BaseDenom = "$$"
 	invalidBaseToken.SymbolDenom = ""

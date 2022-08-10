@@ -49,7 +49,6 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
-	maxSupply, _ := sdk.NewIntFromString("100000000000000000000")
 	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
 
 	initialQueries := []TestCase{
@@ -70,7 +69,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryRegisteredTokensResponse{},
 			&types.QueryRegisteredTokensResponse{
-				Registry: []types.Token{
+				Registry: []types.Token{ // fixtures.NewToken(BondDenom, DisplayDenom, "0.1")
 					{
 						// must match app/test_helpers.go/IntegrationTestNetworkConfig
 						BaseDenom:              umeeapp.BondDenom,
@@ -90,7 +89,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-						MaxSupply:              maxSupply,
+						MaxSupply:              sdk.NewInt(100000000000),
 					},
 				},
 			},
