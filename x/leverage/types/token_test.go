@@ -129,6 +129,7 @@ func TestToken_Validate(t *testing.T) {
 
 	invalidBlacklistedSupply := validToken()
 	invalidBlacklistedSupply.EnableMsgSupply = false
+	invalidBlacklistedSupply.MaxSupply = sdk.ZeroInt()
 	invalidBlacklistedSupply.Blacklist = true
 
 	invalidMaxCollateralShare := validToken()
@@ -145,6 +146,10 @@ func TestToken_Validate(t *testing.T) {
 
 	invalidMaxSupply2 := validToken()
 	invalidMaxSupply2.MaxSupply = sdk.NewInt(-1)
+
+	validMaxSupply := validToken()
+	validMaxSupply.MaxSupply = sdk.NewInt(0)
+	validMaxSupply.EnableMsgSupply = false
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -220,6 +225,10 @@ func TestToken_Validate(t *testing.T) {
 		"invalid max supply (negative)": {
 			input:     invalidMaxSupply2,
 			expectErr: true,
+		},
+		"valid max supply": {
+			input:     validMaxSupply,
+			expectErr: false,
 		},
 	}
 
