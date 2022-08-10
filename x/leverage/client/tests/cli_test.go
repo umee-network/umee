@@ -1,5 +1,5 @@
-//aago:build norace
-//aa+ build norace
+//go:build norace
+// +build norace
 
 package tests
 
