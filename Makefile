@@ -152,8 +152,8 @@ endif
 
 lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m;
-	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m;
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
+	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
 
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
