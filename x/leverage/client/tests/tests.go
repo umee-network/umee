@@ -69,7 +69,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryRegisteredTokensResponse{},
 			&types.QueryRegisteredTokensResponse{
-				Registry: []types.Token{ // fixtures.NewToken(BondDenom, DisplayDenom, "0.1")
+				Registry: []types.Token{
 					{
 						// must match app/test_helpers.go/IntegrationTestNetworkConfig
 						BaseDenom:              umeeapp.BondDenom,

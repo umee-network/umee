@@ -33,7 +33,7 @@ var (
 
 // creates a test token with reasonable initial parameters
 func newToken(base, symbol string) types.Token {
-	return fixtures.NewToken(base, symbol, "0.2")
+	return fixtures.Token(base, symbol, "0.2")
 }
 
 type IntegrationTestSuite struct {

@@ -34,7 +34,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				fixtures.NewToken("uosmo", "", "0.2"), // empty denom is invalid
+				fixtures.Token("uosmo", "", "0.2"), // empty denom is invalid
 			},
 		}
 		require.Error(t, h(ctx, p))
@@ -42,18 +42,18 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 	t.Run("valid proposal", func(t *testing.T) {
 		require.NoError(t, k.SetTokenSettings(ctx,
-			fixtures.NewToken("uosmo", "OSMO", "0.2"),
+			fixtures.Token("uosmo", "OSMO", "0.2"),
 		))
 		require.NoError(t, k.SetTokenSettings(ctx,
-			fixtures.NewToken("uatom", "ATOM", "0.2"),
+			fixtures.Token("uatom", "ATOM", "0.2"),
 		))
 
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				fixtures.NewToken("uumee", "UMEE", "0.2"),
-				fixtures.NewToken("uosmo", "OSMO", "0.3"),
+				fixtures.Token("uumee", "UMEE", "0.2"),
+				fixtures.Token("uosmo", "OSMO", "0.3"),
 			},
 		}
 		require.NoError(t, h(ctx, p))
