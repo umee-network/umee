@@ -6,8 +6,8 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// NewToken returns a valid token
-func NewToken(base, symbol, reserveFactor string) types.Token {
+// Token returns a valid token
+func Token(base, symbol, reserveFactor string) types.Token {
 	return types.Token{
 		BaseDenom:              base,
 		SymbolDenom:            symbol,
