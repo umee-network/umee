@@ -360,7 +360,10 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 // the websocket server does not receive a pong frame back from the connection
 // within a 10 minute period, the connection will be disconnected.
 func (p *BinanceProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return fmt.Errorf("error closing binance websocket connection: %s", err)
+	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)

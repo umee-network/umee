@@ -486,7 +486,10 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 
 // reconnect closes the last WS connection and create a new one.
 func (p *KrakenProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return fmt.Errorf("error closing Kraken websocket connection: %s", err)
+	}
 	p.logger.Debug().Msg("trying to reconnect")
 
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
