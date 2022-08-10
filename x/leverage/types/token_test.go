@@ -195,11 +195,11 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidMaxSupply1,
 			expectErr: true,
 		},
-		"valid max supply (msgsend=false)": {
+		"valid max supply (enable_msg_supply=false)": {
 			input:     validMaxSupply1,
 			expectErr: false,
 		},
-		"valid max supply (msgsend=true)": {
+		"valid max supply (enable_msg_supply=true)": {
 			input:     validMaxSupply2,
 			expectErr: false,
 		},
