@@ -109,11 +109,6 @@ func TestToken_Validate(t *testing.T) {
 	invalidBlacklistedBorrow.EnableMsgBorrow = false
 	invalidBlacklistedBorrow.Blacklist = true
 
-	invalidBlacklistedSupply := validToken()
-	invalidBlacklistedSupply.EnableMsgSupply = false
-	invalidBlacklistedSupply.MaxSupply = sdk.ZeroInt()
-	invalidBlacklistedSupply.Blacklist = true
-
 	invalidMaxCollateralShare := validToken()
 	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
 
@@ -124,14 +119,14 @@ func TestToken_Validate(t *testing.T) {
 	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
 
 	invalidMaxSupply1 := validToken()
-	invalidMaxSupply1.MaxSupply = sdk.NewInt(0)
+	invalidMaxSupply1.MaxSupply = sdk.NewInt(-1)
 
-	invalidMaxSupply2 := validToken()
-	invalidMaxSupply2.MaxSupply = sdk.NewInt(-1)
+	validMaxSupply1 := validToken()
+	validMaxSupply1.MaxSupply = sdk.NewInt(0)
+	validMaxSupply1.EnableMsgSupply = false
 
-	validMaxSupply := validToken()
-	validMaxSupply.MaxSupply = sdk.NewInt(0)
-	validMaxSupply.EnableMsgSupply = false
+	validMaxSupply2 := validToken()
+	validMaxSupply2.MaxSupply = sdk.NewInt(0)
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -180,10 +175,6 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidLiquidationIncentive,
 			expectErr: true,
 		},
-		"blacklisted but supply enabled": {
-			input:     invalidBlacklistedSupply,
-			expectErr: true,
-		},
 		"blacklisted but borrow enabled": {
 			input:     invalidBlacklistedBorrow,
 			expectErr: true,
@@ -200,16 +191,16 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidMinCollateralLiquidity,
 			expectErr: true,
 		},
-		"invalid max supply (0)": {
+		"invalid max supply (negative)": {
 			input:     invalidMaxSupply1,
 			expectErr: true,
 		},
-		"invalid max supply (negative)": {
-			input:     invalidMaxSupply2,
-			expectErr: true,
+		"valid max supply (msgsend=false)": {
+			input:     validMaxSupply1,
+			expectErr: false,
 		},
-		"valid max supply": {
-			input:     validMaxSupply,
+		"valid max supply (msgsend=true)": {
+			input:     validMaxSupply2,
 			expectErr: false,
 		},
 	}

@@ -113,10 +113,9 @@ type Token struct {
 	// of its base denom.
 	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
 	// Enable Msg Supply allows supplying for lending or collateral using this
-	// token. Note that withdrawing is always enabled. Disabling supply would
+	// token. `false` means that a token is not valid for any new supply.
+	// Note that withdrawing is always enabled. Disabling supply would
 	// be one step in phasing out an asset type.
-	// To mark a token as not valid for supply, `msg_supply` must be set to false
-	// and `max_supply` must be set to zero.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
 	// Enable Msg Borrow allows borrowing of this token. Note that repaying is
 	// always enabled. Disabling borrowing would be one step in phasing out an
@@ -147,9 +146,8 @@ type Token struct {
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
 	// Max Supply is the maximum amount of tokens the protocol can hold.
 	// Adding more supply of the given token to the protocol will return an error.
-	// Must be a non negative value.
-	// To mark a token as not valid for supply, `msg_supply` must be set to false
-	// and `max_supply` must be set to zero.
+	// Must be a non negative value. 0 means that there is no limit.
+	// To mark a token as not valid for supply, `msg_supply` must be set to false.
 	MaxSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=max_supply,json=maxSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"max_supply" yaml:"max_supply"`
 }
 
