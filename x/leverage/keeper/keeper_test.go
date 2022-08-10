@@ -479,7 +479,7 @@ func (s *IntegrationTestSuite) TestRepay_Valid() {
 	// user repays 8 umee
 	repaid, err := s.app.LeverageKeeper.Repay(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 8000000))
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt(8000000), repaid)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 8000000), repaid)
 
 	// verify user's new loan amount (12 umee)
 	loanBalance := s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
@@ -500,7 +500,7 @@ func (s *IntegrationTestSuite) TestRepay_Valid() {
 	// user repays 12 umee (loan repaid in full)
 	repaid, err = s.app.LeverageKeeper.Repay(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 12000000))
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt(12000000), repaid)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 12000000), repaid)
 
 	// verify user's new loan amount in the correct denom (zero)
 	loanBalance = s.app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
@@ -533,7 +533,7 @@ func (s *IntegrationTestSuite) TestRepay_Overpay() {
 	coinToRepay := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000)
 	repaid, err := s.app.LeverageKeeper.Repay(ctx, addr, coinToRepay)
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt(20000000), repaid)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 20000000), repaid)
 
 	// verify that coinToRepay has not been modified
 	s.Require().Equal(sdk.NewInt(30000000), coinToRepay.Amount)
