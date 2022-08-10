@@ -9,6 +9,7 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/x/leverage"
 	"github.com/umee-network/umee/v2/x/leverage/fixtures"
@@ -48,12 +49,14 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			fixtures.Token("uatom", "ATOM"),
 		))
 
+		osmo := fixtures.Token("uosmo", "OSMO")
+		osmo.ReserveFactor = sdk.MustNewDecFromStr("0.3")
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
 				fixtures.Token("uumee", "UMEE"),
-				fixtures.Token("uosmo", "OSMO"),
+				osmo,
 			},
 		}
 		require.NoError(t, h(ctx, p))
@@ -67,6 +70,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		token, err := k.GetTokenSettings(ctx, "uosmo")
 		require.NoError(t, err)
-		require.Equal(t, "0.200000000000000000", token.ReserveFactor.String())
+		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String(),
+			"reserve factor is correctly set")
 	})
 }
