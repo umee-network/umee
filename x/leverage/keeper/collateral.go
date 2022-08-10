@@ -10,16 +10,13 @@ import (
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
 // during liquidations.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Coin) error {
-	// reduce account's collateral
 	err := k.setCollateralAmount(ctx, addr, k.GetCollateralAmount(ctx, addr, coin.Denom).Sub(coin))
 	if err != nil {
 		return err
 	}
-	// burn the uTokens
 	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
 		return err
 	}
-	// set the new total uToken supply
 	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin))
 }
 
@@ -27,12 +24,10 @@ func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Co
 // occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the same) as well as
 // during liquidations, where toAddr is the liquidator.
 func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
-	// reduce fromAddr's collateral
 	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, coin.Denom).Sub(coin))
 	if err != nil {
 		return err
 	}
-	// send the uTokens to toAddr
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(coin))
 }
 
