@@ -49,6 +49,7 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:              "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
@@ -68,6 +69,7 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 	uabc := types.Token{
 		BaseDenom:              "uabc",
@@ -87,6 +89,7 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}

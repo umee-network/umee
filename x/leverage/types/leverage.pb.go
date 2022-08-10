@@ -117,7 +117,8 @@ type Token struct {
 	// of its base denom.
 	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
 	// Enable Msg Supply allows supplying for lending or collateral using this
-	// token. Note that withdrawing is always enabled. Disabling supplying would
+	// token. `false` means that a token can no longer be supplied.
+	// Note that withdrawing is always enabled. Disabling supply would
 	// be one step in phasing out an asset type.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
 	// Enable Msg Borrow allows borrowing of this token. Note that repaying is
@@ -147,6 +148,11 @@ type Token struct {
 	// withdrawing assets. Liquidity can only drop below this value due to interest
 	// or liquidations.
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
+	// Max Supply is the maximum amount of tokens the protocol can hold.
+	// Adding more supply of the given token to the protocol will return an error.
+	// Must be a non negative value. 0 means that there is no limit.
+	// To mark a token as not valid for supply, `msg_supply` must be set to false.
+	MaxSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=max_supply,json=maxSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"max_supply" yaml:"max_supply"`
 }
 
 func (m *Token) Reset()         { *m = Token{} }
@@ -318,6 +324,9 @@ func (this *Token) Equal(that interface{}) bool {
 	if !this.MinCollateralLiquidity.Equal(that1.MinCollateralLiquidity) {
 		return false
 	}
+	if !this.MaxSupply.Equal(that1.MaxSupply) {
+		return false
+	}
 	return true
 }
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -413,6 +422,18 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.MaxSupply.Size()
+		i -= size
+		if _, err := m.MaxSupply.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x92
 	{
 		size := m.MinCollateralLiquidity.Size()
 		i -= size
@@ -656,6 +677,8 @@ func (m *Token) Size() (n int) {
 	l = m.MaxSupplyUtilization.Size()
 	n += 2 + l + sovLeverage(uint64(l))
 	l = m.MinCollateralLiquidity.Size()
+	n += 2 + l + sovLeverage(uint64(l))
+	l = m.MaxSupply.Size()
 	n += 2 + l + sovLeverage(uint64(l))
 	return n
 }
@@ -1429,6 +1452,40 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.MinCollateralLiquidity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 18:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxSupply", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxSupply.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

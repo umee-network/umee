@@ -89,6 +89,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+						MaxSupply:              sdk.NewInt(100000000000),
 					},
 				},
 			},

@@ -4,38 +4,17 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramsproposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	"github.com/stretchr/testify/require"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/x/leverage"
+	"github.com/umee-network/umee/v2/x/leverage/fixtures"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
-
-func newTestToken(base, symbol, reserveFactor string) types.Token {
-	return types.Token{
-		BaseDenom:              base,
-		SymbolDenom:            symbol,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr(reserveFactor),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-	}
-}
 
 func TestUpdateRegistryProposalHandler(t *testing.T) {
 	app := umeeapp.Setup(t, false, 1)
@@ -56,7 +35,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				newTestToken("uosmo", "", "0.2"), // empty denom is invalid
+				fixtures.Token("uosmo", ""), // empty denom is invalid
 			},
 		}
 		require.Error(t, h(ctx, p))
@@ -64,18 +43,20 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 	t.Run("valid proposal", func(t *testing.T) {
 		require.NoError(t, k.SetTokenSettings(ctx,
-			newTestToken("uosmo", "OSMO", "0.2"),
+			fixtures.Token("uosmo", "OSMO"),
 		))
 		require.NoError(t, k.SetTokenSettings(ctx,
-			newTestToken("uatom", "ATOM", "0.2"),
+			fixtures.Token("uatom", "ATOM"),
 		))
 
+		osmo := fixtures.Token("uosmo", "OSMO")
+		osmo.ReserveFactor = sdk.MustNewDecFromStr("0.3")
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				newTestToken("uumee", "UMEE", "0.2"),
-				newTestToken("uosmo", "OSMO", "0.3"),
+				fixtures.Token("uumee", "UMEE"),
+				osmo,
 			},
 		}
 		require.NoError(t, h(ctx, p))
@@ -89,6 +70,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		token, err := k.GetTokenSettings(ctx, "uosmo")
 		require.NoError(t, err)
-		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String())
+		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String(),
+			"reserve factor is correctly set")
 	})
 }
