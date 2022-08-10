@@ -82,7 +82,7 @@ func (s msgServer) Withdraw(
 	s.keeper.Logger(ctx).Debug(
 		"supplied assets withdrawn",
 		"supplier", supplierAddr.String(),
-		"amount", msg.Coin.String(),
+		"redeemed", msg.Coin.String(),
 		"received", received.String(),
 	)
 
@@ -243,14 +243,15 @@ func (s msgServer) Repay(
 		"borrowed coins repaid",
 		"borrower", borrowerAddr.String(),
 		"attempted", msg.Coin.String(),
-		"amount", repaid.String(),
+		"repaid", repaid.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeRepayBorrowedAsset,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, repaid.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Coin.String()),
+			sdk.NewAttribute(types.EventAttrRepaid, repaid.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
