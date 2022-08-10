@@ -619,8 +619,11 @@ paths:
                         Enable Msg Supply allows supplying for lending or
                         collateral using this
 
-                        token. Note that withdrawing is always enabled.
-                        Disabling supplying would
+                        token. `false` means that a token can no longer be
+                        supplied.
+
+                        Note that withdrawing is always enabled. Disabling
+                        supply would
 
                         be one step in phasing out an asset type.
                     enable_msg_borrow:
@@ -694,6 +697,20 @@ paths:
                         value due to interest
 
                         or liquidations.
+                    max_supply:
+                      type: string
+                      description: >-
+                        Max Supply is the maximum amount of tokens the protocol
+                        can hold.
+
+                        Adding more supply of the given token to the protocol
+                        will return an error.
+
+                        Must be a non negative value. 0 means that there is no
+                        limit.
+
+                        To mark a token as not valid for supply, `msg_supply`
+                        must be set to false.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -1785,8 +1802,9 @@ definitions:
                 Enable Msg Supply allows supplying for lending or collateral
                 using this
 
-                token. Note that withdrawing is always enabled. Disabling
-                supplying would
+                token. `false` means that a token can no longer be supplied.
+
+                Note that withdrawing is always enabled. Disabling supply would
 
                 be one step in phasing out an asset type.
             enable_msg_borrow:
@@ -1859,6 +1877,19 @@ definitions:
                 to interest
 
                 or liquidations.
+            max_supply:
+              type: string
+              description: >-
+                Max Supply is the maximum amount of tokens the protocol can
+                hold.
+
+                Adding more supply of the given token to the protocol will
+                return an error.
+
+                Must be a non negative value. 0 means that there is no limit.
+
+                To mark a token as not valid for supply, `msg_supply` must be
+                set to false.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -1942,8 +1973,9 @@ definitions:
           Enable Msg Supply allows supplying for lending or collateral using
           this
 
-          token. Note that withdrawing is always enabled. Disabling supplying
-          would
+          token. `false` means that a token can no longer be supplied.
+
+          Note that withdrawing is always enabled. Disabling supply would
 
           be one step in phasing out an asset type.
       enable_msg_borrow:
@@ -2016,6 +2048,18 @@ definitions:
           interest
 
           or liquidations.
+      max_supply:
+        type: string
+        description: >-
+          Max Supply is the maximum amount of tokens the protocol can hold.
+
+          Adding more supply of the given token to the protocol will return an
+          error.
+
+          Must be a non negative value. 0 means that there is no limit.
+
+          To mark a token as not valid for supply, `msg_supply` must be set to
+          false.
     description: |-
       Token defines a token, along with its metadata and parameters, in the Umee
       capital facility that can be supplied and borrowed.
