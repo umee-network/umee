@@ -126,7 +126,7 @@ message Token {
   uint32 exponent = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
 
   // Enable Msg Supply allows supplying for lending or collateral using this
-  // token. `false` means that a token is not valid for any new supply.
+  // token. `false` means that a token can no longer be supplied.
   // Note that withdrawing is always enabled. Disabling supply would
   // be one step in phasing out an asset type.
   bool enable_msg_supply = 12 [(gogoproto.moretags) = "yaml:\"enable_msg_supply\""];
