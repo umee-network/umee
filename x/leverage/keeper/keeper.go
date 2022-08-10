@@ -88,7 +88,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 	}
 
 	// send token balance to leverage module account
-	k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, sdk.NewCoins(coin))
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, sdk.NewCoins(coin))
 	if err != nil {
 		return sdk.Coin{}, err
 	}
