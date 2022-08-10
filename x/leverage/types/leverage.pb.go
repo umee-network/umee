@@ -113,7 +113,7 @@ type Token struct {
 	// of its base denom.
 	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
 	// Enable Msg Supply allows supplying for lending or collateral using this
-	// token. `false` means that a token is not valid for any new supply.
+	// token. `false` means that a token can no longer be supplied.
 	// Note that withdrawing is always enabled. Disabling supply would
 	// be one step in phasing out an asset type.
 	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
