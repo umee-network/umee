@@ -61,6 +61,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
 - [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_balances`.
+- [1236](https://github.com/umee-network/umee/pull/1236) Add more response fields to leverage messages.
+- [1236](https://github.com/umee-network/umee/pull/1236) `Asset` -> `Coin` on leverage messages.
 
 ### Features
 
@@ -79,6 +81,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1203](https://github.com/umee-network/umee/pull/1203) Add Swagger docs.
 - [1212](https://github.com/umee-network/umee/pull/1212) Add `util/checkers` utility package providing common check / validation functions.
 - [1220](https://github.com/umee-network/umee/pull/1220) Submit oracle prevotes / vote txs via the CLI.
+- [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 
 ### Improvements
 
