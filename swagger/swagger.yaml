@@ -4,70 +4,19 @@ info:
   description: A REST interface for state queries
   version: 1.0.0
 paths:
-  /umee/leverage/v1/borrow_limit:
-    get:
-      summary: BorrowLimit queries the borrow limit in USD of a given borrower.
-      operationId: BorrowLimit
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              borrow_limit:
-                type: string
-            description: >-
-              QueryBorrowLimitResponse defines the response structure for the
-              BorrowLimit
-
-              gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
-  /umee/leverage/v1/borrowed:
+  /umee/leverage/v1/account_balances:
     get:
       summary: >-
-        Borrowed queries for the borrowed amount of a user by token
-        denomination.
-
-        If the denomination is not specified, the total for each borrowed token
-        is
-
-        returned.
-      operationId: Borrowed
+        AccountBalances queries an account's current supply, collateral, and
+        borrow positions.
+      operationId: AccountBalances
       responses:
         '200':
           description: A successful response.
           schema:
             type: object
             properties:
-              borrowed:
+              supplied:
                 type: array
                 items:
                   type: object
@@ -84,115 +33,11 @@ paths:
                     method
 
                     signatures required by gogoproto.
-            description: >-
-              QueryBorrowedResponse defines the response structure for the
-              Borrowed gRPC
-
-              service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-        - name: denom
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
-  /umee/leverage/v1/borrowed_value:
-    get:
-      summary: >-
-        BorrowedValue queries for the usd value of the borrowed amount of a user
-
-        by token denomination.  If the denomination is not specified, the sum
-        across
-
-        all borrowed tokens is returned.
-      operationId: BorrowedValue
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              borrowed_value:
-                type: string
-            description: |-
-              QueryBorrowedValueResponse defines the response structure for the
-              BorrowedValue gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-        - name: denom
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
-  /umee/leverage/v1/collateral:
-    get:
-      summary: >-
-        Collateral queries the collateral amount of a user by token
-        denomination.
-
-        If the denomination is not specified, all of the user's collateral
-        tokens
-
-        are returned.
-      operationId: Collateral
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
+                description: >-
+                  Supplied contains all tokens the account has supplied,
+                  including interest earned. It is denominated in base tokens,
+                  so exponent from each coin's registered_tokens entry must be
+                  applied to convert to symbol denom.
               collateral:
                 type: array
                 items:
@@ -210,11 +55,36 @@ paths:
                     method
 
                     signatures required by gogoproto.
-            description: >-
-              QueryCollateralResponse defines the response structure for the
-              Collateral
+                description: >-
+                  Collateral contains all uTokens the account has
+                  collateralized. It is denominated in uTokens, so both exponent
+                  and uToken exchange rate from each coin's market_summary must
+                  be applied to convert to base token symbol denom.
+              borrowed:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
 
-              gRPC service handler.
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  Borrowed contains all tokens the account has borrowed,
+                  including interest owed. It is denominated in base tokens, so
+                  exponent from each coin's registered_tokens entry must be
+                  applied to convert to symbol denom.
+            description: >-
+              QueryAccountBalancesResponse defines the response structure for
+              the AccountBalances gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -242,34 +112,49 @@ paths:
           in: query
           required: false
           type: string
-        - name: denom
-          in: query
-          required: false
-          type: string
       tags:
         - Query
-  /umee/leverage/v1/collateral_value:
+  /umee/leverage/v1/account_summary:
     get:
       summary: >-
-        CollateralValue queries for the total USD value of a user's collateral,
-        or
-
-        the USD value held as a given base asset's associated uToken
-        denomination.
-      operationId: CollateralValue
+        AccountSummary queries USD values representing an account's total
+        positions and borrowing limits. It requires oracle prices to return
+        successfully.
+      operationId: AccountSummary
       responses:
         '200':
           description: A successful response.
           schema:
             type: object
             properties:
+              supplied_value:
+                type: string
+                description: >-
+                  Supplied Value is the sum of the USD value of all tokens the
+                  account has supplied, includng interest earned.
               collateral_value:
                 type: string
+                description: >-
+                  Collateral Value is the sum of the USD value of all uTokens
+                  the account has collateralized.
+              borrowed_value:
+                type: string
+                description: >-
+                  Borrowed Value is the sum of the USD value of all tokens the
+                  account has borrowed, including interest owed.
+              borrow_limit:
+                type: string
+                description: >-
+                  Borrow Limit is the maximum Borrowed Value the account is
+                  allowed to reach through direct borrowing.
+              liquidation_threshold:
+                type: string
+                description: >-
+                  Liquidation Threshold is the Borrowed Value at which the
+                  account becomes eligible for liquidation.
             description: >-
-              QueryCollateralValueResponse defines the response structure for
-              the
-
-              CollateralValue gRPC service handler.
+              QueryAccountSummaryResponse defines the response structure for the
+              AccountSummary gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -294,10 +179,6 @@ paths:
                       format: byte
       parameters:
         - name: address
-          in: query
-          required: false
-          type: string
-        - name: denom
           in: query
           required: false
           type: string
@@ -305,9 +186,9 @@ paths:
         - Query
   /umee/leverage/v1/liquidation_targets:
     get:
-      summary: |-
-        LiquidationTargets queries a list of all borrower addresses eligible for
-        liquidation.
+      summary: >-
+        LiquidationTargets queries a list of all borrower account addresses
+        eligible for liquidation.
       operationId: LiquidationTargets
       responses:
         '200':
@@ -319,6 +200,9 @@ paths:
                 type: array
                 items:
                   type: string
+                description: >-
+                  Targets are the addresses of borrowers eligible for
+                  liquidation.
             description: >-
               QueryLiquidationTargetsResponse defines the response structure for
               the
@@ -346,54 +230,6 @@ paths:
                     value:
                       type: string
                       format: byte
-      tags:
-        - Query
-  /umee/leverage/v1/liquidation_threshold:
-    get:
-      summary: |-
-        LiquidationThreshold returns a maximum borrow value in USD above which a
-        given borrower is eligible for liquidation.
-      operationId: LiquidationThreshold
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              liquidation_threshold:
-                type: string
-            description: >-
-              QueryLiquidationThresholdResponse defines the response structure
-              for the
-
-              LiquidationThreshold gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
       tags:
         - Query
   /umee/leverage/v1/market_summary:
@@ -880,130 +716,6 @@ paths:
                     value:
                       type: string
                       format: byte
-      tags:
-        - Query
-  /umee/leverage/v1/supplied:
-    get:
-      summary: >-
-        Supplied queries for the amount of tokens  by a user by denomination.
-
-        If the denomination is not specified, the total for each supplied token
-        is
-
-        returned.
-      operationId: Supplied
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              supplied:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    denom:
-                      type: string
-                    amount:
-                      type: string
-                  description: >-
-                    Coin defines a token with a denomination and an amount.
-
-
-                    NOTE: The amount field is an Int which implements the custom
-                    method
-
-                    signatures required by gogoproto.
-            description: >-
-              QuerySuppliedResponse defines the response structure for the
-              Supplied gRPC
-
-              service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-        - name: denom
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
-  /umee/leverage/v1/supplied_value:
-    get:
-      summary: |-
-        SuppliedValue queries for the USD value supplied by a user by token
-        denomination. If the denomination is not specified, the sum across all
-        supplied tokens is returned.
-      operationId: SuppliedValue
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              supplied_value:
-                type: string
-            description: >-
-              QuerySuppliedValueResponse defines the response structure for the
-              SuppliedValue
-
-              gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-        - name: denom
-          in: query
-          required: false
-          type: string
       tags:
         - Query
   /umee/oracle/v1/denoms/active_exchange_rates:
@@ -1662,20 +1374,10 @@ definitions:
 
           dynamic close factor.
     description: Params defines the parameters for the leverage module.
-  umee.leverage.v1.QueryBorrowLimitResponse:
+  umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
-      borrow_limit:
-        type: string
-    description: >-
-      QueryBorrowLimitResponse defines the response structure for the
-      BorrowLimit
-
-      gRPC service handler.
-  umee.leverage.v1.QueryBorrowedResponse:
-    type: object
-    properties:
-      borrowed:
+      supplied:
         type: array
         items:
           type: object
@@ -1689,20 +1391,11 @@ definitions:
 
             NOTE: The amount field is an Int which implements the custom method
             signatures required by gogoproto.
-    description: |-
-      QueryBorrowedResponse defines the response structure for the Borrowed gRPC
-      service handler.
-  umee.leverage.v1.QueryBorrowedValueResponse:
-    type: object
-    properties:
-      borrowed_value:
-        type: string
-    description: |-
-      QueryBorrowedValueResponse defines the response structure for the
-      BorrowedValue gRPC service handler.
-  umee.leverage.v1.QueryCollateralResponse:
-    type: object
-    properties:
+        description: >-
+          Supplied contains all tokens the account has supplied, including
+          interest earned. It is denominated in base tokens, so exponent from
+          each coin's registered_tokens entry must be applied to convert to
+          symbol denom.
       collateral:
         type: array
         items:
@@ -1717,17 +1410,64 @@ definitions:
 
             NOTE: The amount field is an Int which implements the custom method
             signatures required by gogoproto.
-    description: |-
-      QueryCollateralResponse defines the response structure for the Collateral
-      gRPC service handler.
-  umee.leverage.v1.QueryCollateralValueResponse:
+        description: >-
+          Collateral contains all uTokens the account has collateralized. It is
+          denominated in uTokens, so both exponent and uToken exchange rate from
+          each coin's market_summary must be applied to convert to base token
+          symbol denom.
+      borrowed:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          Borrowed contains all tokens the account has borrowed, including
+          interest owed. It is denominated in base tokens, so exponent from each
+          coin's registered_tokens entry must be applied to convert to symbol
+          denom.
+    description: >-
+      QueryAccountBalancesResponse defines the response structure for the
+      AccountBalances gRPC service handler.
+  umee.leverage.v1.QueryAccountSummaryResponse:
     type: object
     properties:
+      supplied_value:
+        type: string
+        description: >-
+          Supplied Value is the sum of the USD value of all tokens the account
+          has supplied, includng interest earned.
       collateral_value:
         type: string
-    description: |-
-      QueryCollateralValueResponse defines the response structure for the
-      CollateralValue gRPC service handler.
+        description: >-
+          Collateral Value is the sum of the USD value of all uTokens the
+          account has collateralized.
+      borrowed_value:
+        type: string
+        description: >-
+          Borrowed Value is the sum of the USD value of all tokens the account
+          has borrowed, including interest owed.
+      borrow_limit:
+        type: string
+        description: >-
+          Borrow Limit is the maximum Borrowed Value the account is allowed to
+          reach through direct borrowing.
+      liquidation_threshold:
+        type: string
+        description: >-
+          Liquidation Threshold is the Borrowed Value at which the account
+          becomes eligible for liquidation.
+    description: >-
+      QueryAccountSummaryResponse defines the response structure for the
+      AccountSummary gRPC service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object
     properties:
@@ -1735,17 +1475,10 @@ definitions:
         type: array
         items:
           type: string
+        description: Targets are the addresses of borrowers eligible for liquidation.
     description: |-
       QueryLiquidationTargetsResponse defines the response structure for the
       LiquidationTargets gRPC service handler.
-  umee.leverage.v1.QueryLiquidationThresholdResponse:
-    type: object
-    properties:
-      liquidation_threshold:
-        type: string
-    description: |-
-      QueryLiquidationThresholdResponse defines the response structure for the
-      LiquidationThreshold gRPC service handler.
   umee.leverage.v1.QueryMarketSummaryResponse:
     type: object
     properties:
@@ -2105,36 +1838,6 @@ definitions:
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
-  umee.leverage.v1.QuerySuppliedResponse:
-    type: object
-    properties:
-      supplied:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            amount:
-              type: string
-          description: |-
-            Coin defines a token with a denomination and an amount.
-
-            NOTE: The amount field is an Int which implements the custom method
-            signatures required by gogoproto.
-    description: |-
-      QuerySuppliedResponse defines the response structure for the Supplied gRPC
-      service handler.
-  umee.leverage.v1.QuerySuppliedValueResponse:
-    type: object
-    properties:
-      supplied_value:
-        type: string
-    description: >-
-      QuerySuppliedValueResponse defines the response structure for the
-      SuppliedValue
-
-      gRPC service handler.
   umee.leverage.v1.Token:
     type: object
     properties:

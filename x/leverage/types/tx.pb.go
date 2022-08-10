@@ -33,7 +33,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgSupply struct {
 	// Supplier is the account address supplying assets and the signer of the message.
 	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
+	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
 func (m *MsgSupply) Reset()         { *m = MsgSupply{} }
@@ -74,7 +74,7 @@ var xxx_messageInfo_MsgSupply proto.InternalMessageInfo
 type MsgWithdraw struct {
 	// Supplier is the account address withdrawing assets and the signer of the message.
 	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
+	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
 func (m *MsgWithdraw) Reset()         { *m = MsgWithdraw{} }
@@ -198,7 +198,7 @@ type MsgBorrow struct {
 	// Borrower is the account address taking a loan and the signer
 	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
+	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
 func (m *MsgBorrow) Reset()         { *m = MsgBorrow{} }
@@ -240,7 +240,7 @@ type MsgRepay struct {
 	// Borrower is the account address repaying a loan and the signer
 	// of the message.
 	Borrower string     `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
+	Coin     types.Coin `protobuf:"bytes,2,opt,name=coin,proto3" json:"coin"`
 }
 
 func (m *MsgRepay) Reset()         { *m = MsgRepay{} }
@@ -328,6 +328,10 @@ var xxx_messageInfo_MsgLiquidate proto.InternalMessageInfo
 
 // MsgSupplyResponse defines the Msg/Supply response type.
 type MsgSupplyResponse struct {
+	// Supplied is the amount of base tokens sent ot the module.
+	Supplied types.Coin `protobuf:"bytes,1,opt,name=supplied,proto3" json:"supplied"`
+	// Received is the amount of uTokens received.
+	Received types.Coin `protobuf:"bytes,2,opt,name=received,proto3" json:"received"`
 }
 
 func (m *MsgSupplyResponse) Reset()         { *m = MsgSupplyResponse{} }
@@ -365,6 +369,10 @@ var xxx_messageInfo_MsgSupplyResponse proto.InternalMessageInfo
 
 // MsgWithdrawResponse defines the Msg/Withdraw response type.
 type MsgWithdrawResponse struct {
+	// Redeemed is the amount of uTokens sent to the module.
+	Redeemed types.Coin `protobuf:"bytes,1,opt,name=redeemed,proto3" json:"redeemed"`
+	// Received is the amount of base tokens received.
+	Received types.Coin `protobuf:"bytes,2,opt,name=received,proto3" json:"received"`
 }
 
 func (m *MsgWithdrawResponse) Reset()         { *m = MsgWithdrawResponse{} }
@@ -402,6 +410,8 @@ var xxx_messageInfo_MsgWithdrawResponse proto.InternalMessageInfo
 
 // MsgCollateralizeResponse defines the Msg/Collateralize response type.
 type MsgCollateralizeResponse struct {
+	// Collateralized is the amount of uTokens sent to the module.
+	Collateralized types.Coin `protobuf:"bytes,1,opt,name=collateralized,proto3" json:"collateralized"`
 }
 
 func (m *MsgCollateralizeResponse) Reset()         { *m = MsgCollateralizeResponse{} }
@@ -439,6 +449,8 @@ var xxx_messageInfo_MsgCollateralizeResponse proto.InternalMessageInfo
 
 // MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
 type MsgDecollateralizeResponse struct {
+	// Received is the amount of uTokens retrieved from the module.
+	Received types.Coin `protobuf:"bytes,1,opt,name=received,proto3" json:"received"`
 }
 
 func (m *MsgDecollateralizeResponse) Reset()         { *m = MsgDecollateralizeResponse{} }
@@ -476,6 +488,8 @@ var xxx_messageInfo_MsgDecollateralizeResponse proto.InternalMessageInfo
 
 // MsgBorrowResponse defines the Msg/Borrow response type.
 type MsgBorrowResponse struct {
+	// Borrowed is the amount of uTokens borrowed from the module.
+	Borrowed types.Coin `protobuf:"bytes,1,opt,name=borrowed,proto3" json:"borrowed"`
 }
 
 func (m *MsgBorrowResponse) Reset()         { *m = MsgBorrowResponse{} }
@@ -513,8 +527,7 @@ var xxx_messageInfo_MsgBorrowResponse proto.InternalMessageInfo
 
 // MsgRepayResponse defines the Msg/Repay response type.
 type MsgRepayResponse struct {
-	// Repaid is the amount of debt, in base tokens, that was repaid to the
-	// module by the borrower.
+	// Repaid is the amount of base tokens repaid to the module.
 	Repaid types.Coin `protobuf:"bytes,1,opt,name=repaid,proto3" json:"repaid"`
 }
 
@@ -553,11 +566,11 @@ var xxx_messageInfo_MsgRepayResponse proto.InternalMessageInfo
 
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 type MsgLiquidateResponse struct {
-	// Repaid is the amount of debt, in base tokens, that liquidator repaid
+	// Repaid is the amount of borrowed base tokens that the liquidator repaid
 	// to the module on behalf of the borrower.
 	Repaid types.Coin `protobuf:"bytes,1,opt,name=repaid,proto3" json:"repaid"`
 	// Collateral is the amount of the borrower's uToken collateral that
-	// was converted to the reward tokens as a result of liquidation.
+	// was liquidated.
 	Collateral types.Coin `protobuf:"bytes,2,opt,name=collateral,proto3" json:"collateral"`
 	// Reward is the amount of base tokens that the liquidator received from
 	// the module as reward for the liquidation.
@@ -617,46 +630,49 @@ func init() {
 func init() { proto.RegisterFile("umee/leverage/v1/tx.proto", fileDescriptor_72683128ee6e8843) }
 
 var fileDescriptor_72683128ee6e8843 = []byte{
-	// 617 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0xdb, 0x6e, 0xd3, 0x40,
-	0x10, 0x8d, 0xdb, 0x34, 0x4a, 0x26, 0x45, 0x14, 0xb7, 0x48, 0xa9, 0x01, 0x53, 0xcc, 0x45, 0x15,
-	0x02, 0x9b, 0xa4, 0x42, 0x3c, 0x21, 0xa4, 0xb4, 0x12, 0x52, 0xc1, 0x08, 0xa5, 0x0f, 0x48, 0x48,
-	0x50, 0x9c, 0x64, 0xe4, 0x5a, 0x38, 0x5e, 0xe3, 0xdd, 0x24, 0x0d, 0x5f, 0xc1, 0x87, 0xf0, 0x21,
-	0xe1, 0xad, 0x2f, 0x48, 0x3c, 0x21, 0x48, 0x7e, 0x04, 0xad, 0x2f, 0x9b, 0x0b, 0x6e, 0xb0, 0xa8,
-	0xf2, 0xb6, 0x3b, 0xe7, 0xcc, 0x39, 0xeb, 0x99, 0xd1, 0x18, 0xb6, 0xbb, 0x1d, 0x44, 0xc3, 0xc5,
-	0x1e, 0x06, 0x96, 0x8d, 0x46, 0xaf, 0x6a, 0xb0, 0x53, 0xdd, 0x0f, 0x08, 0x23, 0xf2, 0x06, 0x87,
-	0xf4, 0x04, 0xd2, 0x7b, 0x55, 0x45, 0x6d, 0x11, 0xda, 0x21, 0xd4, 0x68, 0x5a, 0x94, 0x53, 0x9b,
-	0xc8, 0xac, 0xaa, 0xd1, 0x22, 0x8e, 0x17, 0x65, 0x28, 0x5b, 0x36, 0xb1, 0x49, 0x78, 0x34, 0xf8,
-	0x29, 0x8a, 0x6a, 0xef, 0xa1, 0x64, 0x52, 0xfb, 0xa8, 0xeb, 0xfb, 0xee, 0x40, 0x56, 0xa0, 0x48,
-	0xf9, 0xc9, 0xc1, 0xa0, 0x22, 0xed, 0x48, 0xbb, 0xa5, 0x86, 0xb8, 0xcb, 0x8f, 0x61, 0xcd, 0xa2,
-	0x14, 0x59, 0x65, 0x65, 0x47, 0xda, 0x2d, 0xd7, 0xb6, 0xf5, 0xc8, 0x4e, 0xe7, 0x76, 0x7a, 0x6c,
-	0xa7, 0xef, 0x13, 0xc7, 0xab, 0xe7, 0x87, 0x3f, 0x6f, 0xe6, 0x1a, 0x11, 0x5b, 0xfb, 0x00, 0x65,
-	0x93, 0xda, 0x6f, 0x1c, 0x76, 0xd2, 0x0e, 0xac, 0xfe, 0x32, 0x1c, 0x5a, 0xb0, 0x61, 0x52, 0x7b,
-	0x9f, 0xb8, 0xae, 0xc5, 0x30, 0xb0, 0x5c, 0xe7, 0x33, 0x72, 0x9b, 0x26, 0x09, 0x02, 0xd2, 0x9f,
-	0xd8, 0x24, 0x77, 0x79, 0x0f, 0xf2, 0xbc, 0x2a, 0x59, 0x5d, 0x42, 0xb2, 0x86, 0x20, 0x9b, 0xd4,
-	0x3e, 0xc0, 0xd6, 0x72, 0x6d, 0xa2, 0x6e, 0xd4, 0x43, 0x8d, 0x85, 0xea, 0xff, 0x59, 0xab, 0x77,
-	0x50, 0x34, 0xa9, 0xdd, 0x40, 0xdf, 0x1a, 0x2c, 0x43, 0xfe, 0xab, 0x04, 0xeb, 0x26, 0xb5, 0x5f,
-	0x3a, 0x9f, 0xba, 0x4e, 0xdb, 0x62, 0x28, 0xab, 0x00, 0x6e, 0x7c, 0x21, 0x89, 0xcb, 0x54, 0x64,
-	0xe6, 0x0d, 0x2b, 0x73, 0x6f, 0x78, 0x0a, 0xa5, 0x80, 0x3f, 0xb4, 0x83, 0x1e, 0xab, 0xac, 0x66,
-	0x7b, 0xc7, 0x24, 0x43, 0xbe, 0x05, 0xeb, 0x01, 0xf6, 0xad, 0xa0, 0x7d, 0xdc, 0x46, 0x8f, 0x74,
-	0x2a, 0xf9, 0x50, 0xbe, 0x1c, 0xc5, 0x0e, 0x78, 0x48, 0xdb, 0x84, 0x2b, 0x62, 0xf6, 0x1b, 0x48,
-	0x7d, 0xe2, 0x51, 0xd4, 0xae, 0xc2, 0xe6, 0xd4, 0xc0, 0x8a, 0xb0, 0x02, 0x95, 0xf9, 0x29, 0x13,
-	0xd8, 0x75, 0x50, 0xfe, 0x1e, 0x0e, 0x81, 0x46, 0x2e, 0x51, 0x4f, 0x45, 0xf0, 0x45, 0x38, 0xb4,
-	0x61, 0x23, 0x92, 0x98, 0xfc, 0x04, 0x0a, 0xfc, 0xf9, 0x4e, 0x3b, 0x2c, 0x54, 0x86, 0xaf, 0x8d,
-	0xe9, 0xda, 0x37, 0x09, 0xb6, 0xa6, 0xcb, 0x7e, 0x61, 0x45, 0xf9, 0x19, 0xc0, 0xe4, 0x63, 0xb2,
-	0x0e, 0xc1, 0x54, 0x4a, 0xe4, 0xcc, 0x2b, 0x9d, 0xb5, 0x73, 0x31, 0xbd, 0xf6, 0x3d, 0x0f, 0xab,
-	0x26, 0xb5, 0xe5, 0x43, 0x28, 0xc4, 0x4b, 0xe9, 0x9a, 0x3e, 0xbf, 0xea, 0x74, 0xd1, 0x35, 0xe5,
-	0xf6, 0x02, 0x50, 0x94, 0xe1, 0x35, 0x14, 0xc5, 0x02, 0xba, 0x91, 0x9a, 0x90, 0xc0, 0xca, 0xdd,
-	0x85, 0xb0, 0x50, 0x3c, 0x86, 0x4b, 0xb3, 0x0b, 0x47, 0x4b, 0xcd, 0x9b, 0xe1, 0x28, 0xf7, 0xff,
-	0xcd, 0x11, 0x06, 0x08, 0x97, 0xe7, 0x97, 0xcd, 0x9d, 0xd4, 0xf4, 0x39, 0x96, 0xf2, 0x20, 0x0b,
-	0x4b, 0xd8, 0x1c, 0x42, 0x21, 0x5e, 0x36, 0xe9, 0x55, 0x8e, 0xc0, 0x73, 0xaa, 0x3c, 0x3b, 0xd2,
-	0xf2, 0x73, 0x58, 0x8b, 0x17, 0x4b, 0x2a, 0x3b, 0xc4, 0x14, 0xed, 0x7c, 0x4c, 0x08, 0x1d, 0x41,
-	0x69, 0x6a, 0x83, 0xa4, 0x26, 0x08, 0x5c, 0xb9, 0xb7, 0x18, 0x4f, 0x44, 0xeb, 0xaf, 0x86, 0xbf,
-	0xd5, 0xdc, 0x70, 0xa4, 0x4a, 0x67, 0x23, 0x55, 0xfa, 0x35, 0x52, 0xa5, 0x2f, 0x63, 0x35, 0x77,
-	0x36, 0x56, 0x73, 0x3f, 0xc6, 0x6a, 0xee, 0xed, 0x23, 0xdb, 0x61, 0x27, 0xdd, 0xa6, 0xde, 0x22,
-	0x1d, 0x83, 0xeb, 0x3d, 0xf4, 0x90, 0xf5, 0x49, 0xf0, 0x31, 0xbc, 0x18, 0xbd, 0x9a, 0x71, 0x3a,
-	0xf9, 0x0b, 0xb3, 0x81, 0x8f, 0xb4, 0x59, 0x08, 0x7f, 0x9f, 0x7b, 0x7f, 0x02, 0x00, 0x00, 0xff,
-	0xff, 0xf4, 0x30, 0x1e, 0x2f, 0xa3, 0x07, 0x00, 0x00,
+	// 666 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xdd, 0x4e, 0xd4, 0x4e,
+	0x14, 0xdf, 0xc2, 0xfe, 0x37, 0xec, 0x81, 0xbf, 0x62, 0xe5, 0x62, 0xa9, 0xb1, 0x62, 0xfd, 0x08,
+	0x31, 0xda, 0x0a, 0x5c, 0x78, 0x61, 0x8c, 0x09, 0x90, 0x90, 0xa0, 0x35, 0x64, 0xb9, 0x30, 0x7e,
+	0x44, 0xd2, 0x6d, 0x4f, 0x4a, 0xe3, 0xb6, 0x53, 0x67, 0xba, 0xbb, 0xe0, 0x3b, 0x18, 0x7d, 0x10,
+	0x1f, 0x04, 0xef, 0xb8, 0x31, 0xf1, 0xca, 0x28, 0xbc, 0x88, 0x99, 0x7e, 0xcc, 0x76, 0x6b, 0xc1,
+	0x22, 0xeb, 0x5d, 0x67, 0xce, 0xf9, 0x7d, 0xec, 0x74, 0x7e, 0x7b, 0x0a, 0xf3, 0x3d, 0x1f, 0xd1,
+	0xe8, 0x62, 0x1f, 0xa9, 0xe5, 0xa2, 0xd1, 0x5f, 0x32, 0xa2, 0x3d, 0x3d, 0xa4, 0x24, 0x22, 0xf2,
+	0x2c, 0x2f, 0xe9, 0x59, 0x49, 0xef, 0x2f, 0x29, 0xaa, 0x4d, 0x98, 0x4f, 0x98, 0xd1, 0xb1, 0x18,
+	0x6f, 0xed, 0x60, 0x64, 0x2d, 0x19, 0x36, 0xf1, 0x82, 0x04, 0xa1, 0xcc, 0xb9, 0xc4, 0x25, 0xf1,
+	0xa3, 0xc1, 0x9f, 0x92, 0x5d, 0xed, 0x35, 0x34, 0x4d, 0xe6, 0x6e, 0xf7, 0xc2, 0xb0, 0xbb, 0x2f,
+	0x2b, 0x30, 0xc5, 0xf8, 0x93, 0x87, 0xb4, 0x25, 0x2d, 0x48, 0x8b, 0xcd, 0xb6, 0x58, 0xcb, 0x2b,
+	0x50, 0xe7, 0x64, 0xad, 0x89, 0x05, 0x69, 0x71, 0x7a, 0x79, 0x5e, 0x4f, 0xd4, 0x74, 0xae, 0xa6,
+	0xa7, 0x6a, 0xfa, 0x1a, 0xf1, 0x82, 0xd5, 0xfa, 0xc1, 0xf7, 0x6b, 0xb5, 0x76, 0xdc, 0xac, 0xbd,
+	0x81, 0x69, 0x93, 0xb9, 0xcf, 0xbd, 0x68, 0xd7, 0xa1, 0xd6, 0x60, 0xfc, 0xfc, 0x36, 0xcc, 0x9a,
+	0xcc, 0x5d, 0x23, 0xdd, 0xae, 0x15, 0x21, 0xb5, 0xba, 0xde, 0x7b, 0xe4, 0x22, 0x1d, 0x42, 0x29,
+	0x19, 0x0c, 0x45, 0xb2, 0xf5, 0xdf, 0x89, 0x20, 0xc8, 0x26, 0x73, 0xd7, 0xd1, 0xfe, 0xb7, 0x32,
+	0xc9, 0x9b, 0x58, 0x8d, 0x39, 0xc6, 0xcf, 0xfe, 0x0a, 0xa6, 0x4c, 0xe6, 0xb6, 0x31, 0xb4, 0xf6,
+	0xc7, 0x4f, 0xfe, 0x59, 0x82, 0x19, 0x93, 0xb9, 0x4f, 0xbd, 0x77, 0x3d, 0xcf, 0xb1, 0x22, 0x94,
+	0x55, 0x80, 0x6e, 0xba, 0x20, 0x99, 0x46, 0x6e, 0x67, 0xc4, 0xc1, 0x44, 0xc1, 0xc1, 0x23, 0x68,
+	0x52, 0x6e, 0xd3, 0xc7, 0x20, 0x6a, 0x4d, 0x56, 0xb3, 0x31, 0x44, 0xc8, 0xd7, 0x61, 0x86, 0xe2,
+	0xc0, 0xa2, 0xce, 0x8e, 0x83, 0x01, 0xf1, 0x5b, 0xf5, 0x98, 0x7e, 0x3a, 0xd9, 0x5b, 0xe7, 0x5b,
+	0xda, 0x07, 0x09, 0x2e, 0x89, 0x4b, 0xdf, 0x46, 0x16, 0x92, 0x80, 0xa1, 0xfc, 0x50, 0x5c, 0x4e,
+	0x27, 0x76, 0x5c, 0x41, 0x56, 0x00, 0x38, 0x98, 0xa2, 0x8d, 0x5e, 0x1f, 0x9d, 0xaa, 0x47, 0x27,
+	0x00, 0xda, 0x47, 0x09, 0x2e, 0xe7, 0x62, 0x92, 0x77, 0x44, 0xd1, 0x41, 0xf4, 0xcf, 0xe0, 0x28,
+	0x03, 0x9c, 0xcf, 0x91, 0x0d, 0xad, 0x62, 0xae, 0x84, 0xab, 0x0d, 0xb8, 0x30, 0x92, 0x84, 0xca,
+	0xde, 0x0a, 0x30, 0xed, 0x05, 0x28, 0xbf, 0xe7, 0x6a, 0xf4, 0xc7, 0xa7, 0xfe, 0xa5, 0xb3, 0xfa,
+	0xdf, 0x8a, 0x5f, 0x70, 0x92, 0xa5, 0x3c, 0x63, 0x7a, 0xc9, 0xaa, 0x33, 0x66, 0x00, 0xed, 0x49,
+	0xfc, 0x4f, 0x13, 0xe7, 0x47, 0x10, 0x3e, 0x80, 0x06, 0xbf, 0x77, 0x5e, 0x65, 0xba, 0xb4, 0x5d,
+	0xfb, 0x22, 0xc1, 0x5c, 0x3e, 0x2f, 0xe7, 0x66, 0x94, 0x1f, 0x03, 0x0c, 0x8f, 0xb1, 0xea, 0xfb,
+	0xce, 0x41, 0x12, 0x65, 0x1e, 0x91, 0xaa, 0x91, 0x4b, 0xdb, 0x97, 0xbf, 0xd6, 0x61, 0xd2, 0x64,
+	0xae, 0xbc, 0x09, 0x8d, 0x74, 0x8a, 0x5c, 0xd1, 0x8b, 0xb3, 0x49, 0x17, 0x69, 0x53, 0x6e, 0x9c,
+	0x52, 0x14, 0xc7, 0xb0, 0x05, 0x53, 0x62, 0x66, 0x5c, 0x2d, 0x05, 0x64, 0x65, 0xe5, 0xd6, 0xa9,
+	0x65, 0xc1, 0xb8, 0x03, 0xff, 0x8f, 0x4e, 0x09, 0xad, 0x14, 0x37, 0xd2, 0xa3, 0xdc, 0xf9, 0x73,
+	0x8f, 0x10, 0x40, 0xb8, 0x58, 0x9c, 0x10, 0x37, 0x4b, 0xe1, 0x85, 0x2e, 0xe5, 0x6e, 0x95, 0x2e,
+	0x21, 0xb3, 0x09, 0x8d, 0x74, 0x42, 0x94, 0x9f, 0x72, 0x52, 0x3c, 0xe1, 0x94, 0x0b, 0x79, 0xd8,
+	0x80, 0xff, 0xd2, 0x79, 0x50, 0xda, 0x1d, 0xd7, 0x14, 0xed, 0xe4, 0x9a, 0x20, 0xda, 0x86, 0x66,
+	0xee, 0xaf, 0xbf, 0x14, 0x20, 0xea, 0xca, 0xed, 0xd3, 0xeb, 0x19, 0xe9, 0xea, 0xb3, 0x83, 0x9f,
+	0x6a, 0xed, 0xe0, 0x48, 0x95, 0x0e, 0x8f, 0x54, 0xe9, 0xc7, 0x91, 0x2a, 0x7d, 0x3a, 0x56, 0x6b,
+	0x87, 0xc7, 0x6a, 0xed, 0xdb, 0xb1, 0x5a, 0x7b, 0x79, 0xdf, 0xf5, 0xa2, 0xdd, 0x5e, 0x47, 0xb7,
+	0x89, 0x6f, 0x70, 0xbe, 0x7b, 0x01, 0x46, 0x03, 0x42, 0xdf, 0xc6, 0x0b, 0xa3, 0xbf, 0x6c, 0xec,
+	0x0d, 0x3f, 0x9b, 0xa2, 0xfd, 0x10, 0x59, 0xa7, 0x11, 0x7f, 0xef, 0xac, 0xfc, 0x0a, 0x00, 0x00,
+	0xff, 0xff, 0x9e, 0x15, 0x2a, 0x93, 0x54, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -998,7 +1014,7 @@ func (m *MsgSupply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Coin.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1038,7 +1054,7 @@ func (m *MsgWithdraw) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Coin.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1158,7 +1174,7 @@ func (m *MsgBorrow) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Coin.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1198,7 +1214,7 @@ func (m *MsgRepay) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Coin.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1291,6 +1307,26 @@ func (m *MsgSupplyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.Received.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.Supplied.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -1314,6 +1350,26 @@ func (m *MsgWithdrawResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.Received.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.Redeemed.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -1337,6 +1393,16 @@ func (m *MsgCollateralizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.Collateralized.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -1360,6 +1426,16 @@ func (m *MsgDecollateralizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.Received.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -1383,6 +1459,16 @@ func (m *MsgBorrowResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.Borrowed.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -1493,7 +1579,7 @@ func (m *MsgSupply) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Asset.Size()
+	l = m.Coin.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1508,7 +1594,7 @@ func (m *MsgWithdraw) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Asset.Size()
+	l = m.Coin.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1553,7 +1639,7 @@ func (m *MsgBorrow) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Asset.Size()
+	l = m.Coin.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1568,7 +1654,7 @@ func (m *MsgRepay) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Asset.Size()
+	l = m.Coin.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1602,6 +1688,10 @@ func (m *MsgSupplyResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.Supplied.Size()
+	n += 1 + l + sovTx(uint64(l))
+	l = m.Received.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1611,6 +1701,10 @@ func (m *MsgWithdrawResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.Redeemed.Size()
+	n += 1 + l + sovTx(uint64(l))
+	l = m.Received.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1620,6 +1714,8 @@ func (m *MsgCollateralizeResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.Collateralized.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1629,6 +1725,8 @@ func (m *MsgDecollateralizeResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.Received.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1638,6 +1736,8 @@ func (m *MsgBorrowResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = m.Borrowed.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1736,7 +1836,7 @@ func (m *MsgSupply) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Coin", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1763,7 +1863,7 @@ func (m *MsgSupply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Coin.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1851,7 +1951,7 @@ func (m *MsgWithdraw) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Coin", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1878,7 +1978,7 @@ func (m *MsgWithdraw) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Coin.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2196,7 +2296,7 @@ func (m *MsgBorrow) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Coin", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2223,7 +2323,7 @@ func (m *MsgBorrow) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Coin.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2311,7 +2411,7 @@ func (m *MsgRepay) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Coin", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2338,7 +2438,7 @@ func (m *MsgRepay) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Coin.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2571,6 +2671,72 @@ func (m *MsgSupplyResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgSupplyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Supplied", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Supplied.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Received", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Received.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -2621,6 +2787,72 @@ func (m *MsgWithdrawResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgWithdrawResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Redeemed", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Redeemed.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Received", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Received.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -2671,6 +2903,39 @@ func (m *MsgCollateralizeResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgCollateralizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Collateralized", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Collateralized.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -2721,6 +2986,39 @@ func (m *MsgDecollateralizeResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgDecollateralizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Received", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Received.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -2771,6 +3069,39 @@ func (m *MsgBorrowResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgBorrowResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Borrowed", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Borrowed.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

@@ -31,7 +31,8 @@ func (s msgServer) Supply(
 		return nil, err
 	}
 
-	if err := s.keeper.Supply(ctx, supplierAddr, msg.Asset); err != nil {
+	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
+	if err != nil {
 		return nil, err
 	}
 
@@ -54,7 +55,10 @@ func (s msgServer) Supply(
 		),
 	})
 
-	return &types.MsgSupplyResponse{}, nil
+	return &types.MsgSupplyResponse{
+		Supplied: msg.Asset,
+		Received: received,
+	}, nil
 }
 
 func (s msgServer) Withdraw(
@@ -68,7 +72,8 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	if err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset); err != nil {
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
+	if err != nil {
 		return nil, err
 	}
 
@@ -91,7 +96,10 @@ func (s msgServer) Withdraw(
 		),
 	})
 
-	return &types.MsgWithdrawResponse{}, nil
+	return &types.MsgWithdrawResponse{
+		Redeemed: msg.Asset,
+		Received: received,
+	}, nil
 }
 
 func (s msgServer) Collateralize(
@@ -128,7 +136,9 @@ func (s msgServer) Collateralize(
 		),
 	})
 
-	return &types.MsgCollateralizeResponse{}, nil
+	return &types.MsgCollateralizeResponse{
+		Collateralized: msg.Coin,
+	}, nil
 }
 
 func (s msgServer) Decollateralize(
@@ -165,7 +175,9 @@ func (s msgServer) Decollateralize(
 		),
 	})
 
-	return &types.MsgDecollateralizeResponse{}, nil
+	return &types.MsgDecollateralizeResponse{
+		Received: msg.Coin,
+	}, nil
 }
 
 func (s msgServer) Borrow(
@@ -202,7 +214,9 @@ func (s msgServer) Borrow(
 		),
 	})
 
-	return &types.MsgBorrowResponse{}, nil
+	return &types.MsgBorrowResponse{
+		Borrowed: msg.Asset,
+	}, nil
 }
 
 func (s msgServer) Repay(
@@ -221,12 +235,10 @@ func (s msgServer) Repay(
 		return nil, err
 	}
 
-	repaidCoin := sdk.NewCoin(msg.Asset.Denom, repaid)
-
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
-		"amount", repaidCoin.String(),
+		"amount", repaid.String(),
 		"attempted", msg.Asset.String(),
 	)
 
@@ -234,7 +246,7 @@ func (s msgServer) Repay(
 		sdk.NewEvent(
 			types.EventTypeRepayBorrowedAsset,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, repaid.String()),
 			sdk.NewAttribute(types.EventAttrAttempted, msg.Asset.String()),
 		),
 		sdk.NewEvent(
@@ -245,7 +257,7 @@ func (s msgServer) Repay(
 	})
 
 	return &types.MsgRepayResponse{
-		Repaid: repaidCoin,
+		Repaid: repaid,
 	}, nil
 }
 
