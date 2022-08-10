@@ -68,9 +68,9 @@ func (k Keeper) getLiquidationAmounts(
 	// get collateral uToken exchange rate
 	exchangeRate := k.DeriveExchangeRate(ctx, rewardDenom)
 
-	// reduce liquidation incentive if directly receiving base assets. Since this fee also reduces the
-	// amount of collateral that must be burned, it is applied before any other computations as if the
-	// token itself had a smaller liquidation incentive
+	// Reduce liquidation incentive if the liquidator has specified they would like to directly receive base assets. Since this fee also reduces the
+	// amount of collateral that must be burned, it is applied before any other computations, as if the
+	// token itself had a smaller liquidation incentive.
 	liqudationIncentive := ts.LiquidationIncentive
 	if directLiquidation {
 		liqudationIncentive = liqudationIncentive.Mul(sdk.OneDec().Sub(params.DirectLiquidationFee))
