@@ -1,8 +1,8 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -99,17 +99,17 @@ func (k Keeper) getLiquidationAmounts(
 func ComputeLiquidation(
 	availableRepay,
 	availableCollateral,
-	availableReward sdk.Int,
+	availableReward sdkmath.Int,
 	repayTokenPrice,
 	rewardTokenPrice,
 	uTokenExchangeRate,
 	liquidationIncentive,
 	closeFactor,
 	borrowedValue sdk.Dec,
-) (tokenRepay sdk.Int, collateralBurn sdk.Int, tokenReward sdk.Int) {
+) (tokenRepay sdkmath.Int, collateralBurn sdkmath.Int, tokenReward sdkmath.Int) {
 	// Prevent division by zero
 	if uTokenExchangeRate.IsZero() || rewardTokenPrice.IsZero() || repayTokenPrice.IsZero() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt()
 	}
 
 	// Start with the maximum possible repayment amount, as a decimal
