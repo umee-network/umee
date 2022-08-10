@@ -44,8 +44,9 @@ const (
 
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
-	app := umeeapp.Setup(s.T(), false, 1)
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{
+	isCheckTx := false
+	app := umeeapp.Setup(s.T(), isCheckTx, 1)
+	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
 	})
@@ -54,6 +55,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
 	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
