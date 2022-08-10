@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -70,7 +71,7 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
-func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdkmath.Int {
 	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
@@ -249,7 +250,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 // Additionally, if the amount provided is greater than the full repayment amount, only the
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // Repay returns the actual amount repaid.
-func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Int, error) {
+func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdkmath.Int, error) {
 	if !payment.IsValid() {
 		return sdk.ZeroInt(), types.ErrInvalidAsset.Wrap(payment.String())
 	}
@@ -364,7 +365,8 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// calculate borrowed Token repay, uToken collateral, and Token reward amounts allowed by liquidation rules and available balances
+	// calculate borrowed Token repay, uToken collateral, and Token reward amounts
+	// allowed by liquidation rules and available balances.
 	baseRepay, collateralReward, baseReward, err = k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,

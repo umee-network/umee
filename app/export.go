@@ -73,7 +73,7 @@ func (app *UmeeApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs [
 	app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 		_, err := app.DistrKeeper.WithdrawValidatorCommission(ctx, val.GetOperator())
 		if err != nil {
-			log.Fatal(fmt.Sprintf("failed to withdraw validator commission: %s", err))
+			log.Fatalf("failed to withdraw validator commission: %s", err)
 		}
 		return false
 	})

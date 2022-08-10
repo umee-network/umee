@@ -1,8 +1,8 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -91,7 +91,7 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
 			return err
@@ -119,7 +119,7 @@ func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled collateral amount should never happen
 			return err

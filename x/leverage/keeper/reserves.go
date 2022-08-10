@@ -1,14 +1,14 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
 // GetReserveAmount gets the amount reserved of a specified token. On invalid
 // asset, the reserved amount is zero.
-func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdkmath.Int {
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateReserveAmountKey(denom)
 	amount := sdk.ZeroInt()

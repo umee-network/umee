@@ -3,11 +3,11 @@ package tests
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
@@ -63,7 +63,7 @@ type testTransaction struct {
 	name        string
 	command     *cobra.Command
 	args        []string
-	expectedErr *sdkerrors.Error
+	expectedErr *errors.Error
 }
 
 type testQuery struct {

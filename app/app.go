@@ -327,7 +327,11 @@ func New(
 	// set the BaseApp's parameter store
 	bApp.SetParamStore(app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()))
 
-	app.CapabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
+	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
+		appCodec,
+		keys[capabilitytypes.StoreKey],
+		memKeys[capabilitytypes.MemStoreKey],
+	)
 
 	// grant capabilities for the ibc and ibc-transfer modules
 	app.ScopedIBCKeeper = app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
@@ -338,10 +342,19 @@ func New(
 	app.CapabilityKeeper.Seal()
 
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
-		appCodec, keys[authtypes.StoreKey], app.GetSubspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, maccPerms, AccountAddressPrefix,
+		appCodec,
+		keys[authtypes.StoreKey],
+		app.GetSubspace(authtypes.ModuleName),
+		authtypes.ProtoBaseAccount,
+		maccPerms,
+		AccountAddressPrefix,
 	)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
-		appCodec, keys[banktypes.StoreKey], app.AccountKeeper, app.GetSubspace(banktypes.ModuleName), app.ModuleAccountAddrs(),
+		appCodec,
+		keys[banktypes.StoreKey],
+		app.AccountKeeper,
+		app.GetSubspace(banktypes.ModuleName),
+		app.ModuleAccountAddrs(),
 	)
 	_stakingKeeper := stakingkeeper.NewKeeper(
 		appCodec, keys[stakingtypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName),
@@ -364,17 +377,35 @@ func New(
 
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 
-	app.AuthzKeeper = authzkeeper.NewKeeper(keys[authzkeeper.StoreKey], appCodec, app.MsgServiceRouter(), app.AccountKeeper)
+	app.AuthzKeeper = authzkeeper.NewKeeper(
+		keys[authzkeeper.StoreKey],
+		appCodec,
+		app.MsgServiceRouter(),
+		app.AccountKeeper,
+	)
 
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:
 		groupConfig.MaxMetadataLen = 1000
 	*/
-	app.GroupKeeper = groupkeeper.NewKeeper(keys[group.StoreKey], appCodec, app.MsgServiceRouter(), app.AccountKeeper, groupConfig)
+	app.GroupKeeper = groupkeeper.NewKeeper(
+		keys[group.StoreKey],
+		appCodec,
+		app.MsgServiceRouter(),
+		app.AccountKeeper,
+		groupConfig,
+	)
 
 	// set the governance module account as the authority for conducting upgrades
-	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp, authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	app.UpgradeKeeper = upgradekeeper.NewKeeper(
+		skipUpgradeHeights,
+		keys[upgradetypes.StoreKey],
+		appCodec,
+		homePath,
+		app.BaseApp,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
@@ -549,9 +580,8 @@ func New(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	app.mm.SetOrderBeginBlockers(
-
-		upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName, slashingtypes.ModuleName,
-		evidencetypes.ModuleName, stakingtypes.ModuleName,
+		upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName,
+		slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
 		ibchost.ModuleName, ibctransfertypes.ModuleName,
 		authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
 		authz.ModuleName, feegrant.ModuleName,
@@ -587,10 +617,10 @@ func New(
 	// so that other modules that want to create or claim capabilities afterwards in InitChain
 	// can do so safely.
 	app.mm.SetOrderInitGenesis(
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName, stakingtypes.ModuleName,
-		slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName, crisistypes.ModuleName,
-		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
-		ibctransfertypes.ModuleName, // icatypes.ModuleName,
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
+		crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 
@@ -855,7 +885,12 @@ func GetMaccPerms() map[string][]string {
 }
 
 // initParamsKeeper init params keeper and its subspaces
-func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino, key, tkey storetypes.StoreKey) paramskeeper.Keeper {
+func initParamsKeeper(
+	appCodec codec.BinaryCodec,
+	legacyAmino *codec.LegacyAmino,
+	key,
+	tkey storetypes.StoreKey,
+) paramskeeper.Keeper {
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)

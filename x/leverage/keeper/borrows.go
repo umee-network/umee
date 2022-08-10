@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -49,7 +50,7 @@ func (k Keeper) GetTotalBorrowed(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 // GetAvailableToBorrow gets the amount available to borrow of a given token.
-func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdkmath.Int {
 	// Available for borrow = Module Balance - Reserve Amount
 	moduleBalance := k.ModuleBalance(ctx, denom)
 	reserveAmount := k.GetReserveAmount(ctx, denom)

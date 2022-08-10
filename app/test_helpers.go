@@ -82,7 +82,12 @@ func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
 // that also act as delegators. For simplicity, each validator is bonded with a delegation
 // of one consensus engine unit in the default token of the simapp from first genesis
 // account. A Nop logger is set in app.
-func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genAccs []authtypes.GenesisAccount, balances ...banktypes.Balance) *UmeeApp {
+func SetupWithGenesisValSet(
+	t *testing.T,
+	valSet *tmtypes.ValidatorSet,
+	genAccs []authtypes.GenesisAccount,
+	balances ...banktypes.Balance,
+) *UmeeApp {
 	t.Helper()
 
 	app, genesisState := setup(true, 5)
@@ -152,7 +157,8 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 			MinSelfDelegation: sdk.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec()))
+		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec())
+		delegations = append(delegations, newDel)
 
 	}
 
@@ -187,7 +193,12 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 	})
 
 	// update total supply
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(
+		banktypes.DefaultGenesisState().Params,
+		balances,
+		totalSupply,
+		[]banktypes.Metadata{},
+	)
 	genesisState[banktypes.ModuleName] = codec.MustMarshalJSON(bankGenesis)
 
 	return genesisState, nil

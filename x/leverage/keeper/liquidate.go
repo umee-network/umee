@@ -120,7 +120,8 @@ func ComputeLiquidation(
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
 	// Catch no-ops early
-	if maxRepay.IsZero() || maxReward.IsZero() || maxCollateral.IsZero() || closeFactor.IsZero() || borrowedValue.IsZero() {
+	if maxRepay.IsZero() || maxReward.IsZero() || maxCollateral.IsZero() ||
+		closeFactor.IsZero() || borrowedValue.IsZero() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
 	}
 
