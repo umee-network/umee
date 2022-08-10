@@ -181,7 +181,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal(types.EventTypeSupply, msg.Type())
-	s.Require().Equal("185121068uumee", msg.Asset.String())
+	s.Require().Equal("185121068uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -205,7 +205,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal(types.EventTypeWithdraw, msg.Type())
-	s.Require().Equal("73u/uumee", msg.Asset.String())
+	s.Require().Equal("73u/uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -235,7 +235,7 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
 	s.Require().Equal(types.EventTypeBorrow, msg.Type())
-	s.Require().Equal("67uumee", msg.Asset.String())
+	s.Require().Equal("67uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -292,7 +292,8 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 			s.Require().NoError(err)
 		}
 
-		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+		_, err = s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
+		s.Require().NoError(err)
 		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
 		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})
@@ -309,7 +310,7 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeRepayBorrowedAsset, msg.Type())
-	s.Require().Equal("9uumee", msg.Asset.String())
+	s.Require().Equal("9uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
@@ -320,7 +321,8 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
+		s.Require().NoError(err)
 		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
 		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})

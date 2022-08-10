@@ -7,10 +7,10 @@ import (
 	"github.com/umee-network/umee/v2/util/checkers"
 )
 
-func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
+func NewMsgSupply(supplier sdk.AccAddress, coin sdk.Coin) *MsgSupply {
 	return &MsgSupply{
 		Supplier: supplier.String(),
-		Asset:    asset,
+		Coin:     coin,
 	}
 }
 
@@ -18,7 +18,7 @@ func (msg MsgSupply) Route() string { return ModuleName }
 func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
+	return validateSenderAndCoin(msg.Supplier, &msg.Coin)
 }
 
 func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
@@ -31,10 +31,10 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
+func NewMsgWithdraw(supplier sdk.AccAddress, coin sdk.Coin) *MsgWithdraw {
 	return &MsgWithdraw{
 		Supplier: supplier.String(),
-		Asset:    asset,
+		Coin:     coin,
 	}
 }
 
@@ -42,7 +42,7 @@ func (msg MsgWithdraw) Route() string { return ModuleName }
 func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
+	return validateSenderAndCoin(msg.Supplier, &msg.Coin)
 }
 
 func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
@@ -66,7 +66,7 @@ func (msg MsgCollateralize) Route() string { return ModuleName }
 func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndCoin(msg.Borrower, nil)
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
@@ -90,7 +90,7 @@ func (msg MsgDecollateralize) Route() string { return ModuleName }
 func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndCoin(msg.Borrower, nil)
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
@@ -103,10 +103,10 @@ func (msg *MsgDecollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
+func NewMsgBorrow(borrower sdk.AccAddress, coin sdk.Coin) *MsgBorrow {
 	return &MsgBorrow{
 		Borrower: borrower.String(),
-		Asset:    asset,
+		Coin:     coin,
 	}
 }
 
@@ -114,7 +114,7 @@ func (msg MsgBorrow) Route() string { return ModuleName }
 func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
+	return validateSenderAndCoin(msg.Borrower, &msg.Coin)
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
@@ -127,10 +127,10 @@ func (msg *MsgBorrow) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
+func NewMsgRepay(borrower sdk.AccAddress, coin sdk.Coin) *MsgRepay {
 	return &MsgRepay{
 		Borrower: borrower.String(),
-		Asset:    asset,
+		Coin:     coin,
 	}
 }
 
@@ -138,7 +138,7 @@ func (msg MsgRepay) Route() string { return ModuleName }
 func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
+	return validateSenderAndCoin(msg.Borrower, &msg.Coin)
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
@@ -164,7 +164,7 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
+	if err := validateSenderAndCoin(msg.Borrower, &msg.Repayment); err != nil {
 		return err
 	}
 	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
@@ -184,13 +184,13 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
+func validateSenderAndCoin(sender string, coin *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
 		return err
 	}
-	if asset != nil && !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if coin != nil && !coin.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, coin.String())
 	}
 	return nil
 }

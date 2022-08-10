@@ -126,7 +126,7 @@ func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmou
 
 	if supplyAmount > 0 {
 		// account supplies supplyAmount tokens and receives uTokens
-		err := s.app.LeverageKeeper.Supply(s.ctx, addr, sdk.NewInt64Coin(denom, supplyAmount))
+		_, err := s.app.LeverageKeeper.Supply(s.ctx, addr, sdk.NewInt64Coin(denom, supplyAmount))
 		s.Require().NoError(err)
 	}
 
@@ -162,7 +162,7 @@ func (s *IntegrationTestSuite) TestSupply_InvalidAsset() {
 	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, addr, invalidCoins))
 
 	// supplying should fail as we have not registered token "uabcd"
-	err := s.app.LeverageKeeper.Supply(s.ctx, addr, invalidCoin)
+	_, err := s.app.LeverageKeeper.Supply(s.ctx, addr, invalidCoin)
 	s.Require().Error(err)
 }
 
@@ -178,7 +178,7 @@ func (s *IntegrationTestSuite) TestSupply_Valid() {
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
 	// supply asset
-	err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	_, err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
@@ -207,7 +207,7 @@ func (s *IntegrationTestSuite) TestWithdraw_Valid() {
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
 	// supply asset
-	err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	_, err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
@@ -218,7 +218,7 @@ func (s *IntegrationTestSuite) TestWithdraw_Valid() {
 
 	// withdraw the total amount of assets supplied
 	uToken := expected
-	err = s.app.LeverageKeeper.Withdraw(ctx, addr, uToken)
+	_, err = s.app.LeverageKeeper.Withdraw(ctx, addr, uToken)
 	s.Require().NoError(err)
 
 	// verify total supply of the uTokens
@@ -294,7 +294,7 @@ func (s *IntegrationTestSuite) initBorrowScenario() (supplier, bum sdk.AccAddres
 
 	// supplier supplies 1000 umee and receives 1k u/umee
 	supplyCoin := sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)
-	err := s.app.LeverageKeeper.Supply(ctx, supplierAddr, supplyCoin)
+	_, err := s.app.LeverageKeeper.Supply(ctx, supplierAddr, supplyCoin)
 	s.Require().NoError(err)
 
 	// supplier enables u/umee as collateral
@@ -322,7 +322,7 @@ func (s *IntegrationTestSuite) mintAndSupplyAtom(mintTo sdk.AccAddress, amountTo
 
 	// user supplies amountToSupply atom and receives amountToSupply u/atom
 	supplyCoin := sdk.NewInt64Coin(atomIBCDenom, amountToSupply)
-	err := s.app.LeverageKeeper.Supply(ctx, mintTo, supplyCoin)
+	_, err := s.app.LeverageKeeper.Supply(ctx, mintTo, supplyCoin)
 	s.Require().NoError(err)
 
 	// user enables u/atom as collateral
@@ -436,7 +436,7 @@ func (s *IntegrationTestSuite) TestBorrow_BorrowLimit() {
 	s.Require().Error(err)
 
 	// user tries to withdraw all its u/umee, fails due to borrow limit
-	err = s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewCoin(uDenom, collateral.Amount))
+	_, err = s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewCoin(uDenom, collateral.Amount))
 	s.Require().Error(err)
 }
 
@@ -875,7 +875,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
 
 	// withdraw the supplyed umee in the initBorrowScenario
-	err := s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
+	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
 	s.Require().NoError(err)
 
 	// check invariant
@@ -923,7 +923,7 @@ func (s *IntegrationTestSuite) TestWithdraw_InsufficientCollateral() {
 
 	// withdraw more collateral than available
 	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
-	err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
+	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
 	s.Require().EqualError(err, "1000001u/uumee: insufficient balance")
 }
 
