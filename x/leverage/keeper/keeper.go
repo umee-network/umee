@@ -393,9 +393,11 @@ func (k Keeper) Liquidate(
 		if err = k.burnCollateral(ctx, borrowerAddr, collateralLiquidate); err != nil {
 			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 		}
-		
+
 		// send base rewards from module to liquidator's account
-		if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(baseReward)); err != nil {
+		if err = k.bankKeeper.SendCoinsFromModuleToAccount(
+			ctx, types.ModuleName, liquidatorAddr, sdk.NewCoins(baseReward),
+		); err != nil {
 			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 		}
 	} else {
