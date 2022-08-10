@@ -248,7 +248,7 @@ func (s msgServer) Repay(
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeRepayBorrowedAsset,
+			types.EventTypeRepay,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
 			sdk.NewAttribute(types.EventAttrAttempted, msg.Coin.String()),
 			sdk.NewAttribute(types.EventAttrRepaid, repaid.String()),

@@ -150,7 +150,7 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		{simulation.DefaultWeightMsgBorrow, types.ModuleName, types.EventTypeBorrow},
 		{simulation.DefaultWeightMsgCollateralize, types.ModuleName, types.EventTypeCollateralize},
 		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName, types.EventTypeDecollateralize},
-		{simulation.DefaultWeightMsgRepay, types.ModuleName, types.EventTypeRepayBorrowedAsset},
+		{simulation.DefaultWeightMsgRepay, types.ModuleName, types.EventTypeRepay},
 		{simulation.DefaultWeightMsgLiquidate, types.ModuleName, types.EventTypeLiquidate},
 	}
 
@@ -309,7 +309,7 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeRepayBorrowedAsset, msg.Type())
+	s.Require().Equal(types.EventTypeRepay, msg.Type())
 	s.Require().Equal("9uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }

@@ -135,7 +135,7 @@ func NewMsgRepay(borrower sdk.AccAddress, coin sdk.Coin) *MsgRepay {
 }
 
 func (msg MsgRepay) Route() string { return ModuleName }
-func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
+func (msg MsgRepay) Type() string  { return EventTypeRepay }
 
 func (msg *MsgRepay) ValidateBasic() error {
 	return validateSenderAndCoin(msg.Borrower, &msg.Coin)
