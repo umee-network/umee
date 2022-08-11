@@ -11,12 +11,10 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
 const (
@@ -550,7 +548,7 @@ func (p *GateProvider) resetReconnectTimer() {
 func (p *GateProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return sdkerrors.Wrap(oracletypes.ErrProviderConnection, fmt.Errorf("error closing Gate websocket %w", err).Error())
+		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %w", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
