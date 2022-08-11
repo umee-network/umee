@@ -100,42 +100,29 @@ message MsgLiquidate {
   // If it is a uToken, the liquidator will receive uTokens from the borrower's
   // collateral. If it is a base token, the uTokens will be redeemed directly at
   // a reduced Liquidation Incentive, and the liquidator will receive base tokens.
-  string                   reward_denom = 4;
+  string reward_denom = 4;
 }
 
 // MsgSupplyResponse defines the Msg/Supply response type.
 message MsgSupplyResponse {
-  // Supplied is the amount of base tokens sent to the module.
-  cosmos.base.v1beta1.Coin supplied = 1 [(gogoproto.nullable) = false];
   // Received is the amount of uTokens received.
-  cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdrawResponse defines the Msg/Withdraw response type.
 message MsgWithdrawResponse {
-  // Redeemed is the amount of uTokens sent to the module.
-  cosmos.base.v1beta1.Coin redeemed = 1 [(gogoproto.nullable) = false];
   // Received is the amount of base tokens received.
-  cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
-}
-
-// MsgCollateralizeResponse defines the Msg/Collateralize response type.
-message MsgCollateralizeResponse {
-  // Collateralized is the amount of uTokens sent to the module.
-  cosmos.base.v1beta1.Coin collateralized = 1 [(gogoproto.nullable) = false];
-}
-
-// MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
-message MsgDecollateralizeResponse {
-  // Received is the amount of uTokens retrieved from the module.
   cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
 }
 
+// MsgCollateralizeResponse defines the Msg/Collateralize response type.
+message MsgCollateralizeResponse {}
+
+// MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
+message MsgDecollateralizeResponse {}
+
 // MsgBorrowResponse defines the Msg/Borrow response type.
-message MsgBorrowResponse {
-  // Borrowed is the amount of uTokens borrowed from the module.
-  cosmos.base.v1beta1.Coin borrowed = 1 [(gogoproto.nullable) = false];
-}
+message MsgBorrowResponse {}
 
 // MsgRepayResponse defines the Msg/Repay response type.
 message MsgRepayResponse {

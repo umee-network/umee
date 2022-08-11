@@ -58,7 +58,6 @@ func (s msgServer) Supply(
 	})
 
 	return &types.MsgSupplyResponse{
-		Supplied: msg.Coin,
 		Received: received,
 	}, nil
 }
@@ -101,7 +100,6 @@ func (s msgServer) Withdraw(
 	})
 
 	return &types.MsgWithdrawResponse{
-		Redeemed: msg.Coin,
 		Received: received,
 	}, nil
 }
@@ -140,9 +138,7 @@ func (s msgServer) Collateralize(
 		),
 	})
 
-	return &types.MsgCollateralizeResponse{
-		Collateralized: msg.Coin,
-	}, nil
+	return &types.MsgCollateralizeResponse{}, nil
 }
 
 func (s msgServer) Decollateralize(
@@ -179,9 +175,7 @@ func (s msgServer) Decollateralize(
 		),
 	})
 
-	return &types.MsgDecollateralizeResponse{
-		Received: msg.Coin,
-	}, nil
+	return &types.MsgDecollateralizeResponse{}, nil
 }
 
 func (s msgServer) Borrow(
@@ -218,9 +212,7 @@ func (s msgServer) Borrow(
 		),
 	})
 
-	return &types.MsgBorrowResponse{
-		Borrowed: msg.Coin,
-	}, nil
+	return &types.MsgBorrowResponse{}, nil
 }
 
 func (s msgServer) Repay(
