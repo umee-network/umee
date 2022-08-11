@@ -184,13 +184,13 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func validateSenderAndAsset(sender string, coin *sdk.Coin) error {
+func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
 		return err
 	}
-	if coin != nil && !coin.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, coin.String())
+	if asset != nil && !asset.IsValid() {
+		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
 	}
 	return nil
 }
