@@ -342,9 +342,7 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// calculate borrowed Token repay, uToken liquidate, and Token reward amounts allowed by
-	// liquidation rules and available balances
-	baseRepay, collateralLiquidate, baseReward, err := k.getLiquidationAmounts(
+	tokenRepay, utokenLiquidate, tokenReward, err := k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
@@ -355,22 +353,22 @@ func (k Keeper) Liquidate(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if baseRepay.IsZero() {
+	if tokenRepay.IsZero() {
 		// Zero repay amount returned from liquidation computation means the target was eligible for liquidation
 		// but the proposed reward and repayment would have zero effect.
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationInvalid
 	}
 
 	// repay some of the borrower's debt using the liquidator's balance
-	if err = k.repayBorrow(ctx, liquidatorAddr, borrowerAddr, baseRepay); err != nil {
+	if err = k.repayBorrow(ctx, liquidatorAddr, borrowerAddr, tokenRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
 	if directLiquidation {
-		err = k.redeemCollateral(ctx, borrowerAddr, liquidatorAddr, collateralLiquidate)
+		err = k.liquidateCollateral(ctx, borrowerAddr, liquidatorAddr, utokenLiquidate, tokenReward)
 	} else {
 		// send uTokens from borrower collateral to liquidator's account
-		err = k.decollateralize(ctx, borrowerAddr, liquidatorAddr, collateralLiquidate)
+		err = k.decollateralize(ctx, borrowerAddr, liquidatorAddr, utokenLiquidate)
 	}
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
@@ -383,7 +381,7 @@ func (k Keeper) Liquidate(
 
 	// the last return value is the liquidator's selected reward
 	if directLiquidation {
-		return baseRepay, collateralLiquidate, baseReward, nil
+		return tokenRepay, utokenLiquidate, tokenReward, nil
 	}
-	return baseRepay, collateralLiquidate, collateralLiquidate, nil
+	return tokenRepay, utokenLiquidate, utokenLiquidate, nil
 }

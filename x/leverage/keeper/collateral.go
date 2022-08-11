@@ -7,17 +7,22 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// redeemCollateral decollateralize uTokens from the owner and sends the underlying tokens
-// by to the recipient. This occurs during liquidations.
-func (k Keeper) redeemCollateral(ctx sdk.Context, owner, recipient sdk.AccAddress, coin sdk.Coin) error {
-	err := k.decollateralize(ctx, owner, recipient, coin)
+// liquidateCollateral burns utoken collateral and sends the base token reward to the liquidator.
+// This occurs during direct liquidation.
+func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.AccAddress, utoken, token sdk.Coin) error {
+	err := k.setCollateralAmount(ctx, borrower, k.GetCollateralAmount(ctx, borrower, utoken.Denom).Sub(utoken))
 	if err != nil {
 		return err
 	}
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(utoken)); err != nil {
 		return err
 	}
-	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin))
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, utoken.Denom).Sub(utoken)); err != nil {
+		return err
+	}
+	return k.bankKeeper.SendCoinsFromModuleToAccount(
+		ctx, types.ModuleName, liquidator, sdk.NewCoins(token),
+	)
 }
 
 // decollateralize removes fromAddrs' uTokens from circulation and redeems it for the underlying
