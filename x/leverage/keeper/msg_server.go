@@ -194,7 +194,7 @@ func (s msgServer) Borrow(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"coins borrowed",
+		"assets borrowed",
 		"borrower", borrowerAddr.String(),
 		"amount", msg.Asset.String(),
 	)
@@ -232,7 +232,7 @@ func (s msgServer) Repay(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"borrowed coins repaid",
+		"borrowed assets repaid",
 		"borrower", borrowerAddr.String(),
 		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
@@ -279,7 +279,7 @@ func (s msgServer) Liquidate(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"borrowed coins repaid by liquidator",
+		"unhealthy borrower liquidated",
 		"liquidator", liquidator.String(),
 		"borrower", borrower.String(),
 		"attempted", msg.Repayment.String(),
