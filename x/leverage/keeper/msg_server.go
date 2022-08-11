@@ -31,7 +31,7 @@ func (s msgServer) Supply(
 		return nil, err
 	}
 
-	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Coin)
+	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (s msgServer) Supply(
 	s.keeper.Logger(ctx).Debug(
 		"assets supplied",
 		"supplier", supplierAddr.String(),
-		"supplied", msg.Coin.String(),
+		"supplied", msg.Asset.String(),
 		"received", received.String(),
 	)
 
@@ -47,7 +47,7 @@ func (s msgServer) Supply(
 		sdk.NewEvent(
 			types.EventTypeSupply,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
-			sdk.NewAttribute(types.EventAttrSupplied, msg.Coin.String()),
+			sdk.NewAttribute(types.EventAttrSupplied, msg.Asset.String()),
 			sdk.NewAttribute(types.EventAttrReceived, received.String()),
 		),
 		sdk.NewEvent(
@@ -73,7 +73,7 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Coin)
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (s msgServer) Withdraw(
 	s.keeper.Logger(ctx).Debug(
 		"supplied assets withdrawn",
 		"supplier", supplierAddr.String(),
-		"redeemed", msg.Coin.String(),
+		"redeemed", msg.Asset.String(),
 		"received", received.String(),
 	)
 
@@ -89,7 +89,7 @@ func (s msgServer) Withdraw(
 		sdk.NewEvent(
 			types.EventTypeWithdraw,
 			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
-			sdk.NewAttribute(types.EventAttrRedeemed, msg.Coin.String()),
+			sdk.NewAttribute(types.EventAttrRedeemed, msg.Asset.String()),
 			sdk.NewAttribute(types.EventAttrReceived, received.String()),
 		),
 		sdk.NewEvent(
@@ -115,21 +115,21 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Coin); err != nil {
+	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Coin.String(),
+		"amount", msg.Asset.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCollateralize,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -152,21 +152,21 @@ func (s msgServer) Decollateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.Decollateralize(ctx, borrowerAddr, msg.Coin); err != nil {
+	if err := s.keeper.Decollateralize(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral removed",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Coin.String(),
+		"amount", msg.Asset.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeDecollateralize,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -189,21 +189,21 @@ func (s msgServer) Borrow(
 		return nil, err
 	}
 
-	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Coin); err != nil {
+	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"coins borrowed",
 		"borrower", borrowerAddr.String(),
-		"amount", msg.Coin.String(),
+		"amount", msg.Asset.String(),
 	)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeBorrow,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Coin.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -226,7 +226,7 @@ func (s msgServer) Repay(
 		return nil, err
 	}
 
-	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Coin)
+	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (s msgServer) Repay(
 	s.keeper.Logger(ctx).Debug(
 		"borrowed coins repaid",
 		"borrower", borrowerAddr.String(),
-		"attempted", msg.Coin.String(),
+		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
 	)
 
@@ -242,7 +242,7 @@ func (s msgServer) Repay(
 		sdk.NewEvent(
 			types.EventTypeRepay,
 			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(types.EventAttrAttempted, msg.Coin.String()),
+			sdk.NewAttribute(types.EventAttrAttempted, msg.Asset.String()),
 			sdk.NewAttribute(types.EventAttrRepaid, repaid.String()),
 		),
 		sdk.NewEvent(

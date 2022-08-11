@@ -10,7 +10,7 @@ import (
 func NewMsgSupply(supplier sdk.AccAddress, coin sdk.Coin) *MsgSupply {
 	return &MsgSupply{
 		Supplier: supplier.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -18,7 +18,7 @@ func (msg MsgSupply) Route() string { return ModuleName }
 func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Supplier, &msg.Coin)
+	return validateSenderAndCoin(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
@@ -34,7 +34,7 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 func NewMsgWithdraw(supplier sdk.AccAddress, coin sdk.Coin) *MsgWithdraw {
 	return &MsgWithdraw{
 		Supplier: supplier.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -42,7 +42,7 @@ func (msg MsgWithdraw) Route() string { return ModuleName }
 func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Supplier, &msg.Coin)
+	return validateSenderAndCoin(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
@@ -58,7 +58,7 @@ func (msg *MsgWithdraw) GetSignBytes() []byte {
 func NewMsgCollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgCollateralize {
 	return &MsgCollateralize{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -82,7 +82,7 @@ func (msg *MsgCollateralize) GetSignBytes() []byte {
 func NewMsgDecollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgDecollateralize {
 	return &MsgDecollateralize{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -106,7 +106,7 @@ func (msg *MsgDecollateralize) GetSignBytes() []byte {
 func NewMsgBorrow(borrower sdk.AccAddress, coin sdk.Coin) *MsgBorrow {
 	return &MsgBorrow{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -114,7 +114,7 @@ func (msg MsgBorrow) Route() string { return ModuleName }
 func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, &msg.Coin)
+	return validateSenderAndCoin(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
@@ -130,7 +130,7 @@ func (msg *MsgBorrow) GetSignBytes() []byte {
 func NewMsgRepay(borrower sdk.AccAddress, coin sdk.Coin) *MsgRepay {
 	return &MsgRepay{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    coin,
 	}
 }
 
@@ -138,7 +138,7 @@ func (msg MsgRepay) Route() string { return ModuleName }
 func (msg MsgRepay) Type() string  { return EventTypeRepay }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, &msg.Coin)
+	return validateSenderAndCoin(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {

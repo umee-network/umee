@@ -40,7 +40,7 @@ service Msg {
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdraw represents a user's request to withdraw supplied assets.
@@ -48,7 +48,7 @@ message MsgSupply {
 message MsgWithdraw {
   // Supplier is the account address withdrawing assets and the signer of the message.
   string                   supplier = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgCollateralize represents a user's request to enable selected
@@ -56,7 +56,7 @@ message MsgWithdraw {
 message MsgCollateralize {
   // Borrower is the account address adding collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgDecollateralize represents a user's request to disable selected
@@ -64,7 +64,7 @@ message MsgCollateralize {
 message MsgDecollateralize {
   // Borrower is the account address removing collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrow represents a user's request to borrow a base asset type
@@ -73,7 +73,7 @@ message MsgBorrow {
   // Borrower is the account address taking a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgRepay represents a user's request to repay a borrowed base asset
@@ -82,7 +82,7 @@ message MsgRepay {
   // Borrower is the account address repaying a loan and the signer
   // of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidate is the request structure for the Liquidate RPC.
