@@ -29,7 +29,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgSupply is the request structure for the Supply RPC.
+// MsgSupply represents a user's request to supply assets to the module.
 type MsgSupply struct {
 	// Supplier is the account address supplying assets and the signer of the message.
 	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
