@@ -62,7 +62,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
 - [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_balances`.
 - [1236](https://github.com/umee-network/umee/pull/1236) Add more response fields to leverage messages.
-- [1236](https://github.com/umee-network/umee/pull/1236) `Asset` -> `Coin` on leverage messages.
 - [1222](https://github.com/umee-network/umee/pull/1222) Add leverage parameter DirectLiquidationFee.
 
 ### Features
