@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -488,7 +489,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 func (p *KrakenProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return fmt.Errorf("error closing Kraken websocket connection: %s", err)
+		return sdkerrors.Wrap(types.ErrProviderConnection, fmt.Errorf("error closing Kraken websocket %w", err))
 	}
 	p.logger.Debug().Msg("trying to reconnect")
 

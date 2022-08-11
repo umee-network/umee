@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
@@ -427,7 +428,7 @@ func (p *OkxProvider) resetReconnectTimer() {
 func (p *OkxProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return fmt.Errorf("error closing Okx websocket connection: %s", err)
+		return sdkerrors.Wrap(types.ErrProviderConnection, fmt.Errorf("error closing Okx websocket %w", err))
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
