@@ -18,7 +18,7 @@ func (msg MsgSupply) Route() string { return ModuleName }
 func (msg MsgSupply) Type() string  { return EventTypeSupply }
 
 func (msg *MsgSupply) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Supplier, &msg.Asset)
+	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
@@ -42,7 +42,7 @@ func (msg MsgWithdraw) Route() string { return ModuleName }
 func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Supplier, &msg.Asset)
+	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
 
 func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
@@ -66,7 +66,7 @@ func (msg MsgCollateralize) Route() string { return ModuleName }
 func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, nil)
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
@@ -90,7 +90,7 @@ func (msg MsgDecollateralize) Route() string { return ModuleName }
 func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, nil)
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
@@ -114,7 +114,7 @@ func (msg MsgBorrow) Route() string { return ModuleName }
 func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, &msg.Asset)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
@@ -138,7 +138,7 @@ func (msg MsgRepay) Route() string { return ModuleName }
 func (msg MsgRepay) Type() string  { return EventTypeRepay }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	return validateSenderAndCoin(msg.Borrower, &msg.Asset)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
@@ -164,7 +164,7 @@ func (msg MsgLiquidate) Route() string { return ModuleName }
 func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	if err := validateSenderAndCoin(msg.Borrower, &msg.Repayment); err != nil {
+	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
 		return err
 	}
 	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
@@ -184,7 +184,7 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func validateSenderAndCoin(sender string, coin *sdk.Coin) error {
+func validateSenderAndAsset(sender string, coin *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
 		return err
