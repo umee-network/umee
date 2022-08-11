@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.leverage.v1;
 
 import "google/api/annotations.proto";
+import "umee/leverage/v1/genesis.proto";
 import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
@@ -45,6 +46,12 @@ service Query {
   rpc LiquidationTargets(QueryLiquidationTargets)
       returns (QueryLiquidationTargetsResponse) {
     option (google.api.http).get = "/umee/leverage/v1/liquidation_targets";
+  }
+
+  // BadDebts queries a list of borrow positions that have been marked for bad debt repayment.
+  rpc BadDebts(QueryBadDebts)
+      returns (QueryBadDebtsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/bad_debts";
   }
 }
 
@@ -223,13 +230,23 @@ message QueryAccountSummaryResponse {
   ];
 }
 
-// QueryLiquidationTargets defines the request structure for the
-// LiquidationTargets gRPC service handler.
+// QueryLiquidationTargets defines the request structure for the LiquidationTargets gRPC service handler.
 message QueryLiquidationTargets {}
 
-// QueryLiquidationTargetsResponse defines the response structure for the
-// LiquidationTargets gRPC service handler.
+// QueryLiquidationTargetsResponse defines the response structure for the LiquidationTargets gRPC service handler.
 message QueryLiquidationTargetsResponse {
   // Targets are the addresses of borrowers eligible for liquidation.
   repeated string targets = 1;
+}
+
+// QueryBadDebts defines the request structure for the
+// BedDebts gRPC service handler.
+message QueryBadDebts {}
+
+// QueryBadDebtsResponse defines the response structure for the BedDebts gRPC service handler.
+message QueryBadDebtsResponse {
+  // Targets are borrow positions currently marked for bad debt repayment. Each contains an Address and a Denom.
+  repeated BadDebt targets = 1 [
+    (gogoproto.nullable) = false
+  ];
 }

@@ -226,3 +226,17 @@ func (q Querier) LiquidationTargets(
 
 	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
 }
+
+func (q Querier) BadDebts(
+	goCtx context.Context,
+	req *types.QueryBadDebts,
+) (*types.QueryBadDebtsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	targets := q.Keeper.getAllBadDebts(ctx)
+
+	return &types.QueryBadDebtsResponse{Targets: targets}, nil
+}
