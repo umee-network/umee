@@ -14,6 +14,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v2/app"
 	"github.com/umee-network/umee/v2/x/leverage"
+	"github.com/umee-network/umee/v2/x/leverage/fixtures"
 	"github.com/umee-network/umee/v2/x/leverage/keeper"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
@@ -32,25 +33,7 @@ var (
 
 // creates a test token with reasonable initial parameters
 func newToken(base, symbol string) types.Token {
-	return types.Token{
-		BaseDenom:              base,
-		SymbolDenom:            symbol,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-	}
+	return fixtures.Token(base, symbol)
 }
 
 type IntegrationTestSuite struct {
@@ -182,7 +165,7 @@ func (s *IntegrationTestSuite) TestSupply_Valid() {
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
-	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 	supply := s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
@@ -211,7 +194,7 @@ func (s *IntegrationTestSuite) TestWithdraw_Valid() {
 	s.Require().NoError(err)
 
 	// verify the total supply of the minted uToken
-	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 	supply := s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
@@ -419,7 +402,7 @@ func (s *IntegrationTestSuite) TestBorrow_BorrowLimit() {
 
 	// determine an amount of umee to borrow, such that the user will be at about 90% of their borrow limit
 	token, _ := s.app.LeverageKeeper.GetTokenSettings(s.ctx, umeeapp.BondDenom)
-	uDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, umeeapp.BondDenom)
+	uDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, uDenom)
 	amountToBorrow := token.CollateralWeight.Mul(sdk.MustNewDecFromStr("0.9")).MulInt(collateral.Amount).TruncateInt()
 
@@ -872,7 +855,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	_, broken := keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
 	s.Require().False(broken)
 
-	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 
 	// withdraw the supplyed umee in the initBorrowScenario
 	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
@@ -915,7 +898,7 @@ func (s *IntegrationTestSuite) TestWithdraw_InsufficientCollateral() {
 	_ = s.setupAccount(umeeapp.BondDenom, 1000000, 1000000, 0, true)
 
 	// verify collateral amount and total supply of minted uTokens
-	uTokenDenom := types.UTokenFromTokenDenom(umeeapp.BondDenom)
+	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, supplierAddr, uTokenDenom)
 	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 1000000), collateral) // 1 u/umee
 	supply := s.app.LeverageKeeper.GetUTokenSupply(s.ctx, uTokenDenom)
@@ -923,13 +906,16 @@ func (s *IntegrationTestSuite) TestWithdraw_InsufficientCollateral() {
 
 	// withdraw more collateral than available
 	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
+
 	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
-	s.Require().EqualError(err, "1000001u/uumee: insufficient balance")
+	s.Require().EqualError(err,
+		"0 uToken balance + 1000000 from collateral is less than 1000001u/uumee to withdraw: insufficient balance",
+	)
 }
 
 func (s *IntegrationTestSuite) TestTotalCollateral() {
 	// Test zero collateral
-	uDenom := types.UTokenFromTokenDenom(umeeDenom)
+	uDenom := types.ToUTokenDenom(umeeDenom)
 	collateral := s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
 	s.Require().Equal(sdk.ZeroInt(), collateral)
 

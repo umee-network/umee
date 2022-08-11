@@ -8,6 +8,7 @@ The leverage module contains the following parameters:
 | MinimumCloseFactor           | sdk.Dec | 0.01    |
 | OracleRewardFactor           | sdk.Dec | 0.01    |
 | SmallLiquidationSize         | sdk.Dec | 100.00  |
+| DirectLiquidationFee         | sdk.Dec | 0.1     |
 
 ## CompleteLiquidationThreshold
 
@@ -29,3 +30,7 @@ the `x/oracle` reward pool.
 
 SmallLiquidationSize is the borrow value in USD below which [Close Factor](01_concepts.md#Close-Factor)
 is always 1.
+
+## DirectLiquidationFee
+
+DirectLiquidationFee is the reduction in Liquidation Incentive when liquidators choose to directly receive base assets instead of uTokens as liquidation rewards.

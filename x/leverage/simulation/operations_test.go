@@ -49,6 +49,7 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 	atomIBCToken := types.Token{
 		BaseDenom:              "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
@@ -68,6 +69,7 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 	uabc := types.Token{
 		BaseDenom:              "uabc",
@@ -87,12 +89,11 @@ func (s *SimTestSuite) SetupTest() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	}
 
 	tokens := []types.Token{umeeToken, atomIBCToken, uabc}
-
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-
 	for _, token := range tokens {
 		s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, token))
 		app.OracleKeeper.SetExchangeRate(ctx, token.SymbolDenom, sdk.MustNewDecFromStr("100.0"))
@@ -190,7 +191,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(100))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
-		s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
 	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
@@ -241,8 +242,11 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 
 func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	r := rand.New(rand.NewSource(1))
+	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 100)
 
-	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
@@ -256,14 +260,23 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeCollateralize, msg.Type())
-	s.Require().Equal("0u/uabc", msg.Coin.String())
+	s.Require().Equal("73u/uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 
 func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	r := rand.New(rand.NewSource(1))
+	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 100)
 
-	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
+	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
+		uToken, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, supplyToken)
+		if err != nil {
+			s.Require().NoError(err)
+		}
+
+		s.Require().NoError(s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken))
+		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
+	})
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
@@ -277,7 +290,7 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal(types.EventTypeDecollateralize, msg.Type())
-	s.Require().Equal("0u/uabc", msg.Coin.String())
+	s.Require().Equal("73u/uumee", msg.Coin.String())
 	s.Require().Len(futureOperations, 0)
 }
 

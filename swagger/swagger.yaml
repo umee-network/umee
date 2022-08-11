@@ -472,6 +472,16 @@ paths:
                       transaction, bypassing
 
                       dynamic close factor.
+                  direct_liquidation_fee:
+                    type: string
+                    description: >-
+                      Direct Liquidation Fee is the reduction in liquidation
+                      incentive experienced
+
+                      by liquidators who choose to receive base assets instead
+                      of uTokens as
+
+                      liquidation rewards.
                 description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -609,8 +619,11 @@ paths:
                         Enable Msg Supply allows supplying for lending or
                         collateral using this
 
-                        token. Note that withdrawing is always enabled.
-                        Disabling supplying would
+                        token. `false` means that a token can no longer be
+                        supplied.
+
+                        Note that withdrawing is always enabled. Disabling
+                        supply would
 
                         be one step in phasing out an asset type.
                     enable_msg_borrow:
@@ -684,6 +697,20 @@ paths:
                         value due to interest
 
                         or liquidations.
+                    max_supply:
+                      type: string
+                      description: >-
+                        Max Supply is the maximum amount of tokens the protocol
+                        can hold.
+
+                        Adding more supply of the given token to the protocol
+                        will return an error.
+
+                        Must be a non negative value. 0 means that there is no
+                        limit.
+
+                        To mark a token as not valid for supply, `msg_supply`
+                        must be set to false.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -1373,6 +1400,15 @@ definitions:
           bypassing
 
           dynamic close factor.
+      direct_liquidation_fee:
+        type: string
+        description: >-
+          Direct Liquidation Fee is the reduction in liquidation incentive
+          experienced
+
+          by liquidators who choose to receive base assets instead of uTokens as
+
+          liquidation rewards.
     description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
@@ -1664,6 +1700,16 @@ definitions:
               bypassing
 
               dynamic close factor.
+          direct_liquidation_fee:
+            type: string
+            description: >-
+              Direct Liquidation Fee is the reduction in liquidation incentive
+              experienced
+
+              by liquidators who choose to receive base assets instead of
+              uTokens as
+
+              liquidation rewards.
         description: Params defines the parameters for the leverage module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
@@ -1756,8 +1802,9 @@ definitions:
                 Enable Msg Supply allows supplying for lending or collateral
                 using this
 
-                token. Note that withdrawing is always enabled. Disabling
-                supplying would
+                token. `false` means that a token can no longer be supplied.
+
+                Note that withdrawing is always enabled. Disabling supply would
 
                 be one step in phasing out an asset type.
             enable_msg_borrow:
@@ -1830,6 +1877,19 @@ definitions:
                 to interest
 
                 or liquidations.
+            max_supply:
+              type: string
+              description: >-
+                Max Supply is the maximum amount of tokens the protocol can
+                hold.
+
+                Adding more supply of the given token to the protocol will
+                return an error.
+
+                Must be a non negative value. 0 means that there is no limit.
+
+                To mark a token as not valid for supply, `msg_supply` must be
+                set to false.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -1913,8 +1973,9 @@ definitions:
           Enable Msg Supply allows supplying for lending or collateral using
           this
 
-          token. Note that withdrawing is always enabled. Disabling supplying
-          would
+          token. `false` means that a token can no longer be supplied.
+
+          Note that withdrawing is always enabled. Disabling supply would
 
           be one step in phasing out an asset type.
       enable_msg_borrow:
@@ -1987,6 +2048,18 @@ definitions:
           interest
 
           or liquidations.
+      max_supply:
+        type: string
+        description: >-
+          Max Supply is the maximum amount of tokens the protocol can hold.
+
+          Adding more supply of the given token to the protocol will return an
+          error.
+
+          Must be a non negative value. 0 means that there is no limit.
+
+          To mark a token as not valid for supply, `msg_supply` must be set to
+          false.
     description: |-
       Token defines a token, along with its metadata and parameters, in the Umee
       capital facility that can be supplied and borrowed.

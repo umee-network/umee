@@ -96,10 +96,11 @@ message MsgLiquidate {
   // Repayment is the maximum amount of base tokens that the liquidator is willing
   // to repay.
   cosmos.base.v1beta1.Coin repayment = 3 [(gogoproto.nullable) = false];
-  // RewardDenom is the base token denom that the liquidator is willing to accept
-  // as a liquidation reward. The uToken equivalent of any base token rewards
-  // will be taken from the borrower's collateral.
-  string reward_denom = 4;
+  // RewardDenom is the denom that the liquidator will receive as a liquidation reward.
+  // If it is a uToken, the liquidator will receive uTokens from the borrower's
+  // collateral. If it is a base token, the uTokens will be redeemed directly at
+  // a reduced Liquidation Incentive, and the liquidator will receive base tokens.
+  string                   reward_denom = 4;
 }
 
 // MsgSupplyResponse defines the Msg/Supply response type.
