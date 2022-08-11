@@ -856,8 +856,8 @@ func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
 }
 
 // GetStakingKeeper is used solely for testing purposes.
-func (app *UmeeApp) GetStakingKeeper() *stakingkeeper.Keeper {
-	return app.StakingKeeper
+func (app *UmeeApp) GetStakingKeeper() stakingkeeper.Keeper {
+	return *app.StakingKeeper
 }
 
 // GetIBCKeeper is used solely for testing purposes.
