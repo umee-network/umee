@@ -482,7 +482,7 @@ func (p *CoinbaseProvider) resetReconnectTimer() {
 func (p *CoinbaseProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %w", err)
+		return types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %v", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")

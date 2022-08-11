@@ -427,7 +427,7 @@ func (p *OkxProvider) resetReconnectTimer() {
 func (p *OkxProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Okx websocket %w", err)
+		return types.ErrProviderConnection.Wrapf("error closing Okx websocket %v", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
