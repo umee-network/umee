@@ -105,7 +105,7 @@ message MsgLiquidate {
 
 // MsgSupplyResponse defines the Msg/Supply response type.
 message MsgSupplyResponse {
-  // Supplied is the amount of base tokens sent ot the module.
+  // Supplied is the amount of base tokens sent to the module.
   cosmos.base.v1beta1.Coin supplied = 1 [(gogoproto.nullable) = false];
   // Received is the amount of uTokens received.
   cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
