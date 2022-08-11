@@ -200,7 +200,7 @@ containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
 
-proto-all: proto-format proto-lint proto-gen proto-swagger-gen proto-check-breaking
+proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 .PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format proto-swagger-gen
 
 proto-gen:
