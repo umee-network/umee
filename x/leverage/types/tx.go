@@ -7,10 +7,10 @@ import (
 	"github.com/umee-network/umee/v2/util/checkers"
 )
 
-func NewMsgSupply(supplier sdk.AccAddress, coin sdk.Coin) *MsgSupply {
+func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 	return &MsgSupply{
 		Supplier: supplier.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
@@ -31,10 +31,10 @@ func (msg *MsgSupply) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdraw(supplier sdk.AccAddress, coin sdk.Coin) *MsgWithdraw {
+func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
 	return &MsgWithdraw{
 		Supplier: supplier.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
@@ -55,10 +55,10 @@ func (msg *MsgWithdraw) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgCollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgCollateralize {
+func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateralize {
 	return &MsgCollateralize{
 		Borrower: borrower.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
@@ -79,10 +79,10 @@ func (msg *MsgCollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgDecollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgDecollateralize {
+func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollateralize {
 	return &MsgDecollateralize{
 		Borrower: borrower.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
@@ -103,10 +103,10 @@ func (msg *MsgDecollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrow(borrower sdk.AccAddress, coin sdk.Coin) *MsgBorrow {
+func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
 	return &MsgBorrow{
 		Borrower: borrower.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
@@ -127,10 +127,10 @@ func (msg *MsgBorrow) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgRepay(borrower sdk.AccAddress, coin sdk.Coin) *MsgRepay {
+func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 	return &MsgRepay{
 		Borrower: borrower.String(),
-		Asset:    coin,
+		Asset:    asset,
 	}
 }
 
