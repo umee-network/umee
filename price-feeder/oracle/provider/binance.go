@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -363,7 +362,7 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 func (p *BinanceProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return sdkerrors.Wrap(types.ErrProviderConnection, fmt.Errorf("error closing binance websocket %w", err))
+		types.ErrProviderConnection.Wrapf("error closing binance websocket %v", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")

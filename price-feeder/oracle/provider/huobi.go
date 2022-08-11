@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -385,7 +384,7 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 func (p *HuobiProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return sdkerrors.Wrap(types.ErrProviderConnection, fmt.Errorf("error closing Huobi websocket %w", err))
+		return types.ErrProviderConnection.Wrapf("error closing Huobi websocket %w", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")

@@ -16,7 +16,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -483,7 +482,7 @@ func (p *CoinbaseProvider) resetReconnectTimer() {
 func (p *CoinbaseProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return sdkerrors.Wrap(types.ErrProviderConnection, fmt.Errorf("error closing Coinbase websocket %w", err))
+		types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %w", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
