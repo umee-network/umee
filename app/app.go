@@ -150,7 +150,7 @@ var (
 	// and genesis verification.
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		GenutilModule{},
+		genutil.AppModuleBasic{GenTxValidator: GenTxValidator},
 		BankModule{},
 		capability.AppModuleBasic{},
 		StakingModule{},

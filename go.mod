@@ -410,7 +410,7 @@ require (
 
 replace (
 	github.com/Gravity-Bridge/Gravity-Bridge/module => ../Gravity-Bridge/module
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.0-umee
+	github.com/cosmos/cosmos-sdk => ../cosmos-sdk
 	github.com/cosmos/ibc-go/v3 => ../ibc-go
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc => ../bech32-ibc

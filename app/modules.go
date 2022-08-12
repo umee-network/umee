@@ -6,15 +6,12 @@ import (
 	"time"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
@@ -134,55 +131,28 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(genState)
 }
 
-// GenutilModule defines a custom wrapper around the x/genutil module's
-// AppModuleBasic implementation to provide custom genesis state validation.
-type GenutilModule struct {
-	genutil.AppModuleBasic
-}
-
-// ValidateGenesis validates the x/genutil genesis state.
-func (GenutilModule) ValidateGenesis(
-	cdc codec.JSONCodec,
-	encCfg client.TxEncodingConfig,
-	bz json.RawMessage,
-) error {
-	var genState genutiltypes.GenesisState
-	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", genutiltypes.ModuleName, err)
+func GenTxValidator(msgs []sdk.Msg) error {
+	if n := len(msgs); n != 2 {
+		return fmt.Errorf(
+			"contains invalid number of messages; expected: 2; got: %d", n)
 	}
 
-	txJSONDecoder := encCfg.TxJSONDecoder()
-
-	for i, genTx := range genState.GenTxs {
-		var tx sdk.Tx
-
-		tx, err := txJSONDecoder(genTx)
-		if err != nil {
-			return err
-		}
-
-		msgs := tx.GetMsgs()
-		if n := len(msgs); n != 2 {
-			return fmt.Errorf(
-				"gentx %d contains invalid number of messages; expected: 2; got: %d",
-				i, n,
-			)
-		}
-
-		if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
-			return fmt.Errorf(
-				"gentx %d contains invalid message at index 0; expected: %T; got: %T",
-				i, &stakingtypes.MsgCreateValidator{}, msgs[0],
-			)
-		}
-
-		if _, ok := msgs[1].(*gravitytypes.MsgSetOrchestratorAddress); !ok {
-			return fmt.Errorf(
-				"gentx %d contains invalid message at index 1; expected: %T; got: %T",
-				i, &gravitytypes.MsgSetOrchestratorAddress{}, msgs[1],
-			)
-		}
+	if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
+		return fmt.Errorf(
+			"contains invalid message at index 0; expected: %T; got: %T",
+			&stakingtypes.MsgCreateValidator{}, msgs[0])
 	}
 
+	if _, ok := msgs[1].(*gravitytypes.MsgSetOrchestratorAddress); !ok {
+		return fmt.Errorf(
+			"contains invalid message at index 1; expected: %T; got: %T",
+			&gravitytypes.MsgSetOrchestratorAddress{}, msgs[1])
+	}
+
+	for i := range msgs {
+		if err := msgs[i].ValidateBasic(); err != nil {
+			return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
+		}
+	}
 	return nil
 }
