@@ -82,6 +82,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1212](https://github.com/umee-network/umee/pull/1212) Add `util/checkers` utility package providing common check / validation functions.
 - [1220](https://github.com/umee-network/umee/pull/1220) Submit oracle prevotes / vote txs via the CLI.
 - [1222](https://github.com/umee-network/umee/pull/1222) Liquidation reward_denom can now be either token or uToken.
+- [1238](https://github.com/umee-network/umee/pull/1238) Added bad debts query.
 
 ### Improvements
 
