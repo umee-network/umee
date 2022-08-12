@@ -25,9 +25,9 @@ func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.Ac
 	)
 }
 
-// decollateralize removes fromAddrs' uTokens from circulation and redeems it for the underlying
-// token, sending it to the toAddr. It occurs when decollateralizing uTokens (in which case
-// fromAddr and toAddr are the same) as well as during liquidations, where toAddr is the liquidator.
+// decollateralize removes fromAddr's uTokens from the module and sends them to toAddr.
+// It occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the
+// same) as well as during liquidations, where toAddr is the liquidator.
 func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
 	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, coin.Denom).Sub(coin))
 	if err != nil {
