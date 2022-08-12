@@ -548,7 +548,7 @@ func (p *GateProvider) resetReconnectTimer() {
 func (p *GateProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %w", err)
+		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %v", err)
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
