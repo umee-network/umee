@@ -9,7 +9,8 @@ import (
 
 // liquidateCollateral burns uToken collateral and sends the base token reward to the liquidator.
 // This occurs during direct liquidation.
-func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.AccAddress, uToken, token sdk.Coin) error {
+func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.AccAddress, uToken, token sdk.Coin,
+) error {
 	if err := k.burnCollateral(ctx, borrower, uToken); err != nil {
 		return err
 	}
