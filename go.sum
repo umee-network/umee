@@ -2090,6 +2090,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqzi/CzI=
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
+github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220726223124-958071525f39 h1:iOsfJaoEDoasECHtJ3QAfJ5Scbi4TIKwwArDdWhRTdc=
+github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220726223124-958071525f39/go.mod h1:UyY7PrlrfAD8HVQvsC62xM/wgApQ3qzycDB8odKqjX8=
 github.com/umee-network/cosmos-sdk v0.46.0-umee.0.20220812010629-4d5bb2e3f73c h1:m5HWg/iZg8PH9/ffdKwrREvBDjJugRFaKgaXdIrlqms=
 github.com/umee-network/cosmos-sdk v0.46.0-umee.0.20220812010629-4d5bb2e3f73c/go.mod h1:u6Ci6+V+srijJhzctEEPYBygUz3O2YXP5ZijPnV6mt0=
 github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84 h1:p6b0aqaHJuAE86X66g6/T+3yRiOCFvLoRi+MsBIe6qI=
