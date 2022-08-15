@@ -87,6 +87,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [935](https://github.com/umee-network/umee/pull/935) Fix protobuf linting
+- [940](https://github.com/umee-network/umee/pull/940)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization` (see #926)
 - [959](https://github.com/umee-network/umee/pull/959) Improve ModuleBalance calculation
 - [962](https://github.com/umee-network/umee/pull/962) Streamline AccrueAllInterest
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
@@ -98,10 +99,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
-
-### API Breaking
-
-- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
