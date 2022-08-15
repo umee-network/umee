@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.20
-	github.com/umee-network/umee/v2 v2.0.1
+	github.com/umee-network/umee/v2 v2.0.0-20220815133308-cca32bfce063
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.48.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -288,11 +288,9 @@ require (
 )
 
 replace (
-
-	github.com/Gravity-Bridge/Gravity-Bridge/module => ../../Gravity-Bridge/module
-	github.com/cosmos/cosmos-sdk => ../../cosmos-sdk
-	github.com/cosmos/ibc-go/v3 => ../../ibc-go
+	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220805205452-2445605a0377
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.0-umee.0.20220812010629-4d5bb2e3f73c
+	github.com/cosmos/ibc-go/v3 => github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/osmosis-labs/bech32-ibc => ../../bech32-ibc
-	github.com/umee-network/umee/v2 => ../
+	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220726223124-958071525f39
 )
