@@ -2092,6 +2092,8 @@ github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqz
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/umee-network/cosmos-sdk v0.46.0-umee.0.20220812010629-4d5bb2e3f73c h1:m5HWg/iZg8PH9/ffdKwrREvBDjJugRFaKgaXdIrlqms=
 github.com/umee-network/cosmos-sdk v0.46.0-umee.0.20220812010629-4d5bb2e3f73c/go.mod h1:u6Ci6+V+srijJhzctEEPYBygUz3O2YXP5ZijPnV6mt0=
+github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84 h1:p6b0aqaHJuAE86X66g6/T+3yRiOCFvLoRi+MsBIe6qI=
+github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84/go.mod h1:3AlQMMd8WShb6sTPzc78LHh52UKg1V37pwkZKnSvMAY=
 github.com/urfave/cli v0.0.0-20171014202726-7bc6a0acffa5/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
