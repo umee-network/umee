@@ -172,7 +172,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
-		newCollateral := sdk.NewCoin(uToken.Denom, collateralAsset.Sub(amountFromCollateral))
+		newCollateral := sdk.NewCoin(uToken.Denom, collateralAmount.Sub(amountFromCollateral))
 		if err = k.setCollateralAmount(ctx, supplierAddr, newCollateral); err != nil {
 			return sdk.Coin{}, err
 		}
