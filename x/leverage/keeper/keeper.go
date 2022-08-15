@@ -352,7 +352,7 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	tokenRepay, utokenLiquidate, tokenReward, err := k.getLiquidationAmounts(
+	tokenRepay, uTokenLiquidate, tokenReward, err := k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
@@ -375,10 +375,10 @@ func (k Keeper) Liquidate(
 	}
 
 	if directLiquidation {
-		err = k.liquidateCollateral(ctx, borrowerAddr, liquidatorAddr, utokenLiquidate, tokenReward)
+		err = k.liquidateCollateral(ctx, borrowerAddr, liquidatorAddr, uTokenLiquidate, tokenReward)
 	} else {
 		// send uTokens from borrower collateral to liquidator's account
-		err = k.decollateralize(ctx, borrowerAddr, liquidatorAddr, utokenLiquidate)
+		err = k.decollateralize(ctx, borrowerAddr, liquidatorAddr, uTokenLiquidate)
 	}
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
@@ -391,7 +391,7 @@ func (k Keeper) Liquidate(
 
 	// the last return value is the liquidator's selected reward
 	if directLiquidation {
-		return tokenRepay, utokenLiquidate, tokenReward, nil
+		return tokenRepay, uTokenLiquidate, tokenReward, nil
 	}
-	return tokenRepay, utokenLiquidate, utokenLiquidate, nil
+	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
