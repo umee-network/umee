@@ -294,7 +294,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, repayToken, skip := randomRepayFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepayBorrowedAsset, "skip all transfers"), nil, nil
+			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepay, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgRepay(from.Address, repayToken)
@@ -305,7 +305,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeRepayBorrowedAsset,
+			MsgType:         types.EventTypeRepay,
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,
