@@ -36,7 +36,7 @@ service Msg {
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
-// MsgSupply is the request structure for the Supply RPC.
+// MsgSupply represents a user's request to supply assets to the module.
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
@@ -56,7 +56,7 @@ message MsgWithdraw {
 message MsgCollateralize {
   // Borrower is the account address adding collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgDecollateralize represents a user's request to disable selected
@@ -64,7 +64,7 @@ message MsgCollateralize {
 message MsgDecollateralize {
   // Borrower is the account address removing collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrow represents a user's request to borrow a base asset type
@@ -104,10 +104,16 @@ message MsgLiquidate {
 }
 
 // MsgSupplyResponse defines the Msg/Supply response type.
-message MsgSupplyResponse {}
+message MsgSupplyResponse {
+  // Received is the amount of uTokens received.
+  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
+}
 
 // MsgWithdrawResponse defines the Msg/Withdraw response type.
-message MsgWithdrawResponse {}
+message MsgWithdrawResponse {
+  // Received is the amount of base tokens received.
+  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
+}
 
 // MsgCollateralizeResponse defines the Msg/Collateralize response type.
 message MsgCollateralizeResponse {}
@@ -120,18 +126,17 @@ message MsgBorrowResponse {}
 
 // MsgRepayResponse defines the Msg/Repay response type.
 message MsgRepayResponse {
-  // Repaid is the amount of debt, in base tokens, that was repaid to the
-  // module by the borrower.
+  // Repaid is the amount of base tokens repaid to the module.
   cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 message MsgLiquidateResponse {
-  // Repaid is the amount of debt, in base tokens, that liquidator repaid
+  // Repaid is the amount of borrowed base tokens that the liquidator repaid
   // to the module on behalf of the borrower.
   cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
   // Collateral is the amount of the borrower's uToken collateral that
-  // was converted to the reward tokens as a result of liquidation.
+  // was liquidated.
   cosmos.base.v1beta1.Coin collateral = 2 [(gogoproto.nullable) = false];
   // Reward is the amount of base tokens that the liquidator received from
   // the module as reward for the liquidation.
