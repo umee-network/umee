@@ -109,8 +109,9 @@ func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmou
 
 	if supplyAmount > 0 {
 		// account supplies supplyAmount tokens and receives uTokens
-		_, err := s.app.LeverageKeeper.Supply(s.ctx, addr, sdk.NewInt64Coin(denom, supplyAmount))
+		uTokens, err := s.app.LeverageKeeper.Supply(s.ctx, addr, sdk.NewInt64Coin(denom, supplyAmount))
 		s.Require().NoError(err)
+		s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(denom), supplyAmount), uTokens)
 	}
 
 	if collateral {
@@ -145,8 +146,9 @@ func (s *IntegrationTestSuite) TestSupply_InvalidAsset() {
 	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, addr, invalidCoins))
 
 	// supplying should fail as we have not registered token "uabcd"
-	_, err := s.app.LeverageKeeper.Supply(s.ctx, addr, invalidCoin)
+	uTokens, err := s.app.LeverageKeeper.Supply(s.ctx, addr, invalidCoin)
 	s.Require().Error(err)
+	s.Require().Equal(sdk.Coin{}, uTokens)
 }
 
 func (s *IntegrationTestSuite) TestSupply_Valid() {
@@ -161,11 +163,12 @@ func (s *IntegrationTestSuite) TestSupply_Valid() {
 	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 
 	// supply asset
-	_, err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
+	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
+	uToken, err := s.app.LeverageKeeper.Supply(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)) // 1k umee
 	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64Coin(uTokenDenom, 1000000000), uToken) // 1k u/umee
 
 	// verify the total supply of the minted uToken
-	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 	supply := s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
 	expected := sdk.NewInt64Coin(uTokenDenom, 1000000000) // 1k u/umee
 	s.Require().Equal(expected, supply)
@@ -201,8 +204,9 @@ func (s *IntegrationTestSuite) TestWithdraw_Valid() {
 
 	// withdraw the total amount of assets supplied
 	uToken := expected
-	_, err = s.app.LeverageKeeper.Withdraw(ctx, addr, uToken)
+	withdrawn, err := s.app.LeverageKeeper.Withdraw(ctx, addr, uToken)
 	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000), withdrawn) // 1k umee
 
 	// verify total supply of the uTokens
 	supply = s.app.LeverageKeeper.GetUTokenSupply(ctx, uTokenDenom)
@@ -907,10 +911,11 @@ func (s *IntegrationTestSuite) TestWithdraw_InsufficientCollateral() {
 	// withdraw more collateral than available
 	uToken := collateral.Add(sdk.NewInt64Coin(uTokenDenom, 1))
 
-	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
+	withdrawn, err := s.app.LeverageKeeper.Withdraw(s.ctx, supplierAddr, uToken)
 	s.Require().EqualError(err,
 		"0 uToken balance + 1000000 from collateral is less than 1000001u/uumee to withdraw: insufficient balance",
 	)
+	s.Require().Equal(sdk.Coin{}, withdrawn)
 }
 
 func (s *IntegrationTestSuite) TestTotalCollateral() {
