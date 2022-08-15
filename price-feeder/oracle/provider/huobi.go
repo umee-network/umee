@@ -382,7 +382,10 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 
 // reconnect closes the last WS connection and create a new one.
 func (p *HuobiProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Huobi websocket %v", err)
+	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
