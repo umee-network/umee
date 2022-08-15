@@ -926,3 +926,121 @@ func (s *IntegrationTestSuite) TestTotalCollateral() {
 	collateral = s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
 	s.Require().Equal(sdk.NewInt(1000000000), collateral)
 }
+
+func (s *IntegrationTestSuite) TestLiqudateBorrow() {
+	addr, _ := s.initBorrowScenario()
+
+	// The "supplier" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral.
+
+	// user borrows 90 umee
+	err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 90000000))
+	s.Require().NoError(err)
+
+	// create an account and address which will represent a liquidator
+	liquidatorAddr := sdk.AccAddress([]byte("addr______________03"))
+	liquidatorAcc := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, liquidatorAddr)
+	s.app.AccountKeeper.SetAccount(s.ctx, liquidatorAcc)
+
+	// mint and send 10k umee to liquidator
+	s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName,
+		sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 10000000000)), // 10k umee
+	))
+	s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, liquidatorAddr,
+		sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 10000000000)), // 10k umee,
+	))
+
+	// liquidator attempts to liquidate user, but user is ineligible (not over borrow limit)
+	repayment := sdk.NewInt64Coin(umeeapp.BondDenom, 30000000) // 30 umee
+	rewardDenom := types.ToUTokenDenom(umeeapp.BondDenom)
+	_, _, _, err = s.app.LeverageKeeper.Liquidate(s.ctx, liquidatorAddr, addr, repayment, rewardDenom)
+	s.Require().Error(err)
+
+	// set umee liquidation threshold to 0.01 to allow liquidation
+	umeeToken, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, umeeDenom)
+	s.Require().NoError(err)
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
+	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
+
+	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
+
+	// liquidator partially liquidates user, receiving some uTokens
+	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 10000000) // 10 umee
+	repaid, liquidated, reward, err := s.app.LeverageKeeper.Liquidate(
+		s.ctx, liquidatorAddr, addr, repayment, types.ToUTokenDenom(umeeDenom),
+	)
+	s.Require().NoError(err)
+	s.Require().Equal(repayment, repaid)                                                      // 10 umee
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 11000000), liquidated) // 11 u/umee
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 11000000), reward)     // 11 u/umee
+
+	// verify borrower's new borrowed amount is 80 umee (still over borrow limit)
+	borrowed := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 80000000), borrowed)
+
+	// verify borrower's new collateral amount (1k - 11) = 989 u/umee
+	collateral := s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, types.ToUTokenDenom(umeeDenom))
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 989000000), collateral)
+
+	// verify liquidator's new u/umee balance = 11 = (10 + liquidation incentive)
+	uTokenBalance := s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, rewardDenom)
+	s.Require().Equal(sdk.NewInt64Coin(rewardDenom, 11000000), uTokenBalance)
+
+	// verify liquidator's new umee balance (10k - 11) = 9990 umee
+	tokenBalance := s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 9990000000), tokenBalance)
+
+	// liquidator partially liquidates user, receiving base tokens directly at slightly reduced incentive
+	repaid, liquidated, reward, err = s.app.LeverageKeeper.Liquidate(
+		s.ctx, liquidatorAddr, addr, repayment, umeeDenom,
+	)
+	s.Require().NoError(err)
+	s.Require().Equal(repayment, repaid)                                                      // 10 umee
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 10900000), liquidated) // 10.9 u/umee
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 10900000), reward)                          // 10.9 umee
+
+	// verify borrower's new borrow amount is 70 umee (still over borrow limit)
+	borrowed = s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 70000000), borrowed)
+
+	// verify borrower's new collateral amount (989 - 10.9) = 978.1 u/umee
+	collateral = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, types.ToUTokenDenom(umeeDenom))
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 978100000), collateral)
+
+	// verify liquidator's u/umee balance = 11 (unchanged)
+	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, rewardDenom)
+	s.Require().Equal(sdk.NewInt64Coin(rewardDenom, 11000000), uTokenBalance)
+
+	// verify liquidator's new umee balance (9990 - 10 + 10.9) = 9990.9 umee
+	tokenBalance = s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 9990900000), tokenBalance)
+
+	// liquidator fully liquidates user, receiving more collateral and reducing borrowed amount to zero
+	repayment = sdk.NewInt64Coin(umeeapp.BondDenom, 300000000) // 300 umee
+	repaid, liquidated, reward, err = s.app.LeverageKeeper.Liquidate(
+		s.ctx, liquidatorAddr, addr, repayment, types.ToUTokenDenom(umeeDenom),
+	)
+	s.Require().NoError(err)
+	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 70000000), repaid)                          // 70 umee
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 77000000), liquidated) // 77 u/umee
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 77000000), reward)     // 77 u/umee
+
+	// verify that repayment has not been modified
+	s.Require().Equal(sdk.NewInt(300000000), repayment.Amount)
+
+	// verify liquidator's new u/umee balance = 88 = (11 + 77)
+	uTokenBalance = s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, rewardDenom)
+	s.Require().Equal(sdk.NewInt64Coin(rewardDenom, 88000000), uTokenBalance)
+
+	// verify borrower's new borrowed amount is zero
+	borrowed = s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 0), borrowed)
+
+	// verify borrower's new collateral amount (978.1 - 77) = 901.1 u/umee
+	collateral = s.app.LeverageKeeper.GetCollateralAmount(s.ctx, addr, types.ToUTokenDenom(umeeDenom))
+	s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(umeeDenom), 901100000), collateral)
+
+	// verify liquidator's new umee balance (9990.9 - 70) = 9920.9 umee
+	tokenBalance = s.app.BankKeeper.GetBalance(s.ctx, liquidatorAddr, umeeapp.BondDenom)
+	s.Require().Equal(sdk.NewInt64Coin(umeeapp.BondDenom, 9920900000), tokenBalance)
+}
