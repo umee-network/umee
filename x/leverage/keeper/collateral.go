@@ -7,28 +7,38 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-// burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
-// during liquidations.
-func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, coin sdk.Coin) error {
-	err := k.setCollateralAmount(ctx, addr, k.GetCollateralAmount(ctx, addr, coin.Denom).Sub(coin))
-	if err != nil {
+// liquidateCollateral burns uToken collateral and sends the base token reward to the liquidator.
+// This occurs during direct liquidation.
+func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.AccAddress, uToken, token sdk.Coin,
+) error {
+	if err := k.burnCollateral(ctx, borrower, uToken); err != nil {
 		return err
 	}
-	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coin)); err != nil {
-		return err
-	}
-	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, coin.Denom).Sub(coin))
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, liquidator, sdk.NewCoins(token))
 }
 
-// removeCollateral removes some uTokens in fromAddr's collateral and sends them to toAddr. This
-// occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the same) as well as
-// during liquidations, where toAddr is the liquidator.
-func (k Keeper) removeCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, coin sdk.Coin) error {
-	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, coin.Denom).Sub(coin))
+// burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
+// during liquidations.
+func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
+	err := k.setCollateralAmount(ctx, addr, k.GetCollateralAmount(ctx, addr, uToken.Denom).Sub(uToken))
 	if err != nil {
 		return err
 	}
-	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(coin))
+	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
+		return err
+	}
+	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken))
+}
+
+// decollateralize removes fromAddr's uTokens from the module and sends them to toAddr.
+// It occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the
+// same) as well as during non-direct liquidations, where toAddr is the liquidator.
+func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
+	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	if err != nil {
+		return err
+	}
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(uToken))
 }
 
 // GetCollateralAmount returns an sdk.Coin representing how much of a given denom the
