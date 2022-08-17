@@ -33,7 +33,7 @@ type validator struct {
 	index            int
 	moniker          string
 	mnemonic         string
-	keyInfo          keyring.Info
+	keyInfo          keyring.Record
 	privateKey       cryptotypes.PrivKey
 	consensusKey     privval.FilePVKey
 	consensusPrivKey cryptotypes.PrivKey
@@ -126,7 +126,7 @@ func (v *validator) createConsensusKey() error {
 }
 
 func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil)
+	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, nil)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
 		return err
 	}
 
-	v.keyInfo = info
+	v.keyInfo = *info
 	v.mnemonic = mnemonic
 	v.privateKey = privKey
 
@@ -183,9 +183,13 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
+	valAddr, err := v.keyInfo.GetAddress()
+	if err != nil {
+		return nil, err
+	}
 
 	return stakingtypes.NewMsgCreateValidator(
-		sdk.ValAddress(v.keyInfo.GetAddress()),
+		sdk.ValAddress(valAddr),
 		valPubKey,
 		amount,
 		description,
@@ -199,9 +203,13 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 	if err != nil {
 		return nil, err
 	}
+	valAddr, err := v.keyInfo.GetAddress()
+	if err != nil {
+		return nil, err
+	}
 
 	return gravitytypes.NewMsgSetOrchestratorAddress(
-		sdk.ValAddress(v.keyInfo.GetAddress()),
+		sdk.ValAddress(valAddr),
 		orchAddr,
 		*eth,
 	), nil
@@ -232,8 +240,12 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	// Note: This line is not needed for SIGN_MODE_LEGACY_AMINO, but putting it
 	// also doesn't affect its generated sign bytes, so for code's simplicity
 	// sake, we put it here.
+	pubKey, err := v.keyInfo.GetPubKey()
+	if err != nil {
+		return nil, err
+	}
 	sig := txsigning.SignatureV2{
-		PubKey: v.keyInfo.GetPubKey(),
+		PubKey: pubKey,
 		Data: &txsigning.SingleSignatureData{
 			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
 			Signature: nil,
@@ -260,7 +272,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	}
 
 	sig = txsigning.SignatureV2{
-		PubKey: v.keyInfo.GetPubKey(),
+		PubKey: pubKey,
 		Data: &txsigning.SingleSignatureData{
 			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
 			Signature: sigBytes,

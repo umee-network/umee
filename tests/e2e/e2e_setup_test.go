@@ -165,15 +165,20 @@ func (s *IntegrationTestSuite) initNodes() {
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.chain.validators[0].configDir()
 	for _, val := range s.chain.validators {
+		valAddr, err := val.keyInfo.GetAddress()
+		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, val.keyInfo.GetAddress()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, valAddr),
 		)
 	}
 
 	// add orchestrator accounts to genesis file
 	for _, orch := range s.chain.orchestrators {
+		orchAddr, err := orch.keyInfo.GetAddress()
+		s.Require().NoError(err)
+
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orch.keyInfo.GetAddress()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orchAddr),
 		)
 	}
 
@@ -301,7 +306,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
-		delKeysMsg, err := val.buildDelegateKeysMsg(s.chain.orchestrators[i].keyInfo.GetAddress(), s.chain.orchestrators[i].ethereumKey.address)
+		orchAddr, err := s.chain.orchestrators[i].keyInfo.GetAddress()
+		s.Require().NoError(err)
+
+		delKeysMsg, err := val.buildDelegateKeysMsg(orchAddr, s.chain.orchestrators[i].ethereumKey.address)
 		s.Require().NoError(err)
 
 		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
@@ -868,7 +876,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-gas-prices",
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
 					"--cosmos-from",
-					orch.keyInfo.GetName(),
+					orch.keyInfo.Name,
 					"--relay-batches=true",
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",
@@ -937,6 +945,8 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.Require().NoError(err)
 
 	umeeVal := s.chain.validators[0]
+	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
+	s.Require().NoError(err)
 
 	s.priceFeederResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
@@ -953,8 +963,8 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 			Env: []string{
 				"UMEE_E2E_UMEE_VAL_KEY_DIR=/root/.umee",
 				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeVal.keyInfo.GetAddress()),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeVal.keyInfo.GetAddress())),
+				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeValAddr),
+				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
 			},
 			Entrypoint: []string{
