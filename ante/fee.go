@@ -77,6 +77,7 @@ func getTxPriority(fee sdk.Coins, isOracle bool) int64 {
 	var priority int64
 	for _, c := range fee {
 		// TODO: we should better compare amounts
+		// https://github.com/umee-network/umee/issues/510
 		p := int64(math.MaxInt64)
 		if c.Amount.IsInt64() {
 			p = c.Amount.Int64()
