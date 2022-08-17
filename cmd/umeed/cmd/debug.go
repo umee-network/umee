@@ -36,7 +36,6 @@ func debugCmd() *cobra.Command {
 	return cmd
 }
 
-// nolint: lll
 func debugAddrCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "addr [address]",
@@ -81,7 +80,7 @@ $ %s debug addr cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 		},
 	}
 
-	cmd.Flags().String(flagBech32HRP, umeeapp.AccountAddressPrefix, "Input Bech32 HRP (use only when address input is a Bech32 address")
-
+	cmd.Flags().String(flagBech32HRP, umeeapp.AccountAddressPrefix,
+		"Input Bech32 HRP (use only when address input is a Bech32 address")
 	return cmd
 }

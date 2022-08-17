@@ -8,16 +8,17 @@ import (
 
 // getLiquidationAmounts takes a repayment and reward denom proposed by a liquidator and calculates
 // the actual repayment amount a target address is eligible for, and the corresponding collateral
-// to burn and rewards to return to the liquidator.
+// to liquidate and equivalent base rewards to send to the liquidator.
 func (k Keeper) getLiquidationAmounts(
 	ctx sdk.Context,
-	liquidatorAddr sdk.AccAddress,
+	liquidatorAddr,
 	targetAddr sdk.AccAddress,
 	maxRepay sdk.Coin,
 	rewardDenom string,
-) (tokenRepay sdk.Coin, collateralBurn sdk.Coin, tokenReward sdk.Coin, err error) {
+	directLiquidation bool,
+) (tokenRepay sdk.Coin, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
 	repayDenom := maxRepay.Denom
-	collateralDenom := k.FromTokenToUTokenDenom(ctx, rewardDenom)
+	collateralDenom := types.ToUTokenDenom(rewardDenom)
 
 	// get relevant liquidator, borrower, and module balances
 	borrowerCollateral := k.GetBorrowerCollateral(ctx, targetAddr)
@@ -67,6 +68,14 @@ func (k Keeper) getLiquidationAmounts(
 	// get collateral uToken exchange rate
 	exchangeRate := k.DeriveExchangeRate(ctx, rewardDenom)
 
+	// Reduce liquidation incentive if the liquidator has specified they would like to directly receive base assets.
+	// Since this fee also reduces the amount of collateral that must be burned, it is applied before any other
+	// computations, as if the token itself had a smaller liquidation incentive.
+	liqudationIncentive := ts.LiquidationIncentive
+	if directLiquidation {
+		liqudationIncentive = liqudationIncentive.Mul(sdk.OneDec().Sub(params.DirectLiquidationFee))
+	}
+
 	// compute final liquidation amounts
 	repay, burn, reward := ComputeLiquidation(
 		sdk.MinInt(sdk.MinInt(availableRepay, maxRepay.Amount), totalBorrowed.AmountOf(repayDenom)),
@@ -75,7 +84,7 @@ func (k Keeper) getLiquidationAmounts(
 		repayTokenPrice,
 		rewardTokenPrice,
 		exchangeRate,
-		ts.LiquidationIncentive,
+		liqudationIncentive,
 		closeFactor,
 		borrowedValue,
 	)
@@ -120,8 +129,11 @@ func ComputeLiquidation(
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
 	// Catch no-ops early
-	if maxRepay.IsZero() || maxReward.IsZero() || maxCollateral.IsZero() ||
-		closeFactor.IsZero() || borrowedValue.IsZero() {
+	if maxRepay.IsZero() ||
+		maxReward.IsZero() ||
+		maxCollateral.IsZero() ||
+		closeFactor.IsZero() ||
+		borrowedValue.IsZero() {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
 	}
 

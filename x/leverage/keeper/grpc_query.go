@@ -82,7 +82,7 @@ func (q Querier) MarketSummary(
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
 
-	uDenom := q.Keeper.FromTokenToUTokenDenom(ctx, req.Denom)
+	uDenom := types.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
 
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
@@ -225,4 +225,18 @@ func (q Querier) LiquidationTargets(
 	}
 
 	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
+}
+
+func (q Querier) BadDebts(
+	goCtx context.Context,
+	req *types.QueryBadDebts,
+) (*types.QueryBadDebtsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	targets := q.Keeper.getAllBadDebts(ctx)
+
+	return &types.QueryBadDebtsResponse{Targets: targets}, nil
 }

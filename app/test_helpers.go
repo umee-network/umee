@@ -235,13 +235,11 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Start with the default genesis state
 	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
 
-	// Extract the x/leverage part of the genesis state to be modified
+	// Default genesis doesn't have tokens in Token registry, so here we add one:
 	var leverageGenState leveragetypes.GenesisState
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
 	}
-
-	// Modify the x/leverage genesis state
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
 		BaseDenom:              BondDenom,
 		SymbolDenom:            DisplayDenom,
@@ -260,9 +258,8 @@ func IntegrationTestNetworkConfig() network.Config {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	})
-
-	// Marshal the modified state and add it back into appGenState
 	bz, err := cdc.MarshalJSON(&leverageGenState)
 	if err != nil {
 		panic(err)

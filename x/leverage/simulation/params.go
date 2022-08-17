@@ -34,5 +34,10 @@ func ParamChanges(r *rand.Rand) []simtypes.ParamChange {
 				return fmt.Sprintf("\"%s\"", GenSmallLiquidationSize(r))
 			},
 		),
+		simulation.NewSimParamChange(types.ModuleName, string(types.KeyDirectLiquidationFee),
+			func(r *rand.Rand) string {
+				return fmt.Sprintf("\"%s\"", GenDirectLiquidationFee(r))
+			},
+		),
 	}
 }

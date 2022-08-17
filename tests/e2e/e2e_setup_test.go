@@ -220,8 +220,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 	config.Moniker = s.chain.validators[0].moniker
 
 	genFilePath := config.GenesisFile()
+	s.T().Log("starting e2e infrastructure; validator_0 config:", genFilePath)
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
+	s.T().Log("CONFIG \n\n", appGenState)
 
 	var gravityGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
@@ -262,6 +264,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+		MaxSupply:              sdk.NewInt(100000000000),
 	})
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)

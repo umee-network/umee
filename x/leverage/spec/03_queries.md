@@ -6,6 +6,7 @@ General queries:
 - **Registered Tokens** returns the entire [Token Registry](02_state.md#Token-Registry)
 - **Params** returns the module's current [parameters](07_params.md)
 - **Liquidation Targets** queries a list of all borrowers eligible for liquidation
+- **Bad Debts** queries a list of all borrow positions marked for bad debt repayment
 
 Queries on accepted asset types:
 - **Market Summary** collects data on a given `Token` denomination. A description of each response field can be found in the [QueryMarketSummaryResponse proto definition](../../../proto/umee/leverage/v1/query.proto)

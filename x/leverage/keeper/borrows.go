@@ -27,6 +27,17 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
+// repayBorrow repays tokens borrowed by borrowAddr by sending coins in fromAddr to the module. This
+// occurs during normal repayment (in which case fromAddr and borrowAddr are the same) and during
+// liquidations, where fromAddr is the liquidator instead.
+func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress, repay sdk.Coin) error {
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, fromAddr, types.ModuleName, sdk.NewCoins(repay))
+	if err != nil {
+		return err
+	}
+	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
+}
+
 // setBorrow sets the amount borrowed by an address in a given denom.
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {

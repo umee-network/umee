@@ -55,10 +55,10 @@ func (msg *MsgWithdraw) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgCollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgCollateralize {
+func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateralize {
 	return &MsgCollateralize{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    asset,
 	}
 }
 
@@ -79,10 +79,10 @@ func (msg *MsgCollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgDecollateralize(borrower sdk.AccAddress, coin sdk.Coin) *MsgDecollateralize {
+func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollateralize {
 	return &MsgDecollateralize{
 		Borrower: borrower.String(),
-		Coin:     coin,
+		Asset:    asset,
 	}
 }
 
@@ -135,7 +135,7 @@ func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 }
 
 func (msg MsgRepay) Route() string { return ModuleName }
-func (msg MsgRepay) Type() string  { return EventTypeRepayBorrowedAsset }
+func (msg MsgRepay) Type() string  { return EventTypeRepay }
 
 func (msg *MsgRepay) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
