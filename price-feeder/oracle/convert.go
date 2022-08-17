@@ -103,11 +103,15 @@ func convertCandlesToUSD(
 
 	// Convert assets to USD.
 	for provider, assetMap := range candles {
+		conversionRate, ok := conversionRates[requiredConversions[provider].Quote]
+		if !ok {
+			continue
+		}
 		for asset, assetCandles := range assetMap {
 			if requiredConversions[provider].Base == asset {
 				for i := range assetCandles {
 					assetCandles[i].Price = assetCandles[i].Price.Mul(
-						conversionRates[requiredConversions[provider].Quote],
+						conversionRate,
 					)
 				}
 			}
