@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -44,6 +45,9 @@ func newErrorResponse(code int, err string) errorResponse {
 func writeErrorResponse(w http.ResponseWriter, status int, err string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	bz, _ := json.Marshal(newErrorResponse(0, err))
-	_, _ = w.Write(bz)
+	if bz, err := json.Marshal(newErrorResponse(0, err)); err == nil {
+		_, _ = w.Write(bz)
+	} else {
+		_, _ = w.Write([]byte(fmt.Sprintf("failed to marshal error response: %s", err)))
+	}
 }

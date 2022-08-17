@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -110,6 +111,11 @@ func (r *Router) metricsHandler() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", gr.ContentType)
-		_, _ = w.Write(gr.Metrics)
+		if t, err := template.New("metrics").Parse(string(gr.Metrics)); err == nil {
+			// unchecked err, too late for bad response
+			_ = t.ExecuteTemplate(w, "metrics", nil)
+		} else {
+			writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("failed to parse metrics: %s", err))
+		}
 	}
 }
