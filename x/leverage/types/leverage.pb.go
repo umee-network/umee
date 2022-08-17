@@ -41,9 +41,9 @@ type Params struct {
 	// considered small enough to be liquidated in a single transaction, bypassing
 	// dynamic close factor.
 	SmallLiquidationSize github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=small_liquidation_size,json=smallLiquidationSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"small_liquidation_size" yaml:"small_liquidation_size"`
-	// Direct Liquidation Fee is the reduction in liquidation incentive experienced
-	// by liquidators who choose to receive base assets instead of uTokens as
-	// liquidation rewards.
+	// Direct Liquidation Fee is a reduction factor in liquidation incentive
+	// experienced by liquidators who choose to receive base assets instead of
+	// uTokens as liquidation rewards.
 	DirectLiquidationFee github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=direct_liquidation_fee,json=directLiquidationFee,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"direct_liquidation_fee" yaml:"direct_liquidation_fee"`
 }
 
