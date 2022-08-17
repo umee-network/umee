@@ -23,7 +23,7 @@ var (
 // Default parameter values
 const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
-	DefaultSlashWindow              = BlocksPerWeek       // window for a week
+	DefaultSlashWindow              = BlocksPerDay        // window for a day
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
 )
 
