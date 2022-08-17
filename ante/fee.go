@@ -12,12 +12,12 @@ import (
 // MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
 const MaxOracleMsgGasUsage = uint64(100000)
 
-// feeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
+// FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
 // The validator min fee check is ignored if the tx contains only oracle messages and
 // tx gas limit is <= MaxOracleMsgGasUsage. Essentially, validators can provide price
 // transactison for free as long as the gas per message is in the MaxOracleMsgGasUsage limit.
-func feeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
+func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
 		return nil, 0, sdkerrors.ErrTxDecode.Wrap("Tx must be a FeeTx")
@@ -26,10 +26,10 @@ func feeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
-	isOracle := isOracleTx(msgs)
-	chargeForOracle := !isOracle || gas > uint64(len(msgs))*MaxOracleMsgGasUsage
+	isOracle := IsOracleTx(msgs)
+	chargeFees := !isOracle || gas > uint64(len(msgs))*MaxOracleMsgGasUsage
 
-	if ctx.IsCheckTx() && chargeForOracle {
+	if ctx.IsCheckTx() && chargeFees {
 		minGasPrices := ctx.MinGasPrices()
 		if !minGasPrices.IsZero() {
 			requiredFees := make(sdk.Coins, len(minGasPrices))
@@ -50,11 +50,14 @@ func feeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	}
 
 	priority := getTxPriority(feeCoins, isOracle)
+	if !chargeFees {
+		return sdk.Coins{}, priority, nil
+	}
 	return feeCoins, priority, nil
 }
 
-// isOracleTx checks if all messages are oracle messages
-func isOracleTx(msgs []sdk.Msg) bool {
+// IsOracleTx checks if all messages are oracle messages
+func IsOracleTx(msgs []sdk.Msg) bool {
 	for _, msg := range msgs {
 		switch msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote:
