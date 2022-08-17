@@ -11,7 +11,6 @@ import (
 )
 
 func (suite *IntegrationTestSuite) TestFeeAndPriority() {
-	suite.SetupTest()
 	suite.txBuilder = suite.clientCtx.TxConfig.NewTxBuilder()
 	priv1, _, addr1 := testdata.KeyTestPubAddr()
 	require := suite.Require()
