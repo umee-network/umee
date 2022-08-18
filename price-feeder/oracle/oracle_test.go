@@ -697,3 +697,94 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 		prices[btcPair.Base],
 	)
 }
+
+func TestGetComputedPricesPanic(t *testing.T) {
+	symbolUSDT := "USDT"
+	symbolUSD := "USD"
+	symbolDAI := "DAI"
+	symbolETH := "ETH"
+
+	pairETHtoUSDT := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolUSDT,
+	}
+	pairETHtoDAI := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolDAI,
+	}
+	pairETHtoUSD := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolUSD,
+	}
+	basePairsETH := []types.CurrencyPair{
+		pairETHtoUSDT,
+		pairETHtoDAI,
+	}
+	krakenPairsETH := append(basePairsETH, pairETHtoUSD)
+
+	pairUSDTtoUSD := types.CurrencyPair{
+		Base:  symbolUSDT,
+		Quote: symbolUSD,
+	}
+	pairDAItoUSD := types.CurrencyPair{
+		Base:  symbolDAI,
+		Quote: symbolUSD,
+	}
+	stablecoinPairs := []types.CurrencyPair{
+		pairUSDTtoUSD,
+		pairDAItoUSD,
+	}
+
+	krakenPairs := append(krakenPairsETH, stablecoinPairs...)
+
+	volume := sdk.MustNewDecFromStr("881272.00")
+	ethUsdPrice := sdk.MustNewDecFromStr("9989.02")
+	daiUsdPrice := sdk.MustNewDecFromStr("999890000000000000")
+	ethTime := provider.PastUnixTime(1 * time.Minute)
+
+	ethCandle := []provider.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: ethTime,
+		},
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: ethTime,
+		},
+	}
+	daiCandle := []provider.CandlePrice{
+		{
+			Price:     daiUsdPrice,
+			Volume:    volume,
+			TimeStamp: 1660829520000,
+		},
+	}
+
+	candles := provider.AggregatedProviderCandles{
+		provider.ProviderKraken: {
+			"USDT": ethCandle,
+			"DAI":  daiCandle,
+			"ETH":  ethCandle,
+		},
+	}
+
+	prices := provider.AggregatedProviderPrices{}
+
+	pairs := map[provider.Name][]types.CurrencyPair{
+		provider.ProviderKraken: krakenPairs,
+	}
+
+	_, err := GetComputedPrices(
+		zerolog.Nop(),
+		candles,
+		prices,
+		pairs,
+		make(map[string]sdk.Dec),
+	)
+
+	require.NoError(t, err,
+		"It should not panic",
+	)
+}
