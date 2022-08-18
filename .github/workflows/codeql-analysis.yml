@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   pull_request:
-    # paths: ["**.go"]
+    paths: ["**.go"]
     branches:
       - main
       - release/**
