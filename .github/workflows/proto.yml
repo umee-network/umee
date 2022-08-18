@@ -3,16 +3,12 @@ name: Protobuf
 # This workflow is only run when a .proto file has been changed
 on:
   pull_request:
+  paths: ["**.proto"]
 
 jobs:
   breakage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
-        with:
-          PATTERNS: |
-            **/**.proto
       - name: check-breakage
         run: make proto-check-breaking
-        if: env.GIT_DIFF
