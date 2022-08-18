@@ -10,7 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
@@ -30,7 +29,7 @@ type KeeperTestSuite struct {
 	chainA      *ibctesting.TestChain
 	chainB      *ibctesting.TestChain
 
-	queryClient types.QueryClient
+	queryClient ibctransfertypes.QueryClient
 }
 
 func (s *KeeperTestSuite) SetupTest() {
@@ -105,8 +104,8 @@ func (s *KeeperTestSuite) SetupTest() {
 	umeeApp := s.GetUmeeApp(s.chainA)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(s.chainA.GetContext(), umeeApp.InterfaceRegistry())
-	types.RegisterQueryServer(queryHelper, umeeApp.UIBCTransferKeeper)
-	s.queryClient = types.NewQueryClient(queryHelper)
+	ibctransfertypes.RegisterQueryServer(queryHelper, umeeApp.UIBCTransferKeeper)
+	s.queryClient = ibctransfertypes.NewQueryClient(queryHelper)
 }
 
 func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
@@ -121,11 +120,11 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (s *KeeperTestSuite) TestGetTransferAccount() {
-	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
+	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(ibctransfertypes.ModuleName)))
 	macc := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.GetTransferAccount(s.chainA.GetContext())
 
 	s.Require().NotNil(macc)
-	s.Require().Equal(types.ModuleName, macc.GetName())
+	s.Require().Equal(ibctransfertypes.ModuleName, macc.GetName())
 	s.Require().Equal(expectedModAccAddr, macc.GetAddress())
 }
 
@@ -221,11 +220,11 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		sender, err := sdk.AccAddressFromBech32(data.Sender)
 		s.Require().NoError(err)
 
-		denomTrace := types.ParseDenomTrace(data.Denom)
+		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
 		ibcDenom := denomTrace.IBCDenom()
 
 		registerDenom := func() {
-			denomTrace := types.ParseDenomTrace(denom)
+			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
 			if !s.GetUmeeApp(s.chainB).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
 				s.GetUmeeApp(s.chainB).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
