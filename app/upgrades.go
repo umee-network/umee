@@ -25,12 +25,12 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_0Plan)
 			err := setupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
-				return nil, sdkerrors.Wrapf(err, "Calypso %q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
+				return nil, sdkerrors.Wrapf(
+					err, "Calypso %q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-
 		})
 
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
