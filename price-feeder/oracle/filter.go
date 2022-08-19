@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 // defaultDeviationThreshold defines how many 𝜎 a provider can be away
@@ -53,7 +54,7 @@ func FilterTickerDeviations(
 			if d, ok := deviations[base]; !ok || isBetween(tp.Price, means[base], d.Mul(t)) {
 				p, ok := filteredPrices[providerName]
 				if !ok {
-					p = map[string]provider.TickerPrice{}
+					p = map[string]types.TickerPrice{}
 					filteredPrices[providerName] = p
 				}
 				p[base] = tp
@@ -89,7 +90,7 @@ func FilterCandleDeviations(
 		for base, cp := range priceCandles {
 			p, ok := candlePrices[providerName]
 			if !ok {
-				p = map[string][]provider.CandlePrice{}
+				p = map[string][]types.CandlePrice{}
 				candlePrices[providerName] = p
 			}
 			p[base] = cp
@@ -127,7 +128,7 @@ func FilterCandleDeviations(
 			if d, ok := deviations[base]; !ok || isBetween(price, means[base], d.Mul(t)) {
 				p, ok := filteredCandles[providerName]
 				if !ok {
-					p = map[string][]provider.CandlePrice{}
+					p = map[string][]types.CandlePrice{}
 					filteredCandles[providerName] = p
 				}
 				p[base] = candles[providerName][base]
