@@ -66,7 +66,7 @@ func (o *orchestrator) createKey(name string) error {
 }
 
 func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, nil)
+	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return err
 	}

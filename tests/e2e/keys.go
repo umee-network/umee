@@ -36,7 +36,7 @@ func createMemoryKey() (mnemonic string, info *keyring.Record, err error) {
 }
 
 func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Record, error) {
-	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, nil)
+	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return nil, err
 	}
