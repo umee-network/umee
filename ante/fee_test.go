@@ -56,7 +56,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	require.NoError(err)
 	require.True(oracleTx.GetFee().IsZero(), "got: %s", oracleTx.GetFee())
 	require.Equal(uint64(0), oracleTx.GetGas())
-	require.True(ante.IsOracleTx(oracleTx.GetMsgs()))
+	require.True(ante.IsOracleOrGravityTx(oracleTx.GetMsgs()))
 
 	suite.checkFeeAnte(oracleTx, sdk.Coins{}, suite.ctx.WithIsCheckTx(true))
 	suite.checkFeeAnte(oracleTx, sdk.Coins{}, suite.ctx.WithIsCheckTx(false))
