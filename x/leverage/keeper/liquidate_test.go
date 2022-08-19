@@ -52,9 +52,11 @@ func TestComputeLiquidation(t *testing.T) {
 			tc.borrowedValue,
 		)
 
-		require.Equal(sdkmath.NewInt(expectedRepay), repay, msg+" (repay)")
-		require.Equal(sdkmath.NewInt(expectedCollateral), collateral, msg+" (collateral)")
-		require.Equal(sdkmath.NewInt(expectedReward), reward, msg+" (reward)")
+		require.True(sdkmath.NewInt(expectedRepay).Equal(repay),
+			msg+" (repay); got: %d, expected: %s", expectedRepay, repay)
+		require.True(sdkmath.NewInt(expectedCollateral).Equal(collateral),
+			msg+" (collateral); got: %d, expected: %s", expectedCollateral, collateral)
+		require.True(sdkmath.NewInt(expectedReward).Equal(reward), msg+" (reward); got: %d, expected: %s", expectedReward, reward)
 	}
 
 	// basic liquidation of 1000 borrowed tokens with plenty of available rewards and collateral
