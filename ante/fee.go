@@ -61,49 +61,23 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 	for _, msg := range msgs {
 		switch msg.(type) {
-		case *oracletypes.MsgAggregateExchangeRatePrevote:
+		case *oracletypes.MsgAggregateExchangeRatePrevote,
+			*oracletypes.MsgAggregateExchangeRateVote:
 			continue
 
-		case *oracletypes.MsgAggregateExchangeRateVote:
-			continue
-
-		case *gbtypes.MsgValsetConfirm:
-			continue
-
-		case *gbtypes.MsgSendToEth:
-			continue
-
-		case *gbtypes.MsgCancelSendToEth:
-			continue
-
-		case *gbtypes.MsgRequestBatch:
-			continue
-
-		case *gbtypes.MsgConfirmBatch:
-			continue
-
-		case *gbtypes.MsgERC20DeployedClaim:
-			continue
-
-		case *gbtypes.MsgConfirmLogicCall:
-			continue
-
-		case *gbtypes.MsgLogicCallExecutedClaim:
-			continue
-
-		case *gbtypes.MsgSendToCosmosClaim:
-			continue
-
-		case *gbtypes.MsgExecuteIbcAutoForwards:
-			continue
-
-		case *gbtypes.MsgBatchSendToEthClaim:
-			continue
-
-		case *gbtypes.MsgValsetUpdatedClaim:
-			continue
-
-		case *gbtypes.MsgSubmitBadSignatureEvidence:
+		case *gbtypes.MsgValsetConfirm,
+			*gbtypes.MsgSendToEth,
+			*gbtypes.MsgCancelSendToEth,
+			*gbtypes.MsgRequestBatch,
+			*gbtypes.MsgConfirmBatch,
+			*gbtypes.MsgERC20DeployedClaim,
+			*gbtypes.MsgConfirmLogicCall,
+			*gbtypes.MsgLogicCallExecutedClaim,
+			*gbtypes.MsgSendToCosmosClaim,
+			*gbtypes.MsgExecuteIbcAutoForwards,
+			*gbtypes.MsgBatchSendToEthClaim,
+			*gbtypes.MsgValsetUpdatedClaim,
+			*gbtypes.MsgSubmitBadSignatureEvidence:
 			continue
 
 		default:
