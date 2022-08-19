@@ -66,8 +66,6 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 			continue
 
 		case *gbtypes.MsgValsetConfirm,
-			*gbtypes.MsgSendToEth,
-			*gbtypes.MsgCancelSendToEth,
 			*gbtypes.MsgRequestBatch,
 			*gbtypes.MsgConfirmBatch,
 			*gbtypes.MsgERC20DeployedClaim,
