@@ -106,7 +106,7 @@ jobs:
 
   liveness-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.0
@@ -136,4 +136,4 @@ jobs:
         if: env.GIT_DIFF
         run: |
           sleep 1m
-          ./contrib/scripts/test_localnet_liveness.sh 40 5 50 localhost
+          ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost
