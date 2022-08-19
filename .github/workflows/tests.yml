@@ -124,8 +124,10 @@ jobs:
       - name: Install Starport
         if: env.GIT_DIFF
         run: |
+          cd ../
           git clone https://github.com/umee-network/cli --depth=1
           cd cli && make install
+          cd ../umee
       - name: Start Local Network via Starport
         if: env.GIT_DIFF
         run: |
@@ -134,4 +136,4 @@ jobs:
         if: env.GIT_DIFF
         run: |
           sleep 1m
-          ./contrib/scripts/test_localnet_liveness.sh 40 5 50 localhost
+          ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost
