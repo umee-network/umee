@@ -11,6 +11,8 @@ import (
 )
 
 func TestComputeLiquidation(t *testing.T) {
+	require := require.New(t)
+
 	type testCase struct {
 		availableRepay       sdkmath.Int
 		availableCollateral  sdkmath.Int
@@ -50,9 +52,9 @@ func TestComputeLiquidation(t *testing.T) {
 			tc.borrowedValue,
 		)
 
-		require.True(t, sdkmath.NewInt(expectedRepay).Equal(repay), msg+" (repay)")
-		require.True(t, sdkmath.NewInt(expectedCollateral).Equal(collateral), msg+" (collateral)")
-		require.True(t, sdkmath.NewInt(expectedReward).Equal(reward), msg+" (reward)")
+		require.Equal(sdkmath.NewInt(expectedRepay), repay, msg+" (repay)")
+		require.Equal(sdkmath.NewInt(expectedCollateral), collateral, msg+" (collateral)")
+		require.Equal(sdkmath.NewInt(expectedReward), reward, msg+" (reward)")
 	}
 
 	// basic liquidation of 1000 borrowed tokens with plenty of available rewards and collateral
