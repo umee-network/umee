@@ -41,6 +41,14 @@ message Params {
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"small_liquidation_size\""
   ];
+  // Direct Liquidation Fee is a reduction factor in liquidation incentive
+  // experienced by liquidators who choose to receive base assets instead of
+  // uTokens as liquidation rewards.
+  string direct_liquidation_fee = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"direct_liquidation_fee\""
+  ];
 }
 
 // Token defines a token, along with its metadata and parameters, in the Umee
@@ -126,7 +134,8 @@ message Token {
   uint32 exponent = 11 [(gogoproto.moretags) = "yaml:\"exponent\""];
 
   // Enable Msg Supply allows supplying for lending or collateral using this
-  // token. Note that withdrawing is always enabled. Disabling supplying would
+  // token. `false` means that a token can no longer be supplied.
+  // Note that withdrawing is always enabled. Disabling supply would
   // be one step in phasing out an asset type.
   bool enable_msg_supply = 12 [(gogoproto.moretags) = "yaml:\"enable_msg_supply\""];
 
@@ -173,5 +182,15 @@ message Token {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"min_collateral_liquidity\""
+  ];
+
+  // Max Supply is the maximum amount of tokens the protocol can hold.
+  // Adding more supply of the given token to the protocol will return an error.
+  // Must be a non negative value. 0 means that there is no limit.
+  // To mark a token as not valid for supply, `msg_supply` must be set to false.
+  string max_supply = 18 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"max_supply\""
   ];
 }

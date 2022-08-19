@@ -61,6 +61,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1140](https://github.com/umee-network/umee/pull/1140) Rename MarketSize query to TotalSuppliedValue, and TokenMarketSize to TotalSupplied.
 - [1188](https://github.com/umee-network/umee/pull/1188) Remove all individual queries which duplicate market_summary fields.
 - [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_balances`.
+- [1236](https://github.com/umee-network/umee/pull/1236) Add more response fields to leverage messages.
+- [1222](https://github.com/umee-network/umee/pull/1222) Add leverage parameter DirectLiquidationFee.
 
 ### Features
 
@@ -79,24 +81,24 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1203](https://github.com/umee-network/umee/pull/1203) Add Swagger docs.
 - [1212](https://github.com/umee-network/umee/pull/1212) Add `util/checkers` utility package providing common check / validation functions.
 - [1220](https://github.com/umee-network/umee/pull/1220) Submit oracle prevotes / vote txs via the CLI.
+- [1222](https://github.com/umee-network/umee/pull/1222) Liquidation reward_denom can now be either token or uToken.
+- [1238](https://github.com/umee-network/umee/pull/1238) Added bad debts query.
 
 ### Improvements
 
 - [935](https://github.com/umee-network/umee/pull/935) Fix protobuf linting
+- [940](https://github.com/umee-network/umee/pull/940)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization` (see #926)
 - [959](https://github.com/umee-network/umee/pull/959) Improve ModuleBalance calculation
 - [962](https://github.com/umee-network/umee/pull/962) Streamline AccrueAllInterest
 - [967](https://github.com/umee-network/umee/pull/962) Use taylor series of e^x for more accurate interest at high APY.
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
+- [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
-
-### API Breaking
-
-- [926](https://github.com/umee-network/umee/pull/926)(x/leverage) Renamed `Keeper.DeriveBorrowUtilization` to `SupplyUtilization`.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

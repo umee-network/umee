@@ -138,8 +138,8 @@ func NewCoinbaseProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -155,7 +155,7 @@ func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[str
 
 // GetCandlePrices returns candles based off of the saved trades map.
 // Candles need to be cut up into one-minute intervals.
-func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	tradeMap := make(map[string][]CoinbaseTrade, len(pairs))
 
 	for _, cp := range pairs {
@@ -170,7 +170,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 		return nil, fmt.Errorf("no trades have been received")
 	}
 
-	candles := make(map[string][]CandlePrice)
+	candles := make(map[string][]types.CandlePrice)
 
 	for cp := range tradeMap {
 		trades := tradeMap[cp]
@@ -179,7 +179,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			return time.Unix(trades[i].Time, 0).Before(time.Unix(trades[j].Time, 0))
 		})
 
-		candleSlice := []CandlePrice{
+		candleSlice := []types.CandlePrice{
 			{
 				Price:  sdk.ZeroDec(),
 				Volume: sdk.ZeroDec(),
@@ -194,7 +194,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			if trade.Time-startTime > unixMinute {
 				index++
 				startTime = trade.Time
-				candleSlice = append(candleSlice, CandlePrice{
+				candleSlice = append(candleSlice, types.CandlePrice{
 					Price:  sdk.ZeroDec(),
 					Volume: sdk.ZeroDec(),
 				})
@@ -210,7 +210,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			}
 
 			volume := candleSlice[index].Volume.Add(size)
-			candleSlice[index] = CandlePrice{
+			candleSlice[index] = types.CandlePrice{
 				Volume:    volume,     // aggregate size
 				Price:     price,      // most recent price
 				TimeStamp: trade.Time, // most recent timestamp
@@ -296,7 +296,7 @@ func (p *CoinbaseProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
@@ -305,7 +305,7 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 		return tickerPair.toTickerPrice()
 	}
 
-	return TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
@@ -480,7 +480,10 @@ func (p *CoinbaseProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *CoinbaseProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %v", err)
+	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
@@ -513,8 +516,8 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 	return nil
 }
 
-func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(
+func (ticker CoinbaseTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(
 		string(ProviderCoinbase),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,

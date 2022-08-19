@@ -56,6 +56,6 @@ test-unit:
 
 lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
 
 .PHONY: lint

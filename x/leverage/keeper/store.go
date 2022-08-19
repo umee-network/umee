@@ -134,8 +134,11 @@ func (k Keeper) GetUTokenSupply(ctx sdk.Context, denom string) sdk.Coin {
 
 // setUTokenSupply sets the total supply of a uToken.
 func (k Keeper) setUTokenSupply(ctx sdk.Context, coin sdk.Coin) error {
-	if !coin.IsValid() || !k.IsAcceptedUToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if !types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrNotUToken.Wrap(coin.Denom)
 	}
 
 	key := types.CreateUTokenSupplyKey(coin.Denom)

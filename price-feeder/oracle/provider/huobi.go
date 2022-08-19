@@ -139,8 +139,8 @@ func NewHuobiProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
 		price, err := p.getTickerPrice(cp)
@@ -154,8 +154,8 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
 		price, err := p.getCandlePrices(cp)
@@ -382,7 +382,10 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 
 // reconnect closes the last WS connection and create a new one.
 func (p *HuobiProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Huobi websocket %v", err)
+	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
@@ -416,32 +419,32 @@ func (p *HuobiProvider) subscribeCandlePair(cp types.CurrencyPair) error {
 	return p.wsClient.WriteJSON(huobiSubscriptionCandleMsg)
 }
 
-func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[currencyPairToHuobiTickerPair(cp)]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("huobi failed to get ticker price for %s", cp.String())
+		return types.TickerPrice{}, fmt.Errorf("huobi failed to get ticker price for %s", cp.String())
 	}
 
 	return ticker.toTickerPrice()
 }
 
-func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[currencyPairToHuobiCandlePair(cp)]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
+		return []types.CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -491,8 +494,8 @@ func decompressGzip(bz []byte) ([]byte, error) {
 }
 
 // toTickerPrice converts current HuobiTicker to TickerPrice.
-func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(
+func (ticker HuobiTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(
 		string(ProviderHuobi),
 		ticker.CH,
 		strconv.FormatFloat(ticker.Tick.LastPrice, 'f', -1, 64),
@@ -500,8 +503,8 @@ func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
 	)
 }
 
-func (candle HuobiCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(
+func (candle HuobiCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(
 		string(ProviderHuobi),
 		candle.CH,
 		strconv.FormatFloat(candle.Tick.Close, 'f', -1, 64),

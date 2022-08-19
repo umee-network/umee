@@ -68,7 +68,7 @@ func convertCandlesToUSD(
 						for base, candle := range candleSet {
 							if base == pair.Quote {
 								if _, ok := validCandleList[providerName]; !ok {
-									validCandleList[providerName] = make(map[string][]provider.CandlePrice)
+									validCandleList[providerName] = make(map[string][]types.CandlePrice)
 								}
 
 								validCandleList[providerName][base] = candle
@@ -103,11 +103,15 @@ func convertCandlesToUSD(
 
 	// Convert assets to USD.
 	for provider, assetMap := range candles {
+		conversionRate, ok := conversionRates[requiredConversions[provider].Quote]
+		if !ok {
+			continue
+		}
 		for asset, assetCandles := range assetMap {
 			if requiredConversions[provider].Base == asset {
 				for i := range assetCandles {
 					assetCandles[i].Price = assetCandles[i].Price.Mul(
-						conversionRates[requiredConversions[provider].Quote],
+						conversionRate,
 					)
 				}
 			}
@@ -153,7 +157,7 @@ func convertTickersToUSD(
 						for base, ticker := range candleSet {
 							if base == pair.Quote {
 								if _, ok := validTickerList[providerName]; !ok {
-									validTickerList[providerName] = make(map[string]provider.TickerPrice)
+									validTickerList[providerName] = make(map[string]types.TickerPrice)
 								}
 
 								validTickerList[providerName][base] = ticker
@@ -190,7 +194,7 @@ func convertTickersToUSD(
 	for providerName, assetMap := range tickers {
 		for asset := range assetMap {
 			if requiredConversions[providerName].Base == asset {
-				assetMap[asset] = provider.TickerPrice{
+				assetMap[asset] = types.TickerPrice{
 					Price: assetMap[asset].Price.Mul(
 						conversionRates[requiredConversions[providerName].Quote],
 					),
