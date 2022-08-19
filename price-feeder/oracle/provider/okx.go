@@ -150,8 +150,8 @@ func NewOkxProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -166,8 +166,8 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]T
 }
 
 // GetCandlePrices returns the candlePrices based on the saved map
-func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		candles, err := p.getCandlePrices(currencyPair)
@@ -242,33 +242,33 @@ func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	instrumentID := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentID]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
+		return types.TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
 	}
 
 	return tickerPair.toTickerPrice()
 }
 
-func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	instrumentID := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentID]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("okx failed to get candle prices for %s", instrumentID)
+		return []types.CandlePrice{}, fmt.Errorf("okx failed to get candle prices for %s", instrumentID)
 	}
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -494,12 +494,12 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
+func (ticker OkxTickerPair) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
-func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(string(ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
+func (candle OkxCandlePair) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(string(ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // currencyPairToOkxPair returns the expected pair instrument ID for Okx

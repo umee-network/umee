@@ -127,8 +127,8 @@ func NewBinanceProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
-func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -143,8 +143,8 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 }
 
 // GetCandlePrices returns the candlePrices based on the provided pairs.
-func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -211,32 +211,32 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
+func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("binance failed to get ticker price for %s", key)
+		return types.TickerPrice{}, fmt.Errorf("binance failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
 }
 
-func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("binance failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf("binance failed to get candle prices for %s", key)
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -313,12 +313,12 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.candles[candle.Symbol] = candleList
 }
 
-func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
+func (ticker BinanceTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
-func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(string(ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+func (candle BinanceCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(string(ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
 		candle.Metadata.TimeStamp)
 }
 
