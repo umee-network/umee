@@ -10,8 +10,8 @@ import (
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
-// MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxOracleMsgGasUsage = uint64(1000000)
+// MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
+const MaxMsgGasUsage = uint64(100000)
 
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
@@ -28,7 +28,7 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
 	isOracleOrGravity := IsOracleOrGravityTx(msgs)
-	chargeFees := !isOracleOrGravity || gas > uint64(len(msgs))*MaxOracleMsgGasUsage
+	chargeFees := !isOracleOrGravity || gas > uint64(len(msgs))*MaxMsgGasUsage
 
 	if ctx.IsCheckTx() && chargeFees {
 		minGasPrices := ctx.MinGasPrices()
