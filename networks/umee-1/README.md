@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD034 -->
 <!-- markdownlint-disable MD013 -->
+<!-- markdown-link-check-disable -->
 # umee-1 mainnet
 
 ## State Sync Providers
