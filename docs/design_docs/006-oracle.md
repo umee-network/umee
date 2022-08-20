@@ -14,7 +14,7 @@ Umee needs an oracle to determine the price of assets. From section 5.1 of the [
 
 > Oracle reads asset price and updates the state to the Asset Facility Coordination Protocol
 
-We've already decided to import a large chunk of this from [Terra's oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html), although a few parts of this are specific to Terra's protocol and do not need to be implemented with respect to Umee.
+We've already decided to import a large chunk of this from [Terra's oracle](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), although a few parts of this are specific to Terra's protocol and do not need to be implemented with respect to Umee.
 
 ## Alternative Approaches
 
