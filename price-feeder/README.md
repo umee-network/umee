@@ -22,6 +22,7 @@ The `price-feeder` tool is responsible for performing the following:
    on-chain to Umee's `x/oracle` module following Umee's [Oracle](https://github.com/umee-network/umee/tree/main/x/oracle/spec)
    specification.
 
+<!-- markdown-link-check-disable -->
 ## Providers
 
 The list of current supported providers:
@@ -33,6 +34,7 @@ The list of current supported providers:
 - [Kraken](https://www.kraken.com/en-us/)
 - [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
+<!-- markdown-link-check-enable -->
 
 ## Usage
 

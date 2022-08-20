@@ -7,8 +7,6 @@ on:
     tags:
       - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Official release version tags e.g. v2.0.5
       - "v[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+" # Release candidate tags e.g. v1.0.3-rc4
-  pull_request:
-    types: [opened, synchronize]
 
 jobs:
   release:
