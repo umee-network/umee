@@ -23,8 +23,8 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		lastPrice := sdk.MustNewDecFromStr("34.69000000")
 		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		tickerMap := map[string]TickerPrice{}
-		tickerMap["ATOMUSDT"] = TickerPrice{
+		tickerMap := map[string]types.TickerPrice{}
+		tickerMap["ATOMUSDT"] = types.TickerPrice{
 			Price:  lastPrice,
 			Volume: volume,
 		}
@@ -43,13 +43,13 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		lastPriceLuna := sdk.MustNewDecFromStr("41.35000000")
 		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		tickerMap := map[string]TickerPrice{}
-		tickerMap["ATOMUSDT"] = TickerPrice{
+		tickerMap := map[string]types.TickerPrice{}
+		tickerMap["ATOMUSDT"] = types.TickerPrice{
 			Price:  lastPriceAtom,
 			Volume: volume,
 		}
 
-		tickerMap["LUNAUSDT"] = TickerPrice{
+		tickerMap["LUNAUSDT"] = types.TickerPrice{
 			Price:  lastPriceLuna,
 			Volume: volume,
 		}

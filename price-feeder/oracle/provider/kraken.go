@@ -38,7 +38,7 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
-		tickers         map[string]TickerPrice        // Symbol => TickerPrice
+		tickers         map[string]types.TickerPrice  // Symbol => TickerPrice
 		candles         map[string][]KrakenCandle     // Symbol => KrakenCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
@@ -130,7 +130,7 @@ func NewKrakenProvider(
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", string(ProviderKraken)).Logger(),
 		endpoints:       endpoints,
-		tickers:         map[string]TickerPrice{},
+		tickers:         map[string]types.TickerPrice{},
 		candles:         map[string][]KrakenCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
@@ -145,11 +145,11 @@ func NewKrakenProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -164,8 +164,8 @@ func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 }
 
 // GetCandlePrices returns the candlePrices based on the saved map.
-func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -224,8 +224,8 @@ func (p *KrakenProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(
+func (candle KrakenCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(
 		string(ProviderKraken),
 		candle.Symbol,
 		candle.Close,
@@ -234,20 +234,20 @@ func (candle KrakenCandle) toCandlePrice() (CandlePrice, error) {
 	)
 }
 
-func (p *KrakenProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+func (p *KrakenProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("kraken failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf("kraken failed to get candle prices for %s", key)
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -569,7 +569,7 @@ func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 }
 
 // setTickerPair sets an ticker to the map thread safe by the mutex.
-func (p *KrakenProvider) setTickerPair(symbol string, ticker TickerPrice) {
+func (p *KrakenProvider) setTickerPair(symbol string, ticker types.TickerPrice) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	p.tickers[symbol] = ticker
@@ -660,13 +660,13 @@ func (p *KrakenProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 // toTickerPrice return a TickerPrice based on the KrakenTicker.
-func (ticker KrakenTicker) toTickerPrice(symbol string) (TickerPrice, error) {
+func (ticker KrakenTicker) toTickerPrice(symbol string) (types.TickerPrice, error) {
 	if len(ticker.C) != 2 || len(ticker.V) != 2 {
-		return TickerPrice{}, fmt.Errorf("error converting KrakenTicker to TickerPrice")
+		return types.TickerPrice{}, fmt.Errorf("error converting KrakenTicker to TickerPrice")
 	}
 	// ticker.C has the Price in the first position.
 	// ticker.V has the totla	Value over last 24 hours in the second position.
-	return newTickerPrice(string(ProviderKraken), symbol, ticker.C[0], ticker.V[1])
+	return types.NewTickerPrice(string(ProviderKraken), symbol, ticker.C[0], ticker.V[1])
 }
 
 // newKrakenTickerSubscriptionMsg returns a new subscription Msg.
