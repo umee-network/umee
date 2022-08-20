@@ -228,7 +228,6 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.T().Log("starting e2e infrastructure; validator_0 config:", genFilePath)
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
-	s.T().Log("CONFIG \n\n", appGenState)
 
 	var gravityGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
