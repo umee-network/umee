@@ -156,10 +156,6 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	}
 }
 
-func photonAmount(amount uint64) string {
-	return fmt.Sprintf("%d%s", amount, photonDenom)
-}
-
 func (s *IntegrationTestSuite) initNodes() {
 	s.Require().NoError(s.chain.createAndInitValidators(2))
 	s.Require().NoError(s.chain.createAndInitOrchestrators(2))
