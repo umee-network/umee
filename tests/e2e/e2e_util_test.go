@@ -145,6 +145,7 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
 			"--broadcast-mode=sync",
+			"--output=json",
 			"-y",
 		},
 	})
@@ -185,6 +186,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 	defer cancel()
 
 	valAddr, err := s.chain.validators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
 
 	s.T().Logf(
 		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, umeeFee: %s, gravityFee: %s",
@@ -210,6 +212,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
 			"--broadcast-mode=sync",
+			"--output=json",
 			"-y",
 		},
 	})
