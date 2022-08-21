@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -388,7 +387,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 func (s *IntegrationTestSuite) runGanacheContainer() {
 	s.T().Log("starting Ganache container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -468,7 +467,7 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -592,7 +591,7 @@ func (s *IntegrationTestSuite) runValidators() {
 func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-gaia-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-gaia-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -668,7 +667,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.T().Log("starting Hermes relayer container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-hermes-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-hermes-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -840,14 +839,6 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	s.gravityContractAddr = gravityContractAddr
 }
 
-func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
-	s.T().Log("registering Umee validator Ethereum keys...")
-
-	for i := range s.chain.validators {
-		s.registerOrchAddresses(i, "10photon")
-	}
-}
-
 func (s *IntegrationTestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
@@ -930,7 +921,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Log("starting price-feeder container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-price-feeder-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-price-feeder-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
