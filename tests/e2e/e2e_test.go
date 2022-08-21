@@ -7,6 +7,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -94,31 +95,11 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	// send 300 stake tokens from Ethereum back to Umee
 	s.Run("send_stake_tokens_from_eth", func() {
-		valAddr, err := s.chain.validators[0].keyInfo.GetAddress()
-		s.Require().NoError(err)
+		umeeValIdxReceiver := 0
+		orchestratorIdxSender := 1
+		amount := uint64(300)
 
-		s.sendFromEthToUmee(1, ibcStakeERC20Addr, valAddr.String(), "300")
-
-		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		toAddr := valAddr
-		expBalance := int64(3299999993)
-
-		// require the original sender's (validator) balance increased
-		var latestBalance int64
-		s.Require().Eventuallyf(
-			func() bool {
-				balance, err := queryUmeeDenomBalance(umeeAPIEndpoint, toAddr.String(), ibcStakeDenom)
-				if err != nil {
-					return false
-				}
-
-				latestBalance = balance.Amount.Int64()
-				return latestBalance == expBalance
-			},
-			2*time.Minute,
-			5*time.Second,
-			"unexpected balance: %d", latestBalance,
-		)
+		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, ibcStakeERC20Addr, ibcStakeDenom, amount)
 	})
 }
 
@@ -186,7 +167,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		orchestratorIdxSender := 1
 		amount := uint64(100)
 
-		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, photonDenom, photonERC20Addr, amount)
+		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, photonERC20Addr, photonDenom, amount)
 	})
 }
 
@@ -236,29 +217,10 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Ethereum back to Umee
 	s.Run("send_uumee_tokens_from_eth", func() {
-		toAddr, err := s.chain.validators[0].keyInfo.GetAddress()
-		s.Require().NoError(err)
-		s.sendFromEthToUmee(1, umeeERC20Addr, toAddr.String(), "300")
+		umeeValIdxReceiver := 0
+		orchestratorIdxSender := 1
+		amount := uint64(300)
 
-		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		expBalance := int64(9999999993)
-
-		// require the original sender's (validator) balance increased
-		var latestBalance int64
-		s.Require().Eventuallyf(
-			func() bool {
-				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "uumee")
-				if err != nil {
-					return false
-				}
-
-				latestBalance = b.Amount.Int64()
-
-				return latestBalance == expBalance
-			},
-			2*time.Minute,
-			5*time.Second,
-			"unexpected balance: %d", latestBalance,
-		)
+		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, umeeapp.BondDenom, amount)
 	})
 }

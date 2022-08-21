@@ -188,8 +188,8 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 func (s *IntegrationTestSuite) sendFromEthToUmeeCheck(
 	orchestratorIdxSender,
 	umeeValIdxReceiver int,
-	umeeTokenDenom,
-	ethTokenAddr string,
+	ethTokenAddr,
+	umeeTokenDenom string,
 	amount uint64,
 ) {
 	umeeBalanceBeforeSend, ethBalanceBeforeSend, umeeAddr, _ := s.queryUmeeEthBalance(umeeValIdxReceiver, orchestratorIdxSender, umeeTokenDenom, ethTokenAddr)
