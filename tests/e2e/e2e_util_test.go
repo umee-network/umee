@@ -185,6 +185,41 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 	)
 }
 
+func (s *IntegrationTestSuite) sendFromEthToUmeeCheck(
+	orchestratorIdxSender,
+	umeeValIdxReceiver int,
+	umeeTokenDenom,
+	ethTokenAddr string,
+	amount uint64,
+) {
+	umeeBalanceBeforeSend, ethBalanceBeforeSend, umeeAddr, _ := s.queryUmeeEthBalance(umeeValIdxReceiver, orchestratorIdxSender, umeeTokenDenom, ethTokenAddr)
+	s.sendFromEthToUmee(orchestratorIdxSender, ethTokenAddr, umeeAddr, fmt.Sprintf("%d", amount))
+	umeeBalanceAfterSend, ethBalanceAfterSend, _, _ := s.queryUmeeEthBalance(umeeValIdxReceiver, orchestratorIdxSender, umeeTokenDenom, ethTokenAddr)
+
+	s.Require().Equal(ethBalanceBeforeSend-int64(amount), ethBalanceAfterSend)
+
+	umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[umeeValIdxReceiver].GetHostPort("1317/tcp"))
+	// require the original sender's (validator) balance increased
+	// peggo needs time to read the event and cross the tx
+	umeeLatestBalance := umeeBalanceAfterSend.Amount
+	s.Require().Eventuallyf(
+		func() bool {
+			b, err := queryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
+			if err != nil {
+				s.T().Logf("Error at sendFromEthToUmeeCheck.queryUmeeDenomBalance %+v", err)
+				return false
+			}
+
+			umeeLatestBalance = b.Amount
+
+			return umeeBalanceBeforeSend.Amount.AddRaw(int64(amount)).Equal(umeeLatestBalance)
+		},
+		2*time.Minute,
+		5*time.Second,
+		"unexpected balance: %d", umeeLatestBalance.Int64(),
+	)
+}
+
 func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAddr, amount string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -456,7 +491,7 @@ func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
 	return nil
 }
 
-func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int, error) {
+func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int64, error) {
 	data, err := ethABI.Pack(abiMethodNameBalanceOf, ethcmn.HexToAddress(recipientAddr))
 	if err != nil {
 		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
@@ -478,5 +513,37 @@ func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr
 		return 0, fmt.Errorf("failed to parse balance: %w", err)
 	}
 
-	return int(balance), nil
+	return balance, nil
+}
+
+func (s *IntegrationTestSuite) queryUmeeEthBalance(
+	umeeValIdx,
+	orchestratorIdx int,
+	umeeTokenDenom,
+	ethTokenAddr string,
+) (umeeBalance sdk.Coin, ethBalance int64, umeeAddr, ethAddr string) {
+	umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[umeeValIdx].GetHostPort("1317/tcp"))
+	umeeAddress, err := s.chain.validators[umeeValIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
+	umeeAddr = umeeAddress.String()
+
+	umeeBalance, err = queryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
+	s.Require().NoError(err)
+	s.T().Logf(
+		"Umee Balance of tokens validator; index: %d, addr: %s, amount: %s, denom: %s",
+		umeeValIdx, umeeAddr, umeeBalance.String(), umeeTokenDenom,
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	ethAddr = s.chain.orchestrators[orchestratorIdx].ethereumKey.address
+
+	ethBalance, err = queryEthTokenBalance(ctx, s.ethClient, ethTokenAddr, ethAddr)
+	s.Require().NoError(err)
+	s.T().Logf(
+		"ETh Balance of tokens; index: %d, addr: %s, amount: %d, denom: %s, erc20Addr: %s",
+		orchestratorIdx, ethAddr, ethBalance, photonDenom, ethTokenAddr,
+	)
+
+	return umeeBalance, ethBalance, umeeAddr, ethAddr
 }
