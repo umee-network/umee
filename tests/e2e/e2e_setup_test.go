@@ -874,6 +874,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--relay-batches=true",
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",
+					"--oracle-providers=mock",
 					"--relayer-loop-multiplier=1.0",
 					"--requester-loop-multiplier=1.0",
 					"--cosmos-pk",
