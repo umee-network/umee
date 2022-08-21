@@ -131,17 +131,30 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Umee to Ethereum
 	s.Run("send_photon_tokens_to_eth", func() {
-		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
-		s.sendFromUmeeToEth(0, ethRecipient, "100photon", "10photon", "3photon")
-
-		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		fromAddr, err := s.chain.validators[0].keyInfo.GetAddress()
+		valIndex := 0
+		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[valIndex].GetHostPort("1317/tcp"))
+		fromAddr, err := s.chain.validators[valIndex].keyInfo.GetAddress()
 		s.Require().NoError(err)
+
+		balanceBeforeSend, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), photonDenom) // 99999998016
+		s.Require().NoError(err)
+		s.T().Logf(
+			"Balance of tokens validator; index: %d, addr: %s, amount: %s, denom: %s",
+			valIndex, fromAddr.String(), balanceBeforeSend.String(), photonDenom,
+		)
+
+		amount, umeeFee, gravityFee := uint64(100), uint64(10), uint64(3)
+		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
+		s.sendFromUmeeToEth(0, ethRecipient, photonAmount(amount), photonAmount(umeeFee), photonAmount(gravityFee))
 
 		// require the sender's (validator) balance decreased
-		balance, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), "photon")
+		balance, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), photonDenom) // 99999997903
 		s.Require().NoError(err)
-		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998025))
+		s.T().Logf(
+			"Balance of tokens validator; index: %d, addr: %s, amount: %s, denom: %s",
+			valIndex, fromAddr.String(), balance.String(), photonDenom,
+		)
+		s.Require().Equal(balanceBeforeSend.Amount.SubRaw(int64(amount+umeeFee+gravityFee)).Int64(), balance.Amount.Int64())
 
 		// require the Ethereum recipient balance increased
 		var latestBalance int
