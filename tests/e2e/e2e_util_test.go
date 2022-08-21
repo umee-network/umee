@@ -123,7 +123,9 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 	defer cancel()
 
 	valAddr, err := s.chain.validators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
 	orchAddr, err := s.chain.orchestrators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
 
 	s.T().Logf("registering Ethereum Orchestrator addresses; validator: %s", sdk.ValAddress(valAddr))
 
