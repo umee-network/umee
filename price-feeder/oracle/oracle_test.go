@@ -784,7 +784,7 @@ func TestGetComputedPricesPanic(t *testing.T) {
 		make(map[string]sdk.Dec),
 	)
 
-	require.NoError(t, err,
-		"It should not panic",
+	require.ErrorContains(t, err,
+		"error on computing tvwap for quote: DAI, base: ETH",
 	)
 }

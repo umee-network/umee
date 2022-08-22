@@ -95,7 +95,12 @@ func convertCandlesToUSD(
 					return nil, err
 				}
 
-				conversionRates[pair.Quote] = tvwap[pair.Quote]
+				cvRate, ok := tvwap[pair.Quote]
+				if !ok {
+					return nil, fmt.Errorf("error on computing tvwap for quote: %s, base: %s", pair.Quote, pair.Base)
+				}
+
+				conversionRates[pair.Quote] = cvRate
 				requiredConversions[pairProviderName] = pair
 			}
 		}
