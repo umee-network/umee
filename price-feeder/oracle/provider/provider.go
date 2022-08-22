@@ -96,5 +96,5 @@ func PastUnixTime(t time.Duration) int64 {
 
 // SecondsToMilli converts seconds to milliseconds for our unix timestamps.
 func SecondsToMilli(t int64) int64 {
-	return int64(time.Second / time.Millisecond)
+	return t * int64(time.Second/time.Millisecond)
 }
