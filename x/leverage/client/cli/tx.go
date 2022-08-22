@@ -8,7 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -354,7 +354,7 @@ Where proposal.json contains:
 
 			content := types.NewUpdateRegistryProposal(proposal.Title, proposal.Description, proposal.Registry)
 
-			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, clientCtx.GetFromAddress())
+			msg, err := gov1b1.NewMsgSubmitProposal(content, deposit, clientCtx.GetFromAddress())
 			if err != nil {
 				return err
 			}

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v2/x/leverage/types"
@@ -108,21 +109,21 @@ func (k Keeper) getLiquidationAmounts(
 func ComputeLiquidation(
 	availableRepay,
 	availableCollateral,
-	availableReward sdk.Int,
+	availableReward sdkmath.Int,
 	repayTokenPrice,
 	rewardTokenPrice,
 	uTokenExchangeRate,
 	liquidationIncentive,
 	closeFactor,
 	borrowedValue sdk.Dec,
-) (tokenRepay sdk.Int, collateralBurn sdk.Int, tokenReward sdk.Int) {
+) (tokenRepay sdkmath.Int, collateralBurn sdkmath.Int, tokenReward sdkmath.Int) {
 	// Prevent division by zero
 	if uTokenExchangeRate.IsZero() || rewardTokenPrice.IsZero() || repayTokenPrice.IsZero() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt()
 	}
 
 	// Start with the maximum possible repayment amount, as a decimal
-	maxRepay := availableRepay.ToDec()
+	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
 	maxReward := maxRepay.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
@@ -145,11 +146,11 @@ func ComputeLiquidation(
 	)
 	// Collateral burned cannot exceed borrower's collateral
 	ratio = sdk.MinDec(ratio,
-		availableCollateral.ToDec().Quo(maxCollateral),
+		toDec(availableCollateral).Quo(maxCollateral),
 	)
 	// Base token reward cannot exceed available unreserved module balance
 	ratio = sdk.MinDec(ratio,
-		availableReward.ToDec().Quo(maxReward),
+		toDec(availableReward).Quo(maxReward),
 	)
 	// Catch edge cases
 	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
@@ -180,7 +181,7 @@ func ComputeLiquidation(
 	// Finally, the base token reward amount is derived directly from the collateral
 	// to burn. This will round down identically to MsgWithdraw, favoring the module
 	// over the liquidator.
-	tokenReward = collateralBurn.ToDec().Mul(uTokenExchangeRate).TruncateInt()
+	tokenReward = toDec(collateralBurn).Mul(uTokenExchangeRate).TruncateInt()
 
 	return tokenRepay, collateralBurn, tokenReward
 }

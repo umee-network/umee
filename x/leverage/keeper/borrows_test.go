@@ -202,7 +202,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 
 	// Manually compute borrow limit using collateral weight of 0.25
 	// and placeholder of 1 umee = $4.21.
-	expectedUmeeLimit := umeeCollateral[0].Amount.ToDec().
+	expectedUmeeLimit := sdk.NewDecFromInt(umeeCollateral[0].Amount).
 		Mul(sdk.MustNewDecFromStr("0.00000421")).
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
@@ -217,7 +217,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 
 	// Manually compute borrow limit using collateral weight of 0.25
 	// and placeholder of 1 atom = $39.38
-	expectedAtomLimit := atomCollateral[0].Amount.ToDec().
+	expectedAtomLimit := sdk.NewDecFromInt(atomCollateral[0].Amount).
 		Mul(sdk.MustNewDecFromStr("0.00003938")).
 		Mul(sdk.MustNewDecFromStr("0.25"))
 

@@ -22,7 +22,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 	`)
 	os.WriteFile(filePath, bz, 0o644)
 
-	_, err := cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
+	_, err := cli.ParseUpdateRegistryProposal(encCfg.Codec, filePath)
 	require.Error(t, err)
 
 	// create a good proposal file and ensure parsing does not fail
@@ -51,6 +51,6 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 }`)
 	os.WriteFile(filePath, bz, 0o644)
 
-	_, err = cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
+	_, err = cli.ParseUpdateRegistryProposal(encCfg.Codec, filePath)
 	require.NoError(t, err)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/snapshots"
+	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -27,7 +28,7 @@ type appCreator struct {
 	moduleManager module.BasicManager
 }
 
-func (ac appCreator) newApp(
+func (a appCreator) newApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -50,7 +51,7 @@ func (ac appCreator) newApp(
 	}
 
 	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
+	snapshotDB, err := dbm.NewDB("metadata", server.GetAppDBBackend(appOpts), snapshotDir)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create LevelDB database: %s", err))
 	}
@@ -59,8 +60,17 @@ func (ac appCreator) newApp(
 	if err != nil {
 		panic(fmt.Sprintf("failed to create snapshot store: %s", err))
 	}
+	snapshotOptions := snapshottypes.NewSnapshotOptions(
+		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
+		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
+	)
 
-	baseAppOpts := []func(*baseapp.BaseApp){
+	return umeeapp.New(
+		logger, db, traceStore, true, skipUpgradeHeights,
+		cast.ToString(appOpts.Get(flags.FlagHome)),
+		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+		a.encCfg,
+		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
@@ -69,27 +79,12 @@ func (ac appCreator) newApp(
 		baseapp.SetInterBlockCache(cache),
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshotStore(snapshotStore),
-		baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
-		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
-	}
-
-	return umeeapp.New(
-		logger,
-		db,
-		traceStore,
-		true,
-		skipUpgradeHeights,
-		cast.ToString(appOpts.Get(flags.FlagHome)),
-		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		ac.encCfg,
-		appOpts,
-		baseAppOpts...,
+		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
 	)
 }
 
 // appExport creates a new simapp, optionally at a given height.
-func (ac appCreator) appExport(
+func (a appCreator) appExport(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -116,7 +111,7 @@ func (ac appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		ac.encCfg,
+		a.encCfg,
 		appOpts,
 	)
 

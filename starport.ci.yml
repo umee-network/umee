@@ -61,6 +61,8 @@ accounts:
 validator:
   name: alice
   staked: "33500000000000uumee"
+  eth_address: "0x9fc56f2e851e1ab2b4c0fc4f6344800f29652ffe"
+  orch_address: "umee1zypqa76je7pxsdwkfah6mu9a583sju6xjavygg"
 servers:
   dev-ui-address: "localhost:12345"
 faucet:

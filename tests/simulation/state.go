@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -194,13 +195,14 @@ func appStateRandomizedFn(
 
 	// Generate a random amount of initial stake coins and a random initial
 	// number of bonded accounts.
-	var initialStake, numInitiallyBonded int64
+	var numInitiallyBonded int64
+	var initialStake sdkmath.Int
 	appParams.GetOrGenerate(
 		cdc,
 		simappparams.StakePerAccount,
 		&initialStake,
 		r,
-		func(r *rand.Rand) { initialStake = r.Int63n(1e12) },
+		func(r *rand.Rand) { initialStake = sdkmath.NewIntFromUint64(uint64(r.Int63n(1e12))) },
 	)
 	appParams.GetOrGenerate(
 		cdc,

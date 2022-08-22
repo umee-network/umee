@@ -3,14 +3,14 @@ package leverage
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
 	"github.com/umee-network/umee/v2/x/leverage/keeper"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
-func NewUpdateRegistryProposalHandler(k keeper.Keeper) govtypes.Handler {
-	return func(ctx sdk.Context, content govtypes.Content) error {
+func NewUpdateRegistryProposalHandler(k keeper.Keeper) gov1b1.Handler {
+	return func(ctx sdk.Context, content gov1b1.Content) error {
 		switch c := content.(type) {
 		case *types.UpdateRegistryProposal:
 			return handleUpdateRegistryProposalHandler(ctx, k, c)

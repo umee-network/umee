@@ -1,48 +1,36 @@
 package ante
 
 import (
+	"math"
+
+	gbtypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
 )
 
-// MaxOracleMsgGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxOracleMsgGasUsage = uint64(100000)
+// MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
+const MaxMsgGasUsage = uint64(100000)
 
-// MempoolFeeDecorator defines a custom Umee AnteHandler decorator that is
-// responsible for allowing oracle transactions from oracle feeders to bypass
-// the minimum fee CheckTx check. However, if an oracle transaction's gas limit
-// is beyond the accepted threshold, the minimum fee check is still applied.
-//
-// For non-oracle transactions, the minimum fee check is applied.
-type MempoolFeeDecorator struct{}
-
-func NewMempoolFeeDecorator() MempoolFeeDecorator {
-	return MempoolFeeDecorator{}
-}
-
-func (mfd MempoolFeeDecorator) AnteHandle(
-	ctx sdk.Context,
-	tx sdk.Tx,
-	simulate bool,
-	next sdk.AnteHandler,
-) (newCtx sdk.Context, err error) {
+// FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
+// to early remove transactions from the mempool without enough attached fee.
+// The validator min fee check is ignored if the tx contains only oracle messages and
+// tx gas limit is <= MaxOracleMsgGasUsage. Essentially, validators can provide price
+// transactison for free as long as the gas per message is in the MaxOracleMsgGasUsage limit.
+func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	feeTx, ok := tx.(sdk.FeeTx)
 	if !ok {
-		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
+		return nil, 0, sdkerrors.ErrTxDecode.Wrap("Tx must be a FeeTx")
 	}
 
 	feeCoins := feeTx.GetFee()
 	gas := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
+	isOracleOrGravity := IsOracleOrGravityTx(msgs)
+	chargeFees := !isOracleOrGravity || gas > uint64(len(msgs))*MaxMsgGasUsage
 
-	// Only check for minimum fees if the execution mode is CheckTx and the tx does
-	// not contain oracle messages. If the tx does contain oracle messages, it's
-	// total gas must be less than or equal to a constant, otherwise minimum fees
-	// are checked.
-	if ctx.IsCheckTx() && !simulate &&
-		!(isOracleTx(msgs) && gas <= uint64(len(msgs))*MaxOracleMsgGasUsage) {
+	if ctx.IsCheckTx() && chargeFees {
 		minGasPrices := ctx.MinGasPrices()
 		if !minGasPrices.IsZero() {
 			requiredFees := make(sdk.Coins, len(minGasPrices))
@@ -56,26 +44,39 @@ func (mfd MempoolFeeDecorator) AnteHandle(
 			}
 
 			if !feeCoins.IsAnyGTE(requiredFees) {
-				return ctx, sdkerrors.Wrapf(
-					sdkerrors.ErrInsufficientFee,
-					"insufficient fees; got: %s required: %s",
-					feeCoins,
-					requiredFees,
-				)
+				return nil, 0, sdkerrors.ErrInsufficientFee.Wrapf(
+					"insufficient fees; got: %s required: %s", feeCoins, requiredFees)
 			}
 		}
 	}
 
-	return next(ctx, tx, simulate)
+	priority := getTxPriority(feeCoins, isOracleOrGravity)
+	if !chargeFees {
+		return sdk.Coins{}, priority, nil
+	}
+	return feeCoins, priority, nil
 }
 
-func isOracleTx(msgs []sdk.Msg) bool {
+// IsOracleOrGravityTx checks if all messages are oracle messages
+func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 	for _, msg := range msgs {
 		switch msg.(type) {
-		case *oracletypes.MsgAggregateExchangeRatePrevote:
+		case *oracletypes.MsgAggregateExchangeRatePrevote,
+			*oracletypes.MsgAggregateExchangeRateVote:
 			continue
 
-		case *oracletypes.MsgAggregateExchangeRateVote:
+		// TODO: remove messages which should not be "free":
+		case *gbtypes.MsgValsetConfirm,
+			*gbtypes.MsgRequestBatch,
+			*gbtypes.MsgConfirmBatch,
+			*gbtypes.MsgERC20DeployedClaim,
+			*gbtypes.MsgConfirmLogicCall,
+			*gbtypes.MsgLogicCallExecutedClaim,
+			*gbtypes.MsgSendToCosmosClaim,
+			*gbtypes.MsgExecuteIbcAutoForwards,
+			*gbtypes.MsgBatchSendToEthClaim,
+			*gbtypes.MsgValsetUpdatedClaim,
+			*gbtypes.MsgSubmitBadSignatureEvidence:
 			continue
 
 		default:
@@ -84,4 +85,27 @@ func isOracleTx(msgs []sdk.Msg) bool {
 	}
 
 	return true
+}
+
+// getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
+// denom) and oracle tx check.
+func getTxPriority(fee sdk.Coins, isOracleOrGravity bool) int64 {
+	var priority int64
+	for _, c := range fee {
+		// TODO: we should better compare amounts
+		// https://github.com/umee-network/umee/issues/510
+		p := int64(math.MaxInt64)
+		if c.Amount.IsInt64() {
+			p = c.Amount.Int64()
+		}
+		if priority == 0 || p < priority {
+			priority = p
+		}
+	}
+	if isOracleOrGravity {
+		// TODO: this is a naive version.
+		// Proper solution will be implemented in https://github.com/umee-network/umee/issues/510
+		priority += 100000
+	}
+	return priority
 }

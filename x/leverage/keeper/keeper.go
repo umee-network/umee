@@ -3,7 +3,9 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -16,7 +18,7 @@ import (
 
 type Keeper struct {
 	cdc          codec.Codec
-	storeKey     sdk.StoreKey
+	storeKey     storetypes.StoreKey
 	paramSpace   paramtypes.Subspace
 	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
@@ -27,7 +29,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.Codec,
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
@@ -69,7 +71,7 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
-func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdkmath.Int {
 	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
 }
 
@@ -159,7 +161,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		}
 
 		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoins(sdk.NewCoin(uToken.Denom, amountFromCollateral))
+		collateralToWithdraw := sdk.NewCoin(uToken.Denom, amountFromCollateral)
 		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
 		if err != nil {
 			return sdk.Coin{}, err
@@ -301,7 +303,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 	}
 
 	// Determine what borrow limit would be AFTER disabling this denom as collateral
-	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(sdk.NewCoins(coin)))
+	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(coin))
 	if err != nil {
 		return err
 	}

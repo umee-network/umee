@@ -11,7 +11,6 @@ import (
 )
 
 func (suite *IntegrationTestSuite) TestOracleSpam() {
-	suite.SetupTest()
 	suite.txBuilder = suite.clientCtx.TxConfig.NewTxBuilder()
 
 	priv1, _, addr1 := testdata.KeyTestPubAddr()

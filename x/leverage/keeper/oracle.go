@@ -43,7 +43,7 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	return p.Mul(coin.Amount.ToDec()), nil
+	return p.Mul(toDec(coin.Amount)), nil
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is

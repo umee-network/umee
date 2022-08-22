@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -26,9 +27,8 @@ const (
 )
 
 var (
-	initTokens          = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins           = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
-	setupAccountCounter = sdk.ZeroInt()
+	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
+	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
 )
 
 // creates a test token with reasonable initial parameters
@@ -39,10 +39,11 @@ func newToken(base, symbol string) types.Token {
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	ctx         sdk.Context
-	app         *umeeapp.UmeeApp
-	tk          keeper.TestKeeper
-	queryClient types.QueryClient
+	ctx                 sdk.Context
+	app                 *umeeapp.UmeeApp
+	tk                  keeper.TestKeeper
+	queryClient         types.QueryClient
+	setupAccountCounter sdkmath.Int
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -83,6 +84,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	s.app = app
 	s.ctx = ctx
+	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
@@ -90,8 +92,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 // may also supply them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.
 func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmount, borrowAmount int64, collateral bool) sdk.AccAddress {
 	// create a unique address
-	setupAccountCounter = setupAccountCounter.Add(sdk.OneInt())
-	addr := sdk.AccAddress([]byte("addr" + setupAccountCounter.String()))
+	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
+	addrStr := fmt.Sprintf("%-20s", "addr"+s.setupAccountCounter.String()+"_______________")
+	addr := sdk.AccAddress([]byte(addrStr))
 
 	// register the account in AccountKeeper
 	acct := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, addr)
@@ -154,7 +157,7 @@ func (s *IntegrationTestSuite) TestSupply_InvalidAsset() {
 func (s *IntegrationTestSuite) TestSupply_Valid() {
 	app, ctx := s.app, s.ctx
 
-	addr := sdk.AccAddress([]byte("addr________________1234"))
+	addr := sdk.AccAddress([]byte("addr____________1234"))
 	acc := app.AccountKeeper.NewAccountWithAddress(ctx, addr)
 	app.AccountKeeper.SetAccount(ctx, acc)
 

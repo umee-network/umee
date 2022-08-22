@@ -21,7 +21,7 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 
 	exchangeRate := k.DeriveExchangeRate(ctx, token.Denom)
 
-	uTokenAmount := token.Amount.ToDec().Quo(exchangeRate).TruncateInt()
+	uTokenAmount := toDec(token.Amount).Quo(exchangeRate).TruncateInt()
 	return sdk.NewCoin(uTokenDenom, uTokenAmount), nil
 }
 
@@ -39,7 +39,7 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 
 	exchangeRate := k.DeriveExchangeRate(ctx, tokenDenom)
 
-	tokenAmount := uToken.Amount.ToDec().Mul(exchangeRate).TruncateInt()
+	tokenAmount := toDec(uToken.Amount).Mul(exchangeRate).TruncateInt()
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
@@ -69,8 +69,8 @@ func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 	// uTokens in circulation.
 
 	// Get relevant quantities
-	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
+	moduleBalance := toDec(k.ModuleBalance(ctx, denom))
+	reserveAmount := toDec(k.GetReserveAmount(ctx, denom))
 	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
 	uTokenSupply := k.GetUTokenSupply(ctx, types.ToUTokenDenom(denom)).Amount
 

@@ -212,7 +212,7 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 		keyringInput = os.Stdin
 	}
 
-	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput)
+	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput, oc.Encoding.Codec)
 	if err != nil {
 		return client.Context{}, err
 	}
@@ -233,24 +233,22 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 	if err != nil {
 		return client.Context{}, err
 	}
-
 	clientCtx := client.Context{
 		ChainID:           oc.ChainID,
-		JSONCodec:         oc.Encoding.Marshaler,
 		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
 		TxConfig:          oc.Encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             oc.Encoding.Marshaler,
+		Codec:             oc.Encoding.Codec,
 		LegacyAmino:       oc.Encoding.Amino,
 		Input:             os.Stdin,
 		NodeURI:           oc.TMRPC,
 		Client:            tmRPC,
 		Keyring:           kr,
 		FromAddress:       oc.OracleAddr,
-		FromName:          keyInfo.GetName(),
-		From:              keyInfo.GetName(),
+		FromName:          keyInfo.Name,
+		From:              keyInfo.Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,

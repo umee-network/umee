@@ -9,7 +9,7 @@ import (
 type gaiaValidator struct {
 	index    int
 	mnemonic string
-	keyInfo  keyring.Info
+	keyInfo  keyring.Record
 }
 
 func (g *gaiaValidator) instanceName() string {

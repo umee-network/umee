@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
@@ -118,74 +119,16 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 	return erc20Addr
 }
 
-func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	valAddr := s.chain.validators[valIdx].keyInfo.GetAddress()
-
-	s.T().Logf("registering Ethereum Orchestrator addresses; validator: %s", sdk.ValAddress(valAddr))
-
-	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
-		Context:      ctx,
-		AttachStdout: true,
-		AttachStderr: true,
-		Container:    s.valResources[valIdx].Container.ID,
-		User:         "root",
-		Cmd: []string{
-			"umeed",
-			"tx",
-			"gravity",
-			"set-orchestrator-address",
-			valAddr.String(),
-			s.chain.orchestrators[valIdx].keyInfo.GetAddress().String(),
-			s.chain.orchestrators[valIdx].ethereumKey.address,
-			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
-			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
-			"--keyring-backend=test",
-			"--broadcast-mode=sync",
-			"-y",
-		},
-	})
-	s.Require().NoError(err)
-
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
-	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
-		Context:      ctx,
-		Detach:       false,
-		OutputStream: &outBuf,
-		ErrorStream:  &errBuf,
-	})
-	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
-
-	var broadcastResp map[string]interface{}
-	s.Require().NoError(json.Unmarshal(outBuf.Bytes(), &broadcastResp))
-
-	endpoint := fmt.Sprintf("http://%s", s.valResources[valIdx].GetHostPort("1317/tcp"))
-	txHash := broadcastResp["txhash"].(string)
-
-	s.Require().Eventuallyf(
-		func() bool {
-			return queryUmeeTx(endpoint, txHash) == nil
-		},
-		time.Minute,
-		5*time.Second,
-		"stdout: %s, stderr: %s",
-		outBuf.String(), errBuf.String(),
-	)
-}
-
 func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, umeeFee, gravityFee string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
+	valAddr, err := s.chain.validators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
+
 	s.T().Logf(
 		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, umeeFee: %s, gravityFee: %s",
-		s.chain.validators[valIdx].keyInfo.GetAddress(), ethDest, amount, umeeFee, gravityFee,
+		valAddr, ethDest, amount, umeeFee, gravityFee,
 	)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
@@ -202,11 +145,12 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 			ethDest,
 			amount,
 			gravityFee,
-			fmt.Sprintf("--%s=%s", flags.FlagFrom, s.chain.validators[valIdx].keyInfo.GetName()),
+			fmt.Sprintf("--%s=%s", flags.FlagFrom, s.chain.validators[valIdx].keyInfo.Name),
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
 			"--broadcast-mode=sync",
+			"--output=json",
 			"-y",
 		},
 	})
@@ -239,6 +183,97 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
+	)
+}
+
+func (s *IntegrationTestSuite) sendFromUmeeToEthCheck(
+	umeeValIdxSender,
+	orchestratorIdxReceiver int,
+	ethTokenAddr string,
+	amount, umeeFee, gravityFee sdk.Coin,
+) {
+	if !strings.EqualFold(amount.Denom, gravityFee.Denom) {
+		s.T().Error("Amount and gravityFee should be the same denom", amount, gravityFee)
+	}
+
+	// if all the coins are on the same denom
+	allSameDenom := strings.EqualFold(amount.Denom, umeeFee.Denom) && strings.EqualFold(amount.Denom, gravityFee.Denom)
+	var umeeFeeBalanceBeforeSend sdk.Coin
+	if !allSameDenom {
+		umeeFeeBalanceBeforeSend, _ = s.queryUmeeBalance(umeeValIdxSender, umeeFee.Denom)
+	}
+
+	umeeAmountBalanceBeforeSend, ethBalanceBeforeSend, _, ethAddr := s.queryUmeeEthBalance(umeeValIdxSender, orchestratorIdxReceiver, amount.Denom, ethTokenAddr) // 3300000000
+
+	s.sendFromUmeeToEth(umeeValIdxSender, ethAddr, amount.String(), umeeFee.String(), gravityFee.String())
+	umeeAmountBalanceAfterSend, ethBalanceAfterSend, _, _ := s.queryUmeeEthBalance(umeeValIdxSender, orchestratorIdxReceiver, amount.Denom, ethTokenAddr) // 3299999693
+
+	if allSameDenom {
+		s.Require().Equal(umeeAmountBalanceBeforeSend.Sub(amount).Sub(umeeFee).Sub(gravityFee).Amount.Int64(), umeeAmountBalanceAfterSend.Amount.Int64())
+	} else { // the umeeFee and amount have different denom
+		s.Require().Equal(umeeAmountBalanceBeforeSend.Sub(amount).Sub(gravityFee).Amount.Int64(), umeeAmountBalanceAfterSend.Amount.Int64())
+		umeeFeeBalanceAfterSend, _ := s.queryUmeeBalance(umeeValIdxSender, umeeFee.Denom)
+		s.Require().Equal(umeeFeeBalanceBeforeSend.Sub(umeeFee).Amount.Int64(), umeeFeeBalanceAfterSend.Amount.Int64())
+	}
+
+	// require the Ethereum recipient balance increased
+	// peggo needs time to read the event and cross the tx
+	ethLatestBalance := ethBalanceAfterSend
+	expectedAmount := (ethBalanceBeforeSend + int64(amount.Amount.Int64()))
+	s.Require().Eventuallyf(
+		func() bool {
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			b, err := queryEthTokenBalance(ctx, s.ethClient, ethTokenAddr, ethAddr)
+			if err != nil {
+				return false
+			}
+
+			ethLatestBalance = b
+
+			// The balance could differ if the receiving address was the orchestrator
+			// that sent the batch tx and got the gravity fee.
+			return b >= expectedAmount && b <= expectedAmount+gravityFee.Amount.Int64()
+		},
+		2*time.Minute,
+		5*time.Second,
+		"unexpected balance: %d", ethLatestBalance,
+	)
+}
+
+func (s *IntegrationTestSuite) sendFromEthToUmeeCheck(
+	orchestratorIdxSender,
+	umeeValIdxReceiver int,
+	ethTokenAddr,
+	umeeTokenDenom string,
+	amount uint64,
+) {
+	umeeBalanceBeforeSend, ethBalanceBeforeSend, umeeAddr, _ := s.queryUmeeEthBalance(umeeValIdxReceiver, orchestratorIdxSender, umeeTokenDenom, ethTokenAddr)
+	s.sendFromEthToUmee(orchestratorIdxSender, ethTokenAddr, umeeAddr, fmt.Sprintf("%d", amount))
+	umeeBalanceAfterSend, ethBalanceAfterSend, _, _ := s.queryUmeeEthBalance(umeeValIdxReceiver, orchestratorIdxSender, umeeTokenDenom, ethTokenAddr)
+
+	s.Require().Equal(ethBalanceBeforeSend-int64(amount), ethBalanceAfterSend)
+
+	umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[umeeValIdxReceiver].GetHostPort("1317/tcp"))
+	// require the original sender's (validator) balance increased
+	// peggo needs time to read the event and cross the tx
+	umeeLatestBalance := umeeBalanceAfterSend.Amount
+	s.Require().Eventuallyf(
+		func() bool {
+			b, err := queryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
+			if err != nil {
+				s.T().Logf("Error at sendFromEthToUmeeCheck.queryUmeeDenomBalance %+v", err)
+				return false
+			}
+
+			umeeLatestBalance = b.Amount
+
+			return umeeBalanceBeforeSend.Amount.AddRaw(int64(amount)).Equal(umeeLatestBalance)
+		},
+		2*time.Minute,
+		5*time.Second,
+		"unexpected balance: %d", umeeLatestBalance.Int64(),
 	)
 }
 
@@ -513,7 +548,7 @@ func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
 	return nil
 }
 
-func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int, error) {
+func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int64, error) {
 	data, err := ethABI.Pack(abiMethodNameBalanceOf, ethcmn.HexToAddress(recipientAddr))
 	if err != nil {
 		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
@@ -535,5 +570,46 @@ func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr
 		return 0, fmt.Errorf("failed to parse balance: %w", err)
 	}
 
-	return int(balance), nil
+	return balance, nil
+}
+
+func (s *IntegrationTestSuite) queryUmeeBalance(
+	umeeValIdx int,
+	umeeTokenDenom string,
+) (umeeBalance sdk.Coin, umeeAddr string) {
+	umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[umeeValIdx].GetHostPort("1317/tcp"))
+	umeeAddress, err := s.chain.validators[umeeValIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
+	umeeAddr = umeeAddress.String()
+
+	umeeBalance, err = queryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
+	s.Require().NoError(err)
+	s.T().Logf(
+		"Umee Balance of tokens validator; index: %d, addr: %s, amount: %s, denom: %s",
+		umeeValIdx, umeeAddr, umeeBalance.String(), umeeTokenDenom,
+	)
+
+	return umeeBalance, umeeAddr
+}
+
+func (s *IntegrationTestSuite) queryUmeeEthBalance(
+	umeeValIdx,
+	orchestratorIdx int,
+	umeeTokenDenom,
+	ethTokenAddr string,
+) (umeeBalance sdk.Coin, ethBalance int64, umeeAddr, ethAddr string) {
+	umeeBalance, umeeAddr = s.queryUmeeBalance(umeeValIdx, umeeTokenDenom)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	ethAddr = s.chain.orchestrators[orchestratorIdx].ethereumKey.address
+
+	ethBalance, err := queryEthTokenBalance(ctx, s.ethClient, ethTokenAddr, ethAddr)
+	s.Require().NoError(err)
+	s.T().Logf(
+		"ETh Balance of tokens; index: %d, addr: %s, amount: %d, denom: %s, erc20Addr: %s",
+		orchestratorIdx, ethAddr, ethBalance, photonDenom, ethTokenAddr,
+	)
+
+	return umeeBalance, ethBalance, umeeAddr, ethAddr
 }
