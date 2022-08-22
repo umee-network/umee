@@ -14,6 +14,7 @@ const (
 	defaultReconnectTime     = time.Minute * 20
 	maxReconnectionTries     = 3
 	providerCandlePeriod     = 10 * time.Minute
+	convertSecToMilli        = int64(time.Second / time.Millisecond)
 
 	ProviderKraken   Name = "kraken"
 	ProviderBinance  Name = "binance"
@@ -91,4 +92,9 @@ func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 // minus t.
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
+}
+
+// SecondsToMilli converts seconds to milliseconds for our unix timestamps.
+func SecondsToMilli(t int64) int64 {
+	return int64(time.Second / time.Millisecond)
 }

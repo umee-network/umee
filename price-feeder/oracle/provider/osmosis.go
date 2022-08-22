@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -171,16 +170,20 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 			return nil, fmt.Errorf("failed to unmarshal Osmosis response body: %w", err)
 		}
 
+		staleTime := PastUnixTime(providerCandlePeriod)
+
 		candlePrices := []types.CandlePrice{}
 		for _, responseCandle := range candlesResp {
-			closeStr := fmt.Sprintf("%f", responseCandle.Close)
-			volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
-			candlePrices = append(candlePrices, types.CandlePrice{
-				Price:  sdk.MustNewDecFromStr(closeStr),
-				Volume: sdk.MustNewDecFromStr(volumeStr),
-				// convert osmosis timestamp seconds -> milliseconds
-				TimeStamp: responseCandle.Time * int64(time.Second/time.Millisecond),
-			})
+			if staleTime < responseCandle.Time {
+				closeStr := fmt.Sprintf("%f", responseCandle.Close)
+				volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
+				candlePrices = append(candlePrices, types.CandlePrice{
+					Price:  sdk.MustNewDecFromStr(closeStr),
+					Volume: sdk.MustNewDecFromStr(volumeStr),
+					// convert osmosis timestamp seconds -> milliseconds
+					TimeStamp: SecondsToMilli(responseCandle.Time),
+				})
+			}
 		}
 		candles[pair.String()] = candlePrices
 	}
