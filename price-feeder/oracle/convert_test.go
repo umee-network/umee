@@ -76,7 +76,7 @@ func TestGetUSDBasedProviders(t *testing.T) {
 func TestConvertCandlesToUSD(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 2)
 
-	binanceCandles := map[string][]provider.CandlePrice{
+	binanceCandles := map[string][]types.CandlePrice{
 		"ATOM": {{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -85,7 +85,7 @@ func TestConvertCandlesToUSD(t *testing.T) {
 	}
 	providerCandles[provider.ProviderBinance] = binanceCandles
 
-	krakenCandles := map[string][]provider.CandlePrice{
+	krakenCandles := map[string][]types.CandlePrice{
 		"USDT": {{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -117,7 +117,7 @@ func TestConvertCandlesToUSD(t *testing.T) {
 func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	providerCandles := make(provider.AggregatedProviderCandles, 2)
 
-	binanceCandles := map[string][]provider.CandlePrice{
+	binanceCandles := map[string][]types.CandlePrice{
 		"ATOM": {{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -126,7 +126,7 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[provider.ProviderBinance] = binanceCandles
 
-	krakenCandles := map[string][]provider.CandlePrice{
+	krakenCandles := map[string][]types.CandlePrice{
 		"USDT": {{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -135,7 +135,7 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[provider.ProviderKraken] = krakenCandles
 
-	gateCandles := map[string][]provider.CandlePrice{
+	gateCandles := map[string][]types.CandlePrice{
 		"USDT": {{
 			Price:     usdtPrice,
 			Volume:    usdtVolume,
@@ -144,7 +144,7 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 	}
 	providerCandles[provider.ProviderGate] = gateCandles
 
-	okxCandles := map[string][]provider.CandlePrice{
+	okxCandles := map[string][]types.CandlePrice{
 		"USDT": {{
 			Price:     sdk.MustNewDecFromStr("100.0"),
 			Volume:    usdtVolume,
@@ -178,7 +178,7 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 func TestConvertTickersToUSD(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := map[string]provider.TickerPrice{
+	binanceTickers := map[string]types.TickerPrice{
 		"ATOM": {
 			Price:  atomPrice,
 			Volume: atomVolume,
@@ -186,7 +186,7 @@ func TestConvertTickersToUSD(t *testing.T) {
 	}
 	providerPrices[provider.ProviderBinance] = binanceTickers
 
-	krakenTicker := map[string]provider.TickerPrice{
+	krakenTicker := map[string]types.TickerPrice{
 		"USDT": {
 			Price:  usdtPrice,
 			Volume: usdtVolume,
@@ -217,7 +217,7 @@ func TestConvertTickersToUSD(t *testing.T) {
 func TestConvertTickersToUSDFiltering(t *testing.T) {
 	providerPrices := make(provider.AggregatedProviderPrices, 2)
 
-	binanceTickers := map[string]provider.TickerPrice{
+	binanceTickers := map[string]types.TickerPrice{
 		"ATOM": {
 			Price:  atomPrice,
 			Volume: atomVolume,
@@ -225,7 +225,7 @@ func TestConvertTickersToUSDFiltering(t *testing.T) {
 	}
 	providerPrices[provider.ProviderBinance] = binanceTickers
 
-	krakenTicker := map[string]provider.TickerPrice{
+	krakenTicker := map[string]types.TickerPrice{
 		"USDT": {
 			Price:  usdtPrice,
 			Volume: usdtVolume,
@@ -233,12 +233,12 @@ func TestConvertTickersToUSDFiltering(t *testing.T) {
 	}
 	providerPrices[provider.ProviderKraken] = krakenTicker
 
-	gateTicker := map[string]provider.TickerPrice{
+	gateTicker := map[string]types.TickerPrice{
 		"USDT": krakenTicker["USDT"],
 	}
 	providerPrices[provider.ProviderGate] = gateTicker
 
-	huobiTicker := map[string]provider.TickerPrice{
+	huobiTicker := map[string]types.TickerPrice{
 		"USDT": {
 			Price:  sdk.MustNewDecFromStr("10000"),
 			Volume: usdtVolume,

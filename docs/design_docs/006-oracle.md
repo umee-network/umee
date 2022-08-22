@@ -10,30 +10,30 @@ Proposed
 
 ## Context
 
-Umee needs an oracle to determine the price of assets. From section 5.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
+Umee needs an oracle to determine the price of assets. From section 5.1 of the [Umee Whitepaper](https://www.umee.cc/umee-whitepaper.pdf):
 
 > Oracle reads asset price and updates the state to the Asset Facility Coordination Protocol
 
-We've already decided to import a large chunk of this from [Terra's oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html), although a few parts of this are specific to Terra's protocol and do not need to be implemented with respect to Umee.
+We've already decided to import a large chunk of this from [Terra's oracle](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), although a few parts of this are specific to Terra's protocol and do not need to be implemented with respect to Umee.
 
 ## Alternative Approaches
 
-- Cloning the x/oracle module completely. This would leave our code dirty, and we'd later have issues interfacing with Terra's [Cross Exchange Rate](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), since it's designed for getting the exchange rate of only Terra.
+- Cloning the x/oracle module completely. This would leave our code dirty, and we'd later have issues interfacing with Terra's [Cross Exchange Rate](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), since it's designed for getting the exchange rate of only Terra.
 - Using something like Band or Chainlink. This would be additional overhead, and we'd [have less control](https://github.com/umee-network/umee/issues/97#issuecomment-923914840) over how our oracle works. [Here's an example of how we'd implement this.](https://github.com/lajosdeme/Chainlink-Cosmos)
 
 ## Decision
 
-We'd like to use the concepts introduced in [Terra's Oracle](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#concepts), but with a few modifications :
+We'd like to use the concepts introduced in [Terra's Oracle](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html), but with a few modifications :
 
 - Combine the `price-feeder` and `feeder` into a single binary [Ref](https://github.com/umee-network/umee/issues/97#issuecomment-939610302)
 - Only support `MsgAggregateExchangeRate(Pre)Vote`, i.e. not allow individual price updates [Ref](https://github.com/umee-network/umee/issues/97#issuecomment-939610302)
-- Skip the logic for the [Cross Exchange Rate](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), and record simplified exchange rates like `ATOM`
+- Skip the logic for the [Cross Exchange Rate](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra), and record simplified exchange rates like `ATOM`
 - We'll store multiple exchange rates with a base of USD, [instead of a single coin's exchange rate](https://github.com/terra-money/classic-core/blob/746a15f1bd83d62cd284e4af9471dc58701b3e33/x/oracle/keeper/keeper.go#L88)
-- Remove support for the [Tobin Tax](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-market.html#tobintax), a Terra-specific fee for when users spot trade.
+- Remove support for the [Tobin Tax](https://classic-docs.terra.money/docs/develop/module-specifications/spec-market.html), a Terra-specific fee for when users spot trade.
 
 ## Detailed Design
 
-- Terra's design for the voting procedure as documented [here](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html#voting-procedure)
+- Terra's design for the voting procedure as documented [here](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#voting-procedure)
 
 ### API
 
@@ -61,7 +61,7 @@ The `x/oracle` module will provide the following method on its keeper, to be use
 
 ## References
 
-- [Terra Oracle Spec](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-oracle.html)
-- [Terra's Tobin Tax](https://docs.terra.money/Reference/Terra-core/Module-specifications/spec-market.html#tobintax)
+- [Terra Oracle Spec](https://classic-docs.terra.money/docs/develop/module-specifications/spec-oracle.html#compute-cross-exchange-rate-using-reference-terra)
+- [Terra's Tobin Tax](https://classic-docs.terra.money/docs/develop/module-specifications/spec-market.html)
 - [Discussion on Oracle Decision](https://github.com/umee-network/umee/issues/97#issuecomment-923914840)
 - [How to integrate chainlink in Cosmos](https://betterprogramming.pub/connect-a-chainlink-oracle-to-a-cosmos-blockchain-d7934d75bae5)

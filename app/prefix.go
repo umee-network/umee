@@ -22,6 +22,5 @@ func SetAddressConfig() {
 	config.SetBech32PrefixForAccount(AccountAddressPrefix, AccountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(ValidatorAddressPrefix, ValidatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(ConsNodeAddressPrefix, ConsNodePubKeyPrefix)
-	config.SetAddressVerifier(VerifyAddressFormat)
 	config.Seal()
 }

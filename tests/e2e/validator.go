@@ -29,15 +29,14 @@ import (
 )
 
 type validator struct {
-	chain            *chain
-	index            int
-	moniker          string
-	mnemonic         string
-	keyInfo          keyring.Record
-	privateKey       cryptotypes.PrivKey
-	consensusKey     privval.FilePVKey
-	consensusPrivKey cryptotypes.PrivKey
-	nodeKey          p2p.NodeKey
+	chain        *chain
+	index        int
+	moniker      string
+	mnemonic     string
+	keyInfo      keyring.Record
+	privateKey   cryptotypes.PrivKey
+	consensusKey privval.FilePVKey
+	nodeKey      p2p.NodeKey
 }
 
 func (v *validator) instanceName() string {
@@ -126,7 +125,7 @@ func (v *validator) createConsensusKey() error {
 }
 
 func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, nil)
+	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
 	if err != nil {
 		return err
 	}

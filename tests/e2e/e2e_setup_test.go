@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -41,7 +40,7 @@ import (
 const (
 	photonDenom    = "photon"
 	initBalanceStr = "110000000000uumee,100000000000photon"
-	minGasPrice    = "0.00001"
+	minGasPrice    = "0.00001" + photonDenom
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -228,7 +227,6 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.T().Log("starting e2e infrastructure; validator_0 config:", genFilePath)
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
-	s.T().Log("CONFIG \n\n", appGenState)
 
 	var gravityGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
@@ -380,7 +378,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
-		appConfig.MinGasPrices = fmt.Sprintf("%s%s", minGasPrice, photonDenom)
+		appConfig.MinGasPrices = minGasPrice
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -389,7 +387,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 func (s *IntegrationTestSuite) runGanacheContainer() {
 	s.T().Log("starting Ganache container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -469,7 +467,7 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -593,7 +591,7 @@ func (s *IntegrationTestSuite) runValidators() {
 func (s *IntegrationTestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-gaia-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-gaia-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -669,7 +667,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.T().Log("starting Hermes relayer container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-hermes-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-hermes-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -841,14 +839,6 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	s.gravityContractAddr = gravityContractAddr
 }
 
-func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
-	s.T().Log("registering Umee validator Ethereum keys...")
-
-	for i := range s.chain.validators {
-		s.registerOrchAddresses(i, "10photon")
-	}
-}
-
 func (s *IntegrationTestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
@@ -874,12 +864,13 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--tendermint-rpc",
 					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
 					"--cosmos-gas-prices",
-					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					minGasPrice,
 					"--cosmos-from",
 					orch.keyInfo.Name,
 					"--relay-batches=true",
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",
+					"--oracle-providers=mock",
 					"--relayer-loop-multiplier=1.0",
 					"--requester-loop-multiplier=1.0",
 					"--cosmos-pk",
@@ -931,7 +922,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Log("starting price-feeder container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-price-feeder-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-price-feeder-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 

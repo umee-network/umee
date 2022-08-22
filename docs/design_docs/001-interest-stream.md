@@ -13,7 +13,7 @@ Implemented
 
 One of the base functions of the Umee universal capital facility is to allow liquidity providers to deposit assets and earn interest on their deposits.
 
-From section 2.1 of the [Umee Whitepaper](https://umee.cc/umee-whitepaper/):
+From section 2.1 of the [Umee Whitepaper](https://www.umee.cc/umee-whitepaper.pdf):
 
 > Upon deposit of assets into the Asset Facilities, users will receive an amount of tokens called uTokens that map 1:1 with the asset deposited. uTokens are initially minted on Umee and can bridge over to Ethereum as ERC20 tokens.
 >
@@ -26,7 +26,7 @@ Interest on uTokens must be applied in at least the following scenarios:
 - uToken balances sent to other Cosmos chains via IBC
 - uToken balances transferred or split between wallets, in any of the above situations
 
-From [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/):
+From [Cosmos IBC tutorial](https://tutorials.cosmos.network/tutorials/understanding-ibc-denoms/#understand-ibc-denoms-with-gaia):
 
 > The value that tokens represent can be transferred across chains, but the token itself cannot. When sending the tokens with IBC to another blockchain:
 >
@@ -60,7 +60,7 @@ Example scenario:
 >
 > By week=2, the `u/ATOM` exchange rate is `1.002` (technically `1.002001` due to compound interest, but approximate amount will be displayed here)
 >
-> Also at week=2, Bob deposits `1000 ATOM`. Because the exchange rate has shifted, he receives `998 u/ATOM`,  worth `1000 ATOM` if redeemed immediately.
+> Also at week=2, Bob deposits `1000 ATOM`. Because the exchange rate has shifted, he receives `998 u/ATOM`, worth `1000 ATOM` if redeemed immediately.
 >
 > By week=3, the `u/ATOM` exchange rate is `1.003`. Bob's `998 u/ATOM` are now worth `1001 ATOM` if redeemed. Alice's `2000 u/ATOM` are worth `2006 ATOM`.
 >
@@ -102,5 +102,5 @@ Moving to exchange-rate-based implementation of the interest rate solves a good 
 
 ## References
 
-- [Umee Whitepaper](https://umee.cc/umee-whitepaper/)
-- [Cosmos IBC tutorial](https://tutorials.cosmos.network/understanding-ibc-denoms/)
+- [Umee Whitepaper](https://www.umee.cc/umee-whitepaper.pdf)
+- [Cosmos IBC tutorial](https://tutorials.cosmos.network/tutorials/understanding-ibc-denoms/#understand-ibc-denoms-with-gaia)
