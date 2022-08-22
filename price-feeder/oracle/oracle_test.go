@@ -698,7 +698,7 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 	)
 }
 
-func TestGetComputedPricesPanic(t *testing.T) {
+func TestGetComputedPricesErrorTvwap(t *testing.T) {
 	symbolUSDT := "USDT"
 	symbolUSD := "USD"
 	symbolDAI := "DAI"
