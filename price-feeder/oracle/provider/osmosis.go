@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -177,8 +178,8 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 			candlePrices = append(candlePrices, types.CandlePrice{
 				Price:  sdk.MustNewDecFromStr(closeStr),
 				Volume: sdk.MustNewDecFromStr(volumeStr),
-				// Convert timestamp to milliseconds
-				TimeStamp: responseCandle.Time * 1000,
+				// convert osmosis timestamp seconds -> milliseconds
+				TimeStamp: responseCandle.Time * int64(time.Second/time.Millisecond),
 			})
 		}
 		candles[pair.String()] = candlePrices
