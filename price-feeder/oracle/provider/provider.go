@@ -14,7 +14,6 @@ const (
 	defaultReconnectTime     = time.Minute * 20
 	maxReconnectionTries     = 3
 	providerCandlePeriod     = 10 * time.Minute
-	convertSecToMilli        = int64(time.Second / time.Millisecond)
 
 	ProviderKraken   Name = "kraken"
 	ProviderBinance  Name = "binance"
