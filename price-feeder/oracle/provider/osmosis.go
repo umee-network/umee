@@ -175,9 +175,10 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 			closeStr := fmt.Sprintf("%f", responseCandle.Close)
 			volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
 			candlePrices = append(candlePrices, types.CandlePrice{
-				Price:     sdk.MustNewDecFromStr(closeStr),
-				Volume:    sdk.MustNewDecFromStr(volumeStr),
-				TimeStamp: responseCandle.Time,
+				Price:  sdk.MustNewDecFromStr(closeStr),
+				Volume: sdk.MustNewDecFromStr(volumeStr),
+				// Convert timestamp to milliseconds
+				TimeStamp: responseCandle.Time * 1000,
 			})
 		}
 		candles[pair.String()] = candlePrices
