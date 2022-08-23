@@ -2,6 +2,7 @@ package oracle_test
 
 import (
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ func TestComputeVWAP(t *testing.T) {
 			prices:   nil,
 			expected: make(map[string]sdk.Dec),
 		},
-		"non empty prices": {
+		"valid prices": {
 			prices: map[provider.Name]map[string]types.TickerPrice{
 				provider.ProviderBinance: {
 					"ATOM": types.TickerPrice{
@@ -69,6 +70,182 @@ func TestComputeVWAP(t *testing.T) {
 
 		t.Run(name, func(t *testing.T) {
 			vwap, err := oracle.ComputeVWAP(tc.prices)
+			require.NoError(t, err)
+			require.Len(t, vwap, len(tc.expected))
+
+			for k, v := range tc.expected {
+				require.Equalf(t, v, vwap[k], "unexpected VWAP for %s", k)
+			}
+		})
+	}
+}
+
+func TestComputeTVWAP(t *testing.T) {
+	testCases := map[string]struct {
+		candles  provider.AggregatedProviderCandles
+		expected map[string]sdk.Dec
+	}{
+		"empty prices": {
+			candles:  make(provider.AggregatedProviderCandles),
+			expected: make(map[string]sdk.Dec),
+		},
+		"nil prices": {
+			candles:  nil,
+			expected: make(map[string]sdk.Dec),
+		},
+		"valid prices": {
+			candles: map[provider.Name]map[string][]types.CandlePrice{
+				provider.ProviderBinance: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("25.09183"),
+							Volume:    sdk.MustNewDecFromStr("98444.123455"),
+							TimeStamp: provider.PastUnixTime(1 * time.Minute),
+						},
+					},
+				},
+				provider.ProviderKraken: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.268700"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(2 * time.Minute),
+						},
+					},
+					"UMEE": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("1.13000000"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(2 * time.Minute),
+						},
+					},
+					"LUNA": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("64.87853000"),
+							Volume:    sdk.MustNewDecFromStr("458917.46353577"),
+							TimeStamp: provider.PastUnixTime(1 * time.Minute),
+						},
+					},
+				},
+				"FOO": {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.168700"),
+							Volume:    sdk.MustNewDecFromStr("4749102.53314385"),
+							TimeStamp: provider.PastUnixTime(130 * time.Second),
+						},
+					},
+				},
+			},
+			expected: map[string]sdk.Dec{
+				"ATOM": sdk.MustNewDecFromStr("28.045149332478338614"),
+				"UMEE": sdk.MustNewDecFromStr("1.13000000"),
+				"LUNA": sdk.MustNewDecFromStr("64.878530000000000000"),
+			},
+		},
+		"one expired price": {
+			candles: map[provider.Name]map[string][]types.CandlePrice{
+				provider.ProviderBinance: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("25.09183"),
+							Volume:    sdk.MustNewDecFromStr("98444.123455"),
+							TimeStamp: provider.PastUnixTime(1 * time.Minute),
+						},
+					},
+				},
+				provider.ProviderKraken: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.268700"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(2 * time.Minute),
+						},
+					},
+					"UMEE": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("1.13000000"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(2 * time.Minute),
+						},
+					},
+					"LUNA": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("64.87853000"),
+							Volume:    sdk.MustNewDecFromStr("458917.46353577"),
+							TimeStamp: provider.PastUnixTime(1 * time.Minute),
+						},
+					},
+				},
+				"FOO": {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.168700"),
+							Volume:    sdk.MustNewDecFromStr("4749102.53314385"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+				},
+			},
+			expected: map[string]sdk.Dec{
+				"ATOM": sdk.MustNewDecFromStr("26.601468076898424151"),
+				"UMEE": sdk.MustNewDecFromStr("1.13000000"),
+				"LUNA": sdk.MustNewDecFromStr("64.878530000000000000"),
+			},
+		},
+		"all expired prices": {
+			candles: map[provider.Name]map[string][]types.CandlePrice{
+				provider.ProviderBinance: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("25.09183"),
+							Volume:    sdk.MustNewDecFromStr("98444.123455"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+				},
+				provider.ProviderKraken: {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.268700"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+					"UMEE": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("1.13000000"),
+							Volume:    sdk.MustNewDecFromStr("178277.53314385"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+					"LUNA": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("64.87853000"),
+							Volume:    sdk.MustNewDecFromStr("458917.46353577"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+				},
+				"FOO": {
+					"ATOM": []types.CandlePrice{
+						{
+							Price:     sdk.MustNewDecFromStr("28.168700"),
+							Volume:    sdk.MustNewDecFromStr("4749102.53314385"),
+							TimeStamp: provider.PastUnixTime(5 * time.Minute),
+						},
+					},
+				},
+			},
+			expected: map[string]sdk.Dec{},
+		},
+	}
+
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			vwap, err := oracle.ComputeTVWAP(tc.candles)
 			require.NoError(t, err)
 			require.Len(t, vwap, len(tc.expected))
 
