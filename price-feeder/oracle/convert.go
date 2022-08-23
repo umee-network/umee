@@ -91,7 +91,7 @@ func convertCandlesToUSD(
 				}
 
 				// TODO: we should revise ComputeTVWAP to avoid return empty slices
-				// [#1261](https://github.com/umee-network/umee/issues/1261)
+				// Ref: https://github.com/umee-network/umee/issues/1261
 				tvwap, err := ComputeTVWAP(filteredCandles)
 				if err != nil {
 					return nil, err
