@@ -579,7 +579,7 @@ func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert kraken timestamp seconds -> milliseconds
-	candle.TimeStamp *= int64(time.Second / time.Millisecond)
+	candle.TimeStamp = SecondsToMilli(candle.TimeStamp)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []KrakenCandle{}
 

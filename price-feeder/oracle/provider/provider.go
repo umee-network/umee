@@ -92,3 +92,8 @@ func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
 }
+
+// SecondsToMilli converts seconds to milliseconds for our unix timestamps.
+func SecondsToMilli(t int64) int64 {
+	return t * int64(time.Second/time.Millisecond)
+}
