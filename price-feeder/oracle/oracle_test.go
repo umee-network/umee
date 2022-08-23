@@ -762,29 +762,56 @@ func TestGetComputedPricesEmptyTvwap(t *testing.T) {
 		},
 	}
 
-	candles := provider.AggregatedProviderCandles{
-		provider.ProviderKraken: {
-			"USDT": ethCandle,
-			"DAI":  daiCandle,
-			"ETH":  ethCandle,
-		},
-	}
-
 	prices := provider.AggregatedProviderPrices{}
 
 	pairs := map[provider.Name][]types.CurrencyPair{
 		provider.ProviderKraken: krakenPairs,
 	}
 
-	_, err := GetComputedPrices(
-		zerolog.Nop(),
-		candles,
-		prices,
-		pairs,
-		make(map[string]sdk.Dec),
-	)
+	testCases := map[string]struct {
+		expected string
+		candles  provider.AggregatedProviderCandles
+		prices   provider.AggregatedProviderPrices
+		pairs    map[provider.Name][]types.CurrencyPair
+	}{
+		"Empty tvwap": {
+			candles: provider.AggregatedProviderCandles{
+				provider.ProviderKraken: {
+					"USDT": ethCandle,
+					"ETH":  ethCandle,
+					"DAI":  daiCandle,
+				},
+			},
+			prices:   prices,
+			pairs:    pairs,
+			expected: "error on computing tvwap for quote: DAI, base: ETH",
+		},
+		"No valid conversion rates DAI": {
+			candles: provider.AggregatedProviderCandles{
+				provider.ProviderKraken: {
+					"USDT": ethCandle,
+					"ETH":  ethCandle,
+				},
+			},
+			prices:   prices,
+			pairs:    pairs,
+			expected: "there are no valid conversion rates for DAI",
+		},
+	}
 
-	require.ErrorContains(t, err,
-		"error on computing tvwap for quote: DAI, base: ETH",
-	)
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			_, err := GetComputedPrices(
+				zerolog.Nop(),
+				tc.candles,
+				tc.prices,
+				tc.pairs,
+				make(map[string]sdk.Dec),
+			)
+
+			require.ErrorContains(t, err, tc.expected)
+		})
+	}
 }
