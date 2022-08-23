@@ -90,12 +90,19 @@ func convertCandlesToUSD(
 					return nil, err
 				}
 
+				// TODO: we should revise ComputeTVWAP to avoid return empty slices
+				// Ref: https://github.com/umee-network/umee/issues/1261
 				tvwap, err := ComputeTVWAP(filteredCandles)
 				if err != nil {
 					return nil, err
 				}
 
-				conversionRates[pair.Quote] = tvwap[pair.Quote]
+				cvRate, ok := tvwap[pair.Quote]
+				if !ok {
+					return nil, fmt.Errorf("error on computing tvwap for quote: %s, base: %s", pair.Quote, pair.Base)
+				}
+
+				conversionRates[pair.Quote] = cvRate
 				requiredConversions[pairProviderName] = pair
 			}
 		}

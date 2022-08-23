@@ -697,3 +697,121 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 		prices[btcPair.Base],
 	)
 }
+
+func TestGetComputedPricesEmptyTvwap(t *testing.T) {
+	symbolUSDT := "USDT"
+	symbolUSD := "USD"
+	symbolDAI := "DAI"
+	symbolETH := "ETH"
+
+	pairETHtoUSDT := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolUSDT,
+	}
+	pairETHtoDAI := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolDAI,
+	}
+	pairETHtoUSD := types.CurrencyPair{
+		Base:  symbolETH,
+		Quote: symbolUSD,
+	}
+	basePairsETH := []types.CurrencyPair{
+		pairETHtoUSDT,
+		pairETHtoDAI,
+	}
+	krakenPairsETH := append(basePairsETH, pairETHtoUSD)
+
+	pairUSDTtoUSD := types.CurrencyPair{
+		Base:  symbolUSDT,
+		Quote: symbolUSD,
+	}
+	pairDAItoUSD := types.CurrencyPair{
+		Base:  symbolDAI,
+		Quote: symbolUSD,
+	}
+	stablecoinPairs := []types.CurrencyPair{
+		pairUSDTtoUSD,
+		pairDAItoUSD,
+	}
+
+	krakenPairs := append(krakenPairsETH, stablecoinPairs...)
+
+	volume := sdk.MustNewDecFromStr("881272.00")
+	ethUsdPrice := sdk.MustNewDecFromStr("9989.02")
+	daiUsdPrice := sdk.MustNewDecFromStr("999890000000000000")
+	ethTime := provider.PastUnixTime(1 * time.Minute)
+
+	ethCandle := []types.CandlePrice{
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: ethTime,
+		},
+		{
+			Price:     ethUsdPrice,
+			Volume:    volume,
+			TimeStamp: ethTime,
+		},
+	}
+	daiCandle := []types.CandlePrice{
+		{
+			Price:     daiUsdPrice,
+			Volume:    volume,
+			TimeStamp: 1660829520000,
+		},
+	}
+
+	prices := provider.AggregatedProviderPrices{}
+
+	pairs := map[provider.Name][]types.CurrencyPair{
+		provider.ProviderKraken: krakenPairs,
+	}
+
+	testCases := map[string]struct {
+		expected string
+		candles  provider.AggregatedProviderCandles
+		prices   provider.AggregatedProviderPrices
+		pairs    map[provider.Name][]types.CurrencyPair
+	}{
+		"Empty tvwap": {
+			candles: provider.AggregatedProviderCandles{
+				provider.ProviderKraken: {
+					"USDT": ethCandle,
+					"ETH":  ethCandle,
+					"DAI":  daiCandle,
+				},
+			},
+			prices:   prices,
+			pairs:    pairs,
+			expected: "error on computing tvwap for quote: DAI, base: ETH",
+		},
+		"No valid conversion rates DAI": {
+			candles: provider.AggregatedProviderCandles{
+				provider.ProviderKraken: {
+					"USDT": ethCandle,
+					"ETH":  ethCandle,
+				},
+			},
+			prices:   prices,
+			pairs:    pairs,
+			expected: "there are no valid conversion rates for DAI",
+		},
+	}
+
+	for name, tc := range testCases {
+		tc := tc
+
+		t.Run(name, func(t *testing.T) {
+			_, err := GetComputedPrices(
+				zerolog.Nop(),
+				tc.candles,
+				tc.prices,
+				tc.pairs,
+				make(map[string]sdk.Dec),
+			)
+
+			require.ErrorContains(t, err, tc.expected)
+		})
+	}
+}

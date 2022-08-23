@@ -51,8 +51,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
 - [1244](https://github.com/umee-network/umee/pull/1244) Add verification for quote in conversion rate.
 - [1264](https://github.com/umee-network/umee/pull/1264) Convert osmosis candle timestamp from seconds to milliseconds.
+- [1262](https://github.com/umee-network/umee/pull/1262) Add verification for quote in tvwap map.
 - [1268](https://github.com/umee-network/umee/pull/1268) Don't panic when a provider has only out-of-date candles.
--
+
 ### Improvements
 
 - [#1121](https://github.com/umee-network/umee/pull/1121) Use the cosmos-sdk telemetry package instead of our own.
