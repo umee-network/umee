@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
-	cosmossdk.io/math v1.0.0-beta.2
+	cosmossdk.io/math v1.0.0-beta.3
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
 	github.com/cosmos/cosmos-sdk v0.46.0
 	github.com/cosmos/go-bip39 v1.0.0
