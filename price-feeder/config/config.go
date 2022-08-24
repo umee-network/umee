@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
@@ -65,7 +66,7 @@ type (
 		Account           Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
 		Keyring           Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
 		RPC               RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry         Telemetry           `mapstructure:"telemetry"`
+		Telemetry         telemetry.Config    `mapstructure:"telemetry"`
 		GasAdjustment     float64             `mapstructure:"gas_adjustment" validate:"required"`
 		ProviderTimeout   string              `mapstructure:"provider_timeout"`
 		ProviderEndpoints []provider.Endpoint `mapstructure:"provider_endpoints" validate:"dive"`
@@ -115,42 +116,11 @@ type (
 		GRPCEndpoint  string `mapstructure:"grpc_endpoint" validate:"required"`
 		RPCTimeout    string `mapstructure:"rpc_timeout" validate:"required"`
 	}
-
-	// Telemetry defines the configuration options for application telemetry.
-	Telemetry struct {
-		// Prefixed with keys to separate services
-		ServiceName string `mapstructure:"service_name" mapstructure:"service-name"`
-
-		// Enabled enables the application telemetry functionality. When enabled,
-		// an in-memory sink is also enabled by default. Operators may also enabled
-		// other sinks such as Prometheus.
-		Enabled bool `mapstructure:"enabled" mapstructure:"enabled"`
-
-		// Enable prefixing gauge values with hostname
-		EnableHostname bool `mapstructure:"enable_hostname" mapstructure:"enable-hostname"`
-
-		// Enable adding hostname to labels
-		EnableHostnameLabel bool `mapstructure:"enable_hostname_label" mapstructure:"enable-hostname-label"`
-
-		// Enable adding service to labels
-		EnableServiceLabel bool `mapstructure:"enable_service_label" mapstructure:"enable-service-label"`
-
-		// GlobalLabels defines a global set of name/value label tuples applied to all
-		// metrics emitted using the wrapper functions defined in telemetry package.
-		//
-		// Example:
-		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `mapstructure:"global_labels" mapstructure:"global-labels"`
-
-		// PrometheusRetentionTime, when positive, enables a Prometheus metrics sink.
-		// It defines the retention duration in seconds.
-		PrometheusRetentionTime int64 `mapstructure:"prometheus_retention" mapstructure:"prometheus-retention-time"`
-	}
 )
 
 // telemetryValidation is custom validation for the Telemetry struct.
 func telemetryValidation(sl validator.StructLevel) {
-	tel := sl.Current().Interface().(Telemetry)
+	tel := sl.Current().Interface().(telemetry.Config)
 
 	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0) {
 		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
@@ -171,7 +141,7 @@ func endpointValidation(sl validator.StructLevel) {
 
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
-	validate.RegisterStructValidation(telemetryValidation, Telemetry{})
+	validate.RegisterStructValidation(telemetryValidation, telemetry.Config{})
 	validate.RegisterStructValidation(endpointValidation, provider.Endpoint{})
 	return validate.Struct(c)
 }
@@ -187,14 +157,9 @@ func ParseConfig(configPath string) (Config, error) {
 
 	viper.AutomaticEnv()
 	viper.SetConfigFile(configPath)
-	viper.SetConfigType("toml")
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			return cfg, fmt.Errorf("failed to read config because file was not found: %w", err)
-		} else {
-			return cfg, fmt.Errorf("failed to read config: %w", err)
-		}
+		return cfg, fmt.Errorf("failed to read config: %w", err)
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {

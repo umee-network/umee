@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
@@ -35,7 +36,7 @@ func TestValidate(t *testing.T) {
 				GRPCEndpoint:  "localhost:9090",
 				RPCTimeout:    "100ms",
 			},
-			Telemetry: config.Telemetry{
+			Telemetry: telemetry.Config{
 				ServiceName:             "price-feeder",
 				Enabled:                 true,
 				EnableHostname:          true,
@@ -187,13 +188,13 @@ grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
 
 [telemetry]
-service_name = "price-feeder"
+service-name = "price-feeder"
 enabled = true
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
-prometheus_retention = 120
-global_labels = [["chain-id", "umee-local-testnet"]]
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
+prometheus-retention = 120
+global-labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
@@ -418,13 +419,13 @@ grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
 
 [telemetry]
-service_name = "price-feeder"
+service-name = "price-feeder"
 enabled = true
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
-prometheus_retention = 120
-global_labels = [["chain-id", "umee-local-testnet"]]
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
+prometheus-retention = 120
+global-labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
@@ -513,13 +514,13 @@ grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
 
 [telemetry]
-service_name = "price-feeder"
+service-name = "price-feeder"
 enabled = true
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
-prometheus_retention = 120
-global_labels = [["chain-id", "umee-local-testnet"]]
+enable-hostname = true
+enable-hostname_label = true
+enable-service_label = true
+prometheus-retention = 120
+global-labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
@@ -585,13 +586,13 @@ grpc_endpoint = "localhost:9090"
 rpc_timeout = "100ms"
 
 [telemetry]
-service_name = "price-feeder"
+service-name = "price-feeder"
 enabled = true
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
-prometheus_retention = 120
-global_labels = [["chain-id", "umee-local-testnet"]]
+enable-hostname = true
+enable-hostname_label = true
+enable-service_label = true
+prometheus-retention = 120
+global-labels = [["chain-id", "umee-local-testnet"]]
 `)
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
