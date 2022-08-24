@@ -3,11 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"github.com/spf13/viper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
@@ -60,92 +59,92 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server            Server              `toml:"server"`
-		CurrencyPairs     []CurrencyPair      `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Deviations        []Deviation         `toml:"deviation_thresholds"`
-		Account           Account             `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring           Keyring             `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC               RPC                 `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry         Telemetry           `toml:"telemetry"`
-		GasAdjustment     float64             `toml:"gas_adjustment" validate:"required"`
-		ProviderTimeout   string              `toml:"provider_timeout"`
-		ProviderEndpoints []provider.Endpoint `toml:"provider_endpoints" validate:"dive"`
+		Server            Server              `mapstructure:"server"`
+		CurrencyPairs     []CurrencyPair      `mapstructure:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations        []Deviation         `mapstructure:"deviation_thresholds"`
+		Account           Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
+		Keyring           Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
+		RPC               RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry         Telemetry           `mapstructure:"telemetry"`
+		GasAdjustment     float64             `mapstructure:"gas_adjustment" validate:"required"`
+		ProviderTimeout   string              `mapstructure:"provider_timeout"`
+		ProviderEndpoints []provider.Endpoint `mapstructure:"provider_endpoints" validate:"dive"`
 	}
 
 	// Server defines the API server configuration.
 	Server struct {
-		ListenAddr     string   `toml:"listen_addr"`
-		WriteTimeout   string   `toml:"write_timeout"`
-		ReadTimeout    string   `toml:"read_timeout"`
-		VerboseCORS    bool     `toml:"verbose_cors"`
-		AllowedOrigins []string `toml:"allowed_origins"`
+		ListenAddr     string   `mapstructure:"listen_addr"`
+		WriteTimeout   string   `mapstructure:"write_timeout"`
+		ReadTimeout    string   `mapstructure:"read_timeout"`
+		VerboseCORS    bool     `mapstructure:"verbose_cors"`
+		AllowedOrigins []string `mapstructure:"allowed_origins"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
 	// currencies and the supported providers for getting the exchange rate.
 	CurrencyPair struct {
-		Base      string          `toml:"base" validate:"required"`
-		Quote     string          `toml:"quote" validate:"required"`
-		Providers []provider.Name `toml:"providers" validate:"required,gt=0,dive,required"`
+		Base      string          `mapstructure:"base" validate:"required"`
+		Quote     string          `mapstructure:"quote" validate:"required"`
+		Providers []provider.Name `mapstructure:"providers" validate:"required,gt=0,dive,required"`
 	}
 
 	// Deviation defines a maximum amount of standard deviations that a given asset can
 	// be from the median without being filtered out before voting.
 	Deviation struct {
-		Base      string `toml:"base" validate:"required"`
-		Threshold string `toml:"threshold" validate:"required"`
+		Base      string `mapstructure:"base" validate:"required"`
+		Threshold string `mapstructure:"threshold" validate:"required"`
 	}
 
 	// Account defines account related configuration that is related to the Umee
 	// network and transaction signing functionality.
 	Account struct {
-		ChainID   string `toml:"chain_id" validate:"required"`
-		Address   string `toml:"address" validate:"required"`
-		Validator string `toml:"validator" validate:"required"`
+		ChainID   string `mapstructure:"chain_id" validate:"required"`
+		Address   string `mapstructure:"address" validate:"required"`
+		Validator string `mapstructure:"validator" validate:"required"`
 	}
 
 	// Keyring defines the required Umee keyring configuration.
 	Keyring struct {
-		Backend string `toml:"backend" validate:"required"`
-		Dir     string `toml:"dir" validate:"required"`
+		Backend string `mapstructure:"backend" validate:"required"`
+		Dir     string `mapstructure:"dir" validate:"required"`
 	}
 
 	// RPC defines RPC configuration of both the Umee gRPC and Tendermint nodes.
 	RPC struct {
-		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
-		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
-		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
+		TMRPCEndpoint string `mapstructure:"tmrpc_endpoint" validate:"required"`
+		GRPCEndpoint  string `mapstructure:"grpc_endpoint" validate:"required"`
+		RPCTimeout    string `mapstructure:"rpc_timeout" validate:"required"`
 	}
 
 	// Telemetry defines the configuration options for application telemetry.
 	Telemetry struct {
 		// Prefixed with keys to separate services
-		ServiceName string `toml:"service_name" mapstructure:"service-name"`
+		ServiceName string `mapstructure:"service_name" mapstructure:"service-name"`
 
 		// Enabled enables the application telemetry functionality. When enabled,
 		// an in-memory sink is also enabled by default. Operators may also enabled
 		// other sinks such as Prometheus.
-		Enabled bool `toml:"enabled" mapstructure:"enabled"`
+		Enabled bool `mapstructure:"enabled" mapstructure:"enabled"`
 
 		// Enable prefixing gauge values with hostname
-		EnableHostname bool `toml:"enable_hostname" mapstructure:"enable-hostname"`
+		EnableHostname bool `mapstructure:"enable_hostname" mapstructure:"enable-hostname"`
 
 		// Enable adding hostname to labels
-		EnableHostnameLabel bool `toml:"enable_hostname_label" mapstructure:"enable-hostname-label"`
+		EnableHostnameLabel bool `mapstructure:"enable_hostname_label" mapstructure:"enable-hostname-label"`
 
 		// Enable adding service to labels
-		EnableServiceLabel bool `toml:"enable_service_label" mapstructure:"enable-service-label"`
+		EnableServiceLabel bool `mapstructure:"enable_service_label" mapstructure:"enable-service-label"`
 
 		// GlobalLabels defines a global set of name/value label tuples applied to all
 		// metrics emitted using the wrapper functions defined in telemetry package.
 		//
 		// Example:
 		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels" mapstructure:"global-labels"`
+		GlobalLabels [][]string `mapstructure:"global_labels" mapstructure:"global-labels"`
 
 		// PrometheusRetentionTime, when positive, enables a Prometheus metrics sink.
 		// It defines the retention duration in seconds.
-		PrometheusRetentionTime int64 `toml:"prometheus_retention" mapstructure:"prometheus-retention-time"`
+		PrometheusRetentionTime int64 `mapstructure:"prometheus_retention" mapstructure:"prometheus-retention-time"`
 	}
 )
 
@@ -186,12 +185,19 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, ErrEmptyConfigPath
 	}
 
-	configData, err := os.ReadFile(configPath)
-	if err != nil {
-		return cfg, fmt.Errorf("failed to read config: %w", err)
+	viper.AutomaticEnv()
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("toml")
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			return cfg, fmt.Errorf("failed to read config because file was not found: %w", err)
+		} else {
+			return cfg, fmt.Errorf("failed to read config: %w", err)
+		}
 	}
 
-	if _, err := toml.Decode(string(configData), &cfg); err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return cfg, fmt.Errorf("failed to decode config: %w", err)
 	}
 

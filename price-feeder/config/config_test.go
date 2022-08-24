@@ -131,7 +131,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestParseConfig_Valid(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -214,7 +214,7 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 }
 
 func TestParseConfig_Valid_NoTelemetry(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -292,7 +292,7 @@ enabled = false
 }
 
 func TestParseConfig_InvalidProvider(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -323,7 +323,7 @@ providers = [
 }
 
 func TestParseConfig_NonUSDQuote(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -354,7 +354,7 @@ providers = [
 }
 
 func TestParseConfig_Valid_Deviations(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -449,7 +449,7 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 }
 
 func TestParseConfig_Invalid_Deviations(t *testing.T) {
-	tmpFile, err := ioutil.TempFile("", "price-feeder.toml")
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
@@ -526,4 +526,93 @@ global_labels = [["chain-id", "umee-local-testnet"]]
 
 	_, err = config.ParseConfig(tmpFile.Name())
 	require.Error(t, err)
+}
+
+func TestParseConfig_Env_Vars(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	content := []byte(`
+gas_adjustment = 1.5
+
+[server]
+listen_addr = "0.0.0.0:99999"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
+
+[[currency_pairs]]
+base = "ATOM"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[[currency_pairs]]
+base = "UMEE"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[[currency_pairs]]
+base = "USDT"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[account]
+address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
+chain_id = "umee-local-testnet"
+
+[keyring]
+backend = "test"
+dir = "/Users/username/.umee"
+pass = "keyringPassword"
+
+[rpc]
+tmrpc_endpoint = "http://localhost:26657"
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100ms"
+
+[telemetry]
+service_name = "price-feeder"
+enabled = true
+enable_hostname = true
+enable_hostname_label = true
+enable_service_label = true
+prometheus_retention = 120
+global_labels = [["chain-id", "umee-local-testnet"]]
+`)
+	_, err = tmpFile.Write(content)
+	require.NoError(t, err)
+
+	// Set env variables to overwrite config files
+	os.Setenv("SERVER.LISTEN_ADDR", "0.0.0.0:888888")
+	os.Setenv("SERVER.WRITE_TIMEOUT", "10s")
+	os.Setenv("SERVER.READ_TIMEOUT", "10s")
+	os.Setenv("SERVER.VERBOSE_CORS", "false")
+
+	cfg, err := config.ParseConfig(tmpFile.Name())
+	require.NoError(t, err)
+
+	require.Equal(t, "0.0.0.0:888888", cfg.Server.ListenAddr)
+	require.Equal(t, "10s", cfg.Server.WriteTimeout)
+	require.Equal(t, "10s", cfg.Server.ReadTimeout)
+	require.False(t, cfg.Server.VerboseCORS)
+	require.Len(t, cfg.CurrencyPairs, 3)
+	require.Equal(t, "ATOM", cfg.CurrencyPairs[0].Base)
+	require.Equal(t, "USDT", cfg.CurrencyPairs[0].Quote)
+	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
+	require.Equal(t, provider.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
+	require.Equal(t, provider.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
 }
