@@ -19,7 +19,7 @@ require (
 	github.com/tendermint/tendermint v0.34.20
 	github.com/umee-network/umee/v2 v2.0.0-20220815133308-cca32bfce063
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
