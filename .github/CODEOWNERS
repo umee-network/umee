@@ -1,10 +1,14 @@
 # CODEOWNERS: https://help.github.com/articles/about-codeowners/
 
-# NOTE: Order is important; the last matching pattern takes the 
+# NOTE: Order is important; the last matching pattern takes the
 # most precedence.
 
 # Primary repo maintainers
 *       @umee-network/core-devs
 
 # Documentation
-*.md @umee-network/core-docs
+*       *.md @umee-network/core-docs
+
+# Oracle
+*       /price-feeder/** @umee-network/core-oracle
+*       /x/oracle/**
