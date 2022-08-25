@@ -152,7 +152,8 @@ endif
 
 lint:
 	@echo "--> Running linter"
-	@find -name go.mod -execdir go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m \;
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
+	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
 
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
@@ -199,8 +200,8 @@ containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
 
-proto-all: proto-gen proto-lint proto-check-breaking proto-format
-.PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format
+proto-all: proto-format proto-lint proto-gen proto-swagger-gen
+.PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format proto-swagger-gen
 
 proto-gen:
 	@echo "Generating Protobuf files"

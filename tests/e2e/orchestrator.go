@@ -16,7 +16,7 @@ import (
 type orchestrator struct {
 	index       int
 	mnemonic    string
-	keyInfo     keyring.Info
+	keyInfo     keyring.Record
 	privateKey  cryptotypes.PrivKey
 	ethereumKey ethereumKey
 }
@@ -66,7 +66,7 @@ func (o *orchestrator) createKey(name string) error {
 }
 
 func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil)
+	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
 		return err
 	}
 
-	o.keyInfo = info
+	o.keyInfo = *info
 	o.mnemonic = mnemonic
 	o.privateKey = privKey
 

@@ -73,7 +73,7 @@ func NewOsmosisProvider(endpoint Endpoint) *OsmosisProvider {
 	}
 }
 
-func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
+func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	path := fmt.Sprintf("%s%s/all", p.baseURL, osmosisTokenEndpoint)
 
 	resp, err := p.client.Get(path)
@@ -102,7 +102,7 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 		baseDenomIdx[strings.ToUpper(cp.Base)] = cp
 	}
 
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 	for _, tr := range tokensResp {
 		symbol := strings.ToUpper(tr.Symbol) // symbol == base in a currency pair
 
@@ -128,7 +128,7 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 			return nil, fmt.Errorf("failed to read Osmosis volume (%s) for %s", volumeRaw, symbol)
 		}
 
-		tickerPrices[cp.String()] = TickerPrice{Price: price, Volume: volume}
+		tickerPrices[cp.String()] = types.TickerPrice{Price: price, Volume: volume}
 	}
 
 	for _, cp := range pairs {
@@ -140,11 +140,11 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 	return tickerPrices, nil
 }
 
-func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candles := make(map[string][]CandlePrice)
+func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candles := make(map[string][]types.CandlePrice)
 	for _, pair := range pairs {
 		if _, ok := candles[pair.Base]; !ok {
-			candles[pair.String()] = []CandlePrice{}
+			candles[pair.String()] = []types.CandlePrice{}
 		}
 
 		path := fmt.Sprintf("%s%s/%s/chart?tf=5", p.baseURL, osmosisCandleEndpoint, pair.Base)
@@ -170,14 +170,20 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 			return nil, fmt.Errorf("failed to unmarshal Osmosis response body: %w", err)
 		}
 
-		candlePrices := []CandlePrice{}
+		staleTime := PastUnixTime(providerCandlePeriod)
+
+		candlePrices := []types.CandlePrice{}
 		for _, responseCandle := range candlesResp {
+			if staleTime >= responseCandle.Time {
+				continue
+			}
 			closeStr := fmt.Sprintf("%f", responseCandle.Close)
 			volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
-			candlePrices = append(candlePrices, CandlePrice{
-				Price:     sdk.MustNewDecFromStr(closeStr),
-				Volume:    sdk.MustNewDecFromStr(volumeStr),
-				TimeStamp: responseCandle.Time,
+			candlePrices = append(candlePrices, types.CandlePrice{
+				Price:  sdk.MustNewDecFromStr(closeStr),
+				Volume: sdk.MustNewDecFromStr(volumeStr),
+				// convert osmosis timestamp seconds -> milliseconds
+				TimeStamp: SecondsToMilli(responseCandle.Time),
 			})
 		}
 		candles[pair.String()] = candlePrices
@@ -223,7 +229,7 @@ func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) err
 }
 
 func checkHTTPStatus(resp *http.Response) error {
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status: %s", resp.Status)
 	}
 	return nil

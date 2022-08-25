@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // SpamPreventionDecorator defines a custom Umee AnteHandler decorator that is
@@ -74,9 +74,14 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 	return nil
 }
 
-func (spd *SpamPreventionDecorator) validate(ctx sdk.Context, feeder, validator string,
-	cache map[string]int64, curHeight int64, txType string) error {
-
+func (spd *SpamPreventionDecorator) validate(
+	ctx sdk.Context,
+	feeder,
+	validator string,
+	cache map[string]int64,
+	curHeight int64,
+	txType string,
+) error {
 	feederAddr, err := sdk.AccAddressFromBech32(feeder)
 	if err != nil {
 		return err

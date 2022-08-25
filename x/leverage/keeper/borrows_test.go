@@ -2,6 +2,8 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestGetBorrow() {
@@ -195,12 +197,12 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	s.Require().EqualError(err, "abcd: invalid asset")
 
 	// Create collateral uTokens (1k u/umee)
-	umeeCollatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, umeeDenom)
+	umeeCollatDenom := types.ToUTokenDenom(umeeDenom)
 	umeeCollateral := sdk.NewCoins(sdk.NewInt64Coin(umeeCollatDenom, 1000000000))
 
 	// Manually compute borrow limit using collateral weight of 0.25
 	// and placeholder of 1 umee = $4.21.
-	expectedUmeeLimit := umeeCollateral[0].Amount.ToDec().
+	expectedUmeeLimit := sdk.NewDecFromInt(umeeCollateral[0].Amount).
 		Mul(sdk.MustNewDecFromStr("0.00000421")).
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
@@ -210,12 +212,12 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	s.Require().Equal(expectedUmeeLimit, borrowLimit)
 
 	// Create collateral atom uTokens (1k u/uatom)
-	atomCollatDenom := s.app.LeverageKeeper.FromTokenToUTokenDenom(s.ctx, atomIBCDenom)
+	atomCollatDenom := types.ToUTokenDenom(atomIBCDenom)
 	atomCollateral := sdk.NewCoins(sdk.NewInt64Coin(atomCollatDenom, 1000000000))
 
 	// Manually compute borrow limit using collateral weight of 0.25
 	// and placeholder of 1 atom = $39.38
-	expectedAtomLimit := atomCollateral[0].Amount.ToDec().
+	expectedAtomLimit := sdk.NewDecFromInt(atomCollateral[0].Amount).
 		Mul(sdk.MustNewDecFromStr("0.00003938")).
 		Mul(sdk.MustNewDecFromStr("0.25"))
 

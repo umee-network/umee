@@ -21,7 +21,7 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 	atomPrice := sdk.MustNewDecFromStr("29.93")
 	atomVolume := sdk.MustNewDecFromStr("1994674.34000000")
 
-	atomCandlePrice := []provider.CandlePrice{
+	atomCandlePrice := []types.CandlePrice{
 		{
 			Price:     atomPrice,
 			Volume:    atomVolume,
@@ -29,16 +29,16 @@ func TestSuccessFilterCandleDeviations(t *testing.T) {
 		},
 	}
 
-	providerCandles[provider.ProviderBinance] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderBinance] = map[string][]types.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[provider.ProviderHuobi] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderHuobi] = map[string][]types.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[provider.ProviderKraken] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderKraken] = map[string][]types.CandlePrice{
 		pair.Base: atomCandlePrice,
 	}
-	providerCandles[provider.ProviderCoinbase] = map[string][]provider.CandlePrice{
+	providerCandles[provider.ProviderCoinbase] = map[string][]types.CandlePrice{
 		pair.Base: {
 			{
 				Price:     sdk.MustNewDecFromStr("27.1"),
@@ -82,21 +82,21 @@ func TestSuccessFilterTickerDeviations(t *testing.T) {
 	atomPrice := sdk.MustNewDecFromStr("29.93")
 	atomVolume := sdk.MustNewDecFromStr("1994674.34000000")
 
-	atomTickerPrice := provider.TickerPrice{
+	atomTickerPrice := types.TickerPrice{
 		Price:  atomPrice,
 		Volume: atomVolume,
 	}
 
-	providerTickers[provider.ProviderBinance] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderBinance] = map[string]types.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[provider.ProviderHuobi] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderHuobi] = map[string]types.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[provider.ProviderKraken] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderKraken] = map[string]types.TickerPrice{
 		pair.Base: atomTickerPrice,
 	}
-	providerTickers[provider.ProviderCoinbase] = map[string]provider.TickerPrice{
+	providerTickers[provider.ProviderCoinbase] = map[string]types.TickerPrice{
 		pair.Base: {
 			Price:  sdk.MustNewDecFromStr("27.1"),
 			Volume: atomVolume,

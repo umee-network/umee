@@ -1,14 +1,15 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // GetReserveAmount gets the amount reserved of a specified token. On invalid
 // asset, the reserved amount is zero.
-func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdkmath.Int {
 	store := ctx.KVStore(k.storeKey)
 	key := types.CreateReserveAmountKey(denom)
 	amount := sdk.ZeroInt()
@@ -43,6 +44,25 @@ func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	}
 
 	store.Set(reserveKey, bz)
+	return nil
+}
+
+// checkBadDebt detects if a borrower has zero non-blacklisted collateral,
+// and marks any remaining borrowed tokens as bad debt.
+func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+	// get remaining collateral uTokens, ignoring blacklisted
+	remainingCollateral := k.filterAcceptedUTokens(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
+
+	// detect bad debt if collateral is completely exhausted
+	if remainingCollateral.IsZero() {
+		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
+			// set a bad debt flag for each borrowed denom
+			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 

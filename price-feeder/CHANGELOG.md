@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD013 MD024 -->
+<!-- markdown-link-check-disable -->
 
 <!--
 Changelog Guiding Principles:
@@ -48,6 +49,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bugs
 
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
+- [1244](https://github.com/umee-network/umee/pull/1244) Add verification for quote in conversion rate.
+- [1264](https://github.com/umee-network/umee/pull/1264) Convert osmosis candle timestamp from seconds to milliseconds.
+- [1262](https://github.com/umee-network/umee/pull/1262) Add verification for quote in tvwap map.
+- [1268](https://github.com/umee-network/umee/pull/1268) Don't panic when a provider has only out-of-date candles.
 
 ### Improvements
 
@@ -55,6 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1032](https://github.com/umee-network/umee/pull/1032) Update the accepted tvwap period from 3 minutes to 5 minutes.
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add type ProviderName.
+- [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 
 ### Features
 

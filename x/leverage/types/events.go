@@ -2,27 +2,32 @@ package types
 
 // Event types and attributes for the leverage module
 const (
-	EventTypeSupply             = "supply"
-	EventTypeWithdraw           = "withdraw"
-	EventTypeCollateralize      = "collateralize"
-	EventTypeDecollateralize    = "decollateralize"
-	EventTypeBorrow             = "borrow"
-	EventTypeRepayBorrowedAsset = "repay"
-	EventTypeLiquidate          = "liquidate"
-	EventTypeRepayBadDebt       = "repay_bad_debt"
-	EventTypeReservesExhausted  = "reserves_exhausted"
-	EventTypeInterestAccrual    = "interest_accrual"
-	EventTypeFundOracle         = "fund_oracle"
+	// Messages
+	EventTypeSupply          = "supply"
+	EventTypeWithdraw        = "withdraw"
+	EventTypeCollateralize   = "collateralize"
+	EventTypeDecollateralize = "decollateralize"
+	EventTypeBorrow          = "borrow"
+	EventTypeRepay           = "repay"
+	EventTypeLiquidate       = "liquidate"
+
+	// EndBlock
+	EventTypeRepayBadDebt      = "repay_bad_debt"
+	EventTypeReservesExhausted = "reserves_exhausted"
+	EventTypeInterestAccrual   = "interest_accrual"
+	EventTypeFundOracle        = "fund_oracle"
 
 	EventAttrModule      = ModuleName
 	EventAttrSupplier    = "supplier"
 	EventAttrBorrower    = "borrower"
 	EventAttrLiquidator  = "liquidator"
 	EventAttrDenom       = "denom"
-	EventAttrEnable      = "enabled"
+	EventAttrSupplied    = "supplied"
+	EventAttrReceived    = "received"
+	EventAttrRedeemed    = "redeemed"
 	EventAttrAttempted   = "attempted"
 	EventAttrRepaid      = "repaid"
-	EventAttrCollateral  = "collateral"
+	EventAttrLiquidated  = "liquidated"
 	EventAttrReward      = "reward"
 	EventAttrInterest    = "total_interest"
 	EventAttrBlockHeight = "block_height"

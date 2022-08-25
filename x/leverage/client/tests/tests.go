@@ -3,9 +3,9 @@ package tests
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/leverage/client/cli"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestInvalidQueries() {
@@ -89,6 +89,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+						MaxSupply:              sdk.NewInt(100000000000),
 					},
 				},
 			},
@@ -215,7 +216,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.UTokenFromTokenDenom(umeeapp.BondDenom), 1000),
+					sdk.NewInt64Coin(types.ToUTokenDenom(umeeapp.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
 					sdk.NewInt64Coin(umeeapp.BondDenom, 51),

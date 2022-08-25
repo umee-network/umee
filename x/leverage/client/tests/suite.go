@@ -3,11 +3,11 @@ package tests
 import (
 	"fmt"
 
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
@@ -30,9 +30,11 @@ func NewIntegrationTestSuite(cfg network.Config) *IntegrationTestSuite {
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.T().Log("setting up integration test suite")
 
-	s.network = network.New(s.T(), s.cfg)
+	network, err := network.New(s.T(), s.T().TempDir(), s.cfg)
+	s.Require().NoError(err)
+	s.network = network
 
-	_, err := s.network.WaitForHeight(1)
+	_, err = s.network.WaitForHeight(1)
 	s.Require().NoError(err)
 }
 
@@ -61,7 +63,7 @@ type testTransaction struct {
 	name        string
 	command     *cobra.Command
 	args        []string
-	expectedErr *sdkerrors.Error
+	expectedErr *errors.Error
 }
 
 type testQuery struct {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -12,7 +13,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -20,7 +21,7 @@ var ten = sdk.MustNewDecFromStr("10")
 // Keeper of the oracle store
 type Keeper struct {
 	cdc        codec.BinaryCodec
-	storeKey   sdk.StoreKey
+	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
 	accountKeeper types.AccountKeeper
@@ -34,7 +35,7 @@ type Keeper struct {
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramspace paramstypes.Subspace,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
@@ -164,7 +165,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) (sdk.AccAddress, error) {
 	// check that the given validator exists
 	if val := k.StakingKeeper.Validator(ctx, operator); val == nil || !val.IsBonded() {
-		return nil, sdkerrors.Wrapf(stakingtypes.ErrNoValidatorFound, "validator %s is not active set", operator.String())
+		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", operator)
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -385,7 +386,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	}
 }
 
-// ValidateFeeder returns the given feeder is allowed to feed the message or not.
+// ValidateFeeder returns error if the given feeder is not allowed to feed the message.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	delegate, err := k.GetFeederDelegation(ctx, valAddr)
 	if err != nil {

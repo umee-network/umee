@@ -1,11 +1,9 @@
 package provider
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -33,23 +31,16 @@ type (
 	// Provider defines an interface an exchange price provider must implement.
 	Provider interface {
 		// GetTickerPrices returns the tickerPrices based on the provided pairs.
-		GetTickerPrices(...types.CurrencyPair) (map[string]TickerPrice, error)
+		GetTickerPrices(...types.CurrencyPair) (map[string]types.TickerPrice, error)
 
 		// GetCandlePrices returns the candlePrices based on the provided pairs.
-		GetCandlePrices(...types.CurrencyPair) (map[string][]CandlePrice, error)
+		GetCandlePrices(...types.CurrencyPair) (map[string][]types.CandlePrice, error)
 
 		// GetAvailablePairs return all available pairs symbol to susbscribe.
 		GetAvailablePairs() (map[string]struct{}, error)
 
 		// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
 		SubscribeCurrencyPairs(...types.CurrencyPair) error
-	}
-
-	// TickerPrice defines price and volume information for a symbol or ticker
-	// exchange rate.
-	TickerPrice struct {
-		Price  sdk.Dec // last trade price
-		Volume sdk.Dec // 24h volume
 	}
 
 	// Name name of an oracle provider. Usually it is an exchange
@@ -59,19 +50,11 @@ type (
 
 	// AggregatedProviderPrices defines a type alias for a map
 	// of provider -> asset -> TickerPrice
-	AggregatedProviderPrices map[Name]map[string]TickerPrice
+	AggregatedProviderPrices map[Name]map[string]types.TickerPrice
 
 	// AggregatedProviderCandles defines a type alias for a map
-	// of provider -> asset -> []CandlePrice
-	AggregatedProviderCandles map[Name]map[string][]CandlePrice
-
-	// CandlePrice defines price, volume, and time information for an
-	// exchange rate.
-	CandlePrice struct {
-		Price     sdk.Dec // last trade price
-		Volume    sdk.Dec // volume
-		TimeStamp int64   // timestamp
-	}
+	// of provider -> asset -> []types.CandlePrice
+	AggregatedProviderCandles map[Name]map[string][]types.CandlePrice
 
 	// Endpoint defines an override setting in our config for the
 	// hardcoded rest and websocket api endpoints.
@@ -104,36 +87,13 @@ func newHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	}
 }
 
-func newTickerPrice(provider, symbol, lastPrice, volume string) (TickerPrice, error) {
-	price, err := sdk.NewDecFromStr(lastPrice)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse %s price (%s) for %s", provider, lastPrice, symbol)
-	}
-
-	volumeDec, err := sdk.NewDecFromStr(volume)
-	if err != nil {
-		return TickerPrice{}, fmt.Errorf("failed to parse %s volume (%s) for %s", provider, volume, symbol)
-	}
-
-	return TickerPrice{Price: price, Volume: volumeDec}, nil
-}
-
-func newCandlePrice(provider, symbol, lastPrice, volume string, timeStamp int64) (CandlePrice, error) {
-	price, err := sdk.NewDecFromStr(lastPrice)
-	if err != nil {
-		return CandlePrice{}, fmt.Errorf("failed to parse %s price (%s) for %s", provider, lastPrice, symbol)
-	}
-
-	volumeDec, err := sdk.NewDecFromStr(volume)
-	if err != nil {
-		return CandlePrice{}, fmt.Errorf("failed to parse %s volume (%s) for %s", provider, volume, symbol)
-	}
-
-	return CandlePrice{Price: price, Volume: volumeDec, TimeStamp: timeStamp}, nil
-}
-
 // PastUnixTime returns a millisecond timestamp that represents the unix time
 // minus t.
 func PastUnixTime(t time.Duration) int64 {
 	return time.Now().Add(t*-1).Unix() * int64(time.Second/time.Millisecond)
+}
+
+// SecondsToMilli converts seconds to milliseconds for our unix timestamps.
+func SecondsToMilli(t int64) int64 {
+	return t * int64(time.Second/time.Millisecond)
 }

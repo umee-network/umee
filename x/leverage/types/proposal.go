@@ -1,7 +1,7 @@
 package types
 
 import (
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"gopkg.in/yaml.v3"
 )
 
@@ -12,12 +12,11 @@ const (
 )
 
 func init() {
-	govtypes.RegisterProposalType(ProposalTypeUpdateRegistryProposal)
-	govtypes.RegisterProposalTypeCodec(&UpdateRegistryProposal{}, "umee/UpdateRegistryProposal")
+	gov1b1.RegisterProposalType(ProposalTypeUpdateRegistryProposal)
 }
 
 // Assert UpdateRegistryProposal implements govtypes.Content at compile-time
-var _ govtypes.Content = &UpdateRegistryProposal{}
+var _ gov1b1.Content = &UpdateRegistryProposal{}
 
 func NewUpdateRegistryProposal(title, description string, tokens []Token) *UpdateRegistryProposal {
 	return &UpdateRegistryProposal{
@@ -47,7 +46,7 @@ func (p *UpdateRegistryProposal) ProposalType() string { return ProposalTypeUpda
 
 // ValidateBasic validates the proposal returning an error if invalid.
 func (p *UpdateRegistryProposal) ValidateBasic() error {
-	err := govtypes.ValidateAbstract(p)
+	err := gov1b1.ValidateAbstract(p)
 	if err != nil {
 		return err
 	}

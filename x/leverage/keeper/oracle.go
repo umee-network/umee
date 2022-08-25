@@ -4,9 +4,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // TokenPrice returns the USD value of a base token. Note, the token's denomination
@@ -43,7 +43,7 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	return p.Mul(coin.Amount.ToDec()), nil
+	return p.Mul(toDec(coin.Amount)), nil
 }
 
 // TotalTokenValue returns the total value of all supplied tokens. It is

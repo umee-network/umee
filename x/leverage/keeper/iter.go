@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // iterate through all keys with a given prefix using a provided function.
@@ -79,7 +80,7 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled reserve amount should never happen
 			return err
@@ -140,13 +141,12 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		denom := types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 
 		// get collateral amount
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled amount should never happen
 			return err
 		}
 
-		// add to totalBorrowed
 		totalCollateral = totalCollateral.Add(sdk.NewCoin(denom, amount))
 		return nil
 	}
@@ -234,6 +234,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 		// first check if the borrower has gained collateral since the bad debt was identified
 		done := k.HasCollateral(ctx, addr)
+		// TODO #1223: Decollateralize any blacklisted collateral and proceed
 
 		// if collateral is still zero, attempt to repay a single address's debt in this denom
 		if !done {
@@ -264,7 +265,7 @@ func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled utoken supply should never happen
 			return err

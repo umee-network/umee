@@ -15,6 +15,7 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
@@ -22,7 +23,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // We define tickerSleep as the minimum timeout between each oracle loop. We
@@ -190,8 +191,8 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		}
 
 		g.Go(func() error {
-			prices := make(map[string]provider.TickerPrice, 0)
-			candles := make(map[string][]provider.CandlePrice, 0)
+			prices := make(map[string]types.TickerPrice, 0)
+			candles := make(map[string][]types.CandlePrice, 0)
 			ch := make(chan struct{})
 			errCh := make(chan error, 1)
 
@@ -344,15 +345,15 @@ func SetProviderTickerPricesAndCandles(
 	providerName provider.Name,
 	providerPrices provider.AggregatedProviderPrices,
 	providerCandles provider.AggregatedProviderCandles,
-	prices map[string]provider.TickerPrice,
-	candles map[string][]provider.CandlePrice,
+	prices map[string]types.TickerPrice,
+	candles map[string][]types.CandlePrice,
 	pair types.CurrencyPair,
 ) (success bool) {
 	if _, ok := providerPrices[providerName]; !ok {
-		providerPrices[providerName] = make(map[string]provider.TickerPrice)
+		providerPrices[providerName] = make(map[string]types.TickerPrice)
 	}
 	if _, ok := providerCandles[providerName]; !ok {
-		providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+		providerCandles[providerName] = make(map[string][]types.CandlePrice)
 	}
 
 	tp, pricesOk := prices[pair.String()]
@@ -390,7 +391,7 @@ func (o *Oracle) GetParams(ctx context.Context) (oracletypes.Params, error) {
 	grpcConn, err := grpc.Dial(
 		o.oracleClient.GRPCEndpoint,
 		// the Cosmos SDK doesn't support any transport security mechanism
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)
 	if err != nil {

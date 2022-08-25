@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // GetBorrow returns an sdk.Coin representing how much of a given denom a
@@ -26,11 +27,22 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom st
 	return owed
 }
 
+// repayBorrow repays tokens borrowed by borrowAddr by sending coins in fromAddr to the module. This
+// occurs during normal repayment (in which case fromAddr and borrowAddr are the same) and during
+// liquidations, where fromAddr is the liquidator instead.
+func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress, repay sdk.Coin) error {
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, fromAddr, types.ModuleName, sdk.NewCoins(repay))
+	if err != nil {
+		return err
+	}
+	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
+}
+
 // setBorrow sets the amount borrowed by an address in a given denom.
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
 	// Apply interest scalar to determine adjusted amount
-	newAdjustedAmount := borrow.Amount.ToDec().Quo(k.getInterestScalar(ctx, borrow.Denom))
+	newAdjustedAmount := toDec(borrow.Amount).Quo(k.getInterestScalar(ctx, borrow.Denom))
 
 	// Set new borrow value
 	if err := k.setAdjustedBorrow(ctx, borrowerAddr, sdk.NewDecCoinFromDec(borrow.Denom, newAdjustedAmount)); err != nil {
@@ -49,7 +61,7 @@ func (k Keeper) GetTotalBorrowed(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 // GetAvailableToBorrow gets the amount available to borrow of a given token.
-func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdkmath.Int {
 	// Available for borrow = Module Balance - Reserve Amount
 	moduleBalance := k.ModuleBalance(ctx, denom)
 	reserveAmount := k.GetReserveAmount(ctx, denom)
@@ -61,9 +73,9 @@ func (k Keeper) GetAvailableToBorrow(ctx sdk.Context, denom string) sdk.Int {
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
-	moduleBalance := k.ModuleBalance(ctx, denom).ToDec()
-	reserveAmount := k.GetReserveAmount(ctx, denom).ToDec()
-	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount.ToDec()
+	moduleBalance := toDec(k.ModuleBalance(ctx, denom))
+	reserveAmount := toDec(k.GetReserveAmount(ctx, denom))
+	totalBorrowed := toDec(k.GetTotalBorrowed(ctx, denom).Amount)
 	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
 
 	// This edge case can be safely interpreted as 100% utilization.

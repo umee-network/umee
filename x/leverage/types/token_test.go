@@ -6,88 +6,96 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-func TestUTokenFromTokenDenom(t *testing.T) {
-	tokenDenom := "uumee"
-	uTokenDenom := types.UTokenFromTokenDenom(tokenDenom)
-	require.Equal(t, "u/"+tokenDenom, uTokenDenom)
-	require.NoError(t, sdk.ValidateDenom(uTokenDenom))
+func TestToTokenDenom(t *testing.T) {
+	// Turns uToken denoms into base tokens
+	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
+	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
+
+	// Empty return for base tokens
+	require.Equal(t, "", types.ToTokenDenom("uumee"))
+	require.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
+
+	// Empty return on repreated prefix
+	require.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
+
+	// Edge cases
+	require.Equal(t, "", types.ToTokenDenom("u/"))
+	require.Equal(t, "", types.ToTokenDenom(""))
+}
+
+func TestToUTokenDenom(t *testing.T) {
+	// Turns base token denoms into base uTokens
+	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
+	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
+
+	// Empty return for uTokens
+	require.Equal(t, "", types.ToUTokenDenom("u/uumee"))
+	require.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
+
+	// Edge cases
+	require.Equal(t, "u/", types.ToUTokenDenom(""))
+}
+
+func validToken() types.Token {
+	return types.Token{
+		BaseDenom:              "uumee",
+		SymbolDenom:            "umee",
+		Exponent:               6,
+		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
+		CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
+		BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
+		KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
+		MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
+		KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
+		LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
+		EnableMsgSupply:        true,
+		EnableMsgBorrow:        true,
+		Blacklist:              false,
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
+		MaxSupply:              sdk.NewInt(1000),
+	}
 }
 
 func TestUpdateRegistryProposal_String(t *testing.T) {
+	token := validToken()
+	token.ReserveFactor = sdk.NewDec(40)
 	p := types.UpdateRegistryProposal{
 		Title:       "test",
 		Description: "test",
-		Registry: []types.Token{
-			{
-				BaseDenom:              "uumee",
-				SymbolDenom:            "umee",
-				Exponent:               6,
-				ReserveFactor:          sdk.NewDec(40),
-				CollateralWeight:       sdk.NewDec(43),
-				LiquidationThreshold:   sdk.NewDec(66),
-				BaseBorrowRate:         sdk.NewDec(32),
-				KinkBorrowRate:         sdk.NewDec(26),
-				MaxBorrowRate:          sdk.NewDec(21),
-				KinkUtilization:        sdk.MustNewDecFromStr("0.25"),
-				LiquidationIncentive:   sdk.NewDec(88),
-				EnableMsgSupply:        true,
-				EnableMsgBorrow:        true,
-				Blacklist:              false,
-				MaxCollateralShare:     sdk.MustNewDecFromStr("0.1"),
-				MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.5"),
-				MinCollateralLiquidity: sdk.MustNewDecFromStr("0.75"),
-			},
-		},
+		Registry:    []types.Token{token},
 	}
 	expected := `title: test
 description: test
 registry:
     - base_denom: uumee
       reserve_factor: "40.000000000000000000"
-      collateral_weight: "43.000000000000000000"
-      liquidation_threshold: "66.000000000000000000"
-      base_borrow_rate: "32.000000000000000000"
-      kink_borrow_rate: "26.000000000000000000"
-      max_borrow_rate: "21.000000000000000000"
-      kink_utilization: "0.250000000000000000"
-      liquidation_incentive: "88.000000000000000000"
+      collateral_weight: "0.500000000000000000"
+      liquidation_threshold: "0.500000000000000000"
+      base_borrow_rate: "0.010000000000000000"
+      kink_borrow_rate: "0.050000000000000000"
+      max_borrow_rate: "1.000000000000000000"
+      kink_utilization: "0.750000000000000000"
+      liquidation_incentive: "0.050000000000000000"
       symbol_denom: umee
       exponent: 6
       enable_msg_supply: true
       enable_msg_borrow: true
       blacklist: false
-      max_collateral_share: "0.100000000000000000"
-      max_supply_utilization: "0.500000000000000000"
-      min_collateral_liquidity: "0.750000000000000000"
+      max_collateral_share: "1.000000000000000000"
+      max_supply_utilization: "1.000000000000000000"
+      min_collateral_liquidity: "1.000000000000000000"
+      max_supply: "1000"
 `
 	require.Equal(t, expected, p.String())
 }
 
 func TestToken_Validate(t *testing.T) {
-	validToken := func() types.Token {
-		return types.Token{
-			BaseDenom:              "uumee",
-			SymbolDenom:            "umee",
-			Exponent:               6,
-			ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
-			CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
-			LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
-			BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
-			KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
-			MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
-			KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
-			LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
-			EnableMsgSupply:        true,
-			EnableMsgBorrow:        true,
-			Blacklist:              false,
-			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-			MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
-		}
-	}
 	invalidBaseToken := validToken()
 	invalidBaseToken.BaseDenom = "$$"
 	invalidBaseToken.SymbolDenom = ""
@@ -124,10 +132,6 @@ func TestToken_Validate(t *testing.T) {
 	invalidBlacklistedBorrow.EnableMsgBorrow = false
 	invalidBlacklistedBorrow.Blacklist = true
 
-	invalidBlacklistedSupply := validToken()
-	invalidBlacklistedSupply.EnableMsgSupply = false
-	invalidBlacklistedSupply.Blacklist = true
-
 	invalidMaxCollateralShare := validToken()
 	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
 
@@ -136,6 +140,16 @@ func TestToken_Validate(t *testing.T) {
 
 	invalidMinCollateralLiquidity := validToken()
 	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
+
+	invalidMaxSupply1 := validToken()
+	invalidMaxSupply1.MaxSupply = sdk.NewInt(-1)
+
+	validMaxSupply1 := validToken()
+	validMaxSupply1.MaxSupply = sdk.NewInt(0)
+	validMaxSupply1.EnableMsgSupply = false
+
+	validMaxSupply2 := validToken()
+	validMaxSupply2.MaxSupply = sdk.NewInt(0)
 
 	testCases := map[string]struct {
 		input     types.Token
@@ -184,10 +198,6 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidLiquidationIncentive,
 			expectErr: true,
 		},
-		"blacklisted but supply enabled": {
-			input:     invalidBlacklistedSupply,
-			expectErr: true,
-		},
 		"blacklisted but borrow enabled": {
 			input:     invalidBlacklistedBorrow,
 			expectErr: true,
@@ -203,6 +213,18 @@ func TestToken_Validate(t *testing.T) {
 		"invalid min collateral liquidity": {
 			input:     invalidMinCollateralLiquidity,
 			expectErr: true,
+		},
+		"invalid max supply (negative)": {
+			input:     invalidMaxSupply1,
+			expectErr: true,
+		},
+		"valid max supply (enable_msg_supply=false)": {
+			input:     validMaxSupply1,
+			expectErr: false,
+		},
+		"valid max supply (enable_msg_supply=true)": {
+			input:     validMaxSupply2,
+			expectErr: false,
 		},
 	}
 

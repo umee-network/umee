@@ -2,10 +2,12 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestGetCollateralAmount() {
-	uDenom := s.tk.FromTokenToUTokenDenom(s.ctx, umeeDenom)
+	uDenom := types.ToUTokenDenom(umeeDenom)
 
 	// get u/umee collateral amount of empty account address (zero)
 	collateral := s.tk.GetCollateralAmount(s.ctx, sdk.AccAddress{}, uDenom)
@@ -48,7 +50,7 @@ func (s *IntegrationTestSuite) TestGetCollateralAmount() {
 }
 
 func (s *IntegrationTestSuite) TestSetCollateralAmount() {
-	uDenom := s.tk.FromTokenToUTokenDenom(s.ctx, umeeDenom)
+	uDenom := types.ToUTokenDenom(umeeDenom)
 
 	// set u/umee collateral amount of empty account address (error)
 	err := s.tk.SetCollateralAmount(s.ctx, sdk.AccAddress{}, sdk.NewInt64Coin(uDenom, 0))

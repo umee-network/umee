@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // getAdjustedBorrow gets the adjusted amount borrowed by an address in a given denom. Returns zero
@@ -134,8 +134,11 @@ func (k Keeper) GetUTokenSupply(ctx sdk.Context, denom string) sdk.Coin {
 
 // setUTokenSupply sets the total supply of a uToken.
 func (k Keeper) setUTokenSupply(ctx sdk.Context, coin sdk.Coin) error {
-	if !coin.IsValid() || !k.IsAcceptedUToken(ctx, coin.Denom) {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, coin.String())
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if !types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrNotUToken.Wrap(coin.Denom)
 	}
 
 	key := types.CreateUTokenSupplyKey(coin.Denom)

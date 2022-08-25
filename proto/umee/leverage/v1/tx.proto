@@ -4,7 +4,7 @@ package umee.leverage.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
@@ -36,7 +36,7 @@ service Msg {
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
-// MsgSupply is the request structure for the Supply RPC.
+// MsgSupply represents a user's request to supply assets to the module.
 message MsgSupply {
   // Supplier is the account address supplying assets and the signer of the message.
   string                   supplier = 1;
@@ -56,7 +56,7 @@ message MsgWithdraw {
 message MsgCollateralize {
   // Borrower is the account address adding collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgDecollateralize represents a user's request to disable selected
@@ -64,7 +64,7 @@ message MsgCollateralize {
 message MsgDecollateralize {
   // Borrower is the account address removing collateral and the signer of the message.
   string                   borrower = 1;
-  cosmos.base.v1beta1.Coin coin     = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrow represents a user's request to borrow a base asset type
@@ -89,24 +89,31 @@ message MsgRepay {
 message MsgLiquidate {
   // Liquidator is the account address performing a liquidation and the signer
   // of the message.
-  string                   liquidator   = 1;
+  string liquidator = 1;
   // Borrower is the account whose borrow is being repaid, and collateral consumed,
   // by the liquidation. It does not sign the message.
-  string                   borrower     = 2;
+  string borrower = 2;
   // Repayment is the maximum amount of base tokens that the liquidator is willing
   // to repay.
-  cosmos.base.v1beta1.Coin repayment    = 3 [(gogoproto.nullable) = false];
-  // RewardDenom is the base token denom that the liquidator is willing to accept
-  // as a liquidation reward. The uToken equivalent of any base token rewards
-  // will be taken from the borrower's collateral.
-  string                   reward_denom = 4;
+  cosmos.base.v1beta1.Coin repayment = 3 [(gogoproto.nullable) = false];
+  // RewardDenom is the denom that the liquidator will receive as a liquidation reward.
+  // If it is a uToken, the liquidator will receive uTokens from the borrower's
+  // collateral. If it is a base token, the uTokens will be redeemed directly at
+  // a reduced Liquidation Incentive, and the liquidator will receive base tokens.
+  string reward_denom = 4;
 }
 
 // MsgSupplyResponse defines the Msg/Supply response type.
-message MsgSupplyResponse {}
+message MsgSupplyResponse {
+  // Received is the amount of uTokens received.
+  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
+}
 
 // MsgWithdrawResponse defines the Msg/Withdraw response type.
-message MsgWithdrawResponse {}
+message MsgWithdrawResponse {
+  // Received is the amount of base tokens received.
+  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
+}
 
 // MsgCollateralizeResponse defines the Msg/Collateralize response type.
 message MsgCollateralizeResponse {}
@@ -119,20 +126,19 @@ message MsgBorrowResponse {}
 
 // MsgRepayResponse defines the Msg/Repay response type.
 message MsgRepayResponse {
-  // Repaid is the amount of debt, in base tokens, that was repaid to the
-  // module by the borrower.
+  // Repaid is the amount of base tokens repaid to the module.
   cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 message MsgLiquidateResponse {
-  // Repaid is the amount of debt, in base tokens, that liquidator repaid
+  // Repaid is the amount of borrowed base tokens that the liquidator repaid
   // to the module on behalf of the borrower.
-  cosmos.base.v1beta1.Coin repaid     = 1 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
   // Collateral is the amount of the borrower's uToken collateral that
-  // was converted to the reward tokens as a result of liquidation.
+  // was liquidated.
   cosmos.base.v1beta1.Coin collateral = 2 [(gogoproto.nullable) = false];
   // Reward is the amount of base tokens that the liquidator received from
   // the module as reward for the liquidation.
-  cosmos.base.v1beta1.Coin reward     = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin reward = 3 [(gogoproto.nullable) = false];
 }

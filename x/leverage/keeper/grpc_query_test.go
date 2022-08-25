@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
@@ -65,7 +65,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
 		),
 		Collateral: sdk.NewCoins(
-			sdk.NewCoin(types.UTokenFromTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
+			sdk.NewCoin(types.ToUTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
 		),
 		Borrowed: nil,
 	}

@@ -152,8 +152,8 @@ func NewGateProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -168,8 +168,8 @@ func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]
 }
 
 // GetCandlePrices returns the candlePrices based on the saved map
-func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		gp := currencyPairToGatePair(currencyPair)
@@ -184,20 +184,20 @@ func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string]
 	return candlePrices, nil
 }
 
-func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+func (p *GateProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 
 		candleList = append(candleList, cp)
@@ -276,7 +276,7 @@ func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
@@ -285,7 +285,7 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 		return tickerPair.toTickerPrice()
 	}
 
-	return TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
@@ -498,7 +498,7 @@ func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert gate timestamp seconds -> milliseconds
-	candle.TimeStamp *= int64(time.Second / time.Millisecond)
+	candle.TimeStamp = SecondsToMilli(candle.TimeStamp)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []GateCandle{}
 
@@ -546,7 +546,10 @@ func (p *GateProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *GateProvider) reconnect() error {
-	p.wsClient.Close()
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %v", err)
+	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
@@ -604,12 +607,12 @@ func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(string(ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
+func (ticker GateTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
 }
 
-func (candle GateCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(
+func (candle GateCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(
 		string(ProviderGate),
 		candle.Symbol,
 		candle.Close,

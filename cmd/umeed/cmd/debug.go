@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v3/app"
 )
 
 const (
@@ -29,6 +29,7 @@ func debugCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(debug.PubkeyCmd())
+	cmd.AddCommand(debug.PubkeyRawCmd())
 	cmd.AddCommand(debugAddrCmd())
 	cmd.AddCommand(debug.RawBytesCmd())
 
@@ -67,7 +68,7 @@ $ %s debug addr cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 				}
 			}
 
-			if err := umeeapp.VerifyAddressFormat(bz); err != nil {
+			if err := sdk.VerifyAddressFormat(bz); err != nil {
 				return fmt.Errorf("failed to verify converted address: %w", err)
 			}
 
