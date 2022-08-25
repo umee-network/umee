@@ -4,7 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // GetReserveAmount gets the amount reserved of a specified token. On invalid

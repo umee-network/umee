@@ -18,8 +18,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/tests/util"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/tests/util"
 )
 
 type KeeperTestSuite struct {

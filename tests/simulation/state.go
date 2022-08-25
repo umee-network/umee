@@ -23,8 +23,8 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/tests/util"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/tests/util"
 )
 
 // appStateFn returns the initial application state using a genesis file or

@@ -6,9 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {

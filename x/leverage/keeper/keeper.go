@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 type Keeper struct {
