@@ -184,6 +184,60 @@ paths:
           type: string
       tags:
         - Query
+  /umee/leverage/v1/bad_debts:
+    get:
+      summary: >-
+        BadDebts queries a list of borrow positions that have been marked for
+        bad debt repayment.
+      operationId: BadDebts
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              targets:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                    denom:
+                      type: string
+                  description: >-
+                    BadDebt is a bad debt instance used in the leverage module's
+                    genesis state.
+                description: >-
+                  Targets are borrow positions currently marked for bad debt
+                  repayment. Each contains an Address and a Denom.
+            description: >-
+              QueryBadDebtsResponse defines the response structure for the
+              BedDebts gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
   /umee/leverage/v1/liquidation_targets:
     get:
       summary: >-
@@ -205,9 +259,7 @@ paths:
                   liquidation.
             description: >-
               QueryLiquidationTargetsResponse defines the response structure for
-              the
-
-              LiquidationTargets gRPC service handler.
+              the LiquidationTargets gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -475,13 +527,13 @@ paths:
                   direct_liquidation_fee:
                     type: string
                     description: >-
-                      Direct Liquidation Fee is the reduction in liquidation
-                      incentive experienced
+                      Direct Liquidation Fee is a reduction factor in
+                      liquidation incentive
 
-                      by liquidators who choose to receive base assets instead
-                      of uTokens as
+                      experienced by liquidators who choose to receive base
+                      assets instead of
 
-                      liquidation rewards.
+                      uTokens as liquidation rewards.
                 description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -1368,6 +1420,16 @@ definitions:
             value:
               type: string
               format: byte
+  umee.leverage.v1.BadDebt:
+    type: object
+    properties:
+      address:
+        type: string
+      denom:
+        type: string
+    description: >-
+      BadDebt is a bad debt instance used in the leverage module's genesis
+      state.
   umee.leverage.v1.Params:
     type: object
     properties:
@@ -1403,12 +1465,12 @@ definitions:
       direct_liquidation_fee:
         type: string
         description: >-
-          Direct Liquidation Fee is the reduction in liquidation incentive
-          experienced
+          Direct Liquidation Fee is a reduction factor in liquidation incentive
 
-          by liquidators who choose to receive base assets instead of uTokens as
+          experienced by liquidators who choose to receive base assets instead
+          of
 
-          liquidation rewards.
+          uTokens as liquidation rewards.
     description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
@@ -1504,6 +1566,27 @@ definitions:
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
+  umee.leverage.v1.QueryBadDebtsResponse:
+    type: object
+    properties:
+      targets:
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+            denom:
+              type: string
+          description: >-
+            BadDebt is a bad debt instance used in the leverage module's genesis
+            state.
+        description: >-
+          Targets are borrow positions currently marked for bad debt repayment.
+          Each contains an Address and a Denom.
+    description: >-
+      QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
+      service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object
     properties:
@@ -1512,7 +1595,7 @@ definitions:
         items:
           type: string
         description: Targets are the addresses of borrowers eligible for liquidation.
-    description: |-
+    description: >-
       QueryLiquidationTargetsResponse defines the response structure for the
       LiquidationTargets gRPC service handler.
   umee.leverage.v1.QueryMarketSummaryResponse:
@@ -1703,13 +1786,13 @@ definitions:
           direct_liquidation_fee:
             type: string
             description: >-
-              Direct Liquidation Fee is the reduction in liquidation incentive
-              experienced
+              Direct Liquidation Fee is a reduction factor in liquidation
+              incentive
 
-              by liquidators who choose to receive base assets instead of
-              uTokens as
+              experienced by liquidators who choose to receive base assets
+              instead of
 
-              liquidation rewards.
+              uTokens as liquidation rewards.
         description: Params defines the parameters for the leverage module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
