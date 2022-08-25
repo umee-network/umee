@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
