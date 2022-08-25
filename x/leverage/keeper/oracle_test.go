@@ -43,7 +43,7 @@ func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (s
 func (m *mockOracleKeeper) Reset() {
 	m.exchangeRates = map[string]sdk.Dec{
 		umeeapp.BondDenom: sdk.MustNewDecFromStr("4.21"),
-		atomIBCDenom:      sdk.MustNewDecFromStr("39.38"),
+		atomDenom:         sdk.MustNewDecFromStr("39.38"),
 	}
 }
 
@@ -52,7 +52,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00000421"), p)
 
-	p, err = s.app.LeverageKeeper.TokenPrice(s.ctx, atomIBCDenom)
+	p, err = s.app.LeverageKeeper.TokenPrice(s.ctx, atomDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.00003938"), p)
 
@@ -78,7 +78,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 		s.ctx,
 		sdk.NewCoins(
 			sdk.NewInt64Coin(umeeapp.BondDenom, 2400000),
-			sdk.NewInt64Coin(atomIBCDenom, 4700000),
+			sdk.NewInt64Coin(atomDenom, 4700000),
 		),
 	)
 	s.Require().NoError(err)
@@ -89,7 +89,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 		s.ctx,
 		sdk.NewCoins(
 			sdk.NewInt64Coin(umeeapp.BondDenom, 2400000),
-			sdk.NewInt64Coin(atomIBCDenom, 4700000),
+			sdk.NewInt64Coin(atomDenom, 4700000),
 			sdk.NewInt64Coin("foo", 4700000),
 		),
 	)
@@ -98,12 +98,12 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 }
 
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
-	r, err := s.app.LeverageKeeper.PriceRatio(s.ctx, umeeapp.BondDenom, atomIBCDenom)
+	r, err := s.app.LeverageKeeper.PriceRatio(s.ctx, umeeapp.BondDenom, atomDenom)
 	s.Require().NoError(err)
 	// $4.21 / $39.38
 	s.Require().Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
 
-	_, err = s.app.LeverageKeeper.PriceRatio(s.ctx, "foo", atomIBCDenom)
+	_, err = s.app.LeverageKeeper.PriceRatio(s.ctx, "foo", atomDenom)
 	s.Require().Error(err)
 
 	_, err = s.app.LeverageKeeper.PriceRatio(s.ctx, umeeapp.BondDenom, "foo")

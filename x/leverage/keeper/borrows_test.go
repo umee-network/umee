@@ -212,7 +212,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	s.Require().Equal(expectedUmeeLimit, borrowLimit)
 
 	// Create collateral atom uTokens (1k u/uatom)
-	atomCollatDenom := types.ToUTokenDenom(atomIBCDenom)
+	atomCollatDenom := types.ToUTokenDenom(atomDenom)
 	atomCollateral := sdk.NewCoins(sdk.NewInt64Coin(atomCollatDenom, 1000000000))
 
 	// Manually compute borrow limit using collateral weight of 0.25

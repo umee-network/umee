@@ -40,4 +40,5 @@ var (
 	)
 	ErrNotUToken = sdkerrors.Register(ModuleName, 1127, "denom should be a uToken")
 	ErrUToken    = sdkerrors.Register(ModuleName, 1128, "denom should not be a uToken")
+	ErrMaxSupply = sdkerrors.Register(ModuleName, 1129, "market total supply would exceed MaxSupply")
 )

@@ -6,6 +6,11 @@ import (
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
+const (
+	// AtomDenom is an ibc denom to be used as ATOM's BaseDenom during testing
+	AtomDenom = "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D"
+)
+
 // Token returns a valid token
 func Token(base, symbol string) types.Token {
 	return types.Token{
