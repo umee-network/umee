@@ -16,7 +16,7 @@ jobs:
       - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
-            **/**.go
+            **/*.go
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
@@ -30,7 +30,7 @@ jobs:
           args: --timeout 8m
       - name: golangci-lint pricefeeder
         uses: golangci/golangci-lint-action@v3
-        if: env.GIT_DIFF
+        if: ${{ contains(env.GIT_DIFF, 'price-feeder/')  }}
         with:
           version: latest
           working-directory: price-feeder
@@ -62,7 +62,7 @@ jobs:
       - uses: technote-space/get-diff-action@v6
         with:
           PATTERNS: |
-            **/**.proto
+            **/*.proto
       - uses: bufbuild/buf-setup-action@v1
         if: env.GIT_DIFF
       - uses: bufbuild/buf-lint-action@v1
