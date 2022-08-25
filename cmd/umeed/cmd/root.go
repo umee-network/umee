@@ -111,7 +111,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, gentxModule),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, gentxModule.GenTxValidator),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(
 			a.moduleManager,
