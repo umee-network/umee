@@ -92,12 +92,12 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
 // denom) and oracle tx check.
-func getTxPriority(fee sdk.Coins, gasAmount int64, isOracleOrGravity bool, msgs []sdk.Msg) int64 {
+func getTxPriority(fees sdk.Coins, gasAmount int64, isOracleOrGravity bool, msgs []sdk.Msg) int64 { //nolint: unparam
 	var priority int64
 	/* TODO: IBC tx prioritization is not stable and we will implement a more general
 	 * tx prioritization once that will be resolved
 	 * https://github.com/umee-network/umee/issues/1289
-	for _, c := range fee {
+	for _, c := range fees {
 		p := int64(math.MaxInt64)
 		gasPrice := c.Amount.QuoRaw(gasAmount)
 		if gasPrice.IsInt64() {
