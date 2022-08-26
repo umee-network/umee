@@ -1,3 +1,4 @@
+BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
 BUILD_DIR ?= $(CURDIR)/build
 COMMIT    := $(shell git log -1 --format='%H')
 SDK_VERSION     := $(shell go list -m github.com/cosmos/cosmos-sdk | sed 's:.* ::')
@@ -24,7 +25,7 @@ endif
 
 ldflags = -X github.com/umee-network/umee/price-feeder/cmd.Version=$(VERSION) \
 		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT) \
-		  -X github.com/umee-network/umee/price-feeder/cmd.SDKVersion=$(SDK_VERSION) 
+		  -X github.com/umee-network/umee/price-feeder/cmd.SDKVersion=$(SDK_VERSION)
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 
