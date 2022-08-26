@@ -36,10 +36,13 @@ type versionInfo struct {
 
 func getVersionCmd() *cobra.Command {
 	versionCmd := &cobra.Command{
-		Use:   "version",
+		Use:   "version [path to price-feeder directory]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Print binary version information",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			modBz, err := os.ReadFile("go.mod")
+		RunE: func(cmd *cobra.Command, args []string) error {			
+			priceFeederDir := args[0]
+
+			modBz, err := os.ReadFile(priceFeederDir + "/go.mod")
 			if err != nil {
 				return err
 			}
