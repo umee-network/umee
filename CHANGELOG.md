@@ -97,6 +97,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 
 ### Bug Fixes
 
