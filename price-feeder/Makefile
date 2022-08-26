@@ -24,7 +24,7 @@ endif
 
 ldflags = -X github.com/umee-network/umee/price-feeder/cmd.Version=$(VERSION) \
 		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT) \
-		  -X github.com/umee-network/umee/price-feeder/cmd.SDK_Version=$(SDK_VERSION) 
+		  -X github.com/umee-network/umee/price-feeder/cmd.SDKVersion=$(SDK_VERSION) 
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 

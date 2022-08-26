@@ -41,7 +41,7 @@ func getVersionCmd() *cobra.Command {
 			verInfo := versionInfo{
 				Version: Version,
 				Commit:  Commit,
-				SDK:     SDK_Version,
+				SDK:     SDKVersion,
 				Go:      fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 			}
 
