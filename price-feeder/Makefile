@@ -1,5 +1,6 @@
 BUILD_DIR ?= $(CURDIR)/build
 COMMIT    := $(shell git log -1 --format='%H')
+SDK_VERSION     := $(shell go list -m github.com/cosmos/cosmos-sdk | sed 's:.* ::')
 
 all: test-unit install
 
@@ -22,7 +23,8 @@ endif
 ###############################################################################
 
 ldflags = -X github.com/umee-network/umee/price-feeder/cmd.Version=$(VERSION) \
-		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT)
+		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT) \
+		  -X github.com/umee-network/umee/price-feeder/cmd.SDK_Version=$(SDK_VERSION) 
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 
