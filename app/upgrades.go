@@ -11,8 +11,8 @@ import (
 
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 const UpgradeV3_0Plan = "v1.0-v3.0"

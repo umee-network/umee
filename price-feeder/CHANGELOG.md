@@ -70,6 +70,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1170](https://github.com/umee-network/umee/pull/1170) Restrict price feeder quotes to USD, USDT, USDC, ETH, DAI, and BTC.
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add ProviderName type to facilitate the reading of maps.
 - [#1215](https://github.com/umee-network/umee/pull/1215) Moved ProviderName to Name in provider package.
+- [#1274](https://github.com/umee-network/umee/pull/1274) Add option to set config by env variables.
 
 ## [v0.2.5](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.2.5) - 2022-07-28
 

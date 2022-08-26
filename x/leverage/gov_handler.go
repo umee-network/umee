@@ -5,8 +5,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
-	"github.com/umee-network/umee/v2/x/leverage/keeper"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func NewUpdateRegistryProposalHandler(k keeper.Keeper) gov1b1.Handler {

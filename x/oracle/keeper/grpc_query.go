@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 var _ types.QueryServer = querier{}
@@ -148,16 +148,9 @@ func (q querier) SlashWindow(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.GetParams(ctx)
 
-	slashWindow := params.SlashWindow
-	votePeriod := params.VotePeriod
-	currentBlock := uint64(ctx.BlockHeight())
-	votePeriodsPerSlashWindow := slashWindow / votePeriod
-
-	currentSlashWindow := currentBlock / votePeriodsPerSlashWindow
-	blocksIntoSlashWindow := currentBlock - (currentSlashWindow * slashWindow)
-
 	return &types.QuerySlashWindowResponse{
-		WindowProgress: blocksIntoSlashWindow / votePeriod,
+		WindowProgress: (uint64(ctx.BlockHeight()) / params.VotePeriod) %
+			params.SlashWindow,
 	}, nil
 }
 

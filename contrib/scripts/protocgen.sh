@@ -16,7 +16,7 @@ cd ..
 
 # after the proto files have been generated add them to the the repo
 # in the proper location. Then, remove the ephemeral tree used for generation
-cp -r github.com/umee-network/umee/v2/* .
+cp -r github.com/umee-network/umee/v3/* .
 rm -rf github.com
 
 go mod tidy
