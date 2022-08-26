@@ -1,12 +1,12 @@
 package ante
 
 import (
-	"math"
-
 	gbtypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
+	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -50,7 +50,7 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 		}
 	}
 
-	priority := getTxPriority(feeCoins, isOracleOrGravity)
+	priority := getTxPriority(feeCoins, int64(gas), isOracleOrGravity, msgs)
 	if !chargeFees {
 		return sdk.Coins{}, priority, nil
 	}
@@ -59,6 +59,9 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 
 // IsOracleOrGravityTx checks if all messages are oracle messages
 func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
+	if len(msgs) == 0 {
+		return false
+	}
 	for _, msg := range msgs {
 		switch msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote,
@@ -89,23 +92,40 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
 // denom) and oracle tx check.
-func getTxPriority(fee sdk.Coins, isOracleOrGravity bool) int64 {
+func getTxPriority(fee sdk.Coins, gasAmount int64, isOracleOrGravity bool, msgs []sdk.Msg) int64 {
 	var priority int64
+	/* TODO: IBC tx prioritization is not stable and we will implement a more general
+	 * tx prioritization once that will be resolved
+	 * https://github.com/umee-network/umee/issues/1289
 	for _, c := range fee {
-		// TODO: we should better compare amounts
-		// https://github.com/umee-network/umee/issues/510
 		p := int64(math.MaxInt64)
-		if c.Amount.IsInt64() {
-			p = c.Amount.Int64()
+		gasPrice := c.Amount.QuoRaw(gasAmount)
+		if gasPrice.IsInt64() {
+			p = gasPrice.Int64()
 		}
 		if priority == 0 || p < priority {
 			priority = p
 		}
 	}
+	*/
 	if isOracleOrGravity {
-		// TODO: this is a naive version.
-		// Proper solution will be implemented in https://github.com/umee-network/umee/issues/510
-		priority += 100000
+		return 100
 	}
+	for _, msg := range msgs {
+		var p int64
+		switch msg.(type) {
+		case *evidencetypes.MsgSubmitEvidence:
+			p = 90
+		case *leveragetypes.MsgLiquidate:
+			p = 80
+		default:
+			// in case there is a non-prioritized mixed message, we return 0
+			return 0
+		}
+		if priority == 0 || p < priority {
+			priority = p
+		}
+	}
+
 	return priority
 }
