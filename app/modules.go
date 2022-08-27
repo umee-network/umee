@@ -132,27 +132,34 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 }
 
 func GenTxValidator(msgs []sdk.Msg) error {
-	if n := len(msgs); n != 2 {
+	if n := len(msgs); n < 1 || n > 2 {
 		return fmt.Errorf(
-			"contains invalid number of messages; expected: 2; got: %d", n)
+			"contains invalid number of messages; expected: 2 or 1; got: %d", n)
 	}
 
-	if _, ok := msgs[0].(*stakingtypes.MsgCreateValidator); !ok {
-		return fmt.Errorf(
-			"contains invalid message at index 0; expected: %T; got: %T",
-			&stakingtypes.MsgCreateValidator{}, msgs[0])
+	if err := assertMsgType[*stakingtypes.MsgCreateValidator](msgs[0], 0); err != nil {
+		return err
 	}
-
-	if _, ok := msgs[1].(*gravitytypes.MsgSetOrchestratorAddress); !ok {
-		return fmt.Errorf(
-			"contains invalid message at index 1; expected: %T; got: %T",
-			&gravitytypes.MsgSetOrchestratorAddress{}, msgs[1])
+	if len(msgs) > 1 {
+		if err := assertMsgType[*gravitytypes.MsgSetOrchestratorAddress](msgs[1], 1); err != nil {
+			return err
+		}
 	}
 
 	for i := range msgs {
 		if err := msgs[i].ValidateBasic(); err != nil {
 			return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
 		}
+	}
+	return nil
+}
+
+func assertMsgType[T sdk.Msg](m sdk.Msg, idx int) error {
+	if _, ok := m.(T); !ok {
+		var t T
+		return fmt.Errorf(
+			"contains invalid message at index 1; expected: %T; got: %T",
+			t, m)
 	}
 	return nil
 }
