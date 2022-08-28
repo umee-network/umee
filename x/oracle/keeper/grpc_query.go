@@ -148,16 +148,9 @@ func (q querier) SlashWindow(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.GetParams(ctx)
 
-	slashWindow := params.SlashWindow
-	votePeriod := params.VotePeriod
-	currentBlock := uint64(ctx.BlockHeight())
-	votePeriodsPerSlashWindow := slashWindow / votePeriod
-
-	currentSlashWindow := currentBlock / votePeriodsPerSlashWindow
-	blocksIntoSlashWindow := currentBlock - (currentSlashWindow * slashWindow)
-
 	return &types.QuerySlashWindowResponse{
-		WindowProgress: blocksIntoSlashWindow / votePeriod,
+		WindowProgress: (uint64(ctx.BlockHeight()) / params.VotePeriod) %
+			params.SlashWindow,
 	}, nil
 }
 

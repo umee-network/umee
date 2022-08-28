@@ -60,13 +60,13 @@ rpc_timeout = "100ms"
 tmrpc_endpoint = 'http://$UMEE_E2E_UMEE_VAL_HOST:26657'
 
 [telemetry]
-service_name = "price-feeder"
+service-name = "price-feeder"
 enabled = true
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
 type = "prometheus"
-global_labels = [["chain-id", "umee-local-testnet"]]
+global-labels = [["chain-id", "umee-local-testnet"]]
 EOF
 
 # start price-feeder
