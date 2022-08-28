@@ -158,8 +158,8 @@ func assertMsgType[T sdk.Msg](m sdk.Msg, idx int) error {
 	if _, ok := m.(T); !ok {
 		var t T
 		return fmt.Errorf(
-			"contains invalid message at index 1; expected: %T; got: %T",
-			t, m)
+			"contains invalid message at index %d; expected: %T; got: %T",
+			idx, t, m)
 	}
 	return nil
 }
