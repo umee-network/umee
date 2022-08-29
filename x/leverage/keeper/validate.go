@@ -61,6 +61,17 @@ func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
 	return token.AssertSupplyEnabled()
 }
 
+// validateUToken validates an sdk.Coin and ensures its Denom is a uToken. Used by Withdraw and Decollateralize.
+func (k Keeper) validateUToken(ctx sdk.Context, coin sdk.Coin) error {
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if !types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrNotUToken.Wrap(coin.Denom)
+	}
+	return nil
+}
+
 // validateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
 func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	if err := borrow.Validate(); err != nil {
@@ -76,9 +87,20 @@ func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	return token.AssertBorrowEnabled()
 }
 
-// validateCollateralAsset validates an sdk.Coin and ensures it is a uToken of an accepted
+// validateRepay validates an sdk.Coin and ensures its Denom is not a uToken
+func (k Keeper) validateRepay(ctx sdk.Context, coin sdk.Coin) error {
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrUToken.Wrap(coin.Denom)
+	}
+	return nil
+}
+
+// validateCollateralize validates an sdk.Coin and ensures it is a uToken of an accepted
 // Token with EnableMsgSupply and CollateralWeight > 0
-func (k Keeper) validateCollateralAsset(ctx sdk.Context, collateral sdk.Coin) error {
+func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) error {
 	if err := collateral.Validate(); err != nil {
 		return err
 	}

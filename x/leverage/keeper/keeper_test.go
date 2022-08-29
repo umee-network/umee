@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 
 			// verify the outputs of supply function
 			uToken, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
-			require.NoError(err)
+			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedUTokens, uToken, tc.msg)
 
 			// final state
@@ -248,7 +248,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			// verify the outputs of withdraw function
 			token, err := app.LeverageKeeper.Withdraw(ctx, tc.addr, tc.uToken)
 
-			require.NoError(err)
+			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedTokens, token, tc.msg)
 
 			// final state
@@ -345,7 +345,7 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 
 			// verify the output of collateralize function
 			err := app.LeverageKeeper.Collateralize(ctx, tc.addr, tc.uToken)
-			require.NoError(err)
+			require.NoError(err, tc.msg)
 
 			// final state
 			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -447,7 +447,7 @@ func (s *IntegrationTestSuite) TestDecollateralize() {
 
 			// verify the output of decollateralize function
 			err := app.LeverageKeeper.Decollateralize(ctx, tc.addr, tc.uToken)
-			require.NoError(err)
+			require.NoError(err, tc.msg)
 
 			// final state
 			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -557,7 +557,7 @@ func (s *IntegrationTestSuite) TestBorrow() {
 
 			// verify the output of borrow function
 			err := app.LeverageKeeper.Borrow(ctx, tc.addr, tc.coin)
-			require.NoError(err)
+			require.NoError(err, tc.msg)
 
 			// final state
 			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -576,6 +576,123 @@ func (s *IntegrationTestSuite) TestBorrow() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins increased by expected amount
 			require.Equal(iBorrowed.Add(tc.coin), fBorrowed, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
+		}
+	}
+}
+
+func (s *IntegrationTestSuite) TestRepay() {
+	type testCase struct {
+		msg           string
+		addr          sdk.AccAddress
+		coin          sdk.Coin
+		expectedRepay sdk.Coin
+		err           error
+	}
+
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// create and fund a borrower which supplies and collateralizes UMEE, the borrows 10 UMEE
+	borrower := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(borrower, coin(umeeDenom, 150_000000))
+	s.collateralize(borrower, coin("u/"+umeeDenom, 120_000000))
+	s.borrow(borrower, coin(umeeDenom, 10_000000))
+
+	// create and fund a borrower which engages in a supply->borrow->supply loop
+	looper := s.newAccount(coin(umeeDenom, 50_000000))
+	s.supply(looper, coin(umeeDenom, 50_000000))
+	s.collateralize(looper, coin("u/"+umeeDenom, 50_000000))
+	s.borrow(looper, coin(umeeDenom, 5_000000))
+	s.supply(looper, coin(umeeDenom, 5_000000))
+
+	tcs := []testCase{
+		{
+			"uToken",
+			borrower,
+			coin("u/"+umeeDenom, 100_000000),
+			sdk.Coin{},
+			types.ErrUToken,
+		},
+		{
+			"unregistered token",
+			borrower,
+			coin("abcd", 100_000000),
+			sdk.Coin{},
+			types.ErrDenomNotBorrowed,
+		},
+		{
+			"not borrowed",
+			borrower,
+			coin(atomDenom, 100_000000),
+			sdk.Coin{},
+			types.ErrDenomNotBorrowed,
+		},
+		{
+			"valid repay",
+			borrower,
+			coin(umeeDenom, 1_000000),
+			coin(umeeDenom, 1_000000),
+			nil,
+		},
+		{
+			"additional repay",
+			borrower,
+			coin(umeeDenom, 3_000000),
+			coin(umeeDenom, 3_000000),
+			nil,
+		},
+		{
+			"overpay",
+			borrower,
+			coin(umeeDenom, 30_000000),
+			coin(umeeDenom, 6_000000),
+			nil,
+		},
+		{
+			"insufficient balance",
+			looper,
+			coin(umeeDenom, 1_000000),
+			sdk.Coin{},
+			sdkerrors.ErrInsufficientFunds,
+		},
+	}
+
+	for _, tc := range tcs {
+		if tc.err != nil {
+			_, err := app.LeverageKeeper.Repay(ctx, tc.addr, tc.coin)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			// initial state
+			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			iCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			iBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify the output of borrow function
+			repaid, err := app.LeverageKeeper.Repay(ctx, tc.addr, tc.coin)
+			require.NoError(err, tc.msg)
+			require.Equal(tc.expectedRepay, repaid, tc.msg)
+
+			// final state
+			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			fCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			fBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify token balance is decreased by expected amount
+			require.Equal(iBalance.Sub(tc.expectedRepay), fBalance, tc.msg, "balances")
+			// verify uToken collateral unchanged
+			require.Equal(iCollateral, fCollateral, tc.msg, "collateral")
+			// verify uToken supply is unchanged
+			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+			// verify borrowed coins decreased by expected amount
+			s.requireEqualCoins(iBorrowed.Sub(tc.expectedRepay), fBorrowed, "borrowed coins")
 
 			// check all available invariants
 			s.checkInvariants(tc.msg)
