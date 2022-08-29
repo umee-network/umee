@@ -104,7 +104,10 @@ func NewFTXProvider(
 
 	go func() {
 		logger.Debug().Msg("starting ftx polling...")
-		ftx.pollCache(ctx, pairs...)
+		err := ftx.pollCache(ctx, pairs...)
+		if err != nil {
+			logger.Err(err).Msg("ftx provider unable to poll new data")
+		}
 	}()
 
 	return &ftx
@@ -133,7 +136,7 @@ func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 			return nil, fmt.Errorf("duplicate token found in FTX response: %s", symbol)
 		}
 
-		priceRaw := strconv.FormatFloat(float64(tr.Price), 'f', -1, 64)
+		priceRaw := strconv.FormatFloat(tr.Price, 'f', -1, 64)
 		price, err := sdk.NewDecFromStr(priceRaw)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read FTX price (%f) for %s", tr.Price, symbol)
@@ -178,7 +181,7 @@ func (p *FTXProvider) GetAvailablePairs() (map[string]struct{}, error) {
 }
 
 // SubscribeCurrencyPairs performs a no-op since ftx does not use websockets
-func (p FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+func (p *FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
 }
 
