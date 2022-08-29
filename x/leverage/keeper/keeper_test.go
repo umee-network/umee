@@ -672,7 +672,7 @@ func (s *IntegrationTestSuite) TestAccrueInterest_Invalid() {
 
 	// Setting last interest time to a negative value is not allowed
 	err = s.tk.SetLastInterestTime(s.ctx, -1)
-	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrNegativeTimeElapsed)
 
 	// Setting last interest time ahead greatly succeeds
 	err = s.tk.SetLastInterestTime(s.ctx, 100_000_000) // 3 years
@@ -684,7 +684,7 @@ func (s *IntegrationTestSuite) TestAccrueInterest_Invalid() {
 
 	// Setting last interest time back to an earlier time is not allowed
 	err = s.tk.SetLastInterestTime(s.ctx, 1000)
-	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrNegativeTimeElapsed)
 
 	// verify user's loan amount is unchanged (40 umee)
 	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
