@@ -11,7 +11,7 @@ require (
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/cors v1.8.2
-	github.com/rs/zerolog v1.27.0
+	github.com/rs/zerolog v1.28.0
 	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
@@ -218,7 +218,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/rs/xid v1.3.0 // indirect
+	github.com/rs/xid v1.4.0 // indirect
 	github.com/ryancurrah/gomodguard v1.2.4 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.3.0 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.0.6 // indirect
