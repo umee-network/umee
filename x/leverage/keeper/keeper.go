@@ -295,6 +295,9 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, co
 	if err := coin.Validate(); err != nil {
 		return err
 	}
+	if !types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrNotUToken.Wrap(coin.Denom)
+	}
 
 	// Detect where sufficient collateral exists to disable
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)

@@ -72,7 +72,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 	for _, tc := range tcs {
 		if tc.err != nil {
 			_, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
-			require.ErrorContains(err, tc.err.Error(), tc.msg)
+			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
 			denom := tc.coin.Denom
 			uDenom := types.ToUTokenDenom(tc.coin.Denom)
@@ -80,6 +80,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 			// initial state
 			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			iCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
 			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
 			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
@@ -91,6 +92,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 			// final state
 			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			fCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
 			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
 			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
@@ -98,6 +100,8 @@ func (s *IntegrationTestSuite) TestSupply() {
 			require.Equal(iBalance.Sub(tc.coin), fBalance, tc.msg, "token balance")
 			// verify uToken balance increased by the expected amount
 			require.Equal(iUTokens.Add(tc.expectedUTokens), fUTokens, tc.msg, "uToken balance")
+			// verify uToken collateral unchanged
+			require.Equal(iCollateral.Amount.Int64(), fCollateral.Amount.Int64(), tc.msg, "uToken collateral")
 			// verify uToken supply increased by the expected amount
 			require.Equal(iUTokenSupply.Add(tc.expectedUTokens), fUTokenSupply, tc.msg, "uToken supply")
 			// verify uToken exchange rate is unchanged
@@ -292,7 +296,7 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 	for _, tc := range tcs {
 		if tc.err != nil {
 			err := app.LeverageKeeper.Collateralize(ctx, tc.addr, tc.uToken)
-			require.ErrorContains(err, tc.err.Error(), tc.msg)
+			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
 			denom := types.ToTokenDenom(tc.uToken.Denom)
 			uDenom := tc.uToken.Denom
@@ -300,6 +304,7 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 			// initial state
 			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			iCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
 			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
 			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
@@ -310,6 +315,7 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 			// final state
 			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			fCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
 			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
 			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
@@ -317,6 +323,84 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 			require.Equal(iBalance, fBalance, tc.msg, "token balance")
 			// verify uToken balance decreased by the expected amount
 			require.Equal(iUTokens.Sub(tc.uToken), fUTokens, tc.msg, "uToken balance")
+			// verify uToken collateral increased by the expected amount
+			require.Equal(iCollateral.Add(tc.uToken), fCollateral, tc.msg, "uToken collateral")
+			// verify uToken supply is unchanged
+			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+		}
+	}
+}
+
+func (s *IntegrationTestSuite) TestDecollateralize() {
+	type testCase struct {
+		msg    string
+		addr   sdk.AccAddress
+		uToken sdk.Coin
+		err    error
+	}
+
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// create and fund a supplier with 200 UMEE, then supply and collateralize 100 UMEE
+	supplier := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(supplier, coin(umeeDenom, 100_000000))
+	s.collateralize(supplier, coin("u/"+umeeDenom, 100_000000))
+
+	tcs := []testCase{
+		{
+			"base token",
+			supplier,
+			coin(umeeDenom, 80_000000),
+			types.ErrNotUToken,
+		},
+		{
+			"valid decollateralize",
+			supplier,
+			coin("u/"+umeeDenom, 80_000000),
+			nil,
+		},
+		{
+			"insufficient collateral",
+			supplier,
+			coin("u/"+umeeDenom, 40_000000),
+			types.ErrInsufficientCollateral,
+		},
+	}
+
+	for _, tc := range tcs {
+		if tc.err != nil {
+			err := app.LeverageKeeper.Decollateralize(ctx, tc.addr, tc.uToken)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			denom := types.ToTokenDenom(tc.uToken.Denom)
+			uDenom := tc.uToken.Denom
+
+			// initial state
+			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			iCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
+			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+
+			// verify the output of decollateralize function
+			err := app.LeverageKeeper.Decollateralize(ctx, tc.addr, tc.uToken)
+			require.NoError(err)
+
+			// final state
+			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			fCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
+			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+
+			// verify token balance is unchanged
+			require.Equal(iBalance, fBalance, tc.msg, "token balance")
+			// verify uToken balance increased by the expected amount
+			require.Equal(iUTokens.Add(tc.uToken), fUTokens, tc.msg, "uToken balance")
+			// verify uToken collateral decreased by the expected amount
+			require.Equal(iCollateral.Sub(tc.uToken), fCollateral, tc.msg, "uToken collateral")
 			// verify uToken supply is unchanged
 			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
 			// verify uToken exchange rate is unchanged
