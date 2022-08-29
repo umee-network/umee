@@ -689,7 +689,7 @@ func (s *IntegrationTestSuite) TestRepay_Overpay() {
 	s.Require().Error(err)
 }
 
-func (s *IntegrationTestSuite) TestLiqudate() {
+func (s *IntegrationTestSuite) TestLiquidate() {
 	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it

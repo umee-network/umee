@@ -40,15 +40,6 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
 
-// requireEqualCoins compares two sdk.Coins in such a way that sdk.Coins(nil) == sdk.Coins([]sdk.Coin{})
-func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAndArgs ...interface{}) {
-	s.Require().Equal(
-		sdk.NewCoins(coinsA...),
-		sdk.NewCoins(coinsB...),
-		msgAndArgs...,
-	)
-}
-
 func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
@@ -85,6 +76,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
+}
+
+// requireEqualCoins compares two sdk.Coins in such a way that sdk.Coins(nil) == sdk.Coins([]sdk.Coin{})
+func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAndArgs ...interface{}) {
+	s.Require().Equal(
+		sdk.NewCoins(coinsA...),
+		sdk.NewCoins(coinsB...),
+		msgAndArgs...,
+	)
 }
 
 // newToken creates a test token with reasonable initial parameters
@@ -137,7 +137,6 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
-/*
 // withdraw uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -147,7 +146,6 @@ func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin
 		require.NoError(err, "withdraw")
 	}
 }
-*/
 
 // collateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
@@ -159,7 +157,6 @@ func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk
 	}
 }
 
-/*
 // decollateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -169,7 +166,6 @@ func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...s
 		require.NoError(err, "decollateralize")
 	}
 }
-*/
 
 // borrow tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
@@ -181,7 +177,6 @@ func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
-/*
 // repay tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -189,11 +184,10 @@ func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
 	for _, coin := range coins {
 		repaid, err := app.LeverageKeeper.Repay(ctx, addr, coin)
 		require.NoError(err, "repay")
-		// ensure intended repayment amount was not reduced, as doing so would create a misleading test
+		// ensure intended repayment amount was not reduced, as that would create a misleading test
 		require.Equal(repaid, coin, "repay")
 	}
 }
-*/
 
 // setupAccount executes some common boilerplate before a test, where a user account is given tokens of a given denom,
 // may also supply them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.
