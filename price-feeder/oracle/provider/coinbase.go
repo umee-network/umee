@@ -20,12 +20,12 @@ import (
 )
 
 const (
-	coinbaseWSHost    = "ws-feed.exchange.coinbase.com"
-	coinbasePingCheck = time.Second * 28 // should be < 30
-	coinbaseRestHost  = "https://api.exchange.coinbase.com"
-	coinbaseRestPath  = "/products"
-	timeLayout        = "2006-01-02T15:04:05.000000Z"
-	unixMinute        = 60000
+	coinbaseWSHost     = "ws-feed.exchange.coinbase.com"
+	coinbasePingCheck  = time.Second * 28 // should be < 30
+	coinbaseRestHost   = "https://api.exchange.coinbase.com"
+	coinbaseRestPath   = "/products"
+	coinbaseTimeLayout = "2006-01-02T15:04:05.000000Z"
+	unixMinute         = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -408,7 +408,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 
 // timeToUnix converts a Time in format "2006-01-02T15:04:05.000000Z" to unix
 func (tr CoinbaseTradeResponse) timeToUnix() int64 {
-	t, err := time.Parse(timeLayout, tr.Time)
+	t, err := time.Parse(coinbaseTimeLayout, tr.Time)
 	if err != nil {
 		return 0
 	}

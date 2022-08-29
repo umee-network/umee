@@ -227,10 +227,3 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
 }
-
-func checkHTTPStatus(resp *http.Response) error {
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status: %s", resp.Status)
-	}
-	return nil
-}
