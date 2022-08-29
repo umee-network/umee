@@ -92,3 +92,17 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 
 	// we do not test empty denom, as that will cause a panic
 }
+
+func (s *IntegrationTestSuite) TestTotalCollateral() {
+	// Test zero collateral
+	uDenom := types.ToUTokenDenom(umeeDenom)
+	collateral := s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
+	s.Require().Equal(sdk.ZeroInt(), collateral)
+
+	// Uses borrow scenario, because supplier possesses collateral
+	_, _ = s.initBorrowScenario()
+
+	// Test nonzero collateral
+	collateral = s.app.LeverageKeeper.GetTotalCollateral(s.ctx, uDenom)
+	s.Require().Equal(sdk.NewInt(1000000000), collateral)
+}
