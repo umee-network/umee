@@ -40,6 +40,15 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
 
+// requireEqualCoins compares two sdk.Coins in such a way that sdk.Coins(nil) == sdk.Coins([]sdk.Coin{})
+func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAndArgs ...interface{}) {
+	s.Require().Equal(
+		sdk.NewCoins(coinsA...),
+		sdk.NewCoins(coinsB...),
+		msgAndArgs...,
+	)
+}
+
 func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
@@ -78,12 +87,12 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.queryClient = types.NewQueryClient(queryHelper)
 }
 
-// creates a test token with reasonable initial parameters
+// newToken creates a test token with reasonable initial parameters
 func newToken(base, symbol string) types.Token {
 	return fixtures.Token(base, symbol)
 }
 
-// creates a coin with a given base denom and amount
+// coin creates a coin with a given base denom and amount
 func coin(denom string, amount int64) sdk.Coin {
 	return sdk.NewInt64Coin(denom, amount)
 }
