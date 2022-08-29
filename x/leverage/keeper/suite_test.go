@@ -137,16 +137,6 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
-// withdraw uTokens from an account and require no errors. Use when setting up leverage scenarios.
-func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
-
-	for _, coin := range uTokens {
-		_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin)
-		require.NoError(err, "withdraw")
-	}
-}
-
 // collateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -154,16 +144,6 @@ func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk
 	for _, coin := range uTokens {
 		err := app.LeverageKeeper.Collateralize(ctx, addr, coin)
 		require.NoError(err, "collateralize")
-	}
-}
-
-// decollateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
-func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
-
-	for _, coin := range uTokens {
-		err := app.LeverageKeeper.Decollateralize(ctx, addr, coin)
-		require.NoError(err, "decollateralize")
 	}
 }
 
@@ -177,16 +157,18 @@ func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
-// repay tokens as an account and require no errors. Use when setting up leverage scenarios.
-func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
+// forceBorrow artificially borrows tokens with an account, ignoring collateral, to set up liquidation scenarios.
+// this does not alter uToken exchange rates as artificially accruing interest would.
+func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		repaid, err := app.LeverageKeeper.Repay(ctx, addr, coin)
-		require.NoError(err, "repay")
-		// ensure intended repayment amount was not reduced, as that would create a misleading test
-		require.Equal(repaid, coin, "repay")
+		err := s.tk.SetBorrow(ctx, addr, coin)
+		require.NoError(err, "forceBorrow")
 	}
+
+	err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, coins)
+	require.NoError(err, "forceBorroww")
 }
 
 // setupAccount executes some common boilerplate before a test, where a user account is given tokens of a given denom,

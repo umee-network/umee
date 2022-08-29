@@ -594,7 +594,7 @@ func (s *IntegrationTestSuite) TestRepay() {
 
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	// create and fund a borrower which supplies and collateralizes UMEE, the borrows 10 UMEE
+	// create and fund a borrower which supplies and collateralizes UMEE, then borrows 10 UMEE
 	borrower := s.newAccount(coin(umeeDenom, 200_000000))
 	s.supply(borrower, coin(umeeDenom, 150_000000))
 	s.collateralize(borrower, coin("u/"+umeeDenom, 120_000000))
@@ -671,7 +671,7 @@ func (s *IntegrationTestSuite) TestRepay() {
 			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
 			iBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
 
-			// verify the output of borrow function
+			// verify the output of repay function
 			repaid, err := app.LeverageKeeper.Repay(ctx, tc.addr, tc.coin)
 			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedRepay, repaid, tc.msg)
@@ -701,6 +701,185 @@ func (s *IntegrationTestSuite) TestRepay() {
 }
 
 func (s *IntegrationTestSuite) TestLiquidate() {
+	type testCase struct {
+		msg               string
+		liquidator        sdk.AccAddress
+		borrower          sdk.AccAddress
+		attemptedRepay    sdk.Coin
+		rewardDenom       string
+		expectedRepay     sdk.Coin
+		expectedLiquidate sdk.Coin
+		expectedReward    sdk.Coin
+		err               error
+	}
+
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
+	supplier := s.newAccount(coin(umeeDenom, 1000_000000), coin(atomDenom, 1000_000000))
+	s.supply(supplier, coin(umeeDenom, 1000_000000), coin(atomDenom, 1000_000000))
+
+	// create and fund a liquidator which has 1000 UMEE and 40 ATOM
+	liquidator := s.newAccount(coin(umeeDenom, 1000_000000), coin(atomDenom, 40_000000))
+
+	// create a healthy borrower
+	healthyBorrower := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(healthyBorrower, coin(umeeDenom, 100_000000))
+	s.collateralize(healthyBorrower, coin("u/"+umeeDenom, 100_000000))
+	s.borrow(healthyBorrower, coin(umeeDenom, 10_000000))
+
+	// create a borrower which supplies and collateralizes 100 ATOM
+	atomBorrower := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomBorrower, coin(atomDenom, 100_000000))
+	s.collateralize(atomBorrower, coin("u/"+atomDenom, 100_000000))
+	// artificially borrow 50 ATOM
+	s.forceBorrow(atomBorrower, coin(atomDenom, 50_000000))
+
+	// create a borrower which supplies and collateralizes 100 UMEE
+	umeeBorrower := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(umeeBorrower, coin(umeeDenom, 100_000000))
+	s.collateralize(umeeBorrower, coin("u/"+umeeDenom, 100_000000))
+	// artificially borrow 200 UMEE
+	s.forceBorrow(umeeBorrower, coin(umeeDenom, 200_000000))
+
+	// TODO: complex liquidations
+	// TODO: partial liquidations
+	// TODO: zero liquidations
+	// TODO: expect bad debt repayment
+	// TODO: expect reserve exhaustion
+	// TODO: direct and indirect liquidation
+	// TODO: close factor limited (use atom borrower)
+
+	tcs := []testCase{
+		{
+			"healthy borrower",
+			liquidator,
+			healthyBorrower,
+			coin(atomDenom, 1_000000),
+			atomDenom,
+			sdk.Coin{},
+			sdk.Coin{},
+			sdk.Coin{},
+			types.ErrLiquidationIneligible,
+		},
+		{
+			"direct atom liquidation",
+			liquidator,
+			atomBorrower,
+			coin(atomDenom, 1_000000),
+			atomDenom,
+			coin(atomDenom, 1_000000),
+			coin("u/"+atomDenom, 1_090000),
+			coin(atomDenom, 1_090000),
+			nil,
+		},
+		{
+			"u/atom liquidation",
+			liquidator,
+			atomBorrower,
+			coin(atomDenom, 1_000000),
+			"u/" + atomDenom,
+			coin(atomDenom, 1_000000),
+			coin("u/"+atomDenom, 1_100000),
+			coin("u/"+atomDenom, 1_100000),
+			nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		if tc.err != nil {
+			_, _, _, err := app.LeverageKeeper.Liquidate(
+				ctx, tc.liquidator, tc.borrower, tc.attemptedRepay, tc.rewardDenom,
+			)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			baseRewardDenom := types.ToTokenDenom(tc.expectedLiquidate.Denom)
+
+			// initial state (borrowed denom)
+			biUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			biExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.attemptedRepay.Denom)
+
+			// initial state (liquidated denom)
+			liUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			liExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
+
+			// borrower initial state
+			biBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
+			biCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
+			biBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+
+			// liquidator initial state
+			liBalance := app.BankKeeper.GetAllBalances(ctx, tc.liquidator)
+			liCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.liquidator)
+			liBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.liquidator)
+
+			// verify the output of liquidate function
+			repaid, liquidated, reward, err := app.LeverageKeeper.Liquidate(
+				ctx, tc.liquidator, tc.borrower, tc.attemptedRepay, tc.rewardDenom,
+			)
+			require.NoError(err, tc.msg)
+			require.Equal(tc.expectedRepay, repaid, tc.msg, "repaid")
+			require.Equal(tc.expectedLiquidate, liquidated, tc.msg, "liquidated")
+			require.Equal(tc.expectedReward, reward, tc.msg, "reward")
+
+			// final state (liquidated denom)
+			lfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			lfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
+
+			// borrower final state
+			bfBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
+			bfCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
+			bfBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+
+			// liquidator final state
+			lfBalance := app.BankKeeper.GetAllBalances(ctx, tc.liquidator)
+			lfCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.liquidator)
+			lfBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.liquidator)
+
+			// if borrowed denom and reward denom are different, then borrowed denom uTokens should be unaffected
+			if tc.rewardDenom != tc.attemptedRepay.Denom {
+				// final state (borrowed denom)
+				bfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+				bfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.attemptedRepay.Denom)
+
+				// verify borrowed denom uToken supply is unchanged
+				require.Equal(biUTokenSupply, bfUTokenSupply, tc.msg, "uToken supply (borrowed denom")
+				// verify borrowed denom uToken exchange rate is unchanged
+				require.Equal(biExchangeRate, bfExchangeRate, tc.msg, "uToken exchange rate (borrowed denom")
+			}
+
+			// verify liquidated denom uToken supply is unchanged if indirect liquidation, or reduced if direct
+			expectedLiquidatedUTokenSupply := liUTokenSupply
+			if !types.HasUTokenPrefix(tc.rewardDenom) {
+				expectedLiquidatedUTokenSupply = expectedLiquidatedUTokenSupply.Sub(tc.expectedLiquidate)
+			}
+			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, tc.msg, "uToken supply (liquidated denom")
+			// verify liquidated denom uToken exchange rate is unchanged
+			require.Equal(liExchangeRate, lfExchangeRate, tc.msg, "uToken exchange rate (liquidated denom")
+
+			// verify borrower balances unchanged
+			require.Equal(biBalance, bfBalance, tc.msg, "borrower balances")
+			// verify borrower collateral reduced by the expected amount
+			require.Equal(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, tc.msg, "borrower collateral")
+			// verify borrowed coins decreased by expected amount
+			s.requireEqualCoins(biBorrowed.Sub(tc.expectedRepay), bfBorrowed, "borrowed coins")
+
+			// verify liquidator balance changes by expected amounts
+			require.Equal(liBalance.Sub(tc.expectedRepay).Add(tc.expectedReward), lfBalance,
+				tc.msg, "liquidator balances")
+			// verify liquidator collateral unchanged
+			require.Equal(liCollateral, lfCollateral, tc.msg, "liquidator collateral")
+			// verify liquidator borrowed coins unchanged
+			s.requireEqualCoins(liBorrowed, lfBorrowed, "liquidator borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
+
+		}
+	}
+}
+
+func (s *IntegrationTestSuite) TestLiquidate_Old() {
 	addr, _ := s.initBorrowScenario()
 
 	// The "supplier" user from the init scenario is being used because it
