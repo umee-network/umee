@@ -20,7 +20,6 @@ func TestPriority(t *testing.T) {
 	}{
 		{"empty priority 0", false, []sdk.Msg{}, 0},
 		{"when oracleOrGravity is set, then tx is max", true, []sdk.Msg{}, 100},
-		// dirty optimization - isOracleOrGravity flag takes a precendence
 		{"evidence1", true, []sdk.Msg{&evidence.MsgSubmitEvidence{}}, 100},
 		{"evidence2", false, []sdk.Msg{&evidence.MsgSubmitEvidence{}}, 90},
 		{"evidence3", false, []sdk.Msg{&evidence.MsgSubmitEvidence{}, &evidence.MsgSubmitEvidence{}}, 90},
@@ -31,9 +30,8 @@ func TestPriority(t *testing.T) {
 		{"mixed2", false, []sdk.Msg{&bank.MsgSend{}, &evidence.MsgSubmitEvidence{}, &leverage.MsgLiquidate{}}, 0},
 	}
 
-	fee := sdk.Coins{}
 	for _, tc := range tcs {
-		p := getTxPriority(fee, 0, tc.oracle, tc.msgs)
+		p := getTxPriority(0, tc.oracle, tc.msgs)
 		assert.Equal(t, tc.priority, p, tc.name)
 	}
 }
