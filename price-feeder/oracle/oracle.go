@@ -467,7 +467,7 @@ func NewProvider(
 		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
 
 	case provider.ProviderFTX:
-		return provider.NewFTXProvider(endpoint), nil
+		return provider.NewFTXProvider(ctx, logger, endpoint, providerPairs...), nil
 
 	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil

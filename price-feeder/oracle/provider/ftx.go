@@ -1,15 +1,18 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
@@ -21,6 +24,7 @@ const (
 	// candleWindowLength is the amount of seconds between
 	// each candle
 	candleWindowLength = 15
+	cacheInterval      = 500 * time.Millisecond
 )
 
 var _ Provider = (*FTXProvider)(nil)
@@ -33,6 +37,14 @@ type (
 	FTXProvider struct {
 		baseURL string
 		client  *http.Client
+
+		logger zerolog.Logger
+		mtx    sync.RWMutex
+
+		// candleCache is the cache of candle prices for assets.
+		candleCache map[string][]types.CandlePrice
+		// marketsCache is the cache of token markets for assets.
+		marketsCache []FTXMarkets
 	}
 
 	// FTXMarketsResponse is the response object used for
@@ -70,43 +82,37 @@ func (c FTXCandle) parseTime() (time.Time, error) {
 	return t, nil
 }
 
-func NewFTXProvider(endpoint Endpoint) *FTXProvider {
+func NewFTXProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoint Endpoint,
+	pairs ...types.CurrencyPair,
+) *FTXProvider {
+	restURL := ftxRestURL
+
 	if endpoint.Name == ProviderFTX {
-		return &FTXProvider{
-			baseURL: endpoint.Rest,
-			client:  newDefaultHTTPClient(),
-		}
+		restURL = endpoint.Rest
 	}
-	return &FTXProvider{
-		baseURL: ftxRestURL,
-		client:  newDefaultHTTPClient(),
+
+	ftx := FTXProvider{
+		baseURL:      restURL,
+		client:       newDefaultHTTPClient(),
+		logger:       logger,
+		candleCache:  nil,
+		marketsCache: []FTXMarkets{},
 	}
+
+	go func() {
+		logger.Debug().Msg("starting ftx polling...")
+		ftx.pollCache(ctx, pairs...)
+	}()
+
+	return &ftx
 }
 
 // GetCandlePrices returns the tickerPrices based on the provided pairs.
-func (p FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
-	path := fmt.Sprintf("%s%s", p.baseURL, ftxMarketsEndpoint)
-
-	resp, err := p.client.Get(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make FTX request: %w", err)
-	}
-	err = checkHTTPStatus(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read FTX response body: %w", err)
-	}
-
-	var tokensResp FTXMarketsResponse
-	if err := json.Unmarshal(bz, &tokensResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal FTX markets response body: %w", err)
-	}
+func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	markets := p.getMarketsCache()
 
 	baseDenomIdx := make(map[string]types.CurrencyPair)
 	for _, cp := range pairs {
@@ -114,7 +120,7 @@ func (p FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]ty
 	}
 
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
-	for _, tr := range tokensResp.Markets {
+	for _, tr := range markets {
 		symbol := strings.ToUpper(tr.Base)
 
 		cp, ok := baseDenomIdx[symbol]
@@ -152,7 +158,86 @@ func (p FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]ty
 }
 
 // GetCandlePrices returns the candlePrices based on the provided pairs.
-func (p FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+func (p *FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	return p.getCandleCache(), nil
+}
+
+// GetAvailablePairs return all available pairs symbol to susbscribe.
+func (p *FTXProvider) GetAvailablePairs() (map[string]struct{}, error) {
+	markets := p.getMarketsCache()
+	availablePairs := make(map[string]struct{}, len(markets))
+	for _, pair := range markets {
+		cp := types.CurrencyPair{
+			Base:  strings.ToUpper(pair.Base),
+			Quote: strings.ToUpper(pair.Quote),
+		}
+		availablePairs[cp.String()] = struct{}{}
+	}
+
+	return availablePairs, nil
+}
+
+// SubscribeCurrencyPairs performs a no-op since ftx does not use websockets
+func (p FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}
+
+// pollCache polls the markets and candles endpoints,
+// and updates the ftx cache.
+func (p *FTXProvider) pollCache(ctx context.Context, pairs ...types.CurrencyPair) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+
+		default:
+			p.logger.Debug().Msg("querying ftx api")
+
+			err := p.pollMarkets()
+			if err != nil {
+				return err
+			}
+			err = p.pollCandles(pairs...)
+			if err != nil {
+				return err
+			}
+
+			time.Sleep(cacheInterval)
+		}
+	}
+}
+
+// pollMarkets retrieves the markets response from the ftx api and
+// places it in p.marketsCache.
+func (p *FTXProvider) pollMarkets() error {
+	path := fmt.Sprintf("%s%s", p.baseURL, ftxMarketsEndpoint)
+
+	resp, err := p.client.Get(path)
+	if err != nil {
+		return err
+	}
+	err = checkHTTPStatus(resp)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var pairsSummary FTXMarketsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
+		return err
+	}
+
+	if !pairsSummary.Success {
+		return fmt.Errorf("ftx markets api returned with failure")
+	}
+
+	p.setMarketsCache(pairsSummary.Markets)
+	return nil
+}
+
+// pollMarkets retrieves the candles response from the ftx api and
+// places it in p.candleCache.
+func (p *FTXProvider) pollCandles(pairs ...types.CurrencyPair) error {
 	candles := make(map[string][]types.CandlePrice)
 	for _, pair := range pairs {
 		if _, ok := candles[pair.Base]; !ok {
@@ -174,23 +259,23 @@ func (p FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]
 
 		resp, err := p.client.Get(path)
 		if err != nil {
-			return nil, fmt.Errorf("failed to make FTX candle request: %w", err)
+			return fmt.Errorf("failed to make FTX candle request: %w", err)
 		}
 		err = checkHTTPStatus(resp)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		defer resp.Body.Close()
 
 		bz, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read FTX candle response body: %w", err)
+			return fmt.Errorf("failed to read FTX candle response body: %w", err)
 		}
 
 		var candlesResp FTXCandleResponse
 		if err := json.Unmarshal(bz, &candlesResp); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal FTX response body: %w", err)
+			return fmt.Errorf("failed to unmarshal FTX response body: %w", err)
 		}
 
 		candlePrices := []types.CandlePrice{}
@@ -199,7 +284,7 @@ func (p FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]
 			// so we have to calculate it
 			candleStart, err := responseCandle.parseTime()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			candleEnd := candleStart.Add(candleWindowLength).Unix() * int64(time.Second/time.Millisecond)
 
@@ -214,45 +299,30 @@ func (p FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]
 		candles[pair.String()] = candlePrices
 	}
 
-	return candles, nil
-}
-
-// GetAvailablePairs return all available pairs symbol to susbscribe.
-func (p FTXProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	path := fmt.Sprintf("%s%s", p.baseURL, ftxMarketsEndpoint)
-
-	resp, err := p.client.Get(path)
-	if err != nil {
-		return nil, err
-	}
-	err = checkHTTPStatus(resp)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var pairsSummary FTXMarketsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
-		return nil, err
-	}
-
-	if !pairsSummary.Success {
-		return nil, fmt.Errorf("ftx markets api returned with failure")
-	}
-
-	availablePairs := make(map[string]struct{}, len(pairsSummary.Markets))
-	for _, pair := range pairsSummary.Markets {
-		cp := types.CurrencyPair{
-			Base:  strings.ToUpper(pair.Base),
-			Quote: strings.ToUpper(pair.Quote),
-		}
-		availablePairs[cp.String()] = struct{}{}
-	}
-
-	return availablePairs, nil
-}
-
-// SubscribeCurrencyPairs performs a no-op since ftx does not use websockets
-func (p FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	p.setCandleCache(candles)
 	return nil
+}
+
+func (p *FTXProvider) setCandleCache(c map[string][]types.CandlePrice) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+	p.candleCache = c
+}
+
+func (p *FTXProvider) getCandleCache() map[string][]types.CandlePrice {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+	return p.candleCache
+}
+
+func (p *FTXProvider) setMarketsCache(m []FTXMarkets) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+	p.marketsCache = m
+}
+
+func (p *FTXProvider) getMarketsCache() []FTXMarkets {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+	return p.marketsCache
 }
