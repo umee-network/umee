@@ -74,13 +74,14 @@ func (s *IntegrationTestSuite) TestSupply() {
 			_, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
 			require.ErrorContains(err, tc.err.Error(), tc.msg)
 		} else {
+			denom := tc.coin.Denom
 			uDenom := types.ToUTokenDenom(tc.coin.Denom)
 
 			// initial state
-			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, tc.coin.Denom)
+			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
 			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
-			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
 			// verify the outputs of supply function
 			uToken, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
@@ -88,10 +89,10 @@ func (s *IntegrationTestSuite) TestSupply() {
 			require.Equal(tc.expectedUTokens, uToken, tc.msg)
 
 			// final state
-			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, tc.coin.Denom)
+			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
 			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
 			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
-			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
 			// verify token balance decreased by the expected amount
 			require.Equal(iBalance.Sub(tc.coin), fBalance, tc.msg, "token balance")
@@ -99,7 +100,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 			require.Equal(iUTokens.Add(tc.expectedUTokens), fUTokens, tc.msg, "uToken balance")
 			// verify uToken supply increased by the expected amount
 			require.Equal(iUTokenSupply.Add(tc.expectedUTokens), fUTokenSupply, tc.msg, "uToken supply")
-			// verify uToken exchange rate is unchanged (sensitive to rounding)
+			// verify uToken exchange rate is unchanged
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 		}
 	}
@@ -207,14 +208,15 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			_, err := app.LeverageKeeper.Withdraw(ctx, tc.addr, tc.uToken)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			tokenDenom := types.ToTokenDenom(tc.uToken.Denom)
+			denom := types.ToTokenDenom(tc.uToken.Denom)
+			uDenom := tc.uToken.Denom
 
 			// initial state
-			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, tokenDenom)
-			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, tc.uToken.Denom)
-			iCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, tc.uToken.Denom)
-			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, tc.uToken.Denom)
-			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tokenDenom)
+			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			iCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
+			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
 			// verify the outputs of withdraw function
 			token, err := app.LeverageKeeper.Withdraw(ctx, tc.addr, tc.uToken)
@@ -223,11 +225,11 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			require.Equal(tc.expectedTokens, token, tc.msg)
 
 			// final state
-			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, tokenDenom)
-			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, tc.uToken.Denom)
-			fCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, tc.uToken.Denom)
-			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, tc.uToken.Denom)
-			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tokenDenom)
+			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			fCollateral := app.LeverageKeeper.GetCollateralAmount(ctx, tc.addr, uDenom)
+			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
 
 			// verify token balance increased by the expected amount
 			require.Equal(iBalance.Add(tc.expectedTokens), fBalance, tc.msg, "token balance")
@@ -240,30 +242,87 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			// verify uToken supply decreased by the expected amount
 			require.Equal(iUTokenSupply.Sub(tc.uToken).Amount.Int64(),
 				fUTokenSupply.Amount.Int64(), tc.msg, "uToken supply")
-			// verify uToken exchange rate is unchanged (sensitive to rounding)
+			// verify uToken exchange rate is unchanged
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 		}
 	}
 }
 
-func (s *IntegrationTestSuite) TestGetToken() {
-	uabc := newToken("uabc", "ABC")
-	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, uabc))
+func (s *IntegrationTestSuite) TestCollateralize() {
+	type testCase struct {
+		msg    string
+		addr   sdk.AccAddress
+		uToken sdk.Coin
+		err    error
+	}
 
-	t, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uabc")
-	s.Require().NoError(err)
-	s.Require().Equal(t.ReserveFactor, sdk.MustNewDecFromStr("0.2"))
-	s.Require().Equal(t.CollateralWeight, sdk.MustNewDecFromStr("0.25"))
-	s.Require().Equal(t.LiquidationThreshold, sdk.MustNewDecFromStr("0.25"))
-	s.Require().Equal(t.BaseBorrowRate, sdk.MustNewDecFromStr("0.02"))
-	s.Require().Equal(t.KinkBorrowRate, sdk.MustNewDecFromStr("0.22"))
-	s.Require().Equal(t.MaxBorrowRate, sdk.MustNewDecFromStr("1.52"))
-	s.Require().Equal(t.KinkUtilization, sdk.MustNewDecFromStr("0.8"))
-	s.Require().Equal(t.LiquidationIncentive, sdk.MustNewDecFromStr("0.1"))
+	app, ctx, require := s.app, s.ctx, s.Require()
 
-	s.Require().NoError(t.AssertBorrowEnabled())
-	s.Require().NoError(t.AssertSupplyEnabled())
-	s.Require().NoError(t.AssertNotBlacklisted())
+	// create and fund a supplier with 200 UMEE, then supply 100 UMEE
+	supplier := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(supplier, coin(umeeDenom, 100_000000))
+
+	tcs := []testCase{
+		{
+			"base token",
+			supplier,
+			coin(umeeDenom, 80_000000),
+			types.ErrNotUToken,
+		},
+		{
+			"unregistered uToken",
+			supplier,
+			coin("u/abcd", 80_000000),
+			types.ErrNotRegisteredToken,
+		},
+		{
+			"valid collateralize",
+			supplier,
+			coin("u/"+umeeDenom, 80_000000),
+			nil,
+		},
+		{
+			"insufficient balance",
+			supplier,
+			coin("u/"+umeeDenom, 40_000000),
+			sdkerrors.ErrInsufficientFunds,
+		},
+	}
+
+	for _, tc := range tcs {
+		if tc.err != nil {
+			err := app.LeverageKeeper.Collateralize(ctx, tc.addr, tc.uToken)
+			require.ErrorContains(err, tc.err.Error(), tc.msg)
+		} else {
+			denom := types.ToTokenDenom(tc.uToken.Denom)
+			uDenom := tc.uToken.Denom
+
+			// initial state
+			iBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			iUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			iUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+
+			// verify the output of collateralize function
+			err := app.LeverageKeeper.Collateralize(ctx, tc.addr, tc.uToken)
+			require.NoError(err)
+
+			// final state
+			fBalance := app.BankKeeper.GetBalance(ctx, tc.addr, denom)
+			fUTokens := app.BankKeeper.GetBalance(ctx, tc.addr, uDenom)
+			fUTokenSupply := app.LeverageKeeper.GetUTokenSupply(ctx, uDenom)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+
+			// verify token balance is unchanged
+			require.Equal(iBalance, fBalance, tc.msg, "token balance")
+			// verify uToken balance decreased by the expected amount
+			require.Equal(iUTokens.Sub(tc.uToken), fUTokens, tc.msg, "uToken balance")
+			// verify uToken supply is unchanged
+			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+		}
+	}
 }
 
 func (s *IntegrationTestSuite) TestBorrow_Invalid() {

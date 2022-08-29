@@ -13,13 +13,12 @@ var (
 
 	// 2XX = Token Registry
 	ErrNotRegisteredToken   = sdkerrors.Register(ModuleName, 200, "not a registered Token")
-	ErrNotRegisteredUToken  = sdkerrors.Register(ModuleName, 201, "not a registered uToken")
-	ErrUToken               = sdkerrors.Register(ModuleName, 202, "denom should not be a uToken")
-	ErrNotUToken            = sdkerrors.Register(ModuleName, 203, "denom should be a uToken")
-	ErrSupplyNotAllowed     = sdkerrors.Register(ModuleName, 204, "supplying of asset disabled")
-	ErrBorrowNotAllowed     = sdkerrors.Register(ModuleName, 205, "borrowing of asset disabled")
-	ErrBlacklisted          = sdkerrors.Register(ModuleName, 206, "base denom blacklisted")
-	ErrCollateralWeightZero = sdkerrors.Register(ModuleName, 207, "token collateral weight is zero")
+	ErrUToken               = sdkerrors.Register(ModuleName, 201, "denom should not be a uToken")
+	ErrNotUToken            = sdkerrors.Register(ModuleName, 202, "denom should be a uToken")
+	ErrSupplyNotAllowed     = sdkerrors.Register(ModuleName, 203, "supplying of Token disabled")
+	ErrBorrowNotAllowed     = sdkerrors.Register(ModuleName, 204, "borrowing of Token disabled")
+	ErrBlacklisted          = sdkerrors.Register(ModuleName, 205, "blacklisted Token")
+	ErrCollateralWeightZero = sdkerrors.Register(ModuleName, 206, "collateral weight of Token is zero")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")

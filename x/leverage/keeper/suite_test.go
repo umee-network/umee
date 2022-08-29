@@ -124,7 +124,7 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 
 	for _, coin := range coins {
 		_, err := app.LeverageKeeper.Supply(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "supply")
 	}
 }
 
@@ -135,7 +135,7 @@ func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin
 
 	for _, coin := range uTokens {
 		_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "withdraw")
 	}
 }
 */
@@ -146,7 +146,7 @@ func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk
 
 	for _, coin := range uTokens {
 		err := app.LeverageKeeper.Collateralize(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "collateralize")
 	}
 }
 
@@ -157,7 +157,7 @@ func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...s
 
 	for _, coin := range uTokens {
 		err := app.LeverageKeeper.Decollateralize(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "decollateralize")
 	}
 }
 */
@@ -168,7 +168,7 @@ func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 
 	for _, coin := range coins {
 		err := app.LeverageKeeper.Borrow(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "borrow")
 	}
 }
 
@@ -179,9 +179,9 @@ func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
 
 	for _, coin := range coins {
 		repaid, err := app.LeverageKeeper.Repay(ctx, addr, coin)
-		require.NoError(err)
+		require.NoError(err, "repay")
 		// ensure intended repayment amount was not reduced, as doing so would create a misleading test
-		require.Equal(repaid, coin)
+		require.Equal(repaid, coin, "repay")
 	}
 }
 */
