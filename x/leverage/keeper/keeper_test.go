@@ -6,7 +6,6 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/leverage/keeper"
 	"github.com/umee-network/umee/v2/x/leverage/types"
 )
 
@@ -119,6 +118,9 @@ func (s *IntegrationTestSuite) TestSupply() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins are unchanged
 			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
 		}
 	}
 }
@@ -267,6 +269,9 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins are unchanged
 			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
 		}
 	}
 }
@@ -359,6 +364,9 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins are unchanged
 			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
 		}
 	}
 }
@@ -458,6 +466,9 @@ func (s *IntegrationTestSuite) TestDecollateralize() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins are unchanged
 			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
 		}
 	}
 }
@@ -515,7 +526,7 @@ func (s *IntegrationTestSuite) TestBorrow() {
 		{
 			"atom borrow",
 			borrower,
-			coin(atomDenom, 5_000000),
+			coin(atomDenom, 1_000000),
 			nil,
 		},
 		{
@@ -565,6 +576,9 @@ func (s *IntegrationTestSuite) TestBorrow() {
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins increased by expected amount
 			require.Equal(iBorrowed.Add(tc.coin), fBorrowed, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
 		}
 	}
 }
@@ -580,32 +594,6 @@ func (s *IntegrationTestSuite) TestRepay_Invalid() {
 	// user attempts to repay 200 u/umee, fails because utokens are not loanable assets
 	_, err = s.app.LeverageKeeper.Repay(s.ctx, addr, sdk.NewInt64Coin("u/"+umeeapp.BondDenom, 200000000))
 	s.Require().Error(err)
-}
-
-func (s *IntegrationTestSuite) TestBorrow_Reserved() {
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral.
-	addr, _ := s.initBorrowScenario()
-
-	// artifically reserve 200 umee
-	err := s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
-	s.Require().NoError(err)
-
-	// Note: Setting umee collateral weight to 1.0 to allow user to borrow heavily
-	umeeToken := newToken("uumee", "UMEE")
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")
-	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1.0")
-
-	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
-
-	// Supplier tries to borrow 1000 umee, insufficient balance because 200 of the
-	// module's 1000 umee are reserved.
-	err = s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000))
-	s.Require().Error(err)
-
-	// user borrows 800 umee
-	err = s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 800000000))
-	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TestRepay_Valid() {
@@ -936,61 +924,6 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	supplierAddress, err := s.app.LeverageKeeper.GetEligibleLiquidationTargets(s.ctx)
 	s.Require().NoError(err)
 	s.Require().Equal([]sdk.AccAddress{supplierAddr, anotherSupplier}, supplierAddress)
-}
-
-func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
-	// artificially set reserves
-	err := s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
-	s.Require().NoError(err)
-
-	// check invariant
-	_, broken := keeper.ReserveAmountInvariant(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken)
-}
-
-func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
-	addr, _ := s.initBorrowScenario()
-
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral
-
-	// check invariant
-	_, broken := keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken)
-
-	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
-
-	// withdraw the supplyed umee in the initBorrowScenario
-	_, err := s.app.LeverageKeeper.Withdraw(s.ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
-	s.Require().NoError(err)
-
-	// check invariant
-	_, broken = keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken)
-}
-
-func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
-	addr, _ := s.initBorrowScenario()
-
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral
-
-	// user borrows 20 umee
-	err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
-	s.Require().NoError(err)
-
-	// check invariant
-	_, broken := keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken)
-
-	// user repays 30 umee, actually only 20 because is the min between
-	// the amount borrowed and the amount repaid
-	_, err = s.app.LeverageKeeper.Repay(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
-	s.Require().NoError(err)
-
-	// check invariant
-	_, broken = keeper.BorrowAmountInvariant(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken)
 }
 
 func (s *IntegrationTestSuite) TestTotalCollateral() {
