@@ -26,11 +26,6 @@ const (
 	atomDenom    = fixtures.AtomDenom
 )
 
-var (
-	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
-)
-
 type IntegrationTestSuite struct {
 	suite.Suite
 
@@ -133,6 +128,7 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+/*
 // withdraw uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -142,6 +138,7 @@ func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, uTokens ...sdk.Coin
 		require.NoError(err)
 	}
 }
+*/
 
 // collateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
@@ -153,6 +150,7 @@ func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk
 	}
 }
 
+/*
 // decollateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -162,6 +160,7 @@ func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...s
 		require.NoError(err)
 	}
 }
+*/
 
 // borrow tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
@@ -173,6 +172,7 @@ func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+/*
 // repay tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -184,6 +184,7 @@ func (s *IntegrationTestSuite) repay(addr sdk.AccAddress, coins ...sdk.Coin) {
 		require.Equal(repaid, coin)
 	}
 }
+*/
 
 // setupAccount executes some common boilerplate before a test, where a user account is given tokens of a given denom,
 // may also supply them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.

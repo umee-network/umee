@@ -194,7 +194,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	// Unregistered asset
 	invalidCoins := sdk.NewCoins(sdk.NewInt64Coin("abcd", 1000))
 	_, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, invalidCoins)
-	s.Require().EqualError(err, "abcd: invalid asset")
+	s.Require().ErrorIs(err, types.ErrNotUToken)
 
 	// Create collateral uTokens (1k u/umee)
 	umeeCollatDenom := types.ToUTokenDenom(umeeDenom)

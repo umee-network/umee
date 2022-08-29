@@ -703,7 +703,6 @@ func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig) {
 			OracleKeeper:    app.OracleKeeper,
 		},
 	)
-
 	if err != nil {
 		panic(err)
 	}

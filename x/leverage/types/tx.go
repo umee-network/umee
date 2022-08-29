@@ -2,7 +2,6 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v2/util/checkers"
 )
@@ -66,7 +65,7 @@ func (msg MsgCollateralize) Route() string { return ModuleName }
 func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
@@ -90,7 +89,7 @@ func (msg MsgDecollateralize) Route() string { return ModuleName }
 func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
@@ -189,8 +188,11 @@ func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	if err != nil {
 		return err
 	}
-	if asset != nil && !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if asset == nil {
+		return ErrNilAsset
+	}
+	if err := asset.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

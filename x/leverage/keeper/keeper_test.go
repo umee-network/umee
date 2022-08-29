@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
@@ -15,7 +16,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 		addr            sdk.AccAddress
 		coin            sdk.Coin
 		expectedUTokens sdk.Coin
-		expectErr       bool
+		err             error
 	}
 
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -36,42 +37,42 @@ func (s *IntegrationTestSuite) TestSupply() {
 			supplier,
 			coin("abcd", 80_000000),
 			sdk.Coin{},
-			true,
+			types.ErrNotRegisteredToken,
 		},
 		{
 			"uToken",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			sdk.Coin{},
-			true,
+			types.ErrUToken,
 		},
 		{
 			"insufficient balance",
 			supplier,
 			coin(umeeDenom, 120_000000),
 			sdk.Coin{},
-			true,
+			sdkerrors.ErrInsufficientFunds,
 		},
 		{
 			"valid supply",
 			supplier,
 			coin(umeeDenom, 80_000000),
 			coin("u/"+umeeDenom, 80_000000),
-			false,
+			nil,
 		},
 		{
 			"high exchange rate",
 			supplier,
 			coin(atomDenom, 60_000000),
 			coin("u/"+atomDenom, 40_000000),
-			false,
+			nil,
 		},
 	}
 
 	for _, tc := range tcs {
-		if tc.expectErr {
+		if tc.err != nil {
 			_, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
-			require.Error(err)
+			require.ErrorContains(err, tc.err.Error(), tc.msg)
 		} else {
 			uDenom := types.ToUTokenDenom(tc.coin.Denom)
 
@@ -112,7 +113,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 		expectFromBalance    int64
 		expectFromCollateral int64
 		expectedTokens       sdk.Coin
-		expectErr            bool
+		err                  error
 	}
 
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -131,24 +132,19 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 	s.borrow(borrower, coin(atomDenom, 10_000000))
 	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 40_000000))
 
+	// create an additional UMEE supplier
+	other := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(other, coin(umeeDenom, 100_000000))
+
 	tcs := []testCase{
 		{
-			"unregistered denom",
+			"unregistered base token",
 			supplier,
 			coin("abcd", 80_000000),
 			0,
 			0,
 			sdk.Coin{},
-			true,
-		},
-		{
-			"unregistered uToken",
-			supplier,
-			coin("u/abcd", 80_000000),
-			0,
-			0,
-			sdk.Coin{},
-			true,
+			types.ErrNotUToken,
 		},
 		{
 			"base token",
@@ -157,7 +153,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			0,
 			0,
 			sdk.Coin{},
-			true,
+			types.ErrNotUToken,
 		},
 		{
 			"insufficient uTokens",
@@ -166,7 +162,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			0,
 			0,
 			sdk.Coin{},
-			true,
+			types.ErrInsufficientBalance,
 		},
 		{
 			"withdraw from balance",
@@ -175,7 +171,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			10_000000,
 			0,
 			coin(umeeDenom, 10_000000),
-			false,
+			nil,
 		},
 		{
 			"withdraw from collateral",
@@ -184,7 +180,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			15_000000,
 			75_000000,
 			coin(umeeDenom, 90_000000),
-			false,
+			nil,
 		},
 		{
 			"high exchange rate",
@@ -193,7 +189,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			50_000000,
 			0,
 			coin(atomDenom, 60_000000),
-			false,
+			nil,
 		},
 		{
 			"borrow limit",
@@ -202,14 +198,14 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 			0,
 			0,
 			sdk.Coin{},
-			true,
+			types.ErrUndercollaterized,
 		},
 	}
 
 	for _, tc := range tcs {
-		if tc.expectErr {
+		if tc.err != nil {
 			_, err := app.LeverageKeeper.Withdraw(ctx, tc.addr, tc.uToken)
-			require.Error(err)
+			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
 			tokenDenom := types.ToTokenDenom(tc.uToken.Denom)
 

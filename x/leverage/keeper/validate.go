@@ -9,6 +9,9 @@ import (
 // validateAcceptedDenom validates an sdk.Coin and ensures it is a registered Token
 // with Blacklisted == false
 func (k Keeper) validateAcceptedDenom(ctx sdk.Context, denom string) error {
+	if types.HasUTokenPrefix(denom) {
+		return types.ErrUToken.Wrap(denom)
+	}
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return err
@@ -44,11 +47,14 @@ func (k Keeper) validateAcceptedUToken(ctx sdk.Context, coin sdk.Coin) error {
 }
 
 // validateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
-func (k Keeper) validateSupply(ctx sdk.Context, loan sdk.Coin) error {
-	if err := loan.Validate(); err != nil {
+func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
+	if err := coin.Validate(); err != nil {
 		return err
 	}
-	token, err := k.GetTokenSettings(ctx, loan.Denom)
+	if types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrUToken.Wrap(coin.Denom)
+	}
+	token, err := k.GetTokenSettings(ctx, coin.Denom)
 	if err != nil {
 		return err
 	}
@@ -59,6 +65,9 @@ func (k Keeper) validateSupply(ctx sdk.Context, loan sdk.Coin) error {
 func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	if err := borrow.Validate(); err != nil {
 		return err
+	}
+	if types.HasUTokenPrefix(borrow.Denom) {
+		return types.ErrUToken.Wrap(borrow.Denom)
 	}
 	token, err := k.GetTokenSettings(ctx, borrow.Denom)
 	if err != nil {

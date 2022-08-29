@@ -60,7 +60,7 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 
 	// force invalid denom
 	err = s.tk.SetCollateralAmount(s.ctx, addr, sdk.Coin{Denom: "", Amount: sdk.ZeroInt()})
-	s.Require().EqualError(err, "0: invalid asset")
+	s.Require().ErrorContains(err, "invalid denom")
 
 	// set u/umee collateral amount
 	s.Require().NoError(s.tk.SetCollateralAmount(s.ctx, addr, sdk.NewInt64Coin(uDenom, 10)))
