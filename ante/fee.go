@@ -50,7 +50,7 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 		}
 	}
 
-	priority := getTxPriority(int64(gas), isOracleOrGravity, msgs)
+	priority := getTxPriority(isOracleOrGravity, msgs)
 	if !chargeFees {
 		return sdk.Coins{}, priority, nil
 	}
@@ -93,8 +93,8 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
 // denom) and oracle tx check.
 // Dirty optimization: since we already check if msgs are oracle or gravity messages, then we
-// don't recomupte it again: isOracleOrGravity flag takes a precendence over msgs check.
-func getTxPriority(gasAmount int64, isOracleOrGravity bool, msgs []sdk.Msg) int64 {
+// don't recomupte it again: isOracleOrGravity flag takes a precedence over msgs check.
+func getTxPriority( /*fees, gasAmount*/ isOracleOrGravity bool, msgs []sdk.Msg) int64 {
 	var priority int64
 	/* TODO: IBC tx prioritization is not stable and we will implement a more general
 	 * tx prioritization once that will be resolved

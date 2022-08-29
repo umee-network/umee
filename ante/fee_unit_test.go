@@ -31,7 +31,7 @@ func TestPriority(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		p := getTxPriority(0, tc.oracle, tc.msgs)
+		p := getTxPriority(tc.oracle, tc.msgs)
 		assert.Equal(t, tc.priority, p, tc.name)
 	}
 }
