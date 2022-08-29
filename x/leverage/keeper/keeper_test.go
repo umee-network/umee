@@ -348,6 +348,12 @@ func (s *IntegrationTestSuite) TestDecollateralize() {
 	s.supply(supplier, coin(umeeDenom, 100_000000))
 	s.collateralize(supplier, coin("u/"+umeeDenom, 100_000000))
 
+	// create a borrower which supplies, collateralizes, then borrows ATOM
+	borrower := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(borrower, coin(atomDenom, 100_000000))
+	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin(atomDenom, 10_000000))
+
 	tcs := []testCase{
 		{
 			"base token",
@@ -366,6 +372,12 @@ func (s *IntegrationTestSuite) TestDecollateralize() {
 			supplier,
 			coin("u/"+umeeDenom, 40_000000),
 			types.ErrInsufficientCollateral,
+		},
+		{
+			"borrow limit",
+			borrower,
+			coin("u/"+atomDenom, 100_000000),
+			types.ErrUndercollaterized,
 		},
 	}
 
