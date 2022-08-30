@@ -11,13 +11,13 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 
 	// get initial reserves
 	amount := app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
-	require.Equal(amount, sdk.ZeroInt())
+	require.Equal(sdk.ZeroInt(), amount)
 
 	// artifically reserve 200 umee
 	s.setReserves(coin(umeeapp.BondDenom, 200_000000))
 	// get new reserves
 	amount = app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
-	require.Equal(amount, sdk.NewInt(200_000000))
+	require.Equal(sdk.NewInt(200_000000), amount)
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
