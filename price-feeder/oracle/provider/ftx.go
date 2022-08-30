@@ -77,7 +77,7 @@ type (
 func (c FTXCandle) parseTime() (time.Time, error) {
 	t, err := time.Parse(ftxTimeFmt, c.StartTime)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("unable to parse ftx timestamp")
+		return time.Time{}, fmt.Errorf("unable to parse ftx timestamp %w", err)
 	}
 	return t, nil
 }
@@ -113,7 +113,7 @@ func NewFTXProvider(
 	return &ftx
 }
 
-// GetCandlePrices returns the tickerPrices based on the provided pairs.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	markets := p.getMarketsCache()
 
