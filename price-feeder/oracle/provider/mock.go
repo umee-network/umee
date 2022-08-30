@@ -89,7 +89,7 @@ func (p MockProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 
 	for t := range tickerMap {
 		if _, ok := tickerPrices[t]; !ok {
-			return nil, fmt.Errorf("missing exchange rate for %s", t)
+			return nil, fmt.Errorf(types.ErrMissingExchangeRate.Error(), t)
 		}
 	}
 
