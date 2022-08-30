@@ -181,3 +181,9 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 	err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, coins)
 	require.NoError(err, "forceBorroww")
 }
+
+// checkInvariants is used during other tests to quickly test all invariants
+func (s *IntegrationTestSuite) checkInvariants(msg string) {
+	desc, broken := keeper.AllInvariants(s.app.LeverageKeeper)(s.ctx)
+	s.Require().False(broken, msg, desc)
+}

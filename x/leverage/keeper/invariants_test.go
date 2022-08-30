@@ -8,12 +8,6 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-// checkInvariants is used during other tests to quickly test all invariants
-func (s *IntegrationTestSuite) checkInvariants(msg string) {
-	desc, broken := keeper.AllInvariants(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken, msg, desc)
-}
-
 func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	// artificially set reserves
 	err := s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
