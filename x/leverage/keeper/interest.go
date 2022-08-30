@@ -173,18 +173,12 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"interest", totalInterest.String(),
 		"reserved", newReserves.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeInterestAccrual,
-			sdk.NewAttribute(types.EventAttrBlockHeight, fmt.Sprintf("%d", ctx.BlockHeight())),
-			sdk.NewAttribute(types.EventAttrUnixTime, fmt.Sprintf("%d", currentTime)),
-			sdk.NewAttribute(types.EventAttrInterest, totalInterest.String()),
-			sdk.NewAttribute(types.EventAttrReserved, newReserves.String()),
-		),
+	return ctx.EventManager().EmitTypedEvent(&types.EventInterestAccrual{
+		BlockHeight:   uint64(ctx.BlockHeight()),
+		Timestamp:     uint64(currentTime),
+		TotalInterest: totalInterest,
+		Reserved:      newReserves,
 	})
-
-	return nil
 }
 
 // SetLastInterestTime sets LastInterestTime to a given value

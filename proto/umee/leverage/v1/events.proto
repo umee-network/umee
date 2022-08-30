@@ -66,3 +66,12 @@ message EventLiquidate {
   // Assets liquidated from the borrower
   cosmos.base.v1beta1.Coin liquidated = 3 [(gogoproto.nullable) = false];
 }
+
+message EventInterestAccrual {
+  uint64 block_height = 1;
+  // Unix timestamp (in seconds)
+  uint64 timestamp = 2;
+
+  repeated cosmos.base.v1beta1.Coin total_interest = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin reserved       = 4 [(gogoproto.nullable) = false];
+}
