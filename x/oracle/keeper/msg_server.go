@@ -25,12 +25,10 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 	msg *types.MsgAggregateExchangeRatePrevote,
 ) (*types.MsgAggregateExchangeRatePrevoteResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
 		return nil, err
 	}
-
 	feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
 		return nil, err
@@ -52,20 +50,7 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 	}
 
 	aggregatePrevote := types.NewAggregateExchangeRatePrevote(voteHash, valAddr, uint64(ctx.BlockHeight()))
-
 	ms.SetAggregateExchangeRatePrevote(ctx, valAddr, aggregatePrevote)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeAggregatePrevote,
-			sdk.NewAttribute(types.EventAttrKeyVoter, msg.Validator),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Feeder),
-		),
-	})
 
 	return &types.MsgAggregateExchangeRatePrevoteResponse{}, nil
 }
@@ -75,23 +60,19 @@ func (ms msgServer) AggregateExchangeRateVote(
 	msg *types.MsgAggregateExchangeRateVote,
 ) (*types.MsgAggregateExchangeRateVoteResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
 		return nil, err
 	}
-
 	feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := ms.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
 		return nil, err
 	}
 
 	params := ms.GetParams(ctx)
-
 	aggregatePrevote, err := ms.GetAggregateExchangeRatePrevote(ctx, valAddr)
 	if err != nil {
 		return nil, sdkerrors.Wrap(types.ErrNoAggregatePrevote, msg.Validator)
@@ -125,19 +106,6 @@ func (ms msgServer) AggregateExchangeRateVote(
 	ms.SetAggregateExchangeRateVote(ctx, valAddr, types.NewAggregateExchangeRateVote(filteredTuples, valAddr))
 	ms.DeleteAggregateExchangeRatePrevote(ctx, valAddr)
 
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeAggregateVote,
-			sdk.NewAttribute(types.EventAttrKeyVoter, msg.Validator),
-			sdk.NewAttribute(types.EventAttrKeyExchangeRates, msg.ExchangeRates),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Feeder),
-		),
-	})
-
 	return &types.MsgAggregateExchangeRateVoteResponse{}, nil
 }
 
@@ -163,18 +131,8 @@ func (ms msgServer) DelegateFeedConsent(
 	}
 
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
+	err = ctx.EventManager().EmitTypedEvent(&types.EventDelegateFeedConsent{
+		msg.Operator, msg.Delegate})
 
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeFeedDelegate,
-			sdk.NewAttribute(types.EventAttrKeyFeeder, msg.Delegate),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Operator),
-		),
-	})
-
-	return &types.MsgDelegateFeedConsentResponse{}, nil
+	return &types.MsgDelegateFeedConsentResponse{}, err
 }
