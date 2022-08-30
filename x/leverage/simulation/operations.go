@@ -424,7 +424,9 @@ func randomLiquidateFields(
 	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
 }
 
-func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper, bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
+	bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
+) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 	cfg := simappparams.MakeTestEncodingConfig()
 	txCtx := simulation.OperationInput{
 		R:               r,
