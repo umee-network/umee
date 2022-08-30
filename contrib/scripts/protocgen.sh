@@ -19,4 +19,5 @@ cd ..
 cp -r github.com/umee-network/umee/v3/* .
 rm -rf github.com
 
+# we need to go mod manually, because the docker image is still on go1.18
 # go mod tidy

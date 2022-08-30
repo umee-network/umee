@@ -13,6 +13,9 @@ profile.out
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Script single node data
+contrib/scripts/node-data
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 vue/node_modules
