@@ -7,9 +7,11 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestGetBorrow() {
+	ctx, require := s.ctx, s.Require()
+
 	// get uumee borrow amount of empty account address (zero)
-	borrowed := s.tk.GetBorrow(s.ctx, sdk.AccAddress{}, umeeDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), borrowed)
+	borrowed := s.tk.GetBorrow(ctx, sdk.AccAddress{}, umeeDenom)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 0), borrowed)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
 	addr := s.newAccount(coin(umeeDenom, 1000))
@@ -18,62 +20,64 @@ func (s *IntegrationTestSuite) TestGetBorrow() {
 	s.borrow(addr, coin(umeeDenom, 123))
 
 	// confirm borrowed amount is 123 uumee
-	borrowed = s.tk.GetBorrow(s.ctx, addr, umeeDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
+	borrowed = s.tk.GetBorrow(ctx, addr, umeeDenom)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
 
 	// unregistered denom (zero)
-	borrowed = s.tk.GetBorrow(s.ctx, addr, "abcd")
-	s.Require().Equal(sdk.NewInt64Coin("abcd", 0), borrowed)
+	borrowed = s.tk.GetBorrow(ctx, addr, "abcd")
+	require.Equal(sdk.NewInt64Coin("abcd", 0), borrowed)
 
 	// we do not test empty denom, as that will cause a panic
 }
 
 func (s *IntegrationTestSuite) TestSetBorrow() {
+	ctx, require := s.ctx, s.Require()
+
 	// empty account address
-	err := s.tk.SetBorrow(s.ctx, sdk.AccAddress{}, sdk.NewInt64Coin(umeeDenom, 123))
-	s.Require().EqualError(err, "empty address")
+	err := s.tk.SetBorrow(ctx, sdk.AccAddress{}, sdk.NewInt64Coin(umeeDenom, 123))
+	require.EqualError(err, "empty address")
 
 	addr := s.newAccount()
 
 	// set nonzero borrow, and confirm effect
-	err = s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 123))
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 123), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	err = s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 123))
+	require.NoError(err)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 123), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// set zero borrow, and confirm effect
-	err = s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 0))
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	err = s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 0))
+	require.NoError(err)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 0), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// unregistered (but valid) denom
-	err = s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin("abcd", 123))
-	s.Require().NoError(err)
+	err = s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin("abcd", 123))
+	require.NoError(err)
 
 	// interest scalar test - ensure borrowing smallest possible amount doesn't round to zero at scalar = 1.0001
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("1.0001")))
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1)))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 1), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("1.0001")))
+	require.NoError(s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 1)))
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 1), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("1.0")))
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("2.33")))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 466), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("1.0")))
+	require.NoError(s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("2.33")))
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 466), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// interest scalar extreme case - rounding up becomes apparent at high borrow amount
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("555444333222111")))
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1)))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 1), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 20000)))
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 20001), s.tk.GetBorrow(s.ctx, addr, umeeDenom))
-
-	// we do not test empty denom, as that will cause a panic
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("555444333222111")))
+	require.NoError(s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 1)))
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 1), s.tk.GetBorrow(ctx, addr, umeeDenom))
+	require.NoError(s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 20000)))
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 20001), s.tk.GetBorrow(ctx, addr, umeeDenom))
 }
 
 func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
+	ctx, require := s.ctx, s.Require()
+
 	// unregistered denom (zero)
-	borrowed := s.tk.GetTotalBorrowed(s.ctx, "abcd")
-	s.Require().Equal(sdk.NewInt64Coin("abcd", 0), borrowed)
+	borrowed := s.tk.GetTotalBorrowed(ctx, "abcd")
+	require.Equal(sdk.NewInt64Coin("abcd", 0), borrowed)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
 	borrower := s.newAccount(coin(umeeDenom, 1000))
@@ -82,8 +86,8 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	s.borrow(borrower, coin(umeeDenom, 123))
 
 	// confirm total borrowed amount is 123 uumee
-	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
+	borrowed = s.tk.GetTotalBorrowed(ctx, umeeDenom)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 234 uumee
 	borrower2 := s.newAccount(coin(umeeDenom, 1000))
@@ -92,18 +96,20 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	s.borrow(borrower2, coin(umeeDenom, 234))
 
 	// confirm total borrowed amount is 357 uumee
-	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
-	s.Require().Equal(coin(umeeDenom, 357), borrowed)
+	borrowed = s.tk.GetTotalBorrowed(ctx, umeeDenom)
+	require.Equal(coin(umeeDenom, 357), borrowed)
 
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
-	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("2.00")))
-	s.Require().Equal(coin(umeeDenom, 714), s.tk.GetTotalBorrowed(s.ctx, umeeDenom))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("2.00")))
+	require.Equal(coin(umeeDenom, 714), s.tk.GetTotalBorrowed(ctx, umeeDenom))
 }
 
 func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
+	ctx, require := s.ctx, s.Require()
+
 	// unregistered denom (zero)
-	available := s.tk.GetAvailableToBorrow(s.ctx, "abcd")
-	s.Require().Equal(sdk.ZeroInt(), available)
+	available := s.tk.GetAvailableToBorrow(ctx, "abcd")
+	require.Equal(sdk.ZeroInt(), available)
 
 	// creates account which has supplied and collateralized 1000 uumee
 	supplier := s.newAccount(coin(umeeDenom, 1000))
@@ -111,8 +117,8 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	s.collateralize(supplier, coin("u/"+umeeDenom, 1000))
 
 	// confirm lending pool is 1000 uumee
-	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.NewInt(1000), available)
+	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	require.Equal(sdk.NewInt(1000), available)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
 	borrower := s.newAccount(coin(umeeDenom, 1000))
@@ -121,19 +127,21 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	s.borrow(borrower, coin(umeeDenom, 123))
 
 	// confirm lending pool is 1877 uumee
-	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.NewInt(1877), available)
+	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	require.Equal(sdk.NewInt(1877), available)
 
 	// artificially reserve 200 uumee, reducing available amount to 1677
-	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 200)))
-	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.NewInt(1677), available)
+	require.NoError(s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeDenom, 200)))
+	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	require.Equal(sdk.NewInt(1677), available)
 }
 
 func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
+	ctx, require := s.ctx, s.Require()
+
 	// unregistered denom (0 borrowed and 0 lending pool is considered 100%)
-	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
-	s.Require().Equal(sdk.OneDec(), utilization)
+	utilization := s.tk.SupplyUtilization(ctx, "abcd")
+	require.Equal(sdk.OneDec(), utilization)
 
 	// creates account which has supplied and collateralized 1000 uumee
 	addr := s.newAccount(coin(umeeDenom, 1000))
@@ -144,62 +152,64 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	//   utilization = (Total Borrowed / (Total Borrowed + Module Balance - Reserved Amount))
 
 	// 0% utilization (0 / 0+1000-0)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.ZeroDec(), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.ZeroDec(), utilization)
 
 	// user borrows 200 uumee, reducing module account to 800 uumee
 	s.borrow(addr, coin(umeeDenom, 200))
 
 	// 20% utilization (200 / 200+800-0)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("0.2"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("0.2"), utilization)
 
 	// artificially reserve 200 uumee
-	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 200)))
+	require.NoError(s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeDenom, 200)))
 
 	// 25% utilization (200 / 200+800-200)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("0.25"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("0.25"), utilization)
 
 	// user borrows 600 uumee (disregard borrow limit), reducing module account to 0 uumee
 	s.forceBorrow(addr, coin(umeeDenom, 600))
 
 	// 100% utilization (800 / 800+200-200))
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set user borrow to 1200 umee
-	s.Require().NoError(s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 1200)))
+	require.NoError(s.tk.SetBorrow(ctx, addr, sdk.NewInt64Coin(umeeDenom, 1200)))
 
 	// still 100% utilization (1200 / 1200+200-200)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 800 uumee
-	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 800)))
+	require.NoError(s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeDenom, 800)))
 
 	// edge case interpreted as 100% utilization (1200 / 1200+200-800)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 4000 uumee
-	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 4000)))
+	require.NoError(s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeDenom, 4000)))
 
 	// impossible case interpreted as 100% utilization (1200 / 1200+200-4000)
-	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
+	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 }
 
 func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
 	// Empty coins
-	borrowLimit, err := s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, sdk.NewCoins())
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.ZeroDec(), borrowLimit)
+	borrowLimit, err := app.LeverageKeeper.CalculateBorrowLimit(ctx, sdk.NewCoins())
+	require.NoError(err)
+	require.Equal(sdk.ZeroDec(), borrowLimit)
 
 	// Unregistered asset
 	invalidCoins := sdk.NewCoins(sdk.NewInt64Coin("abcd", 1000))
-	_, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, invalidCoins)
-	s.Require().ErrorIs(err, types.ErrNotUToken)
+	_, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, invalidCoins)
+	require.ErrorIs(err, types.ErrNotUToken)
 
 	// Create collateral uTokens (1k u/umee)
 	umeeCollatDenom := types.ToUTokenDenom(umeeDenom)
@@ -212,9 +222,9 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, umeeCollateral)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedUmeeLimit, borrowLimit)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, umeeCollateral)
+	require.NoError(err)
+	require.Equal(expectedUmeeLimit, borrowLimit)
 
 	// Create collateral atom uTokens (1k u/uatom)
 	atomCollatDenom := types.ToUTokenDenom(atomDenom)
@@ -227,16 +237,16 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, atomCollateral)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedAtomLimit, borrowLimit)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, atomCollateral)
+	require.NoError(err)
+	require.Equal(expectedAtomLimit, borrowLimit)
 
 	// Compute the expected borrow limit of the two combined collateral coins
 	expectedCombinedLimit := expectedUmeeLimit.Add(expectedAtomLimit)
 	combinedCollateral := umeeCollateral.Add(atomCollateral...)
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = s.app.LeverageKeeper.CalculateBorrowLimit(s.ctx, combinedCollateral)
-	s.Require().NoError(err)
-	s.Require().Equal(expectedCombinedLimit, borrowLimit)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, combinedCollateral)
+	require.NoError(err)
+	require.Equal(expectedCombinedLimit, borrowLimit)
 }

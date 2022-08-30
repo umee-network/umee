@@ -41,6 +41,7 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
+	require := s.Require()
 	app := umeeapp.Setup(s.T(), false, 1)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
@@ -66,8 +67,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(types.NewMultiHooks())
 
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
-	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, atomIBCToken))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, atomIBCToken))
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.LeverageKeeper))
@@ -107,7 +108,7 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	addr := sdk.AccAddress([]byte(addrStr))
 
 	// register the account in AccountKeeper
-	acct := app.AccountKeeper.NewAccountWithAddress(s.ctx, addr)
+	acct := app.AccountKeeper.NewAccountWithAddress(ctx, addr)
 	app.AccountKeeper.SetAccount(ctx, acct)
 
 	s.fundAccount(addr, funds...)
@@ -184,6 +185,8 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 
 // checkInvariants is used during other tests to quickly test all invariants
 func (s *IntegrationTestSuite) checkInvariants(msg string) {
-	desc, broken := keeper.AllInvariants(s.app.LeverageKeeper)(s.ctx)
-	s.Require().False(broken, msg, desc)
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	desc, broken := keeper.AllInvariants(app.LeverageKeeper)(ctx)
+	require.False(broken, msg, desc)
 }

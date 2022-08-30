@@ -7,20 +7,24 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestSetReserves() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
 	// get initial reserves
-	amount := s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
-	s.Require().Equal(amount, sdk.ZeroInt())
+	amount := app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
+	require.Equal(amount, sdk.ZeroInt())
 
 	// artifically reserve 200 umee
-	err := s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
-	s.Require().NoError(err)
+	err := s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	require.NoError(err)
 
 	// get new reserves
-	amount = s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeapp.BondDenom)
-	s.Require().Equal(amount, sdk.NewInt(200000000))
+	amount = app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
+	require.Equal(amount, sdk.NewInt(200000000))
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
 	// Creating a supplier so module account has some uumee
 	addr := s.newAccount(coin(umeeDenom, 200_000000))
 	s.supply(addr, coin(umeeDenom, 200_000000))
@@ -30,47 +34,47 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Create an uncollateralized debt position
 	badDebt := sdk.NewInt64Coin(umeeDenom, 100000000) // 100 umee
-	err := s.tk.SetBorrow(s.ctx, addr2, badDebt)
-	s.Require().NoError(err)
+	err := s.tk.SetBorrow(ctx, addr2, badDebt)
+	require.NoError(err)
 
 	// Manually mark the bad debt for repayment
-	s.Require().NoError(s.tk.SetBadDebtAddress(s.ctx, addr2, umeeDenom, true))
+	require.NoError(s.tk.SetBadDebtAddress(ctx, addr2, umeeDenom, true))
 
 	// Manually set reserves to 60 umee
 	reserve := sdk.NewInt64Coin(umeeDenom, 60000000)
-	err = s.tk.SetReserveAmount(s.ctx, reserve)
-	s.Require().NoError(err)
+	err = s.tk.SetReserveAmount(ctx, reserve)
+	require.NoError(err)
 
 	// Sweep all bad debts, which should repay 60 umee of the bad debt (partial repayment)
-	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
-	s.Require().NoError(err)
+	err = app.LeverageKeeper.SweepBadDebts(ctx)
+	require.NoError(err)
 
 	// Confirm that a debt of 40 umee remains
-	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, addr2, umeeDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 40000000), remainingDebt)
+	remainingDebt := app.LeverageKeeper.GetBorrow(ctx, addr2, umeeDenom)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 40000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
-	remainingReserve := s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.ZeroInt(), remainingReserve)
+	remainingReserve := app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
+	require.Equal(sdk.ZeroInt(), remainingReserve)
 
 	// Manually set reserves to 70 umee
 	reserve = sdk.NewInt64Coin(umeeDenom, 70000000)
-	err = s.tk.SetReserveAmount(s.ctx, reserve)
-	s.Require().NoError(err)
+	err = s.tk.SetReserveAmount(ctx, reserve)
+	require.NoError(err)
 
 	// Sweep all bad debts, which should fully repay the bad debt this time
-	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
-	s.Require().NoError(err)
+	err = app.LeverageKeeper.SweepBadDebts(ctx)
+	require.NoError(err)
 
 	// Confirm that the debt is eliminated
-	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, addr2, umeeDenom)
-	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), remainingDebt)
+	remainingDebt = app.LeverageKeeper.GetBorrow(ctx, addr2, umeeDenom)
+	require.Equal(sdk.NewInt64Coin(umeeDenom, 0), remainingDebt)
 
 	// Confirm that reserves are now at 30 umee
-	remainingReserve = s.app.LeverageKeeper.GetReserveAmount(s.ctx, umeeDenom)
-	s.Require().Equal(sdk.NewInt(30000000), remainingReserve)
+	remainingReserve = app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
+	require.Equal(sdk.NewInt(30000000), remainingReserve)
 
 	// Sweep all bad debts - but there are none
-	err = s.app.LeverageKeeper.SweepBadDebts(s.ctx)
-	s.Require().NoError(err)
+	err = app.LeverageKeeper.SweepBadDebts(ctx)
+	require.NoError(err)
 }

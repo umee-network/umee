@@ -9,25 +9,31 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
-	resp, err := s.queryClient.RegisteredTokens(s.ctx.Context(), &types.QueryRegisteredTokens{})
-	s.Require().NoError(err)
-	s.Require().Len(resp.Registry, 2, "token registry length")
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
+	require.NoError(err)
+	require.Len(resp.Registry, 2, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	resp, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParams{})
-	s.Require().NoError(err)
-	s.Require().Equal(types.DefaultParams(), resp.Params)
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.Params(ctx.Context(), &types.QueryParams{})
+	require.NoError(err)
+	require.Equal(types.DefaultParams(), resp.Params)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
+	require := s.Require()
+
 	req := &types.QueryMarketSummary{}
 	_, err := s.queryClient.MarketSummary(context.Background(), req)
-	s.Require().Error(err)
+	require.Error(err)
 
 	req = &types.QueryMarketSummary{Denom: "uumee"}
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
-	s.Require().NoError(err)
+	require.NoError(err)
 
 	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
 
@@ -51,17 +57,19 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 		AvailableWithdraw:      sdk.ZeroInt(),
 		AvailableCollateralize: sdk.ZeroInt(),
 	}
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
+	ctx, require := s.ctx, s.Require()
+
 	// creates account which has supplied and collateralized 1000 uumee
 	addr := s.newAccount(coin(umeeDenom, 1000))
 	s.supply(addr, coin(umeeDenom, 1000))
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
 
-	resp, err := s.queryClient.AccountBalances(s.ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
-	s.Require().NoError(err)
+	resp, err := s.queryClient.AccountBalances(ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
+	require.NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
@@ -73,17 +81,19 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 		Borrowed: nil,
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
+	ctx, require := s.ctx, s.Require()
+
 	// creates account which has supplied and collateralized 1000 UMEE
 	addr := s.newAccount(coin(umeeDenom, 1000_000000))
 	s.supply(addr, coin(umeeDenom, 1000_000000))
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
-	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
-	s.Require().NoError(err)
+	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
+	require.NoError(err)
 
 	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
@@ -102,16 +112,18 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
-	resp, err := s.queryClient.LiquidationTargets(s.ctx.Context(), &types.QueryLiquidationTargets{})
-	s.Require().NoError(err)
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
+	require.NoError(err)
 
 	expected := types.QueryLiquidationTargetsResponse{
 		Targets: nil,
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
