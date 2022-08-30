@@ -1,38 +1,20 @@
-#!/bin/bash
+#!/bin/bash -eux
+
+# USAGE:
+# ./single-gen.sh <iterations> <sleep> <num-blocks> <node-address>
 
 CNT=0
-ITER=$1
-SLEEP=$2
-NUMBLOCKS=$3
-NODEADDR=$4
-
-if [ -z "$1" ]; then
-  echo "Invalid argument: missing number of iterations"
-  echo "sh test_localnet_liveness.sh <iterations> <sleep> <num-blocks> <node-address>"
-  exit 1
-fi
-
-if [ -z "$2" ]; then
-  echo "Invalid argument: missing sleep duration"
-  echo "sh test_localnet_liveness.sh <iterations> <sleep> <num-blocks> <node-address>"
-  exit 1
-fi
-
-if [ -z "$3" ]; then
-  echo "Invalid argument: missing number of blocks"
-  echo "sh test_localnet_liveness.sh <iterations> <sleep> <num-blocks> <node-address>"
-  exit 1
-fi
-
-if [ -z "$4" ]; then
-  echo "Invalid argument: missing node address"
-  echo "sh test_localnet_liveness.sh <iterations> <sleep> <num-blocks> <node-address>"
-  exit 1
-fi
-
+ITER="${1:-50}"
+SLEEP="${2:-5}"
+NUMBLOCKS="${3:-50}"
+RPC="${4:-localhost:26657}"
 
 while [ ${CNT} -lt $ITER ]; do
-  curr_block=$(curl -s $NODEADDR:26657/status | jq -r '.result.sync_info.latest_block_height')
+  curr_block=$(curl -s $RPC/status | jq -r '.result.sync_info.latest_block_height')
+
+  if [ -z "$curr_block" ]; then
+    echo "Current block is empty, is the node active?"
+  fi
 
   echo "Current block: ${curr_block} iteration: ${CNT}"
 
