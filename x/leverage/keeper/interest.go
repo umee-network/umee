@@ -84,7 +84,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			"prev", prevInterestTime,
 		)
 
-		// if LastInterestTime appears to tbe in the future, do nothing (besides logging) and leave
+		// if LastInterestTime appears to be in the future, do nothing (besides logging) and leave
 		// LastInterestTime at its stored value. This will repeat every block until BlockTime exceeds
 		// LastInterestTime.
 		return nil
