@@ -38,6 +38,7 @@ var (
 		1126,
 		"market total collateral would exceed MaxCollateralShare",
 	)
-	ErrNotUToken = sdkerrors.Register(ModuleName, 1127, "denom should be a uToken")
-	ErrUToken    = sdkerrors.Register(ModuleName, 1128, "denom should not be a uToken")
+	ErrNotUToken            = sdkerrors.Register(ModuleName, 1127, "denom should be a uToken")
+	ErrUToken               = sdkerrors.Register(ModuleName, 1128, "denom should not be a uToken")
+	ErrExcessiveTimeElapsed = sdkerrors.Register(ModuleName, 1130, "excessive time elapsed since last interest time")
 )
