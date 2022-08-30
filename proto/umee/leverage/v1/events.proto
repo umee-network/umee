@@ -33,15 +33,15 @@ message EventWithdraw {
 message EventCollaterize {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Asset provided as a collateral.
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  // uAsset provided as a collateral.
+  cosmos.base.v1beta1.Coin uasset = 2 [(gogoproto.nullable) = false];
 }
 
 message EventDecollaterize {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Asset removed from collateral.
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  // uAsset removed from collateral.
+  cosmos.base.v1beta1.Coin uasset = 2 [(gogoproto.nullable) = false];
 }
 
 message EventBorrow {
