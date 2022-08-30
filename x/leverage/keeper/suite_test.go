@@ -137,6 +137,16 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+// withdraw utokens from an account and require no errors. Use when setting up leverage scenarios.
+func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, coins ...sdk.Coin) {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	for _, coin := range coins {
+		_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin)
+		require.NoError(err, "withdraw")
+	}
+}
+
 // collateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
