@@ -89,14 +89,14 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 		}
 
 		// This action is not caused by a message so we need to make an event here
-		asset := sdk.Coin{denom, amountToRepay}
+		asset := sdk.NewCoin(denom, amountToRepay)
 		k.Logger(ctx).Debug(
 			"bad debt repaid",
 			"borrower", borrower,
 			"asset", asset,
 		)
 		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
-			borrower, asset})
+			Borrower: borrower, Asset: asset})
 		if err != nil {
 			return false, err
 		}
@@ -110,7 +110,7 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"asset", newBorrowed,
 		)
 		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
-			borrower, newBorrowed})
+			Borrower: borrower, OutstandingDebt: newBorrowed})
 		if err != nil {
 			return false, err
 		}

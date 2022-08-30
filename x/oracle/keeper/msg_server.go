@@ -132,7 +132,7 @@ func (ms msgServer) DelegateFeedConsent(
 
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventDelegateFeedConsent{
-		msg.Operator, msg.Delegate})
+		Operator: msg.Operator, Delegate: msg.Delegate})
 
 	return &types.MsgDelegateFeedConsentResponse{}, err
 }

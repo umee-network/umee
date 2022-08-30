@@ -103,7 +103,7 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 		"funded oracle",
 		"amount", rewards,
 	)
-	if err := ctx.EventManager().EmitTypedEvent(&types.EventFundOracle{rewards}); err != nil {
+	if err := ctx.EventManager().EmitTypedEvent(&types.EventFundOracle{Assets: rewards}); err != nil {
 		return err
 	}
 

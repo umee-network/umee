@@ -127,7 +127,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
 	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
-		denom, exchangeRate})
+		Denom: denom, Rate: exchangeRate})
 }
 
 // DeleteExchangeRate deletes the consensus exchange rate of USD denominated in
