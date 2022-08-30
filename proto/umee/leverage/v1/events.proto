@@ -86,6 +86,11 @@ message EventRepayBadDebt {
 message EventReservesExhausted {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Asset repaid
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  // Outstanding bad debt
+  cosmos.base.v1beta1.Coin outstanding_debt = 2 [(gogoproto.nullable) = false];
+}
+
+message EventFundOracle {
+  // Assets sent to oracle module
+  repeated cosmos.base.v1beta1.Coin assets = 1 [(gogoproto.nullable) = false];
 }

@@ -109,7 +109,7 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"borrower", borrower,
 			"asset", newBorrowed,
 		)
-		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
+		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
 			borrower, newBorrowed})
 		if err != nil {
 			return false, err
