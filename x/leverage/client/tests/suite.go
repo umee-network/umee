@@ -42,12 +42,6 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.network.Cleanup()
 }
 
-// TestCases are queries and transactions that can be run, and return a boolean
-// which indicates to abort the test suite if true
-type TestCase interface {
-	Run(s *IntegrationTestSuite)
-}
-
 // runTestQuery
 func (s *IntegrationTestSuite) runTestQueries(tqs ...testQuery) {
 	for _, t := range tqs {
