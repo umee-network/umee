@@ -20,7 +20,7 @@ const (
 	ftxRestURL         = "https://ftx.com/api"
 	ftxMarketsEndpoint = "/markets"
 	ftxCandleEndpoint  = "/candles"
-	ftxTimeLayout      = "2006-01-02T15:04:05+00:00"
+	ftxTimeFmt         = "2006-01-02T15:04:05+00:00"
 	// candleWindowLength is the amount of seconds between
 	// each candle
 	candleWindowLength = 15
@@ -75,7 +75,7 @@ type (
 
 // parseTime parses a string such as "2022-08-29T20:23:00+00:00" into time.Time
 func (c FTXCandle) parseTime() (time.Time, error) {
-	t, err := time.Parse(ftxTimeLayout, c.StartTime)
+	t, err := time.Parse(ftxTimeFmt, c.StartTime)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("unable to parse ftx timestamp")
 	}
@@ -153,7 +153,7 @@ func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 
 	for _, cp := range pairs {
 		if _, ok := tickerPrices[cp.String()]; !ok {
-			return nil, fmt.Errorf("missing exchange rate for %s", cp.String())
+			return nil, fmt.Errorf(types.ErrMissingExchangeRate.Error(), cp.String())
 		}
 	}
 
@@ -255,13 +255,13 @@ func (p *FTXProvider) pollMarkets() error {
 // places it in p.candleCache.
 func (p *FTXProvider) pollCandles(pairs ...types.CurrencyPair) error {
 	candles := make(map[string][]types.CandlePrice)
+	now := time.Now()
+
 	for _, pair := range pairs {
 		if _, ok := candles[pair.Base]; !ok {
 			candles[pair.String()] = []types.CandlePrice{}
 		}
 
-		startTime := time.Now().Add(providerCandlePeriod * -1).Unix()
-		endTime := time.Now().Unix()
 		path := fmt.Sprintf("%s%s/%s/%s%s?resolution=%d&start_time=%d&end_time=%d",
 			p.baseURL,
 			ftxMarketsEndpoint,
@@ -269,8 +269,8 @@ func (p *FTXProvider) pollCandles(pairs ...types.CurrencyPair) error {
 			pair.Quote,
 			ftxCandleEndpoint,
 			candleWindowLength,
-			startTime,
-			endTime,
+			now.Add(providerCandlePeriod*-1).Unix(),
+			now.Unix(),
 		)
 
 		resp, err := p.client.Get(path)

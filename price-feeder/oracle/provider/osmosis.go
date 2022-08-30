@@ -133,7 +133,7 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 
 	for _, cp := range pairs {
 		if _, ok := tickerPrices[cp.String()]; !ok {
-			return nil, fmt.Errorf("missing exchange rate for %s", cp.String())
+			return nil, fmt.Errorf(types.ErrMissingExchangeRate.Error(), cp.String())
 		}
 	}
 
