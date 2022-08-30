@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -144,13 +145,13 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		weight    int
 		opMsgName string
 	}{
-		{simulation.DefaultWeightMsgSupply, sdk.MsgTypeURL(new(types.MsgSupply))},
-		{simulation.DefaultWeightMsgWithdraw, sdk.MsgTypeURL(new(types.MsgWithdraw))},
-		{simulation.DefaultWeightMsgBorrow, sdk.MsgTypeURL(new(types.MsgBorrow))},
-		{simulation.DefaultWeightMsgCollateralize, sdk.MsgTypeURL(new(types.MsgCollateralize))},
-		{simulation.DefaultWeightMsgDecollateralize, sdk.MsgTypeURL(new(types.MsgDecollateralize))},
-		{simulation.DefaultWeightMsgRepay, sdk.MsgTypeURL(new(types.MsgRepay))},
-		{simulation.DefaultWeightMsgLiquidate, sdk.MsgTypeURL(new(types.MsgLiquidate))},
+		{simulation.DefaultWeightMsgSupply, proto.MessageName(new(types.MsgSupply))},
+		{simulation.DefaultWeightMsgWithdraw, proto.MessageName(new(types.MsgWithdraw))},
+		{simulation.DefaultWeightMsgBorrow, proto.MessageName(new(types.MsgBorrow))},
+		{simulation.DefaultWeightMsgCollateralize, proto.MessageName(new(types.MsgCollateralize))},
+		{simulation.DefaultWeightMsgDecollateralize, proto.MessageName(new(types.MsgDecollateralize))},
+		{simulation.DefaultWeightMsgRepay, proto.MessageName(new(types.MsgRepay))},
+		{simulation.DefaultWeightMsgLiquidate, proto.MessageName(new(types.MsgLiquidate))},
 	}
 
 	for i, w := range weightesOps {
