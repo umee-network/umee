@@ -20,7 +20,6 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - errcheck
@@ -41,14 +40,12 @@ linters:
     - prealloc
     - revive
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
     - usestdlibvars
-    - varcheck
 
 issues:
   exclude-rules:
