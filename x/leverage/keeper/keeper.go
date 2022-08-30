@@ -118,7 +118,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 // balances are insufficient to withdraw the full amount requested, returns an error.
 // Returns the amount of base tokens received.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, error) {
-	if err := k.validateUToken(ctx, uToken); err != nil {
+	if err := k.validateUToken(uToken); err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -253,7 +253,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // Repay returns the actual amount repaid.
 func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Coin, error) {
-	if err := k.validateRepay(ctx, payment); err != nil {
+	if err := k.validateRepay(payment); err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -289,7 +289,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
-	if err := k.validateUToken(ctx, coin); err != nil {
+	if err := k.validateUToken(coin); err != nil {
 		return err
 	}
 

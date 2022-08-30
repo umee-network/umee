@@ -62,7 +62,7 @@ func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
 }
 
 // validateUToken validates an sdk.Coin and ensures its Denom is a uToken. Used by Withdraw and Decollateralize.
-func (k Keeper) validateUToken(ctx sdk.Context, coin sdk.Coin) error {
+func (k Keeper) validateUToken(coin sdk.Coin) error {
 	if err := coin.Validate(); err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 }
 
 // validateRepay validates an sdk.Coin and ensures its Denom is not a uToken
-func (k Keeper) validateRepay(ctx sdk.Context, coin sdk.Coin) error {
+func (k Keeper) validateRepay(coin sdk.Coin) error {
 	if err := coin.Validate(); err != nil {
 		return err
 	}
