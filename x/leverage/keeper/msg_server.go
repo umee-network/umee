@@ -30,7 +30,6 @@ func (s msgServer) Supply(
 	if err != nil {
 		return nil, err
 	}
-
 	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
@@ -38,7 +37,7 @@ func (s msgServer) Supply(
 
 	s.keeper.Logger(ctx).Debug(
 		"assets supplied",
-		"supplier", supplierAddr.String(),
+		"supplier", msg.Supplier,
 		"supplied", msg.Asset.String(),
 		"received", received.String(),
 	)
@@ -62,7 +61,6 @@ func (s msgServer) Withdraw(
 	if err != nil {
 		return nil, err
 	}
-
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
@@ -70,7 +68,7 @@ func (s msgServer) Withdraw(
 
 	s.keeper.Logger(ctx).Debug(
 		"supplied assets withdrawn",
-		"supplier", supplierAddr.String(),
+		"supplier", msg.Supplier,
 		"redeemed", msg.Asset.String(),
 		"received", received.String(),
 	)
@@ -94,14 +92,13 @@ func (s msgServer) Collateralize(
 	if err != nil {
 		return nil, err
 	}
-
 	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
-		"borrower", borrowerAddr.String(),
+		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
@@ -121,14 +118,13 @@ func (s msgServer) Decollateralize(
 	if err != nil {
 		return nil, err
 	}
-
 	if err := s.keeper.Decollateralize(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"collateral removed",
-		"borrower", borrowerAddr.String(),
+		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
@@ -148,14 +144,13 @@ func (s msgServer) Borrow(
 	if err != nil {
 		return nil, err
 	}
-
 	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"assets borrowed",
-		"borrower", borrowerAddr.String(),
+		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
@@ -175,7 +170,6 @@ func (s msgServer) Repay(
 	if err != nil {
 		return nil, err
 	}
-
 	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Asset)
 	if err != nil {
 		return nil, err
@@ -183,7 +177,7 @@ func (s msgServer) Repay(
 
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
-		"borrower", borrowerAddr.String(),
+		"borrower", msg.Borrower,
 		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
 	)
@@ -206,12 +200,10 @@ func (s msgServer) Liquidate(
 	if err != nil {
 		return nil, err
 	}
-
 	borrower, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
-
 	repaid, liquidated, reward, err := s.keeper.Liquidate(ctx, liquidator, borrower, msg.Repayment, msg.RewardDenom)
 	if err != nil {
 		return nil, err
@@ -219,8 +211,8 @@ func (s msgServer) Liquidate(
 
 	s.keeper.Logger(ctx).Debug(
 		"unhealthy borrower liquidated",
-		"liquidator", liquidator.String(),
-		"borrower", borrower.String(),
+		"liquidator", msg.Liquidator,
+		"borrower", msg.Borrower,
 		"attempted", msg.Repayment.String(),
 		"repaid", repaid.String(),
 		"liquidated", liquidated.String(),
