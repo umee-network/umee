@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -146,13 +147,20 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		opMsgRoute string
 		opMsgName  string
 	}{
-		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeSupply},
-		{simulation.DefaultWeightMsgWithdraw, types.ModuleName, types.EventTypeWithdraw},
-		{simulation.DefaultWeightMsgBorrow, types.ModuleName, types.EventTypeBorrow},
-		{simulation.DefaultWeightMsgCollateralize, types.ModuleName, types.EventTypeCollateralize},
-		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName, types.EventTypeDecollateralize},
-		{simulation.DefaultWeightMsgRepay, types.ModuleName, types.EventTypeRepay},
-		{simulation.DefaultWeightMsgLiquidate, types.ModuleName, types.EventTypeLiquidate},
+		{simulation.DefaultWeightMsgSupply, types.ModuleName,
+			proto.MessageName(new(types.MsgSupply))},
+		{simulation.DefaultWeightMsgWithdraw, types.ModuleName,
+			proto.MessageName(new(types.MsgWithdraw))},
+		{simulation.DefaultWeightMsgBorrow, types.ModuleName,
+			proto.MessageName(new(types.MsgBorrow))},
+		{simulation.DefaultWeightMsgCollateralize, types.ModuleName,
+			proto.MessageName(new(types.MsgCollateralize))},
+		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName,
+			proto.MessageName(new(types.MsgDecollateralize))},
+		{simulation.DefaultWeightMsgRepay, types.ModuleName,
+			proto.MessageName(new(types.MsgRepay))},
+		{simulation.DefaultWeightMsgLiquidate, types.ModuleName,
+			proto.MessageName(new(types.MsgLiquidate))},
 	}
 
 	for i, w := range weightesOps {
@@ -181,7 +189,6 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeSupply, msg.Type())
 	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -206,7 +213,6 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeWithdraw, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -234,7 +240,6 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
-	s.Require().Equal(types.EventTypeBorrow, msg.Type())
 	s.Require().Equal("67uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -259,7 +264,6 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeCollateralize, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -285,7 +289,6 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeDecollateralize, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -313,7 +316,6 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeRepay, msg.Type())
 	s.Require().Equal("9uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -345,7 +347,6 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	// While it is no longer simple to create an eligible liquidation target using exported keeper methods here,
 	// we can still verify some properties of the resulting operation.
 	s.Require().False(operationMsg.OK)
-	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
 	s.Require().Len(futureOperations, 0)
 }
 
