@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 
 	req := &types.QueryMarketSummary{}
 	_, err := s.queryClient.MarketSummary(context.Background(), req)
-	require.Error(err)
+	require.ErrorContains(err, "empty denom")
 
 	req = &types.QueryMarketSummary{Denom: "uumee"}
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)

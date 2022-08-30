@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 type mockOracleKeeper struct {
@@ -59,7 +60,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	require.Equal(sdk.MustNewDecFromStr("0.00003938"), p)
 
 	p, err = app.LeverageKeeper.TokenPrice(ctx, "foo")
-	require.Error(err)
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
 }
 
@@ -72,7 +73,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
 	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2_400000))
-	require.Error(err)
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
 }
 
@@ -112,8 +113,8 @@ func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	require.Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
 
 	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom)
-	require.Error(err)
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
 	_, err = app.LeverageKeeper.PriceRatio(ctx, umeeapp.BondDenom, "foo")
-	require.Error(err)
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
 }

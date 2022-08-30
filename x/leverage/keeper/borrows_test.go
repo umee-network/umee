@@ -35,7 +35,7 @@ func (s *IntegrationTestSuite) TestSetBorrow() {
 
 	// empty account address
 	err := s.tk.SetBorrow(ctx, sdk.AccAddress{}, coin(umeeDenom, 123))
-	require.EqualError(err, "empty address")
+	require.ErrorIs(err, types.ErrEmptyAddress)
 
 	addr := s.newAccount()
 

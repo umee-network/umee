@@ -59,7 +59,7 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 
 	// set u/umee collateral amount of empty account address (error)
 	err := s.tk.SetCollateralAmount(ctx, sdk.AccAddress{}, coin(uDenom, 0))
-	require.EqualError(err, "empty address")
+	require.ErrorIs(err, types.ErrEmptyAddress)
 
 	addr := s.newAccount()
 
