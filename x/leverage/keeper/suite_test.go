@@ -13,11 +13,11 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/leverage"
-	"github.com/umee-network/umee/v2/x/leverage/fixtures"
-	"github.com/umee-network/umee/v2/x/leverage/keeper"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/leverage"
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
+	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
