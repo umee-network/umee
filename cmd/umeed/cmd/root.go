@@ -15,7 +15,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -105,6 +107,10 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		umeeapp.DefaultNodeHome,
 	)
 	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
+
+	gentxModule := a.moduleManager[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+	gentxModule.GenTxValidator = umeeapp.GenTxValidator
+	a.moduleManager[genutiltypes.ModuleName] = gentxModule
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
