@@ -133,7 +133,7 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 
 	for _, cp := range pairs {
 		if _, ok := tickerPrices[cp.String()]; !ok {
-			return nil, fmt.Errorf("missing exchange rate for %s", cp.String())
+			return nil, fmt.Errorf(types.ErrMissingExchangeRate.Error(), cp.String())
 		}
 	}
 
@@ -225,12 +225,5 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 // SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
 func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
-}
-
-func checkHTTPStatus(resp *http.Response) error {
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status: %s", resp.Status)
-	}
 	return nil
 }

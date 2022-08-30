@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -22,6 +23,7 @@ const (
 	ProviderOkx      Name = "okx"
 	ProviderGate     Name = "gate"
 	ProviderCoinbase Name = "coinbase"
+	ProviderFTX      Name = "ftx"
 	ProviderMock     Name = "mock"
 )
 
@@ -96,4 +98,11 @@ func PastUnixTime(t time.Duration) int64 {
 // SecondsToMilli converts seconds to milliseconds for our unix timestamps.
 func SecondsToMilli(t int64) int64 {
 	return t * int64(time.Second/time.Millisecond)
+}
+
+func checkHTTPStatus(resp *http.Response) error {
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status: %s", resp.Status)
+	}
+	return nil
 }
