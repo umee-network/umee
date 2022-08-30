@@ -85,19 +85,19 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
 
-	// creates account which has supplied and collateralized 1000 uumee, and borrowed 456 uumee
+	// creates account which has supplied and collateralized 1000 uumee, and borrowed 234 uumee
 	borrower2 := s.newAccount(coin(umeeDenom, 1000))
 	s.supply(borrower2, coin(umeeDenom, 1000))
 	s.collateralize(borrower2, coin("u/"+umeeDenom, 1000))
-	s.borrow(borrower2, coin(umeeDenom, 456))
+	s.borrow(borrower2, coin(umeeDenom, 234))
 
-	// confirm total borrowed amount is 579 uumee
+	// confirm total borrowed amount is 357 uumee
 	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
-	s.Require().Equal(coin(umeeDenom, 579), borrowed)
+	s.Require().Equal(coin(umeeDenom, 357), borrowed)
 
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
 	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("2.00")))
-	s.Require().Equal(coin(umeeDenom, 1158), s.tk.GetTotalBorrowed(s.ctx, umeeDenom))
+	s.Require().Equal(coin(umeeDenom, 714), s.tk.GetTotalBorrowed(s.ctx, umeeDenom))
 }
 
 func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
