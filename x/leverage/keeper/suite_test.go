@@ -163,7 +163,8 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		err := s.tk.SetBorrow(ctx, addr, coin)
+		borrowed := s.tk.GetBorrow(ctx, addr, coin.Denom)
+		err := s.tk.SetBorrow(ctx, addr, borrowed.Add(coin))
 		require.NoError(err, "forceBorrow")
 	}
 

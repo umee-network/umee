@@ -719,8 +719,8 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 	supplier := s.newAccount(coin(umeeDenom, 1000_000000), coin(atomDenom, 1000_000000))
 	s.supply(supplier, coin(umeeDenom, 1000_000000), coin(atomDenom, 1000_000000))
 
-	// create and fund a liquidator which has 1000 UMEE and 40 ATOM
-	liquidator := s.newAccount(coin(umeeDenom, 1000_000000), coin(atomDenom, 40_000000))
+	// create and fund a liquidator which has 1000 UMEE and 1000 ATOM
+	liquidator := s.newAccount(coin(umeeDenom, 1000_000000), coin(atomDenom, 1000_000000))
 
 	// create a healthy borrower
 	healthyBorrower := s.newAccount(coin(umeeDenom, 100_000000))
@@ -728,27 +728,33 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 	s.collateralize(healthyBorrower, coin("u/"+umeeDenom, 100_000000))
 	s.borrow(healthyBorrower, coin(umeeDenom, 10_000000))
 
-	// create a borrower which supplies and collateralizes 100 ATOM
-	atomBorrower := s.newAccount(coin(atomDenom, 100_000000))
-	s.supply(atomBorrower, coin(atomDenom, 100_000000))
-	s.collateralize(atomBorrower, coin("u/"+atomDenom, 100_000000))
-	// artificially borrow 50 ATOM
-	s.forceBorrow(atomBorrower, coin(atomDenom, 50_000000))
+	// create a borrower which supplies and collateralizes 1000 ATOM
+	atomBorrower := s.newAccount(coin(atomDenom, 1000_000000))
+	s.supply(atomBorrower, coin(atomDenom, 1000_000000))
+	s.collateralize(atomBorrower, coin("u/"+atomDenom, 1000_000000))
+	// artificially borrow 500 ATOM - this can be liquidated without bad debt
+	s.forceBorrow(atomBorrower, coin(atomDenom, 500_000000))
 
-	// create a borrower which supplies and collateralizes 100 UMEE
-	umeeBorrower := s.newAccount(coin(umeeDenom, 100_000000))
-	s.supply(umeeBorrower, coin(umeeDenom, 100_000000))
-	s.collateralize(umeeBorrower, coin("u/"+umeeDenom, 100_000000))
-	// artificially borrow 200 UMEE
+	// create a borrower which collateralizes 110 UMEE
+	umeeBorrower := s.newAccount(coin(umeeDenom, 300_000000))
+	s.supply(umeeBorrower, coin(umeeDenom, 200_000000))
+	s.collateralize(umeeBorrower, coin("u/"+umeeDenom, 110_000000))
+	// artificially borrow 200 UMEE - this will create a bad debt when liquidated
 	s.forceBorrow(umeeBorrower, coin(umeeDenom, 200_000000))
 
-	// TODO: complex liquidations
-	// TODO: partial liquidations
-	// TODO: zero liquidations
-	// TODO: expect bad debt repayment
-	// TODO: expect reserve exhaustion
-	// TODO: direct and indirect liquidation
-	// TODO: close factor limited (use atom borrower)
+	// creates a complex borrower with multiple denoms active
+	complexBorrower := s.newAccount(coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+	s.supply(complexBorrower, coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+	s.collateralize(complexBorrower, coin("u/"+umeeDenom, 100_000000), coin("u/"+atomDenom, 100_000000))
+	// artificially borrow multiple denoms
+	s.forceBorrow(complexBorrower, coin(atomDenom, 30_000000), coin(umeeDenom, 30_000000))
+
+	// creates a realistic borrower with 400 UMEE collateral which will have a close factor < 1
+	closeBorrower := s.newAccount(coin(umeeDenom, 400_000000))
+	s.supply(closeBorrower, coin(umeeDenom, 400_000000))
+	s.collateralize(closeBorrower, coin("u/"+umeeDenom, 400_000000))
+	// artificially borrow just barely above liquidation threshold to simulate interest accruing
+	s.forceBorrow(closeBorrower, coin(umeeDenom, 102_000000))
 
 	tcs := []testCase{
 		{
@@ -763,25 +769,80 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 			types.ErrLiquidationIneligible,
 		},
 		{
+			"not borrowed denom",
+			liquidator,
+			umeeBorrower,
+			coin(atomDenom, 1_000000),
+			atomDenom,
+			sdk.Coin{},
+			sdk.Coin{},
+			sdk.Coin{},
+			types.ErrLiquidationRepayZero,
+		},
+		{
 			"direct atom liquidation",
 			liquidator,
 			atomBorrower,
-			coin(atomDenom, 1_000000),
+			coin(atomDenom, 100_000000),
 			atomDenom,
-			coin(atomDenom, 1_000000),
-			coin("u/"+atomDenom, 1_090000),
-			coin(atomDenom, 1_090000),
+			coin(atomDenom, 100_000000),
+			coin("u/"+atomDenom, 109_000000),
+			coin(atomDenom, 109_000000),
 			nil,
 		},
 		{
 			"u/atom liquidation",
 			liquidator,
 			atomBorrower,
-			coin(atomDenom, 1_000000),
+			coin(atomDenom, 100_000000),
 			"u/" + atomDenom,
-			coin(atomDenom, 1_000000),
-			coin("u/"+atomDenom, 1_100000),
-			coin("u/"+atomDenom, 1_100000),
+			coin(atomDenom, 100_000000),
+			coin("u/"+atomDenom, 110_000000),
+			coin("u/"+atomDenom, 110_000000),
+			nil,
+		},
+		{
+			"complete u/atom liquidation",
+			liquidator,
+			atomBorrower,
+			coin(atomDenom, 500_000000),
+			"u/" + atomDenom,
+			coin(atomDenom, 300_000000),
+			coin("u/"+atomDenom, 330_000000),
+			coin("u/"+atomDenom, 330_000000),
+			nil,
+		},
+		{
+			"bad debt u/umee liquidation",
+			liquidator,
+			umeeBorrower,
+			coin(umeeDenom, 200_000000),
+			"u/" + umeeDenom,
+			coin(umeeDenom, 100_000000),
+			coin("u/"+umeeDenom, 110_000000),
+			coin("u/"+umeeDenom, 110_000000),
+			nil,
+		},
+		{
+			"complex borrower",
+			liquidator,
+			complexBorrower,
+			coin(umeeDenom, 200_000000),
+			"u/" + atomDenom,
+			coin(umeeDenom, 30_000000),
+			coin("u/"+atomDenom, 3_527932),
+			coin("u/"+atomDenom, 3_527932),
+			nil,
+		},
+		{
+			"close factor < 1",
+			liquidator,
+			closeBorrower,
+			coin(umeeDenom, 200_000000),
+			"u/" + umeeDenom,
+			coin(umeeDenom, 21_216000),
+			coin("u/"+umeeDenom, 23_337600),
+			coin("u/"+umeeDenom, 23_337600),
 			nil,
 		},
 	}
@@ -860,7 +921,7 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 			// verify borrower balances unchanged
 			require.Equal(biBalance, bfBalance, tc.msg, "borrower balances")
 			// verify borrower collateral reduced by the expected amount
-			require.Equal(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, tc.msg, "borrower collateral")
+			s.requireEqualCoins(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, tc.msg, "borrower collateral")
 			// verify borrowed coins decreased by expected amount
 			s.requireEqualCoins(biBorrowed.Sub(tc.expectedRepay), bfBorrowed, "borrowed coins")
 
@@ -874,7 +935,6 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 
 			// check all available invariants
 			s.checkInvariants(tc.msg)
-
 		}
 	}
 }
