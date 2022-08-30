@@ -46,4 +46,5 @@ var (
 	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 604, "exchange rate less than one")
 	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
 	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 606, "interest scalar less than one")
+	ErrExcessiveTimeElapsed    = sdkerrors.Register(ModuleName, 607, "excessive time elapsed since last interest time")
 )
