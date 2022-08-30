@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"github.com/gogo/protobuf/proto"
 
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -124,7 +123,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, coin, skip := randomSupplyFields(r, ctx, accs, bk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgSupply))
+			typename := sdk.MsgTypeURL(new(types.MsgSupply))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -142,7 +141,7 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk ke
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgWithdraw))
+			typename := sdk.MsgTypeURL(new(types.MsgWithdraw))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -160,7 +159,7 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgBorrow))
+			typename := sdk.MsgTypeURL(new(types.MsgBorrow))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -182,7 +181,7 @@ func SimulateMsgCollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomCollateralizeFields(r, ctx, accs, bk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgCollateralize))
+			typename := sdk.MsgTypeURL(new(types.MsgCollateralize))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -204,7 +203,7 @@ func SimulateMsgDecollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomDecollateralizeFields(r, ctx, accs, lk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgDecollateralize))
+			typename := sdk.MsgTypeURL(new(types.MsgDecollateralize))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -222,7 +221,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, repayToken, skip := randomRepayFields(r, ctx, accs, lk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgRepay))
+			typename := sdk.MsgTypeURL(new(types.MsgRepay))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -240,7 +239,7 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		liquidator, borrower, repaymentToken, rewardDenom, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
-			typename := proto.MessageName(new(types.MsgLiquidate))
+			typename := sdk.MsgTypeURL(new(types.MsgLiquidate))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
@@ -434,7 +433,7 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		TxGen:           cfg.TxConfig,
 		Cdc:             cfg.Codec.(*codec.ProtoCodec),
 		Msg:             msg,
-		MsgType:         proto.MessageName(msg),
+		MsgType:         sdk.MsgTypeURL(msg),
 		Context:         ctx,
 		SimAccount:      from,
 		AccountKeeper:   ak,
