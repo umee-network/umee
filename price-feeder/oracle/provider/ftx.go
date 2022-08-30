@@ -160,9 +160,22 @@ func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 	return tickerPrices, nil
 }
 
-// GetCandlePrices returns the candlePrices based on the provided pairs.
+// GetCandlePrices returns the cached candlePrices based on provided pairs.
 func (p *FTXProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
-	return p.getCandleCache(), nil
+	candleCache := p.getCandleCache()
+	if len(candleCache) < 1 {
+		return nil, fmt.Errorf("candles have not been cached")
+	}
+
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
+	for _, pair := range pairs {
+		if _, ok := candleCache[pair.String()]; !ok {
+			return nil, fmt.Errorf("missing candles for %s", pair.String())
+		}
+		candlePrices[pair.String()] = candleCache[pair.String()]
+	}
+
+	return candlePrices, nil
 }
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
