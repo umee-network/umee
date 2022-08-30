@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"github.com/gogo/protobuf/proto"
 
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -123,18 +124,18 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, coin, skip := randomSupplyFields(r, ctx, accs, bk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSupply, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgSupply))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgSupply(from.Address, coin)
-
 		txCtx := simulation.OperationInput{
 			R:               r,
 			App:             app,
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeSupply,
+			MsgType:         proto.MessageName(msg),
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,
@@ -156,18 +157,18 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk ke
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdraw, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgWithdraw))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgWithdraw(from.Address, withdrawUToken)
-
 		txCtx := simulation.OperationInput{
 			R:               r,
 			App:             app,
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeWithdraw,
+			MsgType:         proto.MessageName(msg),
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,
@@ -189,18 +190,18 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrow, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgBorrow))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgBorrow(from.Address, token)
-
 		txCtx := simulation.OperationInput{
 			R:             r,
 			App:           app,
 			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:           nil,
 			Msg:           msg,
-			MsgType:       types.EventTypeBorrow,
+			MsgType:       proto.MessageName(msg),
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,
@@ -225,18 +226,18 @@ func SimulateMsgCollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomCollateralizeFields(r, ctx, accs, bk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeCollateralize, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgCollateralize))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgCollateralize(from.Address, collateral)
-
 		txCtx := simulation.OperationInput{
 			R:               r,
 			App:             app,
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeCollateralize,
+			MsgType:         proto.MessageName(msg),
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,
@@ -262,18 +263,18 @@ func SimulateMsgDecollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomDecollateralizeFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeDecollateralize, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgDecollateralize))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgDecollateralize(from.Address, collateral)
-
 		txCtx := simulation.OperationInput{
 			R:             r,
 			App:           app,
 			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:           nil,
 			Msg:           msg,
-			MsgType:       types.EventTypeDecollateralize,
+			MsgType:       proto.MessageName(msg),
 			Context:       ctx,
 			SimAccount:    from,
 			AccountKeeper: ak,
@@ -294,18 +295,18 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, repayToken, skip := randomRepayFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepay, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgRepay))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgRepay(from.Address, repayToken)
-
 		txCtx := simulation.OperationInput{
 			R:               r,
 			App:             app,
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeRepay,
+			MsgType:         proto.MessageName(msg),
 			Context:         ctx,
 			SimAccount:      from,
 			AccountKeeper:   ak,
@@ -327,18 +328,18 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		liquidator, borrower, repaymentToken, rewardDenom, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
+			typename := proto.MessageName(new(types.MsgLiquidate))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, rewardDenom)
-
 		txCtx := simulation.OperationInput{
 			R:               r,
 			App:             app,
 			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
 			Cdc:             nil,
 			Msg:             msg,
-			MsgType:         types.EventTypeLiquidate,
+			MsgType:         proto.MessageName(msg),
 			Context:         ctx,
 			SimAccount:      liquidator,
 			AccountKeeper:   ak,
