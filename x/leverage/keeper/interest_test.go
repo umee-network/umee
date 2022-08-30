@@ -6,11 +6,11 @@ import (
 	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
-
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral.
-	addr, _ := s.initBorrowScenario()
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// user borrows 40 umee
 	err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
@@ -43,9 +43,10 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 }
 
 func (s *IntegrationTestSuite) TestDynamicInterest() {
-	// Init scenario is being used because the module account (lending pool)
-	// already has 1000 umee.
-	addr, _ := s.initBorrowScenario()
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	umeeToken := newToken("uumee", "UMEE")
 	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")     // to allow high utilization

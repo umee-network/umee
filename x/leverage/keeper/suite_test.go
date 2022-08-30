@@ -147,6 +147,16 @@ func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk
 	}
 }
 
+// decollateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
+func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	for _, coin := range uTokens {
+		err := app.LeverageKeeper.Decollateralize(ctx, addr, coin)
+		require.NoError(err, "decollateralize")
+	}
+}
+
 // borrow tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -170,91 +180,4 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 
 	err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, coins)
 	require.NoError(err, "forceBorroww")
-}
-
-// setupAccount executes some common boilerplate before a test, where a user account is given tokens of a given denom,
-// may also supply them to receive uTokens, and may also enable those uTokens as collateral and borrow tokens in the same denom.
-func (s *IntegrationTestSuite) setupAccount(denom string, mintAmount, supplyAmount, borrowAmount int64, collateral bool) sdk.AccAddress {
-	// create a unique address
-	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
-	addrStr := fmt.Sprintf("%-20s", "addr"+s.setupAccountCounter.String()+"_______________")
-	addr := sdk.AccAddress([]byte(addrStr))
-
-	// register the account in AccountKeeper
-	acct := s.app.AccountKeeper.NewAccountWithAddress(s.ctx, addr)
-	s.app.AccountKeeper.SetAccount(s.ctx, acct)
-
-	if mintAmount > 0 {
-		// mint and send mintAmount tokens to account
-		s.Require().NoError(s.app.BankKeeper.MintCoins(s.ctx, minttypes.ModuleName,
-			sdk.NewCoins(sdk.NewInt64Coin(denom, mintAmount)),
-		))
-		s.Require().NoError(s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, addr,
-			sdk.NewCoins(sdk.NewInt64Coin(denom, mintAmount)),
-		))
-	}
-
-	if supplyAmount > 0 {
-		// account supplies supplyAmount tokens and receives uTokens
-		uTokens, err := s.app.LeverageKeeper.Supply(s.ctx, addr, sdk.NewInt64Coin(denom, supplyAmount))
-		s.Require().NoError(err)
-		s.Require().Equal(sdk.NewInt64Coin(types.ToUTokenDenom(denom), supplyAmount), uTokens)
-	}
-
-	if collateral {
-		// account enables associated uToken as collateral
-		collat, err := s.app.LeverageKeeper.ExchangeToken(s.ctx, sdk.NewInt64Coin(denom, supplyAmount))
-		s.Require().NoError(err)
-		err = s.app.LeverageKeeper.Collateralize(s.ctx, addr, collat)
-		s.Require().NoError(err)
-	}
-
-	if borrowAmount > 0 {
-		// account borrows borrowAmount tokens
-		err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(denom, borrowAmount))
-		s.Require().NoError(err)
-	}
-
-	// return the account addresse
-	return addr
-}
-
-// initialize the common starting scenario from which borrow and repay tests stem:
-// Umee and u/umee are registered assets; a "supplier" account has 9k umee and 1k u/umee;
-// the leverage module has 1k umee in its lending pool (module account); and a "bum"
-// account has been created with no assets.
-func (s *IntegrationTestSuite) initBorrowScenario() (supplier, bum sdk.AccAddress) {
-	app, ctx := s.app, s.ctx
-
-	// create an account and address which will represent a supplier
-	supplierAddr := sdk.AccAddress([]byte("addr______________01"))
-	supplierAcc := app.AccountKeeper.NewAccountWithAddress(ctx, supplierAddr)
-	app.AccountKeeper.SetAccount(ctx, supplierAcc)
-
-	// create an account and address which will represent a user with no assets
-	bumAddr := sdk.AccAddress([]byte("addr______________02"))
-	bumAcc := app.AccountKeeper.NewAccountWithAddress(ctx, bumAddr)
-	app.AccountKeeper.SetAccount(ctx, bumAcc)
-
-	// mint and send 10k umee to supplier
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName,
-		sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 10000000000)), // 10k umee
-	))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, supplierAddr,
-		sdk.NewCoins(sdk.NewInt64Coin(umeeapp.BondDenom, 10000000000)), // 10k umee,
-	))
-
-	// supplier supplies 1000 umee and receives 1k u/umee
-	supplyCoin := sdk.NewInt64Coin(umeeapp.BondDenom, 1000000000)
-	_, err := s.app.LeverageKeeper.Supply(ctx, supplierAddr, supplyCoin)
-	s.Require().NoError(err)
-
-	// supplier enables u/umee as collateral
-	collat, err := s.app.LeverageKeeper.ExchangeToken(ctx, supplyCoin)
-	s.Require().NoError(err)
-	err = s.app.LeverageKeeper.Collateralize(ctx, supplierAddr, collat)
-	s.Require().NoError(err)
-
-	// return the account addresses
-	return supplierAddr, bumAddr
 }

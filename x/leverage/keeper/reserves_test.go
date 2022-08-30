@@ -22,18 +22,19 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	// Creating a supplier so module account has some uumee
-	_ = s.setupAccount(umeeDenom, 200000000, 200000000, 0, false) // 200 umee
+	addr := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(addr, coin(umeeDenom, 200_000000))
 
 	// Using an address with no assets
-	addr := s.setupAccount(umeeDenom, 0, 0, 0, false)
+	addr2 := s.newAccount()
 
 	// Create an uncollateralized debt position
 	badDebt := sdk.NewInt64Coin(umeeDenom, 100000000) // 100 umee
-	err := s.tk.SetBorrow(s.ctx, addr, badDebt)
+	err := s.tk.SetBorrow(s.ctx, addr2, badDebt)
 	s.Require().NoError(err)
 
 	// Manually mark the bad debt for repayment
-	s.Require().NoError(s.tk.SetBadDebtAddress(s.ctx, addr, umeeDenom, true))
+	s.Require().NoError(s.tk.SetBadDebtAddress(s.ctx, addr2, umeeDenom, true))
 
 	// Manually set reserves to 60 umee
 	reserve := sdk.NewInt64Coin(umeeDenom, 60000000)
@@ -45,7 +46,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	s.Require().NoError(err)
 
 	// Confirm that a debt of 40 umee remains
-	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeDenom)
+	remainingDebt := s.app.LeverageKeeper.GetBorrow(s.ctx, addr2, umeeDenom)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 40000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
@@ -62,7 +63,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	s.Require().NoError(err)
 
 	// Confirm that the debt is eliminated
-	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeDenom)
+	remainingDebt = s.app.LeverageKeeper.GetBorrow(s.ctx, addr2, umeeDenom)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), remainingDebt)
 
 	// Confirm that reserves are now at 30 umee

@@ -55,17 +55,20 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
-	addr, _ := s.initBorrowScenario()
+	// creates account which has supplied and collateralized 1000 uumee
+	addr := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(addr, coin(umeeDenom, 1000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
 
 	resp, err := s.queryClient.AccountBalances(s.ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
 	s.Require().NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
-			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
+			coin(umeeDenom, 1000),
 		),
 		Collateral: sdk.NewCoins(
-			sdk.NewCoin(types.ToUTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
+			coin("u/"+umeeDenom, 1000),
 		),
 		Borrowed: nil,
 	}
@@ -74,7 +77,10 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
-	addr, _ := s.initBorrowScenario()
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
 	s.Require().NoError(err)
@@ -84,15 +90,15 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		// from .Reset() in x/leverage/keeper/oracle_test.go
 		// times the amount of umee, then sometimes times params
 		// from newToken in x/leverage/keeper/keeper_test.go
-		// (1000 / 1000000) * 4.21 = 4210
+		// (1000) * 4.21 = 4210
 		SuppliedValue: sdk.MustNewDecFromStr("4210"),
-		// (1000 / 1000000) * 4.21 = 4210
+		// (1000) * 4.21 = 4210
 		CollateralValue: sdk.MustNewDecFromStr("4210"),
 		// Nothing borrowed
 		BorrowedValue: sdk.ZeroDec(),
-		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
-		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		// (1000) * 4.21 * 0.25 = 1052.5
 		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
 	}
 

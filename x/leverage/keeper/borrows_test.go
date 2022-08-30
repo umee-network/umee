@@ -11,8 +11,11 @@ func (s *IntegrationTestSuite) TestGetBorrow() {
 	borrowed := s.tk.GetBorrow(s.ctx, sdk.AccAddress{}, umeeDenom)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 0), borrowed)
 
-	// creates account which has borrowed 123 uumee
-	addr := s.setupAccount(umeeDenom, 1000, 1000, 123, true)
+	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
+	addr := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(addr, coin(umeeDenom, 1000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
+	s.borrow(addr, coin(umeeDenom, 123))
 
 	// confirm borrowed amount is 123 uumee
 	borrowed = s.tk.GetBorrow(s.ctx, addr, umeeDenom)
@@ -30,7 +33,7 @@ func (s *IntegrationTestSuite) TestSetBorrow() {
 	err := s.tk.SetBorrow(s.ctx, sdk.AccAddress{}, sdk.NewInt64Coin(umeeDenom, 123))
 	s.Require().EqualError(err, "empty address")
 
-	addr := sdk.AccAddress{0x00}
+	addr := s.newAccount()
 
 	// set nonzero borrow, and confirm effect
 	err = s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 123))
@@ -72,15 +75,21 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	borrowed := s.tk.GetTotalBorrowed(s.ctx, "abcd")
 	s.Require().Equal(sdk.NewInt64Coin("abcd", 0), borrowed)
 
-	// creates account which has borrowed 123 uumee
-	_ = s.setupAccount(umeeDenom, 1000, 1000, 123, true)
+	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
+	borrower := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(borrower, coin(umeeDenom, 1000))
+	s.collateralize(borrower, coin("u/"+umeeDenom, 1000))
+	s.borrow(borrower, coin(umeeDenom, 123))
 
 	// confirm total borrowed amount is 123 uumee
 	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 123), borrowed)
 
-	// creates account which has borrowed 456 uumee
-	_ = s.setupAccount(umeeDenom, 2000, 2000, 456, true)
+	// creates account which has supplied and collateralized 1000 uumee, and borrowed 456 uumee
+	borrower2 := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(borrower2, coin(umeeDenom, 1000))
+	s.collateralize(borrower2, coin("u/"+umeeDenom, 1000))
+	s.borrow(borrower2, coin(umeeDenom, 123))
 
 	// confirm total borrowed amount is 579 uumee
 	borrowed = s.tk.GetTotalBorrowed(s.ctx, umeeDenom)
@@ -89,8 +98,6 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
 	s.Require().NoError(s.tk.SetInterestScalar(s.ctx, umeeDenom, sdk.MustNewDecFromStr("2.00")))
 	s.Require().Equal(sdk.NewInt64Coin(umeeDenom, 1158), s.tk.GetTotalBorrowed(s.ctx, umeeDenom))
-
-	// we do not test empty denom, as that will cause a panic
 }
 
 func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
@@ -98,15 +105,20 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	available := s.tk.GetAvailableToBorrow(s.ctx, "abcd")
 	s.Require().Equal(sdk.ZeroInt(), available)
 
-	// creates account which has supplied 1000 uumee, and borrowed 0 uumee
-	_ = s.setupAccount(umeeDenom, 1000, 1000, 0, true)
+	// creates account which has supplied and collateralized 1000 uumee
+	supplier := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(supplier, coin(umeeDenom, 1000))
+	s.collateralize(supplier, coin("u/"+umeeDenom, 1000))
 
 	// confirm lending pool is 1000 uumee
 	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt(1000), available)
 
-	// creates account which has supplied 1000 uumee, and borrowed 123 uumee
-	_ = s.setupAccount(umeeDenom, 1000, 1000, 123, true)
+	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
+	borrower := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(borrower, coin(umeeDenom, 1000))
+	s.collateralize(borrower, coin("u/"+umeeDenom, 1000))
+	s.borrow(borrower, coin(umeeDenom, 123))
 
 	// confirm lending pool is 1877 uumee
 	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
@@ -116,8 +128,6 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	s.Require().NoError(s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeDenom, 200)))
 	available = s.tk.GetAvailableToBorrow(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.NewInt(1677), available)
-
-	// we do not test empty denom, as that will cause a panic
 }
 
 func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
@@ -125,8 +135,10 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization := s.tk.SupplyUtilization(s.ctx, "abcd")
 	s.Require().Equal(sdk.OneDec(), utilization)
 
-	// creates account which has supplied 1000 uumee, and borrowed 0 uumee
-	addr := s.setupAccount(umeeDenom, 1000, 1000, 0, true)
+	// creates account which has supplied and collateralized 1000 uumee
+	addr := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(addr, coin(umeeDenom, 1000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
 
 	// All tests below are commented with the following equation in mind:
 	//   utilization = (Total Borrowed / (Total Borrowed + Module Balance - Reserved Amount))
@@ -136,7 +148,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	s.Require().Equal(sdk.ZeroDec(), utilization)
 
 	// user borrows 200 uumee, reducing module account to 800 uumee
-	s.Require().NoError(s.tk.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 200)))
+	s.borrow(addr, coin(umeeDenom, 200))
 
 	// 20% utilization (200 / 200+800-0)
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
@@ -149,15 +161,8 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)
 	s.Require().Equal(sdk.MustNewDecFromStr("0.25"), utilization)
 
-	// Setting umee collateral weight to 1.0 to allow user to borrow heavily
-	umeeToken := newToken("uumee", "UMEE")
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1")
-	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1")
-
-	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
-
-	// user borrows 600 uumee, reducing module account to 0 uumee
-	s.Require().NoError(s.tk.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeDenom, 600)))
+	// user borrows 600 uumee (disregard borrow limit), reducing module account to 0 uumee
+	s.forceBorrow(addr, coin(umeeDenom, 600))
 
 	// 100% utilization (800 / 800+200-200))
 	utilization = s.tk.SupplyUtilization(s.ctx, umeeDenom)

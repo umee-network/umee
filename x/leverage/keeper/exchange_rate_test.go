@@ -7,16 +7,17 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
-	// The init scenario is being used so module balance starts at 1000 umee
-	// and the uToken supply starts at 1000 due to supplier account
-	_, addr := s.initBorrowScenario()
+	// creates account which has supplied and collateralized 1000 uumee
+	addr := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(addr, coin(umeeDenom, 1000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
 
 	// artificially increase total borrows (by affecting a single address)
-	err := s.tk.SetBorrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 2000000000)) // 2000 umee
+	err := s.tk.SetBorrow(s.ctx, addr, coin(umeeDenom, 2000))
 	s.Require().NoError(err)
 
 	// artificially set reserves
-	err = s.tk.SetReserveAmount(s.ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	err = s.tk.SetReserveAmount(s.ctx, coin(umeeDenom, 300))
 	s.Require().NoError(err)
 
 	// expected token:uToken exchange rate

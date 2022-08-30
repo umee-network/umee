@@ -25,10 +25,10 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
-	addr, _ := s.initBorrowScenario()
-
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// check invariant
 	_, broken := keeper.CollateralAmountInvariant(s.app.LeverageKeeper)(s.ctx)
@@ -46,10 +46,10 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 }
 
 func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
-	addr, _ := s.initBorrowScenario()
-
-	// The "supplier" user from the init scenario is being used because it
-	// already has 1k u/umee for collateral
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// user borrows 20 umee
 	err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
