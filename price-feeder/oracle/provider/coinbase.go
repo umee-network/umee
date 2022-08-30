@@ -24,7 +24,7 @@ const (
 	coinbasePingCheck = time.Second * 28 // should be < 30
 	coinbaseRestHost  = "https://api.exchange.coinbase.com"
 	coinbaseRestPath  = "/products"
-	timeLayout        = "2006-01-02T15:04:05.000000Z"
+	coinbaseTimeFmt   = "2006-01-02T15:04:05.000000Z"
 	unixMinute        = 60000
 )
 
@@ -408,7 +408,7 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 
 // timeToUnix converts a Time in format "2006-01-02T15:04:05.000000Z" to unix
 func (tr CoinbaseTradeResponse) timeToUnix() int64 {
-	t, err := time.Parse(timeLayout, tr.Time)
+	t, err := time.Parse(coinbaseTimeFmt, tr.Time)
 	if err != nil {
 		return 0
 	}
