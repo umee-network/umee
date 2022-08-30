@@ -129,22 +129,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 		}
 
 		msg := types.NewMsgSupply(from.Address, coin)
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         proto.MessageName(msg),
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(coin),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(coin))
 	}
 }
 
@@ -162,22 +147,7 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk ke
 		}
 
 		msg := types.NewMsgWithdraw(from.Address, withdrawUToken)
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         proto.MessageName(msg),
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(withdrawUToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(withdrawUToken))
 	}
 }
 
@@ -195,21 +165,7 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 		}
 
 		msg := types.NewMsgBorrow(from.Address, token)
-		txCtx := simulation.OperationInput{
-			R:             r,
-			App:           app,
-			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:           nil,
-			Msg:           msg,
-			MsgType:       proto.MessageName(msg),
-			Context:       ctx,
-			SimAccount:    from,
-			AccountKeeper: ak,
-			Bankkeeper:    bk,
-			ModuleName:    types.ModuleName,
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg)
 	}
 }
 
@@ -231,22 +187,7 @@ func SimulateMsgCollateralize(
 		}
 
 		msg := types.NewMsgCollateralize(from.Address, collateral)
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         proto.MessageName(msg),
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(collateral),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(collateral))
 	}
 }
 
@@ -268,21 +209,7 @@ func SimulateMsgDecollateralize(
 		}
 
 		msg := types.NewMsgDecollateralize(from.Address, collateral)
-		txCtx := simulation.OperationInput{
-			R:             r,
-			App:           app,
-			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:           nil,
-			Msg:           msg,
-			MsgType:       proto.MessageName(msg),
-			Context:       ctx,
-			SimAccount:    from,
-			AccountKeeper: ak,
-			Bankkeeper:    bk,
-			ModuleName:    types.ModuleName,
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, nil)
 	}
 }
 
@@ -300,22 +227,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 		}
 
 		msg := types.NewMsgRepay(from.Address, repayToken)
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         proto.MessageName(msg),
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(repayToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(repayToken))
 	}
 }
 
@@ -333,22 +245,7 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 		}
 
 		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, rewardDenom)
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         proto.MessageName(msg),
-			Context:         ctx,
-			SimAccount:      liquidator,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(repaymentToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, liquidator, msg, sdk.NewCoins(repaymentToken))
 	}
 }
 
@@ -525,4 +422,24 @@ func randomLiquidateFields(
 	rewardDenom = types.ToTokenDenom(randomCoin(r, collateral).Denom)
 
 	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
+}
+
+func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper, bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+	cfg := simappparams.MakeTestEncodingConfig()
+	txCtx := simulation.OperationInput{
+		R:               r,
+		App:             app,
+		TxGen:           cfg.TxConfig,
+		Cdc:             cfg.Codec.(*codec.ProtoCodec),
+		Msg:             msg,
+		MsgType:         proto.MessageName(msg),
+		Context:         ctx,
+		SimAccount:      from,
+		AccountKeeper:   ak,
+		Bankkeeper:      bk,
+		ModuleName:      types.ModuleName,
+		CoinsSpentInMsg: coins,
+	}
+
+	return simulation.GenAndDeliverTxWithRandFees(txCtx)
 }
