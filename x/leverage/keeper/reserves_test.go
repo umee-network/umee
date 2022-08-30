@@ -14,7 +14,7 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	require.Equal(amount, sdk.ZeroInt())
 
 	// artifically reserve 200 umee
-	err := s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 200000000))
+	err := s.tk.SetReserveAmount(ctx, coin(umeeapp.BondDenom, 200000000))
 	require.NoError(err)
 
 	// get new reserves
@@ -33,7 +33,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	addr2 := s.newAccount()
 
 	// Create an uncollateralized debt position
-	badDebt := sdk.NewInt64Coin(umeeDenom, 100000000) // 100 umee
+	badDebt := coin(umeeDenom, 100000000) // 100 umee
 	err := s.tk.SetBorrow(ctx, addr2, badDebt)
 	require.NoError(err)
 
@@ -41,7 +41,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	require.NoError(s.tk.SetBadDebtAddress(ctx, addr2, umeeDenom, true))
 
 	// Manually set reserves to 60 umee
-	reserve := sdk.NewInt64Coin(umeeDenom, 60000000)
+	reserve := coin(umeeDenom, 60000000)
 	err = s.tk.SetReserveAmount(ctx, reserve)
 	require.NoError(err)
 
@@ -51,14 +51,14 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Confirm that a debt of 40 umee remains
 	remainingDebt := app.LeverageKeeper.GetBorrow(ctx, addr2, umeeDenom)
-	require.Equal(sdk.NewInt64Coin(umeeDenom, 40000000), remainingDebt)
+	require.Equal(coin(umeeDenom, 40000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
 	remainingReserve := app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
 	require.Equal(sdk.ZeroInt(), remainingReserve)
 
 	// Manually set reserves to 70 umee
-	reserve = sdk.NewInt64Coin(umeeDenom, 70000000)
+	reserve = coin(umeeDenom, 70000000)
 	err = s.tk.SetReserveAmount(ctx, reserve)
 	require.NoError(err)
 
@@ -68,7 +68,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Confirm that the debt is eliminated
 	remainingDebt = app.LeverageKeeper.GetBorrow(ctx, addr2, umeeDenom)
-	require.Equal(sdk.NewInt64Coin(umeeDenom, 0), remainingDebt)
+	require.Equal(coin(umeeDenom, 0), remainingDebt)
 
 	// Confirm that reserves are now at 30 umee
 	remainingReserve = app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)

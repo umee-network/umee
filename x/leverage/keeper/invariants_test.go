@@ -1,8 +1,6 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	umeeapp "github.com/umee-network/umee/v3/app"
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -12,7 +10,7 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// artificially set reserves
-	err := s.tk.SetReserveAmount(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 300000000)) // 300 umee
+	err := s.tk.SetReserveAmount(ctx, coin(umeeapp.BondDenom, 300000000)) // 300 umee
 	require.NoError(err)
 
 	// check invariants
@@ -35,7 +33,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 
 	// withdraw the supplied umee in the initBorrowScenario
-	_, err := app.LeverageKeeper.Withdraw(ctx, addr, sdk.NewInt64Coin(uTokenDenom, 1000000000))
+	_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin(uTokenDenom, 1000000000))
 	require.NoError(err)
 
 	// check invariant
@@ -52,7 +50,7 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// user borrows 20 umee
-	err := app.LeverageKeeper.Borrow(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 20000000))
+	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 20000000))
 	require.NoError(err)
 
 	// check invariant
@@ -61,7 +59,7 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 
 	// user repays 30 umee, actually only 20 because is the min between
 	// the amount borrowed and the amount repaid
-	_, err = app.LeverageKeeper.Repay(ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 30000000))
+	_, err = app.LeverageKeeper.Repay(ctx, addr, coin(umeeapp.BondDenom, 30000000))
 	require.NoError(err)
 
 	// check invariant

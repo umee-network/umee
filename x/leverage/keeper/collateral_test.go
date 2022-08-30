@@ -58,7 +58,7 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 	uDenom := types.ToUTokenDenom(umeeDenom)
 
 	// set u/umee collateral amount of empty account address (error)
-	err := s.tk.SetCollateralAmount(ctx, sdk.AccAddress{}, sdk.NewInt64Coin(uDenom, 0))
+	err := s.tk.SetCollateralAmount(ctx, sdk.AccAddress{}, coin(uDenom, 0))
 	require.EqualError(err, "empty address")
 
 	addr := s.newAccount()
@@ -68,32 +68,32 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 	require.ErrorContains(err, "invalid denom")
 
 	// set u/umee collateral amount
-	require.NoError(s.tk.SetCollateralAmount(ctx, addr, sdk.NewInt64Coin(uDenom, 10)))
+	require.NoError(s.tk.SetCollateralAmount(ctx, addr, coin(uDenom, 10)))
 
 	// confirm effect
 	collateral := s.tk.GetCollateralAmount(ctx, addr, uDenom)
-	require.Equal(sdk.NewInt64Coin(uDenom, 10), collateral)
+	require.Equal(coin(uDenom, 10), collateral)
 
 	// set u/umee collateral amount to zero
-	require.NoError(s.tk.SetCollateralAmount(ctx, addr, sdk.NewInt64Coin(uDenom, 0)))
+	require.NoError(s.tk.SetCollateralAmount(ctx, addr, coin(uDenom, 0)))
 
 	// confirm effect
 	collateral = s.tk.GetCollateralAmount(ctx, addr, uDenom)
-	require.Equal(sdk.NewInt64Coin(uDenom, 0), collateral)
+	require.Equal(coin(uDenom, 0), collateral)
 
 	// set unregistered token collateral amount
-	require.NoError(s.tk.SetCollateralAmount(ctx, addr, sdk.NewInt64Coin("abcd", 10)))
+	require.NoError(s.tk.SetCollateralAmount(ctx, addr, coin("abcd", 10)))
 
 	// confirm effect
 	collateral = s.tk.GetCollateralAmount(ctx, addr, "abcd")
-	require.Equal(sdk.NewInt64Coin("abcd", 10), collateral)
+	require.Equal(coin("abcd", 10), collateral)
 
 	// set unregistered token collateral amount to zero
-	require.NoError(s.tk.SetCollateralAmount(ctx, addr, sdk.NewInt64Coin("abcd", 0)))
+	require.NoError(s.tk.SetCollateralAmount(ctx, addr, coin("abcd", 0)))
 
 	// confirm effect
 	collateral = s.tk.GetCollateralAmount(ctx, addr, "abcd")
-	require.Equal(sdk.NewInt64Coin("abcd", 0), collateral)
+	require.Equal(coin("abcd", 0), collateral)
 
 	// we do not test empty denom, as that will cause a panic
 }

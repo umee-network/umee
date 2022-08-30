@@ -67,11 +67,11 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.TokenValue(ctx, sdk.NewInt64Coin(umeeapp.BondDenom, 2400000))
+	v, err := app.LeverageKeeper.TokenValue(ctx, coin(umeeapp.BondDenom, 2400000))
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
-	v, err = app.LeverageKeeper.TokenValue(ctx, sdk.NewInt64Coin("foo", 2400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2400000))
 	require.Error(err)
 	require.Equal(sdk.ZeroDec(), v)
 }
@@ -83,8 +83,8 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err := app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			sdk.NewInt64Coin(umeeapp.BondDenom, 2400000),
-			sdk.NewInt64Coin(atomDenom, 4700000),
+			coin(umeeapp.BondDenom, 2400000),
+			coin(atomDenom, 4700000),
 		),
 	)
 	require.NoError(err)
@@ -94,9 +94,9 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			sdk.NewInt64Coin(umeeapp.BondDenom, 2400000),
-			sdk.NewInt64Coin(atomDenom, 4700000),
-			sdk.NewInt64Coin("foo", 4700000),
+			coin(umeeapp.BondDenom, 2400000),
+			coin(atomDenom, 4700000),
+			coin("foo", 4700000),
 		),
 	)
 	require.NoError(err)
