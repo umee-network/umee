@@ -25,6 +25,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// EventSupply is emitted on Msg/Supply
 type EventSupply struct {
 	// Liquidity supplier bech32 address.
 	Supplier string `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
@@ -68,6 +69,7 @@ func (m *EventSupply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventSupply proto.InternalMessageInfo
 
+// EventWithdraw is emitted on Msg/Withdraw
 type EventWithdraw struct {
 	// Liquidity supplier bech32 address.
 	Supplier string `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
@@ -110,6 +112,7 @@ func (m *EventWithdraw) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventWithdraw proto.InternalMessageInfo
 
+// EventCollaterize is emitted on Msg/Collaterize
 type EventCollaterize struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -150,6 +153,7 @@ func (m *EventCollaterize) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventCollaterize proto.InternalMessageInfo
 
+// EventDecollaterize is emitted on Msg/Decollateralize
 type EventDecollaterize struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -190,6 +194,7 @@ func (m *EventDecollaterize) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventDecollaterize proto.InternalMessageInfo
 
+// EventBorrow is emitted on Msg/Borrow
 type EventBorrow struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -230,6 +235,7 @@ func (m *EventBorrow) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventBorrow proto.InternalMessageInfo
 
+// EventRepay is emitted on Msg/Repay
 type EventRepay struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -270,6 +276,7 @@ func (m *EventRepay) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventRepay proto.InternalMessageInfo
 
+// EventLiquidate is emitted on Msg/Liquidate
 type EventLiquidate struct {
 	// Liquidator bech32 address.
 	Liquidator string `protobuf:"bytes,1,opt,name=liquidator,proto3" json:"liquidator,omitempty"`
@@ -312,6 +319,8 @@ func (m *EventLiquidate) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventLiquidate proto.InternalMessageInfo
 
+// EventInterestAccrual is emitted when intrest accrual is accounted in end
+// blocker
 type EventInterestAccrual struct {
 	BlockHeight uint64 `protobuf:"varint,1,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"`
 	// Unix timestamp (in seconds)
@@ -353,6 +362,8 @@ func (m *EventInterestAccrual) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventInterestAccrual proto.InternalMessageInfo
 
+// EventRepayBadDebt is emitted when bad debt is detected and repayed
+// (potentially partially)
 type EventRepayBadDebt struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -393,6 +404,8 @@ func (m *EventRepayBadDebt) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventRepayBadDebt proto.InternalMessageInfo
 
+// EventReservesExhausted is emitted when the module reserves are exhausted
+// by paying off bad debts.
 type EventReservesExhausted struct {
 	// Borrower bech32 address.
 	Borrower string `protobuf:"bytes,1,opt,name=borrower,proto3" json:"borrower,omitempty"`
@@ -433,6 +446,7 @@ func (m *EventReservesExhausted) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventReservesExhausted proto.InternalMessageInfo
 
+// EventFundOracle is emitted when sending rewards to oracle module
 type EventFundOracle struct {
 	// Assets sent to oracle module
 	Assets []types.Coin `protobuf:"bytes,1,rep,name=assets,proto3" json:"assets"`
