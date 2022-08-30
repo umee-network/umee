@@ -165,7 +165,7 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 		}
 
 		msg := types.NewMsgBorrow(from.Address, token)
-		return deliver(r, app, ctx, ak, bk, from, msg)
+		return deliver(r, app, ctx, ak, bk, from, msg, nil)
 	}
 }
 
