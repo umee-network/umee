@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func TestGetExchangeRateKey(t *testing.T) {

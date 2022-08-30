@@ -49,12 +49,12 @@ rpc_timeout = "100ms"
 tmrpc_endpoint = "http://localhost:26657"
 
 [telemetry]
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
 enabled = true
-global_labels = [["chain-id", "umee-local-testnet"]]
-service_name = "price-feeder"
+global-labels = [["chain-id", "umee-local-testnet"]]
+service-name = "price-feeder"
 type = "prometheus"
 
 [[provider_endpoints]]

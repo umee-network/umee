@@ -229,7 +229,7 @@ func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) err
 }
 
 func checkHTTPStatus(resp *http.Response) error {
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status: %s", resp.Status)
 	}
 	return nil

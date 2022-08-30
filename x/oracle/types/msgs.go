@@ -5,7 +5,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
-	"github.com/umee-network/umee/v2/util/checkers"
+	"github.com/umee-network/umee/v3/util/checkers"
 )
 
 var (
