@@ -42,24 +42,14 @@ func (s msgServer) Supply(
 		"supplied", msg.Asset.String(),
 		"received", received.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeSupply,
-			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
-			sdk.NewAttribute(types.EventAttrSupplied, msg.Asset.String()),
-			sdk.NewAttribute(types.EventAttrReceived, received.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, supplierAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+		Supplier: msg.Supplier,
+		Supplied: msg.Asset,
+		Uasset:   received,
 	})
-
 	return &types.MsgSupplyResponse{
 		Received: received,
-	}, nil
+	}, err
 }
 
 func (s msgServer) Withdraw(
@@ -84,24 +74,14 @@ func (s msgServer) Withdraw(
 		"redeemed", msg.Asset.String(),
 		"received", received.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeWithdraw,
-			sdk.NewAttribute(types.EventAttrSupplier, supplierAddr.String()),
-			sdk.NewAttribute(types.EventAttrRedeemed, msg.Asset.String()),
-			sdk.NewAttribute(types.EventAttrReceived, received.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, supplierAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+		Supplier: msg.Supplier,
+		Uasset:   msg.Asset,
+		Asset:    received,
 	})
-
 	return &types.MsgWithdrawResponse{
 		Received: received,
-	}, nil
+	}, err
 }
 
 func (s msgServer) Collateralize(
@@ -124,21 +104,11 @@ func (s msgServer) Collateralize(
 		"borrower", borrowerAddr.String(),
 		"amount", msg.Asset.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeCollateralize,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+		Borrower: msg.Borrower,
+		Uasset:   msg.Asset,
 	})
-
-	return &types.MsgCollateralizeResponse{}, nil
+	return &types.MsgCollateralizeResponse{}, err
 }
 
 func (s msgServer) Decollateralize(
@@ -161,21 +131,11 @@ func (s msgServer) Decollateralize(
 		"borrower", borrowerAddr.String(),
 		"amount", msg.Asset.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeDecollateralize,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
+		Borrower: msg.Borrower,
+		Uasset:   msg.Asset,
 	})
-
-	return &types.MsgDecollateralizeResponse{}, nil
+	return &types.MsgDecollateralizeResponse{}, err
 }
 
 func (s msgServer) Borrow(
@@ -198,16 +158,11 @@ func (s msgServer) Borrow(
 		"borrower", borrowerAddr.String(),
 		"amount", msg.Asset.String(),
 	)
-	ctx.EventManager().EmitTypedEvent()
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeBorrow,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Asset.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+		Borrower: msg.Borrower,
+		Asset:    msg.Asset,
 	})
-
-	return &types.MsgBorrowResponse{}, nil
+	return &types.MsgBorrowResponse{}, err
 }
 
 func (s msgServer) Repay(
@@ -232,24 +187,13 @@ func (s msgServer) Repay(
 		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeRepay,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(types.EventAttrAttempted, msg.Asset.String()),
-			sdk.NewAttribute(types.EventAttrRepaid, repaid.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventRepay{
+		Borrower: msg.Borrower,
+		Repaid:   repaid,
 	})
-
 	return &types.MsgRepayResponse{
 		Repaid: repaid,
-	}, nil
+	}, err
 }
 
 func (s msgServer) Liquidate(
@@ -282,27 +226,14 @@ func (s msgServer) Liquidate(
 		"liquidated", liquidated.String(),
 		"reward", reward.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeLiquidate,
-			sdk.NewAttribute(types.EventAttrLiquidator, liquidator.String()),
-			sdk.NewAttribute(types.EventAttrBorrower, borrower.String()),
-			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
-			sdk.NewAttribute(types.EventAttrRepaid, reward.String()),
-			sdk.NewAttribute(types.EventAttrLiquidated, liquidated.String()),
-			sdk.NewAttribute(types.EventAttrReward, reward.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, liquidator.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventLiquidate{
+		Liquidator: msg.Liquidator,
+		Borrower:   msg.Borrower,
+		Liquidated: liquidated,
 	})
-
 	return &types.MsgLiquidateResponse{
 		Repaid:     repaid,
 		Collateral: liquidated,
 		Reward:     reward,
-	}, nil
+	}, err
 }
