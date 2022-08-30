@@ -4,7 +4,6 @@ package umee.oracle.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "google/api/annotations.proto";
 
 import "umee/oracle/v1/oracle.proto";
 
