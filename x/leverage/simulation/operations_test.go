@@ -141,26 +141,17 @@ func (s *SimTestSuite) TestWeightedOperations() {
 	// setup 3 accounts
 	r := rand.New(rand.NewSource(1))
 	accs := s.getTestingAccounts(r, 3, func(acc simtypes.Account) {})
-
 	expected := []struct {
-		weight     int
-		opMsgRoute string
-		opMsgName  string
+		weight    int
+		opMsgName string
 	}{
-		{simulation.DefaultWeightMsgSupply, types.ModuleName,
-			proto.MessageName(new(types.MsgSupply))},
-		{simulation.DefaultWeightMsgWithdraw, types.ModuleName,
-			proto.MessageName(new(types.MsgWithdraw))},
-		{simulation.DefaultWeightMsgBorrow, types.ModuleName,
-			proto.MessageName(new(types.MsgBorrow))},
-		{simulation.DefaultWeightMsgCollateralize, types.ModuleName,
-			proto.MessageName(new(types.MsgCollateralize))},
-		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName,
-			proto.MessageName(new(types.MsgDecollateralize))},
-		{simulation.DefaultWeightMsgRepay, types.ModuleName,
-			proto.MessageName(new(types.MsgRepay))},
-		{simulation.DefaultWeightMsgLiquidate, types.ModuleName,
-			proto.MessageName(new(types.MsgLiquidate))},
+		{simulation.DefaultWeightMsgSupply, sdk.MsgTypeURL(new(types.MsgSupply))},
+		{simulation.DefaultWeightMsgWithdraw, sdk.MsgTypeURL(new(types.MsgWithdraw))},
+		{simulation.DefaultWeightMsgBorrow, sdk.MsgTypeURL(new(types.MsgBorrow))},
+		{simulation.DefaultWeightMsgCollateralize, sdk.MsgTypeURL(new(types.MsgCollateralize))},
+		{simulation.DefaultWeightMsgDecollateralize, sdk.MsgTypeURL(new(types.MsgDecollateralize))},
+		{simulation.DefaultWeightMsgRepay, sdk.MsgTypeURL(new(types.MsgRepay))},
+		{simulation.DefaultWeightMsgLiquidate, sdk.MsgTypeURL(new(types.MsgLiquidate))},
 	}
 
 	for i, w := range weightesOps {
@@ -169,7 +160,6 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		// by WeightedOperations. if the ordering in WeightedOperations changes some tests
 		// will fail
 		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
-		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
 	}
 }
