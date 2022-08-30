@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	uTokenDenom := types.ToUTokenDenom(umeeapp.BondDenom)
 
 	// withdraw the supplied umee in the initBorrowScenario
-	_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin(uTokenDenom, 1000000000))
+	_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin(uTokenDenom, 1000_000000))
 	require.NoError(err)
 
 	// check invariant
@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// user borrows 20 umee
-	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 20000000))
+	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 20_000000))
 	require.NoError(err)
 
 	// check invariant
@@ -58,7 +58,7 @@ func (s *IntegrationTestSuite) TestBorrowAmountInvariant() {
 
 	// user repays 30 umee, actually only 20 because is the min between
 	// the amount borrowed and the amount repaid
-	_, err = app.LeverageKeeper.Repay(ctx, addr, coin(umeeapp.BondDenom, 30000000))
+	_, err = app.LeverageKeeper.Repay(ctx, addr, coin(umeeapp.BondDenom, 30_000000))
 	require.NoError(err)
 
 	// check invariant

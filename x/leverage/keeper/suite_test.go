@@ -21,9 +21,8 @@ import (
 )
 
 const (
-	initialPower = int64(10000000000)
-	umeeDenom    = umeeapp.BondDenom
-	atomDenom    = fixtures.AtomDenom
+	umeeDenom = umeeapp.BondDenom
+	atomDenom = fixtures.AtomDenom
 )
 
 type IntegrationTestSuite struct {

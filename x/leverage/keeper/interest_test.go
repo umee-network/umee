@@ -15,12 +15,12 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
 	// user borrows 40 umee
-	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 40000000))
+	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 40_000000))
 	require.NoError(err)
 
 	// verify user's loan amount (40 umee)
 	loanBalance := app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
-	require.Equal(loanBalance, coin(umeeapp.BondDenom, 40000000))
+	require.Equal(loanBalance, coin(umeeapp.BondDenom, 40_000000))
 
 	// Because no time has passed since genesis (due to test setup) this will not
 	// increase borrowed amount.
@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 
 	// verify user's loan amount (40 umee)
 	loanBalance = app.LeverageKeeper.GetBorrow(ctx, addr, umeeapp.BondDenom)
-	require.Equal(loanBalance, coin(umeeapp.BondDenom, 40000000))
+	require.Equal(loanBalance, coin(umeeapp.BondDenom, 40_000000))
 
 	// borrow APY at utilization = 4%
 	// when kink utilization = 80%, and base/kink APY are 0.02 and 0.22
@@ -63,7 +63,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	require.Equal(rate, sdk.MustNewDecFromStr("0.02"))
 
 	// user borrows 200 umee, utilization 200/1000
-	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 200000000))
+	err := app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 200_000000))
 	require.NoError(err)
 
 	// Between base interest and kink (20% utilization)
@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	require.Equal(rate, sdk.MustNewDecFromStr("0.07"))
 
 	// user borrows 600 more umee, utilization 800/1000
-	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 600000000))
+	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 600_000000))
 	require.NoError(err)
 
 	// Kink interest rate (80% utilization)
@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	require.Equal(rate, sdk.MustNewDecFromStr("0.22"))
 
 	// user borrows 100 more umee, utilization 900/1000
-	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 100000000))
+	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 100_000000))
 	require.NoError(err)
 
 	// Between kink interest and max (90% utilization)
@@ -89,7 +89,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	require.Equal(rate, sdk.MustNewDecFromStr("0.87"))
 
 	// user borrows 100 more umee, utilization 1000/1000
-	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 100000000))
+	err = app.LeverageKeeper.Borrow(ctx, addr, coin(umeeapp.BondDenom, 100_000000))
 	require.NoError(err)
 
 	// Max interest rate (100% utilization)

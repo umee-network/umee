@@ -17,7 +17,7 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	s.setReserves(coin(umeeapp.BondDenom, 200_000000))
 	// get new reserves
 	amount = app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
-	require.Equal(amount, sdk.NewInt(200000000))
+	require.Equal(amount, sdk.NewInt(200_000000))
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
@@ -31,7 +31,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	addr2 := s.newAccount()
 
 	// Create an uncollateralized debt position
-	badDebt := coin(umeeDenom, 100000000) // 100 umee
+	badDebt := coin(umeeDenom, 100_000000)
 	err := s.tk.SetBorrow(ctx, addr2, badDebt)
 	require.NoError(err)
 
@@ -39,7 +39,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	require.NoError(s.tk.SetBadDebtAddress(ctx, addr2, umeeDenom, true))
 
 	// Manually set reserves to 60 umee
-	reserve := coin(umeeDenom, 60000000)
+	reserve := coin(umeeDenom, 60_000000)
 	s.setReserves(reserve)
 
 	// Sweep all bad debts, which should repay 60 umee of the bad debt (partial repayment)
@@ -48,14 +48,14 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Confirm that a debt of 40 umee remains
 	remainingDebt := app.LeverageKeeper.GetBorrow(ctx, addr2, umeeDenom)
-	require.Equal(coin(umeeDenom, 40000000), remainingDebt)
+	require.Equal(coin(umeeDenom, 40_000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
 	remainingReserve := app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
 	require.Equal(sdk.ZeroInt(), remainingReserve)
 
 	// Manually set reserves to 70 umee
-	reserve = coin(umeeDenom, 70000000)
+	reserve = coin(umeeDenom, 70_000000)
 	s.setReserves(reserve)
 
 	// Sweep all bad debts, which should fully repay the bad debt this time
@@ -68,7 +68,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Confirm that reserves are now at 30 umee
 	remainingReserve = app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
-	require.Equal(sdk.NewInt(30000000), remainingReserve)
+	require.Equal(sdk.NewInt(30_000000), remainingReserve)
 
 	// Sweep all bad debts - but there are none
 	err = app.LeverageKeeper.SweepBadDebts(ctx)

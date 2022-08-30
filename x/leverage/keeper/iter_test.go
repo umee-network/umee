@@ -55,7 +55,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	// user borrows 4 atom (max current allowed - 1) user amount enabled as collateral * CollateralWeight
 	// = (50 * 0.1) - 1
 	// = 4app.
-	err = app.LeverageKeeper.Borrow(s.ctx, addr, coin(atomDenom, 4000000)) // 4 atom
+	err = app.LeverageKeeper.Borrow(s.ctx, addr, coin(atomDenom, 4_000000))
 	require.NoError(err)
 
 	// Note: Setting umee liquidation threshold to 0.05 to make the user eligible for liquidation
