@@ -12,7 +12,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.28.0
-	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
@@ -75,6 +74,7 @@ require (
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.1 // indirect
 	github.com/cosmos/ibc-go/v3 v3.1.0 // indirect
+	github.com/cosmos/ibc-go/v5 v5.0.0-20220826093050-dcd616c24afd // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/creachadair/taskgroup v0.3.2 // indirect
