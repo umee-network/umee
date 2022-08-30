@@ -50,12 +50,6 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	s.supply(addr, coin(umeeDenom, 1000_000000))
 	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
 
-	umeeToken := newToken("uumee", "UMEE")
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("1.0")     // to allow high utilization
-	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("1.0") // to allow high utilization
-
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
-
 	// Base interest rate (0% utilization)
 	rate := app.LeverageKeeper.DeriveBorrowAPY(ctx, umeeapp.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("0.02"), rate)
@@ -67,22 +61,22 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 	rate = app.LeverageKeeper.DeriveBorrowAPY(ctx, umeeapp.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("0.07"), rate)
 
-	// user borrows 600 more umee, utilization 800/1000
-	s.borrow(addr, coin(umeeapp.BondDenom, 600_000000))
+	// user borrows 600 more umee (ignores collateral), utilization 800/1000
+	s.forceBorrow(addr, coin(umeeapp.BondDenom, 600_000000))
 
 	// Kink interest rate (80% utilization)
 	rate = app.LeverageKeeper.DeriveBorrowAPY(ctx, umeeapp.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("0.22"), rate)
 
-	// user borrows 100 more umee, utilization 900/1000
-	s.borrow(addr, coin(umeeapp.BondDenom, 100_000000))
+	// user borrows 100 more umee (ignores collateral), utilization 900/1000
+	s.forceBorrow(addr, coin(umeeapp.BondDenom, 100_000000))
 
 	// Between kink interest and max (90% utilization)
 	rate = app.LeverageKeeper.DeriveBorrowAPY(ctx, umeeapp.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("0.87"), rate)
 
-	// user borrows 100 more umee, utilization 1000/1000
-	s.borrow(addr, coin(umeeapp.BondDenom, 100_000000))
+	// user borrows 100 more umee (ignores collateral), utilization 1000/1000
+	s.forceBorrow(addr, coin(umeeapp.BondDenom, 100_000000))
 
 	// Max interest rate (100% utilization)
 	rate = app.LeverageKeeper.DeriveBorrowAPY(ctx, umeeapp.BondDenom)
