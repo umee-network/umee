@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version: 1.19
       - name: Display Go Version
         run: go version
       - uses: actions/cache@v3
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
-          go-version: 1.18
+          go-version: 1.19
           cache: true
       - name: Test and Create Coverage Report
         if: env.GIT_DIFF
@@ -72,7 +72,7 @@ jobs:
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
-          go-version: 1.18
+          go-version: 1.19
           cache: true
       - name: Build Docker Image
         if: env.GIT_DIFF
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
-          go-version: 1.18
+          go-version: 1.19
           cache: true
           cache-dependency-path: price-feeder/go.sum
       - name: Test price-feeder
@@ -119,7 +119,7 @@ jobs:
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
-          go-version: 1.18
+          go-version: 1.19
           cache: true
       - name: Install Starport
         if: env.GIT_DIFF
