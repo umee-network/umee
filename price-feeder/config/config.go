@@ -38,6 +38,7 @@ var (
 		provider.ProviderHuobi:    {},
 		provider.ProviderGate:     {},
 		provider.ProviderCoinbase: {},
+		provider.ProviderFTX:      {},
 		provider.ProviderMock:     {},
 	}
 
