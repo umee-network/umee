@@ -6,17 +6,18 @@ import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
 message EventBorrow {
-  // TODO: this is not needed
-  // // Msg type URL for which an autorization is granted
-  // string msg_type_url = 2;
-
   // Borrower account address
-  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string borrower = 1;
   // Asset borrowed
   cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+}
+
+message EventSupply {
+  string supplier = 1;
 }

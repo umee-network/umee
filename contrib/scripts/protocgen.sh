@@ -19,4 +19,4 @@ cd ..
 cp -r github.com/umee-network/umee/v3/* .
 rm -rf github.com
 
-go mod tidy
+# go mod tidy
