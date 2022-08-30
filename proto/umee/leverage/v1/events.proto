@@ -25,7 +25,7 @@ message EventWithdraw {
   // Liquidity supplier bech32 address.
   string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // uAsset sent to the module in exchange for the underlying asset.
-  cosmos.base.v1beta1.Coin redeemed = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin uasset = 2 [(gogoproto.nullable) = false];
   // Liquidity received by the supplier.
   cosmos.base.v1beta1.Coin asset = 3 [(gogoproto.nullable) = false];
 }
