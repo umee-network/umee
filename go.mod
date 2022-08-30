@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/v3
 
-go 1.18
+go 1.19
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
@@ -19,7 +19,7 @@ require (
 	github.com/ignite/cli v0.23.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0-rc2
-	github.com/rs/zerolog v1.27.0
+	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
@@ -418,6 +418,8 @@ replace (
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220805205452-2445605a0377
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.1-umee
 	github.com/cosmos/ibc-go/v3 => github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84
+	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
+	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220726223124-958071525f39
 )

@@ -661,6 +661,36 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	s.Require().Equal(sdk.MustNewDecFromStr("0.000948"), supplyAPY)
 }
 
+func (s *IntegrationTestSuite) TestAccrueInterest_Invalid() {
+	// The "supplier" user from the init scenario is being used because it
+	// already has 1k u/umee for collateral.
+	addr, _ := s.initBorrowScenario()
+
+	// user borrows 40 umee
+	err := s.app.LeverageKeeper.Borrow(s.ctx, addr, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
+	s.Require().NoError(err)
+
+	// Setting last interest time to a negative value is not allowed
+	err = s.tk.SetLastInterestTime(s.ctx, -1)
+	s.Require().ErrorIs(err, types.ErrNegativeTimeElapsed)
+
+	// Setting last interest time ahead greatly succeeds
+	err = s.tk.SetLastInterestTime(s.ctx, 100_000_000) // 3 years
+	s.Require().NoError(err)
+
+	// Interest will not accrue (suite BlockTime = 0) but will not error either
+	err = s.app.LeverageKeeper.AccrueAllInterest(s.ctx)
+	s.Require().NoError(err)
+
+	// Setting last interest time back to an earlier time is not allowed
+	err = s.tk.SetLastInterestTime(s.ctx, 1000)
+	s.Require().ErrorIs(err, types.ErrNegativeTimeElapsed)
+
+	// verify user's loan amount is unchanged (40 umee)
+	loanBalance := s.app.LeverageKeeper.GetBorrow(s.ctx, addr, umeeapp.BondDenom)
+	s.Require().Equal(loanBalance, sdk.NewInt64Coin(umeeapp.BondDenom, 40000000))
+}
+
 func (s *IntegrationTestSuite) TestDynamicInterest() {
 	// Init scenario is being used because the module account (lending pool)
 	// already has 1000 umee.
