@@ -131,7 +131,7 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	require.Equal(sdk.NewInt(1877), available)
 
 	// artificially reserve 200 uumee, reducing available amount to 1677
-	require.NoError(s.tk.SetReserveAmount(ctx, coin(umeeDenom, 200)))
+	s.setReserves(coin(umeeDenom, 200))
 	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
 	require.Equal(sdk.NewInt(1677), available)
 }
@@ -163,7 +163,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	require.Equal(sdk.MustNewDecFromStr("0.2"), utilization)
 
 	// artificially reserve 200 uumee
-	require.NoError(s.tk.SetReserveAmount(ctx, coin(umeeDenom, 200)))
+	s.setReserves(coin(umeeDenom, 200))
 
 	// 25% utilization (200 / 200+800-200)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
@@ -184,14 +184,14 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 800 uumee
-	require.NoError(s.tk.SetReserveAmount(ctx, coin(umeeDenom, 800)))
+	s.setReserves(coin(umeeDenom, 800))
 
 	// edge case interpreted as 100% utilization (1200 / 1200+200-800)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
 	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 4000 uumee
-	require.NoError(s.tk.SetReserveAmount(ctx, coin(umeeDenom, 4000)))
+	s.setReserves(coin(umeeDenom, 4000))
 
 	// impossible case interpreted as 100% utilization (1200 / 1200+200-4000)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)

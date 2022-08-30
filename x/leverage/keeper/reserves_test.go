@@ -14,9 +14,7 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	require.Equal(amount, sdk.ZeroInt())
 
 	// artifically reserve 200 umee
-	err := s.tk.SetReserveAmount(ctx, coin(umeeapp.BondDenom, 200000000))
-	require.NoError(err)
-
+	s.setReserves(coin(umeeapp.BondDenom, 200_000000))
 	// get new reserves
 	amount = app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
 	require.Equal(amount, sdk.NewInt(200000000))
@@ -42,8 +40,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Manually set reserves to 60 umee
 	reserve := coin(umeeDenom, 60000000)
-	err = s.tk.SetReserveAmount(ctx, reserve)
-	require.NoError(err)
+	s.setReserves(reserve)
 
 	// Sweep all bad debts, which should repay 60 umee of the bad debt (partial repayment)
 	err = app.LeverageKeeper.SweepBadDebts(ctx)
@@ -59,8 +56,7 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 
 	// Manually set reserves to 70 umee
 	reserve = coin(umeeDenom, 70000000)
-	err = s.tk.SetReserveAmount(ctx, reserve)
-	require.NoError(err)
+	s.setReserves(reserve)
 
 	// Sweep all bad debts, which should fully repay the bad debt this time
 	err = app.LeverageKeeper.SweepBadDebts(ctx)

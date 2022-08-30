@@ -19,8 +19,7 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	require.NoError(err)
 
 	// artificially set reserves
-	err = s.tk.SetReserveAmount(ctx, coin(umeeDenom, 300))
-	require.NoError(err)
+	s.setReserves(coin(umeeDenom, 300))
 
 	// expected token:uToken exchange rate
 	//    = (total borrows + module balance - reserves) / utoken supply

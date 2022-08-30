@@ -183,6 +183,16 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 	require.NoError(err, "forceBorroww")
 }
 
+// setReserves artificially sets reserves of one or more tokens to given values
+func (s *IntegrationTestSuite) setReserves(coins ...sdk.Coin) {
+	ctx, require := s.ctx, s.Require()
+
+	for _, coin := range coins {
+		err := s.tk.SetReserveAmount(ctx, coin)
+		require.NoError(err, "setReserves")
+	}
+}
+
 // checkInvariants is used during other tests to quickly test all invariants
 func (s *IntegrationTestSuite) checkInvariants(msg string) {
 	app, ctx, require := s.app, s.ctx, s.Require()

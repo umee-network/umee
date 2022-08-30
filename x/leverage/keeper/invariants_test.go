@@ -10,8 +10,7 @@ func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// artificially set reserves
-	err := s.tk.SetReserveAmount(ctx, coin(umeeapp.BondDenom, 300000000)) // 300 umee
-	require.NoError(err)
+	s.setReserves(coin(umeeapp.BondDenom, 300_000000))
 
 	// check invariants
 	_, broken := keeper.ReserveAmountInvariant(app.LeverageKeeper)(ctx)
