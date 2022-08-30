@@ -3,18 +3,14 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"runtime"
 
-	"github.com/sirkon/goproxy/gomod"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
 const (
 	flagFormat = "format"
-
-	pathCosmosSDK = "github.com/cosmos/cosmos-sdk"
 )
 
 var (
@@ -23,6 +19,9 @@ var (
 
 	// Commit defines the application commit hash (defined at compile time)
 	Commit = ""
+
+	// SDKVersion defines the sdk version (defined at compile time)
+	SDKVersion = ""
 
 	versionFormat string
 )
@@ -39,25 +38,16 @@ func getVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print binary version information",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			modBz, err := os.ReadFile("go.mod")
-			if err != nil {
-				return err
-			}
-
-			mod, err := gomod.Parse("go.mod", modBz)
-			if err != nil {
-				return err
-			}
-
 			verInfo := versionInfo{
 				Version: Version,
 				Commit:  Commit,
-				SDK:     mod.Require[pathCosmosSDK],
+				SDK:     SDKVersion,
 				Go:      fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 			}
 
 			var bz []byte
 
+			var err error
 			switch versionFormat {
 			case "json":
 				bz, err = json.Marshal(verInfo)
