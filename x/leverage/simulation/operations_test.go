@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -103,6 +104,16 @@ func (s *SimTestSuite) SetupTest() {
 	s.ctx = ctx
 }
 
+// msg must be a pointer to a Message
+func (s *SimTestSuite) unmarshal(op *simtypes.OperationMsg, msg proto.Message) {
+	// TODO: use app Codec instead of Amino #1313
+	// err := s.app.AppCodec().UnmarshalJSON(op.Msg, msg)
+
+	s.Require().True(op.OK)
+	err := types.ModuleCdc.UnmarshalJSON(op.Msg, msg)
+	s.Require().NoError(err)
+}
+
 // getTestingAccounts generates accounts with balance in all registered token types
 func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAccount simtypes.Account)) []simtypes.Account {
 	accounts := simtypes.RandomAccounts(r, n)
@@ -140,19 +151,17 @@ func (s *SimTestSuite) TestWeightedOperations() {
 	// setup 3 accounts
 	r := rand.New(rand.NewSource(1))
 	accs := s.getTestingAccounts(r, 3, func(acc simtypes.Account) {})
-
 	expected := []struct {
-		weight     int
-		opMsgRoute string
-		opMsgName  string
+		weight    int
+		opMsgName string
 	}{
-		{simulation.DefaultWeightMsgSupply, types.ModuleName, types.EventTypeSupply},
-		{simulation.DefaultWeightMsgWithdraw, types.ModuleName, types.EventTypeWithdraw},
-		{simulation.DefaultWeightMsgBorrow, types.ModuleName, types.EventTypeBorrow},
-		{simulation.DefaultWeightMsgCollateralize, types.ModuleName, types.EventTypeCollateralize},
-		{simulation.DefaultWeightMsgDecollateralize, types.ModuleName, types.EventTypeDecollateralize},
-		{simulation.DefaultWeightMsgRepay, types.ModuleName, types.EventTypeRepay},
-		{simulation.DefaultWeightMsgLiquidate, types.ModuleName, types.EventTypeLiquidate},
+		{simulation.DefaultWeightMsgSupply, sdk.MsgTypeURL(new(types.MsgSupply))},
+		{simulation.DefaultWeightMsgWithdraw, sdk.MsgTypeURL(new(types.MsgWithdraw))},
+		{simulation.DefaultWeightMsgBorrow, sdk.MsgTypeURL(new(types.MsgBorrow))},
+		{simulation.DefaultWeightMsgCollateralize, sdk.MsgTypeURL(new(types.MsgCollateralize))},
+		{simulation.DefaultWeightMsgDecollateralize, sdk.MsgTypeURL(new(types.MsgDecollateralize))},
+		{simulation.DefaultWeightMsgRepay, sdk.MsgTypeURL(new(types.MsgRepay))},
+		{simulation.DefaultWeightMsgLiquidate, sdk.MsgTypeURL(new(types.MsgLiquidate))},
 	}
 
 	for i, w := range weightesOps {
@@ -162,7 +171,6 @@ func (s *SimTestSuite) TestWeightedOperations() {
 		// by WeightedOperations. if the ordering in WeightedOperations changes some tests
 		// will fail
 		s.Require().Equal(expected[i].weight, w.Weight(), "weight should be the same")
-		s.Require().Equal(expected[i].opMsgRoute, operationMsg.Route, "route should be the same")
 		s.Require().Equal(expected[i].opMsgName, operationMsg.Name, "operation Msg name should be the same")
 	}
 }
@@ -178,11 +186,8 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	s.Require().NoError(err)
 
 	var msg types.MsgSupply
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeSupply, msg.Type())
 	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -203,11 +208,9 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	s.Require().NoError(err)
 
 	var msg types.MsgWithdraw
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal(types.EventTypeWithdraw, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -231,11 +234,8 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	s.Require().NoError(err)
 
 	var msg types.MsgBorrow
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
-	s.Require().Equal(types.EventTypeBorrow, msg.Type())
 	s.Require().Equal("67uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -256,11 +256,8 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	s.Require().NoError(err)
 
 	var msg types.MsgCollateralize
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeCollateralize, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -282,11 +279,8 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	s.Require().NoError(err)
 
 	var msg types.MsgDecollateralize
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeDecollateralize, msg.Type())
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -310,11 +304,8 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 	s.Require().NoError(err)
 
 	var msg types.MsgRepay
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
-	s.Require().Equal(types.EventTypeRepay, msg.Type())
 	s.Require().Equal("9uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
@@ -340,13 +331,10 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 		"failed to execute message; message index: 0: borrower not eligible for liquidation",
 	)
 
-	var msg types.MsgLiquidate
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
 	// While it is no longer simple to create an eligible liquidation target using exported keeper methods here,
 	// we can still verify some properties of the resulting operation.
+	s.Require().Empty(operationMsg.Msg)
 	s.Require().False(operationMsg.OK)
-	s.Require().Equal(types.EventTypeLiquidate, msg.Type())
 	s.Require().Len(futureOperations, 0)
 }
 

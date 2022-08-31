@@ -70,6 +70,7 @@ func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error
 // It returns a boolean representing whether full repayment was achieved.
 func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
+	borrower := borrowerAddr.String()
 	reserved := k.GetReserveAmount(ctx, denom)
 
 	amountToRepay := sdk.MinInt(borrowed.Amount, reserved)
@@ -87,42 +88,32 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			return false, err
 		}
 
-		// Because this action is not caused by a message, logging and
-		// events are here instead of msg_server.go
+		// This action is not caused by a message so we need to make an event here
+		asset := sdk.NewCoin(denom, amountToRepay)
 		k.Logger(ctx).Debug(
 			"bad debt repaid",
-			"borrower", borrowerAddr.String(),
-			"denom", denom,
-			"amount", amountToRepay.String(),
+			"borrower", borrower,
+			"asset", asset,
 		)
-
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeRepayBadDebt,
-				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-				sdk.NewAttribute(types.EventAttrDenom, denom),
-				sdk.NewAttribute(sdk.AttributeKeyAmount, amountToRepay.String()),
-			),
-		)
+		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
+			Borrower: borrower, Asset: asset})
+		if err != nil {
+			return false, err
+		}
 	}
 
 	// Reserve exhaustion logs track any bad debts that were not repaid
 	if newBorrowed.IsPositive() {
 		k.Logger(ctx).Debug(
 			"reserves exhausted",
-			"borrower", borrowerAddr.String(),
-			"denom", denom,
-			"amount", newBorrowed.Amount.String(),
+			"borrower", borrower,
+			"asset", newBorrowed,
 		)
-
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeReservesExhausted,
-				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-				sdk.NewAttribute(types.EventAttrDenom, denom),
-				sdk.NewAttribute(sdk.AttributeKeyAmount, newBorrowed.Amount.String()),
-			),
-		)
+		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
+			Borrower: borrower, OutstandingDebt: newBorrowed})
+		if err != nil {
+			return false, err
+		}
 	}
 
 	// True is returned on full repayment
