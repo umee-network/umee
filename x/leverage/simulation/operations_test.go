@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -101,6 +102,16 @@ func (s *SimTestSuite) SetupTest() {
 
 	s.app = app
 	s.ctx = ctx
+}
+
+// msg must be a pointer to a Message
+func (s *SimTestSuite) unmarshal(op *simtypes.OperationMsg, msg proto.Message) {
+	// TODO: use app Codec instead of Amino #1313
+	// err := s.app.AppCodec().UnmarshalJSON(op.Msg, msg)
+
+	s.Require().True(op.OK)
+	err := types.ModuleCdc.UnmarshalJSON(op.Msg, msg)
+	s.Require().NoError(err)
 }
 
 // getTestingAccounts generates accounts with balance in all registered token types
@@ -198,8 +209,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	s.Require().NoError(err)
 
 	var msg types.MsgWithdraw
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().True(operationMsg.OK)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal("73u/uumee", msg.Asset.String())
