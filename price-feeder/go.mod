@@ -12,7 +12,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.28.0
-	github.com/sirkon/goproxy v1.4.8
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
@@ -74,7 +73,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.1 // indirect
-	github.com/cosmos/ibc-go/v3 v3.1.0 // indirect
+	github.com/cosmos/ibc-go/v5 v5.0.0-rc1 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/creachadair/taskgroup v0.3.2 // indirect
@@ -294,10 +293,9 @@ require (
 )
 
 replace (
-	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220805205452-2445605a0377
+	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220831213229-254615a7be1d
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.1-umee
-	github.com/cosmos/ibc-go/v3 => github.com/umee-network/ibc-go/v3 v3.1.1-0.20220805152159-67d4d37d2d84
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220726223124-958071525f39
+	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e
 	github.com/umee-network/umee/v3 => ../
 )
