@@ -24,7 +24,7 @@ providers = [
   "okx",
   "gate"
 ]
-  quote = "USDT"
+quote = "USDT"
 
 [[currency_pairs]]
 base = "UMEE"
