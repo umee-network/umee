@@ -175,7 +175,6 @@ message QueryAggregatePrevoteResponse {
   // in the current vote period
   AggregateExchangeRatePrevote aggregate_prevote = 1
       [(gogoproto.nullable) = false];
-  ;
 }
 
 // QueryAggregatePrevotes is the request type for the
