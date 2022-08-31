@@ -8,20 +8,28 @@ write_timeout = "20s"
 
 [[deviation_thresholds]]
 base = "USDT"
-threshold = "2"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "UMEE"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "ATOM"
+threshold = "1.5"
 
 [[currency_pairs]]
-base = "ATOM"
+base = "UMEE"
 providers = [
-  "binance",
+  "okx",
+  "gate"
 ]
 quote = "USDT"
 
 [[currency_pairs]]
-base = "ATOM"
+base = "UMEE"
 providers = [
-  "kraken",
-  "osmosis",
+  "ftx"
 ]
 quote = "USD"
 
@@ -29,8 +37,23 @@ quote = "USD"
 base = "USDT"
 providers = [
   "kraken",
-  "gate",
+  "ftx",
   "coinbase"
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "ftx",
+  "okx",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "kraken",
 ]
 quote = "USD"
 
