@@ -73,7 +73,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			}
 
 			// Set the exchange rate, emit ABCI event
-			k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate)
+			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
+				return err
+			}
 		}
 
 		// update miss counting & slashing
