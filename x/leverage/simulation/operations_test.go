@@ -185,9 +185,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	s.Require().NoError(err)
 
 	var msg types.MsgSupply
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
 	s.Require().Equal("185121068uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
@@ -235,9 +233,7 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	s.Require().NoError(err)
 
 	var msg types.MsgBorrow
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1qnclgkcxtuledc8xhle4lqly2q0z96uqkks60s", msg.Borrower)
 	s.Require().Equal("67uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
@@ -259,9 +255,7 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	s.Require().NoError(err)
 
 	var msg types.MsgCollateralize
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
@@ -284,9 +278,7 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	s.Require().NoError(err)
 
 	var msg types.MsgDecollateralize
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal("73u/uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
@@ -311,9 +303,7 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 	s.Require().NoError(err)
 
 	var msg types.MsgRepay
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
-	s.Require().True(operationMsg.OK)
+	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Borrower)
 	s.Require().Equal("9uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
@@ -340,11 +330,9 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 		"failed to execute message; message index: 0: borrower not eligible for liquidation",
 	)
 
-	var msg types.MsgLiquidate
-	types.ModuleCdc.UnmarshalJSON(operationMsg.Msg, &msg)
-
 	// While it is no longer simple to create an eligible liquidation target using exported keeper methods here,
 	// we can still verify some properties of the resulting operation.
+	s.Require().Empty(operationMsg.Msg)
 	s.Require().False(operationMsg.OK)
 	s.Require().Len(futureOperations, 0)
 }
