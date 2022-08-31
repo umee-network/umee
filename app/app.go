@@ -102,6 +102,7 @@ import (
 	ibcporttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v5/modules/core/keeper"
+	ibctesting "github.com/cosmos/ibc-go/v5/testing/types"
 	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
@@ -854,7 +855,7 @@ func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
 }
 
 // GetStakingKeeper is used solely for testing purposes.
-func (app *UmeeApp) GetStakingKeeper() stakingkeeper.Keeper {
+func (app *UmeeApp) GetStakingKeeper() ibctesting.StakingKeeper {
 	return *app.StakingKeeper
 }
 

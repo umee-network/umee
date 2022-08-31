@@ -15,7 +15,6 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	ibctesting "github.com/cosmos/ibc-go/v5/testing"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
@@ -118,15 +117,6 @@ func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
 func TestKeeperTestSuite(t *testing.T) {
 	t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
 	suite.Run(t, new(KeeperTestSuite))
-}
-
-func (s *KeeperTestSuite) TestGetTransferAccount() {
-	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(ibctransfertypes.ModuleName)))
-	macc := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.GetTransferAccount(s.chainA.GetContext())
-
-	s.Require().NotNil(macc)
-	s.Require().Equal(ibctransfertypes.ModuleName, macc.GetName())
-	s.Require().Equal(expectedModAccAddr, macc.GetAddress())
 }
 
 func (s *KeeperTestSuite) TestTrackMetadata() {
