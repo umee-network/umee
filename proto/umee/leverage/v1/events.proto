@@ -14,9 +14,8 @@ message EventSupply {
   // Liquidity supplier bech32 address.
   string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Liquidity provided to the module.
-  cosmos.base.v1beta1.Coin supplied = 2 [(gogoproto.nullable) = false];
-  // uToken received by the supplier in exchange for the
-  // provided liquidity.
+  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  // uToken received by the supplier in exchange for the provided liquidity.
   cosmos.base.v1beta1.Coin utoken = 3 [(gogoproto.nullable) = false];
 }
 

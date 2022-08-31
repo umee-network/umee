@@ -43,7 +43,7 @@ func (s msgServer) Supply(
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
 		Supplier: msg.Supplier,
-		Supplied: msg.Asset,
+		Asset:    msg.Asset,
 		Utoken:   received,
 	})
 	return &types.MsgSupplyResponse{
