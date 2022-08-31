@@ -26,6 +26,9 @@ func NewMsgAggregateExchangeRatePrevote(
 	}
 }
 
+// Type implements LegacyMsg interface
+func (msg MsgAggregateExchangeRatePrevote) Type() string { return sdk.MsgTypeURL(&msg) }
+
 // GetSignBytes implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
@@ -74,6 +77,9 @@ func NewMsgAggregateExchangeRateVote(
 		Validator:     validator.String(),
 	}
 }
+
+// Type implements LegacyMsg interface
+func (msg MsgAggregateExchangeRateVote) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // GetSignBytes implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) GetSignBytes() []byte {
@@ -133,6 +139,9 @@ func NewMsgDelegateFeedConsent(operatorAddress sdk.ValAddress, feederAddress sdk
 		Delegate: feederAddress.String(),
 	}
 }
+
+// Type implements LegacyMsg interface
+func (msg MsgDelegateFeedConsent) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // GetSignBytes implements sdk.Msg
 func (msg MsgDelegateFeedConsent) GetSignBytes() []byte {

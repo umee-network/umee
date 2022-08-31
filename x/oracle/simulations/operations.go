@@ -110,25 +110,20 @@ func SimulateMsgAggregateExchangeRatePrevote(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgAggregateExchangeRatePrevote)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"unable to find validator",
-			), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// check for an existing prevote
 		_, err := k.GetAggregateExchangeRatePrevote(ctx, address)
 		if err == nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"prevote already exists for this validator",
-			), nil, nil
+			return noop("prevote already exists for this validator"), nil, nil
 		}
 
 		prices := make(map[string]sdk.Dec, len(acceptList))
@@ -147,15 +142,10 @@ func SimulateMsgAggregateExchangeRatePrevote(
 
 		fees, err := simtypes.RandomFees(r, ctx, spendable)
 		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"unable to generate fees",
-			), nil, err
+			return noop("unable to generate fees"), nil, err
 		}
 
 		msg := types.NewMsgAggregateExchangeRatePrevote(voteHash, feederAddr, address)
-
 		txGen := simappparams.MakeTestEncodingConfig().TxConfig
 		tx, err := helpers.GenSignedMockTx(
 			r,
@@ -169,12 +159,12 @@ func SimulateMsgAggregateExchangeRatePrevote(
 			feederSimAccount.PrivKey,
 		)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
+			return noop("unable to generate mock tx"), nil, err
 		}
 
 		_, _, err = app.SimDeliver(txGen.TxEncoder(), tx)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
+			return noop("unable to deliver tx"), nil, err
 		}
 
 		voteHashMap[address.String()] = exchangeRatesStr
@@ -195,40 +185,31 @@ func SimulateMsgAggregateExchangeRateVote(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgAggregateExchangeRateVote)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to find validator",
-			), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// ensure vote hash exists
 		exchangeRatesStr, ok := voteHashMap[address.String()]
 		if !ok {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"vote hash does not exist",
-			), nil, nil
+			return noop("vote hash does not exist"), nil, nil
 		}
 
 		// get prevote
 		prevote, err := k.GetAggregateExchangeRatePrevote(ctx, address)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.TypeMsgAggregateExchangeRateVote, "prevote not found"), nil, nil
+			return noop("prevote not found"), nil, nil
 		}
 
 		params := k.GetParams(ctx)
 		if (uint64(ctx.BlockHeight())/params.VotePeriod)-(prevote.SubmitBlock/params.VotePeriod) != 1 {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"reveal period of submitted vote does not match with registered prevote",
-			), nil, nil
+			return noop("reveal period of submitted vote does not match with registered prevote"), nil, nil
 		}
 
 		feederAddr, _ := k.GetFeederDelegation(ctx, address)
@@ -238,15 +219,10 @@ func SimulateMsgAggregateExchangeRateVote(
 
 		fees, err := simtypes.RandomFees(r, ctx, spendableCoins)
 		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to generate fees",
-			), nil, err
+			return noop("unable to generate fees"), nil, err
 		}
 
 		msg := types.NewMsgAggregateExchangeRateVote(salt, exchangeRatesStr, feederAddr, address)
-
 		txGen := simappparams.MakeTestEncodingConfig().TxConfig
 		tx, err := helpers.GenSignedMockTx(
 			r,
@@ -260,12 +236,12 @@ func SimulateMsgAggregateExchangeRateVote(
 			feederSimAccount.PrivKey,
 		)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
+			return noop("unable to generate mock tx"), nil, err
 		}
 
 		_, _, err = app.SimDeliver(txGen.TxEncoder(), tx)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
+			return noop("unable to deliver tx"), nil, err
 		}
 
 		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
@@ -282,31 +258,26 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper,
 		valAddress := sdk.ValAddress(simAccount.Address)
 		delegateValAddress := sdk.ValAddress(delegateAccount.Address)
 		account := ak.GetAccount(ctx, simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgDelegateFeedConsent)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, valAddress)
 		if val == nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.TypeMsgDelegateFeedConsent, "unable to find validator"), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// ensure the target address is not a validator
 		val2 := k.StakingKeeper.Validator(ctx, delegateValAddress)
 		if val2 != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgDelegateFeedConsent,
-				"unable to delegate to validator",
-			), nil, nil
+			return noop("unable to delegate to validator"), nil, nil
 		}
 
 		spendableCoins := bk.SpendableCoins(ctx, account.GetAddress())
 		fees, err := simtypes.RandomFees(r, ctx, spendableCoins)
 		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to generate fees",
-			), nil, err
+			return noop("unable to generate fees"), nil, err
 		}
 
 		msg := types.NewMsgDelegateFeedConsent(valAddress, delegateAccount.Address)
@@ -324,12 +295,12 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper,
 			simAccount.PrivKey,
 		)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
+			return noop("unable to generate mock tx"), nil, err
 		}
 
 		_, _, err = app.SimDeliver(txGen.TxEncoder(), tx)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
+			return noop("unable to deliver tx"), nil, err
 		}
 
 		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
