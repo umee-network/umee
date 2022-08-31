@@ -146,7 +146,8 @@ func SimulateMsgAggregateExchangeRatePrevote(
 		}
 
 		msg := types.NewMsgAggregateExchangeRatePrevote(voteHash, feederAddr, address)
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
+		cfg := simappparams.MakeTestEncodingConfig()
+		txGen := cfg.TxConfig
 		tx, err := helpers.GenSignedMockTx(
 			r,
 			txGen,
@@ -169,7 +170,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 
 		voteHashMap[address.String()] = exchangeRatesStr
 
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return simtypes.NewOperationMsg(msg, true, "", cfg.Codec.(*codec.ProtoCodec)), nil, nil
 	}
 }
 
@@ -223,7 +224,8 @@ func SimulateMsgAggregateExchangeRateVote(
 		}
 
 		msg := types.NewMsgAggregateExchangeRateVote(salt, exchangeRatesStr, feederAddr, address)
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
+		cfg := simappparams.MakeTestEncodingConfig()
+		txGen := cfg.TxConfig
 		tx, err := helpers.GenSignedMockTx(
 			r,
 			txGen,
@@ -244,7 +246,7 @@ func SimulateMsgAggregateExchangeRateVote(
 			return noop("unable to deliver tx"), nil, err
 		}
 
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return simtypes.NewOperationMsg(msg, true, "", cfg.Codec.(*codec.ProtoCodec)), nil, nil
 	}
 }
 
@@ -281,8 +283,8 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper,
 		}
 
 		msg := types.NewMsgDelegateFeedConsent(valAddress, delegateAccount.Address)
-
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
+		cfg := simappparams.MakeTestEncodingConfig()
+		txGen := cfg.TxConfig
 		tx, err := helpers.GenSignedMockTx(
 			r,
 			txGen,
@@ -303,6 +305,6 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper,
 			return noop("unable to deliver tx"), nil, err
 		}
 
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return simtypes.NewOperationMsg(msg, true, "", cfg.Codec.(*codec.ProtoCodec)), nil, nil
 	}
 }
