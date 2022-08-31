@@ -14,13 +14,6 @@ var (
 	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
 )
 
-// Messages types constants
-const (
-	TypeMsgDelegateFeedConsent          = "delegate_feeder"
-	TypeMsgAggregateExchangeRatePrevote = "aggregate_exchange_rate_prevote"
-	TypeMsgAggregateExchangeRateVote    = "aggregate_exchange_rate_vote"
-)
-
 func NewMsgAggregateExchangeRatePrevote(
 	hash AggregateVoteHash,
 	feeder sdk.AccAddress,
@@ -32,12 +25,6 @@ func NewMsgAggregateExchangeRatePrevote(
 		Validator: validator.String(),
 	}
 }
-
-// Route implements sdk.Msg
-func (msg MsgAggregateExchangeRatePrevote) Route() string { return RouterKey }
-
-// Type implements sdk.Msg
-func (msg MsgAggregateExchangeRatePrevote) Type() string { return TypeMsgAggregateExchangeRatePrevote }
 
 // GetSignBytes implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) GetSignBytes() []byte {
@@ -87,12 +74,6 @@ func NewMsgAggregateExchangeRateVote(
 		Validator:     validator.String(),
 	}
 }
-
-// Route implements sdk.Msg
-func (msg MsgAggregateExchangeRateVote) Route() string { return RouterKey }
-
-// Type implements sdk.Msg
-func (msg MsgAggregateExchangeRateVote) Type() string { return TypeMsgAggregateExchangeRateVote }
 
 // GetSignBytes implements sdk.Msg
 func (msg MsgAggregateExchangeRateVote) GetSignBytes() []byte {
@@ -152,12 +133,6 @@ func NewMsgDelegateFeedConsent(operatorAddress sdk.ValAddress, feederAddress sdk
 		Delegate: feederAddress.String(),
 	}
 }
-
-// Route implements sdk.Msg
-func (msg MsgDelegateFeedConsent) Route() string { return RouterKey }
-
-// Type implements sdk.Msg
-func (msg MsgDelegateFeedConsent) Type() string { return TypeMsgDelegateFeedConsent }
 
 // GetSignBytes implements sdk.Msg
 func (msg MsgDelegateFeedConsent) GetSignBytes() []byte {
