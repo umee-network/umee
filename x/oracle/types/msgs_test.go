@@ -142,8 +142,6 @@ func TestNewMsgAggregateExchangeRatePrevote(t *testing.T) {
 		vals[0],
 	)
 
-	require.Equal(t, aggregateExchangeRatePreVote.Route(), RouterKey)
-	require.Equal(t, aggregateExchangeRatePreVote.Type(), TypeMsgAggregateExchangeRatePrevote)
 	require.NotNil(t, aggregateExchangeRatePreVote.GetSignBytes())
 	require.Equal(t, aggregateExchangeRatePreVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
@@ -159,8 +157,6 @@ func TestNewMsgAggregateExchangeRateVote(t *testing.T) {
 		vals[0],
 	)
 
-	require.Equal(t, aggregateExchangeRateVote.Route(), RouterKey)
-	require.Equal(t, aggregateExchangeRateVote.Type(), TypeMsgAggregateExchangeRateVote)
 	require.NotNil(t, aggregateExchangeRateVote.GetSignBytes())
 	require.Equal(t, aggregateExchangeRateVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
@@ -169,8 +165,6 @@ func TestMsgDelegateFeedConsent(t *testing.T) {
 	vals := GenerateRandomValAddr(2)
 	msgFeedConsent := NewMsgDelegateFeedConsent(vals[0], sdk.AccAddress(vals[1]))
 
-	require.Equal(t, msgFeedConsent.Route(), RouterKey)
-	require.Equal(t, msgFeedConsent.Type(), TypeMsgDelegateFeedConsent)
 	require.NotNil(t, msgFeedConsent.GetSignBytes())
 	require.Equal(t, msgFeedConsent.GetSigners(), []sdk.AccAddress{sdk.AccAddress(vals[0])})
 }
