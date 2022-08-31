@@ -31,6 +31,6 @@ func Token(base, symbol string) types.Token {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100000000000),
+		MaxSupply:              sdk.NewInt(100000_000000),
 	}
 }

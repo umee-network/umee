@@ -37,6 +37,7 @@ var (
 	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 501, "market would exceed MaxSupplyUtilization")
 	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 502, "market would fall below MinCollateralLiquidity")
 	ErrMaxCollateralShare      = sdkerrors.Register(ModuleName, 503, "market would exceed MaxCollateralShare")
+	ErrMaxSupply               = sdkerrors.Register(ModuleName, 504, "market would exceed MaxSupply")
 
 	// 6XX = Internal Failsafes
 	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 600, "invalid token utilization")
