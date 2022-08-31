@@ -66,9 +66,9 @@ func (m *EventDelegateFeedConsent) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventDelegateFeedConsent proto.InternalMessageInfo
 
-// EventSetFxRate is emitted on Fx Rate update
+// EventSetFxRate is emitted on exchange rate update
 type EventSetFxRate struct {
-	// Asset denom
+	// uToken denom
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	// Exchange rate (based to USD)
 	Rate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=rate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"rate"`

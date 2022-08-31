@@ -44,7 +44,7 @@ func (s msgServer) Supply(
 	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
 		Supplier: msg.Supplier,
 		Supplied: msg.Asset,
-		Uasset:   received,
+		Utoken:   received,
 	})
 	return &types.MsgSupplyResponse{
 		Received: received,
@@ -74,7 +74,7 @@ func (s msgServer) Withdraw(
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
 		Supplier: msg.Supplier,
-		Uasset:   msg.Asset,
+		Utoken:   msg.Asset,
 		Asset:    received,
 	})
 	return &types.MsgWithdrawResponse{
@@ -103,7 +103,7 @@ func (s msgServer) Collateralize(
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
 		Borrower: msg.Borrower,
-		Uasset:   msg.Asset,
+		Utoken:   msg.Asset,
 	})
 	return &types.MsgCollateralizeResponse{}, err
 }
@@ -129,7 +129,7 @@ func (s msgServer) Decollateralize(
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
 		Borrower: msg.Borrower,
-		Uasset:   msg.Asset,
+		Utoken:   msg.Asset,
 	})
 	return &types.MsgDecollateralizeResponse{}, err
 }
