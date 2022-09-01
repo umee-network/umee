@@ -4,9 +4,10 @@ package umee.leverage.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/leverage module's Msg service.
 service Msg {

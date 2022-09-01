@@ -4,9 +4,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // TokenPrice returns the USD value of a base token. Note, the token's denomination
@@ -98,19 +98,14 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 		}
 	}
 
-	// Because this action is not caused by a message, logging and
-	// events are here instead of msg_server.go
+	// This action is not caused by a message so we need to make an event here
 	k.Logger(ctx).Debug(
 		"funded oracle",
-		"amount", rewards.String(),
+		"amount", rewards,
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeFundOracle,
-			sdk.NewAttribute(sdk.AttributeKeyAmount, rewards.String()),
-		),
-	})
+	if err := ctx.EventManager().EmitTypedEvent(&types.EventFundOracle{Assets: rewards}); err != nil {
+		return err
+	}
 
 	// Send rewards
 	if !rewards.IsZero() {

@@ -23,7 +23,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // We define tickerSleep as the minimum timeout between each oracle loop. We
@@ -277,7 +277,6 @@ func GetComputedPrices(
 	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
-
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := convertCandlesToUSD(
 		logger,
@@ -466,6 +465,9 @@ func NewProvider(
 
 	case provider.ProviderGate:
 		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.ProviderFTX:
+		return provider.NewFTXProvider(ctx, logger, endpoint, providerPairs...), nil
 
 	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil

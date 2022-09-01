@@ -10,8 +10,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/umee-network/umee/v2/x/leverage/keeper"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // Default simulation operation weights for leverage messages
@@ -19,7 +19,7 @@ const (
 	DefaultWeightMsgSupply            int = 100
 	DefaultWeightMsgWithdraw          int = 85
 	DefaultWeightMsgBorrow            int = 80
-	DefaultWeightMsgCollateralize     int = 60
+	DefaultWeightMsgCollateralize     int = 65
 	DefaultWeightMsgDecollateralize   int = 60
 	DefaultWeightMsgRepay             int = 70
 	DefaultWeightMsgLiquidate         int = 75
@@ -88,28 +88,28 @@ func WeightedOperations(
 			SimulateMsgSupply(ak, bk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgWithdraw,
-			SimulateMsgWithdraw(ak, bk, lk),
+			weightMsgCollateralize,
+			SimulateMsgCollateralize(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgBorrow,
 			SimulateMsgBorrow(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgCollateralize,
-			SimulateMsgCollateralize(ak, bk, lk),
-		),
-		simulation.NewWeightedOperation(
-			weightMsgDecollateralize,
-			SimulateMsgDecollateralize(ak, bk, lk),
+			weightMsgLiquidate,
+			SimulateMsgLiquidate(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgRepay,
 			SimulateMsgRepay(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgLiquidate,
-			SimulateMsgLiquidate(ak, bk, lk),
+			weightMsgDecollateralize,
+			SimulateMsgDecollateralize(ak, bk, lk),
+		),
+		simulation.NewWeightedOperation(
+			weightMsgWithdraw,
+			SimulateMsgWithdraw(ak, bk, lk),
 		),
 	}
 }
@@ -123,27 +123,12 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, coin, skip := randomSupplyFields(r, ctx, accs, bk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeSupply, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgSupply))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgSupply(from.Address, coin)
-
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         types.EventTypeSupply,
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(coin),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(coin))
 	}
 }
 
@@ -156,27 +141,12 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk ke
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeWithdraw, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgWithdraw))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgWithdraw(from.Address, withdrawUToken)
-
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         types.EventTypeWithdraw,
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(withdrawUToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(withdrawUToken))
 	}
 }
 
@@ -189,26 +159,12 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeBorrow, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgBorrow))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgBorrow(from.Address, token)
-
-		txCtx := simulation.OperationInput{
-			R:             r,
-			App:           app,
-			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:           nil,
-			Msg:           msg,
-			MsgType:       types.EventTypeBorrow,
-			Context:       ctx,
-			SimAccount:    from,
-			AccountKeeper: ak,
-			Bankkeeper:    bk,
-			ModuleName:    types.ModuleName,
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, nil)
 	}
 }
 
@@ -225,27 +181,12 @@ func SimulateMsgCollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomCollateralizeFields(r, ctx, accs, bk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeCollateralize, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgCollateralize))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgCollateralize(from.Address, collateral)
-
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         types.EventTypeCollateralize,
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(collateral),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(collateral))
 	}
 }
 
@@ -262,26 +203,12 @@ func SimulateMsgDecollateralize(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomDecollateralizeFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeDecollateralize, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgDecollateralize))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgDecollateralize(from.Address, collateral)
-
-		txCtx := simulation.OperationInput{
-			R:             r,
-			App:           app,
-			TxGen:         simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:           nil,
-			Msg:           msg,
-			MsgType:       types.EventTypeDecollateralize,
-			Context:       ctx,
-			SimAccount:    from,
-			AccountKeeper: ak,
-			Bankkeeper:    bk,
-			ModuleName:    types.ModuleName,
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, nil)
 	}
 }
 
@@ -294,27 +221,12 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, repayToken, skip := randomRepayFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeRepay, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgRepay))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgRepay(from.Address, repayToken)
-
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         types.EventTypeRepay,
-			Context:         ctx,
-			SimAccount:      from,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(repayToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(repayToken))
 	}
 }
 
@@ -327,27 +239,12 @@ func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk k
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		liquidator, borrower, repaymentToken, rewardDenom, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {
-			return simtypes.NoOpMsg(types.ModuleName, types.EventTypeLiquidate, "skip all transfers"), nil, nil
+			typename := sdk.MsgTypeURL(new(types.MsgLiquidate))
+			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
 		msg := types.NewMsgLiquidate(liquidator.Address, borrower.Address, repaymentToken, rewardDenom)
-
-		txCtx := simulation.OperationInput{
-			R:               r,
-			App:             app,
-			TxGen:           simappparams.MakeTestEncodingConfig().TxConfig,
-			Cdc:             nil,
-			Msg:             msg,
-			MsgType:         types.EventTypeLiquidate,
-			Context:         ctx,
-			SimAccount:      liquidator,
-			AccountKeeper:   ak,
-			Bankkeeper:      bk,
-			ModuleName:      types.ModuleName,
-			CoinsSpentInMsg: sdk.NewCoins(repaymentToken),
-		}
-
-		return simulation.GenAndDeliverTxWithRandFees(txCtx)
+		return deliver(r, app, ctx, ak, bk, liquidator, msg, sdk.NewCoins(repaymentToken))
 	}
 }
 
@@ -458,7 +355,7 @@ func randomDecollateralizeFields(
 }
 
 // randomBorrowFields returns a random account and an sdk.Coin from all
-// the registered tokens with an random amount [0, 150].
+// the registered tokens with an random amount [0, 10^6].
 // It returns skip=true if no registered token was found.
 func randomBorrowFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
@@ -471,7 +368,7 @@ func randomBorrowFields(
 	}
 
 	registeredToken := allTokens[r.Int31n(int32(len(allTokens)))]
-	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(150)))
+	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(1_000000)))
 
 	return acc, token, false
 }
@@ -504,10 +401,9 @@ func randomLiquidateFields(
 	rewardDenom string,
 	skip bool,
 ) {
-	idxLiquidator := r.Intn(len(accs) - 1)
-
-	liquidator = accs[idxLiquidator]
-	borrower = accs[idxLiquidator+1]
+	// note: liquidator and borrower might even be the same account
+	liquidator, _ = simtypes.RandomAcc(r, accs)
+	borrower, _ = simtypes.RandomAcc(r, accs)
 
 	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
 	if collateral.Empty() {
@@ -521,7 +417,42 @@ func randomLiquidateFields(
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
+	liquidationThreshold, err := lk.CalculateLiquidationThreshold(ctx, collateral)
+	if err != nil {
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed)
+	if err != nil {
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+	if borrowedValue.LTE(liquidationThreshold) {
+		// borrower not eligible for liquidation
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+
 	rewardDenom = types.ToTokenDenom(randomCoin(r, collateral).Denom)
 
 	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
+}
+
+func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
+	bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
+) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+	cfg := simappparams.MakeTestEncodingConfig()
+	txCtx := simulation.OperationInput{
+		R:               r,
+		App:             app,
+		TxGen:           cfg.TxConfig,
+		Cdc:             cfg.Codec.(*codec.ProtoCodec),
+		Msg:             msg,
+		MsgType:         sdk.MsgTypeURL(msg),
+		Context:         ctx,
+		SimAccount:      from,
+		AccountKeeper:   ak,
+		Bankkeeper:      bk,
+		ModuleName:      types.ModuleName,
+		CoinsSpentInMsg: coins,
+	}
+
+	return simulation.GenAndDeliverTxWithRandFees(txCtx)
 }

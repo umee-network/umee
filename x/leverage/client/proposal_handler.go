@@ -3,7 +3,7 @@ package client
 import (
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 
-	"github.com/umee-network/umee/v2/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/client/cli"
 )
 
 // TODO: need to be updated to new gov message hanlders

@@ -18,47 +18,20 @@ pull_request_rules:
           {{ title }} (#{{ number }})
           {{ body }}
 
-  - name: Backport patches to the release/v0.8.x branch
+  - name: Backport patches to the release/v3.x.x branch
     conditions:
       - base=main
-      - label=S:backport/v0.8.x
+      - label=S:backport/v3.x.x
     actions:
       backport:
         branches:
-          - release/v0.8.x
+          - release/v3.x.x
 
-  - name: Backport patches to the release/v1.x.x branch
+  - name: Backport patches to the release/price-feeder/v0.3.x branch
     conditions:
       - base=main
-      - label=S:backport/v1.x.x
+      - label=S:backport/price-feeder/v0.3.x
     actions:
       backport:
         branches:
-          - release/v1.x.x
-
-  - name: Backport patches to the release/v2.x.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v2.x.x
-    actions:
-      backport:
-        branches:
-          - release/v2.x.x
-
-  - name: Backport patches to the release/price-feeder/v0.1.x branch
-    conditions:
-      - base=main
-      - label=S:backport/price-feeder/v0.1.x
-    actions:
-      backport:
-        branches:
-          - release/price-feeder/v0.1.x
-
-  - name: Backport patches to the release/price-feeder/v0.2.x branch
-    conditions:
-      - base=main
-      - label=S:backport/price-feeder/v0.2.x
-    actions:
-      backport:
-        branches:
-          - release/price-feeder/v0.2.x
+          - release/price-feeder/v0.3.x

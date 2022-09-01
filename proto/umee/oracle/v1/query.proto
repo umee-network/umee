@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "umee/oracle/v1/oracle.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
+option go_package = "github.com/umee-network/umee/v3/x/oracle/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
@@ -175,7 +175,6 @@ message QueryAggregatePrevoteResponse {
   // in the current vote period
   AggregateExchangeRatePrevote aggregate_prevote = 1
       [(gogoproto.nullable) = false];
-  ;
 }
 
 // QueryAggregatePrevotes is the request type for the

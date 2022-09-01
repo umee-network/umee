@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom
@@ -67,7 +67,11 @@ func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	currentTime := ctx.BlockTime().Unix()
 	prevInterestTime := k.GetLastInterestTime(ctx)
-	if prevInterestTime == 0 {
+	if prevInterestTime <= 0 {
+		// if stored LastInterestTime is zero (or negative), either the chain has just started
+		// or the genesis file has been modified intentionally. In either case, proceed as if
+		// 0 seconds have passed since the last block, thus accruing no interest and setting
+		// the current BlockTime as the new starting point.
 		prevInterestTime = currentTime
 	}
 
@@ -80,9 +84,19 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			"prev", prevInterestTime,
 		)
 
+		// if LastInterestTime appears to be in the future, do nothing (besides logging) and leave
+		// LastInterestTime at its stored value. This will repeat every block until BlockTime exceeds
+		// LastInterestTime.
 		return nil
 	}
+
 	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
+	if yearsElapsed.GTE(sdk.OneDec()) {
+		// this safeguards primarily against misbehaving block time or incorrectly modified genesis states
+		// which would accrue significant interest on borrows instantly. Chain will halt.
+		return types.ErrExcessiveTimeElapsed.Wrapf("BlockTime: %d, LastInterestTime: %d",
+			currentTime, prevInterestTime)
+	}
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)
@@ -159,24 +173,26 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"interest", totalInterest.String(),
 		"reserved", newReserves.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeInterestAccrual,
-			sdk.NewAttribute(types.EventAttrBlockHeight, fmt.Sprintf("%d", ctx.BlockHeight())),
-			sdk.NewAttribute(types.EventAttrUnixTime, fmt.Sprintf("%d", currentTime)),
-			sdk.NewAttribute(types.EventAttrInterest, totalInterest.String()),
-			sdk.NewAttribute(types.EventAttrReserved, newReserves.String()),
-		),
+	return ctx.EventManager().EmitTypedEvent(&types.EventInterestAccrual{
+		BlockHeight:   uint64(ctx.BlockHeight()),
+		Timestamp:     uint64(currentTime),
+		TotalInterest: totalInterest,
+		Reserved:      newReserves,
 	})
-
-	return nil
 }
 
 // SetLastInterestTime sets LastInterestTime to a given value
 func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error {
 	store := ctx.KVStore(k.storeKey)
 	timeKey := types.CreateLastInterestTimeKey()
+
+	prevTime := k.GetLastInterestTime(ctx)
+
+	if interestTime < prevTime {
+		// prevent time from moving backwards
+		return types.ErrNegativeTimeElapsed.Wrapf("cannot set LastInterestTime from %d to %d",
+			prevTime, interestTime)
+	}
 
 	bz, err := k.cdc.Marshal(&gogotypes.Int64Value{Value: interestTime})
 	if err != nil {

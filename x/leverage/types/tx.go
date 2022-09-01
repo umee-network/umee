@@ -2,9 +2,8 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v2/util/checkers"
+	"github.com/umee-network/umee/v3/util/checkers"
 )
 
 func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
@@ -14,8 +13,8 @@ func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 	}
 }
 
-func (msg MsgSupply) Route() string { return ModuleName }
-func (msg MsgSupply) Type() string  { return EventTypeSupply }
+func (msg MsgSupply) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgSupply) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgSupply) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
@@ -38,8 +37,8 @@ func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
 	}
 }
 
-func (msg MsgWithdraw) Route() string { return ModuleName }
-func (msg MsgWithdraw) Type() string  { return EventTypeWithdraw }
+func (msg MsgWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
@@ -62,11 +61,11 @@ func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateral
 	}
 }
 
-func (msg MsgCollateralize) Route() string { return ModuleName }
-func (msg MsgCollateralize) Type() string  { return EventTypeCollateralize }
+func (msg MsgCollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgCollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
@@ -86,11 +85,11 @@ func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollat
 	}
 }
 
-func (msg MsgDecollateralize) Route() string { return ModuleName }
-func (msg MsgDecollateralize) Type() string  { return EventTypeDecollateralize }
+func (msg MsgDecollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgDecollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, nil)
+	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
 
 func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
@@ -110,8 +109,8 @@ func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
 	}
 }
 
-func (msg MsgBorrow) Route() string { return ModuleName }
-func (msg MsgBorrow) Type() string  { return EventTypeBorrow }
+func (msg MsgBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgBorrow) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
@@ -134,8 +133,8 @@ func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 	}
 }
 
-func (msg MsgRepay) Route() string { return ModuleName }
-func (msg MsgRepay) Type() string  { return EventTypeRepay }
+func (msg MsgRepay) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgRepay) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgRepay) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
@@ -160,8 +159,8 @@ func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, re
 	}
 }
 
-func (msg MsgLiquidate) Route() string { return ModuleName }
-func (msg MsgLiquidate) Type() string  { return EventTypeLiquidate }
+func (msg MsgLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
 	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
@@ -189,8 +188,11 @@ func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	if err != nil {
 		return err
 	}
-	if asset != nil && !asset.IsValid() {
-		return sdkerrors.Wrap(ErrInvalidAsset, asset.String())
+	if asset == nil {
+		return ErrNilAsset
+	}
+	if err := asset.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

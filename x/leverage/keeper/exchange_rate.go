@@ -4,19 +4,19 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // ExchangeToken converts an sdk.Coin containing a base asset to its value as a
 // uToken.
 func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
-	if !token.IsValid() {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.String())
+	if err := token.Validate(); err != nil {
+		return sdk.Coin{}, err
 	}
 
 	uTokenDenom := types.ToUTokenDenom(token.Denom)
 	if uTokenDenom == "" {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, token.Denom)
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrUToken, token.Denom)
 	}
 
 	exchangeRate := k.DeriveExchangeRate(ctx, token.Denom)
@@ -28,13 +28,13 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 // ExchangeUToken converts an sdk.Coin containing a uToken to its value in a base
 // token.
 func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
-	if !uToken.IsValid() {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.String())
+	if err := uToken.Validate(); err != nil {
+		return sdk.Coin{}, err
 	}
 
 	tokenDenom := types.ToTokenDenom(uToken.Denom)
 	if tokenDenom == "" {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrInvalidAsset, uToken.Denom)
+		return sdk.Coin{}, sdkerrors.Wrap(types.ErrNotUToken, uToken.Denom)
 	}
 
 	exchangeRate := k.DeriveExchangeRate(ctx, tokenDenom)
@@ -46,8 +46,8 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 // ExchangeUTokens converts an sdk.Coins containing uTokens to their values in base
 // tokens.
 func (k Keeper) ExchangeUTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
-	if !uTokens.IsValid() {
-		return sdk.Coins{}, sdkerrors.Wrap(types.ErrInvalidAsset, uTokens.String())
+	if err := uTokens.Validate(); err != nil {
+		return sdk.Coins{}, err
 	}
 
 	tokens := sdk.Coins{}

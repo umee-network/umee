@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
 	routeInterestScalars  = "interest-scalars"
+	routeExchangeRates    = "exchange-rates"
 	routeReserveAmount    = "reserve-amount"
 	routeCollateralAmount = "collateral-amount"
 	routeBorrowAmount     = "borrow-amount"
@@ -24,6 +25,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeSupplyAPY, SupplyAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/leverage module.
@@ -54,7 +56,12 @@ func AllInvariants(k Keeper) sdk.Invariant {
 			return res, stop
 		}
 
-		return InterestScalarsInvariant(k)(ctx)
+		res, stop = InterestScalarsInvariant(k)(ctx)
+		if stop {
+			return res, stop
+		}
+
+		return ExchangeRatesInvariant(k)(ctx)
 	}
 }
 
@@ -294,6 +301,42 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 		return sdk.FormatInvariant(
 			types.ModuleName, routeInterestScalars,
 			fmt.Sprintf("amount of interest scalars lower than one %d\n%s", count, msg),
+		), broken
+	}
+}
+
+// ExchangeRatesInvariant checks that all denoms have an uToken exchange rate >= 1
+func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
+	return func(ctx sdk.Context) (string, bool) {
+		var (
+			msg   string
+			count int
+		)
+
+		tokenPrefix := types.KeyPrefixRegisteredToken
+
+		// Iterate through all denoms of registered tokens in the
+		// keeper, ensuring none have an interest scalar less than one.
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
+			denom := types.DenomFromKey(key, tokenPrefix)
+
+			exchangeRate := k.DeriveExchangeRate(ctx, denom)
+
+			if exchangeRate.LT(sdk.OneDec()) {
+				count++
+				msg += fmt.Sprintf("\t%s exchange rate %s is less than one\n", denom, exchangeRate.String())
+			}
+			return nil
+		})
+		if err != nil {
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the uToken exchange rates %+v\n", err)
+		}
+
+		broken := count != 0
+
+		return sdk.FormatInvariant(
+			types.ModuleName, routeExchangeRates,
+			fmt.Sprintf("amount of uToken exchange rates lower than one %d\n%s", count, msg),
 		), broken
 	}
 }

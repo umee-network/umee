@@ -97,11 +97,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [987](https://github.com/umee-network/umee/pull/987) Streamline x/leverage CLI tests
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
+- [1294](https://github.com/umee-network/umee/pull/1294) Simplify window progress query math.
+- [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
 
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
+- [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

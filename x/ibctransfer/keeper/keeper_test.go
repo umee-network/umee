@@ -10,19 +10,19 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-	ibctesting "github.com/cosmos/ibc-go/v3/testing"
+	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
+	ibctesting "github.com/cosmos/ibc-go/v5/testing"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/tests/util"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/tests/util"
 )
 
 func TestKeeperTestSuite(t *testing.T) {
+	// t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
 	suite.Run(t, new(KeeperTestSuite))
 }
 
@@ -117,15 +117,6 @@ func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
 	s.Require().True(ok)
 
 	return umeeApp
-}
-
-func (s *KeeperTestSuite) TestGetTransferAccount() {
-	expectedModAccAddr := sdk.AccAddress(crypto.AddressHash([]byte(ibctransfertypes.ModuleName)))
-	macc := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.GetTransferAccount(s.chainA.GetContext())
-
-	s.Require().NotNil(macc)
-	s.Require().Equal(ibctransfertypes.ModuleName, macc.GetName())
-	s.Require().Equal(expectedModAccAddr, macc.GetAddress())
 }
 
 func (s *KeeperTestSuite) TestTrackMetadata() {

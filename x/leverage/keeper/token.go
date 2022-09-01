@@ -1,12 +1,10 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // SetTokenSettings stores a Token into the x/leverage module's KVStore.
@@ -20,7 +18,7 @@ func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 
 	bz, err := k.cdc.Marshal(&token)
 	if err != nil {
-		panic(fmt.Errorf("failed to encode token settings: %w", err))
+		return err
 	}
 
 	k.hooks.AfterTokenRegistered(ctx, token)
@@ -42,7 +40,7 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 	token := types.Token{}
 	bz := store.Get(tokenKey)
 	if len(bz) == 0 {
-		return token, sdkerrors.Wrap(types.ErrInvalidAsset, denom)
+		return token, sdkerrors.Wrap(types.ErrNotRegisteredToken, denom)
 	}
 
 	err := k.cdc.Unmarshal(bz, &token)

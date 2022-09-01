@@ -22,8 +22,8 @@ import (
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/app/params"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
@@ -107,11 +107,14 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		umeeapp.DefaultNodeHome,
 	)
 	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
-	gentxModule := umeeapp.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+
+	gentxModule := a.moduleManager[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+	gentxModule.GenTxValidator = umeeapp.GenTxValidator
+	a.moduleManager[genutiltypes.ModuleName] = gentxModule
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, gentxModule),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, umeeapp.GenTxValidator),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(
 			a.moduleManager,

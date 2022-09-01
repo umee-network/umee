@@ -5,29 +5,35 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
-	resp, err := s.queryClient.RegisteredTokens(s.ctx.Context(), &types.QueryRegisteredTokens{})
-	s.Require().NoError(err)
-	s.Require().Len(resp.Registry, 2, "token registry length")
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
+	require.NoError(err)
+	require.Len(resp.Registry, 2, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
-	resp, err := s.queryClient.Params(s.ctx.Context(), &types.QueryParams{})
-	s.Require().NoError(err)
-	s.Require().Equal(types.DefaultParams(), resp.Params)
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.Params(ctx.Context(), &types.QueryParams{})
+	require.NoError(err)
+	require.Equal(types.DefaultParams(), resp.Params)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
+	require := s.Require()
+
 	req := &types.QueryMarketSummary{}
 	_, err := s.queryClient.MarketSummary(context.Background(), req)
-	s.Require().Error(err)
+	require.ErrorContains(err, "empty denom")
 
 	req = &types.QueryMarketSummary{Denom: "uumee"}
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
-	s.Require().NoError(err)
+	require.NoError(err)
 
 	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
 
@@ -51,61 +57,73 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 		AvailableWithdraw:      sdk.ZeroInt(),
 		AvailableCollateralize: sdk.ZeroInt(),
 	}
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
-	addr, _ := s.initBorrowScenario()
+	ctx, require := s.ctx, s.Require()
 
-	resp, err := s.queryClient.AccountBalances(s.ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
-	s.Require().NoError(err)
+	// creates account which has supplied and collateralized 1000 uumee
+	addr := s.newAccount(coin(umeeDenom, 1000))
+	s.supply(addr, coin(umeeDenom, 1000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
+
+	resp, err := s.queryClient.AccountBalances(ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
+	require.NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
-			sdk.NewCoin(umeeDenom, sdk.NewInt(1000000000)),
+			coin(umeeDenom, 1000),
 		),
 		Collateral: sdk.NewCoins(
-			sdk.NewCoin(types.ToUTokenDenom(umeeDenom), sdk.NewInt(1000000000)),
+			coin("u/"+umeeDenom, 1000),
 		),
 		Borrowed: nil,
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
-	addr, _ := s.initBorrowScenario()
+	ctx, require := s.ctx, s.Require()
 
-	resp, err := s.queryClient.AccountSummary(s.ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
-	s.Require().NoError(err)
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+
+	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
+	require.NoError(err)
 
 	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
 		// from .Reset() in x/leverage/keeper/oracle_test.go
 		// times the amount of umee, then sometimes times params
 		// from newToken in x/leverage/keeper/keeper_test.go
-		// (1000 / 1000000) * 4.21 = 4210
+		// (1000) * 4.21 = 4210
 		SuppliedValue: sdk.MustNewDecFromStr("4210"),
-		// (1000 / 1000000) * 4.21 = 4210
+		// (1000) * 4.21 = 4210
 		CollateralValue: sdk.MustNewDecFromStr("4210"),
 		// Nothing borrowed
 		BorrowedValue: sdk.ZeroDec(),
-		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
-		// (1000 / 1000000) * 4.21 * 0.25 = 1052.5
+		// (1000) * 4.21 * 0.25 = 1052.5
 		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
-	resp, err := s.queryClient.LiquidationTargets(s.ctx.Context(), &types.QueryLiquidationTargets{})
-	s.Require().NoError(err)
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
+	require.NoError(err)
 
 	expected := types.QueryLiquidationTargetsResponse{
 		Targets: nil,
 	}
 
-	s.Require().Equal(expected, *resp)
+	require.Equal(expected, *resp)
 }

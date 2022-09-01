@@ -33,8 +33,8 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
@@ -347,7 +347,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 		vpr.SetConfigFile(tmCfgPath)
 		s.Require().NoError(vpr.ReadInConfig())
 
-		valConfig := &tmconfig.Config{}
+		valConfig := tmconfig.DefaultConfig()
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"
