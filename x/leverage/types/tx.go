@@ -13,7 +13,7 @@ func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 	}
 }
 
-func (msg MsgSupply) Route() string { return ModuleName }
+func (msg MsgSupply) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgSupply) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgSupply) ValidateBasic() error {
@@ -37,7 +37,7 @@ func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
 	}
 }
 
-func (msg MsgWithdraw) Route() string { return ModuleName }
+func (msg MsgWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgWithdraw) ValidateBasic() error {
@@ -61,7 +61,7 @@ func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateral
 	}
 }
 
-func (msg MsgCollateralize) Route() string { return ModuleName }
+func (msg MsgCollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgCollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgCollateralize) ValidateBasic() error {
@@ -85,7 +85,7 @@ func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollat
 	}
 }
 
-func (msg MsgDecollateralize) Route() string { return ModuleName }
+func (msg MsgDecollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgDecollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgDecollateralize) ValidateBasic() error {
@@ -109,7 +109,7 @@ func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
 	}
 }
 
-func (msg MsgBorrow) Route() string { return ModuleName }
+func (msg MsgBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgBorrow) ValidateBasic() error {
@@ -133,7 +133,7 @@ func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 	}
 }
 
-func (msg MsgRepay) Route() string { return ModuleName }
+func (msg MsgRepay) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgRepay) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgRepay) ValidateBasic() error {
@@ -159,7 +159,7 @@ func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, re
 	}
 }
 
-func (msg MsgLiquidate) Route() string { return ModuleName }
+func (msg MsgLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
