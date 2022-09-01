@@ -203,3 +203,48 @@ func TestComputeLiquidation(t *testing.T) {
 	uDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(uDust, 2, 1, 29, "high exchange rate collateral dust")
 }
+
+func TestCloseFactor(t *testing.T) {
+	require := require.New(t)
+
+	type testCase struct {
+		borrowedValue                sdk.Dec
+		collateralValue              sdk.Dec
+		liquidationThreshold         sdk.Dec
+		smallLiquidationSize         sdk.Dec
+		minimumCloseFactor           sdk.Dec
+		completeLiquidationThreshold sdk.Dec
+	}
+
+	baseCase := func() testCase {
+		return testCase{
+			sdk.MustNewDecFromStr("50"),  // borrowed value 50
+			sdk.MustNewDecFromStr("100"), // collateral value 100
+			sdk.MustNewDecFromStr("40"),  // liquidation threshold 40
+			sdk.MustNewDecFromStr("10"),  // small liquidation size 10
+			sdk.MustNewDecFromStr("0.1"), // minimum close factor 10%
+			sdk.MustNewDecFromStr("0.3"), // complete liquidation threshold 30%
+		}
+	}
+
+	runTestCase := func(tc testCase, expectedCloseFactor string, msg string) {
+		closeFactor := keeper.ComputeCloseFactor(
+			tc.borrowedValue,
+			tc.collateralValue,
+			tc.liquidationThreshold,
+			tc.smallLiquidationSize,
+			tc.minimumCloseFactor,
+			tc.completeLiquidationThreshold,
+		)
+
+		require.Equal(sdk.MustNewDecFromStr(expectedCloseFactor), closeFactor, msg)
+	}
+
+	// In the base case, close factor scales from 10% to 100% as borrowed value
+	// goes from liquidation threshold ($40) to a critical point, which is defined
+	// to be 30% of the way between liquidation threshold and collateral value ($100).
+	// This critical point is calculated to be borrowed value = $58. Since the actual
+	// borrowed value is $50, which is 5/9 the way from $40 to $58, the computed close
+	// factor is 5/9 of the way from 10% to 100% - thus, 60%.
+	runTestCase(baseCase(), "0.6", "base case")
+}
