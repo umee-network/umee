@@ -838,9 +838,9 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 			closeBorrower,
 			coin(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
-			coin(umeeDenom, 21_216000),
-			coin("u/"+umeeDenom, 23_337600),
-			coin("u/"+umeeDenom, 23_337600),
+			coin(umeeDenom, 102_000000),
+			coin("u/"+umeeDenom, 112_200000),
+			coin("u/"+umeeDenom, 112_200000),
 			nil,
 		},
 	}
