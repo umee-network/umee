@@ -17,8 +17,6 @@ import (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	abort bool // stop interdependent tests on the first error for clarity
-
 	cfg     network.Config
 	network *network.Network
 }
@@ -44,30 +42,29 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	s.network.Cleanup()
 }
 
-// TestCases are queries and transactions that can be run, and return a boolean
-// which indicates to abort the test suite if true
-type TestCase interface {
-	Run(s *IntegrationTestSuite) bool
+// runTestQuery
+func (s *IntegrationTestSuite) runTestQueries(tqs ...testQuery) {
+	for _, t := range tqs {
+		t.Run(s)
+	}
 }
 
 // runTestCases runs test transactions or queries, stopping early if an error occurs
-func (s *IntegrationTestSuite) runTestCases(tcs ...TestCase) {
-	for _, t := range tcs {
-		if !s.abort {
-			s.abort = t.Run(s)
-		}
+func (s *IntegrationTestSuite) runTestTransactions(txs ...testTransaction) {
+	for _, t := range txs {
+		t.Run(s)
 	}
 }
 
 type testTransaction struct {
-	name        string
+	msg         string
 	command     *cobra.Command
 	args        []string
 	expectedErr *errors.Error
 }
 
 type testQuery struct {
-	name             string
+	msg              string
 	command          *cobra.Command
 	args             []string
 	expectErr        bool
@@ -75,7 +72,7 @@ type testQuery struct {
 	expectedResponse proto.Message
 }
 
-func (t testTransaction) Run(s *IntegrationTestSuite) (abort bool) {
+func (t testTransaction) Run(s *IntegrationTestSuite) {
 	clientCtx := s.network.Validators[0].ClientCtx
 
 	txFlags := []string{
@@ -87,36 +84,21 @@ func (t testTransaction) Run(s *IntegrationTestSuite) (abort bool) {
 
 	t.args = append(t.args, txFlags...)
 
-	s.Run(t.name, func() {
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
-		s.Require().NoError(err)
-		if err != nil {
-			abort = true
-		}
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
+	s.Require().NoError(err, t.msg)
 
-		resp := &sdk.TxResponse{}
-		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp)
-		s.Require().NoError(err, out.String())
-		if err != nil {
-			abort = true
-		}
+	resp := &sdk.TxResponse{}
+	err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp)
+	s.Require().NoError(err, t.msg)
 
-		if t.expectedErr == nil {
-			s.Require().Equal(0, int(resp.Code), "events %v", resp.Events)
-			if int(resp.Code) != 0 {
-				abort = true
-			}
-		} else {
-			s.Require().Equal(int(t.expectedErr.ABCICode()), int(resp.Code))
-			if int(resp.Code) != int(t.expectedErr.ABCICode()) {
-				abort = true
-			}
-		}
-	})
-	return abort
+	if t.expectedErr == nil {
+		s.Require().Equal(0, int(resp.Code), t.msg)
+	} else {
+		s.Require().Equal(int(t.expectedErr.ABCICode()), int(resp.Code), t.msg)
+	}
 }
 
-func (t testQuery) Run(s *IntegrationTestSuite) (abort bool) {
+func (t testQuery) Run(s *IntegrationTestSuite) {
 	clientCtx := s.network.Validators[0].ClientCtx
 
 	queryFlags := []string{
@@ -125,31 +107,16 @@ func (t testQuery) Run(s *IntegrationTestSuite) (abort bool) {
 
 	t.args = append(t.args, queryFlags...)
 
-	s.Run(t.name, func() {
-		out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
 
-		if t.expectErr {
-			s.Require().Error(err)
-			if err == nil {
-				abort = true
-			}
-		} else {
-			s.Require().NoError(err)
-			if err != nil {
-				abort = true
-			}
+	if t.expectErr {
+		s.Require().Error(err, t.msg)
+	} else {
+		s.Require().NoError(err, t.msg)
 
-			err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), t.responseType)
-			s.Require().NoError(err, out.String())
-			if err != nil {
-				abort = true
-			}
+		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), t.responseType)
+		s.Require().NoError(err, t.msg)
 
-			s.Require().Equal(t.expectedResponse, t.responseType)
-			if !s.Assert().Equal(t.expectedResponse, t.responseType) {
-				abort = true
-			}
-		}
-	})
-	return abort
+		s.Require().Equal(t.expectedResponse, t.responseType)
+	}
 }

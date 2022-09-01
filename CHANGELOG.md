@@ -98,6 +98,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 - [1294](https://github.com/umee-network/umee/pull/1294) Simplify window progress query math.
+- [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
 
 ### Bug Fixes
 

@@ -19,7 +19,7 @@ const (
 	DefaultWeightMsgSupply            int = 100
 	DefaultWeightMsgWithdraw          int = 85
 	DefaultWeightMsgBorrow            int = 80
-	DefaultWeightMsgCollateralize     int = 60
+	DefaultWeightMsgCollateralize     int = 65
 	DefaultWeightMsgDecollateralize   int = 60
 	DefaultWeightMsgRepay             int = 70
 	DefaultWeightMsgLiquidate         int = 75
@@ -88,28 +88,28 @@ func WeightedOperations(
 			SimulateMsgSupply(ak, bk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgWithdraw,
-			SimulateMsgWithdraw(ak, bk, lk),
+			weightMsgCollateralize,
+			SimulateMsgCollateralize(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgBorrow,
 			SimulateMsgBorrow(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgCollateralize,
-			SimulateMsgCollateralize(ak, bk, lk),
-		),
-		simulation.NewWeightedOperation(
-			weightMsgDecollateralize,
-			SimulateMsgDecollateralize(ak, bk, lk),
+			weightMsgLiquidate,
+			SimulateMsgLiquidate(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgRepay,
 			SimulateMsgRepay(ak, bk, lk),
 		),
 		simulation.NewWeightedOperation(
-			weightMsgLiquidate,
-			SimulateMsgLiquidate(ak, bk, lk),
+			weightMsgDecollateralize,
+			SimulateMsgDecollateralize(ak, bk, lk),
+		),
+		simulation.NewWeightedOperation(
+			weightMsgWithdraw,
+			SimulateMsgWithdraw(ak, bk, lk),
 		),
 	}
 }
@@ -355,7 +355,7 @@ func randomDecollateralizeFields(
 }
 
 // randomBorrowFields returns a random account and an sdk.Coin from all
-// the registered tokens with an random amount [0, 150].
+// the registered tokens with an random amount [0, 10^6].
 // It returns skip=true if no registered token was found.
 func randomBorrowFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
@@ -368,7 +368,7 @@ func randomBorrowFields(
 	}
 
 	registeredToken := allTokens[r.Int31n(int32(len(allTokens)))]
-	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(150)))
+	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(1_000000)))
 
 	return acc, token, false
 }
@@ -401,10 +401,9 @@ func randomLiquidateFields(
 	rewardDenom string,
 	skip bool,
 ) {
-	idxLiquidator := r.Intn(len(accs) - 1)
-
-	liquidator = accs[idxLiquidator]
-	borrower = accs[idxLiquidator+1]
+	// note: liquidator and borrower might even be the same account
+	liquidator, _ = simtypes.RandomAcc(r, accs)
+	borrower, _ = simtypes.RandomAcc(r, accs)
 
 	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
 	if collateral.Empty() {
@@ -415,6 +414,19 @@ func randomLiquidateFields(
 
 	borrowed = simtypes.RandSubsetCoins(r, borrowed)
 	if borrowed.Empty() {
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+
+	liquidationThreshold, err := lk.CalculateLiquidationThreshold(ctx, collateral)
+	if err != nil {
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed)
+	if err != nil {
+		return liquidator, borrower, sdk.Coin{}, "", true
+	}
+	if borrowedValue.LTE(liquidationThreshold) {
+		// borrower not eligible for liquidation
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 

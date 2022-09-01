@@ -3,7 +3,6 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -64,8 +63,8 @@ func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 // stored value is cleared. A negative amount or invalid coin causes an error.
 // This function does not move coins to or from the module account.
 func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, collateral sdk.Coin) error {
-	if !collateral.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, collateral.String())
+	if err := collateral.Validate(); err != nil {
+		return err
 	}
 
 	if borrowerAddr.Empty() {

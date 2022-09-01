@@ -118,11 +118,8 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 // balances are insufficient to withdraw the full amount requested, returns an error.
 // Returns the amount of base tokens received.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, error) {
-	if err := uToken.Validate(); err != nil {
+	if err := k.validateUToken(uToken); err != nil {
 		return sdk.Coin{}, err
-	}
-	if !types.HasUTokenPrefix(uToken.Denom) {
-		return sdk.Coin{}, types.ErrNotUToken.Wrap(uToken.Denom)
 	}
 
 	// calculate base asset amount to withdraw
@@ -256,14 +253,14 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // Repay returns the actual amount repaid.
 func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Coin, error) {
-	if err := payment.Validate(); err != nil {
+	if err := k.validateRepay(payment); err != nil {
 		return sdk.Coin{}, err
 	}
 
 	// determine amount of selected denom currently owed
 	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
 	if owed.IsZero() {
-		return sdk.Coin{}, types.ErrInvalidRepayment.Wrapf("No %s borrowed ", payment.Denom)
+		return sdk.Coin{}, types.ErrDenomNotBorrowed.Wrap(payment.Denom)
 	}
 
 	// prevent overpaying
@@ -278,7 +275,7 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 
 // Collateralize enables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
-	if err := k.validateCollateralAsset(ctx, coin); err != nil {
+	if err := k.validateCollateralize(ctx, coin); err != nil {
 		return err
 	}
 
@@ -292,14 +289,14 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
+	if err := k.validateUToken(coin); err != nil {
 		return err
 	}
 
 	// Detect where sufficient collateral exists to disable
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	if collateral.AmountOf(coin.Denom).LT(coin.Amount) {
-		return types.ErrInsufficientBalance
+		return types.ErrInsufficientCollateral
 	}
 
 	// Determine what borrow limit would be AFTER disabling this denom as collateral
@@ -368,7 +365,7 @@ func (k Keeper) Liquidate(
 	if tokenRepay.IsZero() {
 		// Zero repay amount returned from liquidation computation means the target was eligible for liquidation
 		// but the proposed reward and repayment would have zero effect.
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationInvalid
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationRepayZero
 	}
 
 	// repay some of the borrower's debt using the liquidator's balance
