@@ -4,6 +4,7 @@ NOTES:
 
 - the gas used depends on the current state of the chain
 - the gas records below are based on the empty state
+- user is charged the gas-limit, even if tx consumed less gas
 
 | operation                                      | gas used |
 | :--------------------------------------------- | -------: |
@@ -13,7 +14,7 @@ NOTES:
 | x/oracle MsgAggregateExchangeRateVote (6 curr) |    69726 |
 | default gas limit                              |   200000 |
 
-### Target price (in USD cent) for x/bank send
+## Target price (in USD cent) for x/bank send
 
 | umee price (usd cent) | gas price in uumee | fee (usd cent) |
 | --------------------: | -----------------: | -------------: |
@@ -24,7 +25,7 @@ NOTES:
 |                     5 |                0.1 |         0.0155 |
 |                     5 |               0.02 |         0.0031 |
 
-### Target price (in USD cent) for validator oracle txs (with 6 currencies) per day
+## Target price (in USD cent) for validator oracle txs (with 6 currencies) per day
 
 There are roughly 10tx / minute and 14400 per day.
 Validator has to do 2 tx (prevote and vote) every 5 blocks.
@@ -40,7 +41,7 @@ In table below we assume the same price scheme as above, but in the code most li
 |                     5 |                0.1 |          201.6 |
 |                     5 |               0.02 |          40.32 |
 
-### Target price (in USD) for default gas limit
+## Target price (in USD) for default gas limit
 
 | umee price (usd cent) | gas price in uumee | fee (usd cent) |
 | --------------------: | -----------------: | -------------: |
