@@ -221,7 +221,7 @@ func TestCloseFactor(t *testing.T) {
 			sdk.MustNewDecFromStr("50"),  // borrowed value 50
 			sdk.MustNewDecFromStr("100"), // collateral value 100
 			sdk.MustNewDecFromStr("40"),  // liquidation threshold 40
-			sdk.MustNewDecFromStr("10"),  // small liquidation size 10
+			sdk.MustNewDecFromStr("20"),  // small liquidation size 20
 			sdk.MustNewDecFromStr("0.1"), // minimum close factor 10%
 			sdk.MustNewDecFromStr("0.3"), // complete liquidation threshold 30%
 		}
@@ -247,4 +247,32 @@ func TestCloseFactor(t *testing.T) {
 	// borrowed value is $50, which is 5/9 the way from $40 to $58, the computed close
 	// factor is 5/9 of the way from 10% to 100% - thus, 60%.
 	runTestCase(baseCase(), "0.6", "base case")
+
+	// If borrowed value has passed the critical point, close factor is 1
+	completeLiquidation := baseCase()
+	completeLiquidation.borrowedValue = sdk.MustNewDecFromStr("60")
+	runTestCase(completeLiquidation, "1", "complete liquidation")
+
+	// If borrowed value is less than small liquidation size, close factor is always 1.
+	smallLiquidation := baseCase()
+	smallLiquidation.smallLiquidationSize = sdk.MustNewDecFromStr("60")
+	runTestCase(smallLiquidation, "1", "small liquidation")
+
+	// A liquidation-ineligible target would not have its close factor calculated in
+	// practice, but the function should return zero if it were.
+	notEligible := baseCase()
+	notEligible.borrowedValue = sdk.MustNewDecFromStr("40")
+	runTestCase(notEligible, "0", "liquidation ineligible")
+
+	// A liquidation-ineligible target would not have its close factor calculated in
+	// practice, but the function should return zero if it were.
+	smallNotEligible := baseCase()
+	smallNotEligible.borrowedValue = sdk.MustNewDecFromStr("10")
+	runTestCase(smallNotEligible, "0", "liquidation ineligible")
+
+	// If collateral weights are all 1 (CV = LT), close factor must be 1 if target
+	// is eligible for liquidation.
+	highCollateralWeight := baseCase()
+	highCollateralWeight.collateralValue = sdk.MustNewDecFromStr("40")
+	runTestCase(highCollateralWeight, "1", "high collateral weight")
 }
