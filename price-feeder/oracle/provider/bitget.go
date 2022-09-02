@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -24,6 +23,8 @@ const (
 	bitgetReconnectTime = time.Minute * 2
 	bitgetRestHost      = "https://api.bitget.com"
 	bitgetRestPath      = "/api/spot/v1/public/currencies"
+	tickerChannel       = "ticker"
+	candleChannel       = "candle5m"
 )
 
 var _ Provider = (*BitgetProvider)(nil)
@@ -256,7 +257,11 @@ func (p *BitgetProvider) handleWebSocketMsgs(ctx context.Context) {
 // data of websocket Market APIs are compressed with GZIP so they need to be
 // decompressed.
 func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
-	if bytes.Contains(bz, ping) {
+	if messageType != websocket.TextMessage {
+		return
+	}
+
+	if messageType == websocket.PingMessage {
 		p.pong(bz, reconnectTicker)
 		return
 	}
@@ -270,8 +275,8 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 		subscriptionResponse BitgetSubscriptionResponse
 	)
 
-	json.Unmarshal(bz, &errResponse)
-	if errResponse.Code != 0 {
+	err := json.Unmarshal(bz, &errResponse)
+	if err == nil && errResponse.Code != 0 {
 		p.logger.Error().
 			Int("length", len(bz)).
 			Str("msg", string(bz)).
@@ -279,8 +284,8 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 		return
 	}
 
-	json.Unmarshal(bz, &subscriptionResponse)
-	if subscriptionResponse.Event == "subscribe" {
+	err = json.Unmarshal(bz, &subscriptionResponse)
+	if err != nil && subscriptionResponse.Event == "subscribe" {
 		p.logger.Debug().
 			Str("InstID", subscriptionResponse.Arg.InstID).
 			Str("Channel", subscriptionResponse.Arg.Channel).
@@ -290,14 +295,14 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	}
 
 	tickerErr = json.Unmarshal(bz, &tickerResp)
-	if tickerResp.Arg.Channel == "ticker" {
+	if tickerResp.Arg.Channel == tickerChannel {
 		p.setTickerPair(tickerResp)
 		telemetry.IncrCounter(
 			1,
 			"websocket",
 			"message",
 			"type",
-			"ticker",
+			tickerChannel,
 			"provider",
 			string(ProviderBitget),
 		)
@@ -305,7 +310,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
-	if candleResp.Arg.Channel == "candle5m" {
+	if candleResp.Arg.Channel == candleChannel {
 		candle, err := candleResp.ToBitgetCandle()
 		if err != nil {
 			p.logger.Error().
@@ -526,7 +531,7 @@ func newBitgetTickerSubscriptionMsg(cps []types.CurrencyPair) BitgetSubscription
 		}
 		args[index+1] = BitgetSubscriptionArg{
 			InstType: "SP",
-			Channel:  "candle5m",
+			Channel:  candleChannel,
 			InstID:   cp.String(),
 		}
 	}
