@@ -92,7 +92,10 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 
 			valAddress := sdk.ValAddress(clientCtx.GetFromAddress())
 			if len(args) > 1 {
-				valAddress = sdk.ValAddress(args[1])
+				valAddress, err = sdk.ValAddressFromBech32(args[1])
+				if err != nil {
+					return err
+				}
 			}
 
 			msg := types.NewMsgAggregateExchangeRatePrevote(
@@ -135,7 +138,10 @@ func GetCmdAggregateExchangeRateVote() *cobra.Command {
 
 			valAddress := sdk.ValAddress(clientCtx.GetFromAddress())
 			if len(args) > 2 {
-				valAddress = sdk.ValAddress(args[2])
+				valAddress, err = sdk.ValAddressFromBech32(args[2])
+				if err != nil {
+					return err
+				}
 			}
 
 			msg := types.NewMsgAggregateExchangeRateVote(
