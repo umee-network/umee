@@ -28,6 +28,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/umee-network/umee/v3/app/params"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -71,7 +72,7 @@ func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
 	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(BondDenom, sdk.NewInt(10000000000000000))),
+		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdk.NewInt(10000000000000000))),
 	}
 
 	app := SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
@@ -168,7 +169,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 		defaultStParams.MaxValidators,
 		defaultStParams.MaxEntries,
 		defaultStParams.HistoricalEntries,
-		BondDenom,
+		params.BondDenom,
 		defaultStParams.MinCommissionRate,
 	)
 	// set validators and delegations
@@ -183,13 +184,13 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 
 	for range delegations {
 		// add delegated tokens to total supply
-		totalSupply = totalSupply.Add(sdk.NewCoin(BondDenom, bondAmt))
+		totalSupply = totalSupply.Add(sdk.NewCoin(params.BondDenom, bondAmt))
 	}
 
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin(BondDenom, bondAmt)},
+		Coins:   sdk.Coins{sdk.NewCoin(params.BondDenom, bondAmt)},
 	})
 
 	// update total supply
@@ -241,8 +242,8 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:              BondDenom,
-		SymbolDenom:            DisplayDenom,
+		BaseDenom:              params.BondDenom,
+		SymbolDenom:            params.DisplayDenom,
 		Exponent:               6,
 		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
@@ -276,7 +277,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
-		DisplayDenom, sdk.MustNewDecFromStr("34.21"),
+		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
@@ -304,8 +305,8 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.LegacyAmino = encCfg.Amino
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.GenesisState = appGenState
-	cfg.BondDenom = BondDenom
-	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", BondDenom)
+	cfg.BondDenom = params.BondDenom
+	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", params.BondDenom)
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
 		return New(
 			val.Ctx.Logger,

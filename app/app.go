@@ -121,22 +121,6 @@ import (
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-const (
-	// Name defines the application name of the Umee network.
-	Name = "umee"
-
-	// BondDenom defines the native staking token denomination.
-	BondDenom = "uumee"
-
-	// DisplayDenom defines the name, symbol, and display value of the umee token.
-	DisplayDenom = "UMEE"
-
-	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
-	//
-	// NOTE: In the SDK, the default value is 255.
-	MaxAddrLen = 20
-)
-
 var (
 	_ CosmosApp               = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)

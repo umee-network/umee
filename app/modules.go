@@ -20,6 +20,8 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"github.com/umee-network/umee/v3/app/params"
 )
 
 // BankModule defines a custom wrapper around the x/bank module's AppModuleBasic
@@ -32,20 +34,20 @@ type BankModule struct {
 func (BankModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	umeeMetadata := banktypes.Metadata{
 		Description: "The native staking token of the Umee network.",
-		Base:        BondDenom,
-		Name:        DisplayDenom,
-		Display:     DisplayDenom,
-		Symbol:      DisplayDenom,
+		Base:        params.BondDenom,
+		Name:        params.DisplayDenom,
+		Display:     params.DisplayDenom,
+		Symbol:      params.DisplayDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    BondDenom,
+				Denom:    params.BondDenom,
 				Exponent: 0,
 				Aliases: []string{
 					"microumee",
 				},
 			},
 			{
-				Denom:    DisplayDenom,
+				Denom:    params.DisplayDenom,
 				Exponent: 6,
 				Aliases:  []string{},
 			},
@@ -67,7 +69,7 @@ type StakingModule struct {
 // DefaultGenesis returns custom Umee x/staking module genesis state.
 func (StakingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	params := stakingtypes.DefaultParams()
-	params.BondDenom = BondDenom
+	params.BondDenom = params.BondDenom
 
 	return cdc.MustMarshalJSON(&stakingtypes.GenesisState{
 		Params: params,
@@ -83,7 +85,7 @@ type CrisisModule struct {
 // DefaultGenesis returns custom Umee x/crisis module genesis state.
 func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(BondDenom, sdk.NewInt(1000)),
+		ConstantFee: sdk.NewCoin(params.BondDenom, sdk.NewInt(1000)),
 	})
 }
 
@@ -96,7 +98,7 @@ type MintModule struct {
 // DefaultGenesis returns custom Umee x/mint module genesis state.
 func (MintModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genState := minttypes.DefaultGenesisState()
-	genState.Params.MintDenom = BondDenom
+	genState.Params.MintDenom = params.BondDenom
 
 	return cdc.MustMarshalJSON(genState)
 }
@@ -109,7 +111,7 @@ type GovModule struct {
 
 // DefaultGenesis returns custom Umee x/gov module genesis state.
 func (GovModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	minDeposit := sdk.NewCoins(sdk.NewCoin(BondDenom, govv1.DefaultMinDepositTokens))
+	minDeposit := sdk.NewCoins(sdk.NewCoin(params.BondDenom, govv1.DefaultMinDepositTokens))
 	genState := govv1.DefaultGenesisState()
 	genState.DepositParams.MinDeposit = minDeposit
 
