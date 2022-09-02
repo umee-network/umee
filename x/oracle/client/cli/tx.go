@@ -72,8 +72,8 @@ func GetCmdDelegateFeedConsent() *cobra.Command {
 // broadcast a transaction with a MsgAggregateExchangeRatePrevote message.
 func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "exchange-rate-prevote [hash]",
-		Args:  cobra.ExactArgs(1),
+		Use:   "exchange-rate-prevote [hash] [validator-address]",
+		Args:  cobra.MinimumNArgs(1),
 		Short: "Submit an exchange rate prevote with a hash",
 		Long: fmt.Sprintf(`Submit an exchange rate prevote with a hash as a hex string
 			representation of a byte array.
@@ -90,10 +90,18 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 				return err
 			}
 
+			valAddress := sdk.ValAddress(clientCtx.GetFromAddress())
+			if len(args) > 1 {
+				valAddress, err = sdk.ValAddressFromBech32(args[1])
+				if err != nil {
+					return err
+				}
+			}
+
 			msg := types.NewMsgAggregateExchangeRatePrevote(
 				hash,
 				clientCtx.GetFromAddress(),
-				sdk.ValAddress(clientCtx.GetFromAddress()),
+				valAddress,
 			)
 
 			if err := msg.ValidateBasic(); err != nil {
@@ -113,8 +121,8 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 // broadcast a transaction with a NewMsgAggregateExchangeRateVote message.
 func GetCmdAggregateExchangeRateVote() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "exchange-rate-vote [salt] [exchange-rates]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "exchange-rate-vote [salt] [exchange-rates] [validator-address]",
+		Args:  cobra.MinimumNArgs(2),
 		Short: "Submit an exchange rate vote with the salt and exchange rate string",
 		Long: fmt.Sprintf(`Submit an exchange rate vote with the salt of the previous hash, and the
 			exchange rate string previously used in the hash.
@@ -128,11 +136,19 @@ func GetCmdAggregateExchangeRateVote() *cobra.Command {
 				return err
 			}
 
+			valAddress := sdk.ValAddress(clientCtx.GetFromAddress())
+			if len(args) > 2 {
+				valAddress, err = sdk.ValAddressFromBech32(args[2])
+				if err != nil {
+					return err
+				}
+			}
+
 			msg := types.NewMsgAggregateExchangeRateVote(
 				args[0],
 				args[1],
 				clientCtx.GetFromAddress(),
-				sdk.ValAddress(clientCtx.GetFromAddress()),
+				valAddress,
 			)
 
 			if err := msg.ValidateBasic(); err != nil {
