@@ -1,6 +1,8 @@
 package params
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	// Name defines the application name of the Umee network.
@@ -18,5 +20,7 @@ const (
 	MaxAddrLen = 20
 )
 
-// MinMinGasPrice is the minimum value a validator can set for `minimum-gas-prices` his app.toml config
-var MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.05"))
+var (
+	// MinMinGasPrice is the minimum value a validator can set for `minimum-gas-prices` his app.toml config
+	MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.05"))
+)

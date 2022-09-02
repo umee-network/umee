@@ -20,6 +20,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func init() {
@@ -75,7 +76,7 @@ func TestFullAppSimulation(t *testing.T) {
 		umeeapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
 	)
-	require.Equal(t, umeeapp.Name, app.Name())
+	require.Equal(t, appparams.Name, app.Name())
 
 	// run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(

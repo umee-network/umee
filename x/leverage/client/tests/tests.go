@@ -3,7 +3,7 @@ package tests
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/client/cli"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -72,8 +72,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Registry: []types.Token{
 					{
 						// must match app/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:              umeeapp.BondDenom,
-						SymbolDenom:            umeeapp.DisplayDenom,
+						BaseDenom:              appparams.BondDenom,
+						SymbolDenom:            appparams.DisplayDenom,
 						Exponent:               6,
 						ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			"query market summary - zero supply",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
-				umeeapp.BondDenom,
+				appparams.BondDenom,
 			},
 			false,
 			&types.QueryMarketSummaryResponse{},
@@ -213,13 +213,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAccountBalancesResponse{},
 			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
+					sdk.NewInt64Coin(appparams.BondDenom, 1000),
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.ToUTokenDenom(umeeapp.BondDenom), 1000),
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
+					sdk.NewInt64Coin(appparams.BondDenom, 51),
 				),
 			},
 		},

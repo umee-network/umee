@@ -24,6 +24,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	"github.com/umee-network/umee/v3/app/params"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
@@ -40,10 +41,10 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
 		WithHomeDir(umeeapp.DefaultNodeHome).
-		WithViper(umeeapp.Name)
+		WithViper(appparams.Name)
 
 	rootCmd := &cobra.Command{
-		Use:   umeeapp.Name + "d",
+		Use:   appparams.Name + "d",
 		Short: "Umee application network daemon and client",
 		Long: `A daemon and client for interacting with the Umee network. Umee is a
 Universal Capital Facility that can collateralize assets on one blockchain

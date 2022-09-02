@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -43,15 +43,15 @@ func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (s
 
 func (m *mockOracleKeeper) Reset() {
 	m.exchangeRates = map[string]sdk.Dec{
-		umeeapp.BondDenom: sdk.MustNewDecFromStr("4.21"),
-		atomDenom:         sdk.MustNewDecFromStr("39.38"),
+		appparams.BondDenom: sdk.MustNewDecFromStr("4.21"),
+		atomDenom:           sdk.MustNewDecFromStr("39.38"),
 	}
 }
 
 func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	p, err := app.LeverageKeeper.TokenPrice(ctx, umeeapp.BondDenom)
+	p, err := app.LeverageKeeper.TokenPrice(ctx, appparams.BondDenom)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.00000421"), p)
 
@@ -68,7 +68,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.TokenValue(ctx, coin(umeeapp.BondDenom, 2_400000))
+	v, err := app.LeverageKeeper.TokenValue(ctx, coin(appparams.BondDenom, 2_400000))
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
@@ -84,7 +84,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err := app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			coin(umeeapp.BondDenom, 2_400000),
+			coin(appparams.BondDenom, 2_400000),
 			coin(atomDenom, 4_700000),
 		),
 	)
@@ -95,7 +95,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			coin(umeeapp.BondDenom, 2_400000),
+			coin(appparams.BondDenom, 2_400000),
 			coin(atomDenom, 4_700000),
 			coin("foo", 4_700000),
 		),
@@ -107,7 +107,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	r, err := app.LeverageKeeper.PriceRatio(ctx, umeeapp.BondDenom, atomDenom)
+	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, atomDenom)
 	require.NoError(err)
 	// $4.21 / $39.38
 	require.Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
@@ -115,6 +115,6 @@ func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
-	_, err = app.LeverageKeeper.PriceRatio(ctx, umeeapp.BondDenom, "foo")
+	_, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, "foo")
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 }
