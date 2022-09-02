@@ -29,6 +29,7 @@ NOTES:
 There are roughly 10tx / minute and 14400 per day.
 Validator has to do 2 tx (prevote and vote) every 5 blocks.
 Validator will need to do `5760 = 2*14400/5` tx.
+In table below we assume the same price scheme as above, but in the code most likely we will apply a fixed discount (eg 10x).
 
 | umee price (usd cent) | gas price in uumee | fee (usd cent) |
 | --------------------: | -----------------: | -------------: |

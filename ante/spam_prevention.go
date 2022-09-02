@@ -64,6 +64,7 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 			err = spd.validate(ctx, msg.Feeder, msg.Validator, spd.oracleVoteMap, curHeight, "vote")
 		default:
 			// non oracle msg: stop validation!
+			// NOTE: only tx which contain only oracle Msgs are considered oracle-prioritized
 			return nil
 		}
 		if err != nil {
