@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
@@ -80,7 +80,7 @@ $ %s debug addr cosmos1e0jnq2sun3dzjh8p2xq95kk0expwmd7shwjpfg
 		},
 	}
 
-	cmd.Flags().String(flagBech32HRP, umeeapp.AccountAddressPrefix,
+	cmd.Flags().String(flagBech32HRP, appparams.AccountAddressPrefix,
 		"Input Bech32 HRP (use only when address input is a Bech32 address")
 	return cmd
 }

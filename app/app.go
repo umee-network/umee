@@ -240,12 +240,6 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", appparams.Name))
-
-	// XXX: If other upstream or external application's depend on any of Umee's
-	// CLI or command functionality, then this would require us to move the
-	// SetAddressConfig call to somewhere external such as the root command
-	// constructor and anywhere else we contract the app.
-	SetAddressConfig()
 }
 
 func New(
@@ -331,7 +325,7 @@ func New(
 		app.GetSubspace(authtypes.ModuleName),
 		authtypes.ProtoBaseAccount,
 		maccPerms,
-		AccountAddressPrefix,
+		appparams.AccountAddressPrefix,
 	)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
