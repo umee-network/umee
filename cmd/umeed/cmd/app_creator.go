@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	stdlog "log"
 	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -20,11 +21,11 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
-	"github.com/umee-network/umee/v3/app/params"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type appCreator struct {
-	encCfg        params.EncodingConfig
+	encCfg        appparams.EncodingConfig
 	moduleManager module.BasicManager
 }
 
@@ -65,6 +66,9 @@ func (a appCreator) newApp(
 		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
 	)
 
+	minGasPrices := cast.ToString(appOpts.Get(server.FlagMinGasPrices))
+	assertMinUmeeGasPrice(minGasPrices)
+
 	return umeeapp.New(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
@@ -72,7 +76,7 @@ func (a appCreator) newApp(
 		a.encCfg,
 		appOpts,
 		baseapp.SetPruning(pruningOpts),
-		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
+		baseapp.SetMinGasPrices(minGasPrices),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
 		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
 		baseapp.SetHaltTime(cast.ToUint64(appOpts.Get(server.FlagHaltTime))),
@@ -81,6 +85,22 @@ func (a appCreator) newApp(
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
 		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
 	)
+}
+
+func assertMinUmeeGasPrice(minGasPrices string) {
+	gasPrices, err := sdk.ParseDecCoins(minGasPrices)
+	if err != nil {
+		stdlog.Fatalf("invalid minimum gas prices: %v", err)
+	}
+	for _, c := range gasPrices {
+		if c.Denom == appparams.BondDenom {
+			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
+				break // go to Fatal below
+			}
+			return
+		}
+	}
+	stdlog.Fatal("minimum-gas-price config in app.toml must be at least", appparams.MinMinGasPrice)
 }
 
 // appExport creates a new simapp, optionally at a given height.

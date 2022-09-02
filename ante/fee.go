@@ -49,6 +49,9 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 					"insufficient fees; got: %s required: %s", feeCoins, requiredFees)
 			}
 		}
+	} else {
+		// TODO
+		// check if consensus mingas is in fees
 	}
 
 	priority := getTxPriority(isOracleOrGravity, msgs)

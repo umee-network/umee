@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
+	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -23,12 +24,11 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
-	"github.com/umee-network/umee/v3/app/params"
 	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
-func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	moduleManager := umeeapp.ModuleBasics
 
@@ -67,8 +67,9 @@ towards borrowing assets on another blockchain.`,
 				return err
 			}
 
-			tmConfig := initTendermintConfig()
-			return server.InterceptConfigsPreRunHandler(cmd, "", nil, tmConfig)
+			appTmpl, appCfg := initAppConfig()
+			tmCfg := initTendermintConfig()
+			return server.InterceptConfigsPreRunHandler(cmd, appTmpl, appCfg, tmCfg)
 		},
 	}
 
@@ -92,6 +93,45 @@ func initTendermintConfig() *tmcfg.Config {
 	// cfg.P2P.MaxNumOutboundPeers = 40
 
 	return cfg
+}
+
+// initAppConfig helps to override default appConfig template and configs.
+// return "", nil if no custom configuration is required for the application.
+func initAppConfig() (string, interface{}) {
+	// WASMConfig defines configuration for the wasm module.
+	type WASMConfig struct {
+		// This is the maximum sdk gas (wasm and storage) that we allow for any x/wasm "smart" queries
+		QueryGasLimit uint64 `mapstructure:"query_gas_limit"`
+
+		LruSize uint64 `mapstructure:"lru_size"`
+	}
+
+	type CustomAppConfig struct {
+		serverconfig.Config
+		WASM WASMConfig `mapstructure:"wasm"`
+	}
+
+	// here we set a default initial app.toml values for validators.
+	srvCfg := serverconfig.DefaultConfig()
+	srvCfg.MinGasPrices = "" // validators MUST set mininum-gas-prices in their app.toml, otherwise the app will halt.
+
+	customAppConfig := CustomAppConfig{
+		Config: *srvCfg,
+		WASM: WASMConfig{
+			LruSize:       1,
+			QueryGasLimit: 300000,
+		},
+	}
+
+	customAppTemplate := serverconfig.DefaultConfigTemplate + `
+[wasm]
+# This is the maximum sdk gas (wasm and storage) that we allow for any x/wasm "smart" queries
+query_gas_limit = 300000
+# This is the number of wasm vm instances we keep cached in memory for speed-up
+# Warning: this is currently unstable and may lead to crashes, best to keep for 0 unless testing locally
+lru_size = 0`
+
+	return customAppTemplate, customAppConfig
 }
 
 func initRootCmd(rootCmd *cobra.Command, a appCreator) {
