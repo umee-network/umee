@@ -267,7 +267,7 @@ func TestCloseFactor(t *testing.T) {
 	// A liquidation-ineligible target would not have its close factor calculated in
 	// practice, but the function should return zero if it were.
 	smallNotEligible := baseCase()
-	smallNotEligible.borrowedValue = sdk.MustNewDecFromStr("10")
+	smallNotEligible.borrowedValue = sdk.MustNewDecFromStr("10")  // < baseCase.smallLiquidationSize = 20
 	runTestCase(smallNotEligible, "0", "liquidation ineligible")
 
 	// If collateral weights are all 1 (CV = LT), close factor must be 1 if target
