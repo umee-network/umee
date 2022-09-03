@@ -193,6 +193,16 @@ func ComputeLiquidation(
 
 // ComputeCloseFactor derives the maximum portion of a borrower's current
 // borrowed value can currently be repaid in a single liquidate transaction.
+// We interpolate the maximum liquidation size based on the position of borrowed value between LiquidationThreshold and CollateralValue:
+// B = borrowed value
+// C = collateral value
+// L = liquidation threshold (must be < C)
+// CV = critical value - place between L and C, where 100% liquidation is allowed.
+//    It is calculated as: L + (C-L)*completeLiquidationThreshold
+// when B >= L liquidation is allowed
+// when L <= B <= CV we interpolate the liquidation factor 
+//  ------ | ---- | -- | ---- | ----
+//         L      B    CV     C
 func ComputeCloseFactor(
 	borrowedValue sdk.Dec,
 	collateralValue sdk.Dec,
