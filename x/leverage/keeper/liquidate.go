@@ -231,7 +231,6 @@ func ComputeCloseFactor(
 		return sdk.OneDec()
 	}
 
-	// critical borrowed value = liquidationThreshold + CLT * (collateralValue - liquidationThreshold)
 	criticalValue := liquidationThreshold.Add(completeLiquidationThreshold.Mul(collateralValue.Sub(liquidationThreshold)))
 
 	// outside of special cases, closeFactor scales linearly between MinimumCloseFactor and 1.0, reaching 1
