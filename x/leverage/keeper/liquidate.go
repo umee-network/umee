@@ -39,7 +39,7 @@ func (k Keeper) getLiquidationAmounts(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if liquidationThreshold.GT(borrowedValue) {
+	if borrowedValue.LT(liquidationThreshold) {
 		// borrower is healthy and cannot be liquidated
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}
