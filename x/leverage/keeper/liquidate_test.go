@@ -223,7 +223,7 @@ func TestCloseFactor(t *testing.T) {
 			sdk.MustNewDecFromStr("40"),  // liquidation threshold 40
 			sdk.MustNewDecFromStr("20"),  // small liquidation size 20
 			sdk.MustNewDecFromStr("0.1"), // minimum close factor 10%
-			sdk.MustNewDecFromStr("0.3"), // complete liquidation threshold 30%
+			sdk.MustNewDecFromStr("0.3"), // complete liquidation threshold 30% --> critical_value=58
 		}
 	}
 
