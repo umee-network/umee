@@ -191,18 +191,26 @@ func ComputeLiquidation(
 	return tokenRepay, collateralBurn, tokenReward
 }
 
-// ComputeCloseFactor derives the maximum portion of a borrower's current
-// borrowed value can currently be repaid in a single liquidate transaction.
-// We interpolate the maximum liquidation size based on the position of borrowed value between LiquidationThreshold and CollateralValue:
-// B = borrowed value
-// C = collateral value
-// L = liquidation threshold (must be < C)
-// CV = critical value - place between L and C, where 100% liquidation is allowed.
-//    It is calculated as: L + (C-L)*completeLiquidationThreshold
-// when B >= L liquidation is allowed
-// when L <= B <= CV we interpolate the liquidation factor 
-//  ------ | ---- | -- | ---- | ----
-//         L      B    CV     C
+// ComputeCloseFactor derives the maximum portion of a borrower's current borrowedValue
+// that can currently be repaid in a single liquidate transaction.
+//
+// closeFactor scales linearly between minimumCloseFactor and 1.0,
+// reaching its maximum when borrowedValue has reached a critical value
+// between liquidationThreshold to collateralValue.
+// This critical value is defined as:
+//
+//	B = critical borrowedValue
+//	C = collateralValue
+//	L = liquidationThreshold
+//	CLT = completeLiquidationThreshold
+//
+//	B = L + (C-L) * CLT
+//
+// closeFactor is zero for borrowers that are not eligible for liquidation,
+// i.e. borrowedValue < liquidationThreshold
+//
+// Finally, if borrowedValue is less than smallLiquidationSize,
+// closeFactor will always be 1 as long as the borrower is eligible for liquidation.
 func ComputeCloseFactor(
 	borrowedValue sdk.Dec,
 	collateralValue sdk.Dec,
@@ -211,7 +219,7 @@ func ComputeCloseFactor(
 	minimumCloseFactor sdk.Dec,
 	completeLiquidationThreshold sdk.Dec,
 ) (closeFactor sdk.Dec) {
-	if borrowedValue.LTE(liquidationThreshold) {
+	if borrowedValue.LT(liquidationThreshold) {
 		// Not eligible for liquidation
 		return sdk.ZeroDec()
 	}
@@ -222,19 +230,13 @@ func ComputeCloseFactor(
 	}
 
 	if completeLiquidationThreshold.IsZero() {
-		// If close factor is set to unlimited by global params
+		// If close factor is set to unlimited
 		return sdk.OneDec()
 	}
 
-	if collateralValue.LTE(liquidationThreshold) {
-		// If all tokens have a collateral weight of 1, there is no room for dynamic close factor
-		return sdk.OneDec()
-	}
-
+	// Calculate the borrowed value at which close factor reaches 1.0
 	criticalValue := liquidationThreshold.Add(completeLiquidationThreshold.Mul(collateralValue.Sub(liquidationThreshold)))
 
-	// outside of special cases, closeFactor scales linearly between MinimumCloseFactor and 1.0, reaching 1
-	// when borrowedValue has reached a critical value between liquidationThreshold and collateralValue
 	closeFactor = Interpolate(
 		borrowedValue,        // x
 		liquidationThreshold, // xMin
