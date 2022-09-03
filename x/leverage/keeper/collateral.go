@@ -103,7 +103,7 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdkmath.Int {
 // collateral sdk.Coins, using each token's uToken exchange rate.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
 func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	limit := sdk.ZeroDec()
+	total := sdk.ZeroDec()
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
@@ -119,8 +119,8 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 		}
 
 		// add each collateral coin's weighted value to borrow limit
-		limit = limit.Add(v)
+		total = total.Add(v)
 	}
 
-	return limit, nil
+	return total, nil
 }

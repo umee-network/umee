@@ -31,7 +31,7 @@ func (k Keeper) getLiquidationAmounts(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	collateralValue, err := k.TotalTokenValue(ctx, borrowerCollateral)
+	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -39,7 +39,7 @@ func (k Keeper) getLiquidationAmounts(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if liquidationThreshold.GTE(borrowedValue) {
+	if liquidationThreshold.GT(borrowedValue) {
 		// borrower is healthy and cannot be liquidated
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}

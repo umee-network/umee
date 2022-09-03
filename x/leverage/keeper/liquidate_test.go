@@ -254,7 +254,7 @@ func TestCloseFactor(t *testing.T) {
 	completeLiquidation.borrowedValue = sdk.MustNewDecFromStr("60")
 	runTestCase(completeLiquidation, "1", "complete liquidation")
 
-	// If borrowed value is less than small liquidation size, close factor is always 1.
+	// If borrowed value is less than small liquidation size, close factor is 1.
 	smallLiquidation := baseCase()
 	smallLiquidation.smallLiquidationSize = sdk.MustNewDecFromStr("60")
 	runTestCase(smallLiquidation, "1", "small liquidation")
@@ -262,7 +262,7 @@ func TestCloseFactor(t *testing.T) {
 	// A liquidation-ineligible target would not have its close factor calculated in
 	// practice, but the function should return zero if it were.
 	notEligible := baseCase()
-	notEligible.borrowedValue = sdk.MustNewDecFromStr("40")
+	notEligible.borrowedValue = sdk.MustNewDecFromStr("30")
 	runTestCase(notEligible, "0", "liquidation ineligible")
 
 	// A liquidation-ineligible target which is below the small liquidation size
@@ -270,6 +270,12 @@ func TestCloseFactor(t *testing.T) {
 	smallNotEligible := baseCase()
 	smallNotEligible.borrowedValue = sdk.MustNewDecFromStr("10")
 	runTestCase(smallNotEligible, "0", "liquidation ineligible (small)")
+
+	// A borrower which is exactly on their liquidation threshold will have a close factor
+	// equal to minimumCloseFactor.
+	exactThreshold := baseCase()
+	exactThreshold.borrowedValue = sdk.MustNewDecFromStr("40")
+	runTestCase(exactThreshold, "0.1", "exact threshold")
 
 	// If collateral weights are all 1 (CV = LT), close factor will be MinimumCloseFactor.
 	// This situation will not occur in practice as collateral weights are less than one.
