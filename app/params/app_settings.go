@@ -15,11 +15,6 @@ const (
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UMEE"
-
-	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
-	//
-	// NOTE: In the SDK, the default value is 255.
-	MaxAddrLen = 20
 )
 
 var (
