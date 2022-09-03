@@ -7,7 +7,8 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	umeeapp "github.com/umee-network/umee/v3/app"
+
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -115,9 +116,9 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	s.Run("send_uumee_tokens_to_eth", func() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
-		amount := sdk.NewCoin(umeeapp.BondDenom, math.NewInt(300))
+		amount := sdk.NewCoin(appparams.BondDenom, math.NewInt(300))
 		umeeFee := sdk.NewCoin(photonDenom, math.NewInt(10))
-		gravityFee := sdk.NewCoin(umeeapp.BondDenom, math.NewInt(7))
+		gravityFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(7))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, umeeERC20Addr, amount, umeeFee, gravityFee)
 	})
@@ -128,6 +129,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		orchestratorIdxSender := 1
 		amount := uint64(300)
 
-		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, umeeapp.BondDenom, amount)
+		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, appparams.BondDenom, amount)
 	})
 }
