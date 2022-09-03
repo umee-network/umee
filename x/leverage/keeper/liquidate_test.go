@@ -243,8 +243,7 @@ func TestCloseFactor(t *testing.T) {
 	// In the base case, close factor scales from 10% to 100% as borrowed value
 	// goes from liquidation threshold ($40) to a critical point, which is defined
 	// to be 30% of the way between liquidation threshold and collateral value ($100).
-	// This critical point is calculated to be borrowed value = $58. Since the actual
-	// borrowed value is $50, which is 5/9 the way from $40 to $58, the computed close
+	// Since the borrowed value is $50: 5/9 the way from liquidation threshold to critical value, the computed close
 	// factor is 5/9 of the way from 10% to 100% - thus, 60%.
 	runTestCase(baseCase(), "0.6", "base case")
 
