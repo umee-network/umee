@@ -173,3 +173,25 @@ func TestBitgetProvider_AvailablePairs(t *testing.T) {
 
 	require.NotEmpty(t, pairs)
 }
+
+func TestBitgetProvider_NewSubscriptionMsg(t *testing.T) {
+	cps := []types.CurrencyPair{
+		{
+			Base: "ATOM", Quote: "USDT",
+		},
+		{
+			Base: "FOO", Quote: "BAR",
+		},
+	}
+	sub := newBitgetTickerSubscriptionMsg(cps)
+
+	require.Equal(t, len(sub.Args), 2*len(cps))
+	require.Equal(t, sub.Args[0].InstID, "ATOMUSDT")
+	require.Equal(t, sub.Args[0].Channel, "ticker")
+	require.Equal(t, sub.Args[1].InstID, "ATOMUSDT")
+	require.Equal(t, sub.Args[1].Channel, "candle5m")
+	require.Equal(t, sub.Args[2].InstID, "FOOBAR")
+	require.Equal(t, sub.Args[2].Channel, "ticker")
+	require.Equal(t, sub.Args[3].InstID, "FOOBAR")
+	require.Equal(t, sub.Args[3].Channel, "candle5m")
+}

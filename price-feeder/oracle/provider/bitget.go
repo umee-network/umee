@@ -25,6 +25,7 @@ const (
 	bitgetRestPath      = "/api/spot/v1/public/currencies"
 	tickerChannel       = "ticker"
 	candleChannel       = "candle5m"
+	instType            = "SP"
 )
 
 var _ Provider = (*BitgetProvider)(nil)
@@ -41,8 +42,8 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
-		tickers         map[string]BitgetTicker       // market.$symbol.ticker => BitgetTicker
-		candles         map[string][]BitgetCandle     // market.$symbol.kline.$period => BitgetCandle
+		tickers         map[string]BitgetTicker       // Symbol => BitgetTicker
+		candles         map[string][]BitgetCandle     // Symbol => BitgetCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
 	}
 
@@ -105,7 +106,8 @@ type (
 	}
 )
 
-// NewBitgetProvider returns a new Bitget provider with the WS connection and msg handler.
+// NewBitgetProvider returns a new Bitget provider with the WS connection
+// and msg handler.
 func NewBitgetProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
@@ -181,7 +183,8 @@ func (p *BitgetProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
+// SubscribeCurrencyPairs subscribe all currency pairs into
+// ticker and candle channels.
 func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	if len(cps) == 0 {
 		return fmt.Errorf("currency pairs is empty")
@@ -252,9 +255,7 @@ func (p *BitgetProvider) handleWebSocketMsgs(ctx context.Context) {
 	}
 }
 
-// messageReceived handles the received data from the Bitget websocket. All return
-// data of websocket Market APIs are compressed with GZIP so they need to be
-// decompressed.
+// messageReceived handles the received data from the Bitget websocket.
 func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
 	if messageType != websocket.TextMessage {
 		return
@@ -337,7 +338,10 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 		Msg("Error on receive message")
 }
 
-// ToBitgetCandle turns a BitgetCandleResponse into a more-readable BitgetCandle
+// ToBitgetCandle turns a BitgetCandleResponse into a more-readable
+// BitgetCandle. The Close and Volume responses are at the [0][4] and
+// [0][5] indexes respectively.
+// Ref: https://bitgetlimited.github.io/apidoc/en/spot/#candlesticks-channel
 func (bcr BitgetCandleResponse) ToBitgetCandle() (BitgetCandle, error) {
 	if len(bcr.Data) < 1 || len(bcr.Data[0]) < 6 {
 		return BitgetCandle{}, fmt.Errorf("invalid candle response")
@@ -524,18 +528,18 @@ func (candle BitgetCandle) toCandlePrice() (types.CandlePrice, error) {
 
 // newBitgetTickerSubscriptionMsg returns a new ticker subscription Msg.
 func newBitgetTickerSubscriptionMsg(cps []types.CurrencyPair) BitgetSubscriptionMsg {
-	args := make([]BitgetSubscriptionArg, 2*len(cps))
-	for index, cp := range cps {
-		args[index] = BitgetSubscriptionArg{
-			InstType: "SP",
-			Channel:  "ticker",
+	args := []BitgetSubscriptionArg{}
+	for _, cp := range cps {
+		args = append(args, BitgetSubscriptionArg{
+			InstType: instType,
+			Channel:  tickerChannel,
 			InstID:   cp.String(),
-		}
-		args[index+1] = BitgetSubscriptionArg{
-			InstType: "SP",
+		})
+		args = append(args, BitgetSubscriptionArg{
+			InstType: instType,
 			Channel:  candleChannel,
 			InstID:   cp.String(),
-		}
+		})
 	}
 
 	return BitgetSubscriptionMsg{
