@@ -94,15 +94,14 @@ type (
 		Volume    string                // volume e.x. "45247"
 	}
 
-	// BitgetPairsSummary defines the response structure for an Bitget pairs
+	// BitgetPairsSummary defines the response structure for a Bitget pairs
 	// summary.
 	BitgetPairsSummary struct {
+		Code string           `json:"code""`
 		Data []BitgetPairData `json:"data"`
 	}
-
-	// BitgetPairData defines the data response structure for an Bitget pair.
 	BitgetPairData struct {
-		Symbol string `json:"symbol"`
+		Symbol string `json:"coinName"`
 	}
 )
 
@@ -487,6 +486,9 @@ func (p *BitgetProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	var pairsSummary BitgetPairsSummary
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
+	}
+	if pairsSummary.Code != "00000" {
+		return nil, fmt.Errorf("unable to get bitget available pairs")
 	}
 
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))

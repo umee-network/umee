@@ -118,8 +118,17 @@ func TestBitgetProvider_SubscribeCurrencyPairs(t *testing.T) {
 	})
 }
 
-func TestBitgetCurrencyPairToBitgetPair(t *testing.T) {
-	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
-	bitgetSymbol := cp.String()
-	require.Equal(t, bitgetSymbol, "ATOM/USDT")
+func TestBitgetAvailableData(t *testing.T) {
+	p, err := NewBitgetProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{},
+	)
+	require.NoError(t, err)
+
+	pairs, err := p.GetAvailablePairs()
+	require.NoError(t, err)
+
+	require.NotEmpty(t, pairs)
 }
