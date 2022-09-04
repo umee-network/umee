@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -89,14 +88,14 @@ func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
 // the x/leverage module account currently holds as collateral. Non-uTokens return zero.
-func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdkmath.Int {
+func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 	if !types.HasUTokenPrefix(denom) {
 		// non-uTokens cannot be collateral
-		return sdk.ZeroInt()
+		return sdk.Coin{}
 	}
 
 	// uTokens in the module account are always from collateral
-	return k.ModuleBalance(ctx, denom)
+	return sdk.NewCoin(denom, k.ModuleBalance(ctx, denom))
 }
 
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
@@ -123,4 +122,16 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 	}
 
 	return limit, nil
+}
+
+// GetAllTotalCollateral returns total collateral across all uToken denominations.
+func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
+	total := sdk.NewCoins()
+
+	tokens := k.GetAllRegisteredTokens(ctx)
+	for _, t := range tokens {
+		uDenom := types.ToUTokenDenom(t.BaseDenom)
+		total = total.Add(k.GetTotalCollateral(ctx, uDenom))
+	}
+	return total
 }
