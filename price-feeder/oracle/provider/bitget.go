@@ -97,8 +97,8 @@ type (
 	// BitgetPairsSummary defines the response structure for a Bitget pairs
 	// summary.
 	BitgetPairsSummary struct {
-		Code string           `json:"code""`
-		Data []BitgetPairData `json:"data"`
+		RespCode string           `json:"code"`
+		Data     []BitgetPairData `json:"data"`
 	}
 	BitgetPairData struct {
 		Symbol string `json:"coinName"`
@@ -487,7 +487,7 @@ func (p *BitgetProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&pairsSummary); err != nil {
 		return nil, err
 	}
-	if pairsSummary.Code != "00000" {
+	if pairsSummary.RespCode != "00000" {
 		return nil, fmt.Errorf("unable to get bitget available pairs")
 	}
 

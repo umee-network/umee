@@ -103,6 +103,47 @@ func TestBitgetProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
+func TestBitgetProvider_GetCandlePrices(t *testing.T) {
+	p, err := NewBitgetProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+	)
+	require.NoError(t, err)
+
+	t.Run("valid_request_single_candle", func(t *testing.T) {
+		price := "34.689998626708984000"
+		volume := "2396974.000000000000000000"
+		timeStamp := int64(1000000)
+
+		candle := BitgetCandle{
+			TimeStamp: timeStamp,
+			Close:     price,
+			Volume:    volume,
+			Arg: BitgetSubscriptionArg{
+				Channel: "candle15m",
+				InstID:  "ATOMUSDT",
+			},
+		}
+
+		p.setCandlePair(candle)
+
+		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+		require.NoError(t, err)
+		require.Len(t, prices, 1)
+		require.Equal(t, sdk.MustNewDecFromStr(price), prices["ATOMUSDT"][0].Price)
+		require.Equal(t, sdk.MustNewDecFromStr(volume), prices["ATOMUSDT"][0].Volume)
+		require.Equal(t, timeStamp, prices["ATOMUSDT"][0].TimeStamp)
+	})
+
+	t.Run("invalid_request_invalid_candle", func(t *testing.T) {
+		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
+		require.EqualError(t, err, "failed to get candles price for FOOBAR")
+		require.Nil(t, prices)
+	})
+}
+
 func TestBitgetProvider_SubscribeCurrencyPairs(t *testing.T) {
 	p, err := NewBitgetProvider(
 		context.TODO(),
@@ -118,7 +159,7 @@ func TestBitgetProvider_SubscribeCurrencyPairs(t *testing.T) {
 	})
 }
 
-func TestBitgetAvailableData(t *testing.T) {
+func TestBitgetProvider_AvailablePairs(t *testing.T) {
 	p, err := NewBitgetProvider(
 		context.TODO(),
 		zerolog.Nop(),
