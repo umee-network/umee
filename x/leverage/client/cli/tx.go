@@ -41,20 +41,16 @@ func GetTxCmd() *cobra.Command {
 // transaction with a MsgSupply message.
 func GetCmdSupply() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "supply [supplier] [amount]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "supply [amount]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Supply a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -74,20 +70,16 @@ func GetCmdSupply() *cobra.Command {
 // transaction with a MsgWithdraw message.
 func GetCmdWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw [supplier] [amount]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "withdraw [amount]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Withdraw a specified amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -107,20 +99,16 @@ func GetCmdWithdraw() *cobra.Command {
 // transaction with a MsgCollateralize message.
 func GetCmdCollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "collateralize [borrower] [coin]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "collateralize [coin]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Add uTokens as collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			coin, err := sdk.ParseCoinNormalized(args[1])
+			coin, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -142,20 +130,16 @@ func GetCmdCollateralize() *cobra.Command {
 // transaction with a MsgDecollateralize message.
 func GetCmdDecollateralize() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "decollateralize [borrower] [coin]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "decollateralize [coin]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Remove uTokens from collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			coin, err := sdk.ParseCoinNormalized(args[1])
+			coin, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -177,20 +161,16 @@ func GetCmdDecollateralize() *cobra.Command {
 // transaction with a MsgBorrow message.
 func GetCmdBorrow() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrow [borrower] [amount]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "borrow [amount]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Borrow a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -210,20 +190,16 @@ func GetCmdBorrow() *cobra.Command {
 // transaction with a MsgRepay message.
 func GetCmdRepay() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "repay [borrower] [amount]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "repay [amount]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Repay a specified amount of a borrowed asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
@@ -243,41 +219,36 @@ func GetCmdRepay() *cobra.Command {
 // transaction with a MsgLiquidate message.
 func GetCmdLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "liquidate [liquidator] [borrower] [amount] [reward-denom]",
-		Args:  cobra.ExactArgs(4),
+		Use:   "liquidate [borrower] [amount] [reward-denom]",
+		Args:  cobra.ExactArgs(3),
 		Short: "Liquidate a specified amount of a borrower's debt for a chosen reward denomination",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`
 Liquidate up to a specified amount of a borrower's debt for a chosen reward denomination.
 
 Example:
-$ umeed tx leverage liquidate %s %s  50000000uumee u/uumee --from mykey`,
-				"umee16jgsjqp7h0mpahlkw3p6vp90vd3jhn5tz6lcex",
+$ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
 			),
 		),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			borrowerAddr, err := sdk.AccAddressFromBech32(args[1])
+			borrowerAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[2])
+			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
 
-			rewardDenom := args[3]
+			rewardDenom := args[2]
 
 			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {

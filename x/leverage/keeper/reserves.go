@@ -96,11 +96,14 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"asset", asset,
 		)
 		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
-			Borrower: borrower, Asset: asset})
+			Borrower: borrower, Asset: asset,
+		})
 		if err != nil {
 			return false, err
 		}
 	}
+
+	newModuleBalance := sdk.NewCoin(denom, k.ModuleBalance(ctx, denom))
 
 	// Reserve exhaustion logs track any bad debts that were not repaid
 	if newBorrowed.IsPositive() {
@@ -108,9 +111,13 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"reserves exhausted",
 			"borrower", borrower,
 			"asset", newBorrowed,
+			"module balance", newModuleBalance,
+			"reserves", newReserved,
 		)
 		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
-			Borrower: borrower, OutstandingDebt: newBorrowed})
+			Borrower: borrower, OutstandingDebt: newBorrowed,
+			ModuleBalance: newModuleBalance, Reserves: newReserved,
+		})
 		if err != nil {
 			return false, err
 		}
