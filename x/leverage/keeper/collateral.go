@@ -149,7 +149,7 @@ func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
-	collateralLiquidity := toDec(liquidity).Quo(exchangeRate.MulInt(totalCollateral))
+	collateralLiquidity := toDec(liquidity).Quo(exchangeRate.MulInt(totalCollateral.Amount))
 
 	// Liquidity above 100% is ignored
 	return sdk.MinDec(collateralLiquidity, sdk.OneDec())

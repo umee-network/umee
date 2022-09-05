@@ -262,7 +262,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	if utilization.GT(token.MaxSupplyUtilization) {
 		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
 	}
-  
+
 	// check MinCollateralLiquidity is still satisfied after the transaction
 	return k.checkCollateralLiquidity(ctx, borrow.Denom)
 }
@@ -298,13 +298,13 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 	if err := k.validateCollateralize(ctx, uToken); err != nil {
 		return err
 	}
-  
-  max, err := k.maxCollateral(ctx, uToken.Denom)
+
+	max, err := k.maxCollateral(ctx, uToken.Denom)
 	if err != nil {
 		return err
 	}
-  
-  total := k.GetTotalCollateral(ctx, uToken.Denom)
+
+	total := k.GetTotalCollateral(ctx, uToken.Denom)
 	if total.Add(uToken).Amount.GT(max) {
 		return types.ErrMaxCollateralShare
 	}
@@ -315,7 +315,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
-  if err != nil
+	if err != nil {
 		return err
 	}
 
