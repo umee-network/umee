@@ -76,6 +76,7 @@ func (t testTransaction) Run(s *IntegrationTestSuite) {
 	clientCtx := s.network.Validators[0].ClientCtx
 
 	txFlags := []string{
+		fmt.Sprintf("--%s=%s", flags.FlagFrom, s.network.Validators[0].Address),
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),

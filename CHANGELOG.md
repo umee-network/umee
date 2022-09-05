@@ -63,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_balances`.
 - [1236](https://github.com/umee-network/umee/pull/1236) Add more response fields to leverage messages.
 - [1222](https://github.com/umee-network/umee/pull/1222) Add leverage parameter DirectLiquidationFee.
+- [1333](https://github.com/umee-network/umee/pull/1333) Remove first (addr) argument on all CLI commands, using `--from` flag instead.
 
 ### Features
 
