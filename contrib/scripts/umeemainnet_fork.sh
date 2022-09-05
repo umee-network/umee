@@ -10,7 +10,7 @@
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 UMEED_BIN_MAINNET_URL_TARBALL=${UMEED_BIN_MAINNET_URL_TARBALL:-"https://github.com/umee-network/umee/releases/download/v1.0.3/umeed-v1.0.3-linux-amd64.tar.gz"}
 
-if [ $UMEED_BIN_MAINNET_URL_TARBALL -eq "" ]; then
+if [ -z $UMEED_BIN_MAINNET_URL_TARBALL ]; then
   echo You need to set the UMEED_BIN_MAINNET_URL_TARBALL variable
   exit 1
 fi
@@ -23,7 +23,7 @@ ls $extracted_dir
 UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$CWD/$extracted_dir/umeed}"
 echo CWD $CWD
 echo UMEED_BIN_MAINNET $UMEED_BIN_MAINNET
-ls $UMEED_BIN_MAINNET
+# ls $UMEED_BIN_MAINNET
 
 if [ ! -f $UMEED_BIN_MAINNET ]; then
   wget -c $UMEED_BIN_MAINNET_URL_TARBALL -O - | tar -xz
