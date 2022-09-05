@@ -177,7 +177,7 @@ sleep 50
 
 while [ $CURRENT_BLOCK_HEIGHT -lt $WAIT_UNTIL_HEIGHT ]
 do
-  QUERY_RESPONSE="$($UMEED_BIN_MAINNET query block $nodeHome --chain-id $CHAIN_ID)"
+  QUERY_RESPONSE="$($UMEED_BIN_CURRENT query block $nodeHome --chain-id $CHAIN_ID)"
   CURRENT_BLOCK_HEIGHT=$(echo $QUERY_RESPONSE | jq -r '.block.header.height')
   echo "Current block height $CURRENT_BLOCK_HEIGHT, waiting to reach $WAIT_UNTIL_HEIGHT"
   ((CURRENT_TRY=CURRENT_TRY+1))
