@@ -131,7 +131,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
 	exchangeRate := k.DeriveExchangeRate(ctx, denom)
-	liquidity := k.GetAvailableToBorrow(ctx, denom)
+	liquidity := k.Liquidity(ctx, denom)
 
 	// Zero collateral will be interpreted as having no liquidity
 	if totalCollateral.IsZero() {
