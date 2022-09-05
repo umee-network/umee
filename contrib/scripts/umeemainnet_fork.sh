@@ -142,7 +142,7 @@ echo "Logs:"
 echo "  * tail -f $nodeLogPath"
 
 echo Wait for the node to load the genesis state and start to produce blocks D:
-sleep 50
+sleep 70
 
 # Any block number to be confirmed
 WAIT_UNTIL_HEIGHT=1000
@@ -173,7 +173,7 @@ CURRENT_TRY=0
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT"
-sleep 50
+sleep 70
 
 while [ $CURRENT_BLOCK_HEIGHT -lt $WAIT_UNTIL_HEIGHT ]
 do
