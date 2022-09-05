@@ -100,6 +100,8 @@ func (q Querier) MarketSummary(
 	// TODO #1163 - additional restriction
 	minLiquidity := supplied.Amount.Sub(maxBorrow)
 
+	maxCollateral, _ := q.Keeper.maxCollateral(ctx, uDenom)
+
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:            token.SymbolDenom,
 		Exponent:               token.Exponent,
@@ -108,16 +110,16 @@ func (q Querier) MarketSummary(
 		Borrow_APY:             borrowAPY,
 		Supplied:               supplied.Amount,
 		Reserved:               reserved,
-		Collateral:             uCollateral,
+		Collateral:             uCollateral.Amount,
 		Borrowed:               borrowed.Amount,
 		Liquidity:              balance.Sub(reserved),
 		MaximumBorrow:          maxBorrow,
-		MaximumCollateral:      uSupply.Amount, // TODO #1163 - implement limits
+		MaximumCollateral:      maxCollateral,
 		MinimumLiquidity:       minLiquidity,
 		UTokenSupply:           uSupply.Amount,
 		AvailableBorrow:        availableBorrow,
-		AvailableWithdraw:      uSupply.Amount,                  // TODO #1163 - implement limits
-		AvailableCollateralize: uSupply.Amount.Sub(uCollateral), // TODO #1163 - implement limits
+		AvailableWithdraw:      uSupply.Amount, // TODO #1163 - implement limits
+		AvailableCollateralize: sdk.MaxInt(maxCollateral.Sub(uCollateral.Amount), sdk.ZeroInt()),
 	}
 
 	// Oracle price in response will be nil if it is unavailable
