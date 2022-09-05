@@ -141,7 +141,7 @@ echo
 echo "Logs:"
 echo "  * tail -f $nodeLogPath"
 
-echo Wait for the node to load the genesis state and start to produce blocks ≃ 8min D:
+echo Wait for the node to load the genesis state and start to produce blocks D:
 sleep 50
 
 # Any block number to be confirmed
