@@ -299,7 +299,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
-	max, err := k.maxCollateral(ctx, uToken.Denom)
+	max, err := k.maxCollateralFromShare(ctx, uToken.Denom)
 	if err != nil {
 		return err
 	}
