@@ -100,6 +100,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 - [1294](https://github.com/umee-network/umee/pull/1294) Simplify window progress query math.
 - [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
+- [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
 
 ### Bug Fixes
 
