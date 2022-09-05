@@ -135,7 +135,7 @@ jobs:
           sleep 1m
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
 
-  upgrade-v1.0-v3.0:
+  upgrade-v1-v3:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
