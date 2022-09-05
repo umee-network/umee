@@ -30,6 +30,14 @@ if [ ! -f $UMEED_BIN_MAINNET ]; then
   wget -c $UMEED_BIN_MAINNET_URL_TARBALL -O - | tar -xz
 fi
 
+echo "CWD/extracted_dir"  $CWD/$extracted_dir
+
+echo "ls CWD"
+ls $CWD
+
+echo "ls CWD/extracted_dir"
+ls $CWD/$extracted_dir
+
 CHAIN_ID="${CHAIN_ID:-umeemain-local-testnet}"
 FORK_DIR="${FORK_DIR:-$CWD}"
 CHAIN_DIR="${CHAIN_DIR:-$FORK_DIR/node-data}"
