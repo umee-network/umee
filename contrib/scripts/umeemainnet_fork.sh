@@ -8,6 +8,21 @@
 # USAGE: ./umeemainnet_fork.sh
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+UMEED_BIN_MAINNET_URL_TARBALL=${UMEED_BIN_MAINNET_URL_TARBALL:-"https://github.com/umee-network/umee/releases/download/v1.0.3/umeed-v1.0.3-linux-amd64.tar.gz"}
+
+if [ $UMEED_BIN_MAINNET_URL_TARBALL -eq "" ]; then
+  echo You need to set the UMEED_BIN_MAINNET_URL_TARBALL variable
+  exit 1
+fi
+
+extracted_dir=$(basename $UMEED_BIN_MAINNET_URL_TARBALL .tar.gz)
+echo extracted_dir: $extracted_dir
+UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$CWD/$extracted_dir/umeed}"
+
+if [ ! -f $UMEED_BIN_MAINNET ]; then
+  wget -c $UMEED_BIN_MAINNET_URL_TARBALL -O - | tar -xz
+fi
+
 CHAIN_ID="${CHAIN_ID:-umeemain-local-testnet}"
 FORK_DIR="${FORK_DIR:-$CWD}"
 CHAIN_DIR="${CHAIN_DIR:-$FORK_DIR/node-data}"
@@ -15,7 +30,6 @@ LOG_LEVEL="${LOG_LEVEL:-debug}"
 BLOCK_TIME="${BLOCK_TIME:-6}"
 UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.0-v3.0"}"
 UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
-UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/mainnet-umeed-v103}"
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key-coping.json}"
 
@@ -117,7 +131,6 @@ UMEE_ENABLE_BETA=false $UMEED_BIN_MAINNET $nodeHome start --grpc.address="0.0.0.
 
 # Gets the node piid
 echo $! > $pid_path
-pid_value=$(cat $pid_path)
 
 echo
 echo "Logs:"
@@ -152,7 +165,7 @@ CURRENT_TRY=0
 # we should produce at least 20 blocks with the new version
 ((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+20))
 
-UMEED_V1_PID=$pid_value CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
+UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT"
 sleep 30
@@ -174,5 +187,10 @@ done
 echo
 echo Upgrade Process Finish
 echo
+
+pid_value=$(cat $pid_path)
+echo "Kill the process ID '$pid_value'"
+
+kill -s 15 $pid_value
 
 exit 0

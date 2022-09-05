@@ -1,16 +1,17 @@
 #!/bin/bash -eux
 
 # It uses an chain already up and start an governance proposal to upgrade to a new binary version
-# vote 'yes' for that proposal, wait to reach to reach an upgrade height and kill the process id received by parameter $UMEED_V1_PID
+# vote 'yes' for that proposal, wait to reach to reach an upgrade height and kill the process id
+# received by the parameter $UMEED_V1_PID_FILE
 
-# USAGE: UMEED_V1_PID=$umee_pid ./upgrade-test-single-node.sh
+# USAGE: UMEED_V1_PID_FILE=$umee_pid ./upgrade-test-single-node.sh
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-UMEED_V1_PID="${UMEED_V1_PID:-0}"
+UMEED_V1_PID_FILE="${UMEED_V1_PID_FILE_FILE:-""}"
 
-if [ $UMEED_V1_PID -le 0 ]; then
-  echo "You need to specify the process id of umeed v1 by setting UMEED_V1_PID"
+if [ $UMEED_V1_PID_FILE -e "" ]; then
+  echo "You need to specify the process id of umeed v1 inside of a file by setting UMEED_V1_PID_FILE"
   exit 1
 fi
 
@@ -70,9 +71,10 @@ do
 done
 
 echo "Reached upgrade block height: $BLOCK_HEIGHT == $UPGRADE_HEIGHT"
-echo "Kill the process ID '$UMEED_V1_PID'"
+pid_value=$(cat $UMEED_V1_PID_FILE)
+echo "Kill the process ID '$pid_value'"
 
-kill -s 15 $UMEED_V1_PID
+kill -s 15 $pid_value
 
 sleep 5
 
@@ -85,6 +87,9 @@ sleep $VOTING_PERIOD
 nodeLogPath=$hdir.umeed-v2.log
 
 $UMEED_BIN_V2 $nodeHomeFlag start --minimum-gas-prices=0.001uumee --grpc.address="0.0.0.0:9090"  --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
+
+# Gets the node piid
+echo $! > $UMEED_V1_PID_FILE
 
 echo
 echo "Logs:"
