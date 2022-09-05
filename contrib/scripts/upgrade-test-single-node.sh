@@ -8,10 +8,10 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-UMEED_V1_PID_FILE="${UMEED_V1_PID_FILE_FILE:-""}"
+UMEED_V1_PID_FILE="${UMEED_V1_PID_FILE:-""}"
 
-if [ $UMEED_V1_PID_FILE -e "" ]; then
-  echo "You need to specify the process id of umeed v1 inside of a file by setting UMEED_V1_PID_FILE"
+if [ ! -f $UMEED_V1_PID_FILE ]; then
+  echo "You need to specify the file with process id of umeed v1 inside of a file by setting UMEED_V1_PID_FILE"
   exit 1
 fi
 
@@ -72,10 +72,7 @@ done
 
 echo "Reached upgrade block height: $BLOCK_HEIGHT == $UPGRADE_HEIGHT"
 
-echo "UMEED_V1_PID_FILE $UMEED_V1_PID_FILE"
-echo UMEED_V1_PID_FILE $( cat $UMEED_V1_PID_FILE)
-
-node_pid_value=$( cat $UMEED_V1_PID_FILE)
+node_pid_value=$(cat $UMEED_V1_PID_FILE)
 
 echo "Kill the process ID '$node_pid_value'"
 
