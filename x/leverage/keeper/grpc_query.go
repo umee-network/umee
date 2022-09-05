@@ -106,9 +106,12 @@ func (q Querier) MarketSummary(
 	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
 
 	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
-	maxCollateralFromShare, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
-	availableCollateralize := maxCollateralFromShare.Sub(uCollateral.Amount)
-	// TODO: MinCollatLiq
+	maxCollateral, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
+	if token.MinCollateralLiquidity.IsPositive() {
+		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
+		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
+	}
+	availableCollateralize := maxCollateral.Sub(uCollateral.Amount)
 	availableCollateralize = sdk.MaxInt(availableCollateralize, sdk.ZeroInt())
 
 	resp := types.QueryMarketSummaryResponse{
@@ -123,7 +126,7 @@ func (q Querier) MarketSummary(
 		Borrowed:               borrowed.Amount,
 		Liquidity:              balance.Sub(reserved),
 		MaximumBorrow:          maxBorrow,
-		MaximumCollateral:      maxCollateralFromShare,
+		MaximumCollateral:      maxCollateral,
 		MinimumLiquidity:       minLiquidity,
 		UTokenSupply:           uSupply.Amount,
 		AvailableBorrow:        availableBorrow,
