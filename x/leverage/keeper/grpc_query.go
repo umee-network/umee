@@ -114,7 +114,7 @@ func (q Querier) MarketSummary(
 		Borrowed:               borrowed.Amount,
 		Liquidity:              balance.Sub(reserved),
 		MaximumBorrow:          maxBorrow,
-		MaximumCollateral:      maxCollateral
+		MaximumCollateral:      maxCollateral,
 		MinimumLiquidity:       minLiquidity,
 		UTokenSupply:           uSupply.Amount,
 		AvailableBorrow:        availableBorrow,
