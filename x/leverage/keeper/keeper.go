@@ -253,6 +253,16 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 		return err
 	}
 
+	// Check MaxSupplyUtilization after transaction
+	token, err := k.GetTokenSettings(ctx, borrow.Denom)
+	if err != nil {
+		return err
+	}
+	utilization := k.SupplyUtilization(ctx, borrow.Denom)
+	if utilization.GT(token.MaxSupplyUtilization) {
+		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
+	}
+  
 	// check MinCollateralLiquidity is still satisfied after the transaction
 	return k.checkCollateralLiquidity(ctx, borrow.Denom)
 }

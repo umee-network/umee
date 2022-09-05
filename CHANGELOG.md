@@ -88,6 +88,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1238](https://github.com/umee-network/umee/pull/1238) Added bad debts query.
 - [1323](https://github.com/umee-network/umee/pull/1323) Oracle cli - Add validator address override option.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
+- [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
 
 ### Improvements
 
