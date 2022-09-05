@@ -294,7 +294,13 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
-	return k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
+	if err != nil {
+		return err
+	}
+
+	// check MinCollateralLiquidity is still satisfied after the transaction
+	return k.checkCollateralLiquidity(ctx, types.ToTokenDenom(uToken.Denom))
 }
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.
@@ -333,12 +339,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 	if err := k.setCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(uToken.Denom, newCollateralAmount)); err != nil {
 		return err
 	}
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(uToken)); err != nil {
-		return err
-	}
-
-	// check MinCollateralLiquidity is still satisfied after the transaction
-	return k.checkCollateralLiquidity(ctx, types.ToTokenDenom(uToken.Denom))
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(uToken))
 }
 
 // Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange for
