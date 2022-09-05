@@ -155,7 +155,7 @@ jobs:
         if: env.GIT_DIFF
         run: |
           make build
-      - name: Start single node chain
+      - name: Start Upgrade from v1.0.3 to v.3.x.x
         if: env.GIT_DIFF
         run: |
           ./contrib/scripts/umeemainnet_fork.sh

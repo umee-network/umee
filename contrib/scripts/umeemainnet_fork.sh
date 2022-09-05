@@ -17,7 +17,11 @@ fi
 
 extracted_dir=$(basename $UMEED_BIN_MAINNET_URL_TARBALL .tar.gz)
 echo extracted_dir: $extracted_dir
+ls $extracted_dir
 UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$CWD/$extracted_dir/umeed}"
+echo CWD $CWD
+echo UMEED_BIN_MAINNET $UMEED_BIN_MAINNET
+ls $UMEED_BIN_MAINNET
 
 if [ ! -f $UMEED_BIN_MAINNET ]; then
   wget -c $UMEED_BIN_MAINNET_URL_TARBALL -O - | tar -xz
