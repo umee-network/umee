@@ -17,9 +17,10 @@ fi
 
 extracted_dir=$(basename $UMEED_BIN_MAINNET_URL_TARBALL .tar.gz)
 echo extracted_dir: $extracted_dir
+echo ls CWD
 ls $CWD
-ls $CWD/$extracted_dir
-ls $extracted_dir
+# ls $CWD/$extracted_dir
+# ls $extracted_dir
 UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$CWD/$extracted_dir/umeed}"
 echo CWD $CWD
 echo UMEED_BIN_MAINNET $UMEED_BIN_MAINNET
