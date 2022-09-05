@@ -141,22 +141,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.0
-        # id: git_diff
-        # with:
-        #   PATTERNS: |
-        #     **/**.go
-        #     go.mod
-        #     go.sum
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
       - uses: actions/setup-go@v3
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
         with:
           go-version: 1.19
           cache: true
       - name: Build umeed
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
         run: |
           make build
       - name: Start single node chain
-        # if: env.GIT_DIFF
+        if: env.GIT_DIFF
         run: |
           ./contrib/scripts/umeemainnet_fork.sh
