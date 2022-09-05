@@ -4,7 +4,7 @@
 # vote 'yes' for that proposal, wait to reach to reach an upgrade height and kill the process id
 # received by the parameter $UMEED_V1_PID_FILE
 
-# USAGE: UMEED_V1_PID_FILE=$umee_pid ./upgrade-test-single-node.sh
+# USAGE: UMEED_V1_PID_FILE=$umee_pid_file ./upgrade-test-single-node.sh
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
@@ -71,10 +71,15 @@ do
 done
 
 echo "Reached upgrade block height: $BLOCK_HEIGHT == $UPGRADE_HEIGHT"
-pid_value=$(cat $UMEED_V1_PID_FILE)
-echo "Kill the process ID '$pid_value'"
 
-kill -s 15 $pid_value
+echo "UMEED_V1_PID_FILE $UMEED_V1_PID_FILE"
+echo UMEED_V1_PID_FILE $( cat $UMEED_V1_PID_FILE)
+
+node_pid_value=$( cat $UMEED_V1_PID_FILE)
+
+echo "Kill the process ID '$node_pid_value'"
+
+kill -s 15 $node_pid_value
 
 sleep 5
 
