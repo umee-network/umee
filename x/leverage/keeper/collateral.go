@@ -137,7 +137,7 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 }
 
 // CollateralLiquidity calculates the current collateral liquidity of a token denom,
-// which is defines as the token's liquidity, divided by the base token equivalent
+// which is defined as the token's liquidity, divided by the base token equivalent
 // of associated uToken's total collateral. Ranges from 0 to 1.0
 func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
