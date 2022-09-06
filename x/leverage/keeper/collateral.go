@@ -136,6 +136,25 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 	return total
 }
 
+// CollateralLiquidity calculates the current collateral liquidity of a token denom,
+// which is defined as the token's liquidity, divided by the base token equivalent
+// of associated uToken's total collateral. Ranges from 0 to 1.0
+func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
+	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
+	exchangeRate := k.DeriveExchangeRate(ctx, denom)
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	// Zero collateral will be interpreted as having no liquidity
+	if totalCollateral.IsZero() {
+		return sdk.ZeroDec()
+	}
+
+	collateralLiquidity := toDec(liquidity).Quo(exchangeRate.MulInt(totalCollateral.Amount))
+
+	// Liquidity above 100% is ignored
+	return sdk.MinDec(collateralLiquidity, sdk.OneDec())
+}
+
 // CollateralShare calculates the portion of overall collateral
 // (measured in USD value) that a given uToken denom represents.
 func (k *Keeper) CollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
@@ -158,6 +177,21 @@ func (k *Keeper) CollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error)
 		return sdk.ZeroDec(), nil
 	}
 	return thisValue.Quo(totalValue), nil
+}
+
+// checkCollateralLiquidity returns the appropriate error if a token denom's
+// collateral liquidity is below its MinCollateralLiquidity
+func (k Keeper) checkCollateralLiquidity(ctx sdk.Context, denom string) error {
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	collateralLiquidity := k.CollateralLiquidity(ctx, denom)
+	if collateralLiquidity.LT(token.MinCollateralLiquidity) {
+		return types.ErrMinCollateralLiquidity.Wrap(collateralLiquidity.String())
+	}
+	return nil
 }
 
 // checkCollateralShare returns an error if a given uToken is above its collateral share

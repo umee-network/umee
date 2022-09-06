@@ -6,10 +6,10 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-// maxCollateral calculates the maximum amount of collateral a utoken denom
+// maxCollateralFromShare calculates the maximum amount of collateral a utoken denom
 // is allowed to have, taking into account its associated token's MaxCollateralShare
 // under current market conditions
-func (k *Keeper) maxCollateral(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
 	if err != nil {
 		return sdk.ZeroInt(), err
