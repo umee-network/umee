@@ -234,8 +234,11 @@ func (p *BitgetProvider) handleWebSocketMsgs(ctx context.Context) {
 				p.logger.Err(err).Msg("failed to read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
+					if err := p.close(); err != nil {
+						p.logger.Err(err).Msg("error closing websocket")
+					}
 					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting")
+						p.logger.Err(err).Msg("error reconnecting websocket")
 					}
 				}
 				continue
@@ -248,8 +251,11 @@ func (p *BitgetProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz, reconnectTicker)
 
 		case <-reconnectTicker.C:
+			if err := p.close(); err != nil {
+				p.logger.Err(err).Msg("error closing websocket")
+			}
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
+				p.logger.Err(err).Msg("error reconnecting websocket")
 			}
 		}
 	}
@@ -411,13 +417,17 @@ func (p *BitgetProvider) setCandlePair(candle BitgetCandle) {
 	p.candles[candle.Arg.InstID] = candleList
 }
 
-// reconnect closes the last WS connection and create a new one.
-func (p *BitgetProvider) reconnect() error {
+// close closes the current websocket connection.
+func (p *BitgetProvider) close() error {
 	err := p.wsClient.Close()
 	if err != nil {
 		return types.ErrProviderConnection.Wrapf("error closing Bitget websocket %v", err)
 	}
+	return nil
+}
 
+// reconnect creates a new websocket connection.
+func (p *BitgetProvider) reconnect() error {
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
