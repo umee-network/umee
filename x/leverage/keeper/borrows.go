@@ -60,9 +60,8 @@ func (k Keeper) GetTotalBorrowed(ctx sdk.Context, denom string) sdk.Coin {
 	return sdk.NewCoin(denom, total)
 }
 
-// Liquidity gets the amount available to borrow of a given token.
-func (k Keeper) Liquidity(ctx sdk.Context, denom string) sdkmath.Int {
-	// Available for borrow = Module Balance - Reserve Amount
+// AvailableLiquidity gets the unreserved module balance of a given token.
+func (k Keeper) AvailableLiquidity(ctx sdk.Context, denom string) sdkmath.Int {
 	moduleBalance := k.ModuleBalance(ctx, denom)
 	reserveAmount := k.GetReserveAmount(ctx, denom)
 

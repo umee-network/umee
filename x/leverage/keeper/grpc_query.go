@@ -82,7 +82,7 @@ func (q Querier) MarketSummary(
 	balance := q.Keeper.ModuleBalance(ctx, req.Denom)
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
-	liquidity := q.Keeper.Liquidity(ctx, req.Denom)
+	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
 
 	uDenom := types.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
