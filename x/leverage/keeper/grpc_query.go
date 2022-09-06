@@ -102,6 +102,8 @@ func (q Querier) MarketSummary(
 
 	maxCollateral, _ := q.Keeper.maxCollateral(ctx, uDenom)
 
+	maxCollateral, _ := q.Keeper.maxCollateral(ctx, uDenom)
+
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:            token.SymbolDenom,
 		Exponent:               token.Exponent,

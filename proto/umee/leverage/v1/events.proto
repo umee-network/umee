@@ -97,6 +97,10 @@ message EventReservesExhausted {
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Outstanding bad debt
   cosmos.base.v1beta1.Coin outstanding_debt = 2 [(gogoproto.nullable) = false];
+  // Module balance remaining
+  cosmos.base.v1beta1.Coin module_balance = 3 [(gogoproto.nullable) = false];
+  // Reserves remaining
+  cosmos.base.v1beta1.Coin reserves = 4 [(gogoproto.nullable) = false];
 }
 
 // EventFundOracle is emitted when sending rewards to oracle module
