@@ -97,6 +97,11 @@ func coin(denom string, amount int64) sdk.Coin {
 	return sdk.NewInt64Coin(denom, amount)
 }
 
+// registerToken adds or updates a token in the token registry and requires no error.
+func (s *IntegrationTestSuite) registerToken(token types.Token) {
+	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, token))
+}
+
 // newAccount creates a new account for testing, and funds it with any input tokens.
 func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	app, ctx := s.app, s.ctx
