@@ -84,7 +84,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 		{
 			"max supply",
 			whale,
-			coin(umeeDenom, 1000000_000000),
+			coin(umeeDenom, 1_000_000_000000),
 			sdk.Coin{},
 			types.ErrMaxSupply,
 		},
