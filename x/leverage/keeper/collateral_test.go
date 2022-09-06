@@ -101,10 +101,14 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 func (s *IntegrationTestSuite) TestTotalCollateral() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
+	// not a uToken
+	collateral := app.LeverageKeeper.GetTotalCollateral(ctx, umeeDenom)
+	require.Equal(sdk.Coin{}, collateral, "not a uToken")
+
 	// Test zero collateral
 	uDenom := types.ToUTokenDenom(umeeDenom)
-	collateral := app.LeverageKeeper.GetTotalCollateral(ctx, uDenom)
-	require.Equal(sdk.ZeroInt(), collateral, "zero collateral")
+	collateral = app.LeverageKeeper.GetTotalCollateral(ctx, uDenom)
+	require.Equal(coin(uDenom, 0), collateral, "zero collateral")
 
 	// create a supplier which will have 100 u/UMEE collateral
 	addr := s.newAccount(coin(umeeDenom, 100_000000))
@@ -113,5 +117,5 @@ func (s *IntegrationTestSuite) TestTotalCollateral() {
 
 	// Test nonzero collateral
 	collateral = app.LeverageKeeper.GetTotalCollateral(ctx, uDenom)
-	require.Equal(sdk.NewInt(100_000000), collateral, "nonzero collateral")
+	require.Equal(coin(uDenom, 100_000000), collateral, "nonzero collateral")
 }

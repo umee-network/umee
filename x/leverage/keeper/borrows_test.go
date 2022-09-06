@@ -104,11 +104,11 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	require.Equal(coin(umeeDenom, 714), s.tk.GetTotalBorrowed(ctx, umeeDenom))
 }
 
-func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
+func (s *IntegrationTestSuite) TestLiquidity() {
 	ctx, require := s.ctx, s.Require()
 
 	// unregistered denom (zero)
-	available := s.tk.GetAvailableToBorrow(ctx, "abcd")
+	available := s.tk.AvailableLiquidity(ctx, "abcd")
 	require.Equal(sdk.ZeroInt(), available)
 
 	// creates account which has supplied and collateralized 1000 uumee
@@ -117,7 +117,7 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	s.collateralize(supplier, coin("u/"+umeeDenom, 1000))
 
 	// confirm lending pool is 1000 uumee
-	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
 	require.Equal(sdk.NewInt(1000), available)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
@@ -127,12 +127,12 @@ func (s *IntegrationTestSuite) TestGetAvailableToBorrow() {
 	s.borrow(borrower, coin(umeeDenom, 123))
 
 	// confirm lending pool is 1877 uumee
-	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
 	require.Equal(sdk.NewInt(1877), available)
 
 	// artificially reserve 200 uumee, reducing available amount to 1677
 	s.setReserves(coin(umeeDenom, 200))
-	available = s.tk.GetAvailableToBorrow(ctx, umeeDenom)
+	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
 	require.Equal(sdk.NewInt(1677), available)
 }
 
