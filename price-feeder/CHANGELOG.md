@@ -46,6 +46,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+<<<<<<< HEAD
+=======
+### Features
+
+- [1328](https://github.com/umee-network/umee/pull/1328) Add bitget provider.
+
+## [v0.3.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv0.3.0) - 2022-08-31
+
+>>>>>>> 1982eb7 (feat(price-feeder): add bitget provider (#1328))
 ### Bugs
 
 - [1084](https://github.com/umee-network/umee/pull/1084) Initializes block height before subscription to fix an error message that appeared on the first few ticks.
