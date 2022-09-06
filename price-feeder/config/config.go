@@ -39,6 +39,7 @@ var (
 		provider.ProviderGate:     {},
 		provider.ProviderCoinbase: {},
 		provider.ProviderFTX:      {},
+		provider.ProviderBitget:   {},
 		provider.ProviderMock:     {},
 	}
 
