@@ -63,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1199](https://github.com/umee-network/umee/pull/1199) Move all queries which require address input (e.g. `supplied`, `collateral_value`, `borrow_limit`) into aggregate queries `acccount_summary` or `account_balances`.
 - [1236](https://github.com/umee-network/umee/pull/1236) Add more response fields to leverage messages.
 - [1222](https://github.com/umee-network/umee/pull/1222) Add leverage parameter DirectLiquidationFee.
+- [1333](https://github.com/umee-network/umee/pull/1333) Remove first (addr) argument on all CLI commands, using `--from` flag instead.
 
 ### Features
 
@@ -86,6 +87,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1220](https://github.com/umee-network/umee/pull/1220) Submit oracle prevotes / vote txs via the CLI.
 - [1222](https://github.com/umee-network/umee/pull/1222) Liquidation reward_denom can now be either token or uToken.
 - [1238](https://github.com/umee-network/umee/pull/1238) Added bad debts query.
+- [1323](https://github.com/umee-network/umee/pull/1323) Oracle cli - Add validator address override option.
+- [1329](https://github.com/umee-network/umee/pull/1329) Implement MaxCollateralShare.
+- [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
 
 ### Improvements
 
@@ -98,6 +102,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1012](https://github.com/umee-network/umee/pull/1012) Improve negative time elapsed error message
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 - [1294](https://github.com/umee-network/umee/pull/1294) Simplify window progress query math.
+- [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
+- [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
 
 ### Bug Fixes
 

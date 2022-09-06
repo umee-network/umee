@@ -9,8 +9,8 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestInvalidQueries() {
-	invalidQueries := []TestCase{
-		testQuery{
+	invalidQueries := []testQuery{
+		{
 			"query market summary - invalid denom",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
@@ -20,7 +20,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
-		testQuery{
+		{
 			"query account balances - invalid address",
 			cli.GetCmdQueryAccountBalances(),
 			[]string{
@@ -30,7 +30,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
-		testQuery{
+		{
 			"query account summary - invalid address",
 			cli.GetCmdQueryAccountSummary(),
 			[]string{
@@ -43,7 +43,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
-	s.runTestCases(invalidQueries...)
+	s.runTestQueries(invalidQueries...)
 }
 
 func (s *IntegrationTestSuite) TestLeverageScenario() {
@@ -51,8 +51,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
 
-	initialQueries := []TestCase{
-		testQuery{
+	initialQueries := []testQuery{
+		{
 			"query params",
 			cli.GetCmdQueryParams(),
 			[]string{},
@@ -62,7 +62,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Params: types.DefaultParams(),
 			},
 		},
-		testQuery{
+		{
 			"query registered tokens",
 			cli.GetCmdQueryRegisteredTokens(),
 			[]string{},
@@ -94,7 +94,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				},
 			},
 		},
-		testQuery{
+		{
 			"query market summary - zero supply",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
@@ -134,7 +134,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"supply",
 		cli.GetCmdSupply(),
 		[]string{
-			val.Address.String(),
 			"1000uumee",
 		},
 		nil,
@@ -144,7 +143,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"add collateral",
 		cli.GetCmdCollateralize(),
 		[]string{
-			val.Address.String(),
 			"1000u/uumee",
 		},
 		nil,
@@ -154,7 +152,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			val.Address.String(),
 			"50uumee",
 		},
 		nil,
@@ -164,7 +161,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"liquidate",
 		cli.GetCmdLiquidate(),
 		[]string{
-			val.Address.String(),
 			val.Address.String(),
 			"5uumee",
 			"uumee",
@@ -176,7 +172,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			val.Address.String(),
 			"50uumee",
 		},
 		nil,
@@ -186,7 +181,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"remove collateral",
 		cli.GetCmdDecollateralize(),
 		[]string{
-			val.Address.String(),
 			"950u/uumee",
 		},
 		nil,
@@ -196,14 +190,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"withdraw",
 		cli.GetCmdWithdraw(),
 		[]string{
-			val.Address.String(),
 			"950u/uumee",
 		},
 		nil,
 	}
 
-	nonzeroQueries := []TestCase{
-		testQuery{
+	nonzeroQueries := []testQuery{
+		{
 			"query account balances",
 			cli.GetCmdQueryAccountBalances(),
 			[]string{
@@ -223,7 +216,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				),
 			},
 		},
-		testQuery{
+		{
 			"query account summary",
 			cli.GetCmdQueryAccountSummary(),
 			[]string{
@@ -250,20 +243,20 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	}
 
 	// These queries do not require any borrower setup
-	s.runTestCases(initialQueries...)
+	s.runTestQueries(initialQueries...)
 
 	// These transactions will set up nonzero leverage positions and allow nonzero query results
-	s.runTestCases(
+	s.runTestTransactions(
 		supply,
 		addCollateral,
 		borrow,
 	)
 
 	// These queries run while the supplying and borrowing is active to produce nonzero output
-	s.runTestCases(nonzeroQueries...)
+	s.runTestQueries(nonzeroQueries...)
 
 	// These transactions run after nonzero queries are finished
-	s.runTestCases(
+	s.runTestTransactions(
 		liquidate,
 		repay,
 		removeCollateral,

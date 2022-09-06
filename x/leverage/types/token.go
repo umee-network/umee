@@ -50,7 +50,7 @@ func (t Token) Validate() error {
 	}
 	if HasUTokenPrefix(t.BaseDenom) {
 		// prevent base asset denoms that start with "u/"
-		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
+		return ErrUToken.Wrap(t.BaseDenom)
 	}
 
 	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
@@ -58,7 +58,7 @@ func (t Token) Validate() error {
 	}
 	if HasUTokenPrefix(t.SymbolDenom) {
 		// prevent symbol denoms that start with "u/"
-		return sdkerrors.Wrap(ErrInvalidAsset, t.SymbolDenom)
+		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
 	// Reserve factor and collateral weight range between 0 and 1, inclusive.

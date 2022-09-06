@@ -1,9 +1,7 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -64,8 +62,8 @@ func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 // stored value is cleared. A negative amount or invalid coin causes an error.
 // This function does not move coins to or from the module account.
 func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, collateral sdk.Coin) error {
-	if !collateral.IsValid() {
-		return sdkerrors.Wrap(types.ErrInvalidAsset, collateral.String())
+	if err := collateral.Validate(); err != nil {
+		return err
 	}
 
 	if borrowerAddr.Empty() {
@@ -90,14 +88,14 @@ func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress
 
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
 // the x/leverage module account currently holds as collateral. Non-uTokens return zero.
-func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdkmath.Int {
+func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 	if !types.HasUTokenPrefix(denom) {
 		// non-uTokens cannot be collateral
-		return sdk.ZeroInt()
+		return sdk.Coin{}
 	}
 
 	// uTokens in the module account are always from collateral
-	return k.ModuleBalance(ctx, denom)
+	return sdk.NewCoin(denom, k.ModuleBalance(ctx, denom))
 }
 
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
@@ -124,4 +122,58 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 	}
 
 	return limit, nil
+}
+
+// GetAllTotalCollateral returns total collateral across all uTokens.
+func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
+	total := sdk.NewCoins()
+
+	tokens := k.GetAllRegisteredTokens(ctx)
+	for _, t := range tokens {
+		uDenom := types.ToUTokenDenom(t.BaseDenom)
+		total = total.Add(k.GetTotalCollateral(ctx, uDenom))
+	}
+	return total
+}
+
+// CollateralShare calculates the portion of overall collateral
+// (measured in USD value) that a given uToken denom represents.
+func (k *Keeper) CollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	systemCollateral := k.GetAllTotalCollateral(ctx)
+	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
+
+	// get USD collateral value for all uTokens combined
+	totalValue, err := k.CalculateCollateralValue(ctx, systemCollateral)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	// get USD collateral value for this uToken only
+	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	if !totalValue.IsPositive() {
+		return sdk.ZeroDec(), nil
+	}
+	return thisValue.Quo(totalValue), nil
+}
+
+// checkCollateralShare returns an error if a given uToken is above its collateral share
+func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
+	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	if err != nil {
+		return err
+	}
+
+	share, err := k.CollateralShare(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	if share.GT(token.MaxCollateralShare) {
+		return types.ErrMaxCollateralShare.Wrapf("%s share is %s", denom, share)
+	}
+	return nil
 }

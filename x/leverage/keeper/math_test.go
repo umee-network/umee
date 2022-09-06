@@ -15,28 +15,28 @@ func TestInterpolate(t *testing.T) {
 	y2 := sdk.MustNewDecFromStr("17.4")
 
 	// Sloped line, endpoint checks
-	x := Interpolate(x1, x1, y1, x2, y2)
-	require.Equal(t, x, y1)
-	x = Interpolate(x2, x1, y1, x2, y2)
-	require.Equal(t, x, y2)
+	result := Interpolate(x1, x1, y1, x2, y2)
+	require.Equal(t, y1, result)
+	result = Interpolate(x2, x1, y1, x2, y2)
+	require.Equal(t, y2, result)
 
 	// Sloped line, point on segment
-	x = Interpolate(sdk.MustNewDecFromStr("4.0"), x1, y1, x2, y2)
-	require.Equal(t, x, sdk.MustNewDecFromStr("13.2"))
+	result = Interpolate(sdk.MustNewDecFromStr("4.0"), x1, y1, x2, y2)
+	require.Equal(t, sdk.MustNewDecFromStr("13.2"), result)
 
 	// Sloped line, point outside of segment
-	x = Interpolate(sdk.MustNewDecFromStr("2.0"), x1, y1, x2, y2)
-	require.Equal(t, x, sdk.MustNewDecFromStr("9.0"))
+	result = Interpolate(sdk.MustNewDecFromStr("2.0"), x1, y1, x2, y2)
+	require.Equal(t, sdk.MustNewDecFromStr("9.0"), result)
 
 	// Vertical line: always return y1
-	x = Interpolate(sdk.ZeroDec(), x1, y1, x1, y2)
-	require.Equal(t, x, y1)
-	x = Interpolate(x1, x1, y1, x1, y2)
-	require.Equal(t, x, y1)
+	result = Interpolate(sdk.ZeroDec(), x1, y1, x1, y2)
+	require.Equal(t, y1, result)
+	result = Interpolate(x1, x1, y1, x1, y2)
+	require.Equal(t, y1, result)
 
 	// Undefined line (x1=x2, y1=y2): always return y1
-	x = Interpolate(sdk.ZeroDec(), x1, y1, x1, y1)
-	require.Equal(t, x, y1)
-	x = Interpolate(x1, x1, y1, x1, y1)
-	require.Equal(t, x, y1)
+	result = Interpolate(sdk.ZeroDec(), x1, y1, x1, y1)
+	require.Equal(t, y1, result)
+	result = Interpolate(x1, x1, y1, x1, y1)
+	require.Equal(t, y1, result)
 }
