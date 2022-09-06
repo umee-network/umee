@@ -77,17 +77,42 @@ func (q Querier) MarketSummary(
 	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
 	supplyAPY := q.Keeper.DeriveSupplyAPY(ctx, req.Denom)
 	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
+
 	supplied, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
 	balance := q.Keeper.ModuleBalance(ctx, req.Denom)
 	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
+	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
 
 	uDenom := types.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
-
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
 
-	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom) // TODO #1162 #1163 - update implementation
+	// maxBorrow is based on MaxSupplyUtilization
+	maxBorrow := token.MaxSupplyUtilization.MulInt(supplied.Amount).TruncateInt()
+
+	// minimum liquidity respects both MaxSupplyUtilization and MinCollateralLiquidity
+	minLiquidityFromSupply := supplied.Amount.Sub(maxBorrow)
+	minLiquidityFromCollateral := token.MinCollateralLiquidity.Mul(rate.MulInt(uCollateral.Amount)).TruncateInt()
+	minLiquidity := sdk.MinInt(minLiquidityFromCollateral, minLiquidityFromSupply)
+
+	// availableBorrow respects both maxBorrow and minLiquidity
+	availableBorrow := liquidity.Sub(minLiquidity)
+	availableBorrow = sdk.MinInt(availableBorrow, maxBorrow.Sub(borrowed.Amount))
+	availableBorrow = sdk.MaxInt(availableBorrow, sdk.ZeroInt())
+
+	// availableWithdraw is based on minLiquidity
+	availableWithdraw := liquidity.Sub(minLiquidity)
+	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
+
+	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
+	maxCollateral, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
+	if token.MinCollateralLiquidity.IsPositive() {
+		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
+		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
+	}
+	availableCollateralize := maxCollateral.Sub(uCollateral.Amount)
+	availableCollateralize = sdk.MaxInt(availableCollateralize, sdk.ZeroInt())
 
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:            token.SymbolDenom,
@@ -97,16 +122,16 @@ func (q Querier) MarketSummary(
 		Borrow_APY:             borrowAPY,
 		Supplied:               supplied.Amount,
 		Reserved:               reserved,
-		Collateral:             uCollateral,
+		Collateral:             uCollateral.Amount,
 		Borrowed:               borrowed.Amount,
 		Liquidity:              balance.Sub(reserved),
-		MaximumBorrow:          supplied.Amount, // TODO #1162 #1163 - implement limits
-		MaximumCollateral:      uSupply.Amount,  // TODO #1163 - implement limits
-		MinimumLiquidity:       sdk.ZeroInt(),   // TODO #1163 - implement limits
+		MaximumBorrow:          maxBorrow,
+		MaximumCollateral:      maxCollateral,
+		MinimumLiquidity:       minLiquidity,
 		UTokenSupply:           uSupply.Amount,
 		AvailableBorrow:        availableBorrow,
-		AvailableWithdraw:      uSupply.Amount,                  // TODO #1163 - implement limits
-		AvailableCollateralize: uSupply.Amount.Sub(uCollateral), // TODO #1163 - implement limits
+		AvailableWithdraw:      availableWithdraw,
+		AvailableCollateralize: availableCollateralize,
 	}
 
 	// Oracle price in response will be nil if it is unavailable
