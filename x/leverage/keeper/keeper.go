@@ -279,22 +279,17 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
-	max, err := k.maxCollateral(ctx, uToken.Denom)
-	if err != nil {
-		return err
-	}
-
-	total := k.GetTotalCollateral(ctx, uToken.Denom)
-	if total.Add(uToken).Amount.GT(max) {
-		return types.ErrMaxCollateralShare
-	}
-
 	currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
 	if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
 		return err
 	}
 
-	return k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
+	if err != nil {
+		return err
+	}
+
+	return k.checkCollateralShare(ctx, uToken.Denom)
 }
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.

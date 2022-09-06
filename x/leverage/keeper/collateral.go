@@ -135,3 +135,45 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 	}
 	return total
 }
+
+// CollateralShare calculates the portion of overall collateral
+// (measured in USD value) that a given uToken denom represents.
+func (k *Keeper) CollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	systemCollateral := k.GetAllTotalCollateral(ctx)
+	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
+
+	// get USD collateral value for all uTokens combined
+	totalValue, err := k.CalculateCollateralValue(ctx, systemCollateral)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	// get USD collateral value for this uToken only
+	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+
+	if !totalValue.IsPositive() {
+		return sdk.ZeroDec(), nil
+	}
+	return thisValue.Quo(totalValue), nil
+}
+
+// checkCollateralShare returns an error if a given uToken is above its collateral share
+func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
+	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	if err != nil {
+		return err
+	}
+
+	share, err := k.CollateralShare(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	if share.GT(token.MaxCollateralShare) {
+		return types.ErrMaxCollateralShare.Wrapf("%s share is %s", denom, share)
+	}
+	return nil
+}
