@@ -978,3 +978,61 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	err = app.LeverageKeeper.Collateralize(ctx, atomSupplier, coin("u/"+atomDenom, 10000))
 	require.ErrorIs(err, types.ErrMaxCollateralShare)
 }
+
+func (s *IntegrationTestSuite) TestMinCollateralLiquidity() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// update initial UMEE to have a limited MinCollateralLiquidity
+	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
+	require.NoError(err)
+	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	s.registerToken(umee)
+
+	// create a supplier to collateralize 100 UMEE
+	umeeSupplier := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
+
+	// create an ATOM supplier and borrow 49 UMEE
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 100_000000))
+	s.borrow(atomSupplier, coin(umeeDenom, 49_000000))
+
+	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
+
+	// withdrawal would reduce collateral liquidity to 41/90
+	_, err = app.LeverageKeeper.Withdraw(ctx, umeeSupplier, coin("u/"+umeeDenom, 10_000000))
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "withdraw")
+
+	// borrow would reduce collateral liquidity to 41/100
+	err = app.LeverageKeeper.Borrow(ctx, umeeSupplier, coin(umeeDenom, 10_000000))
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "borrow")
+}
+
+func (s *IntegrationTestSuite) TestMinCollateralLiquidity_Collateralize() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// update initial UMEE to have a limited MinCollateralLiquidity
+	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
+	require.NoError(err)
+	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	s.registerToken(umee)
+
+	// create a supplier to supply 200 UMEE, and collateralize 100 UMEE
+	umeeSupplier := s.newAccount(coin(umeeDenom, 200))
+	s.supply(umeeSupplier, coin(umeeDenom, 200))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100))
+
+	// create an ATOM supplier and borrow 149 UMEE
+	atomSupplier := s.newAccount(coin(atomDenom, 100))
+	s.supply(atomSupplier, coin(atomDenom, 100))
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 100))
+	s.borrow(atomSupplier, coin(umeeDenom, 149))
+
+	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
+
+	// collateralize would reduce collateral liquidity to 51/200
+	err = app.LeverageKeeper.Collateralize(ctx, umeeSupplier, coin("u/"+umeeDenom, 100))
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "collateralize")
+}

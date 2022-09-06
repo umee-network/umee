@@ -90,6 +90,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1323](https://github.com/umee-network/umee/pull/1323) Oracle cli - Add validator address override option.
 - [1329](https://github.com/umee-network/umee/pull/1329) Implement MaxCollateralShare.
 - [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
+- [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
 
 ### Improvements
 
