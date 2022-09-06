@@ -24,6 +24,7 @@ const (
 	ProviderGate     Name = "gate"
 	ProviderCoinbase Name = "coinbase"
 	ProviderFTX      Name = "ftx"
+	ProviderBitget   Name = "bitget"
 	ProviderMock     Name = "mock"
 )
 
