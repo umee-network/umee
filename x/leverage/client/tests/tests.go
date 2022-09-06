@@ -134,7 +134,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"supply",
 		cli.GetCmdSupply(),
 		[]string{
-			val.Address.String(),
 			"1000uumee",
 		},
 		nil,
@@ -144,7 +143,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"add collateral",
 		cli.GetCmdCollateralize(),
 		[]string{
-			val.Address.String(),
 			"1000u/uumee",
 		},
 		nil,
@@ -154,7 +152,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			val.Address.String(),
 			"50uumee",
 		},
 		nil,
@@ -164,7 +161,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"liquidate",
 		cli.GetCmdLiquidate(),
 		[]string{
-			val.Address.String(),
 			val.Address.String(),
 			"5uumee",
 			"uumee",
@@ -176,7 +172,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			val.Address.String(),
 			"50uumee",
 		},
 		nil,
@@ -186,7 +181,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"remove collateral",
 		cli.GetCmdDecollateralize(),
 		[]string{
-			val.Address.String(),
 			"950u/uumee",
 		},
 		nil,
@@ -196,7 +190,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"withdraw",
 		cli.GetCmdWithdraw(),
 		[]string{
-			val.Address.String(),
 			"950u/uumee",
 		},
 		nil,

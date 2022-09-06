@@ -76,9 +76,9 @@ enable-hostname = true
 enable-hostname-label = true
 enable-service-label = true
 enabled = true
-global-labels = [["chain-id", "umee-local-testnet"]]
+global-labels = [["chain_id", "umee-local-testnet"]]
 service-name = "price-feeder"
-type = "prometheus"
+prometheus-retention-time = 100
 
 [[provider_endpoints]]
 name = "binance"
