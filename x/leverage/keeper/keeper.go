@@ -244,7 +244,20 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 
 	// Determine the total amount of denom borrowed (previously borrowed + newly borrowed)
 	newBorrow := borrowed.AmountOf(borrow.Denom).Add(borrow.Amount)
-	return k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow))
+	if err := k.setBorrow(ctx, borrowerAddr, sdk.NewCoin(borrow.Denom, newBorrow)); err != nil {
+		return err
+	}
+
+	// Check MaxSupplyUtilization after transaction
+	token, err := k.GetTokenSettings(ctx, borrow.Denom)
+	if err != nil {
+		return err
+	}
+	utilization := k.SupplyUtilization(ctx, borrow.Denom)
+	if utilization.GT(token.MaxSupplyUtilization) {
+		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
+	}
+	return nil
 }
 
 // Repay attempts to repay a borrow position. If asset type is invalid, account balance

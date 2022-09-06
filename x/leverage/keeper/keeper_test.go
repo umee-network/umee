@@ -522,8 +522,14 @@ func (s *IntegrationTestSuite) TestBorrow() {
 		{
 			"additional borrow",
 			borrower,
-			coin(umeeDenom, 30_000000),
+			coin(umeeDenom, 20_000000),
 			nil,
+		},
+		{
+			"max supply utilization",
+			borrower,
+			coin(umeeDenom, 10_000000),
+			types.ErrMaxSupplyUtilization,
 		},
 		{
 			"atom borrow",
