@@ -309,6 +309,10 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
+	if err := k.checkCollateralLiquidity(ctx, uToken.Denom); err != nil {
+		return err
+	}
+
 	return k.checkCollateralShare(ctx, uToken.Denom)
 }
 
