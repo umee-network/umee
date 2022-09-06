@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 60_000000))
 
 	// create a supplier that will exceed token's default MaxSupply
-	whale := s.newAccount(coin(umeeDenom, 1000000_000000))
+	whale := s.newAccount(coin(umeeDenom, 1_000_000_000000))
 
 	tcs := []testCase{
 		{
