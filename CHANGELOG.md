@@ -88,6 +88,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1222](https://github.com/umee-network/umee/pull/1222) Liquidation reward_denom can now be either token or uToken.
 - [1238](https://github.com/umee-network/umee/pull/1238) Added bad debts query.
 - [1323](https://github.com/umee-network/umee/pull/1323) Oracle cli - Add validator address override option.
+- [1329](https://github.com/umee-network/umee/pull/1329) Implement MaxCollateralShare.
 
 ### Improvements
 
