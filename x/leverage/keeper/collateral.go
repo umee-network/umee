@@ -124,7 +124,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 	return limit, nil
 }
 
-// GetAllTotalCollateral returns total collateral across all uToken denominations.
+// GetAllTotalCollateral returns total collateral across all uTokens.
 func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 	total := sdk.NewCoins()
 
