@@ -5,6 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	signing "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
 	"github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
@@ -33,20 +34,26 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 		f := sdk.MustNewDecFromStr(factor)
 		return sdk.DecCoins{sdk.NewDecCoinFromDec(denom, minG.Amount.Mul(f))}
 	}
+	mkTx := func(fee sdk.Coins) signing.Tx {
+		suite.txBuilder.SetFeeAmount(fee)
+		tx, err := suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
+		require.NoError(err)
+		return tx
+	}
 
+	suite.txBuilder.SetGasLimit(uint64(gasLimit))
 	// we set fee to 2*gasLimit*minGasPrice
 	fee := mkFee("2")
-	suite.txBuilder.SetFeeAmount(fee)
-	suite.txBuilder.SetGasLimit(uint64(gasLimit))
-	tx, err := suite.CreateTestTx(privs, accNums, accSeqs, suite.ctx.ChainID())
-	require.NoError(err)
+	tx := mkTx(fee)
 
-	// Test CheckTX //
-
-	// min-gas-settings should work
+	//
+	// Test CheckTX
+	//
 	ctx := suite.ctx.
 		WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice}).
 		WithIsCheckTx(true)
+
+	// min-gas-settings should work
 	suite.checkFeeAnte(tx, fee, ctx)
 
 	// should work when exact fee is provided
@@ -61,25 +68,28 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	// should fail when some fee doesn't include all gas denoms
 	ctx = ctx.WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice,
 		sdk.NewDecCoinFromDec("other", sdk.NewDec(10))})
-	_, _, err = ante.FeeAndPriority(ctx, tx)
-	require.ErrorIs(sdkerrors.ErrInsufficientFee, err)
+	suite.checkFeeFailed(tx, ctx)
 
-	/*
-		// Test2: validator min gas price check during the
-		// Ante should fail when validator min gas price is above the transaction gas limit
-		ctx = ctx.WithMinGasPrices(sdk.NewDecCoinsFromCoins(fee...))
-		_, _, err = ante.FeeAndPriority(ctx, tx)
-		require.ErrorIs(sdkerrors.ErrInsufficientFee, err)
+	//
+	// Test DeliverTx
+	//
+	ctx = suite.ctx.
+		WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice}).
+		WithIsCheckTx(false)
 
-		// Test2: min gas price not checked in DeliverTx
-		ctx = suite.ctx.WithIsCheckTx(false)
-		suite.checkFeeAnte(tx, fee, ctx)
+	// ctx.MinGasPrice shouldn't matter
+	suite.checkFeeAnte(tx, fee, ctx)
+	suite.checkFeeAnte(tx, fee, ctx.WithMinGasPrices(mkGas("", "3")))
+	suite.checkFeeAnte(tx, fee, ctx.WithMinGasPrices(mkGas("other", "1")))
+	suite.checkFeeAnte(tx, fee, ctx.WithMinGasPrices(sdk.DecCoins{}))
 
-		ctx = ctx.WithMinGasPrices([]sdk.DecCoin{sdk.NewDecCoin(fee[0].Denom, fee[0].Amount.QuoRaw(2))})
-		suite.checkFeeAnte(tx, fee, ctx)
+	// should fail when not enough fee is provided
+	suite.checkFeeFailed(mkTx(mkFee("0.5")), ctx)
+	suite.checkFeeFailed(mkTx(sdk.Coins{}), ctx)
 
-
-	*/
+	// should  work when more fees are applied
+	fee = append(fee, sdk.NewInt64Coin("other", 10))
+	suite.checkFeeAnte(mkTx(fee), fee, ctx)
 
 	// Test4: ensure no fees for oracle msgs
 	require.NoError(suite.txBuilder.SetMsgs(
