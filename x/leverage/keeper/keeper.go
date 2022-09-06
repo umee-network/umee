@@ -212,6 +212,11 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		return sdk.Coin{}, err
 	}
 
+	// check MinCollateralLiquidity is still satisfied after the transaction
+	if err = k.checkCollateralLiquidity(ctx, token.Denom); err != nil {
+		return sdk.Coin{}, err
+	}
+
 	return token, nil
 }
 
@@ -272,7 +277,9 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	if utilization.GT(token.MaxSupplyUtilization) {
 		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
 	}
-	return nil
+
+	// check MinCollateralLiquidity is still satisfied after the transaction
+	return k.checkCollateralLiquidity(ctx, borrow.Denom)
 }
 
 // Repay attempts to repay a borrow position. If asset type is invalid, account balance
@@ -314,6 +321,10 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 
 	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
 	if err != nil {
+		return err
+	}
+
+	if err := k.checkCollateralLiquidity(ctx, types.ToTokenDenom(uToken.Denom)); err != nil {
 		return err
 	}
 
