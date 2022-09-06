@@ -9,7 +9,7 @@
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 UMEED_BIN_MAINNET_URL_TARBALL=${UMEED_BIN_MAINNET_URL_TARBALL:-"https://github.com/umee-network/umee/releases/download/v1.0.3/umeed-v1.0.3-linux-amd64.tar.gz"}
-UMEED_BIN_MAINNET=${UMEED_BIN_MAINNET:-"$CWD/umeed-v103"}
+UMEED_BIN_MAINNET=${UMEED_BIN_MAINNET:-"$CWD/umeed-releases/umeed-v1.0.3-linux-amd64/umeed"}
 
 # Checks for the umeed v1 file
 if [ ! -f "$UMEED_BIN_MAINNET" ]; then
@@ -37,6 +37,10 @@ UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.0-v3.0"}"
 UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key-coping.json}"
+SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
+
+# Loads another sources
+. $CWD/blocks.sh
 
 nodeHome="$CHAIN_DIR/$CHAIN_ID"
 home="--home $nodeHome"
@@ -115,7 +119,7 @@ cp $NODE_PRIV_KEY $nodePrivateKeyPath
 
 echo Coping addr is $NODE_ADDR
 
-echo Replace generated genesis with umeemania genesis
+echo Replace generated genesis with tinkered genesis
 rm $nodeDir/$genesisConfigPath
 
 cp $UMEEMAINNET_GENESIS_PATH $nodeDir/$genesisConfigPath
@@ -142,52 +146,27 @@ echo "Logs:"
 echo "  * tail -f $nodeLogPath"
 
 echo Wait for the node to load the genesis state and start to produce blocks D:
-sleep 80
+sleep $SEC_AWAIT_NODE_START
 
 # Any block number to be confirmed
 WAIT_UNTIL_HEIGHT=1000
-CURRENT_BLOCK_HEIGHT=0
-MAX_TRIES=50
-CURRENT_TRY=0
 
-while [ $CURRENT_BLOCK_HEIGHT -lt $WAIT_UNTIL_HEIGHT ]
-do
-  QUERY_RESPONSE="$($UMEED_BIN_MAINNET query block $nodeHome --chain-id $CHAIN_ID)"
-  CURRENT_BLOCK_HEIGHT=$(echo $QUERY_RESPONSE | jq -r '.block.header.height')
-  echo "Current block height $CURRENT_BLOCK_HEIGHT, waiting to reach $WAIT_UNTIL_HEIGHT"
-  ((CURRENT_TRY=CURRENT_TRY+1))
+CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
+echo "Finish wait_until_block"
 
-  if [ $CURRENT_TRY -ge $MAX_TRIES ]; then
-    exit 1
-  fi
+CURRENT_BLOCK_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT get_block_current_height)
 
-  sleep $BLOCK_TIME
-done
+echo "Current Block: $CURRENT_BLOCK_HEIGHT >= $WAIT_UNTIL_HEIGHT"
 
-echo "Current Block: $CURRENT_BLOCK_HEIGHT == $WAIT_UNTIL_HEIGHT"
-
-CURRENT_TRY=0
 # we should produce at least 20 blocks with the new version
 ((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+20))
 
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT"
-sleep 80
+sleep $SEC_AWAIT_NODE_START
 
-while [ $CURRENT_BLOCK_HEIGHT -lt $WAIT_UNTIL_HEIGHT ]
-do
-  QUERY_RESPONSE="$($UMEED_BIN_CURRENT query block $nodeHome --chain-id $CHAIN_ID)"
-  CURRENT_BLOCK_HEIGHT=$(echo $QUERY_RESPONSE | jq -r '.block.header.height')
-  echo "Current block height $CURRENT_BLOCK_HEIGHT, waiting to reach $WAIT_UNTIL_HEIGHT"
-  ((CURRENT_TRY=CURRENT_TRY+1))
-
-  if [ $CURRENT_TRY -ge $MAX_TRIES ]; then
-    exit 1
-  fi
-
-  sleep $BLOCK_TIME
-done
+CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
 
 echo
 echo Upgrade Process Finish

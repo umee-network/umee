@@ -31,6 +31,9 @@ VOTING_PERIOD=${VOTING_PERIOD:-8}
 
 hdir="$CHAIN_DIR/$CHAIN_ID"
 
+# Loads another sources
+. $CWD/blocks.sh
+
 # Folders for nodes
 nodeDir="$hdir/$NODE_NAME"
 
@@ -42,7 +45,7 @@ nodeUrlFlag="--node $NODE_URL"
 kbt="--keyring-backend test"
 cid="--chain-id $CHAIN_ID"
 
-CURRENT_HEIGHT=$($UMEED_BIN_V1 q block $nodeUrlFlag | jq ".block.header.height" -r)
+CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
 echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 
 UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 10))
@@ -61,16 +64,11 @@ echo "..."
 echo "Finish voting in the proposal"
 echo "It will wait to reach the block height to upgrade"
 echo "..."
-BLOCK_HEIGHT=0
-while [ $BLOCK_HEIGHT -lt $UPGRADE_HEIGHT ]
-do
-  QUERY_RESPONSE="$($UMEED_BIN_V1 query block $nodeHomeFlag $nodeUrlFlag $cid)"
-  BLOCK_HEIGHT=$(echo $QUERY_RESPONSE | jq -r '.block.header.height')
-  echo "Current block height $BLOCK_HEIGHT, waiting to reach $UPGRADE_HEIGHT"
-  sleep $BLOCK_TIME
-done
+CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 wait_until_block $UPGRADE_HEIGHT
 
-echo "Reached upgrade block height: $BLOCK_HEIGHT == $UPGRADE_HEIGHT"
+CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
+
+echo "Reached upgrade block height: $CURRENT_HEIGHT == $UPGRADE_HEIGHT"
 
 node_pid_value=$(cat $UMEED_V1_PID_FILE)
 
