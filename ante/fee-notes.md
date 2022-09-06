@@ -8,11 +8,11 @@ NOTES:
 
 | operation                                      | gas used |
 | :--------------------------------------------- | -------: |
-| x/bank send                                    |    31029 |
-| x/group create                                 |    68908 |
-| x/oracle MsgAggregateExchangeRateVote (3 curr) |    66251 |
-| x/oracle MsgAggregateExchangeRateVote (6 curr) |    69726 |
-| default gas limit                              |   200000 |
+| x/bank send                                    |   31'029 |
+| x/group create                                 |   68'908 |
+| x/oracle MsgAggregateExchangeRateVote (3 curr) |   66'251 |
+| x/oracle MsgAggregateExchangeRateVote (6 curr) |   69'726 |
+| default gas limit                              |  200'000 |
 
 ## Target price (in USD cent) for x/bank send
 
