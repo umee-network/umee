@@ -288,6 +288,10 @@ func (s *IntegrationTestSuite) TestCollateralize() {
 	supplier := s.newAccount(coin(umeeDenom, 200_000000))
 	s.supply(supplier, coin(umeeDenom, 100_000000))
 
+	// create and fund another supplier
+	otherSupplier := s.newAccount(coin(umeeDenom, 200_000000), coin(atomDenom, 200_000000))
+	s.supply(otherSupplier, coin(umeeDenom, 200_000000), coin(atomDenom, 200_000000))
+
 	tcs := []testCase{
 		{
 			"base token",
@@ -935,4 +939,36 @@ func (s *IntegrationTestSuite) TestLiquidate() {
 			s.checkInvariants(tc.msg)
 		}
 	}
+}
+
+func (s *IntegrationTestSuite) TestMaxCollateralShare() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// update initial ATOM to have a limited MaxCollateralShare
+	atom, err := app.LeverageKeeper.GetTokenSettings(ctx, atomDenom)
+	require.NoError(err)
+	atom.MaxCollateralShare = sdk.MustNewDecFromStr("0.1")
+	s.registerToken(atom)
+
+	// Mock oracle prices:
+	// UMEE $4.21
+	// ATOM $39.38
+
+	// create a supplier to collateralize 100 UMEE, worth $421.00
+	umeeSupplier := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
+
+	// create an ATOM supplier
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
+
+	// collateralize 1.18 ATOM, worth $46.46, with no error.
+	// total collateral value (across all denoms) will be $467.46
+	// so ATOM's collateral share ($46.46 / $467.46) is barely below 10%
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 1_180000))
+
+	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
+	err = app.LeverageKeeper.Collateralize(ctx, atomSupplier, coin("u/"+atomDenom, 10000))
+	require.ErrorIs(err, types.ErrMaxCollateralShare)
 }
