@@ -279,7 +279,8 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	if err == nil && errResponse.Code != 0 {
 		p.logger.Error().
 			Int("length", len(bz)).
-			Str("msg", string(bz)).
+			Str("msg", errResponse.Msg).
+			Str("body", string(bz)).
 			Msg("Error on receive bitget message")
 		return
 	}
