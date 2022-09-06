@@ -6,7 +6,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
-	// appparmas "github.com/umee-network/umee/v3/app/params"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -25,40 +25,51 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 		return nil, 0, sdkerrors.ErrTxDecode.Wrap("Tx must be a FeeTx")
 	}
 
-	feeCoins := feeTx.GetFee()
-	gas := feeTx.GetGas()
+	providedFees := feeTx.GetFee()
+	gasLimit := feeTx.GetGas()
 	msgs := feeTx.GetMsgs()
 	isOracleOrGravity := IsOracleOrGravityTx(msgs)
-	chargeFees := !isOracleOrGravity || gas > uint64(len(msgs))*MaxMsgGasUsage
-
-	if ctx.IsCheckTx() && chargeFees {
-		minGasPrices := ctx.MinGasPrices()
-		if !minGasPrices.IsZero() {
-			requiredFees := make(sdk.Coins, len(minGasPrices))
-
-			// Determine the required fees by multiplying each required minimum gas
-			// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
-			glDec := sdk.NewDec(int64(gas))
-			for i, gp := range minGasPrices {
-				fee := gp.Amount.Mul(glDec)
-				requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-			}
-
-			if !feeCoins.IsAnyGTE(requiredFees) {
-				return nil, 0, sdkerrors.ErrInsufficientFee.Wrapf(
-					"insufficient fees; got: %s required: %s", feeCoins, requiredFees)
-			}
-		}
-	} else {
-		// TODO
-		// check if consensus mingas is in fees
-	}
-
 	priority := getTxPriority(isOracleOrGravity, msgs)
+	chargeFees := !isOracleOrGravity || gasLimit > uint64(len(msgs))*MaxMsgGasUsage
 	if !chargeFees {
 		return sdk.Coins{}, priority, nil
 	}
-	return feeCoins, priority, nil
+
+	var err error
+	if ctx.IsCheckTx() {
+		err = checkFees(ctx.MinGasPrices(), providedFees, gasLimit)
+	} else {
+		err = checkFees(nil, providedFees, gasLimit)
+	}
+	return providedFees, priority, err
+}
+
+func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error {
+	if minGasPrices != nil {
+		// check minGasPrices set by validator
+		if err := AssertMinProtocolGasPrice(minGasPrices); err != nil {
+			return err
+		}
+	} else {
+		// in deliverTx = use protocol min gas price
+		minGasPrices = sdk.DecCoins{appparams.MinMinGasPrice}
+	}
+
+	requiredFees := make(sdk.Coins, len(minGasPrices))
+
+	// Determine the required fees by multiplying each required minimum gas
+	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
+	glDec := sdk.NewDec(int64(gasLimit))
+	for i, gp := range minGasPrices {
+		fee := gp.Amount.Mul(glDec)
+		requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+	}
+
+	if !fees.IsAnyGTE(requiredFees) {
+		return sdkerrors.ErrInsufficientFee.Wrapf(
+			"insufficient fees; got: %s required: %s", fees, requiredFees)
+	}
+	return nil
 }
 
 // IsOracleOrGravityTx checks if all messages are oracle messages
@@ -92,6 +103,21 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 	}
 
 	return true
+}
+
+// AssertMinProtocolGasPrice returns an error if the provided gasPrices are lower then
+// the required by protocol.
+func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
+	for _, c := range gasPrices {
+		if c.Denom == appparams.MinMinGasPrice.Denom {
+			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
+				break // go to error below
+			}
+			return nil
+		}
+	}
+	return sdkerrors.ErrInsufficientFee.Wrapf(
+		"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
 }
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the

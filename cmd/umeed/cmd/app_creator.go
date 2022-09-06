@@ -20,6 +20,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/umee-network/umee/v3/ante"
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
 )
@@ -67,7 +68,7 @@ func (a appCreator) newApp(
 	)
 
 	minGasPrices := cast.ToString(appOpts.Get(server.FlagMinGasPrices))
-	assertMinUmeeGasPrice(minGasPrices)
+	mustMinUmeeGasPrice(minGasPrices)
 
 	return umeeapp.New(
 		logger, db, traceStore, true, skipUpgradeHeights,
@@ -87,20 +88,15 @@ func (a appCreator) newApp(
 	)
 }
 
-func assertMinUmeeGasPrice(minGasPrices string) {
+func mustMinUmeeGasPrice(minGasPrices string) {
 	gasPrices, err := sdk.ParseDecCoins(minGasPrices)
 	if err != nil {
 		stdlog.Fatalf("invalid minimum gas prices: %v", err)
 	}
-	for _, c := range gasPrices {
-		if c.Denom == appparams.BondDenom {
-			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
-				break // go to Fatal below
-			}
-			return
-		}
+	if err := ante.AssertMinProtocolGasPrice(gasPrices); err != nil {
+		stdlog.Fatal("minimum-gas-price config in app.toml must be at least",
+			appparams.MinMinGasPrice, " [", err, "]")
 	}
-	stdlog.Fatal("minimum-gas-price config in app.toml must be at least", appparams.MinMinGasPrice)
 }
 
 // appExport creates a new simapp, optionally at a given height.
