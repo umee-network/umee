@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -22,7 +21,7 @@ const (
 	bitgetWSPath        = "/spot/v1/stream"
 	bitgetReconnectTime = time.Minute * 2
 	bitgetRestHost      = "https://api.bitget.com"
-	bitgetRestPath      = "/api/spot/v1/public/currencies"
+	bitgetRestPath      = "/api/spot/v1/public/products"
 	tickerChannel       = "ticker"
 	candleChannel       = "candle5m"
 	instType            = "SP"
@@ -102,7 +101,8 @@ type (
 		Data     []BitgetPairData `json:"data"`
 	}
 	BitgetPairData struct {
-		Symbol string `json:"coinName"`
+		Base  string `json:"baseCoin"`
+		Quote string `json:"quoteCoin"`
 	}
 )
 
@@ -497,7 +497,11 @@ func (p *BitgetProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 	availablePairs := make(map[string]struct{}, len(pairsSummary.Data))
 	for _, pair := range pairsSummary.Data {
-		availablePairs[strings.ToUpper(pair.Symbol)] = struct{}{}
+		cp := types.CurrencyPair{
+			Base:  pair.Base,
+			Quote: pair.Quote,
+		}
+		availablePairs[cp.String()] = struct{}{}
 	}
 
 	return availablePairs, nil
