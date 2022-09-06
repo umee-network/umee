@@ -345,12 +345,24 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 				p.keepReconnecting()
 			}
 		}
 	}
+}
+
+// disconnect disconnects the existing websocket connection.
+func (p *BinanceProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Binance websocket %v", err)
+	}
+	return nil
 }
 
 // reconnect closes the last WS connection then create a new one and subscribe to
@@ -360,11 +372,6 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 // the websocket server does not receive a pong frame back from the connection
 // within a 10 minute period, the connection will be disconnected.
 func (p *BinanceProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Binance websocket %v", err)
-	}
-
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()

@@ -289,6 +289,9 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("attempted to reconnect")
 				p.keepReconnecting()
@@ -484,12 +487,17 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	return nil
 }
 
-// reconnect closes the last WS connection and create a new one.
-func (p *KrakenProvider) reconnect() error {
+// disconnect disconnects the existing websocket connection.
+func (p *KrakenProvider) disconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
 		return types.ErrProviderConnection.Wrapf("error closing Kraken websocket %v", err)
 	}
+	return nil
+}
+
+// reconnect creates a new websocket connection.
+func (p *KrakenProvider) reconnect() error {
 	p.logger.Debug().Msg("trying to reconnect")
 
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
