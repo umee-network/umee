@@ -243,6 +243,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 				p.logger.Err(err).Msg("failed to read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
+					if err := p.disconnect(); err != nil {
+						p.logger.Err(err).Msg("error disconnecting")
+					}
 					if err := p.reconnect(); err != nil {
 						p.logger.Err(err).Msg("error reconnecting")
 					}
@@ -257,6 +260,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz, reconnectTicker)
 
 		case <-reconnectTicker.C:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -380,13 +386,17 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.candles[candle.CH] = candleList
 }
 
-// reconnect closes the last WS connection and create a new one.
-func (p *HuobiProvider) reconnect() error {
+// disconnect disconnects the existing websocket connection.
+func (p *HuobiProvider) disconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
 		return types.ErrProviderConnection.Wrapf("error closing Huobi websocket %v", err)
 	}
+	return nil
+}
 
+// reconnect creates a new websocket connection.
+func (p *HuobiProvider) reconnect() error {
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
