@@ -24,8 +24,8 @@ func TestMexcProvider_GetTickerPrices(t *testing.T) {
 		volume := "2396974.02000000"
 
 		tickerMap := map[string]MexcTicker{}
-		tickerMap["ATOMUSDT"] = MexcTicker{
-			Symbol:    "ATOMUSDT",
+		tickerMap["ATOM_USDT"] = MexcTicker{
+			Symbol:    "ATOM_USDT",
 			LastPrice: lastPrice,
 			Volume:    volume,
 		}
@@ -45,14 +45,14 @@ func TestMexcProvider_GetTickerPrices(t *testing.T) {
 		volume := "2396974.02000000"
 
 		tickerMap := map[string]MexcTicker{}
-		tickerMap["ATOMUSDT"] = MexcTicker{
-			Symbol:    "ATOMUSDT",
+		tickerMap["ATOM_USDT"] = MexcTicker{
+			Symbol:    "ATOM_USDT",
 			LastPrice: lastPriceAtom,
 			Volume:    volume,
 		}
 
-		tickerMap["LUNAUSDT"] = MexcTicker{
-			Symbol:    "LUNAUSDT",
+		tickerMap["LUNA_USDT"] = MexcTicker{
+			Symbol:    "LUNA_USDT",
 			LastPrice: lastPriceLuna,
 			Volume:    volume,
 		}
@@ -73,7 +73,7 @@ func TestMexcProvider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
-		require.Equal(t, "mexc provider failed to get ticker price for FOOBAR", err.Error())
+		require.Equal(t, "mexc provider failed to get ticker price for FOO_BAR", err.Error())
 		require.Nil(t, prices)
 	})
 }
