@@ -31,7 +31,8 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	isOracleOrGravity := IsOracleOrGravityTx(msgs)
 	priority := getTxPriority(isOracleOrGravity, msgs)
 	chargeFees := !isOracleOrGravity || gasLimit > uint64(len(msgs))*MaxMsgGasUsage
-	if !chargeFees {
+	// we also don't charge transaction fees for the first block, for the genesis transactions.
+	if !chargeFees || ctx.BlockHeight() == 0 {
 		return sdk.Coins{}, priority, nil
 	}
 
