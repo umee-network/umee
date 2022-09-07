@@ -47,14 +47,46 @@ func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	return nil
 }
 
+// clearBlacklistedCollateral decollateralizes any blacklisted uTokens
+// from a borrower's collateral. It is used during liquidations and before
+// repaying bad debts with reserves to make any subsequent checks for
+// remaining collateral on the borrower's address more efficient.
+// Also returns a boolean indicating whether valid collateral remains.
+func (k Keeper) clearBlacklistedCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) (bool, error) {
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	hasCollateral := false
+	for _, coin := range collateral {
+		denom := types.ToTokenDenom(coin.Denom)
+		token, err := k.GetTokenSettings(ctx, denom)
+		if err != nil {
+			return false, err
+		}
+		if token.Blacklist {
+			// Decollateralize any blacklisted uTokens encountered
+			err := k.decollateralize(ctx, borrowerAddr, borrowerAddr, coin)
+			if err != nil {
+				return false, err
+			}
+		} else {
+			// At least one non-blacklisted uToken was found
+			hasCollateral = true
+		}
+	}
+	// Any remaining collateral is non-blacklisted
+	return hasCollateral, nil
+}
+
 // checkBadDebt detects if a borrower has zero non-blacklisted collateral,
 // and marks any remaining borrowed tokens as bad debt.
 func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
-	// get remaining collateral uTokens, ignoring blacklisted
-	remainingCollateral := k.filterAcceptedUTokens(ctx, k.GetBorrowerCollateral(ctx, borrowerAddr))
+	// clear blacklisted collateral while checking for any remaining (valid) collateral
+	hasCollateral, err := k.clearBlacklistedCollateral(ctx, borrowerAddr)
+	if err != nil {
+		return err
+	}
 
-	// detect bad debt if collateral is completely exhausted
-	if remainingCollateral.IsZero() {
+	// mark bad debt if collateral is completely exhausted
+	if !hasCollateral {
 		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
 			// set a bad debt flag for each borrowed denom
 			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
@@ -68,6 +100,8 @@ func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error
 
 // RepayBadDebt uses reserves to repay borrower's debts of a given denom.
 // It returns a boolean representing whether full repayment was achieved.
+// This function assumes the borrower has already been verified to have
+// no collateral remaining.
 func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
 	borrower := borrowerAddr.String()
