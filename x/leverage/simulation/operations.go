@@ -10,6 +10,8 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
+	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/util/coin"
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -121,14 +123,14 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		from, coin, skip := randomSupplyFields(r, ctx, accs, bk)
+		from, c, skip := randomSupplyFields(r, ctx, accs, bk)
 		if skip {
 			typename := sdk.MsgTypeURL(new(types.MsgSupply))
 			return simtypes.NoOpMsg(types.ModuleName, typename, "skip all transfers"), nil, nil
 		}
 
-		msg := types.NewMsgSupply(from.Address, coin)
-		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(coin))
+		msg := types.NewMsgSupply(from.Address, c)
+		return deliver(r, app, ctx, ak, bk, from, msg, sdk.NewCoins(c))
 	}
 }
 
@@ -439,7 +441,7 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 	bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 	cfg := simappparams.MakeTestEncodingConfig()
-	txCtx := simulation.OperationInput{
+	o := simulation.OperationInput{
 		R:               r,
 		App:             app,
 		TxGen:           cfg.TxConfig,
@@ -454,5 +456,25 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		CoinsSpentInMsg: coins,
 	}
 
-	return simulation.GenAndDeliverTxWithRandFees(txCtx)
+	// note: leverage operations are more expensive!
+	return GenAndDeliver(o, appparams.DefaultGasLimit*50)
+}
+
+// GenAndDeliverTxWithRandFees generates a transaction with a random fee and delivers it.
+// If gasLimit==0 then appparams default gas limit is used.
+func GenAndDeliver(o simulation.OperationInput, gasLimit sdk.Gas) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+	if gasLimit == 0 {
+		gasLimit = appparams.DefaultGasLimit
+	}
+	account := o.AccountKeeper.GetAccount(o.Context, o.SimAccount.Address)
+	spendable := o.Bankkeeper.SpendableCoins(o.Context, account.GetAddress())
+
+	_, hasNeg := spendable.SafeSub(o.CoinsSpentInMsg...)
+	if hasNeg {
+		return simtypes.NoOpMsg(o.ModuleName, o.MsgType, "message doesn't leave room for fees"), nil, nil
+	}
+
+	fees := coin.NewDecBld(appparams.MinMinGasPrice).
+		Scale(int64(gasLimit)).ToCoins()
+	return simulation.GenAndDeliverTx(o, fees)
 }

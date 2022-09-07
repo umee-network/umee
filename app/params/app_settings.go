@@ -15,6 +15,10 @@ const (
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UMEE"
+
+	// DefaultGasLimit - set to the same value as cosmos-sdk flags.DefaultGasLimit
+	// this value is currently only used in tests.
+	DefaultGasLimit = 200000
 )
 
 var (
