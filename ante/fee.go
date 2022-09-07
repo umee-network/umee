@@ -42,6 +42,9 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	} else {
 		err = checkFees(nil, providedFees, gasLimit)
 	}
+	if err != nil {
+		err = sdkerrors.Wrap(err, msgs[0].String())
+	}
 	return providedFees, priority, err
 }
 

@@ -8,6 +8,7 @@ import (
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	appparams "github.com/umee-network/umee/v3/app/params"
@@ -36,7 +37,7 @@ const (
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
 func WeightedOperations(
-	appParams simtypes.AppParams, cdc codec.JSONCodec, ak types.AccountKeeper, bk types.BankKeeper,
+	appParams simtypes.AppParams, cdc codec.JSONCodec, ak types.AccountKeeper, bk bankkeeper.Keeper,
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
 	var (
@@ -118,7 +119,7 @@ func WeightedOperations(
 
 // SimulateMsgSupply tests and runs a single msg supply where
 // an account supplies some available assets.
-func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtypes.Operation {
+func SimulateMsgSupply(ak simulation.AccountKeeper, bk bankkeeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -136,7 +137,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk types.BankKeeper) simtype
 
 // SimulateMsgWithdraw tests and runs a single msg withdraw where
 // an account attempts to withdraw some supplied assets.
-func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -154,7 +155,7 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk types.BankKeeper, lk ke
 
 // SimulateMsgBorrow tests and runs a single msg borrow where
 // an account attempts to borrow some assets.
-func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+func SimulateMsgBorrow(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -174,7 +175,7 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk types.BankKeeper, lk keep
 // some collateral to a user.
 func SimulateMsgCollateralize(
 	ak simulation.AccountKeeper,
-	bk types.BankKeeper,
+	bk bankkeeper.Keeper,
 	lk keeper.Keeper,
 ) simtypes.Operation {
 	return func(
@@ -196,7 +197,7 @@ func SimulateMsgCollateralize(
 // some collateral from a user.
 func SimulateMsgDecollateralize(
 	ak simulation.AccountKeeper,
-	bk types.BankKeeper,
+	bk bankkeeper.Keeper,
 	lk keeper.Keeper,
 ) simtypes.Operation {
 	return func(
@@ -216,7 +217,7 @@ func SimulateMsgDecollateralize(
 
 // SimulateMsgRepay tests and runs a single msg repay where
 // an account repays some borrowed assets.
-func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+func SimulateMsgRepay(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -234,7 +235,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk types.BankKeeper, lk keepe
 
 // SimulateMsgLiquidate tests and runs a single msg liquidate where
 // one user attempts to liquidate another user's borrow.
-func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk types.BankKeeper, lk keeper.Keeper) simtypes.Operation {
+func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
 		accs []simtypes.Account, chainID string,
@@ -288,9 +289,7 @@ func randomSupplyFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
 ) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-
 	tokens := getSpendableTokens(ctx, acc.Address, bk)
-
 	spendableTokens := simtypes.RandSubsetCoins(r, tokens)
 	if spendableTokens.Empty() {
 		return acc, sdk.Coin{}, true
@@ -307,12 +306,9 @@ func randomWithdrawFields(
 	bk types.BankKeeper, lk keeper.Keeper,
 ) (acc simtypes.Account, withdrawal sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk)
 	uTokens = uTokens.Add(lk.GetBorrowerCollateral(ctx, acc.Address)...)
-
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
-
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
@@ -326,11 +322,8 @@ func randomCollateralizeFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, bk types.BankKeeper,
 ) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-
 	uTokens := getSpendableUTokens(ctx, acc.Address, bk)
-
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
-
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
@@ -344,11 +337,8 @@ func randomDecollateralizeFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, spendableToken sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-
 	uTokens := lk.GetBorrowerCollateral(ctx, acc.Address)
-
 	uTokens = simtypes.RandSubsetCoins(r, uTokens)
-
 	if uTokens.Empty() {
 		return acc, sdk.Coin{}, true
 	}
@@ -363,7 +353,6 @@ func randomBorrowFields(
 	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
 ) (acc simtypes.Account, token sdk.Coin, skip bool) {
 	acc, _ = simtypes.RandomAcc(r, accs)
-
 	allTokens := lk.GetAllRegisteredTokens(ctx)
 	if len(allTokens) == 0 {
 		return acc, sdk.Coin{}, true
@@ -406,14 +395,12 @@ func randomLiquidateFields(
 	// note: liquidator and borrower might even be the same account
 	liquidator, _ = simtypes.RandomAcc(r, accs)
 	borrower, _ = simtypes.RandomAcc(r, accs)
-
 	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
 	if collateral.Empty() {
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
 	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
-
 	borrowed = simtypes.RandSubsetCoins(r, borrowed)
 	if borrowed.Empty() {
 		return liquidator, borrower, sdk.Coin{}, "", true
@@ -438,7 +425,7 @@ func randomLiquidateFields(
 }
 
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
-	bk types.BankKeeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
+	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 	cfg := simappparams.MakeTestEncodingConfig()
 	o := simulation.OperationInput{
@@ -457,5 +444,5 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 	}
 
 	// note: leverage operations are more expensive!
-	return umeesim.GenAndDeliver(o, appparams.DefaultGasLimit*50)
+	return umeesim.GenAndDeliver(bk, o, appparams.DefaultGasLimit*50)
 }
