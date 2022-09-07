@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -39,46 +40,29 @@ type (
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
-		tickers         map[string]MexcTicker         // Symbol => MexcTicker
-		candles         map[string][]MexcCandle       // Symbol => MexcCandle
-		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
+		tickers         map[string]types.TickerPrice   // Symbol => TickerPrice
+		candles         map[string][]types.CandlePrice // Symbol => CandlePrice
+		subscribedPairs map[string]types.CurrencyPair  // Symbol => types.CurrencyPair
 	}
 
-	// MexcTicker ticker price response. https://pkg.go.dev/encoding/json#Unmarshal
-	// Unmarshal matches incoming object keys to the keys used by Marshal (either the
-	// struct field name or its tag), preferring an exact match but also accepting a
-	// case-insensitive match. C field which is Statistics close time is not used, but
-	// it avoids to implement specific UnmarshalJSON.
-
-	MexcTicker struct {
-		Symbol    string `json:"symbol"` // Symbol ex.: ATOM_USDT
-		LastPrice string `json:"p"`      // Last price ex.: 0.0025
-		Volume    string `json:"v"`      // Total traded base asset volume ex.: 1000
-		C         uint64 `json:"C"`      // Statistics close time
+	// MexcTickerResponse is the ticker price response object.
+	MexcTickerResponse struct {
+		Symbol map[string]MexcTickerData `json:"data"` // e.x. ATOM_USDT
 	}
-
 	MexcTickerData struct {
 		LastPrice float64 `json:"p"` // Last price ex.: 0.0025
 		Volume    float64 `json:"v"` // Total traded base asset volume ex.: 1000
 	}
 
-	MexcTickerResult struct {
-		Channel string                    `json:"channel"` // expect "push.overview"
-		Symbol  map[string]MexcTickerData `json:"data"`    // this key is the Symbol ex.: ATOM_USDT
+	// MexcCandle is the candle websocket response object.
+	MexcCandleResponse struct {
+		Symbol   string             `json:"symbol"` // Symbol ex.: ATOM_USDT
+		Metadata MexcCandleMetadata `json:"data"`   // Metadata for candle
 	}
-
-	// MexcCandleMetadata candle metadata used to compute tvwap price.
 	MexcCandleMetadata struct {
 		Close     float64 `json:"c"` // Price at close
 		TimeStamp int64   `json:"t"` // Close time in unix epoch ex.: 1645756200000
 		Volume    float64 `json:"v"` // Volume during period
-	}
-
-	// MexcCandle candle Mexc websocket channel "kline_1m" response.
-	MexcCandle struct {
-		// Channel  string             `json:"channel"` // expect "push.kline"
-		Symbol   string             `json:"symbol"` // Symbol ex.: ATOM_USDT
-		Metadata MexcCandleMetadata `json:"data"`   // Metadata for candle
 	}
 
 	// MexcSubscribeMsg Msg to subscribe all the tickers channels.
@@ -131,8 +115,8 @@ func NewMexcProvider(
 		wsClient:        wsConn,
 		logger:          logger.With().Str("provider", "mexc").Logger(),
 		endpoints:       endpoints,
-		tickers:         map[string]MexcTicker{},
-		candles:         map[string][]MexcCandle{},
+		tickers:         map[string]types.TickerPrice{},
+		candles:         map[string][]types.CandlePrice{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
@@ -239,7 +223,7 @@ func (p *MexcProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 		return types.TickerPrice{}, fmt.Errorf("mexc provider failed to get ticker price for %s", key)
 	}
 
-	return ticker.toTickerPrice()
+	return ticker, nil
 }
 
 func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
@@ -251,15 +235,7 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 		return []types.CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
 	}
 
-	candleList := []types.CandlePrice{}
-	for _, candle := range candles {
-		cp, err := candle.toCandlePrice()
-		if err != nil {
-			return []types.CandlePrice{}, err
-		}
-		candleList = append(candleList, cp)
-	}
-	return candleList, nil
+	return candles, nil
 }
 
 func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
@@ -268,9 +244,9 @@ func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	var (
-		tickerResp MexcTickerResult
+		tickerResp MexcTickerResponse
 		tickerErr  error
-		candleResp MexcCandle
+		candleResp MexcCandleResponse
 		candleErr  error
 	)
 
@@ -323,43 +299,51 @@ func (p *MexcProvider) setTickerPair(symbol string, ticker MexcTickerData) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	p.tickers[symbol] = MexcTicker{
-		Symbol:    symbol,
-		LastPrice: strconv.FormatFloat(ticker.LastPrice, 'f', 5, 64),
-		Volume:    strconv.FormatFloat(ticker.Volume, 'f', 5, 64),
+	price, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.LastPrice, 'f', 5, 64))
+	if err != nil {
+		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker price")
+	}
+	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.Volume, 'f', 5, 64))
+	if err != nil {
+		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker volume")
+	}
+
+	p.tickers[symbol] = types.TickerPrice{
+		Price:  price,
+		Volume: volume,
 	}
 }
 
-func (p *MexcProvider) setCandlePair(candle MexcCandle) {
+func (p *MexcProvider) setCandlePair(candleResp MexcCandleResponse) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
+
+	close, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Close, 'f', 5, 64))
+	if err != nil {
+		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle close")
+	}
+	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Volume, 'f', 5, 64))
+	if err != nil {
+		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle volume")
+	}
+	candle := types.CandlePrice{
+		Price:  close,
+		Volume: volume,
+		// convert seconds -> milli
+		TimeStamp: SecondsToMilli(candleResp.Metadata.TimeStamp),
+	}
+
 	staleTime := PastUnixTime(providerCandlePeriod)
-	candleList := []MexcCandle{}
-	// convert candle timestamp s -> milli
-	candle.Metadata.TimeStamp = SecondsToMilli(candle.Metadata.TimeStamp)
+	candleList := []types.CandlePrice{}
 	candleList = append(candleList, candle)
 
-	for _, c := range p.candles[candle.Symbol] {
-		if staleTime < c.Metadata.TimeStamp {
+	for _, c := range p.candles[candleResp.Symbol] {
+		if staleTime < c.TimeStamp {
 			candleList = append(candleList, c)
 		}
 	}
 
-	p.candles[candle.Symbol] = candleList
-}
-
-func (ticker MexcTicker) toTickerPrice() (types.TickerPrice, error) {
-	return types.NewTickerPrice("mexc", ticker.Symbol, ticker.LastPrice, ticker.Volume)
-}
-
-func (candle MexcCandle) toCandlePrice() (types.CandlePrice, error) {
-	return types.NewCandlePrice(
-		"mexc",
-		candle.Symbol,
-		strconv.FormatFloat(candle.Metadata.Close, 'f', 5, 64),
-		strconv.FormatFloat(candle.Metadata.Volume, 'f', 5, 64),
-		candle.Metadata.TimeStamp,
-	)
+	p.candles[candleResp.Symbol] = candleList
 }
 
 func (p *MexcProvider) handleWebSocketMsgs(ctx context.Context) {
