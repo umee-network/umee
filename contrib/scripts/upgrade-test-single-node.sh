@@ -17,7 +17,7 @@ fi
 
 CHAIN_ID="${CHAIN_ID:-888}"
 CHAIN_DIR="${CHAIN_DIR:-$CWD/node-data}"
-NODE_NAME="${NODE_NAME:-coping}"
+NODE_NAME="${NODE_NAME:-n0}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
 NODE_URL="${NODE_URL:-"tcp://localhost:26657"}"
 BLOCK_TIME="${BLOCK_TIME:-6}"

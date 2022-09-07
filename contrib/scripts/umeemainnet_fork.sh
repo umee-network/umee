@@ -118,7 +118,7 @@ NODE_ADDR="$($UMEED_BIN_MAINNET $nodeHome keys show $ADMIN_KEY -a $kbt)"
 
 cp $NODE_PRIV_KEY $nodePrivateKeyPath
 
-echo Coping addr is $NODE_ADDR
+echo Node addr is $NODE_ADDR
 
 echo Replace generated genesis with tinkered genesis
 rm $nodeDir/$genesisConfigPath
