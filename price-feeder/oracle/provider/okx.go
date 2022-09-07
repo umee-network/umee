@@ -300,6 +300,9 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler.
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -414,7 +417,16 @@ func (p *OkxProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(okxPingCheck)
 }
 
-// reconnect closes the last WS connection and creates a new one. If there’s a
+// disconnect disconnects the existing websocket connection.
+func (p *OkxProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Okx websocket %v", err)
+	}
+	return nil
+}
+
+// reconnect creates a websocket connection. If there’s a
 // network problem, the system will automatically disable the connection. The
 // connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds. To keep the connection stable:
@@ -425,11 +437,6 @@ func (p *OkxProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *OkxProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Okx websocket %v", err)
-	}
-
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
