@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
+
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type IntegrationTestSuite struct {
@@ -74,28 +76,27 @@ type testQuery struct {
 
 func (t testTransaction) Run(s *IntegrationTestSuite) {
 	clientCtx := s.network.Validators[0].ClientCtx
-
 	txFlags := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, s.network.Validators[0].Address),
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+		fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
 	}
+	args := append(t.args, txFlags...)
+	require := s.Require()
 
-	t.args = append(t.args, txFlags...)
-
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
-	s.Require().NoError(err, t.msg)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, args)
+	require.NoError(err, t.msg)
 
 	resp := &sdk.TxResponse{}
 	err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp)
-	s.Require().NoError(err, t.msg)
+	require.NoError(err, t.msg)
 
 	if t.expectedErr == nil {
-		s.Require().Equal(0, int(resp.Code), t.msg)
+		require.Equal(0, int(resp.Code), "msg", t.msg, "resp", resp)
 	} else {
-		s.Require().Equal(int(t.expectedErr.ABCICode()), int(resp.Code), t.msg)
+		require.Equal(int(t.expectedErr.ABCICode()), int(resp.Code), t.msg)
 	}
 }
 
@@ -105,10 +106,9 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 	queryFlags := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
+	args := append(t.args, queryFlags...)
 
-	t.args = append(t.args, queryFlags...)
-
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, t.args)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, args)
 
 	if t.expectErr {
 		s.Require().Error(err, t.msg)
