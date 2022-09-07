@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-# File with an common used function among others scripts
+# File with commonly used functions for other scripts
 
 CHAIN_ID="${CHAIN_ID:-888}"
 NODE_URL="${NODE_URL:-"tcp://localhost:26657"}"

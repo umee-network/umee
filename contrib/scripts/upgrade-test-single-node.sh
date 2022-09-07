@@ -1,7 +1,7 @@
 #!/bin/bash -eux
 
-# It uses an chain already up and start an governance proposal to upgrade to a new binary version
-# vote 'yes' for that proposal, wait to reach to reach an upgrade height and kill the process id
+# Using an already running chain, starts a governance proposal to upgrade to a new binary version,
+# votes 'yes' on that proposal, waits to reach to reach an upgrade height and kills the process id
 # received by the parameter $UMEED_V1_PID_FILE
 
 # USAGE: UMEED_V1_PID_FILE=$umee_pid_file ./upgrade-test-single-node.sh
@@ -61,8 +61,8 @@ echo proposal ID is $PROPOSAL_ID
 $UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes
 
 echo "..."
-echo "Finish voting in the proposal"
-echo "It will wait to reach the block height to upgrade"
+echo "Finished voting on the proposal"
+echo "Waiting to reach the upgrade height"
 echo "..."
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 wait_until_block $UPGRADE_HEIGHT
 
@@ -79,7 +79,7 @@ kill -s 15 $node_pid_value
 sleep 5
 
 echo "...."
-echo "Upgrade finish"
+echo "Upgrade finished"
 echo "...."
 sleep $VOTING_PERIOD
 
@@ -88,7 +88,7 @@ nodeLogPath=$hdir.umeed-v2.log
 
 $UMEED_BIN_V2 $nodeHomeFlag start --minimum-gas-prices=0.001uumee --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
 
-# Gets the node piid
+# Gets the node pid
 echo $! > $UMEED_V1_PID_FILE
 
 echo

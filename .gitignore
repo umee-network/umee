@@ -18,6 +18,8 @@ contrib/scripts/node-data
 contrib/scripts/umeemainnet.*
 contrib/scripts/cosmos-genesis-tinkerer
 contrib/scripts/tinkered_genesis.json
+contrib/scripts/preprocessing.json
+contrib/scripts/umeed-releases
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

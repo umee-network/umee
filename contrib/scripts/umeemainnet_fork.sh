@@ -139,7 +139,7 @@ unset UMEE_ENABLE_BETA
 pid_path=$nodeDir.pid
 UMEE_ENABLE_BETA=false $UMEED_BIN_MAINNET $nodeHome start --grpc.address="0.0.0.0:9090" --x-crisis-skip-assert-invariants --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
 
-# Gets the node piid
+# Gets the node pid
 echo $! > $pid_path
 
 echo
