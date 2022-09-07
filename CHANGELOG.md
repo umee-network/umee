@@ -90,6 +90,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1323](https://github.com/umee-network/umee/pull/1323) Oracle cli - Add validator address override option.
 - [1329](https://github.com/umee-network/umee/pull/1329) Implement MaxCollateralShare.
 - [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
+- [1319](https://github.com/umee-network/umee/pull/1319) Implemented MaxSupply.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
 
 ### Improvements
@@ -104,6 +105,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1236](https://github.com/umee-network/umee/pull/1236) Improve leverage event fields.
 - [1294](https://github.com/umee-network/umee/pull/1294) Simplify window progress query math.
 - [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
+- [1322](https://github.com/umee-network/umee/pull/1322) Improve complete liquidation threshold and close factor.
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
 
 ### Bug Fixes
