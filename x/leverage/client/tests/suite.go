@@ -106,7 +106,8 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, append(t.args, queryFlags...))
-	require.NoError(err, t.msg)
+	// TODO: enable err check https://github.com/umee-network/umee/issues/1351
+	// require.NoError(err, t.msg)
 
 	if t.expectErr {
 		require.Error(err, t.msg)
