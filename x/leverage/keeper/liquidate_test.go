@@ -203,3 +203,83 @@ func TestComputeLiquidation(t *testing.T) {
 	uDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
 	runTestCase(uDust, 2, 1, 29, "high exchange rate collateral dust")
 }
+
+func TestCloseFactor(t *testing.T) {
+	require := require.New(t)
+
+	type testCase struct {
+		borrowedValue                sdk.Dec
+		collateralValue              sdk.Dec
+		liquidationThreshold         sdk.Dec
+		smallLiquidationSize         sdk.Dec
+		minimumCloseFactor           sdk.Dec
+		completeLiquidationThreshold sdk.Dec
+	}
+
+	baseCase := func() testCase {
+		// returns a liquidation scenario where close factor will reach 1 at a borrowed value of 58
+		return testCase{
+			sdk.MustNewDecFromStr("50"),  // borrowed value 50
+			sdk.MustNewDecFromStr("100"), // collateral value 100
+			sdk.MustNewDecFromStr("40"),  // liquidation threshold 40
+			sdk.MustNewDecFromStr("20"),  // small liquidation size 20
+			sdk.MustNewDecFromStr("0.1"), // minimum close factor 10%
+			sdk.MustNewDecFromStr("0.3"), // complete liquidation threshold 30%
+		}
+	}
+
+	runTestCase := func(tc testCase, expectedCloseFactor string, msg string) {
+		closeFactor := keeper.ComputeCloseFactor(
+			tc.borrowedValue,
+			tc.collateralValue,
+			tc.liquidationThreshold,
+			tc.smallLiquidationSize,
+			tc.minimumCloseFactor,
+			tc.completeLiquidationThreshold,
+		)
+
+		require.Equal(sdk.MustNewDecFromStr(expectedCloseFactor), closeFactor, msg)
+	}
+
+	// In the base case, close factor scales from 10% to 100% as borrowed value
+	// goes from liquidation threshold ($40) to a critical value, which is defined
+	// to be 30% of the way between liquidation threshold and collateral value ($100).
+	// Since the borrowed value of $50 is 5/9 the way from liquidation threshold to
+	// the base case's critical value of $58, the computed close factor will be
+	// 5/9 of the way from 10% to 100% - thus, 60%.
+	runTestCase(baseCase(), "0.6", "base case")
+
+	// If borrowed value has passed the critical point, close factor is 1
+	completeLiquidation := baseCase()
+	completeLiquidation.borrowedValue = sdk.MustNewDecFromStr("60")
+	runTestCase(completeLiquidation, "1", "complete liquidation")
+
+	// If borrowed value is less than small liquidation size, close factor is 1.
+	smallLiquidation := baseCase()
+	smallLiquidation.smallLiquidationSize = sdk.MustNewDecFromStr("60")
+	runTestCase(smallLiquidation, "1", "small liquidation")
+
+	// A liquidation-ineligible target would not have its close factor calculated in
+	// practice, but the function should return zero if it were.
+	notEligible := baseCase()
+	notEligible.borrowedValue = sdk.MustNewDecFromStr("30")
+	runTestCase(notEligible, "0", "liquidation ineligible")
+
+	// A liquidation-ineligible target which is below the small liquidation size
+	// should still return a close factor of zero.
+	smallNotEligible := baseCase()
+	smallNotEligible.borrowedValue = sdk.MustNewDecFromStr("10")
+	runTestCase(smallNotEligible, "0", "liquidation ineligible (small)")
+
+	// A borrower which is exactly on their liquidation threshold will have a close factor
+	// equal to minimumCloseFactor.
+	exactThreshold := baseCase()
+	exactThreshold.borrowedValue = sdk.MustNewDecFromStr("40")
+	runTestCase(exactThreshold, "0.1", "exact threshold")
+
+	// If collateral weights are all 1 (CV = LT), close factor will be MinimumCloseFactor.
+	// This situation will not occur in practice as collateral weights are less than one.
+	highCollateralWeight := baseCase()
+	highCollateralWeight.collateralValue = sdk.MustNewDecFromStr("40")
+	runTestCase(highCollateralWeight, "0.1", "high collateral weights")
+}
