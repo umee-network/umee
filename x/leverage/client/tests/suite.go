@@ -106,7 +106,7 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, append(t.args, queryFlags...))
-	require.Error(err, t.msg)
+	require.NoError(err, t.msg)
 
 	if t.expectErr {
 		require.Error(err, t.msg)
