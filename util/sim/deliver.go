@@ -35,7 +35,7 @@ func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit s
 		err := banktestutil.FundAccount(bk, o.Context, o.SimAccount.Address, fund)
 		if err != nil {
 			return simtypes.NewOperationMsg(o.Msg, false, o.ModuleName, o.Cdc), nil,
-				fmt.Errorf("Can't fund account [%s] to pay fees; [%w]", o.SimAccount.Address, err)
+				fmt.Errorf("can't fund account [%s] to pay fees; [%w]", o.SimAccount.Address, err)
 		}
 	}
 

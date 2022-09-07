@@ -630,7 +630,8 @@ func New(
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
 
-	simStateModules := genmap.Pick(app.mm.Modules, []string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
+	simStateModules := genmap.Pick(app.mm.Modules,
+		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
 	// TODO: Ensure x/leverage implements simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
 
