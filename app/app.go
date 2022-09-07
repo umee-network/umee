@@ -110,6 +110,7 @@ import (
 	customante "github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/swagger"
+	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v3/x/leverage"
@@ -228,6 +229,8 @@ type UmeeApp struct {
 
 	// simulation manager
 	sm *module.SimulationManager
+	// simulation manager to create state
+	StateSimulationManager *module.SimulationManager
 
 	// module configurator
 	configurator module.Configurator
@@ -626,18 +629,13 @@ func New(
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
-	
+
+	simStateModules := genmap.Pick(app.mm.Modules, []string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
 	// TODO: Ensure x/leverage implements simulator and add it here:
-	simModules := map[string]module.AppModule{
-		leveragetypes.ModuleName: app.mm.Modules 
-	}
-	
-	for name, m := range app.mm.Modules {
-		if name != leveragetypes.ModuleName {
-			simModules[name] = m
-		}
-	}
-	app.sm = module.NewSimulationManagerFromAppModules(simModules, overrideModules)
+	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
+
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 
 	app.sm.RegisterStoreDecoders()
 
