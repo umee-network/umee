@@ -9,6 +9,7 @@ import (
 
 	"github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/util/coin"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -20,19 +21,16 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 
 	msgs := testdata.NewTestMsg(addr1)
 	require.NoError(suite.txBuilder.SetMsgs(msgs))
-	gasLimit := 200000
-	minG := appparams.MinMinGasPrice
+	minGas := appparams.MinMinGasPrice
 	mkFee := func(factor string) sdk.Coins {
-		f := sdk.MustNewDecFromStr(factor)
-		return sdk.NewCoins(sdk.NewCoin(appparams.BondDenom,
-			minG.Amount.MulInt64(int64(gasLimit)).Mul(f).Ceil().RoundInt()))
+		return coin.NewDecBld(minGas).Scale(int64(appparams.DefaultGasLimit)).ScaleStr(factor).ToCoins()
 	}
 	mkGas := func(denom, factor string) sdk.DecCoins {
 		if denom == "" {
-			denom = minG.Denom
+			denom = minGas.Denom
 		}
 		f := sdk.MustNewDecFromStr(factor)
-		return sdk.DecCoins{sdk.NewDecCoinFromDec(denom, minG.Amount.Mul(f))}
+		return sdk.DecCoins{sdk.NewDecCoinFromDec(denom, minGas.Amount.Mul(f))}
 	}
 	mkTx := func(fee sdk.Coins) signing.Tx {
 		suite.txBuilder.SetFeeAmount(fee)
@@ -41,7 +39,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 		return tx
 	}
 
-	suite.txBuilder.SetGasLimit(uint64(gasLimit))
+	suite.txBuilder.SetGasLimit(appparams.DefaultGasLimit)
 	// we set fee to 2*gasLimit*minGasPrice
 	fee := mkFee("2")
 	tx := mkTx(fee)
@@ -50,7 +48,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	// Test CheckTX
 	//
 	ctx := suite.ctx.
-		WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice}).
+		WithMinGasPrices(sdk.DecCoins{minGas}).
 		WithIsCheckTx(true)
 
 	// min-gas-settings should work
@@ -66,7 +64,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	suite.checkFeeFailed(tx, ctx.WithMinGasPrices(mkGas("other", "1")))
 
 	// should fail when some fee doesn't include all gas denoms
-	ctx = ctx.WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice,
+	ctx = ctx.WithMinGasPrices(sdk.DecCoins{minGas,
 		sdk.NewDecCoinFromDec("other", sdk.NewDec(10))})
 	suite.checkFeeFailed(tx, ctx)
 
@@ -74,7 +72,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	// Test DeliverTx
 	//
 	ctx = suite.ctx.
-		WithMinGasPrices(sdk.DecCoins{appparams.MinMinGasPrice}).
+		WithMinGasPrices(sdk.DecCoins{minGas}).
 		WithIsCheckTx(false)
 
 	// ctx.MinGasPrice shouldn't matter
