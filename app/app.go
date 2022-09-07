@@ -626,8 +626,12 @@ func New(
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
-	// TODO: Ensure x/leverage implements simulator and then use app.mm.Modules directly.
-	simModules := map[string]module.AppModule{}
+	
+	// TODO: Ensure x/leverage implements simulator and add it here:
+	simModules := map[string]module.AppModule{
+		leveragetypes.ModuleName: app.mm.Modules 
+	}
+	
 	for name, m := range app.mm.Modules {
 		if name != leveragetypes.ModuleName {
 			simModules[name] = m
