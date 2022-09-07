@@ -92,7 +92,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
 - [1319](https://github.com/umee-network/umee/pull/1319) Implemented MaxSupply.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
-- [13XX](https://github.com/umee-network/umee/pull/13XX) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
+- [1343](https://github.com/umee-network/umee/pull/1343) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
 
 ### Improvements
 
