@@ -87,23 +87,8 @@ jobs:
   price-feeder:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
-        with:
-          PATTERNS: |
-            **/**.go
-            price-feeder/go.mod
-            price-feeder/go.sum
-      - uses: actions/setup-go@v3
-        if: env.GIT_DIFF
-        with:
-          go-version: 1.19
-          cache: true
-          cache-dependency-path: price-feeder/go.sum
-      - name: Test price-feeder
-        if: env.GIT_DIFF
-        run: |
-          cd price-feeder && make test-unit
+      - run:
+          echo: OK, price feeder not tested in v1
 
   liveness-test:
     runs-on: ubuntu-latest
