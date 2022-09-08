@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD041 -->
+
 ![Logo!](assets/umee-small-logo.png)
 
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/repo%20status-WIP-yellow.svg?style=flat-square)](https://www.repostatus.org/#wip)
@@ -10,7 +11,7 @@
 [![GitHub Super-Linter](https://img.shields.io/github/workflow/status/umee-network/umee/Lint?style=flat-square&label=Lint)](https://github.com/marketplace/actions/super-linter)
 
 > A Golang implementation of the Umee network, a decentralized universal capital
-facility in the Cosmos ecosystem.
+> facility in the Cosmos ecosystem.
 
 Umee is a Universal Capital Facility that can collateralize assets on one blockchain
 towards borrowing assets on another blockchain. The platform specializes in
@@ -29,9 +30,10 @@ Umee will allow a multitude of decentralized debt products.
 
 ## Compatibility Matrix
 
-| Version | Experimental | SDK Version | Peggo Version | Price Feeder Version |
-|:-------:|:------------:|:-----------:|---------------|----------------------|
-|  v0.7.x |     true     |   v0.45.x   | v0.2.x        | v0.1.x               |
+| Umee Version | Mainnet | Experimental | Cosmos SDK |  IBC   | Peggo  | Price Feeder |       Gravity Bridge       |
+| :----------: | :-----: | :----------: | :--------: | :----: | :----: | :----------: | :------------------------: |
+|    v0.8.x    |    ✗    |      ✓       |  v0.45.x   | v2.0.x | v0.2.x |    v0.1.x    |                            |
+|    v1.x.x    |    ✓    |      ✗       |  v0.45.x   | v2.0.x | v0.2.x |     N/A      | umee/v1 module/v1.4.x-umee |
 
 ## Active Networks
 
