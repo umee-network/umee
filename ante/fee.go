@@ -87,6 +87,7 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 			*oracletypes.MsgAggregateExchangeRateVote:
 			continue
 
+		// TODO: revisit free gravity msg set
 		case *gbtypes.MsgValsetConfirm,
 			*gbtypes.MsgConfirmBatch,
 			*gbtypes.MsgERC20DeployedClaim,

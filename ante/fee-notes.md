@@ -32,6 +32,9 @@ Validator has to do 2 tx (prevote and vote) every 5 blocks.
 Validator will need to do `5760 = 2*14400/5` tx.
 In table below we assume the same price scheme as above, but in the code most likely we will apply a fixed discount (eg 10x).
 
+The prices are indicative. For some transactions (especially oracle) fees can be disabled.
+See fee.go file for details.
+
 | umee price (usd cent) | gas price in uumee | fee (usd cent) |
 | --------------------: | -----------------: | -------------: |
 |                     2 |                0.2 |         161.28 |
