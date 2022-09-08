@@ -13,6 +13,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage"
 	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	"github.com/umee-network/umee/v3/x/leverage/simulation"
@@ -132,7 +133,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 
 func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -155,7 +156,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 
 func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	r := rand.New(rand.NewSource(8))
-	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		uToken, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -180,7 +181,7 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 
 func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 10_000000)
+	supplyToken := sdk.NewInt64Coin(appparams.BondDenom, 10_000000)
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -202,7 +203,7 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 
 func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 10_000000)
+	supplyToken := sdk.NewInt64Coin(appparams.BondDenom, 10_000000)
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		uToken, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -225,8 +226,8 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 
 func (s *SimTestSuite) TestSimulateMsgRepay() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewInt64Coin(umeeapp.BondDenom, 10_000000)
-	borrowToken := sdk.NewInt64Coin(umeeapp.BondDenom, 1_000000)
+	supplyToken := sdk.NewInt64Coin(appparams.BondDenom, 10_000000)
+	borrowToken := sdk.NewInt64Coin(appparams.BondDenom, 1_000000)
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		uToken, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -250,9 +251,9 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 
 func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(10_000000))
-	uToken := sdk.NewCoin("u/"+umeeapp.BondDenom, sdk.NewInt(10_000000))
-	borrowToken := sdk.NewCoin(umeeapp.BondDenom, sdk.NewInt(1_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
+	uToken := sdk.NewCoin("u/"+appparams.BondDenom, sdk.NewInt(10_000000))
+	borrowToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)

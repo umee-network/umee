@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # Start a single node chain from an exported genesis file,
 # process the genesis file if it wasn't already,
@@ -132,6 +132,7 @@ perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $nodeCfg
 perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $nodeCfg
 perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $nodeCfg
 perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $nodeCfg
+perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uumee"|g' $nodeApp
 
 nodeLogPath=$hdir.umeed-main.log
 unset UMEE_ENABLE_BETA
@@ -164,7 +165,7 @@ echo "Current Block: $CURRENT_BLOCK_HEIGHT >= $WAIT_UNTIL_HEIGHT"
 
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
-echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT"
+echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
 sleep $SEC_AWAIT_NODE_START
 
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT

@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### State Machine Breaking
+
+- [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+
 ### API Breaking
 
 - [1029](https://github.com/umee-network/umee/pull/1029) Removed MsgSetCollateral(addr,denom,bool), and replaced with MsgAddCollateral(addr,coin) and MsgRemoveCollateral(addr,coin)

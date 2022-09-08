@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # Using an already running chain, starts a governance proposal to upgrade to a new binary version,
 # votes 'yes' on that proposal, waits to reach to reach an upgrade height and kills the process id
@@ -53,12 +53,12 @@ echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
 $UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
   --upgrade-height $UPGRADE_HEIGHT --upgrade-info '{"binaries":{"linux/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-amd64","linux/arm64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-arm64","darwin/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-darwin-amd64"}}' \
-  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes
+  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 10000uumee
 
 PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
 echo proposal ID is $PROPOSAL_ID
 
-$UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes
+$UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes --fees 10000uumee
 
 echo "..."
 echo "Finished voting on the proposal"
@@ -86,7 +86,7 @@ sleep $VOTING_PERIOD
 # Starts a different file for logging
 nodeLogPath=$hdir.umeed-v2.log
 
-$UMEED_BIN_V2 $nodeHomeFlag start --minimum-gas-prices=0.001uumee --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
+$UMEED_BIN_V2 $nodeHomeFlag start --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
 
 # Gets the node pid
 echo $! > $UMEED_V1_PID_FILE
