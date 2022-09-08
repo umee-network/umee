@@ -15,7 +15,8 @@ import (
 
 // GenAndDeliverTxWithRandFees generates a transaction with a random fee and delivers it.
 // If gasLimit==0 then appparams default gas limit is used.
-func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit sdk.Gas) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit sdk.Gas
+) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 	if gasLimit == 0 {
 		gasLimit = appparams.DefaultGasLimit
 	}
