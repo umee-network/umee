@@ -52,11 +52,12 @@ jobs:
         if: env.GIT_DIFF
         run: |
           make test-unit-cover
-      - uses: codecov/codecov-action@v3
-        if: env.GIT_DIFF
-        with:
-          file: ./coverage.txt
-          fail_ci_if_error: true
+      # TODO: disabled
+      # - uses: codecov/codecov-action@v3
+      #   if: env.GIT_DIFF
+      #   with:
+      #     file: ./coverage.txt
+      #     fail_ci_if_error: true
 
   test-e2e:
     runs-on: ubuntu-latest
