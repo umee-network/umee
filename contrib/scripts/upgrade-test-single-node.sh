@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # Using an already running chain, starts a governance proposal to upgrade to a new binary version,
 # votes 'yes' on that proposal, waits to reach to reach an upgrade height and kills the process id

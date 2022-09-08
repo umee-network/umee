@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # Start a single node chain from an exported genesis file,
 # process the genesis file if it wasn't already,
