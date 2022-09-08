@@ -3,7 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
@@ -27,6 +27,6 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	//    = 2.7
 
 	// get derived exchange rate
-	rate := app.LeverageKeeper.DeriveExchangeRate(ctx, umeeapp.BondDenom)
+	rate := app.LeverageKeeper.DeriveExchangeRate(ctx, appparams.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("2.7"), rate)
 }

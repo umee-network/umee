@@ -14,6 +14,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage"
 	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
@@ -21,7 +22,7 @@ import (
 )
 
 const (
-	umeeDenom = umeeapp.BondDenom
+	umeeDenom = appparams.BondDenom
 	atomDenom = fixtures.AtomDenom
 )
 
@@ -48,7 +49,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Unix(0, 0),
 	})
 
-	umeeToken := newToken(umeeapp.BondDenom, "UMEE")
+	umeeToken := newToken(appparams.BondDenom, "UMEE")
 	atomIBCToken := newToken(atomDenom, "ATOM")
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle

@@ -3,20 +3,20 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func (s *IntegrationTestSuite) TestSetReserves() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// get initial reserves
-	amount := app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
+	amount := app.LeverageKeeper.GetReserveAmount(ctx, appparams.BondDenom)
 	require.Equal(sdk.ZeroInt(), amount)
 
 	// artifically reserve 200 umee
-	s.setReserves(coin(umeeapp.BondDenom, 200_000000))
+	s.setReserves(coin(appparams.BondDenom, 200_000000))
 	// get new reserves
-	amount = app.LeverageKeeper.GetReserveAmount(ctx, umeeapp.BondDenom)
+	amount = app.LeverageKeeper.GetReserveAmount(ctx, appparams.BondDenom)
 	require.Equal(sdk.NewInt(200_000000), amount)
 }
 

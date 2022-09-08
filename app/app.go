@@ -110,6 +110,7 @@ import (
 	customante "github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/swagger"
+	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v3/x/leverage"
@@ -119,22 +120,6 @@ import (
 	"github.com/umee-network/umee/v3/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
-)
-
-const (
-	// Name defines the application name of the Umee network.
-	Name = "umee"
-
-	// BondDenom defines the native staking token denomination.
-	BondDenom = "uumee"
-
-	// DisplayDenom defines the name, symbol, and display value of the umee token.
-	DisplayDenom = "UMEE"
-
-	// MaxAddrLen is the maximum allowed length (in bytes) for an address.
-	//
-	// NOTE: In the SDK, the default value is 255.
-	MaxAddrLen = 20
 )
 
 var (
@@ -244,6 +229,8 @@ type UmeeApp struct {
 
 	// simulation manager
 	sm *module.SimulationManager
+	// simulation manager to create state
+	StateSimulationManager *module.SimulationManager
 
 	// module configurator
 	configurator module.Configurator
@@ -255,13 +242,7 @@ func init() {
 		panic(fmt.Sprintf("failed to get user home directory: %s", err))
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", Name))
-
-	// XXX: If other upstream or external application's depend on any of Umee's
-	// CLI or command functionality, then this would require us to move the
-	// SetAddressConfig call to somewhere external such as the root command
-	// constructor and anywhere else we contract the app.
-	SetAddressConfig()
+	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", appparams.Name))
 }
 
 func New(
@@ -280,7 +261,7 @@ func New(
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 
-	bApp := baseapp.NewBaseApp(Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
+	bApp := baseapp.NewBaseApp(appparams.Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 	// TODO
 	// bApp.SetVersion(version.Version)
@@ -347,7 +328,7 @@ func New(
 		app.GetSubspace(authtypes.ModuleName),
 		authtypes.ProtoBaseAccount,
 		maccPerms,
-		AccountAddressPrefix,
+		appparams.AccountAddressPrefix,
 	)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
@@ -648,14 +629,14 @@ func New(
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
-	// TODO: Ensure x/leverage implements simulator and then use app.mm.Modules directly.
-	simModules := map[string]module.AppModule{}
-	for name, m := range app.mm.Modules {
-		if name != leveragetypes.ModuleName {
-			simModules[name] = m
-		}
-	}
-	app.sm = module.NewSimulationManagerFromAppModules(simModules, overrideModules)
+
+	simStateModules := genmap.Pick(app.mm.Modules,
+		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
+	// TODO: Ensure x/leverage implements simulator and add it here:
+	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
+
+	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 
 	app.sm.RegisterStoreDecoders()
 

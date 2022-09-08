@@ -608,7 +608,7 @@ func (s *IntegrationTestSuite) queryUmeeEthBalance(
 	s.Require().NoError(err)
 	s.T().Logf(
 		"ETh Balance of tokens; index: %d, addr: %s, amount: %d, denom: %s, erc20Addr: %s",
-		orchestratorIdx, ethAddr, ethBalance, photonDenom, ethTokenAddr,
+		orchestratorIdx, ethAddr, ethBalance, umeeTokenDenom, ethTokenAddr,
 	)
 
 	return umeeBalance, ethBalance, umeeAddr, ethAddr

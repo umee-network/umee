@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # USAGE:
 # ./single-gen.sh <iterations> <sleep> <num-blocks> <node-address>
