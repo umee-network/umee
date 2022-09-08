@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/price-feeder
 
-go 1.17
+go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
