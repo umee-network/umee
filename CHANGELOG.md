@@ -52,7 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - Disable Gravity Bridge bridge messages.
 
-Improvements:
+### Improvements
 
 - [#1355](https://github.com/umee-network/umee/pull/1355) Update tooling to go1.19 and CI to the latest setup (based on v3).
 
