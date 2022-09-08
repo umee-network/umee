@@ -86,7 +86,7 @@ sleep $VOTING_PERIOD
 # Starts a different file for logging
 nodeLogPath=$hdir.umeed-v2.log
 
-$UMEED_BIN_V2 $nodeHomeFlag start --minimum-gas-prices=0.001uumee --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
+$UMEED_BIN_V2 $nodeHomeFlag start --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
 
 # Gets the node pid
 echo $! > $UMEED_V1_PID_FILE
