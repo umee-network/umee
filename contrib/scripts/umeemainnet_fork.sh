@@ -132,6 +132,7 @@ perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $nodeCfg
 perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $nodeCfg
 perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $nodeCfg
 perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $nodeCfg
+perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uumee"|g' $nodeApp
 
 nodeLogPath=$hdir.umeed-main.log
 unset UMEE_ENABLE_BETA
