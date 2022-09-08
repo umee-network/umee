@@ -205,8 +205,7 @@ func txCommand(ac appCreator) *cobra.Command {
 	return cmd
 }
 
-// nolint: unused
-func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
+func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) { //nolint: unused
 	set := func(s *pflag.FlagSet, key, val string) {
 		if f := s.Lookup(key); f != nil {
 			f.DefValue = val
