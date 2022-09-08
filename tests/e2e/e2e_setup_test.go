@@ -39,8 +39,8 @@ import (
 
 const (
 	photonDenom    = "photon"
-	initBalanceStr = "110000000000uumee,100000000000photon"
-	minGasPrice    = "0.00001" + photonDenom
+	initBalanceStr = "110000000000" + appparams.BondDenom + ",100000000000" + photonDenom
+	minGasPrice    = "0.05" + appparams.BondDenom
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15

@@ -26,6 +26,7 @@ import (
 	"github.com/tendermint/tendermint/privval"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type validator struct {
@@ -223,7 +224,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 
 	txBuilder.SetMemo(fmt.Sprintf("%s@%s:26656", v.nodeKey.ID(), v.instanceName()))
 	txBuilder.SetFeeAmount(sdk.NewCoins())
-	txBuilder.SetGasLimit(200000)
+	txBuilder.SetGasLimit(appparams.DefaultGasLimit)
 
 	signerData := authsigning.SignerData{
 		ChainID:       v.chain.id,

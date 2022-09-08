@@ -49,8 +49,8 @@ rpc_timeout = '10s'
 account_prefix = 'umee'
 key_name = 'val01-umee'
 store_prefix = 'ibc'
-max_gas = 6000000
-gas_price = { price = 0.001, denom = 'photon' }
+max_gas = 200000
+gas_price = { price = 0.05, denom = 'uumee' }
 gas_adjustment = 1.0
 clock_drift = '1m' # to accomdate docker containers
 trusting_period = '14days'
