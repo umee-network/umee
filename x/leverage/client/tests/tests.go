@@ -253,10 +253,10 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAccountBalancesResponse{},
 			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 201), // slightly increased uToken exchange rate
+					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.ToUTokenDenom(umeeapp.BondDenom), 100),
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
 				),
 				Borrowed: sdk.NewCoins(),
 			},
