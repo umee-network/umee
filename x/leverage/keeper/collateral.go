@@ -144,9 +144,9 @@ func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	exchangeRate := k.DeriveExchangeRate(ctx, denom)
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
-	// Zero collateral will be interpreted as having no liquidity
+	// Zero collateral will be interpreted as full liquidity
 	if totalCollateral.IsZero() {
-		return sdk.ZeroDec()
+		return sdk.OneDec()
 	}
 
 	collateralLiquidity := toDec(liquidity).Quo(exchangeRate.MulInt(totalCollateral.Amount))
