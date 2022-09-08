@@ -145,8 +145,8 @@ func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
 	// Zero collateral will be interpreted as full collateral liquidity. This encompasses two cases:
-	// - 0/0 liquidity / collateral: Empty market, system is considered healthy by default
-	// - x/0 liquidity / collateral: No collateral but plenty of liquidity, also considered healthy
+	// - liquidity / collateral = 0/0: Empty market, system is considered healthy by default
+	// - liquidity / collateral = x/0: No collateral but nonzero liquidity, also considered healthy
 	// In both cases, "all collateral is liquid" is technically true, given that there is no collateral.
 	if totalCollateral.IsZero() {
 		return sdk.OneDec()
