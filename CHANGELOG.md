@@ -46,7 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v1.0.4](https://github.com/umee-network/umee/releases/tag/v1.0.4) - 2022-09-08
+## [v1.1.0](https://github.com/umee-network/umee/releases/tag/v1.1.0) - 2022-09-08
+
+### State Machine Breaking
+
+- Disable Gravity Bridge bridge messages.
+
+Improvements:
+
+- [#1355](https://github.com/umee-network/umee/pull/1355) Update tooling to go1.19 and CI to the latest setup (based on v3).
+
+## [v1.0.4](https://github.com/umee-network/umee/releases/tag/v1.0.4) - - 2022-09-08
 
 ### Improvements
 
