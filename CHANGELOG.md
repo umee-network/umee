@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v1.0.4](https://github.com/umee-network/umee/releases/tag/v1.0.4) - 2022-09-08
+
+### Improvements
+
+- [#1353](https://github.com/umee-network/umee/pull/1353) Gravity Bridge update
+
 ## [v1.0.3](https://github.com/umee-network/umee/releases/tag/v1.0.3) - 2022-02-17
 
 ### State Machine Breaking
