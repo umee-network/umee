@@ -61,7 +61,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(ibcStakeDenom, math.NewInt(300))
-		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
 		gravityFee := sdk.NewCoin(ibcStakeDenom, math.NewInt(7))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, ibcStakeERC20Addr, amount, umeeFee, gravityFee)
@@ -89,7 +89,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(photonDenom, math.NewInt(100))
-		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
 		gravityFee := sdk.NewCoin(photonDenom, math.NewInt(3))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, photonERC20Addr, amount, umeeFee, gravityFee)
@@ -117,7 +117,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(appparams.BondDenom, math.NewInt(300))
-		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
 		gravityFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(7))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, umeeERC20Addr, amount, umeeFee, gravityFee)
