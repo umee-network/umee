@@ -87,9 +87,7 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 			*oracletypes.MsgAggregateExchangeRateVote:
 			continue
 
-		// TODO: remove messages which should not be "free":
 		case *gbtypes.MsgValsetConfirm,
-			*gbtypes.MsgRequestBatch,
 			*gbtypes.MsgConfirmBatch,
 			*gbtypes.MsgERC20DeployedClaim,
 			*gbtypes.MsgConfirmLogicCall,
