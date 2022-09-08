@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - release/*
+      - release/**
 
 jobs:
   cleanup-runs:
@@ -87,8 +87,7 @@ jobs:
   price-feeder:
     runs-on: ubuntu-latest
     steps:
-      - run:
-          echo: OK, price feeder not tested in v1
+      - run: echo OK price feeder not tested in v1
 
   liveness-test:
     runs-on: ubuntu-latest
