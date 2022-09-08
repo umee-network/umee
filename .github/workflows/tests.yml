@@ -20,240 +20,117 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.19
       - name: Display Go Version
         run: go version
-      - name: Install tparse
-        run: |
-          export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.8.3
       - uses: actions/cache@v3
+        id: cache-go-tparse
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-tparse-binary
+      - name: Install tparse
+        if: steps.cache-go-tparse.outputs.cache-hit != 'true'
+        run: |
+          export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.9.0
 
   test-unit-cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
       - name: Test and Create Coverage Report
+        if: env.GIT_DIFF
         run: |
           make test-unit-cover
+      - uses: codecov/codecov-action@v3
         if: env.GIT_DIFF
-      - uses: codecov/codecov-action@v2.1.0
         with:
           file: ./coverage.txt
           fail_ci_if_error: true
-        if: env.GIT_DIFF
 
   test-e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
       - name: Build Docker Image
+        if: env.GIT_DIFF
         run: |
           make docker-build-debug
-        if: env.GIT_DIFF
       - name: Test E2E
+        if: env.GIT_DIFF
         run: |
           make test-e2e
-        if: env.GIT_DIFF
-
-  # split-test-files:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Create Packages File
-  #       run: go list ./... > pkgs.txt
-  #     - name: Split Packages into Files
-  #       run: split -d -n l/4 pkgs.txt pkgs.txt.part.
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-00"
-  #         path: ./pkgs.txt.part.00
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-01"
-  #         path: ./pkgs.txt.part.01
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-02"
-  #         path: ./pkgs.txt.part.02
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-03"
-  #         path: ./pkgs.txt.part.03
-
-  # upload-coverage-report:
-  #   runs-on: ubuntu-latest
-  #   needs: tests
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: technote-space/get-diff-action@v6.0.1
-  #       with:
-  #         PATTERNS: |
-  #           **/**.go
-  #           go.mod
-  #           go.sum
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-00-coverage"
-  #       if: env.GIT_DIFF
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-01-coverage"
-  #       if: env.GIT_DIFF
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-02-coverage"
-  #       if: env.GIT_DIFF
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-03-coverage"
-  #       if: env.GIT_DIFF
-  #     - run: |
-  #         cat ./*profile.out | grep -v "mode: atomic" >> coverage.txt
-  #       if: env.GIT_DIFF
-  #     - name: filter out DONTCOVER
-  #       run: |
-  #         excludelist="$(find ./ -type f -name '*.go' | xargs grep -l 'DONTCOVER')"
-  #         excludelist+=" $(find ./ -type f -name '*.pb.go')"
-  #         excludelist+=" $(find ./ -type f -name '*.pb.gw.go')"
-  #         excludelist+=" $(find ./ -type f -path './tests/mocks/*.go')"
-  #         for filename in ${excludelist}; do
-  #           filename=$(echo $filename | sed 's/^./github.com\/cosmos\/cosmos-sdk/g')
-  #           echo "Excluding ${filename} from coverage report..."
-  #           sed -i.bak "/$(echo $filename | sed 's/\//\\\//g')/d" coverage.txt
-  #         done
-  #       if: env.GIT_DIFF
-  #     - uses: codecov/codecov-action@v2.1.0
-  #       with:
-  #         file: ./coverage.txt
-  #       if: env.GIT_DIFF
-
-  # tests:
-  #   runs-on: ubuntu-latest
-  #   needs: split-test-files
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       part: ["00", "01", "02", "03"]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-go@v3
-  #       with:
-  #         go-version: 1.17
-  #     - uses: technote-space/get-diff-action@v6.0.1
-  #       with:
-  #         PATTERNS: |
-  #           **/**.go
-  #           go.mod
-  #           go.sum
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-${{ matrix.part }}"
-  #       if: env.GIT_DIFF
-  #     - name: Create Test and Coverage Report
-  #       run: |
-  #         cat pkgs.txt.part.${{ matrix.part }} | xargs go test -mod=readonly -timeout 30m -coverprofile=${{ matrix.part }}profile.out -covermode=atomic
-  #       if: env.GIT_DIFF
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         name: "${{ github.sha }}-${{ matrix.part }}-coverage"
-  #         path: ./${{ matrix.part }}profile.out
 
   price-feeder:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
             price-feeder/go.mod
             price-feeder/go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+          cache-dependency-path: price-feeder/go.sum
       - name: Test price-feeder
+        if: env.GIT_DIFF
         run: |
           cd price-feeder && make test-unit
-        if: env.GIT_DIFF
 
   liveness-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         id: git_diff
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
-      - name: Install Starport
-        run: |
-          curl https://get.starport.network/starport@v0.19.3! | bash
+      - uses: actions/setup-go@v3
         if: env.GIT_DIFF
-      - name: Start Local Network via Starport
-        run: |
-          starport chain serve --reset-once -v -c ./starport.ci.yml > starport.out 2>&1 &
+        with:
+          go-version: 1.19
+          cache: true
+      - name: Build umeed
         if: env.GIT_DIFF
+        run: |
+          make build
+      - name: Start single node chain
+        if: env.GIT_DIFF
+        run: |
+          ./contrib/scripts/single-node.sh
       - name: Test Local Network Liveness
-        run: |
-          sleep 2m
-          ./contrib/scripts/test_localnet_liveness.sh 100 5 50 localhost
         if: env.GIT_DIFF
-
-  beta-liveness-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
-      - uses: technote-space/get-diff-action@v6.0.1
-        id: git_diff
-        with:
-          PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-      - name: Install Starport
         run: |
-          curl https://get.starport.network/starport@v0.19.3! | bash
-        if: env.GIT_DIFF
-      - name: Start Local Beta Network via Starport
-        run: |
-          starport chain serve --reset-once -v -c ./starport.ci.beta.yml > starport.beta.out 2>&1 &
-        env:
-          UMEE_ENABLE_BETA: true
-        if: env.GIT_DIFF
-      - name: Test Local Beta Network Liveness
-        run: |
-          sleep 2m
-          ./contrib/scripts/test_localnet_liveness.sh 100 5 50 localhost
-        if: env.GIT_DIFF
+          sleep 1m
+          ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657

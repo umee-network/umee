@@ -20,7 +20,8 @@ jobs:
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.19
+
       - name: Install runsim
         run: export GO111MODULE="on" && go install github.com/cosmos/tools/cmd/runsim@v1.0.0
       - uses: actions/cache@v3
@@ -31,45 +32,48 @@ jobs:
   test-sim-non-determinism:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
       - name: Test application non-determinism
+        if: env.GIT_DIFF
         run: |
           make test-sim-non-determinism
-        if: env.GIT_DIFF
 
   test-sim-multi-seed-short:
     runs-on: ubuntu-latest
     needs: install-dependencies
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
             **/**.go
             go.mod
             go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
       - uses: actions/cache@v3
+        if: env.GIT_DIFF
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-runsim-binary
-        if: env.GIT_DIFF
       - name: test-sim-multi-seed-short
         run: |
           make test-sim-multi-seed-short
         # TODO: We disable multi-seed simulations due to the gravity bridge.
-        #
         # Ref: https://github.com/umee-network/umee/issues/389
         if: ${{ false }}
         # if: env.GIT_DIFF

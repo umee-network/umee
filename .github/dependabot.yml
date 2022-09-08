@@ -12,10 +12,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     reviewers:
-      - alexanderbez
-      - toteki
-      - adamewozniak
-      - facundomedica
+      - umee-network/core-devs
     labels:
       - "A:Automerge"
       - "T:Dependencies"
@@ -26,10 +23,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     reviewers:
-      - alexanderbez
-      - toteki
-      - adamewozniak
-      - facundomedica
+      - umee-network/core-devs
     labels:
       - "A:Automerge"
       - "T:Dependencies"

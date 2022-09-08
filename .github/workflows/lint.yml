@@ -4,25 +4,37 @@ on:
   push:
     branches:
       - main
+      - release/**
+
 jobs:
   golangci:
     name: Run golangci-lint
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: 1.17
-      - uses: technote-space/get-diff-action@v6.0.1
+      - uses: technote-space/get-diff-action@v6.1.0
         with:
           PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-      - name: Run golangci-lint
-        run: make lint
+            **/*.go
+      - uses: actions/setup-go@v3
         if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+      - name: golangci-lint main
+        uses: golangci/golangci-lint-action@v3
+        if: env.GIT_DIFF
+        with:
+          version: latest
+          args: --timeout 8m
+      - name: golangci-lint pricefeeder
+        uses: golangci/golangci-lint-action@v3
+        if: ${{ contains(env.GIT_DIFF, 'price-feeder/')  }}
+        with:
+          version: latest
+          working-directory: price-feeder
+          args: --timeout 8m
 
   super-linter:
     name: Run super-linter
@@ -41,3 +53,19 @@ jobs:
           VALIDATE_MARKDOWN: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  buf-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: technote-space/get-diff-action@v6
+        with:
+          PATTERNS: |
+            **/*.proto
+      - uses: bufbuild/buf-setup-action@v1
+        if: env.GIT_DIFF
+      - uses: bufbuild/buf-lint-action@v1
+        if: env.GIT_DIFF
+        with:
+          input: "proto"
