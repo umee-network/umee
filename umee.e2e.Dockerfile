@@ -5,14 +5,17 @@ FROM golang:1.19-alpine AS base-builder
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 
+# Fetch base umee packages
+FROM base-builder AS umee-base-builder
+ENV PACKAGES curl bash eudev-dev python3
+RUN apk add --no-cache $PACKAGES
+
 # Compile the umeed binary
-FROM base-builder AS umeed-builder
+FROM umee-base-builder AS umeed-builder
 WORKDIR /src/app/
 COPY go.mod go.sum* ./
 RUN go mod download
 COPY . .
-ENV PACKAGES curl bash eudev-dev python3
-RUN apk add --no-cache $PACKAGES
 RUN CGO_ENABLED=0 make install
 RUN cd price-feeder && make install
 
