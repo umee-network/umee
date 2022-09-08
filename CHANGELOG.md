@@ -50,7 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### State Machine Breaking
 
-- Disable Gravity Bridge bridge messages.
+- [1358](https://github.com/umee-network/umee/pull/1358/files) Disable Gravity Bridge bridge messages.
 
 ### Improvements
 
