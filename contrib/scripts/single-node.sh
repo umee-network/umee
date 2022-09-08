@@ -158,7 +158,7 @@ if [[ ! -d "$hdir" ]]; then
   perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n0cfg
 
   echo "--- Modifying app..."
-  perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.0001uumee"|g' $n0app
+  perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uumee"|g' $n0app
 
   # Don't need to set peers if just one node, right?
 else
@@ -183,6 +183,7 @@ echo "  * $NODE_BIN --home $hdir status"
 
 $NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace > $log_path 2>&1 &
 
-sleep 10
+# Adds 1 sec to create the log and makes it easier to debug it on CI
+sleep 1
 
 cat $log_path

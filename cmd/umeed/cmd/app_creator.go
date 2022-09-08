@@ -94,7 +94,7 @@ func mustMinUmeeGasPrice(minGasPrices string) {
 		stdlog.Fatalf("invalid minimum gas prices: %v", err)
 	}
 	if err := ante.AssertMinProtocolGasPrice(gasPrices); err != nil {
-		stdlog.Fatal("minimum-gas-price config in app.toml must be at least",
+		stdlog.Fatal("minimum-gas-price config in app.toml must be at least ",
 			appparams.MinMinGasPrice, " [", err, "]")
 	}
 }
