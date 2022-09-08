@@ -52,7 +52,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	})
 
 	var ibcStakeERC20Addr string
-	s.Run("deploy_stake_erc20", func() {
+	s.Run("deploy_stake_erc20 ibcStakeERC20Addr", func() {
+		s.Require().NotEmpty(ibcStakeDenom)
 		ibcStakeERC20Addr = s.deployERC20Token(ibcStakeDenom)
 	})
 
@@ -81,7 +82,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	// deploy photon ERC20 token contact
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
-		photonERC20Addr = s.deployERC20Token("photon")
+		photonERC20Addr = s.deployERC20Token(photonDenom)
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
@@ -109,7 +110,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	// deploy umee ERC20 token contract
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
-		umeeERC20Addr = s.deployERC20Token("uumee")
+		umeeERC20Addr = s.deployERC20Token(appparams.BondDenom)
 	})
 
 	// send 300 umee tokens from Umee to Ethereum
