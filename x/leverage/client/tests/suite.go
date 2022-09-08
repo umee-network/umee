@@ -118,6 +118,6 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), t.responseType)
 		s.Require().NoError(err, t.msg)
 
-		s.Require().Equal(t.expectedResponse, t.responseType)
+		s.Require().Equal(t.expectedResponse.String(), t.responseType.String())
 	}
 }
