@@ -40,7 +40,6 @@ import (
 const (
 	photonDenom    = "photon"
 	initBalanceStr = "110000000000" + appparams.BondDenom + ",100000000000" + photonDenom
-	minGasPrice    = "0.05" + appparams.BondDenom
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -48,6 +47,7 @@ const (
 )
 
 var (
+	minGasPrice     = appparams.MinMinGasPrice.String()
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 )
