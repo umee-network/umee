@@ -3,7 +3,7 @@ package coin
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
+// TODO: add unit tests for `util/coin/math.go`
 // DecBld is a Builder pattern for dec coin
 type DecBld struct {
 	D sdk.DecCoin
