@@ -208,8 +208,23 @@ func (s *IntegrationTestSuite) setReserves(coins ...sdk.Coin) {
 	}
 }
 
-// checkInvariants is used during other tests to quickly test all invariants
+// checkInvariants is used during other tests to quickly test all invariants,
+// including the inefficient ones we do not run in production
 func (s *IntegrationTestSuite) checkInvariants(msg string) {
-	desc, broken := s.tk.AllInvariants()(s.ctx)
-	s.Require().False(broken, msg, desc)
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	invariants := []sdk.Invariant{
+		keeper.InefficientBorrowAmountInvariant(app.LeverageKeeper),
+		keeper.InefficientCollateralAmountInvariant(app.LeverageKeeper),
+		keeper.ReserveAmountInvariant(app.LeverageKeeper),
+		keeper.InterestScalarsInvariant(app.LeverageKeeper),
+		keeper.ExchangeRatesInvariant(app.LeverageKeeper),
+		keeper.SupplyAPYInvariant(app.LeverageKeeper),
+		keeper.BorrowAPYInvariant(app.LeverageKeeper),
+	}
+
+	for _, inv := range invariants {
+		desc, broken := inv(ctx)
+		require.False(broken, msg, desc)
+	}
 }
