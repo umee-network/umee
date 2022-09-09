@@ -27,8 +27,8 @@ func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte)
 	return nil
 }
 
-// GetAllBadDebts gets bad debt instances across all borrowers.
-func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
+// getAllBadDebts gets bad debt instances across all borrowers.
+func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	prefix := types.KeyPrefixBadDebt
 	badDebts := []types.BadDebt{}
 
