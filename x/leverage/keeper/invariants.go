@@ -71,7 +71,9 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// InefficientCollateralAmountInvariant checks that collateral amounts have all positive values
+// InefficientCollateralAmountInvariant checks that collateral amounts have all positive values.
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
 func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
@@ -116,6 +118,8 @@ func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 }
 
 // InefficientBorrowAmountInvariant checks that borrow amounts have all positive values
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
 func InefficientBorrowAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
