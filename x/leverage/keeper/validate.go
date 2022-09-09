@@ -19,15 +19,6 @@ func (k Keeper) validateAcceptedDenom(ctx sdk.Context, denom string) error {
 	return token.AssertNotBlacklisted()
 }
 
-// validateAcceptedUTokenDenom validates an sdk.Coin and ensures it is a uToken
-// associated with a registered Token with Blacklisted == false
-func (k Keeper) validateAcceptedUTokenDenom(ctx sdk.Context, udenom string) error {
-	if !types.HasUTokenPrefix(udenom) {
-		return types.ErrNotUToken.Wrap(udenom)
-	}
-	return k.validateAcceptedDenom(ctx, types.ToTokenDenom(udenom))
-}
-
 // validateAcceptedAsset validates an sdk.Coin and ensures it is a registered Token
 // with Blacklisted == false
 func (k Keeper) validateAcceptedAsset(ctx sdk.Context, coin sdk.Coin) error {
@@ -35,15 +26,6 @@ func (k Keeper) validateAcceptedAsset(ctx sdk.Context, coin sdk.Coin) error {
 		return err
 	}
 	return k.validateAcceptedDenom(ctx, coin.Denom)
-}
-
-// validateAcceptedUToken validates an sdk.Coin and ensures it is a uToken
-// associated with a registered Token with Blacklisted == false
-func (k Keeper) validateAcceptedUToken(ctx sdk.Context, coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
-		return err
-	}
-	return k.validateAcceptedUTokenDenom(ctx, coin.Denom)
 }
 
 // validateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
