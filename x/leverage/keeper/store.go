@@ -9,32 +9,32 @@ import (
 )
 
 // getStoredDec retrieves an sdk.Dec from the KVStore, or zero if no value is stored.
-// It panics if a stored value fails to unmarshal into a positive value.
-// Accepts an additional string which should describe the field being retrieved in any error messages.
-func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, desc string) sdk.Dec {
+// It panics if a stored value fails to unmarshal into a value higher than a specified minimum.
+// Accepts an additional string which should describe the field being retrieved in panic messages.
+func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, minimum sdk.Dec, desc string) sdk.Dec {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
 		val := sdk.ZeroDec()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(err)
 		}
-		if !val.IsPositive() {
-			panic(types.ErrGetAmount.Wrapf("%s is below the minimum %s of zero", val, desc))
+		if val.LTE(minimum) {
+			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of %s", val, desc, minimum))
 		}
 		return val
 	}
 	// No stored bytes at key
-	return sdk.ZeroDec()
+	return minimum
 }
 
 // setStoredDec stores an sdk.Dec in the KVStore, or clears if setting to zero.
-// Returns an error on attempting to store negative value or on failure to encode.
-// Accepts an additional string which should describe the field being set in any error messages.
-func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val sdk.Dec, desc string) error {
+// Returns an error on attempting to store value lower than a specified minimum or on failure to encode.
+// Accepts an additional string which should describe the field being set in custom error messages.
+func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdk.Dec, desc string) error {
 	store := ctx.KVStore(k.storeKey)
-	if val.IsNegative() {
-		return types.ErrSetAmount.Wrapf("%s is below the minimum %s of zero", val, desc)
+	if val.LT(minimum) {
+		return types.ErrSetAmount.Wrapf("%s is below the minimum %s of %s", val, desc, minimum)
 	}
-	if val.IsZero() {
+	if val.Equal(minimum) {
 		store.Delete(key)
 	} else {
 		bz, err := val.Marshal()
@@ -47,16 +47,13 @@ func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val sdk.Dec, desc stri
 }
 
 // getStoredInt retrieves an sdkmath.Int from the KVStore, or zero if no value is stored.
-// It panics if a stored value fails to unmarshal into a positive value.
+// It panics if a stored value fails to unmarshal.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func (k Keeper) getStoredInt(ctx sdk.Context, key []byte, desc string) sdkmath.Int {
+func (k Keeper) getStoredInt(ctx sdk.Context, key []byte) sdkmath.Int {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
 		val := sdk.ZeroInt()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(err)
-		}
-		if !val.IsPositive() {
-			panic(types.ErrGetAmount.Wrapf("%s is below the minimum %s of zero", val, desc))
 		}
 		return val
 	}
@@ -88,14 +85,14 @@ func (k Keeper) setStoredInt(ctx sdk.Context, key []byte, val sdkmath.Int, desc 
 // Returned value is non-negative.
 func (k Keeper) getAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Dec {
 	key := types.CreateAdjustedBorrowKey(addr, denom)
-	return k.getStoredDec(ctx, key, "adjusted borrow")
+	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted borrow")
 }
 
 // getAdjustedTotalBorrowed gets the total amount borrowed across all borrowers for a given denom.
 // Returned value is non-negative.
 func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec {
 	key := types.CreateAdjustedTotalBorrowKey(denom)
-	return k.getStoredDec(ctx, key, "adjusted total borrow")
+	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted total borrow")
 }
 
 // setAdjustedBorrow sets the adjusted amount borrowed by an address in a given denom directly instead
@@ -116,21 +113,21 @@ func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjusted
 	// Update total adjusted borrow
 	key := types.CreateAdjustedTotalBorrowKey(adjustedBorrow.Denom)
 	newTotal := k.getAdjustedTotalBorrowed(ctx, adjustedBorrow.Denom).Add(delta)
-	err := k.setStoredDec(ctx, key, newTotal, "total adjusted borrow")
+	err := k.setStoredDec(ctx, key, newTotal, sdk.ZeroDec(), "total adjusted borrow")
 	if err != nil {
 		return err
 	}
 
 	// Set new adjusted borrow
 	key = types.CreateAdjustedBorrowKey(addr, adjustedBorrow.Denom)
-	return k.setStoredDec(ctx, key, adjustedBorrow.Amount, "adjusted borrow")
+	return k.setStoredDec(ctx, key, adjustedBorrow.Amount, sdk.ZeroDec(), "adjusted borrow")
 }
 
 // GetCollateral returns an sdk.Coin representing how much of a given denom the
 // x/leverage module account currently holds as collateral for a given borrower.
 func (k Keeper) GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
 	key := types.CreateCollateralAmountKey(borrowerAddr, denom)
-	amount := k.getStoredInt(ctx, key, "collateral")
+	amount := k.getStoredInt(ctx, key)
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -152,7 +149,7 @@ func (k Keeper) setCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coll
 // On invalid asset, the reserved amount is zero.
 func (k Keeper) GetReserves(ctx sdk.Context, denom string) sdk.Coin {
 	key := types.CreateReserveAmountKey(denom)
-	amount := k.getStoredInt(ctx, key, "reserves")
+	amount := k.getStoredInt(ctx, key)
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -179,6 +176,9 @@ func (k Keeper) getLastInterestTime(ctx sdk.Context) int64 {
 	val := gogotypes.Int64Value{}
 	if err := k.cdc.Unmarshal(bz, &val); err != nil {
 		panic(err)
+	}
+	if val.Value < 0 {
+		panic(types.ErrGetAmount.Wrapf("%d is below the minimum LastInterestTime of zero", val.Value))
 	}
 
 	return val.Value
@@ -229,9 +229,7 @@ func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom st
 // denom. Returns 1.0 if no value is stored.
 func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
 	key := types.CreateInterestScalarKey(denom)
-	scalar := k.getStoredDec(ctx, key, "interest scalar")
-	// If no value is stored, interest scalar is 1. It never decreases.
-	return sdk.MaxDec(scalar, sdk.OneDec())
+	return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
 }
 
 // setInterestScalar sets the interest scalar for a given base token denom.
@@ -240,17 +238,14 @@ func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec)
 		return err
 	}
 	key := types.CreateInterestScalarKey(denom)
-	if scalar.LT(sdk.OneDec()) {
-		return types.ErrSetAmount.Wrapf("%s is below the minimum interest scalar of one", scalar)
-	}
-	return k.setStoredDec(ctx, key, scalar, "interest scalar")
+	return k.setStoredDec(ctx, key, scalar, sdk.OneDec(), "interest scalar")
 }
 
 // GetUTokenSupply gets the total supply of a specified utoken, as tracked by
 // module state. On invalid asset or non-uToken, the supply is zero.
 func (k Keeper) GetUTokenSupply(ctx sdk.Context, denom string) sdk.Coin {
 	key := types.CreateUTokenSupplyKey(denom)
-	amount := k.getStoredInt(ctx, key, "uToken supply")
+	amount := k.getStoredInt(ctx, key)
 	return sdk.NewCoin(denom, amount)
 }
 

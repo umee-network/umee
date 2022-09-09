@@ -64,10 +64,11 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	totalBorrowed := toDec(k.GetTotalBorrowed(ctx, denom).Amount)
 	tokenSupply := totalBorrowed.Add(availableLiquidity)
 
-	// This case can be safely interpreted as 100% utilization.
+	// This edge case can be safely interpreted as 100% utilization.
 	if totalBorrowed.GTE(tokenSupply) {
 		return sdk.OneDec()
 	}
+
 	return totalBorrowed.Quo(tokenSupply)
 }
 
