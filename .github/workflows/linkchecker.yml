@@ -1,5 +1,5 @@
 name: Check Markdown links
-on: 
+on:
   pull_request:
     paths: ["**.md"]
   push:
@@ -17,3 +17,4 @@ jobs:
         with:
           check-modified-files-only: "yes"
           base-branch: main
+          config-file: ".github/workflows/linkcheck.config.json"
