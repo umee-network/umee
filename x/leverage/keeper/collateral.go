@@ -19,7 +19,7 @@ func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.Ac
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
 // during liquidations.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
-	err := k.setCollateralAmount(ctx, addr, k.GetCollateralAmount(ctx, addr, uToken.Denom).Sub(uToken))
+	err := k.setCollateral(ctx, addr, k.GetCollateral(ctx, addr, uToken.Denom).Sub(uToken))
 	if err != nil {
 		return err
 	}
@@ -33,57 +33,11 @@ func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.
 // It occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the
 // same) as well as during non-direct liquidations, where toAddr is the liquidator.
 func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
-	err := k.setCollateralAmount(ctx, fromAddr, k.GetCollateralAmount(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	err := k.setCollateral(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, uToken.Denom).Sub(uToken))
 	if err != nil {
 		return err
 	}
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(uToken))
-}
-
-// GetCollateralAmount returns an sdk.Coin representing how much of a given denom the
-// x/leverage module account currently holds as collateral for a given borrower.
-func (k Keeper) GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
-	store := ctx.KVStore(k.storeKey)
-	collateral := sdk.NewCoin(denom, sdk.ZeroInt())
-	key := types.CreateCollateralAmountKey(borrowerAddr, denom)
-
-	if bz := store.Get(key); bz != nil {
-		err := collateral.Amount.Unmarshal(bz)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return collateral
-}
-
-// setCollateralAmount sets the amount of a given denom the x/leverage module account
-// currently holds as collateral for a given borrower. If the amount is zero, any
-// stored value is cleared. A negative amount or invalid coin causes an error.
-// This function does not move coins to or from the module account.
-func (k Keeper) setCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, collateral sdk.Coin) error {
-	if err := collateral.Validate(); err != nil {
-		return err
-	}
-
-	if borrowerAddr.Empty() {
-		return types.ErrEmptyAddress
-	}
-
-	bz, err := collateral.Amount.Marshal()
-	if err != nil {
-		return err
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateCollateralAmountKey(borrowerAddr, collateral.Denom)
-
-	if collateral.Amount.IsZero() {
-		store.Delete(key)
-	} else {
-		store.Set(key, bz)
-	}
-	return nil
 }
 
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
@@ -95,7 +49,7 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 	}
 
 	// uTokens in the module account are always from collateral
-	return sdk.NewCoin(denom, k.ModuleBalance(ctx, denom))
+	return k.ModuleBalance(ctx, denom)
 }
 
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by

@@ -1,8 +1,6 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
@@ -10,14 +8,14 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// get initial reserves
-	amount := app.LeverageKeeper.GetReserveAmount(ctx, appparams.BondDenom)
-	require.Equal(sdk.ZeroInt(), amount)
+	reserves := app.LeverageKeeper.GetReserves(ctx, umeeDenom)
+	require.Equal(coin(umeeDenom, 0), reserves)
 
 	// artifically reserve 200 umee
-	s.setReserves(coin(appparams.BondDenom, 200_000000))
+	s.setReserves(coin(umeeDenom, 200_000000))
 	// get new reserves
-	amount = app.LeverageKeeper.GetReserveAmount(ctx, appparams.BondDenom)
-	require.Equal(sdk.NewInt(200_000000), amount)
+	reserves = app.LeverageKeeper.GetReserves(ctx, appparams.BondDenom)
+	require.Equal(coin(umeeDenom, 200_000000), reserves)
 }
 
 func (s *IntegrationTestSuite) TestRepayBadDebt() {
@@ -51,8 +49,8 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	require.Equal(coin(umeeDenom, 40_000000), remainingDebt)
 
 	// Confirm that reserves are exhausted
-	remainingReserve := app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
-	require.Equal(sdk.ZeroInt(), remainingReserve)
+	remainingReserves := app.LeverageKeeper.GetReserves(ctx, umeeDenom)
+	require.Equal(coin(umeeDenom, 0), remainingReserves)
 
 	// Manually set reserves to 70 umee
 	reserve = coin(umeeDenom, 70_000000)
@@ -67,8 +65,8 @@ func (s *IntegrationTestSuite) TestRepayBadDebt() {
 	require.Equal(coin(umeeDenom, 0), remainingDebt)
 
 	// Confirm that reserves are now at 30 umee
-	remainingReserve = app.LeverageKeeper.GetReserveAmount(ctx, umeeDenom)
-	require.Equal(sdk.NewInt(30_000000), remainingReserve)
+	remainingReserves = app.LeverageKeeper.GetReserves(ctx, umeeDenom)
+	require.Equal(coin(umeeDenom, 30_000000), remainingReserves)
 
 	// Sweep all bad debts - but there are none
 	err = app.LeverageKeeper.SweepBadDebts(ctx)

@@ -88,10 +88,7 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 
 	// reduce rewards if they exceed unreserved module balance
 	for _, coin := range requested {
-		reserved := k.GetReserveAmount(ctx, coin.Denom)
-		balance := k.ModuleBalance(ctx, coin.Denom)
-
-		amountToTransfer := sdk.MinInt(coin.Amount, balance.Sub(reserved))
+		amountToTransfer := sdk.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
 
 		if amountToTransfer.IsPositive() {
 			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
