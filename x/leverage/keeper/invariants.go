@@ -73,7 +73,7 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		reserveAmountPrefix := types.KeyPrefixReserveAmount
+		reserveAmountPrefix := types.CreateReserveAmountKeyNoDenom()
 
 		// Iterate through all denoms which have an reserve amount stored
 		// in the keeper. If a token is registered but its reserve amount is
@@ -117,7 +117,7 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		collateralPrefix := types.KeyPrefixCollateralAmount
+		collateralPrefix := types.CreateCollateralAmountKeyNoAddress()
 
 		// Iterate through all collateral amounts stored in the keeper,
 		// ensuring all successfully unmarshal to positive values.
