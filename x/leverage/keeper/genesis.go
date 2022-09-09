@@ -34,18 +34,18 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 			panic(err)
 		}
 
-		if err = k.setCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
+		if err = k.setCollateral(ctx, borrower, collateral.Amount); err != nil {
 			panic(err)
 		}
 	}
 
 	for _, reserve := range genState.Reserves {
-		if err := k.setReserveAmount(ctx, reserve); err != nil {
+		if err := k.setReserves(ctx, reserve); err != nil {
 			panic(err)
 		}
 	}
 
-	if err := k.SetLastInterestTime(ctx, genState.LastInterestTime); err != nil {
+	if err := k.setLastInterestTime(ctx, genState.LastInterestTime); err != nil {
 		panic(err)
 	}
 
@@ -75,7 +75,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.getAllAdjustedBorrows(ctx),
 		k.getAllCollateral(ctx),
 		k.GetAllReserves(ctx),
-		k.GetLastInterestTime(ctx),
+		k.getLastInterestTime(ctx),
 		k.getAllBadDebts(ctx),
 		k.getAllInterestScalars(ctx),
 		k.GetAllUTokenSupply(ctx),
@@ -136,29 +136,6 @@ func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
 	}
 
 	return collateral
-}
-
-// getAllBadDebts gets bad debt instances across all borrowers. Uses the
-// BadDebt struct found  in GenesisState.
-func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
-	prefix := types.KeyPrefixBadDebt
-	badDebts := []types.BadDebt{}
-
-	iterator := func(key, _ []byte) error {
-		addr := types.AddressFromKey(key, prefix)
-		denom := types.DenomFromKeyWithAddress(key, prefix)
-
-		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
-
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return badDebts
 }
 
 // getAllInterestScalars returns all interest scalars. Uses the InterestScalar struct found
