@@ -48,11 +48,8 @@ func (k Keeper) validateAcceptedUToken(ctx sdk.Context, coin sdk.Coin) error {
 
 // validateSupply validates an sdk.Coin and ensures its Denom is a Token with EnableMsgSupply
 func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
+	if err := validateBaseToken(coin); err != nil {
 		return err
-	}
-	if types.HasUTokenPrefix(coin.Denom) {
-		return types.ErrUToken.Wrap(coin.Denom)
 	}
 	token, err := k.GetTokenSettings(ctx, coin.Denom)
 	if err != nil {
@@ -61,24 +58,10 @@ func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
 	return token.AssertSupplyEnabled()
 }
 
-// validateUToken validates an sdk.Coin and ensures its Denom is a uToken. Used by Withdraw and Decollateralize.
-func (k Keeper) validateUToken(coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
-		return err
-	}
-	if !types.HasUTokenPrefix(coin.Denom) {
-		return types.ErrNotUToken.Wrap(coin.Denom)
-	}
-	return nil
-}
-
 // validateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
 func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
-	if err := borrow.Validate(); err != nil {
+	if err := validateBaseToken(borrow); err != nil {
 		return err
-	}
-	if types.HasUTokenPrefix(borrow.Denom) {
-		return types.ErrUToken.Wrap(borrow.Denom)
 	}
 	token, err := k.GetTokenSettings(ctx, borrow.Denom)
 	if err != nil {
@@ -87,25 +70,11 @@ func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
 	return token.AssertBorrowEnabled()
 }
 
-// validateRepay validates an sdk.Coin and ensures its Denom is not a uToken
-func (k Keeper) validateRepay(coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
-		return err
-	}
-	if types.HasUTokenPrefix(coin.Denom) {
-		return types.ErrUToken.Wrap(coin.Denom)
-	}
-	return nil
-}
-
 // validateCollateralize validates an sdk.Coin and ensures it is a uToken of an accepted
 // Token with EnableMsgSupply and CollateralWeight > 0
 func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) error {
-	if err := collateral.Validate(); err != nil {
+	if err := validateUToken(collateral); err != nil {
 		return err
-	}
-	if !types.HasUTokenPrefix(collateral.Denom) {
-		return types.ErrNotUToken.Wrap(collateral.Denom)
 	}
 	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(collateral.Denom))
 	if err != nil {
@@ -115,4 +84,37 @@ func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) erro
 		return types.ErrCollateralWeightZero
 	}
 	return token.AssertSupplyEnabled()
+}
+
+// validateBaseToken validates an sdk.Coin and ensures its Denom is not a uToken.
+func validateBaseToken(coin sdk.Coin) error {
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrUToken.Wrap(coin.Denom)
+	}
+	return nil
+}
+
+// validateUToken validates an sdk.Coin and ensures its Denom is a uToken.
+func validateUToken(coin sdk.Coin) error {
+	if err := coin.Validate(); err != nil {
+		return err
+	}
+	if !types.HasUTokenPrefix(coin.Denom) {
+		return types.ErrNotUToken.Wrap(coin.Denom)
+	}
+	return nil
+}
+
+// validateBaseDenom validates a denom and ensures it is not a uToken.
+func validateBaseDenom(denom string) error {
+	if err := sdk.ValidateDenom(denom); err != nil {
+		return err
+	}
+	if types.HasUTokenPrefix(denom) {
+		return types.ErrUToken.Wrap(denom)
+	}
+	return nil
 }
