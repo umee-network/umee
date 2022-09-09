@@ -31,11 +31,15 @@ func (k Keeper) getLiquidationAmounts(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
+	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
 	liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, borrowerCollateral)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if liquidationThreshold.GTE(borrowedValue) {
+	if borrowedValue.LT(liquidationThreshold) {
 		// borrower is healthy and cannot be liquidated
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}
@@ -50,6 +54,7 @@ func (k Keeper) getLiquidationAmounts(
 	params := k.GetParams(ctx)
 	closeFactor := ComputeCloseFactor(
 		borrowedValue,
+		collateralValue,
 		liquidationThreshold,
 		params.SmallLiquidationSize,
 		params.MinimumCloseFactor,
@@ -81,7 +86,7 @@ func (k Keeper) getLiquidationAmounts(
 	repay, burn, reward := ComputeLiquidation(
 		sdk.MinInt(sdk.MinInt(availableRepay, maxRepay.Amount), totalBorrowed.AmountOf(repayDenom)),
 		borrowerCollateral.AmountOf(collateralDenom),
-		k.ModuleBalance(ctx, rewardDenom).Sub(k.GetReserveAmount(ctx, rewardDenom)),
+		k.AvailableLiquidity(ctx, rewardDenom),
 		repayTokenPrice,
 		rewardTokenPrice,
 		exchangeRate,
@@ -186,16 +191,35 @@ func ComputeLiquidation(
 	return tokenRepay, collateralBurn, tokenReward
 }
 
-// ComputeCloseFactor derives the maximum portion of a borrower's current
-// borrowed value can currently be repaid in a single liquidate transaction.
+// ComputeCloseFactor derives the maximum portion of a borrower's current borrowedValue
+// that can currently be repaid in a single liquidate transaction.
+//
+// closeFactor scales linearly between minimumCloseFactor and 1.0,
+// reaching its maximum when borrowedValue has reached a critical value
+// between liquidationThreshold to collateralValue.
+// This critical value is defined as:
+//
+//	B = critical borrowedValue
+//	C = collateralValue
+//	L = liquidationThreshold
+//	CLT = completeLiquidationThreshold
+//
+//	B = L + (C-L) * CLT
+//
+// closeFactor is zero for borrowers that are not eligible for liquidation,
+// i.e. borrowedValue < liquidationThreshold
+//
+// Finally, if borrowedValue is less than smallLiquidationSize,
+// closeFactor will always be 1 as long as the borrower is eligible for liquidation.
 func ComputeCloseFactor(
 	borrowedValue sdk.Dec,
+	collateralValue sdk.Dec,
 	liquidationThreshold sdk.Dec,
 	smallLiquidationSize sdk.Dec,
 	minimumCloseFactor sdk.Dec,
 	completeLiquidationThreshold sdk.Dec,
 ) (closeFactor sdk.Dec) {
-	if !liquidationThreshold.IsPositive() || borrowedValue.LTE(liquidationThreshold) {
+	if borrowedValue.LT(liquidationThreshold) {
 		// Not eligible for liquidation
 		return sdk.ZeroDec()
 	}
@@ -206,19 +230,21 @@ func ComputeCloseFactor(
 	}
 
 	if completeLiquidationThreshold.IsZero() {
-		// If close factor is set to unlimited by global params
+		// If close factor is set to unlimited
 		return sdk.OneDec()
 	}
 
-	// outside of special cases, close factor scales linearly between MinimumCloseFactor and 1.0,
-	// reaching max value when (borrowed / threshold) = 1 + CompleteLiquidationThreshold
+	// Calculate the borrowed value at which close factor reaches 1.0
+	criticalValue := liquidationThreshold.Add(completeLiquidationThreshold.Mul(collateralValue.Sub(liquidationThreshold)))
+
 	closeFactor = Interpolate(
-		borrowedValue.Quo(liquidationThreshold).Sub(sdk.OneDec()), // x
-		sdk.ZeroDec(),                // xMin
-		minimumCloseFactor,           // yMin
-		completeLiquidationThreshold, // xMax
-		sdk.OneDec(),                 // yMax
+		borrowedValue,        // x
+		liquidationThreshold, // xMin
+		minimumCloseFactor,   // yMin
+		criticalValue,        // xMax
+		sdk.OneDec(),         // yMax
 	)
+
 	if closeFactor.GTE(sdk.OneDec()) {
 		closeFactor = sdk.OneDec()
 	}

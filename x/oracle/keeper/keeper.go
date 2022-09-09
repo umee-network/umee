@@ -158,19 +158,18 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 
 // GetFeederDelegation gets the account address to which the validator operator
 // delegated oracle vote rights.
-func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) (sdk.AccAddress, error) {
+func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.AccAddress, error) {
 	// check that the given validator exists
-	if val := k.StakingKeeper.Validator(ctx, operator); val == nil || !val.IsBonded() {
-		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", operator)
+	if val := k.StakingKeeper.Validator(ctx, vAddr); val == nil || !val.IsBonded() {
+		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", vAddr)
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetFeederDelegationKey(operator))
+	bz := store.Get(types.GetFeederDelegationKey(vAddr))
 	if bz == nil {
-		// by default the right is delegated to the validator itself
-		return sdk.AccAddress(operator), nil
+		// no delegation, so validator itself must provide price feed
+		return sdk.AccAddress(vAddr), nil
 	}
-
 	return sdk.AccAddress(bz), nil
 }
 

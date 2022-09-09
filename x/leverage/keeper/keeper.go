@@ -3,7 +3,6 @@ package keeper
 import (
 	"fmt"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -71,8 +70,9 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
-func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdkmath.Int {
-	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
+	amount := k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
+	return sdk.NewCoin(denom, amount)
 }
 
 // Supply attempts to deposit assets into the leverage module account in
@@ -81,6 +81,21 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdkmath.Int {
 func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) (sdk.Coin, error) {
 	if err := k.validateSupply(ctx, coin); err != nil {
 		return sdk.Coin{}, err
+	}
+
+	token, err := k.GetTokenSettings(ctx, coin.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	total, err := k.GetTotalSupply(ctx, coin.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	if token.MaxSupply.IsPositive() && total.Add(coin).Amount.GTE(token.MaxSupply) {
+		return sdk.Coin{}, types.ErrMaxSupply.Wrapf("attempted: %s, current supply: %s, max supply: %s",
+			coin, total.Amount, token.MaxSupply)
 	}
 
 	// determine uToken amount to mint
@@ -118,7 +133,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 // balances are insufficient to withdraw the full amount requested, returns an error.
 // Returns the amount of base tokens received.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, error) {
-	if err := k.validateUToken(uToken); err != nil {
+	if err := validateUToken(uToken); err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -129,9 +144,8 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// Ensure module account has sufficient unreserved tokens to withdraw
-	reservedAmount := k.GetReserveAmount(ctx, token.Denom)
-	availableAmount := k.ModuleBalance(ctx, token.Denom)
-	if token.Amount.GT(availableAmount.Sub(reservedAmount)) {
+	availableAmount := k.AvailableLiquidity(ctx, token.Denom)
+	if token.Amount.GT(availableAmount) {
 		return sdk.Coin{}, sdkerrors.Wrap(types.ErrLendingPoolInsufficient, token.String())
 	}
 
@@ -172,7 +186,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 
 		// reduce the supplier's collateral by amountFromCollateral
 		newCollateral := sdk.NewCoin(uToken.Denom, collateralAmount.Sub(amountFromCollateral))
-		if err = k.setCollateralAmount(ctx, supplierAddr, newCollateral); err != nil {
+		if err = k.setCollateral(ctx, supplierAddr, newCollateral); err != nil {
 			return sdk.Coin{}, err
 		}
 	}
@@ -214,9 +228,8 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
-	reservedAmount := k.GetReserveAmount(ctx, borrow.Denom)
-	availableAmount := k.ModuleBalance(ctx, borrow.Denom)
-	if borrow.Amount.GT(availableAmount.Sub(reservedAmount)) {
+	availableAmount := k.AvailableLiquidity(ctx, borrow.Denom)
+	if borrow.Amount.GT(availableAmount) {
 		return types.ErrLendingPoolInsufficient.Wrap(borrow.String())
 	}
 
@@ -273,7 +286,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 // necessary amount is transferred. Because amount repaid may be less than the repayment attempted,
 // Repay returns the actual amount repaid.
 func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.Coin) (sdk.Coin, error) {
-	if err := k.validateRepay(payment); err != nil {
+	if err := validateBaseToken(payment); err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -299,8 +312,8 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
-	currentCollateral := k.GetCollateralAmount(ctx, borrowerAddr, uToken.Denom)
-	if err := k.setCollateralAmount(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
+	currentCollateral := k.GetCollateral(ctx, borrowerAddr, uToken.Denom)
+	if err := k.setCollateral(ctx, borrowerAddr, currentCollateral.Add(uToken)); err != nil {
 		return err
 	}
 
@@ -318,7 +331,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.
 func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uToken sdk.Coin) error {
-	if err := k.validateUToken(uToken); err != nil {
+	if err := validateUToken(uToken); err != nil {
 		return err
 	}
 
@@ -349,7 +362,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 	// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
 	// from the module account and returns it to the user
 	newCollateralAmount := collateral.AmountOf(uToken.Denom).Sub(uToken.Amount)
-	if err := k.setCollateralAmount(ctx, borrowerAddr, sdk.NewCoin(uToken.Denom, newCollateralAmount)); err != nil {
+	if err := k.setCollateral(ctx, borrowerAddr, sdk.NewCoin(uToken.Denom, newCollateralAmount)); err != nil {
 		return err
 	}
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(uToken))

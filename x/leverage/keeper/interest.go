@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -66,7 +65,7 @@ func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 // oracle rewards, and sets LastInterestTime to BlockTime.
 func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	currentTime := ctx.BlockTime().Unix()
-	prevInterestTime := k.GetLastInterestTime(ctx)
+	prevInterestTime := k.getLastInterestTime(ctx)
 	if prevInterestTime <= 0 {
 		// if stored LastInterestTime is zero (or negative), either the chain has just started
 		// or the genesis file has been modified intentionally. In either case, proceed as if
@@ -148,7 +147,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// apply all reserve increases accumulated when iterating over denoms
 	for _, coin := range newReserves {
-		if err := k.setReserveAmount(ctx, coin.AddAmount(k.GetReserveAmount(ctx, coin.Denom))); err != nil {
+		if err := k.setReserves(ctx, coin.Add(k.GetReserves(ctx, coin.Denom))); err != nil {
 			return err
 		}
 	}
@@ -159,7 +158,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 	}
 
 	// set LastInterestTime
-	err := k.SetLastInterestTime(ctx, currentTime)
+	err := k.setLastInterestTime(ctx, currentTime)
 	if err != nil {
 		return err
 	}
@@ -179,44 +178,4 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		TotalInterest: totalInterest,
 		Reserved:      newReserves,
 	})
-}
-
-// SetLastInterestTime sets LastInterestTime to a given value
-func (k *Keeper) SetLastInterestTime(ctx sdk.Context, interestTime int64) error {
-	store := ctx.KVStore(k.storeKey)
-	timeKey := types.CreateLastInterestTimeKey()
-
-	prevTime := k.GetLastInterestTime(ctx)
-
-	if interestTime < prevTime {
-		// prevent time from moving backwards
-		return types.ErrNegativeTimeElapsed.Wrapf("cannot set LastInterestTime from %d to %d",
-			prevTime, interestTime)
-	}
-
-	bz, err := k.cdc.Marshal(&gogotypes.Int64Value{Value: interestTime})
-	if err != nil {
-		return err
-	}
-
-	store.Set(timeKey, bz)
-	return nil
-}
-
-// GetLastInterestTime returns unix timestamp (in seconds) when the last interest was accrued.
-// Returns 0 if the value if the value is absent.
-func (k Keeper) GetLastInterestTime(ctx sdk.Context) int64 {
-	store := ctx.KVStore(k.storeKey)
-	timeKey := types.CreateLastInterestTimeKey()
-	bz := store.Get(timeKey)
-	if bz == nil {
-		return 0
-	}
-
-	val := gogotypes.Int64Value{}
-	if err := k.cdc.Unmarshal(bz, &val); err != nil {
-		panic(err)
-	}
-
-	return val.Value
 }

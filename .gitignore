@@ -15,6 +15,13 @@ profile.out
 
 # Script single node data
 contrib/scripts/node-data
+contrib/scripts/umeemainnet.*
+contrib/scripts/cosmos-genesis-tinkerer
+contrib/scripts/tinkered_genesis.json
+contrib/scripts/preprocessing.json
+contrib/scripts/umeed-releases
+# preprocessing can appear from the shell curdir that is cosmos-genesis-tinkerer is running
+preprocessing.json
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
