@@ -7,13 +7,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func TestAddressFromKey(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	key := types.CreateAdjustedBorrowKey(address, umeeapp.BondDenom)
+	key := types.CreateAdjustedBorrowKey(address, appparams.BondDenom)
 	expectedAddress := types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, address, expectedAddress)
@@ -27,7 +27,7 @@ func TestAddressFromKey(t *testing.T) {
 
 func TestDenomFromKeyWithAddress(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	denom := umeeapp.BondDenom
+	denom := appparams.BondDenom
 	key := types.CreateAdjustedBorrowKey(address, denom)
 	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 
@@ -41,7 +41,7 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 }
 
 func TestDenomFromKey(t *testing.T) {
-	denom := umeeapp.BondDenom
+	denom := appparams.BondDenom
 	key := types.CreateReserveAmountKey(denom)
 	expectedDenom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 

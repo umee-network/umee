@@ -33,14 +33,13 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
 	photonDenom    = "photon"
-	initBalanceStr = "110000000000uumee,100000000000photon"
-	minGasPrice    = "0.00001" + photonDenom
+	initBalanceStr = "110000000000" + appparams.BondDenom + ",100000000000" + photonDenom
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -48,8 +47,9 @@ const (
 )
 
 var (
+	minGasPrice     = appparams.MinMinGasPrice.String()
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(umeeapp.BondDenom, stakeAmount)
+	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 )
 
 type IntegrationTestSuite struct {
@@ -250,8 +250,8 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:              umeeapp.BondDenom,
-		SymbolDenom:            umeeapp.DisplayDenom,
+		BaseDenom:              appparams.BondDenom,
+		SymbolDenom:            appparams.DisplayDenom,
 		Exponent:               6,
 		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),

@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### State Machine Breaking
+
+- [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+
 ### API Breaking
 
 - [1029](https://github.com/umee-network/umee/pull/1029) Removed MsgSetCollateral(addr,denom,bool), and replaced with MsgAddCollateral(addr,coin) and MsgRemoveCollateral(addr,coin)
@@ -92,6 +96,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1330](https://github.com/umee-network/umee/pull/1330) Implemented MaxSupplyUtilization.
 - [1319](https://github.com/umee-network/umee/pull/1319) Implemented MaxSupply.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
+- [1343](https://github.com/umee-network/umee/pull/1343) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
 
 ### Improvements
 
@@ -107,12 +112,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
 - [1322](https://github.com/umee-network/umee/pull/1322) Improve complete liquidation threshold and close factor.
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
+- [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
+- [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
 
 ### Bug Fixes
 
 - [1018](https://github.com/umee-network/umee/pull/1018) Return nil if negative time elapsed from the last block happens.
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 - [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
+- [1357](https://github.com/umee-network/umee/pull/1357) Interptex x/0 collateral liquidity as 100%
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

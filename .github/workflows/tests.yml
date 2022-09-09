@@ -134,3 +134,28 @@ jobs:
         run: |
           sleep 1m
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
+
+  mainnet-upgrade-v1-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.0
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+      - name: Build umeed
+        if: env.GIT_DIFF
+        run: |
+          make build
+      - name: Fork mainnet and upgrade from v1.0.3 to v.3.x.x
+        if: env.GIT_DIFF
+        run: |
+          ./contrib/scripts/umeemainnet_fork.sh

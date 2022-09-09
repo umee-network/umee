@@ -7,7 +7,8 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	umeeapp "github.com/umee-network/umee/v3/app"
+
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -51,7 +52,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	})
 
 	var ibcStakeERC20Addr string
-	s.Run("deploy_stake_erc20", func() {
+	s.Run("deploy_stake_erc20 ibcStakeERC20Addr", func() {
+		s.Require().NotEmpty(ibcStakeDenom)
 		ibcStakeERC20Addr = s.deployERC20Token(ibcStakeDenom)
 	})
 
@@ -60,7 +62,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(ibcStakeDenom, math.NewInt(300))
-		umeeFee := sdk.NewCoin(photonDenom, math.NewInt(10))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
 		gravityFee := sdk.NewCoin(ibcStakeDenom, math.NewInt(7))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, ibcStakeERC20Addr, amount, umeeFee, gravityFee)
@@ -80,7 +82,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	// deploy photon ERC20 token contact
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
-		photonERC20Addr = s.deployERC20Token("photon")
+		photonERC20Addr = s.deployERC20Token(photonDenom)
 	})
 
 	// send 100 photon tokens from Umee to Ethereum
@@ -88,7 +90,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(photonDenom, math.NewInt(100))
-		umeeFee := sdk.NewCoin(photonDenom, math.NewInt(10))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
 		gravityFee := sdk.NewCoin(photonDenom, math.NewInt(3))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, photonERC20Addr, amount, umeeFee, gravityFee)
@@ -108,16 +110,16 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	// deploy umee ERC20 token contract
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {
-		umeeERC20Addr = s.deployERC20Token("uumee")
+		umeeERC20Addr = s.deployERC20Token(appparams.BondDenom)
 	})
 
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
-		amount := sdk.NewCoin(umeeapp.BondDenom, math.NewInt(300))
-		umeeFee := sdk.NewCoin(photonDenom, math.NewInt(10))
-		gravityFee := sdk.NewCoin(umeeapp.BondDenom, math.NewInt(7))
+		amount := sdk.NewCoin(appparams.BondDenom, math.NewInt(300))
+		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
+		gravityFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(7))
 
 		s.sendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, umeeERC20Addr, amount, umeeFee, gravityFee)
 	})
@@ -128,6 +130,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		orchestratorIdxSender := 1
 		amount := uint64(300)
 
-		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, umeeapp.BondDenom, amount)
+		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, appparams.BondDenom, amount)
 	})
 }

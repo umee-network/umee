@@ -79,8 +79,8 @@ func (q Querier) MarketSummary(
 	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
 
 	supplied, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
-	balance := q.Keeper.ModuleBalance(ctx, req.Denom)
-	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
+	balance := q.Keeper.ModuleBalance(ctx, req.Denom).Amount
+	reserved := q.Keeper.GetReserves(ctx, req.Denom).Amount
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
 	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
 

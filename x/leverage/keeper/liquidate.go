@@ -86,7 +86,7 @@ func (k Keeper) getLiquidationAmounts(
 	repay, burn, reward := ComputeLiquidation(
 		sdk.MinInt(sdk.MinInt(availableRepay, maxRepay.Amount), totalBorrowed.AmountOf(repayDenom)),
 		borrowerCollateral.AmountOf(collateralDenom),
-		k.ModuleBalance(ctx, rewardDenom).Sub(k.GetReserveAmount(ctx, rewardDenom)),
+		k.AvailableLiquidity(ctx, rewardDenom),
 		repayTokenPrice,
 		rewardTokenPrice,
 		exchangeRate,

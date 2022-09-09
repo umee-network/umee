@@ -27,8 +27,8 @@ func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte)
 	return nil
 }
 
-// GetAllBadDebts gets bad debt instances across all borrowers.
-func (k Keeper) GetAllBadDebts(ctx sdk.Context) []types.BadDebt {
+// getAllBadDebts gets bad debt instances across all borrowers.
+func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 	prefix := types.KeyPrefixBadDebt
 	badDebts := []types.BadDebt{}
 
@@ -232,11 +232,13 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		// first check if the borrower has gained collateral since the bad debt was identified
-		done := k.HasCollateral(ctx, addr)
-		// TODO #1223: Decollateralize any blacklisted collateral and proceed
+		// clear blacklisted collateral while checking for any remaining (valid) collateral
+		done, err := k.clearBlacklistedCollateral(ctx, addr)
+		if err != nil {
+			return err
+		}
 
-		// if collateral is still zero, attempt to repay a single address's debt in this denom
+		// if remaining collateral is zero, attempt to repay this bad debt
 		if !done {
 			var err error
 			done, err = k.RepayBadDebt(ctx, addr, denom)
