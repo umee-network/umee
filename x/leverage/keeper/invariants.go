@@ -26,9 +26,6 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
 
-	// these invariants run in O(N) time, with N = number of accounts engaged in borrowing/lending
-	// ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
-	// ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 }
 
 // ReserveAmountInvariant checks that reserve amounts have non-negative balances
