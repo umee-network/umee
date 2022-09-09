@@ -19,50 +19,16 @@ const (
 
 // RegisterInvariants registers the leverage module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
+	// these invariants run in O(N) time, with N = number of registered tokens
 	ir.RegisterRoute(types.ModuleName, routeReserveAmount, ReserveAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeSupplyAPY, SupplyAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
-}
 
-// AllInvariants runs all invariants of the x/leverage module.
-func AllInvariants(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
-		res, stop := ReserveAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = CollateralAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = SupplyAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = InterestScalarsInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		return ExchangeRatesInvariant(k)(ctx)
-	}
+	// these invariants run in O(N) time, with N = number of accounts engaged in borrowing/lending
+	// ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
+	// ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 }
 
 // ReserveAmountInvariant checks that reserve amounts have non-negative balances

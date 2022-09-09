@@ -210,8 +210,6 @@ func (s *IntegrationTestSuite) setReserves(coins ...sdk.Coin) {
 
 // checkInvariants is used during other tests to quickly test all invariants
 func (s *IntegrationTestSuite) checkInvariants(msg string) {
-	app, ctx, require := s.app, s.ctx, s.Require()
-
-	desc, broken := keeper.AllInvariants(app.LeverageKeeper)(ctx)
-	require.False(broken, msg, desc)
+	desc, broken := s.tk.AllInvariants()(s.ctx)
+	s.Require().False(broken, msg, desc)
 }
