@@ -19,50 +19,12 @@ const (
 
 // RegisterInvariants registers the leverage module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
+	// these invariants run in O(N) time, with N = number of registered tokens
 	ir.RegisterRoute(types.ModuleName, routeReserveAmount, ReserveAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeSupplyAPY, SupplyAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
-}
-
-// AllInvariants runs all invariants of the x/leverage module.
-func AllInvariants(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
-		res, stop := ReserveAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = CollateralAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = SupplyAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = InterestScalarsInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		return ExchangeRatesInvariant(k)(ctx)
-	}
 }
 
 // ReserveAmountInvariant checks that reserve amounts have non-negative balances
@@ -109,8 +71,10 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// CollateralAmountInvariant checks that collateral amounts have all positive values
-func CollateralAmountInvariant(k Keeper) sdk.Invariant {
+// InefficientCollateralAmountInvariant checks that collateral amounts have all positive values.
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
+func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
 			msg   string
@@ -153,8 +117,10 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// BorrowAmountInvariant checks that borrow amounts have all positive values
-func BorrowAmountInvariant(k Keeper) sdk.Invariant {
+// InefficientBorrowAmountInvariant checks that borrow amounts have all positive values
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
+func InefficientBorrowAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
 			msg   string

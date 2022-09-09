@@ -112,6 +112,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
 - [1322](https://github.com/umee-network/umee/pull/1322) Improve complete liquidation threshold and close factor.
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
+- [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
 - [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
 
 ### Bug Fixes
