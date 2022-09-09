@@ -47,13 +47,16 @@ func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdk.Dec, 
 }
 
 // getStoredInt retrieves an sdkmath.Int from the KVStore, or zero if no value is stored.
-// It panics if a stored value fails to unmarshal.
+// It panics if a stored value fails to unmarshal or is not positive.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func (k Keeper) getStoredInt(ctx sdk.Context, key []byte) sdkmath.Int {
+func (k Keeper) getStoredInt(ctx sdk.Context, key []byte, desc string) sdkmath.Int {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
 		val := sdk.ZeroInt()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(err)
+		}
+		if val.LTE(sdk.ZeroInt()) {
+			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of zero", val, desc))
 		}
 		return val
 	}
@@ -127,7 +130,7 @@ func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjusted
 // x/leverage module account currently holds as collateral for a given borrower.
 func (k Keeper) GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
 	key := types.CreateCollateralAmountKey(borrowerAddr, denom)
-	amount := k.getStoredInt(ctx, key)
+	amount := k.getStoredInt(ctx, key, "collateral")
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -149,7 +152,7 @@ func (k Keeper) setCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, coll
 // On invalid asset, the reserved amount is zero.
 func (k Keeper) GetReserves(ctx sdk.Context, denom string) sdk.Coin {
 	key := types.CreateReserveAmountKey(denom)
-	amount := k.getStoredInt(ctx, key)
+	amount := k.getStoredInt(ctx, key, "reserves")
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -245,7 +248,7 @@ func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec)
 // module state. On invalid asset or non-uToken, the supply is zero.
 func (k Keeper) GetUTokenSupply(ctx sdk.Context, denom string) sdk.Coin {
 	key := types.CreateUTokenSupplyKey(denom)
-	amount := k.getStoredInt(ctx, key)
+	amount := k.getStoredInt(ctx, key, "uToken supply")
 	return sdk.NewCoin(denom, amount)
 }
 
