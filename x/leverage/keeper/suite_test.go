@@ -225,6 +225,6 @@ func (s *IntegrationTestSuite) checkInvariants(msg string) {
 
 	for _, inv := range invariants {
 		desc, broken := inv(ctx)
-		require.False(broken, msg, desc)
+		require.False(broken, msg, "desc", desc)
 	}
 }
