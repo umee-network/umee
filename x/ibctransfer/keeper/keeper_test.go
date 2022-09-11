@@ -22,7 +22,7 @@ import (
 )
 
 func TestKeeperTestSuite(t *testing.T) {
-	t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
+	// t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
 	suite.Run(t, new(KeeperTestSuite))
 }
 
