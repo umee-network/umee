@@ -38,14 +38,6 @@ func NewTestKeeper(
 	return k, TestKeeper{&k}
 }
 
-func (tk *TestKeeper) GetAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Dec {
-	return tk.Keeper.getAdjustedBorrow(ctx, addr, denom)
-}
-
-func (tk *TestKeeper) SetAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, amount sdk.DecCoin) error {
-	return tk.Keeper.setAdjustedBorrow(ctx, addr, amount)
-}
-
 func (tk *TestKeeper) SetBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom string, hasDebt bool) error {
 	return tk.Keeper.setBadDebtAddress(ctx, addr, denom, hasDebt)
 }
@@ -54,12 +46,8 @@ func (tk *TestKeeper) SetBorrow(ctx sdk.Context, addr sdk.AccAddress, amount sdk
 	return tk.Keeper.setBorrow(ctx, addr, amount)
 }
 
-func (tk *TestKeeper) SetCollateralAmount(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
-	return tk.Keeper.setCollateralAmount(ctx, addr, collateral)
-}
-
-func (tk *TestKeeper) GetInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
-	return tk.Keeper.getInterestScalar(ctx, denom)
+func (tk *TestKeeper) SetCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
+	return tk.Keeper.setCollateral(ctx, addr, collateral)
 }
 
 func (tk *TestKeeper) SetInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec) error {
@@ -67,5 +55,5 @@ func (tk *TestKeeper) SetInterestScalar(ctx sdk.Context, denom string, scalar sd
 }
 
 func (tk *TestKeeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
-	return tk.Keeper.setReserveAmount(ctx, coin)
+	return tk.Keeper.setReserves(ctx, coin)
 }

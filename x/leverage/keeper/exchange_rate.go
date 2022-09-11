@@ -69,8 +69,8 @@ func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 	// uTokens in circulation.
 
 	// Get relevant quantities
-	moduleBalance := toDec(k.ModuleBalance(ctx, denom))
-	reserveAmount := toDec(k.GetReserveAmount(ctx, denom))
+	moduleBalance := toDec(k.ModuleBalance(ctx, denom).Amount)
+	reserveAmount := toDec(k.GetReserves(ctx, denom).Amount)
 	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
 	uTokenSupply := k.GetUTokenSupply(ctx, types.ToUTokenDenom(denom)).Amount
 

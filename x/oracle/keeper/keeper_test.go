@@ -20,13 +20,14 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 const (
-	displayDenom string = umeeapp.DisplayDenom
-	bondDenom    string = umeeapp.BondDenom
+	displayDenom string = appparams.DisplayDenom
+	bondDenom    string = appparams.BondDenom
 )
 
 type IntegrationTestSuite struct {
@@ -90,7 +91,7 @@ var (
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
+	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
 // NewTestMsgCreateValidator test msg creator

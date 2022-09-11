@@ -3,7 +3,7 @@ package tests
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/client/cli"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -72,8 +72,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Registry: []types.Token{
 					{
 						// must match app/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:              umeeapp.BondDenom,
-						SymbolDenom:            umeeapp.DisplayDenom,
+						BaseDenom:              appparams.BondDenom,
+						SymbolDenom:            appparams.DisplayDenom,
 						Exponent:               6,
 						ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
 						CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			"query market summary - zero supply",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
-				umeeapp.BondDenom,
+				appparams.BondDenom,
 			},
 			false,
 			&types.QueryMarketSummaryResponse{},
@@ -162,7 +162,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdLiquidate(),
 		[]string{
 			val.Address.String(),
-			"5uumee",
+			"5uumee", // borrower liquidates itself, reduces borrow amount and collateral by 5
 			"uumee",
 		},
 		nil,
@@ -172,7 +172,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"50uumee",
+			"50uumee", // repays only the remaining borrowed balance, reduced automatically from 50
 		},
 		nil,
 	}
@@ -181,7 +181,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"remove collateral",
 		cli.GetCmdDecollateralize(),
 		[]string{
-			"950u/uumee",
+			"895u/uumee", // 100 u/uumee will remain
 		},
 		nil,
 	}
@@ -190,7 +190,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"withdraw",
 		cli.GetCmdWithdraw(),
 		[]string{
-			"950u/uumee",
+			"795u/uumee", // 200 u/uumee will remain
 		},
 		nil,
 	}
@@ -206,13 +206,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAccountBalancesResponse{},
 			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1000),
+					sdk.NewInt64Coin(appparams.BondDenom, 1000),
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.ToUTokenDenom(umeeapp.BondDenom), 1000),
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 51),
+					sdk.NewInt64Coin(appparams.BondDenom, 51),
 				),
 			},
 		},
@@ -242,6 +242,27 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		},
 	}
 
+	postQueries := []testQuery{
+		{
+			"query account balances",
+			cli.GetCmdQueryAccountBalances(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
+				Supplied: sdk.NewCoins(
+					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
+				),
+				Collateral: sdk.NewCoins(
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
+				),
+				Borrowed: sdk.NewCoins(),
+			},
+		},
+	}
+
 	// These queries do not require any borrower setup
 	s.runTestQueries(initialQueries...)
 
@@ -262,4 +283,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		removeCollateral,
 		withdraw,
 	)
+
+	// Confirm cleanup transaction effects
+	s.runTestQueries(postQueries...)
 }

@@ -10,21 +10,9 @@ import (
 // GetBorrow returns an sdk.Coin representing how much of a given denom a
 // borrower currently owes.
 func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
-	store := ctx.KVStore(k.storeKey)
-	owed := sdk.NewCoin(denom, sdk.ZeroInt())
-	key := types.CreateAdjustedBorrowKey(borrowerAddr, denom)
-
-	adjustedAmount := sdk.ZeroDec()
-	if bz := store.Get(key); bz != nil {
-		err := adjustedAmount.Unmarshal(bz)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// Apply interest scalar
-	owed.Amount = adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).Ceil().TruncateInt()
-	return owed
+	adjustedAmount := k.getAdjustedBorrow(ctx, borrowerAddr, denom)
+	owedAmount := adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).Ceil().TruncateInt()
+	return sdk.NewCoin(denom, owedAmount)
 }
 
 // repayBorrow repays tokens borrowed by borrowAddr by sending coins in fromAddr to the module. This
@@ -62,8 +50,8 @@ func (k Keeper) GetTotalBorrowed(ctx sdk.Context, denom string) sdk.Coin {
 
 // AvailableLiquidity gets the unreserved module balance of a given token.
 func (k Keeper) AvailableLiquidity(ctx sdk.Context, denom string) sdkmath.Int {
-	moduleBalance := k.ModuleBalance(ctx, denom)
-	reserveAmount := k.GetReserveAmount(ctx, denom)
+	moduleBalance := k.ModuleBalance(ctx, denom).Amount
+	reserveAmount := k.GetReserves(ctx, denom).Amount
 
 	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
 }
@@ -72,10 +60,9 @@ func (k Keeper) AvailableLiquidity(ctx sdk.Context, denom string) sdkmath.Int {
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
-	moduleBalance := toDec(k.ModuleBalance(ctx, denom))
-	reserveAmount := toDec(k.GetReserveAmount(ctx, denom))
+	availableLiquidity := toDec(k.AvailableLiquidity(ctx, denom))
 	totalBorrowed := toDec(k.GetTotalBorrowed(ctx, denom).Amount)
-	tokenSupply := totalBorrowed.Add(moduleBalance).Sub(reserveAmount)
+	tokenSupply := totalBorrowed.Add(availableLiquidity)
 
 	// This edge case can be safely interpreted as 100% utilization.
 	if totalBorrowed.GTE(tokenSupply) {
@@ -152,24 +139,4 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 	}
 
 	return totalThreshold, nil
-}
-
-// setBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
-func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom string, hasDebt bool) error {
-	if err := sdk.ValidateDenom(denom); err != nil {
-		return err
-	}
-	if addr.Empty() {
-		return types.ErrEmptyAddress
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateBadDebtKey(denom, addr)
-
-	if hasDebt {
-		store.Set(key, []byte{0x01})
-	} else {
-		store.Delete(key)
-	}
-	return nil
 }

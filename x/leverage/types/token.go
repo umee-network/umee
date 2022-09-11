@@ -61,17 +61,16 @@ func (t Token) Validate() error {
 		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
-	// Reserve factor and collateral weight range between 0 and 1, inclusive.
-	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GT(sdk.OneDec()) {
+	// Reserve factor is non-negative and less than 1.
+	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
 	}
-
-	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GT(sdk.OneDec()) {
+	// Collateral weight is non-negative and less than 1.
+	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
-
-	// Liquidation threshold ranges between collateral weight and 1, inclusive.
-	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GT(sdk.OneDec()) {
+	// Liquidation threshold is at least collateral weight, but less than 1.
+	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid liquidation threshold: %s", t.LiquidationThreshold)
 	}
 

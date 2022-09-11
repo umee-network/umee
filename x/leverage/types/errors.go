@@ -10,6 +10,8 @@ var (
 	// 1XX = General Validation
 	ErrEmptyAddress = sdkerrors.Register(ModuleName, 100, "empty address")
 	ErrNilAsset     = sdkerrors.Register(ModuleName, 101, "nil asset")
+	ErrGetAmount    = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
+	ErrSetAmount    = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
 
 	// 2XX = Token Registry
 	ErrNotRegisteredToken   = sdkerrors.Register(ModuleName, 200, "not a registered Token")
@@ -37,6 +39,7 @@ var (
 	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 501, "market would exceed MaxSupplyUtilization")
 	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 502, "market would fall below MinCollateralLiquidity")
 	ErrMaxCollateralShare      = sdkerrors.Register(ModuleName, 503, "market would exceed MaxCollateralShare")
+	ErrMaxSupply               = sdkerrors.Register(ModuleName, 504, "market would exceed MaxSupply")
 
 	// 6XX = Internal Failsafes
 	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 600, "invalid token utilization")
@@ -45,6 +48,5 @@ var (
 	ErrNegativeTimeElapsed     = sdkerrors.Register(ModuleName, 603, "negative time elapsed since last interest time")
 	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 604, "exchange rate less than one")
 	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
-	ErrInvalidInteresrScalar   = sdkerrors.Register(ModuleName, 606, "interest scalar less than one")
-	ErrExcessiveTimeElapsed    = sdkerrors.Register(ModuleName, 607, "excessive time elapsed since last interest time")
+	ErrExcessiveTimeElapsed    = sdkerrors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
 )

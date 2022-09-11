@@ -12,7 +12,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/oracle/client/cli"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 				s.network.Validators[1].Address.String(),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
 			},
 			expectErr:    false,
 			expectedCode: 0,
@@ -176,7 +176,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
 
 	s.Require().Len(res.ExchangeRates, 1)
-	s.Require().Equal(res.ExchangeRates[0].Denom, umeeapp.DisplayDenom)
+	s.Require().Equal(res.ExchangeRates[0].Denom, appparams.DisplayDenom)
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
 }
 
