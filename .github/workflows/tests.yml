@@ -53,6 +53,7 @@ jobs:
         if: env.GIT_DIFF
         run: |
           make build
+          chmod +x ./build/umeed
       - uses: actions/upload-artifact@v3
         if: env.GIT_DIFF
         with:
