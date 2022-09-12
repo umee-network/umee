@@ -25,6 +25,9 @@ jobs:
         run: |
           export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.9.0
 
+  build-umeed:
+    uses: ./.github/workflows/build.yml
+
   test-unit-cover:
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +120,7 @@ jobs:
   #         make build
 
   liveness-test:
-    needs: build
+    needs: build-umeed
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -148,7 +151,7 @@ jobs:
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
 
   mainnet-upgrade-v1-v3:
-    needs: build
+    needs: build-umeed
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
