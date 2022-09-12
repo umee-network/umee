@@ -52,15 +52,12 @@ jobs:
       - name: Compile
         if: env.GIT_DIFF
         run: |
-          go mod download
-          cd cmd/umeed
-          go build .
-          chmod +x ./umeed
+          make build
       - uses: actions/upload-artifact@v3
         if: env.GIT_DIFF
         with:
           name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
-          path: cmd/umeed/umeed
+          path: ./build/umeed
           retention-days: 1
 
   test-unit-cover:

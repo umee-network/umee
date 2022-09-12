@@ -78,7 +78,9 @@ cid="--chain-id $CHAIN_ID"
 
 
 ls -lha $CWD/../../
+echo ls -lha $CWD/../../build
 ls -lha $CWD/../../build
+echo ls -lha $NODE_BIN
 ls -lha $NODE_BIN
 
 echo $NODE_BIN "VERSION"
