@@ -114,12 +114,11 @@ jobs:
           go-version: 1.19
           cache: true
 
-      # Caches go packages
-      - uses: actions/cache@v3
-        if: env.GIT_DIFF
+      - name: cache go packages
+        uses: actions/cache@v3
         with:
           path: |
-            ~/Library/Caches/go-build
+            ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
@@ -157,13 +156,11 @@ jobs:
           go-version: 1.19
           cache: true
 
-      # Caches go packages
-      - name: check cache of go pkgs
+      - name: cache go packages
         uses: actions/cache@v3
-        if: env.GIT_DIFF
         with:
           path: |
-            ~/Library/Caches/go-build
+            ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
