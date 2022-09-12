@@ -171,11 +171,11 @@ jobs:
         with:
           name: umeed-linux-amd64
           path: ./build
-        run: chmod +x ./build/umeed
 
       - name: Start single node chain
         if: env.GIT_DIFF
         run: |
+          chmod +x ./build/umeed
           ./contrib/scripts/single-node.sh
       - name: Test Local Network Liveness
         if: env.GIT_DIFF
@@ -202,7 +202,6 @@ jobs:
         with:
           name: umeed-linux-amd64
           path: ./build
-        run: chmod +x ./build/umeed
 
       - name: cache umeed mainnet
         uses: actions/cache@v3
@@ -227,4 +226,5 @@ jobs:
       - name: Fork mainnet and upgrade from v1.0.3 to v.3.x.x
         if: env.GIT_DIFF
         run: |
+          chmod +x ./build/umeed
           ./contrib/scripts/umeemainnet_fork.sh
