@@ -4,13 +4,38 @@ import (
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
 	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix = "u/"
+	UTokenPrefix                  = "u/"
+	DefaultExponent               = uint32(6)
+	DefaultEnableMsgSupply        = true
+	DefaultEnableMsgBorrow        = true
+	DefaultBlacklist              = false
+	UmeeDenom              string = appparams.BondDenom
+	UmeeSymbol             string = "umee"
+	AtomDenom              string = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
+	AtomSymbol             string = "atom"
+)
+
+var (
+	DefaultReserveFactor          = sdk.MustNewDecFromStr("0.100000000000000000")
+	DefaultCollateralWeight       = sdk.MustNewDecFromStr("0.050000000000000000")
+	DefaultLiquidationThreshold   = sdk.MustNewDecFromStr("0.050000000000000000")
+	DefaultBaseBorrowRate         = sdk.MustNewDecFromStr("0.020000000000000000")
+	DefaultKinkBorrowRate         = sdk.MustNewDecFromStr("0.200000000000000000")
+	DefaultMaxBorrowRate          = sdk.MustNewDecFromStr("1.50000000000000000")
+	DefaultKinkUtilization        = sdk.MustNewDecFromStr("0.200000000000000000")
+	DefaultLiquidationIncentive   = sdk.MustNewDecFromStr("0.180000000000000000")
+	DefaultMaxCollateralShare     = sdk.MustNewDecFromStr("1.00000000000000000")
+	DefaultMaxSupplyUtilization   = sdk.MustNewDecFromStr("1.00000000000000000")
+	DefaultMinCollateralLiquidity = sdk.MustNewDecFromStr("0.000000000000000000")
+	DefaultMaxSupply, _           = math.NewIntFromString("100000000000000000000")
 )
 
 // HasUTokenPrefix detects the uToken prefix on a denom.
@@ -148,4 +173,40 @@ func (t Token) AssertNotBlacklisted() error {
 		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
 	}
 	return nil
+}
+
+func NewDefaultRegistryToken(baseDenom, symbolDenom string) Token {
+	return Token{
+		BaseDenom:              baseDenom,
+		SymbolDenom:            symbolDenom,
+		Exponent:               DefaultExponent,
+		ReserveFactor:          DefaultReserveFactor,
+		CollateralWeight:       DefaultCollateralWeight,
+		LiquidationThreshold:   DefaultLiquidationThreshold,
+		BaseBorrowRate:         DefaultBaseBorrowRate,
+		KinkBorrowRate:         DefaultKinkBorrowRate,
+		MaxBorrowRate:          DefaultMaxBorrowRate,
+		KinkUtilization:        DefaultKinkUtilization,
+		LiquidationIncentive:   DefaultLiquidationIncentive,
+		EnableMsgSupply:        DefaultEnableMsgSupply,
+		EnableMsgBorrow:        DefaultEnableMsgBorrow,
+		Blacklist:              DefaultBlacklist,
+		MaxCollateralShare:     DefaultMaxCollateralShare,
+		MaxSupplyUtilization:   DefaultMaxSupplyUtilization,
+		MinCollateralLiquidity: DefaultMinCollateralLiquidity,
+		MaxSupply:              DefaultMaxSupply,
+	}
+}
+
+func DefaultRegistry() []Token {
+	return []Token{
+		NewDefaultRegistryToken(
+			UmeeDenom,
+			UmeeSymbol,
+		),
+		NewDefaultRegistryToken(
+			AtomDenom,
+			AtomSymbol,
+		),
+	}
 }
