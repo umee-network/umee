@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 # USAGE:
 # ./single-gen.sh <option of full path to umeed>
@@ -41,9 +41,9 @@ hdir="$CHAIN_DIR/$CHAIN_ID"
 
 if ! command -v jq &> /dev/null
 then
-    echo "⚠️ jq command could not be found!"
-    echo "Install it by checking https://stedolan.github.io/jq/download/"
-    exit 1
+  echo "⚠️ jq command could not be found!"
+  echo "Install it by checking https://stedolan.github.io/jq/download/"
+  exit 1
 fi
 
 echo "--- Chain ID = $CHAIN_ID"
@@ -75,17 +75,6 @@ n0app="$n0cfgDir/app.toml"
 # Common flags
 kbt="--keyring-backend test"
 cid="--chain-id $CHAIN_ID"
-
-
-ls -lha $CWD/../../
-echo ls -lha $CWD/../../build
-ls -lha $CWD/../../build
-echo ls -lha $NODE_BIN
-ls -lha $NODE_BIN
-
-echo $NODE_BIN "VERSION"
-
-$NODE_BIN version
 
 # Check if the node-data dir has been initialized already
 if [[ ! -d "$hdir" ]]; then
