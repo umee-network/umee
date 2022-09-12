@@ -11,7 +11,7 @@ PYTHON_CLI="${PYTHON_CLI:-python3}"
 if [ -d "$COSMOS_GENESIS_TINKERER_PATH" ]; then
   echo "$COSMOS_GENESIS_TINKERER_PATH exists."
 else
-  git clone https://github.com/umee-network/cosmos-genesis-tinkerer.git $CWD/cosmos-genesis-tinkerer
+  git clone --depth 1 --sparse https://github.com/umee-network/cosmos-genesis-tinkerer.git $CWD/cosmos-genesis-tinkerer
   pip install -r $COSMOS_GENESIS_TINKERER_PATH/requirements.txt
 fi
 
