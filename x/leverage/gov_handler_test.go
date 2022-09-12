@@ -63,7 +63,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		// no tokens should have been deleted
 		tokens := k.GetAllRegisteredTokens(ctx)
-		require.Len(t, tokens, 3)
+		require.Len(t, tokens, 4)
 
 		_, err := k.GetTokenSettings(ctx, "uumee")
 		require.NoError(t, err)

@@ -241,26 +241,28 @@ func IntegrationTestNetworkConfig() network.Config {
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
 	}
-	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:              params.BondDenom,
-		SymbolDenom:            params.DisplayDenom,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100000000000),
-	})
+	leverageGenState.Registry = []leveragetypes.Token{
+		{
+			BaseDenom:              params.BondDenom,
+			SymbolDenom:            params.DisplayDenom,
+			Exponent:               6,
+			ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
+			CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
+			LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
+			BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
+			MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
+			KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
+			LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
+			EnableMsgSupply:        true,
+			EnableMsgBorrow:        true,
+			Blacklist:              false,
+			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+			MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+			MaxSupply:              sdk.NewInt(100000000000),
+		},
+	}
 	bz, err := cdc.MarshalJSON(&leverageGenState)
 	if err != nil {
 		panic(err)
