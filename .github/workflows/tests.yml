@@ -155,13 +155,25 @@ jobs:
         uses: actions/cache@v3
         id: cache-umeed-v103
         with:
-          path: contrib/scripts/umeed-releases/umeed-v1.0.3-linux-amd64/umeed
+          path: ./contrib/scripts/umeed-releases/umeed-v1.0.3-linux-amd64/umeed
           key: ${{ runner.os }}-umeed-v103
 
       - name: download mainnet binary
         if: steps.cache-umeed-v103.outputs.cache-hit != 'true'
         run: |
           ./contrib/scripts/download-mainnet-umeed.sh
+
+      - name: cache mainnet tinkered genesis
+        uses: actions/cache@v3
+        id: cache-tinkered-genesis
+        with:
+          path: ./contrib/scripts/mainnet_tinkered_genesis.json
+          key: ${{ runner.os }}-tinkered-genesis
+
+      - name: tinkerer mainnet genesis
+        if: steps.cache-tinkered-genesis.outputs.cache-hit != 'true'
+        run: |
+          ./contrib/scripts/tikerer-mainnet-genesis.sh
 
       - name: Fork mainnet and upgrade from v1.0.3 to v.3.x.x
         if: env.GIT_DIFF

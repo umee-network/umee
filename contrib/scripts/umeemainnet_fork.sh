@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 # Start a single node chain from an exported genesis file,
 # process the genesis file if it wasn't already,
@@ -23,6 +23,7 @@ SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
 
 # Loads another sources
 . $CWD/download-mainnet-umeed.sh
+UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tikerer-mainnet-genesis.sh
 . $CWD/blocks.sh
 
 nodeHome="$CHAIN_DIR/$CHAIN_ID"
@@ -67,26 +68,7 @@ else
 fi
 
 # Checks for the tikered genesis file
-if [ ! -f "$UMEEMAINNET_GENESIS_PATH" ]; then
-  echo "$UMEEMAINNET_GENESIS_PATH doesn't exist"
-  EXPORTED_GENESIS_UNPROCESSED=$CWD/umeemainnet.genesis.json
 
-  if [ ! -f "$EXPORTED_GENESIS_UNPROCESSED" ]; then
-
-    EXPORTED_GENESIS_UNZIPED=$CWD/umeemainnet.genesis.json.gz
-
-    if [ ! -f $EXPORTED_GENESIS_UNZIPED ]; then
-      echo "$EXPORTED_GENESIS_UNZIPED doesn't exist, we need to curl it"
-      curl $MAINNET_EXPORTED_GENESIS_URL > $EXPORTED_GENESIS_UNZIPED
-    fi
-
-    echo "$EXPORTED_GENESIS_UNPROCESSED doesn't exist, we need to unpack"
-    gunzip -k $EXPORTED_GENESIS_UNZIPED
-  fi
-
-  echo "$EXPORTED_GENESIS_UNPROCESSED exists and ready to be processed"
-  EXPORTED_GENESIS_UNPROCESSED_PATH=$EXPORTED_GENESIS_UNPROCESSED COSMOS_GENESIS_TINKERER_SCRIPT=umeemainnet-fork.py EXPORTED_GENESIS_PROCESSED_PATH=$UMEEMAINNET_GENESIS_PATH $CWD/process_genesis.sh
-fi
 
 echo Remove everything from the $CHAIN_DIR
 rm -rf $CHAIN_DIR
