@@ -26,7 +26,7 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 	k := app.LeverageKeeper
 	h := leverage.NewUpdateRegistryProposalHandler(k)
 
-	t.Run("invalid proposal type 1", func(t *testing.T) {
+	t.Run("invalid proposal type", func(t *testing.T) {
 		require.Error(t, h(ctx, &paramsproposal.ParameterChangeProposal{}))
 	})
 
