@@ -156,7 +156,7 @@ jobs:
         id: cache-umeed-v103
         with:
           path: ./contrib/scripts/umeed-releases/umeed-v1.0.3-linux-amd64/umeed
-          key: ${{ runner.os }}-umeed-v103
+          key: umeed-v103
 
       - name: download mainnet binary
         if: steps.cache-umeed-v103.outputs.cache-hit != 'true'
@@ -168,7 +168,7 @@ jobs:
         id: cache-tinkered-genesis
         with:
           path: ./contrib/scripts/mainnet_tinkered_genesis.json
-          key: ${{ runner.os }}-tinkered-genesis
+          key: mainnet-tinkered-genesis
 
       - name: tinkerer mainnet genesis
         if: steps.cache-tinkered-genesis.outputs.cache-hit != 'true'
