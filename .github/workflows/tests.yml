@@ -172,7 +172,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: umeed-linux-amd64
-          path: ./build/umeed
+          path: ./build
 
       - name: Start single node chain
         if: env.GIT_DIFF
@@ -202,7 +202,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: umeed-linux-amd64
-          path: ./build/umeed
+          path: ./build
 
       - name: cache umeed mainnet
         uses: actions/cache@v3

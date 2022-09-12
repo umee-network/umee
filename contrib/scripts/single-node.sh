@@ -76,15 +76,6 @@ n0app="$n0cfgDir/app.toml"
 kbt="--keyring-backend test"
 cid="--chain-id $CHAIN_ID"
 
-
-ls -lha $CWD/../../
-ls -lha $CWD/../../build
-ls -lha $NODE_BIN
-
-echo $NODE_BIN "VERSION"
-
-$NODE_BIN version
-
 # Check if the node-data dir has been initialized already
 if [[ ! -d "$hdir" ]]; then
   echo "====================================="
