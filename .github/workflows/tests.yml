@@ -150,6 +150,7 @@ jobs:
             **/**.go
             go.mod
             go.sum
+
       - uses: actions/setup-go@v3
         if: env.GIT_DIFF
         with:
@@ -157,7 +158,8 @@ jobs:
           cache: true
 
       # Caches go packages
-      - uses: actions/cache@v3
+      - name: check cache of go pkgs
+        uses: actions/cache@v3
         if: env.GIT_DIFF
         with:
           path: |
