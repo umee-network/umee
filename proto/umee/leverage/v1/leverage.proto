@@ -12,15 +12,30 @@ message Params {
   option (gogoproto.goproto_stringer) = false;
   // Complete Liquidation Threshold determines how far over their borrow
   // limit a borrower must be in order for their positions to be liquidated
-  // fully in a single event.
+  // fully in a single event. See minimum_close_factor for more details.
+  // Valid values: 0-1.
   string complete_liquidation_threshold = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"complete_liquidation_threshold\""
   ];
-  // Minimum Close Factor determines the portion of a borrower's position
-  // that can be liquidated in a single event, when the borrower is just barely
-  // over their borrow limit.
+  // Close Factor determines the portion of a borrower's position that can be
+  // liquidated in a single event. Minimum Close Factor is Close Factor at
+  // liquidation_threshold. 0.1 means that that 10% of the borrower position can
+  // be liquidated when the borrowed value passes the/ liquidation_threshold.
+  // close_factor scales linearly between minimum_close_factor and 1.0,
+  // reaching its maximum when borrowed value passed
+  // complete_liquidation_threshold. We can put it into the picture:
+  //
+  //
+  //             borrowed           C := collateral
+  //             value                   value
+  //  --- | ------- | ----- | -------- | ------->
+  //   liquidation      complete
+  //   threshold        liquidation
+  //    * C             threshold * C
+  //
+  // Valid values: 0-1.
   string minimum_close_factor = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -28,6 +43,7 @@ message Params {
   ];
   // Oracle Reward Factor determines the portion of interest accrued on
   // borrows that is sent to the oracle module to fund its reward pool.
+  // Valid values: 0-1.
   string oracle_reward_factor = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -44,6 +60,7 @@ message Params {
   // Direct Liquidation Fee is a reduction factor in liquidation incentive
   // experienced by liquidators who choose to receive base assets instead of
   // uTokens as liquidation rewards.
+  // Valid values: 0-1.
   string direct_liquidation_fee = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -61,6 +78,7 @@ message Token {
 
   // Reserve Factor defines what portion of accrued interest goes to reserves
   // when this token is borrowed.
+  // Valid values: 0-1.
   string reserve_factor = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -70,6 +88,7 @@ message Token {
   // Collateral Weight defines what portion of the total value of the asset
   // can contribute to a users borrowing power. If the collateral weight is
   // zero, using this asset as collateral against borrowing will be disabled.
+  // Valid values: 0-1.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -77,8 +96,10 @@ message Token {
   ];
 
   // Liquidation Threshold defines what amount of the total value of the
-  // asset can contribute to a user's liquidation threshold (above which they
-  // become eligible for liquidation).
+  // asset as a collateral can contribute to a user's liquidation threshold
+  // (above which they become eligible for liquidation).
+  // See also: min_close_factor.
+  // Valid values: 0-1.
   string liquidation_threshold = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -87,6 +108,7 @@ message Token {
 
   // Base Borrow Rate defines the minimum interest rate for borrowing this
   // asset.
+  // Valid values: 0-inf
   string base_borrow_rate = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -95,6 +117,7 @@ message Token {
 
   // Kink Borrow Rate defines the interest rate for borrowing this
   // asset when supply utilization is equal to 'kink_utilization'.
+  // Valid values: 0-inf
   string kink_borrow_rate = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -103,6 +126,7 @@ message Token {
 
   // Max Borrow Rate defines the interest rate for borrowing this
   // asset when supply utilization is at its maximum.
+  // Valid values: 0-inf
   string max_borrow_rate = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -111,6 +135,7 @@ message Token {
 
   // Kink Utilization defines the supply utilization value where
   // the kink in the borrow interest rate function occurs.
+  // Valid values: 0-1.
   string kink_utilization = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -119,6 +144,7 @@ message Token {
 
   // Liquidation Incentive determines the portion of bonus collateral of
   // a token type liquidators receive as a liquidation reward.
+  // Valid values: 0-1.
   string liquidation_incentive = 9 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -174,17 +200,19 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"max_supply_utilization\""
   ];
 
-  // Min Collateral Liquidity specifies the minimum collateral liquidity a token is
-  // allowed to reach as a direct result of users borrowing, collateralizing, or
-  // withdrawing assets. Liquidity can only drop below this value due to interest
-  // or liquidations.
+  // Min Collateral Liquidity specifies an allowed minimum allowed for the following function:
+  //     collateral_liquidity(token) = available(token) / total_collateral(token)
+  // Borrowing, collateralizing, or withdrawing assets is not allowed when the
+  // result of such action invalidates min_collateral_liquidity.
+  // Liquidity can only drop below this value due to interest or liquidations.
+  // Valid values: 0 - ∞
   string min_collateral_liquidity = 17 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"min_collateral_liquidity\""
   ];
 
-  // Max Supply is the maximum amount of tokens the protocol can hold.
+  // Max Supply is the maximum amount of tokens the protocol can hold measured in USD.
   // Adding more supply of the given token to the protocol will return an error.
   // Must be a non negative value. 0 means that there is no limit.
   // To mark a token as not valid for supply, `msg_supply` must be set to false.
