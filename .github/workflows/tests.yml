@@ -171,7 +171,7 @@ jobs:
         if: env.GIT_DIFF
         uses: actions/download-artifact@v3
         with:
-          name: umeed-${{ runner.os }}-${{ runner.arch }}
+          name: umeed-linux-amd64
           path: ./build/umeed
 
       - name: Start single node chain
@@ -201,7 +201,7 @@ jobs:
         if: env.GIT_DIFF
         uses: actions/download-artifact@v3
         with:
-          name: umeed-${{ runner.os }}-${{ runner.arch }}
+          name: umeed-linux-amd64
           path: ./build/umeed
 
       - name: cache umeed mainnet
