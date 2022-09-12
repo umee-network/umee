@@ -52,7 +52,9 @@ jobs:
       - name: Compile
         if: env.GIT_DIFF
         run: |
-          make build
+          go mod download
+          cd cmd/umeed
+          go build .
       - uses: actions/upload-artifact@v3
         if: env.GIT_DIFF
         with:
