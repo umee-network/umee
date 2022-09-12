@@ -59,7 +59,7 @@ jobs:
         if: env.GIT_DIFF
         with:
           name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
-          path: ./build/umeed
+          path: cmd/umeed/umeed
           retention-days: 1
 
   test-unit-cover:
