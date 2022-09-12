@@ -1,47 +1,47 @@
-# name: Build
-# on:
-#   workflow_call:
-#   pull_request:
-#   push:
-#     branches:
-#       - main
-#       - release/**
+name: Build
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches:
+      - main
+      - release/**
 
-# # This workflow makes amd64 and arm64 binaries for macOS and Linux.
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         arch: [amd64, arm64]
-#         targetos: [darwin, linux]
-#     name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
-#     steps:
-#       - uses: actions/checkout@v3
-#       - uses: technote-space/get-diff-action@v6.1.0
-#         with:
-#           PATTERNS: |
-#             **/**.go
-#             go.mod
-#             go.sum
-#       - name: Setup go
-#         if: env.GIT_DIFF
-#         uses: actions/setup-go@v3
-#         with:
-#           go-version: 1.19
-#           cache: true
-#         env:
-#           GOOS: ${{ matrix.targetos }}
-#           GOARCH: ${{ matrix.arch }}
-#       - name: Compile
-#         if: env.GIT_DIFF
-#         run: |
-#           go mod download
-#           cd cmd/umeed
-#           go build .
-#       - uses: actions/upload-artifact@v3
-#         if: env.GIT_DIFF
-#         with:
-#           name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
-#           path: cmd/umeed/umeed
-#           retention-days: 1
+# This workflow makes amd64 and arm64 binaries for macOS and Linux.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        targetos: [darwin, linux]
+    name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.0
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - name: Setup go
+        if: env.GIT_DIFF
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+          cache: true
+        env:
+          GOOS: ${{ matrix.targetos }}
+          GOARCH: ${{ matrix.arch }}
+      - name: Compile
+        if: env.GIT_DIFF
+        run: |
+          go mod download
+          cd cmd/umeed
+          go build .
+      - uses: actions/upload-artifact@v3
+        if: env.GIT_DIFF
+        with:
+          name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
+          path: cmd/umeed/umeed
+          retention-days: 1
