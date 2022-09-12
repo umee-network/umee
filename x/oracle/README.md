@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Oracle module provides the Umee blockchain with an up-to-date and accurate price feed of exchange rates of multiple currencies against the USD for the [Leverage](../leverage/spec/README.md) module.
+The Oracle module provides the Umee blockchain with an up-to-date and accurate price feed of exchange rates of multiple currencies against the USD for the [Leverage](../leverage/README.md) module.
 
 As price information is extrinsic to the blockchain, the Umee network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the weighted median of the ballot.
 
@@ -97,7 +97,7 @@ The control flow for vote-tallying, exchange rate updates, ballot rewards and sl
 
 ### ExchangeRate
 
-An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Leverage](../../leverage/README.md) module.
+An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Leverage](../leverage/README.md) module.
 
 - ExchangeRate: `0x01 | byte(denom) -> sdk.Dec`
 
