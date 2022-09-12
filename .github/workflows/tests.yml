@@ -151,7 +151,8 @@ jobs:
         run: |
           make build
 
-      - uses: actions/cache@v3
+      - name: cache umeed mainnet
+        uses: actions/cache@v3
         id: cache-umeed-v103
         with:
           path: contrib/scripts/umeed-releases/umeed-v1.0.3-linux-amd64/umeed
