@@ -114,16 +114,6 @@ jobs:
           go-version: 1.19
           cache: true
 
-      - name: cache go packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Build umeed
         if: env.GIT_DIFF
         run: |
@@ -156,20 +146,22 @@ jobs:
           go-version: 1.19
           cache: true
 
-      - name: cache go packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Build umeed
         if: env.GIT_DIFF
         run: |
           make build
+
+      - uses: actions/cache@v3
+        id: cache-umeed-v103
+        with:
+          path: contrib/scripts/umeed-releases/umeed-v1.0.3-linux-amd64/umeed
+          key: ${{ runner.os }}-umeed-v103
+
+      - name: download mainnet binary
+        if: steps.cache-umeed-v103.outputs.cache-hit != 'true'
+        run: |
+          ./contrib/scripts/download-mainnet-umeed.sh
+
       - name: Fork mainnet and upgrade from v1.0.3 to v.3.x.x
         if: env.GIT_DIFF
         run: |
