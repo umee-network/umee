@@ -17,7 +17,7 @@ BLOCK_TIME="${BLOCK_TIME:-6}"
 UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.0-v3.0"}"
 MAINNET_EXPORTED_GENESIS_URL="${MAINNET_EXPORTED_GENESIS_URL:-"https://storage.googleapis.com/umeedropzone/jul-28-umee-1-export.json.gz"}"
 UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
-UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/tinkered_genesis.json}"
+UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key.json}"
 SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
 
