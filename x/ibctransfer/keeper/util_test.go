@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	ibctesting "github.com/cosmos/ibc-go/v5/testing"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
@@ -35,6 +36,8 @@ func NewTransferPath(chainA, chainB *ibctesting.TestChain) *ibctesting.Path {
 	path := ibctesting.NewPath(chainA, chainB)
 	path.EndpointA.ChannelConfig.PortID = ibctesting.TransferPort
 	path.EndpointB.ChannelConfig.PortID = ibctesting.TransferPort
+	path.EndpointA.ChannelConfig.Version = transfertypes.Version
+	path.EndpointB.ChannelConfig.Version = transfertypes.Version
 
 	return path
 }
