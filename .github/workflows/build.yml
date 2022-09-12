@@ -41,5 +41,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: env.GIT_DIFF
         with:
-          name: umeed ${{ matrix.targetos }} ${{ matrix.arch }}
+          name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
           path: cmd/umeed/umeed
+          retention-days: 1

@@ -96,28 +96,28 @@ jobs:
         run: |
           cd price-feeder && make test-unit
 
-  build-umeed:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
-        with:
-          PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-      - uses: actions/setup-go@v3
-        if: env.GIT_DIFF
-        with:
-          go-version: 1.19
-          cache: true
-      - name: Build umeed
-        if: env.GIT_DIFF
-        run: |
-          make build
+  # build-umeed:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: technote-space/get-diff-action@v6.1.0
+  #       with:
+  #         PATTERNS: |
+  #           **/**.go
+  #           go.mod
+  #           go.sum
+  #     - uses: actions/setup-go@v3
+  #       if: env.GIT_DIFF
+  #       with:
+  #         go-version: 1.19
+  #         cache: true
+  #     - name: Build umeed
+  #       if: env.GIT_DIFF
+  #       run: |
+  #         make build
 
   liveness-test:
-    needs: build-umeed
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -129,6 +129,14 @@ jobs:
             **/**.go
             go.mod
             go.sum
+
+      - name: gets umeed bin
+        if: env.GIT_DIFF
+        uses: actions/download-artifact@v3
+        with:
+          name: umeed-${{ runner.os }}-${{ runner.arch }}
+          path: ./build/umeed
+
       - name: Start single node chain
         if: env.GIT_DIFF
         run: |
@@ -140,7 +148,7 @@ jobs:
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
 
   mainnet-upgrade-v1-v3:
-    needs: build-umeed
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -151,6 +159,14 @@ jobs:
             **/**.go
             go.mod
             go.sum
+
+      - name: gets umeed bin
+        if: env.GIT_DIFF
+        uses: actions/download-artifact@v3
+        with:
+          name: umeed-${{ runner.os }}-${{ runner.arch }}
+          path: ./build/umeed
+
       - name: cache umeed mainnet
         uses: actions/cache@v3
         id: cache-umeed-v103
