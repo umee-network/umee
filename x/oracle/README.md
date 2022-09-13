@@ -11,18 +11,18 @@ As price information is extrinsic to the blockchain, the Umee network relies on 
 ## Contents
 
 1. **[Concepts](#concepts)**
-   - [Voting Procedure](#Voting-Procedure)
-   - [Reward Band](#Reward-Band)
+   - [Voting Procedure](#voting-procedure)
+   - [reward Band](#Reward-Band)
    - [Slashing](#Slashing)
-   - [Abstaining from Voting](#Abstaining-from-Voting)
+   - [Abstaining from Voting](#abstaining-from-voting)
 2. **[State](#state)**
-   - [ExchangeRate](#ExchangeRate)
-   - [FeederDelegation](#FeederDelegation)
-   - [MissCounter](#MissCounter)
-   - [AggregateExchangeRatePrevote](#AggregateExchangeRatePrevote)
-   - [AggregateExchangeRateVote](#AggregateExchangeRateVote)
-3. **[EndBlock](#end-block)**
-   - [Tally Exchange Rate Votes](#Tally-Exchange-Rate-Votes)
+   - [ExchangeRate](#exchangerate)
+   - [FeederDelegation](#feederdelegation)
+   - [MissCounter](#misscounter)
+   - [AggregateExchangeRatePrevote](#aggregateexchangerateprevote)
+   - [AggregateExchangeRateVote](#aggregateexchangeratevote)
+3. **[End Block](#end-block)**
+   - [Tally Exchange Rate Votes](#tally-exchange-rate-votes)
 4. **[Messages](#messages)**
 5. **[Events](#events)**
 6. **[Parameters](#params)**
@@ -91,7 +91,7 @@ In Terra's implementation, validators have the option of abstaining from voting.
 
 In order to ensure that we have the most accurate exchange rates, we have removed this feature. Non-positive exchange rates in `MsgAggregateExchangeRateVote` are instead dropped.
 
-The control flow for vote-tallying, exchange rate updates, ballot rewards and slashing happens at the end of every `VotePeriod`, and is found at the [end-block ABCI](#endblock) function rather than inside message handlers.
+The control flow for vote-tallying, exchange rate updates, ballot rewards and slashing happens at the end of every `VotePeriod`, and is found at the [end-block ABCI](#end-block) function rather than inside message handlers.
 
 ## State
 
@@ -155,7 +155,7 @@ type AggregateExchangeRateVote struct {
 
 ### Tally Exchange Rate Votes
 
-At the end of every block, the `Oracle` module checks whether it's the last block of the `VotePeriod`. If it is, it runs the [Voting Procedure](#Voting_Procedure):
+At the end of every block, the `Oracle` module checks whether it's the last block of the `VotePeriod`. If it is, it runs the [Voting Procedure](#voting-procedure):
 
 1. All current active exchange rates are purged from the store
 
@@ -173,7 +173,7 @@ At the end of every block, the `Oracle` module checks whether it's the last bloc
    - Set the exchange rate on the blockchain for that `denom` with `k.SetExchangeRate()`
    - Emit an `exchange_rate_update` event
 
-5. Count up the validators who [missed](#Slashing) the Oracle vote and increase the appropriate miss counters
+5. Count up the validators who [missed](#slashing) the Oracle vote and increase the appropriate miss counters
 
 6. If at the end of a `SlashWindow`, penalize validators who have missed more than the penalty threshold (submitted fewer valid votes than `MinValidPerWindow`)
 

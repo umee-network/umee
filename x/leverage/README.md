@@ -11,35 +11,35 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 ## Contents
 
 1. **[Concepts](#concepts)**
-   - [Accepted Assets](##accepted-assets)
+   - [Accepted Assets](#accepted-assets)
      - [uTokens](#utokens)
-   - [Supplying and Borrowing](#Supplying-and-Borrowing)
-   - [Reserves](#Reserves)
-   - [Liquidation](#Liquidation)
+   - [Supplying and Borrowing](#supplying-and-borrowing)
+   - [Reserves](#reserves)
+   - [Liquidation](#liquidation)
    - Important Derived Values:
-     - [Adjusted Borrow Amounts](#Adjusted-Borrow-Amounts)
-     - [uToken Exchange Rate](#uToken-Exchange-Rate)
-     - [Supply Utilization](#Supply-Utilization)
-     - [Borrow Limit](#Borrow-Limit)
-     - [Liquidation Limit](#Liquidation-Limit)
-     - [Borrow APY](#Borrow-APY)
-     - [Supplying APY](#Supplying-APY)
-     - [Close Factor](#Close-Factor)
-     - [Total Supplied](#Total-Supplied)
+     - [Adjusted Borrow Amounts](#adjusted-borrow-amounts)
+     - [uToken Exchange Rate](#utoken-exchange-rate)
+     - [Supply Utilization](#supply-utilization)
+     - [Borrow Limit](#borrow-limit)
+     - [Liquidation Limit](#liquidation-limit)
+     - [Borrow APY](#borrow-apy)
+     - [Supplying APY](#supplying-apy)
+     - [Close Factor](#close-factor)
+     - [Total Supplied](#total-supplied)
 2. **[State](#state)**
 3. **[Queries](#queries)**
 4. **[Messages](#messages)**
 5. **[Events](#events)**
 6. **[Parameters](#params)**
 7. **[EndBlock](#end-block)**
-   - [Bad Debt Sweeping](#Sweep-Bad-Debt)
-   - [Interest Accrual](#Accrue-Interest)
+   - [Bad Debt Sweeping](#sweep-bad-debt)
+   - [Interest Accrual](#accrue-interest)
 
 ## Concepts
 
 ### Accepted Assets
 
-At the foundation of the `leverage` module is the [Token Registry](#Token-Registry), which contains a list of accepted types.
+At the foundation of the `leverage` module is the [Token Registry](#token-registry), which contains a list of accepted types.
 
 This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or supplying.
 
@@ -55,9 +55,9 @@ uTokens do not have parameters like the `Token` struct does, and they are always
 
 Users have the following actions available to them:
 
-- [Supply](#MsgSupply) accepted asset types to the module, receiving _uTokens_ in exchange.
+- Supply accepted asset types to the module, receiving _uTokens_ in exchange.
 
-  Suppliers earn interest at an effective rate of the asset's [Supplying APY](#Supplying-APY) as the [uToken Exchange Rate](#uToken-Exchange-Rate) increases over time.
+  Suppliers earn interest at an effective rate of the asset's [Supplying APY](#supplying-apy) as the [uToken Exchange Rate](#utoken-exchange-rate) increases over time.
 
   Additionally, for assets denominations already enabled as collateral, the supplied assets immediately become collateral as well, causing their borrow limit to increase.
 
@@ -65,28 +65,28 @@ Users have the following actions available to them:
 
   Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
-- [Enable or Disable](#MsgSetCollateral) a uToken denomination as collateral for borrowing.
+- Enable or Disable (`MsgSetCollateral`) a uToken denomination as collateral for borrowing.
 
-  Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#Borrow-Limit) below their total borrowed value.
+  Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
-  Withdraw respects the [uToken Exchange Rate](#uToken-Exchange-Rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#Borrow-Limit) below their total borrowed value.
+  Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
-- `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#Borrow-Limit).
+- `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
-  Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#Borrow-APY).
+  Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
 
 - `MsgRepay` assets of a borrowed type, directly reducing the amount owed.
 
   Repayments that exceed a borrower's amount owed in the selected denomination succeed at paying the reduced amount rather than failing outright.
 
-- `MsgLiquidate` undercollateralized borrows a different user whose total borrowed value is greater than their [Liquidation Threshold](#Liquidation_Threshold).
+- `MsgLiquidate` undercollateralized borrows a different user whose total borrowed value is greater than their [Liquidation Threshold](#liquidation-threshold).
 
-  The liquidator must select a reward denomination present in the borrower's uToken collateral. Liquidation is limited by [Close Factor](#Close-Factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
+  The liquidator must select a reward denomination present in the borrower's uToken collateral. Liquidation is limited by [Close Factor](#close-factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
 
-  If a borrower is serverly past their borrow limit, incentivized liquidation may exhaust all of their collateral and leave some debt behind. When liquidation exhausts the last of a borrower's collateral, its remaining debt is marked as _bad debt_ in the keeper, so it can be repaid using module reserves.
+  If a borrower is way past their borrow limit, incentivized liquidation may exhaust all of their collateral and leave some debt behind. When liquidation exhausts the last of a borrower's collateral, its remaining debt is marked as _bad debt_ in the keeper, so it can be repaid using module reserves.
 
 ### Reserves
 
@@ -94,7 +94,7 @@ A portion of accrued interest on all borrows (determined per-token by the parame
 
 Rather than being stored in a separate account, the `ReserveAmount` of any given token is stored in the module's state, after which point the module respects the reserved amount by treating part of the balance of the `leverage` module account as off-limits.
 
-For example, if the module contains `1000 uumee` and `100 uumee` are reserved, then only `900 uumee` are available for Borrow and Withdraw transactions. If `40 uumee` of reserves are then used to pay off a bad debt, the module acount will have `960 uumee` with `60 uumee` reserved, keeping the available balance at `900 uumee`.
+For example, if the module contains `1000 uumee` and `100 uumee` are reserved, then only `900 uumee` are available for Borrow and Withdraw transactions. If `40 uumee` of reserves are then used to pay off a bad debt, the module account will have `960 uumee` with `60 uumee` reserved, keeping the available balance at `900 uumee`.
 
 ### Oracle Rewards
 
@@ -114,7 +114,7 @@ As a reminder, the following values are always available as a basis for calculat
 - _Interest scalars_ for all borrowed denominations, which are used with adjusted borrow amounts
 - Total _adjusted borrows_ summed over all borrower accounts.
 - Leverage module [Parameters](#params)
-- Token parameters from the [Token Registry](#Token-Registry)
+- Token parameters from the [Token Registry](#token-registry)
 
 The more complex derived values must use the values above as a basis.
 
@@ -279,14 +279,14 @@ Every block, the leverage module runs the following steps in order:
 
 Borrowers whose entire balance of collateral has been liquidated but still owe debt are marked by their final liquidation transaction. This periodic routine sweeps up all marked `address | denom` bad debt entries in the keeper, performing the following steps for each:
 
-- Determine the about of [Reserves](#Reserves) in the borrowed denomination available to repay the debt
+- Determine the about of [Reserves](#reserves) in the borrowed denomination available to repay the debt
 - Repay the full amount owed using reserves, or the maxmimum amount available if reserves are insufficient
 - Emit a "Bad Debt Repaid" event indicating amount repaid, if nonzero
 - Emit a "Reserves Exhausted" event with the borrow amount remaining, if nonzero
 
 ### Accrue Interest
 
-At every epoch, the module recalculates [Borrow APY](#Borrow-APY) and [Supplying APY](#Supplying-APY) for each accepted asset type, storing them in state for easier query.
+At every epoch, the module recalculates [Borrow APY](#borrow-apy) and [Supplying APY](#supplying-apy) for each accepted asset type, storing them in state for easier query.
 
 Borrow APY is then used to accrue interest on all open borrows.
 
