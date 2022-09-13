@@ -3,12 +3,12 @@ ARG IMG_TAG=latest
 # Fetch base packages
 FROM golang:1.19-alpine AS base-builder
 ENV PACKAGES make git libc-dev gcc linux-headers
-RUN apk add $PACKAGES
+RUN apk add --no-cache $PACKAGES
 
 # Fetch base umee packages
 FROM base-builder AS umee-base-builder
 ENV PACKAGES curl bash eudev-dev python3
-RUN apk add $PACKAGES
+RUN apk add --no-cache $PACKAGES
 
 # Compile the umeed binary
 FROM umee-base-builder AS umeed-builder-go
