@@ -11,8 +11,8 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 ## Contents
 
 1. **[Concepts](#concepts)**
-   - [Accepted Assets](#Accepted-Assets)
-     - [uTokens](#uTokens)
+   - [Accepted Assets](##accepted-assets)
+     - [uTokens](#utokens)
    - [Supplying and Borrowing](#Supplying-and-Borrowing)
    - [Reserves](#Reserves)
    - [Liquidation](#Liquidation)
