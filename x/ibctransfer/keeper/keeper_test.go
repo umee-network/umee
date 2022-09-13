@@ -21,6 +21,11 @@ import (
 	"github.com/umee-network/umee/v3/tests/util"
 )
 
+func TestKeeperTestSuite(t *testing.T) {
+	t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
+	suite.Run(t, new(KeeperTestSuite))
+}
+
 type KeeperTestSuite struct {
 	suite.Suite
 
@@ -112,11 +117,6 @@ func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
 	s.Require().True(ok)
 
 	return umeeApp
-}
-
-func TestKeeperTestSuite(t *testing.T) {
-	t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
-	suite.Run(t, new(KeeperTestSuite))
 }
 
 func (s *KeeperTestSuite) TestTrackMetadata() {
