@@ -168,6 +168,7 @@ func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) erro
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderBinance, len(cps))
 	return nil
 }
 
