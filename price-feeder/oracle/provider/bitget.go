@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -195,14 +194,7 @@ func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		string(ProviderBitget),
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderBitget, len(cps))
 	return nil
 }
 

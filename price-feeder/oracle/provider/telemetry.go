@@ -51,6 +51,22 @@ func telemetryWebsocketReconnect(n Name) {
 	)
 }
 
+// telemetryWebsocketSubscribeCurrencyPairs gives an standard way to add
+// `price_feeder_websocket_subscribe_currency_pairs{provider="x"}` metric.
+func telemetryWebsocketSubscribeCurrencyPairs(n Name, incr int) {
+	telemetry.IncrCounterWithLabels(
+		[]string{
+			"websocket",
+			"subscribe",
+			"currency_pairs",
+		},
+		float32(incr),
+		[]metrics.Label{
+			providerLabel(n),
+		},
+	)
+}
+
 // telemetryWebsocketMessage gives an standard way to add
 // `price_feeder_websocket_message{type="x", provider="x"}` metric.
 func telemetryWebsocketMessage(n Name, mt MessageType) {
