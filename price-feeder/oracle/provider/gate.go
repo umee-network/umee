@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
@@ -219,14 +218,7 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		return err
 	}
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderGate, len(cps))
 	return nil
 }
 
@@ -408,15 +400,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"ticker",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeTicker)
 	return nil
 }
 
@@ -482,15 +466,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"candle",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeCandle)
 	return nil
 }
 
@@ -572,13 +548,7 @@ func (p *GateProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketReconnect(ProviderGate)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
