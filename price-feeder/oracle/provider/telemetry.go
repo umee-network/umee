@@ -20,6 +20,22 @@ func (mt messageType) String() string {
 	return string(mt)
 }
 
+// providerLabel returns a label based on the provider name.
+func providerLabel(n Name) metrics.Label {
+	return metrics.Label{
+		Name:  "provider",
+		Value: n.String(),
+	}
+}
+
+// messageTypeLabel returns a label based on the message type.
+func messageTypeLabel(mt messageType) metrics.Label {
+	return metrics.Label{
+		Name:  "type",
+		Value: mt.String(),
+	}
+}
+
 // telemetryWebsocketReconnect gives an standard way to add
 // `price_feeder_websocket_reconnect` metric.
 func telemetryWebsocketReconnect(n Name) {
@@ -30,10 +46,7 @@ func telemetryWebsocketReconnect(n Name) {
 		},
 		1,
 		[]metrics.Label{
-			{
-				Name:  "provider",
-				Value: n.String(),
-			},
+			providerLabel(n),
 		},
 	)
 }
@@ -48,14 +61,23 @@ func telemetryWebsocketMessage(n Name, mt messageType) {
 		},
 		1,
 		[]metrics.Label{
-			{
-				Name:  "provider",
-				Value: n.String(),
-			},
-			{
-				Name:  "type",
-				Value: mt.String(),
-			},
+			providerLabel(n),
+			messageTypeLabel(mt),
+		},
+	)
+}
+
+// TelemetryFailure gives an standard way to add
+// `price_feeder_failure_provider{type="x", provider="x"}` metric.
+func TelemetryFailure(n Name, mt messageType) {
+	telemetry.IncrCounterWithLabels(
+		[]string{
+			"failure",
+		},
+		1,
+		[]metrics.Label{
+			providerLabel(n),
+			messageTypeLabel(mt),
 		},
 	)
 }
