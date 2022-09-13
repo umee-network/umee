@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
@@ -59,7 +58,7 @@ func FilterTickerDeviations(
 				}
 				p[base] = tp
 			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+				provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
 				logger.Warn().
 					Str("base", base).
 					Str("provider", string(providerName)).
@@ -133,7 +132,7 @@ func FilterCandleDeviations(
 				}
 				p[base] = candles[providerName][base]
 			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+				provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
 				logger.Warn().
 					Str("base", base).
 					Str("provider", string(providerName)).
