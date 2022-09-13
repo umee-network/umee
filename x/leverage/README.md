@@ -267,7 +267,7 @@ See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/ume
 
 See [leverage events proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/events.proto) for list of supported events.
 
-## Events
+## Params
 
 See [leverage module proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/leverage.proto) for list of supported module params.
 
