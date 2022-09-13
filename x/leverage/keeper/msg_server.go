@@ -36,7 +36,7 @@ func (s msgServer) Supply(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"assets supplied ",
+		"assets supplied",
 		"supplier", msg.Supplier,
 		"supplied", msg.Asset.String(),
 		"received", received.String(),
