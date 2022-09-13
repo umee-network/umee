@@ -386,11 +386,11 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		}
 
 		p.setTickerPair(coinbaseTicker)
-		telemetryWebsocketMessage(ProviderCoinbase, messageTypeTicker)
+		telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTicker)
 		return
 	}
 
-	telemetryWebsocketMessage(ProviderCoinbase, messageTypeTrade)
+	telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTrade)
 	p.setTradePair(coinbaseTrade)
 }
 

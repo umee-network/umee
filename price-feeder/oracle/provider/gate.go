@@ -408,7 +408,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
-	telemetryWebsocketMessage(ProviderGate, messageTypeTicker)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeTicker)
 	return nil
 }
 
@@ -474,7 +474,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
-	telemetryWebsocketMessage(ProviderGate, messageTypeCandle)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeCandle)
 	return nil
 }
 

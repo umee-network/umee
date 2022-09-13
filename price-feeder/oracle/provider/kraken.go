@@ -390,7 +390,7 @@ func (p *KrakenProvider) messageReceivedTickerPrice(bz []byte) error {
 	}
 
 	p.setTickerPair(currencyPairSymbol, tickerPrice)
-	telemetryWebsocketMessage(ProviderKraken, messageTypeTicker)
+	telemetryWebsocketMessage(ProviderKraken, MessageTypeTicker)
 	return nil
 }
 
@@ -466,7 +466,7 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	currencyPairSymbol := krakenPairToCurrencyPairSymbol(krakenPair)
 	krakenCandle.Symbol = currencyPairSymbol
 
-	telemetryWebsocketMessage(ProviderKraken, messageTypeCandle)
+	telemetryWebsocketMessage(ProviderKraken, MessageTypeCandle)
 	p.setCandlePair(krakenCandle)
 	return nil
 }

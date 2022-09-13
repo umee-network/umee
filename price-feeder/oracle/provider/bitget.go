@@ -304,7 +304,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Arg.Channel == tickerChannel {
 		p.setTickerPair(tickerResp)
-		telemetryWebsocketMessage(ProviderBitget, messageTypeTicker)
+		telemetryWebsocketMessage(ProviderBitget, MessageTypeTicker)
 		return
 	}
 
@@ -318,7 +318,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 				Msg("Unable to parse bitget candle")
 		}
 		p.setCandlePair(candle)
-		telemetryWebsocketMessage(ProviderBitget, messageTypeCandle)
+		telemetryWebsocketMessage(ProviderBitget, MessageTypeCandle)
 		return
 	}
 

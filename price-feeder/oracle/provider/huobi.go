@@ -300,14 +300,14 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
-		telemetryWebsocketMessage(ProviderHuobi, messageTypeTicker)
+		telemetryWebsocketMessage(ProviderHuobi, MessageTypeTicker)
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
-		telemetryWebsocketMessage(ProviderHuobi, messageTypeCandle)
+		telemetryWebsocketMessage(ProviderHuobi, MessageTypeCandle)
 		return
 	}
 

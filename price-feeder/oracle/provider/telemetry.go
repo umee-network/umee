@@ -6,17 +6,17 @@ import (
 )
 
 const (
-	messageTypeCandle = messageType("candle")
-	messageTypeTicker = messageType("ticker")
-	messageTypeTrade  = messageType("trade")
+	MessageTypeCandle = MessageType("candle")
+	MessageTypeTicker = MessageType("ticker")
+	MessageTypeTrade  = MessageType("trade")
 )
 
 type (
-	messageType string
+	MessageType string
 )
 
 // String cast provider MessageType to string.
-func (mt messageType) String() string {
+func (mt MessageType) String() string {
 	return string(mt)
 }
 
@@ -29,7 +29,7 @@ func providerLabel(n Name) metrics.Label {
 }
 
 // messageTypeLabel returns a label based on the message type.
-func messageTypeLabel(mt messageType) metrics.Label {
+func messageTypeLabel(mt MessageType) metrics.Label {
 	return metrics.Label{
 		Name:  "type",
 		Value: mt.String(),
@@ -53,7 +53,7 @@ func telemetryWebsocketReconnect(n Name) {
 
 // telemetryWebsocketMessage gives an standard way to add
 // `price_feeder_websocket_message{type="x", provider="x"}` metric.
-func telemetryWebsocketMessage(n Name, mt messageType) {
+func telemetryWebsocketMessage(n Name, mt MessageType) {
 	telemetry.IncrCounterWithLabels(
 		[]string{
 			"websocket",
@@ -69,7 +69,7 @@ func telemetryWebsocketMessage(n Name, mt messageType) {
 
 // TelemetryFailure gives an standard way to add
 // `price_feeder_failure_provider{type="x", provider="x"}` metric.
-func TelemetryFailure(n Name, mt messageType) {
+func TelemetryFailure(n Name, mt MessageType) {
 	telemetry.IncrCounterWithLabels(
 		[]string{
 			"failure",
