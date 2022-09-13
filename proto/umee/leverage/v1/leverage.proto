@@ -22,7 +22,7 @@ message Params {
   // Close Factor determines the portion of a borrower's position that can be
   // liquidated in a single event. Minimum Close Factor is Close Factor at
   // liquidation_threshold. 0.1 means that that 10% of the borrower position can
-  // be liquidated when the borrowed value passes the/ liquidation_threshold.
+  // be liquidated when the borrowed value passes the liquidation_threshold.
   // close_factor scales linearly between minimum_close_factor and 1.0,
   // reaching its maximum when borrowed value passed
   // complete_liquidation_threshold. We can put it into the picture:
