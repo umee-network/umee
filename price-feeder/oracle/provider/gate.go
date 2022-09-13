@@ -408,15 +408,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"ticker",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketMessage(ProviderGate, messageTypeTicker)
 	return nil
 }
 
@@ -482,15 +474,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"candle",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketMessage(ProviderGate, messageTypeCandle)
 	return nil
 }
 

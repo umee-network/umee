@@ -327,15 +327,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if tickerResp.ID.Channel == "tickers" {
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"ticker",
-				"provider",
-				string(ProviderOkx),
-			)
+			telemetryWebsocketMessage(ProviderOkx, messageTypeTicker)
 		}
 		return
 	}
@@ -344,15 +336,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"candle",
-				"provider",
-				string(ProviderOkx),
-			)
+			telemetryWebsocketMessage(ProviderOkx, messageTypeCandle)
 		}
 		return
 	}

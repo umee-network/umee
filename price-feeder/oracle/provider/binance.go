@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -258,30 +257,14 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			string(ProviderBinance),
-		)
+		telemetryWebsocketMessage(ProviderBinance, messageTypeTicker)
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			string(ProviderBinance),
-		)
+		telemetryWebsocketMessage(ProviderBinance, messageTypeCandle)
 		return
 	}
 
