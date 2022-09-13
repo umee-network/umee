@@ -15,13 +15,12 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uTokens](#utokens)
    - [Supplying and Borrowing](#supplying-and-borrowing)
    - [Reserves](#reserves)
-   - [Liquidation](#liquidation)
    - Important Derived Values:
      - [Adjusted Borrow Amounts](#adjusted-borrow-amounts)
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Borrow Limit](#borrow-limit)
-     - [Liquidation Limit](#liquidation-limit)
+     - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
      - [Supplying APY](#supplying-apy)
      - [Close Factor](#close-factor)
@@ -39,7 +38,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 
 ### Accepted Assets
 
-At the foundation of the `leverage` module is the [Token Registry](#token-registry), which contains a list of accepted types.
+At the foundation of the `leverage` module is the _Token Registry_, which contains a list of accepted types.
 
 This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or supplying.
 
@@ -114,7 +113,7 @@ As a reminder, the following values are always available as a basis for calculat
 - _Interest scalars_ for all borrowed denominations, which are used with adjusted borrow amounts
 - Total _adjusted borrows_ summed over all borrower accounts.
 - Leverage module [Parameters](#params)
-- Token parameters from the [Token Registry](#token-registry)
+- Token parameters from the Token Registry
 
 The more complex derived values must use the values above as a basis.
 
@@ -267,6 +266,10 @@ See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/ume
 ## Events
 
 See [leverage events proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/events.proto) for list of supported events.
+
+## Events
+
+See [leverage module proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/leverage.proto) for list of supported module params.
 
 ## End Block
 

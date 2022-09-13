@@ -12,8 +12,8 @@ As price information is extrinsic to the blockchain, the Umee network relies on 
 
 1. **[Concepts](#concepts)**
    - [Voting Procedure](#voting-procedure)
-   - [reward Band](#Reward-Band)
-   - [Slashing](#Slashing)
+   - [Reward Band](#reward-band)
+   - [Slashing](#slashing)
    - [Abstaining from Voting](#abstaining-from-voting)
 2. **[State](#state)**
    - [ExchangeRate](#exchangerate)
