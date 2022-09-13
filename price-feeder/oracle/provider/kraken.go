@@ -509,13 +509,7 @@ func (p *KrakenProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderKraken),
-	)
+	telemetryWebsocketReconnect(ProviderKraken)
 	return p.subscribeChannels(currencyPairs...)
 }
 

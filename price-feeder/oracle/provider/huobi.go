@@ -407,13 +407,7 @@ func (p *HuobiProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderHuobi),
-	)
+	telemetryWebsocketReconnect(ProviderHuobi)
 	return p.subscribeChannels(currencyPairs...)
 }
 

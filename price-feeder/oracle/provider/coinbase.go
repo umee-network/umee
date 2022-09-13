@@ -503,13 +503,7 @@ func (p *CoinbaseProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderCoinbase),
-	)
+	telemetryWebsocketReconnect(ProviderCoinbase)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 

@@ -448,13 +448,7 @@ func (p *OkxProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderOkx),
-	)
+	telemetryWebsocketReconnect(ProviderOkx)
 	return p.subscribeChannels(currencyPairs...)
 }
 

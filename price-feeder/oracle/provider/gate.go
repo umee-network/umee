@@ -572,13 +572,7 @@ func (p *GateProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderGate),
-	)
+	telemetryWebsocketReconnect(ProviderGate)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 

@@ -438,13 +438,7 @@ func (p *BitgetProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderBitget),
-	)
+	telemetryWebsocketReconnect(ProviderBitget)
 	return p.subscribeChannels(currencyPairs...)
 }
 
