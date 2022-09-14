@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -266,7 +265,7 @@ func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
 				mexcPair,
 				tickerResp.Symbol[mexcPair],
 			)
-			telemetryWebsocketReconnect(ProviderMexc)
+			telemetryWebsocketMessage(ProviderMexc, MessageTypeTicker)
 			return
 		}
 	}
@@ -274,15 +273,7 @@ func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Metadata.Close != 0 {
 		p.setCandlePair(candleResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			string(ProviderMexc),
-		)
+		telemetryWebsocketMessage(ProviderMexc, MessageTypeCandle)
 		return
 	}
 
