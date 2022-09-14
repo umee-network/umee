@@ -46,17 +46,23 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v1.1.1](https://github.com/umee-network/umee/releases/tag/v1.1.0) - 2022-09-13
+## [v1.1.2](https://github.com/umee-network/umee/releases/tag/v1.1.1) - 2022-09-13
 
 ### Bug Fixes
 
-- [1376](https://github.com/umee-network/umee/pull/1376/files) Add "v1.1.0" upgrade handler.
+- [1377](https://github.com/umee-network/umee/pull/1377) Fix "v1.1.0" upgrade handler.
+
+## [v1.1.1](https://github.com/umee-network/umee/releases/tag/v1.1.1) - 2022-09-13
+
+### Bug Fixes
+
+- [1376](https://github.com/umee-network/umee/pull/1376) Add "v1.1.0" upgrade handler.
 
 ## [v1.1.0](https://github.com/umee-network/umee/releases/tag/v1.1.0) - 2022-09-08
 
 ### State Machine Breaking
 
-- [1358](https://github.com/umee-network/umee/pull/1358/files) Disable Gravity Bridge bridge messages.
+- [1358](https://github.com/umee-network/umee/pull/1358) Disable Gravity Bridge bridge messages.
 
 ### Improvements
 
