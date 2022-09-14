@@ -47,33 +47,33 @@ type (
 
 	// MexcTickerResponse is the ticker price response object.
 	MexcTickerResponse struct {
-		Symbol map[string]MexcTickerData `json:"data"` // e.x. ATOM_USDT
+		Symbol map[string]MexcTicker `json:"data"` // e.x. ATOM_USDT
 	}
-	MexcTickerData struct {
+	MexcTicker struct {
 		LastPrice float64 `json:"p"` // Last price ex.: 0.0025
 		Volume    float64 `json:"v"` // Total traded base asset volume ex.: 1000
 	}
 
 	// MexcCandle is the candle websocket response object.
 	MexcCandleResponse struct {
-		Symbol   string             `json:"symbol"` // Symbol ex.: ATOM_USDT
-		Metadata MexcCandleMetadata `json:"data"`   // Metadata for candle
+		Symbol   string     `json:"symbol"` // Symbol ex.: ATOM_USDT
+		Metadata MexcCandle `json:"data"`   // Metadata for candle
 	}
-	MexcCandleMetadata struct {
+	MexcCandle struct {
 		Close     float64 `json:"c"` // Price at close
 		TimeStamp int64   `json:"t"` // Close time in unix epoch ex.: 1645756200000
 		Volume    float64 `json:"v"` // Volume during period
 	}
 
-	// MexcSubscribeMsg Msg to subscribe all the tickers channels.
-	MexcCandleSubscriptionMsg struct {
+	// MexcCandleSubscription Msg to subscribe all the candle channels.
+	MexcCandleSubscription struct {
 		OP       string `json:"op"`       // kline
 		Symbol   string `json:"symbol"`   // streams to subscribe ex.: atom_usdt
 		Interval string `json:"interval"` // Min1、Min5、Min15、Min30
 	}
 
-	// MexcSubscribeMsg Msg to subscribe all the tickers channels.
-	MexcTickerSubscriptionMsg struct {
+	// MexcTickerSubscription Msg to subscribe all the ticker channels.
+	MexcTickerSubscription struct {
 		OP string `json:"op"` // kline
 	}
 
@@ -220,7 +220,11 @@ func (p *MexcProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return types.TickerPrice{}, fmt.Errorf("mexc provider failed to get ticker price for %s", key)
+		return types.TickerPrice{}, fmt.Errorf(
+			types.ErrTickerNotFound.Error(),
+			ProviderMexc,
+			key,
+		)
 	}
 
 	return ticker, nil
@@ -232,7 +236,11 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			ProviderMexc,
+			key,
+		)
 	}
 
 	return candles, nil
@@ -258,15 +266,7 @@ func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
 				mexcPair,
 				tickerResp.Symbol[mexcPair],
 			)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"ticker",
-				"provider",
-				string(ProviderMexc),
-			)
+			telemetryWebsocketReconnect(ProviderMexc)
 			return
 		}
 	}
@@ -295,7 +295,7 @@ func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
 	}
 }
 
-func (p *MexcProvider) setTickerPair(symbol string, ticker MexcTickerData) {
+func (p *MexcProvider) setTickerPair(symbol string, ticker MexcTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -369,71 +369,34 @@ func (p *MexcProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error closing websocket")
-			}
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("mexc: error reconnecting")
-				p.keepReconnecting()
+				p.logger.Err(err).Msg("error reconnecting")
 			}
 		}
 	}
 }
 
-func (p *MexcProvider) disconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Mecx websocket %v", err)
-	}
-	return nil
-}
-
-// reconnect closes the last WS connection then create a new one and subscribe to
+// reconnect closes the last WS connection then create a new one and subscribes to
 // all subscribed pairs in the ticker and candle pairs. If no ping is received
 // within 1 minute, the connection will be disconnected. It is recommended to
 // send a ping for 10-20 seconds
 func (p *MexcProvider) reconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Mecx websocket %v", err)
+	}
+
 	p.logger.Debug().Msg("mexc: reconnecting websocket")
+
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("mexc: error reconnect to mexc websocket: %w", err)
 	}
 	p.wsClient = wsConn
+	telemetryWebsocketReconnect(ProviderMexc)
 
-	currencyPairs := p.subscribedPairsToSlice()
-
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderMexc),
-	)
-	return p.subscribeChannels(currencyPairs...)
-}
-
-// keepReconnecting keeps trying to reconnect if an error occurs in reconnect.
-func (p *MexcProvider) keepReconnecting() {
-	reconnectTicker := time.NewTicker(defaultReconnectTime)
-	defer reconnectTicker.Stop()
-	connectionTries := 1
-
-	for time := range reconnectTicker.C {
-		if err := p.disconnect(); err != nil {
-			p.logger.Err(err).Msg("error closing websocket")
-		}
-		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("mexc: attempted to reconnect %d times at %s", connectionTries, time.String())
-			connectionTries++
-			continue
-		}
-
-		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("mexc: failed to reconnect %d times", connectionTries)
-		}
-		return
-	}
+	return p.subscribeChannels(p.subscribedPairsToSlice()...)
 }
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
@@ -488,8 +451,8 @@ func currencyPairToMexcPair(cp types.CurrencyPair) string {
 }
 
 // newMexcCandleSubscriptionMsg returns a new candle subscription Msg.
-func newMexcCandleSubscriptionMsg(param string) MexcCandleSubscriptionMsg {
-	return MexcCandleSubscriptionMsg{
+func newMexcCandleSubscriptionMsg(param string) MexcCandleSubscription {
+	return MexcCandleSubscription{
 		OP:       "sub.kline",
 		Symbol:   param,
 		Interval: "Min1",
@@ -497,8 +460,8 @@ func newMexcCandleSubscriptionMsg(param string) MexcCandleSubscriptionMsg {
 }
 
 // newMexcTickerSubscriptionMsg returns a new ticker subscription Msg.
-func newMexcTickerSubscriptionMsg() MexcTickerSubscriptionMsg {
-	return MexcTickerSubscriptionMsg{
+func newMexcTickerSubscriptionMsg() MexcTickerSubscription {
+	return MexcTickerSubscription{
 		OP: "sub.overview",
 	}
 }

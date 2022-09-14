@@ -3,6 +3,7 @@ module github.com/umee-network/umee/price-feeder
 go 1.19
 
 require (
+	github.com/armon/go-metrics v0.4.0
 	github.com/cosmos/cosmos-sdk v0.46.1
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/golangci/golangci-lint v1.49.0
@@ -45,7 +46,6 @@ require (
 	github.com/Workiva/go-datastructures v1.0.53 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
-	github.com/armon/go-metrics v0.4.0 // indirect
 	github.com/ashanbrown/forbidigo v1.3.0 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/aws/aws-sdk-go v1.40.45 // indirect
