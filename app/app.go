@@ -232,7 +232,6 @@ func New(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *UmeeApp {
-
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -576,6 +575,8 @@ func New(
 
 	app.sm.RegisterStoreDecoders()
 
+	app.RegisterUpgradeHandlers(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
+
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(transientKeys)
@@ -778,7 +779,6 @@ func initParamsKeeper(
 	legacyAmino *codec.LegacyAmino,
 	key, tkey sdk.StoreKey,
 ) paramskeeper.Keeper {
-
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)
