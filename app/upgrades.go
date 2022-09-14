@@ -36,21 +36,21 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate param of staking module",
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate param of staking module",
 				"name", UpgradeV3_0Plan)
 			minCommissionRate, err := upgrades.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate param of staking module",
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate param of staking module",
 					UpgradeV3_0Plan)
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate of all validators",
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
 				"name", UpgradeV3_0Plan)
 			err = upgrades.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate to validatos",
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate for validators",
 					UpgradeV3_0Plan)
 			}
 
