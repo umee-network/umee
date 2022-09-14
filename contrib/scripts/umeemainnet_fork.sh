@@ -22,7 +22,7 @@ SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
 
 # Loads another sources
 . $CWD/download-mainnet-umeed.sh
-UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tikerer-mainnet-genesis.sh
+UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tinker-mainnet-genesis.sh
 . $CWD/blocks.sh
 
 nodeHome="$CHAIN_DIR/$CHAIN_ID"

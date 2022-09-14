@@ -181,7 +181,7 @@ jobs:
       - name: tinkerer mainnet genesis
         if: steps.cache-tinkered-genesis.outputs.cache-hit != 'true'
         run: |
-          ./contrib/scripts/tikerer-mainnet-genesis.sh
+          ./contrib/scripts/tinker-mainnet-genesis.sh
       - name: Fork mainnet and upgrade from v1.0.3 to v.3.x.x
         if: env.GIT_DIFF
         run: |
