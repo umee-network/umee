@@ -46,7 +46,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v1.1.2](https://github.com/umee-network/umee/releases/tag/v1.1.1) - 2022-09-13
+## [v1.1.2](https://github.com/umee-network/umee/releases/tag/v1.1.2) - 2022-09-13
 
 ### Bug Fixes
 
