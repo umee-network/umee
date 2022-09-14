@@ -36,11 +36,13 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate to validators", "name", UpgradeV3_0Plan)
+			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate to validators",
+				"name", UpgradeV3_0Plan)
 			err = setMinimumCommissionRateToValidatros(app.StakingKeeper, ctx)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate to validatos", UpgradeV3_0Plan)
+					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate to validatos",
+					UpgradeV3_0Plan)
 			}
 
 			return vm, err
@@ -67,7 +69,8 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	}
 }
 
-// setMinimumCommissionRateToValidatros is update the minimum commission rate to the validators rate whose commission rate is below the minimum commission rate.
+// setMinimumCommissionRateToValidatros is update the minimum commission rate to the validators rate
+// whose commission rate is below the minimum commission rate.
 func setMinimumCommissionRateToValidatros(keeper *stakingKeeper.Keeper, ctx sdk.Context) error {
 	validators := keeper.GetAllValidators(ctx)
 
