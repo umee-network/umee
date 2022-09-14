@@ -65,7 +65,7 @@ func TestComputeLiquidation(t *testing.T) {
 	// borrower is healthy (as implied by a close factor of zero) so liquidation cannot occur
 	healthyCase := baseCase()
 	healthyCase.closeFactor = sdk.ZeroDec()
-	runTestCase(healthyCase, 0, 0, 0, "healthy borrower ")
+	runTestCase(healthyCase, 0, 0, 0, "healthy borrower")
 
 	// limiting factor is available repay
 	repayLimited := baseCase()
