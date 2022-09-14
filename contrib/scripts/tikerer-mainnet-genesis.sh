@@ -11,7 +11,7 @@ MAINNET_EXPORTED_GENESIS_URL="${MAINNET_EXPORTED_GENESIS_URL:-"https://storage.g
 EXPORTED_GENESIS_UNPROCESSED="${EXPORTED_GENESIS_UNPROCESSED:-$CWD/umeemainnet.genesis.json}"
 EXPORTED_GENESIS_UNZIPED="${EXPORTED_GENESIS_UNZIPED:-$CWD/umeemainnet.genesis.json.gz}"
 
-# Checks for the tikered genesis file
+# Checks for the tinkered genesis file
 if [ ! -f "$UMEEMAINNET_GENESIS_PATH" ]; then
   echo "$UMEEMAINNET_GENESIS_PATH doesn't exist"
 
