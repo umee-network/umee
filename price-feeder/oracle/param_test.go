@@ -21,7 +21,7 @@ func TestParamCacheIsOutdated(t *testing.T) {
 			currentBlockHeigh: 10,
 			expected:          true,
 		},
-		"currentBlockHeigh < cacheOnChainBlockQuantity": {
+		"currentBlockHeigh < cacheOnChainBlockQuantity ": {
 			paramCache: ParamCache{
 				params:           &oracletypes.Params{},
 				lastUpdatedBlock: 0,
