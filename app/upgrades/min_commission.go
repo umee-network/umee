@@ -22,7 +22,8 @@ func UpdateMinimumCommissionRateParam(ctx sdk.Context, keeper *stakingKeeper.Kee
 
 // SetMinimumCommissionRateToValidatros is update the minimum commission rate to the validators rate
 // whose commission rate is below the minimum commission rate.
-func SetMinimumCommissionRateToValidatros(ctx sdk.Context, keeper *stakingKeeper.Keeper, minCommissionRate sdk.Dec) error {
+func SetMinimumCommissionRateToValidatros(
+	ctx sdk.Context, keeper *stakingKeeper.Keeper, minCommissionRate sdk.Dec) error {
 	validators := keeper.GetAllValidators(ctx)
 
 	for _, validator := range validators {
