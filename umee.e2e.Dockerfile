@@ -1,5 +1,3 @@
-ARG IMG_TAG=latest
-
 # Fetch base packages
 FROM golang:1.19-alpine AS base-builder
 ENV PACKAGES make git libc-dev gcc linux-headers
@@ -27,8 +25,7 @@ RUN git clone https://github.com/umee-network/peggo.git
 RUN cd peggo && git checkout ${PEGGO_VERSION} && make build && cp ./build/peggo /usr/local/bin/
 
 # Add to a distroless container
-FROM gcr.io/distroless/cc:$IMG_TAG
-ARG IMG_TAG
+FROM gcr.io/distroless/cc:debug
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
 COPY --from=umeed-builder /go/bin/price-feeder /usr/local/bin/
 COPY --from=peggo-builder /usr/local/bin/peggo /usr/local/bin/
