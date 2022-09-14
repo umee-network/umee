@@ -108,16 +108,13 @@ clean:
 docker-build:
 	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
 
-docker-build-debug:
-	@docker build -t umeenet/umeed-e2e --build-arg IMG_TAG=debug -f umee.e2e.Dockerfile .
-
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
-.PHONY: docker-build docker-build-debug docker-push-hermes docker-push-gaia
+.PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
 ##                              Tests & Linting                              ##
