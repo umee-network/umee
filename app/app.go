@@ -443,6 +443,7 @@ func New(
 	)
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+	configurator := module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
@@ -552,7 +553,7 @@ func New(
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-	app.mm.RegisterServices(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	app.mm.RegisterServices(configurator)
 
 	// Create the simulation manager and define the order of the modules for
 	// deterministic simulations.
@@ -575,7 +576,7 @@ func New(
 
 	app.sm.RegisterStoreDecoders()
 
-	app.RegisterUpgradeHandlers(module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	app.RegisterUpgradeHandlers(configurator)
 
 	// initialize stores
 	app.MountKVStores(keys)
