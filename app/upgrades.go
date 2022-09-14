@@ -14,8 +14,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(cfgr module.Configurator) {
 		UpgradeV110Plan,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV110Plan)
-
 			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV110Plan)
-			return app.mm.RunMigrations(ctx, cfgr, fromVM)
+			return fromVM, nil
 		})
 }
