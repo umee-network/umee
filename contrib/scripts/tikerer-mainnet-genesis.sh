@@ -1,8 +1,8 @@
 #!/bin/bash -eu
 
-# tikerer the mainnet genesis by swapping the polychain by priv_validator_key
+# tinker the mainnet genesis by swapping polychain -> priv_validator_key
 
-# USAGE: ./tikerer-mainnet-genesis.sh
+# USAGE: ./tinker-mainnet-genesis.sh
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
