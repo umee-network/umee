@@ -290,11 +290,11 @@ func (p *MexcProvider) setTickerPair(symbol string, ticker MexcTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	price, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.LastPrice, 'f', 5, 64))
+	price, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.LastPrice, 'f', -1, 64))
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker price")
 	}
-	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.Volume, 'f', 5, 64))
+	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.Volume, 'f', -1, 64))
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker volume")
 	}
@@ -309,11 +309,11 @@ func (p *MexcProvider) setCandlePair(candleResp MexcCandleResponse) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	close, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Close, 'f', 5, 64))
+	close, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Close, 'f', -1, 64))
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle close")
 	}
-	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Volume, 'f', 5, 64))
+	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Volume, 'f', -1, 64))
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle volume")
 	}
