@@ -36,7 +36,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate to validators",
+			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate of all validators",
 				"name", UpgradeV3_0Plan)
 			err = setMinimumCommissionRateToValidatros(app.StakingKeeper, ctx)
 			if err != nil {
@@ -72,10 +72,11 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 // setMinimumCommissionRateToValidatros is update the minimum commission rate to the validators rate
 // whose commission rate is below the minimum commission rate.
 func setMinimumCommissionRateToValidatros(keeper *stakingKeeper.Keeper, ctx sdk.Context) error {
+	params := keeper.GetParams(ctx)
+
 	validators := keeper.GetAllValidators(ctx)
 
 	for _, validator := range validators {
-		params := keeper.GetParams(ctx)
 		if validator.Commission.Rate.GTE(params.MinCommissionRate) {
 			continue
 		}
