@@ -9,9 +9,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	stakingKeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	"github.com/umee-network/umee/v3/app/upgrades"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -36,9 +36,18 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				return vm, err
 			}
 
+			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate param of staking module",
+				"name", UpgradeV3_0Plan)
+			minCommissionRate, err := upgrades.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
+			if err != nil {
+				return vm, sdkerrors.Wrapf(
+					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate param of staking module",
+					UpgradeV3_0Plan)
+			}
+
 			ctx.Logger().Info("Upgrade handler execution finished, updatiing minimum commission rate of all validators",
 				"name", UpgradeV3_0Plan)
-			err = setMinimumCommissionRateToValidatros(app.StakingKeeper, ctx)
+			err = upgrades.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
 					err, "Calypso %q Upgrade: Unable to upgrade, failied to update minimum commission rate to validatos",
@@ -67,31 +76,6 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 		app.SetStoreLoader(
 			upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
-}
-
-// setMinimumCommissionRateToValidatros is update the minimum commission rate to the validators rate
-// whose commission rate is below the minimum commission rate.
-func setMinimumCommissionRateToValidatros(keeper *stakingKeeper.Keeper, ctx sdk.Context) error {
-	params := keeper.GetParams(ctx)
-
-	validators := keeper.GetAllValidators(ctx)
-
-	for _, validator := range validators {
-		if validator.Commission.Rate.GTE(params.MinCommissionRate) {
-			continue
-		}
-
-		if err := keeper.BeforeValidatorModified(ctx, validator.GetOperator()); err != nil {
-			return err
-		}
-
-		validator.Commission.Rate = params.MinCommissionRate
-		validator.Commission.UpdateTime = ctx.BlockTime()
-
-		keeper.SetValidator(ctx, validator)
-	}
-
-	return nil
 }
 
 // Sets up bech32ibc module by setting the native account prefix to "umee".
