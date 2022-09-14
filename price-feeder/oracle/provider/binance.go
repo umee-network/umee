@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -169,6 +168,7 @@ func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) erro
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderBinance, len(cps))
 	return nil
 }
 
@@ -258,30 +258,14 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			string(ProviderBinance),
-		)
+		telemetryWebsocketMessage(ProviderBinance, MessageTypeTicker)
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			string(ProviderBinance),
-		)
+		telemetryWebsocketMessage(ProviderBinance, MessageTypeCandle)
 		return
 	}
 
@@ -382,13 +366,7 @@ func (p *BinanceProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderBinance),
-	)
+	telemetryWebsocketReconnect(ProviderBinance)
 	return p.subscribeChannels(currencyPairs...)
 }
 

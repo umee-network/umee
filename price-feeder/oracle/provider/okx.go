@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
@@ -192,14 +191,7 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		string(ProviderOkx),
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderOkx, len(cps))
 	return nil
 }
 
@@ -327,15 +319,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if tickerResp.ID.Channel == "tickers" {
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"ticker",
-				"provider",
-				string(ProviderOkx),
-			)
+			telemetryWebsocketMessage(ProviderOkx, MessageTypeTicker)
 		}
 		return
 	}
@@ -344,15 +328,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"candle",
-				"provider",
-				string(ProviderOkx),
-			)
+			telemetryWebsocketMessage(ProviderOkx, MessageTypeCandle)
 		}
 		return
 	}
@@ -448,13 +424,7 @@ func (p *OkxProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderOkx),
-	)
+	telemetryWebsocketReconnect(ProviderOkx)
 	return p.subscribeChannels(currencyPairs...)
 }
 

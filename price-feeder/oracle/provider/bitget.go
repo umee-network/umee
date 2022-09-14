@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -195,14 +194,7 @@ func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		string(ProviderBitget),
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderBitget, len(cps))
 	return nil
 }
 
@@ -304,15 +296,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Arg.Channel == tickerChannel {
 		p.setTickerPair(tickerResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			tickerChannel,
-			"provider",
-			string(ProviderBitget),
-		)
+		telemetryWebsocketMessage(ProviderBitget, MessageTypeTicker)
 		return
 	}
 
@@ -326,15 +310,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 				Msg("Unable to parse bitget candle")
 		}
 		p.setCandlePair(candle)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			string(ProviderBitget),
-		)
+		telemetryWebsocketMessage(ProviderBitget, MessageTypeCandle)
 		return
 	}
 
@@ -438,13 +414,7 @@ func (p *BitgetProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderBitget),
-	)
+	telemetryWebsocketReconnect(ProviderBitget)
 	return p.subscribeChannels(currencyPairs...)
 }
 
