@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+
+	"github.com/umee-network/umee/v3/util/coin"
 )
 
 const (
@@ -290,11 +290,11 @@ func (p *MexcProvider) setTickerPair(symbol string, ticker MexcTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	price, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.LastPrice, 'f', -1, 64))
+	price, err := coin.NewDecFromFloat(ticker.LastPrice)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker price")
 	}
-	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(ticker.Volume, 'f', -1, 64))
+	volume, err := coin.NewDecFromFloat(ticker.Volume)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse ticker volume")
 	}
@@ -309,11 +309,11 @@ func (p *MexcProvider) setCandlePair(candleResp MexcCandleResponse) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	close, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Close, 'f', -1, 64))
+	close, err := coin.NewDecFromFloat(candleResp.Metadata.Close)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle close")
 	}
-	volume, err := sdk.NewDecFromStr(strconv.FormatFloat(candleResp.Metadata.Volume, 'f', -1, 64))
+	volume, err := coin.NewDecFromFloat(candleResp.Metadata.Volume)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("mexc: failed to parse candle volume")
 	}
