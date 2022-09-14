@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-# Donwload the umeed binary with the same version as mainnet and upack it
+# Download the umeed binary with the same version as mainnet and unpack it
 
 # USAGE: ./download-mainnet-umeed.sh
 
