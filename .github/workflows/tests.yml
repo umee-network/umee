@@ -174,12 +174,12 @@ jobs:
           ./contrib/scripts/download-mainnet-umeed.sh
       - name: cache mainnet tinkered genesis
         uses: actions/cache@v3
-        id: tinkered-genesis-set-15
+        id: tinkered-genesis-sep-15
         with:
           path: ./contrib/scripts/mainnet_tinkered_genesis.json
-          key: tinkered-genesis-set-15
+          key: tinkered-genesis-sep-15
       - name: tinkerer mainnet genesis
-        if: steps.tinkered-genesis-set-15.outputs.cache-hit != 'true'
+        if: steps.tinkered-genesis-sep-15.outputs.cache-hit != 'true'
         run: |
           ./contrib/scripts/tinker-mainnet-genesis.sh
       - name: Fork mainnet and upgrade from v1.1.2 to v.3.x.x
