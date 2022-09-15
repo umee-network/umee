@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // RewardBallotWinners is executed at the end of every voting period, where we
@@ -77,6 +77,6 @@ func (k Keeper) RewardBallotWinners(
 	// move distributed reward to distribution module
 	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.distrName, distributedReward)
 	if err != nil {
-		panic(fmt.Sprintf("failed to send coins to distribution module %s", err.Error()))
+		panic(fmt.Errorf("failed to send coins to distribution module %w", err))
 	}
 }

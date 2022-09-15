@@ -2,11 +2,10 @@ package keeper
 
 import (
 	"context"
-	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 var _ types.MsgServer = msgServer{}
@@ -21,198 +20,174 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
-func (s msgServer) LendAsset(
+func (s msgServer) Supply(
 	goCtx context.Context,
-	msg *types.MsgLendAsset,
-) (*types.MsgLendAssetResponse, error) {
+	msg *types.MsgSupply,
+) (*types.MsgSupplyResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.keeper.LendAsset(ctx, lenderAddr, msg.Amount); err != nil {
-		return nil, err
-	}
-
 	s.keeper.Logger(ctx).Debug(
-		"assets loaned",
-		"lender", lenderAddr.String(),
-		"amount", msg.Amount.String(),
+		"assets supplied",
+		"supplier", msg.Supplier,
+		"supplied", msg.Asset.String(),
+		"received", received.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeLoanAsset,
-			sdk.NewAttribute(types.EventAttrLender, lenderAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, lenderAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+		Supplier: msg.Supplier,
+		Asset:    msg.Asset,
+		Utoken:   received,
 	})
-
-	return &types.MsgLendAssetResponse{}, nil
+	return &types.MsgSupplyResponse{
+		Received: received,
+	}, err
 }
 
-func (s msgServer) WithdrawAsset(
+func (s msgServer) Withdraw(
 	goCtx context.Context,
-	msg *types.MsgWithdrawAsset,
-) (*types.MsgWithdrawAssetResponse, error) {
+	msg *types.MsgWithdraw,
+) (*types.MsgWithdrawResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	lenderAddr, err := sdk.AccAddressFromBech32(msg.Lender)
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.keeper.WithdrawAsset(ctx, lenderAddr, msg.Amount); err != nil {
-		return nil, err
-	}
-
 	s.keeper.Logger(ctx).Debug(
-		"loaned assets withdrawn",
-		"lender", lenderAddr.String(),
-		"amount", msg.Amount.String(),
+		"supplied assets withdrawn",
+		"supplier", msg.Supplier,
+		"redeemed", msg.Asset.String(),
+		"received", received.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeWithdrawLoanedAsset,
-			sdk.NewAttribute(types.EventAttrLender, lenderAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, lenderAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+		Supplier: msg.Supplier,
+		Utoken:   msg.Asset,
+		Asset:    received,
 	})
-
-	return &types.MsgWithdrawAssetResponse{}, nil
+	return &types.MsgWithdrawResponse{
+		Received: received,
+	}, err
 }
 
-func (s msgServer) SetCollateral(
+func (s msgServer) Collateralize(
 	goCtx context.Context,
-	msg *types.MsgSetCollateral,
-) (*types.MsgSetCollateralResponse, error) {
+	msg *types.MsgCollateralize,
+) (*types.MsgCollateralizeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
-
-	if err := s.keeper.SetCollateralSetting(ctx, borrowerAddr, msg.Denom, msg.Enable); err != nil {
+	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"collateral setting set",
-		"borrower", borrowerAddr.String(),
-		"denom", msg.Denom,
-		"enable", strconv.FormatBool(msg.Enable),
+		"collateral added",
+		"borrower", msg.Borrower,
+		"amount", msg.Asset.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeSetCollateralSetting,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(types.EventAttrDenom, msg.Denom),
-			sdk.NewAttribute(types.EventAttrEnable, strconv.FormatBool(msg.Enable)),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+		Borrower: msg.Borrower,
+		Utoken:   msg.Asset,
 	})
-
-	return &types.MsgSetCollateralResponse{}, nil
+	return &types.MsgCollateralizeResponse{}, err
 }
 
-func (s msgServer) BorrowAsset(
+func (s msgServer) Decollateralize(
 	goCtx context.Context,
-	msg *types.MsgBorrowAsset,
-) (*types.MsgBorrowAssetResponse, error) {
+	msg *types.MsgDecollateralize,
+) (*types.MsgDecollateralizeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
+	if err := s.keeper.Decollateralize(ctx, borrowerAddr, msg.Asset); err != nil {
+		return nil, err
+	}
 
-	if err := s.keeper.BorrowAsset(ctx, borrowerAddr, msg.Amount); err != nil {
+	s.keeper.Logger(ctx).Debug(
+		"collateral removed",
+		"borrower", msg.Borrower,
+		"amount", msg.Asset.String(),
+	)
+	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
+		Borrower: msg.Borrower,
+		Utoken:   msg.Asset,
+	})
+	return &types.MsgDecollateralizeResponse{}, err
+}
+
+func (s msgServer) Borrow(
+	goCtx context.Context,
+	msg *types.MsgBorrow,
+) (*types.MsgBorrowResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"assets borrowed",
-		"borrower", borrowerAddr.String(),
-		"amount", msg.Amount.String(),
+		"borrower", msg.Borrower,
+		"amount", msg.Asset.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeBorrowAsset,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+		Borrower: msg.Borrower,
+		Asset:    msg.Asset,
 	})
-
-	return &types.MsgBorrowAssetResponse{}, nil
+	return &types.MsgBorrowResponse{}, err
 }
 
-func (s msgServer) RepayAsset(
+func (s msgServer) Repay(
 	goCtx context.Context,
-	msg *types.MsgRepayAsset,
-) (*types.MsgRepayAssetResponse, error) {
+	msg *types.MsgRepay,
+) (*types.MsgRepayResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
-
-	repaid, err := s.keeper.RepayAsset(ctx, borrowerAddr, msg.Amount)
+	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
 
-	repaidCoin := sdk.NewCoin(msg.Amount.Denom, repaid)
-
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
-		"borrower", borrowerAddr.String(),
-		"amount", repaidCoin.String(),
-		"attempted", msg.Amount.String(),
+		"borrower", msg.Borrower,
+		"attempted", msg.Asset.String(),
+		"repaid", repaid.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeRepayBorrowedAsset,
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
-			sdk.NewAttribute(types.EventAttrAttempted, msg.Amount.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, borrowerAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventRepay{
+		Borrower: msg.Borrower,
+		Repaid:   repaid,
 	})
-
-	return &types.MsgRepayAssetResponse{
-		Repaid: repaidCoin,
-	}, nil
+	return &types.MsgRepayResponse{
+		Repaid: repaid,
+	}, err
 }
 
 func (s msgServer) Liquidate(
@@ -221,51 +196,36 @@ func (s msgServer) Liquidate(
 ) (*types.MsgLiquidateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	liquidatorAddr, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
 	if err != nil {
 		return nil, err
 	}
-
-	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	borrower, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err
 	}
-
-	repaid, reward, err := s.keeper.LiquidateBorrow(ctx, liquidatorAddr, borrowerAddr, msg.Repayment, msg.Reward)
+	repaid, liquidated, reward, err := s.keeper.Liquidate(ctx, liquidator, borrower, msg.Repayment, msg.RewardDenom)
 	if err != nil {
 		return nil, err
 	}
-
-	repaidCoin := sdk.NewCoin(msg.Repayment.Denom, repaid)
-	rewardCoin := sdk.NewCoin(msg.Reward.Denom, reward)
 
 	s.keeper.Logger(ctx).Debug(
-		"borrowed assets repaid by liquidator",
-		"liquidator", liquidatorAddr.String(),
-		"borrower", borrowerAddr.String(),
-		"amount", repaidCoin.String(),
-		"reward", rewardCoin.String(),
+		"unhealthy borrower liquidated",
+		"liquidator", msg.Liquidator,
+		"borrower", msg.Borrower,
 		"attempted", msg.Repayment.String(),
+		"repaid", repaid.String(),
+		"liquidated", liquidated.String(),
+		"reward", reward.String(),
 	)
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			types.EventTypeLiquidate,
-			sdk.NewAttribute(types.EventAttrLiquidator, liquidatorAddr.String()),
-			sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, repaidCoin.String()),
-			sdk.NewAttribute(types.EventAttrReward, rewardCoin.String()),
-			sdk.NewAttribute(types.EventAttrAttempted, msg.Repayment.String()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.EventAttrModule),
-			sdk.NewAttribute(sdk.AttributeKeySender, liquidatorAddr.String()),
-		),
+	err = ctx.EventManager().EmitTypedEvent(&types.EventLiquidate{
+		Liquidator: msg.Liquidator,
+		Borrower:   msg.Borrower,
+		Liquidated: liquidated,
 	})
-
 	return &types.MsgLiquidateResponse{
-		Repaid: repaidCoin,
-		Reward: rewardCoin,
-	}, nil
+		Repaid:     repaid,
+		Collateral: liquidated,
+		Reward:     reward,
+	}, err
 }

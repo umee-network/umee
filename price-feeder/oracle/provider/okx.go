@@ -13,17 +13,16 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	okxHost          = "ws.okx.com:8443"
-	okxPath          = "/ws/v5/public"
-	okxPingCheck     = time.Second * 28 // should be < 30
-	okxPairsEndpoint = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
+	okxWSHost    = "ws.okx.com:8443"
+	okxWSPath    = "/ws/v5/public"
+	okxPingCheck = time.Second * 28 // should be < 30
+	okxRestHost  = "https://www.okx.com"
+	okxRestPath  = "/api/v5/market/tickers?instType=SPOT"
 )
 
 var _ Provider = (*OkxProvider)(nil)
@@ -39,6 +38,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       Endpoint
 		tickers         map[string]OkxTickerPair      // InstId => OkxTickerPair
 		candles         map[string][]OkxCandlePair    // InstId => 0kxCandlePair
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -101,14 +101,28 @@ type (
 )
 
 // NewOkxProvider creates a new OkxProvider.
-func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*OkxProvider, error) {
-	wsURL := url.URL{
-		Scheme: "wss",
-		Host:   okxHost,
-		Path:   okxPath,
+func NewOkxProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints Endpoint,
+	pairs ...types.CurrencyPair,
+) (*OkxProvider, error) {
+	if endpoints.Name != ProviderOkx {
+		endpoints = Endpoint{
+			Name:      ProviderOkx,
+			Rest:      okxRestHost,
+			Websocket: okxWSHost,
+		}
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   endpoints.Websocket,
+		Path:   okxWSPath,
+	}
+
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Okx websocket: %w", err)
 	}
@@ -116,8 +130,9 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 	provider := &OkxProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "okx").Logger(),
+		logger:          logger.With().Str("provider", string(ProviderOkx)).Logger(),
 		reconnectTimer:  time.NewTicker(okxPingCheck),
+		endpoints:       endpoints,
 		tickers:         map[string]OkxTickerPair{},
 		candles:         map[string][]OkxCandlePair{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -134,8 +149,8 @@ func NewOkxProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.C
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -150,8 +165,8 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]T
 }
 
 // GetCandlePrices returns the candlePrices based on the saved map
-func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		candles, err := p.getCandlePrices(currencyPair)
@@ -176,14 +191,7 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		config.ProviderOkx,
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderOkx, len(cps))
 	return nil
 }
 
@@ -226,33 +234,33 @@ func (p *OkxProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	instrumentID := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentID]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("okx provider failed to get ticker price for %s", instrumentID)
+		return types.TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
 	}
 
 	return tickerPair.toTickerPrice()
 }
 
-func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	instrumentID := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentID]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", instrumentID)
+		return []types.CandlePrice{}, fmt.Errorf("okx failed to get candle prices for %s", instrumentID)
 	}
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -284,6 +292,9 @@ func (p *OkxProvider) handleReceivedTickers(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler.
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -308,15 +319,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if tickerResp.ID.Channel == "tickers" {
 		for _, tickerPair := range tickerResp.Data {
 			p.setTickerPair(tickerPair)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"ticker",
-				"provider",
-				config.ProviderOkx,
-			)
+			telemetryWebsocketMessage(ProviderOkx, MessageTypeTicker)
 		}
 		return
 	}
@@ -325,15 +328,7 @@ func (p *OkxProvider) messageReceived(messageType int, bz []byte) {
 	if candleResp.ID.Channel == "candle1m" {
 		for _, candlePair := range candleResp.Data {
 			p.setCandlePair(candlePair, candleResp.ID.InstID)
-			telemetry.IncrCounter(
-				1,
-				"websocket",
-				"message",
-				"type",
-				"candle",
-				"provider",
-				config.ProviderOkx,
-			)
+			telemetryWebsocketMessage(ProviderOkx, MessageTypeCandle)
 		}
 		return
 	}
@@ -398,7 +393,16 @@ func (p *OkxProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(okxPingCheck)
 }
 
-// reconnect closes the last WS connection and creates a new one. If there’s a
+// disconnect disconnects the existing websocket connection.
+func (p *OkxProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Okx websocket %v", err)
+	}
+	return nil
+}
+
+// reconnect creates a websocket connection. If there’s a
 // network problem, the system will automatically disable the connection. The
 // connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds. To keep the connection stable:
@@ -409,10 +413,9 @@ func (p *OkxProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *OkxProvider) reconnect() error {
-	p.wsClient.Close()
-
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Okx websocket: %w", err)
 	}
@@ -421,13 +424,7 @@ func (p *OkxProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		config.ProviderOkx,
-	)
+	telemetryWebsocketReconnect(ProviderOkx)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -443,7 +440,7 @@ func (p *OkxProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(okxPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + okxRestPath)
 	if err != nil {
 		return nil, err
 	}
@@ -474,12 +471,12 @@ func (p *OkxProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-func (ticker OkxTickerPair) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Okx", ticker.InstID, ticker.Last, ticker.Vol24h)
+func (ticker OkxTickerPair) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderOkx), ticker.InstID, ticker.Last, ticker.Vol24h)
 }
 
-func (candle OkxCandlePair) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice("Okx", candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
+func (candle OkxCandlePair) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(string(ProviderOkx), candle.InstID, candle.Close, candle.Volume, candle.TimeStamp)
 }
 
 // currencyPairToOkxPair returns the expected pair instrument ID for Okx

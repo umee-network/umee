@@ -6,12 +6,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v2/ante"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/ante"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func (suite *IntegrationTestSuite) TestOracleSpam() {
-	suite.SetupTest()
 	suite.txBuilder = suite.clientCtx.TxConfig.NewTxBuilder()
 
 	priv1, _, addr1 := testdata.KeyTestPubAddr()

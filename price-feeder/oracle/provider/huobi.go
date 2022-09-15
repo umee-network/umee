@@ -6,7 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -16,16 +16,15 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
-	huobiHost          = "api-aws.huobi.pro"
-	huobiPath          = "/ws"
+	huobiWSHost        = "api-aws.huobi.pro"
+	huobiWSPath        = "/ws"
 	huobiReconnectTime = time.Minute * 2
-	huobiPairsEndpoint = "https://api.huobi.pro/market/tickers"
+	huobiRestHost      = "https://api.huobi.pro"
+	huobiRestPath      = "/market/tickers"
 )
 
 var _ Provider = (*HuobiProvider)(nil)
@@ -41,6 +40,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       Endpoint
 		tickers         map[string]HuobiTicker        // market.$symbol.ticker => HuobiTicker
 		candles         map[string][]HuobiCandle      // market.$symbol.kline.$period => HuobiCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -92,14 +92,28 @@ type (
 )
 
 // NewHuobiProvider returns a new Huobi provider with the WS connection and msg handler.
-func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*HuobiProvider, error) {
-	wsURL := url.URL{
-		Scheme: "wss",
-		Host:   huobiHost,
-		Path:   huobiPath,
+func NewHuobiProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints Endpoint,
+	pairs ...types.CurrencyPair,
+) (*HuobiProvider, error) {
+	if endpoints.Name != ProviderHuobi {
+		endpoints = Endpoint{
+			Name:      ProviderHuobi,
+			Rest:      huobiRestHost,
+			Websocket: huobiWSHost,
+		}
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   endpoints.Websocket,
+		Path:   huobiWSPath,
+	}
+
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Huobi websocket: %w", err)
 	}
@@ -107,7 +121,8 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 	provider := &HuobiProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "huobi").Logger(),
+		logger:          logger.With().Str("provider", string(ProviderHuobi)).Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]HuobiTicker{},
 		candles:         map[string][]HuobiCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -123,8 +138,8 @@ func NewHuobiProvider(ctx context.Context, logger zerolog.Logger, pairs ...types
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
 		price, err := p.getTickerPrice(cp)
@@ -138,8 +153,8 @@ func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
 		price, err := p.getCandlePrices(cp)
@@ -163,14 +178,7 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		config.ProviderHuobi,
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderHuobi, len(cps))
 	return nil
 }
 
@@ -227,6 +235,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 				p.logger.Err(err).Msg("failed to read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
+					if err := p.disconnect(); err != nil {
+						p.logger.Err(err).Msg("error disconnecting")
+					}
 					if err := p.reconnect(); err != nil {
 						p.logger.Err(err).Msg("error reconnecting")
 					}
@@ -241,6 +252,9 @@ func (p *HuobiProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz, reconnectTicker)
 
 		case <-reconnectTicker.C:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -278,30 +292,14 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte, reconnectTic
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if tickerResp.Tick.LastPrice != 0 {
 		p.setTickerPair(tickerResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			config.ProviderHuobi,
-		)
+		telemetryWebsocketMessage(ProviderHuobi, MessageTypeTicker)
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if candleResp.Tick.Close != 0 {
 		p.setCandlePair(candleResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			config.ProviderHuobi,
-		)
+		telemetryWebsocketMessage(ProviderHuobi, MessageTypeCandle)
 		return
 	}
 
@@ -351,7 +349,7 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert huobi timestamp seconds -> milliseconds
-	candle.Tick.TimeStamp *= int64(time.Second / time.Millisecond)
+	candle.Tick.TimeStamp = SecondsToMilli(candle.Tick.TimeStamp)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []HuobiCandle{}
 	candleList = append(candleList, candle)
@@ -364,12 +362,20 @@ func (p *HuobiProvider) setCandlePair(candle HuobiCandle) {
 	p.candles[candle.CH] = candleList
 }
 
-// reconnect closes the last WS connection and create a new one.
-func (p *HuobiProvider) reconnect() error {
-	p.wsClient.Close()
+// disconnect disconnects the existing websocket connection.
+func (p *HuobiProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Huobi websocket %v", err)
+	}
+	return nil
+}
 
+// reconnect creates a new websocket connection.
+func (p *HuobiProvider) reconnect() error {
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Huobi websocket: %w", err)
 	}
@@ -377,13 +383,7 @@ func (p *HuobiProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		config.ProviderHuobi,
-	)
+	telemetryWebsocketReconnect(ProviderHuobi)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -399,32 +399,32 @@ func (p *HuobiProvider) subscribeCandlePair(cp types.CurrencyPair) error {
 	return p.wsClient.WriteJSON(huobiSubscriptionCandleMsg)
 }
 
-func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[currencyPairToHuobiTickerPair(cp)]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", cp.String())
+		return types.TickerPrice{}, fmt.Errorf("huobi failed to get ticker price for %s", cp.String())
 	}
 
 	return ticker.toTickerPrice()
 }
 
-func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]CandlePrice, error) {
+func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[currencyPairToHuobiCandlePair(cp)]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
+		return []types.CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -443,7 +443,7 @@ func (p *HuobiProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *HuobiProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(huobiPairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + huobiRestPath)
 	if err != nil {
 		return nil, err
 	}
@@ -470,22 +470,22 @@ func decompressGzip(bz []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(r)
+	return io.ReadAll(r)
 }
 
 // toTickerPrice converts current HuobiTicker to TickerPrice.
-func (ticker HuobiTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(
-		"Huobi",
+func (ticker HuobiTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(
+		string(ProviderHuobi),
 		ticker.CH,
 		strconv.FormatFloat(ticker.Tick.LastPrice, 'f', -1, 64),
 		strconv.FormatFloat(ticker.Tick.Vol, 'f', -1, 64),
 	)
 }
 
-func (candle HuobiCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(
-		"Huobi",
+func (candle HuobiCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(
+		string(ProviderHuobi),
 		candle.CH,
 		strconv.FormatFloat(candle.Tick.Close, 'f', -1, 64),
 		strconv.FormatFloat(candle.Tick.Volume, 'f', -1, 64),

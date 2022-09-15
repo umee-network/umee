@@ -7,8 +7,6 @@ on:
     tags:
       - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Official release version tags e.g. v2.0.5
       - "v[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+" # Release candidate tags e.g. v1.0.3-rc4
-  pull_request:
-    types: [opened, synchronize]
 
 jobs:
   release:
@@ -19,16 +17,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.18
-      - name: Get Go Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/golangci-lint
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-cache-${{ hashFiles('**/go.sum') }}
-        if: env.GIT_DIFF
+          go-version: 1.19
+          cache: true
 
       - name: Set Env
         run: echo "TM_VERSION=$(go list -m github.com/tendermint/tendermint | sed 's:.* ::')" >> $GITHUB_ENV

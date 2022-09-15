@@ -3,7 +3,9 @@ package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v2/x/oracle/types";
+option go_package = "github.com/umee-network/umee/v3/x/oracle/types";
+
+option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the oracle Msg service.
 service Msg {
@@ -28,7 +30,8 @@ message MsgAggregateExchangeRatePrevote {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
-  string hash      = 1 [(gogoproto.moretags) = "yaml:\"hash\""];
+  string hash = 1 [(gogoproto.moretags) = "yaml:\"hash\""];
+  // Feeder is the author and the signer of the message.
   string feeder    = 2 [(gogoproto.moretags) = "yaml:\"feeder\""];
   string validator = 3 [(gogoproto.moretags) = "yaml:\"validator\""];
 }
@@ -45,8 +48,9 @@ message MsgAggregateExchangeRateVote {
 
   string salt           = 1 [(gogoproto.moretags) = "yaml:\"salt\""];
   string exchange_rates = 2 [(gogoproto.moretags) = "yaml:\"exchange_rates\""];
-  string feeder         = 3 [(gogoproto.moretags) = "yaml:\"feeder\""];
-  string validator      = 4 [(gogoproto.moretags) = "yaml:\"validator\""];
+  // Feeder is the author and the signer of the message.
+  string feeder    = 3 [(gogoproto.moretags) = "yaml:\"feeder\""];
+  string validator = 4 [(gogoproto.moretags) = "yaml:\"validator\""];
 }
 
 // MsgAggregateExchangeRateVoteResponse defines the
@@ -59,6 +63,7 @@ message MsgDelegateFeedConsent {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
+  // Operator is the author and the signer of the message.
   string operator = 1 [(gogoproto.moretags) = "yaml:\"operator\""];
   string delegate = 2 [(gogoproto.moretags) = "yaml:\"delegate\""];
 }

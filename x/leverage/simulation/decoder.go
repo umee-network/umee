@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // NewDecodeStore returns a decoder function closure that unmarshals the KVPair's
@@ -35,11 +36,8 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			}
 			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
-		case bytes.Equal(prefixA, types.KeyPrefixCollateralSetting):
-			return fmt.Sprintf("%v\n%v", kvA, kvB) // it is bytes: []byte{0x01}
-
 		case bytes.Equal(prefixA, types.KeyPrefixCollateralAmount):
-			var amountA, amountB sdk.Int
+			var amountA, amountB sdkmath.Int
 			if err := amountA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
@@ -49,7 +47,7 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			return fmt.Sprintf("%v\n%v", amountA, amountB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixReserveAmount):
-			var amountA, amountB sdk.Int
+			var amountA, amountB sdkmath.Int
 			if err := amountA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}

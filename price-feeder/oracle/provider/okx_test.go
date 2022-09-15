@@ -11,7 +11,12 @@ import (
 )
 
 func TestOkxProvider_GetTickerPrices(t *testing.T) {
-	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewOkxProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
@@ -73,14 +78,18 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.Error(t, err)
-		require.Equal(t, "okx provider failed to get ticker price for FOO-BAR", err.Error())
+		require.EqualError(t, err, "okx failed to get ticker price for FOO-BAR")
 		require.Nil(t, prices)
 	})
 }
 
 func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewOkxProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	p, err := NewOkxProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {

@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // ParseUpdateRegistryProposal attempts to parse a UpdateRegistryProposal from
@@ -13,7 +13,7 @@ import (
 func ParseUpdateRegistryProposal(cdc codec.JSONCodec, proposalFile string) (types.UpdateRegistryProposal, error) {
 	content := types.UpdateRegistryProposal{}
 
-	contents, err := ioutil.ReadFile(proposalFile)
+	contents, err := os.ReadFile(proposalFile)
 	if err != nil {
 		return content, err
 	}

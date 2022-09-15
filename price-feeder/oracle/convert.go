@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -12,8 +13,11 @@ import (
 
 // getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,
 // given the asset and the map of providers to currency pairs.
-func getUSDBasedProviders(asset string, providerPairs map[string][]types.CurrencyPair) (map[string]struct{}, error) {
-	conversionProviders := make(map[string]struct{})
+func getUSDBasedProviders(
+	asset string,
+	providerPairs map[provider.Name][]types.CurrencyPair,
+) (map[provider.Name]struct{}, error) {
+	conversionProviders := make(map[provider.Name]struct{})
 
 	for provider, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -30,17 +34,22 @@ func getUSDBasedProviders(asset string, providerPairs map[string][]types.Currenc
 }
 
 // ConvertCandlesToUSD converts any candles which are not quoted in USD
-// to USD by other price feeds.
+// to USD by other price feeds. It will also filter out any candles not
+// within the deviation threshold set by the config.
+//
+// Ref: https://github.com/umee-network/umee/blob/4348c3e433df8c37dd98a690e96fc275de609bc1/price-feeder/oracle/filter.go#L41
 func convertCandlesToUSD(
+	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
-	providerPairs map[string][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderCandles, error) {
 	if len(candles) == 0 {
 		return candles, nil
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
-	requiredConversions := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[provider.Name]types.CurrencyPair)
 
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -59,7 +68,7 @@ func convertCandlesToUSD(
 						for base, candle := range candleSet {
 							if base == pair.Quote {
 								if _, ok := validCandleList[providerName]; !ok {
-									validCandleList[providerName] = make(map[string][]provider.CandlePrice)
+									validCandleList[providerName] = make(map[string][]types.CandlePrice)
 								}
 
 								validCandleList[providerName][base] = candle
@@ -71,12 +80,29 @@ func convertCandlesToUSD(
 				if len(validCandleList) == 0 {
 					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
 				}
-				tvwap, err := ComputeTVWAP(validCandleList)
+
+				filteredCandles, err := FilterCandleDeviations(
+					logger,
+					validCandleList,
+					deviationThresholds,
+				)
 				if err != nil {
 					return nil, err
 				}
 
-				conversionRates[pair.Quote] = tvwap[pair.Quote]
+				// TODO: we should revise ComputeTVWAP to avoid return empty slices
+				// Ref: https://github.com/umee-network/umee/issues/1261
+				tvwap, err := ComputeTVWAP(filteredCandles)
+				if err != nil {
+					return nil, err
+				}
+
+				cvRate, ok := tvwap[pair.Quote]
+				if !ok {
+					return nil, fmt.Errorf("error on computing tvwap for quote: %s, base: %s", pair.Quote, pair.Base)
+				}
+
+				conversionRates[pair.Quote] = cvRate
 				requiredConversions[pairProviderName] = pair
 			}
 		}
@@ -84,11 +110,15 @@ func convertCandlesToUSD(
 
 	// Convert assets to USD.
 	for provider, assetMap := range candles {
+		conversionRate, ok := conversionRates[requiredConversions[provider].Quote]
+		if !ok {
+			continue
+		}
 		for asset, assetCandles := range assetMap {
 			if requiredConversions[provider].Base == asset {
 				for i := range assetCandles {
 					assetCandles[i].Price = assetCandles[i].Price.Mul(
-						conversionRates[requiredConversions[provider].Quote],
+						conversionRate,
 					)
 				}
 			}
@@ -99,17 +129,22 @@ func convertCandlesToUSD(
 }
 
 // convertTickersToUSD converts any tickers which are not quoted in USD to USD,
-// using the conversion rates of other tickers.
+// using the conversion rates of other tickers. It will also filter out any tickers
+// not within the deviation threshold set by the config.
+//
+// Ref: https://github.com/umee-network/umee/blob/4348c3e433df8c37dd98a690e96fc275de609bc1/price-feeder/oracle/filter.go#L41
 func convertTickersToUSD(
+	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,
-	providerPairs map[string][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
+	deviationThresholds map[string]sdk.Dec,
 ) (provider.AggregatedProviderPrices, error) {
 	if len(tickers) == 0 {
 		return tickers, nil
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
-	requiredConversions := make(map[string]types.CurrencyPair)
+	requiredConversions := make(map[provider.Name]types.CurrencyPair)
 
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -129,7 +164,7 @@ func convertTickersToUSD(
 						for base, ticker := range candleSet {
 							if base == pair.Quote {
 								if _, ok := validTickerList[providerName]; !ok {
-									validTickerList[providerName] = make(map[string]provider.TickerPrice)
+									validTickerList[providerName] = make(map[string]types.TickerPrice)
 								}
 
 								validTickerList[providerName][base] = ticker
@@ -141,7 +176,17 @@ func convertTickersToUSD(
 				if len(validTickerList) == 0 {
 					return nil, fmt.Errorf("there are no valid conversion rates for %s", pair.Quote)
 				}
-				vwap, err := ComputeVWAP(validTickerList)
+
+				filteredTickers, err := FilterTickerDeviations(
+					logger,
+					validTickerList,
+					deviationThresholds,
+				)
+				if err != nil {
+					return nil, err
+				}
+
+				vwap, err := ComputeVWAP(filteredTickers)
 				if err != nil {
 					return nil, err
 				}
@@ -156,7 +201,7 @@ func convertTickersToUSD(
 	for providerName, assetMap := range tickers {
 		for asset := range assetMap {
 			if requiredConversions[providerName].Base == asset {
-				assetMap[asset] = provider.TickerPrice{
+				assetMap[asset] = types.TickerPrice{
 					Price: assetMap[asset].Price.Mul(
 						conversionRates[requiredConversions[providerName].Quote],
 					),

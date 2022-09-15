@@ -8,7 +8,7 @@ DIST_DIR       ?= $(CURDIR)/dist
 LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
-PROJECT_NAME   = $(shell git remote get-url origin | xargs basename -s .git)
+PROJECT_NAME   := umee
 HTTPS_GIT 		 := https://github.com/umee-network/umee.git
 
 ###############################################################################
@@ -73,12 +73,16 @@ build: go.sum
 	@echo "--> Building..."
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
-install: go.sum
-	@echo "--> Installing..."
-	go install -mod=readonly $(BUILD_FLAGS) ./...
+build-no_cgo:
+	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
+	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
+
+install: go.sum
+	@echo "--> Installing..."
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 go-mod-cache: go.sum
 	@echo "--> Download go modules to local cache"
@@ -104,16 +108,13 @@ clean:
 docker-build:
 	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
 
-docker-build-debug:
-	@docker build -t umeenet/umeed-e2e --build-arg IMG_TAG=debug -f umee.e2e.Dockerfile .
-
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
-.PHONY: docker-build docker-build-debug docker-push-hermes docker-push-gaia
+.PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
 ##                              Tests & Linting                              ##
@@ -148,7 +149,8 @@ endif
 
 lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=10m
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
+	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
 
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
@@ -187,21 +189,26 @@ test-sim-benchmark-invariants
 ###############################################################################
 
 #DOCKER_BUF := docker run -v $(shell pwd):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc11
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.4.0
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.7.0
 
 containerProtoVer=v0.7
 containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
-containerProtoGen=cosmos-sdk-proto-gen-$(containerProtoVer)
-containerProtoFmt=cosmos-sdk-proto-fmt-$(containerProtoVer)
+containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
+containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
+containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
 
-
-proto-all: proto-gen proto-lint proto-check-breaking proto-format
-.PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format
+proto-all: proto-format proto-lint proto-gen proto-swagger-gen
+.PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format proto-swagger-gen
 
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
 		sh ./contrib/scripts/protocgen.sh; fi
+
+proto-swagger-gen:
+	@echo "Generating Swagger of Protobuf"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
+		sh ./contrib/scripts/protoc-swagger-gen.sh; fi
 
 proto-format:
 	@echo "Formatting Protobuf files"

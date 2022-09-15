@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/telemetry"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 // defaultDeviationThreshold defines how many 𝜎 a provider can be away
@@ -21,15 +21,17 @@ func FilterTickerDeviations(
 ) (provider.AggregatedProviderPrices, error) {
 	var (
 		filteredPrices = make(provider.AggregatedProviderPrices)
-		priceMap       = make(map[string]map[string]sdk.Dec)
+		priceMap       = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceTickers := range prices {
-		if _, ok := priceMap[providerName]; !ok {
-			priceMap[providerName] = make(map[string]sdk.Dec)
+		p, ok := priceMap[providerName]
+		if !ok {
+			p = map[string]sdk.Dec{}
+			priceMap[providerName] = p
 		}
 		for base, tp := range priceTickers {
-			priceMap[providerName][base] = tp.Price
+			p[base] = tp.Price
 		}
 	}
 
@@ -43,24 +45,23 @@ func FilterTickerDeviations(
 	// or defaulted to 1.
 	for providerName, priceTickers := range prices {
 		for base, tp := range priceTickers {
-			threshold := defaultDeviationThreshold
+			t := defaultDeviationThreshold
 			if _, ok := deviationThresholds[base]; ok {
-				threshold = deviationThresholds[base]
+				t = deviationThresholds[base]
 			}
 
-			if _, ok := deviations[base]; !ok ||
-				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-					tp.Price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
-				if _, ok := filteredPrices[providerName]; !ok {
-					filteredPrices[providerName] = make(map[string]provider.TickerPrice)
+			if d, ok := deviations[base]; !ok || isBetween(tp.Price, means[base], d.Mul(t)) {
+				p, ok := filteredPrices[providerName]
+				if !ok {
+					p = map[string]types.TickerPrice{}
+					filteredPrices[providerName] = p
 				}
-
-				filteredPrices[providerName][base] = tp
+				p[base] = tp
 			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+				provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName).
+					Str("provider", string(providerName)).
 					Str("price", tp.Price.String()).
 					Msg("provider deviating from other prices")
 			}
@@ -79,18 +80,19 @@ func FilterCandleDeviations(
 ) (provider.AggregatedProviderCandles, error) {
 	var (
 		filteredCandles = make(provider.AggregatedProviderCandles)
-		tvwaps          = make(map[string]map[string]sdk.Dec)
+		tvwaps          = make(map[provider.Name]map[string]sdk.Dec)
 	)
 
 	for providerName, priceCandles := range candles {
 		candlePrices := make(provider.AggregatedProviderCandles)
 
 		for base, cp := range priceCandles {
-			if _, ok := candlePrices[providerName]; !ok {
-				candlePrices[providerName] = make(map[string][]provider.CandlePrice)
+			p, ok := candlePrices[providerName]
+			if !ok {
+				p = map[string][]types.CandlePrice{}
+				candlePrices[providerName] = p
 			}
-
-			candlePrices[providerName][base] = cp
+			p[base] = cp
 		}
 
 		tvwap, err := ComputeTVWAP(candlePrices)
@@ -117,24 +119,23 @@ func FilterCandleDeviations(
 	// or defaulted to 1.
 	for providerName, priceMap := range tvwaps {
 		for base, price := range priceMap {
-			threshold := defaultDeviationThreshold
+			t := defaultDeviationThreshold
 			if _, ok := deviationThresholds[base]; ok {
-				threshold = deviationThresholds[base]
+				t = deviationThresholds[base]
 			}
 
-			if _, ok := deviations[base]; !ok ||
-				(price.GTE(means[base].Sub(deviations[base].Mul(threshold))) &&
-					price.LTE(means[base].Add(deviations[base].Mul(threshold)))) {
-				if _, ok := filteredCandles[providerName]; !ok {
-					filteredCandles[providerName] = make(map[string][]provider.CandlePrice)
+			if d, ok := deviations[base]; !ok || isBetween(price, means[base], d.Mul(t)) {
+				p, ok := filteredCandles[providerName]
+				if !ok {
+					p = map[string][]types.CandlePrice{}
+					filteredCandles[providerName] = p
 				}
-
-				filteredCandles[providerName][base] = candles[providerName][base]
+				p[base] = candles[providerName][base]
 			} else {
-				telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+				provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
 				logger.Warn().
 					Str("base", base).
-					Str("provider", providerName).
+					Str("provider", string(providerName)).
 					Str("price", price.String()).
 					Msg("provider deviating from other candles")
 			}
@@ -142,4 +143,9 @@ func FilterCandleDeviations(
 	}
 
 	return filteredCandles, nil
+}
+
+func isBetween(p, mean, margin sdk.Dec) bool {
+	return p.GTE(mean.Sub(margin)) &&
+		p.LTE(mean.Add(margin))
 }

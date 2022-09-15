@@ -1,0 +1,110 @@
+syntax = "proto3";
+package umee.leverage.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// EventSupply is emitted on Msg/Supply
+message EventSupply {
+  // Liquidity supplier bech32 address.
+  string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Liquidity provided to the module.
+  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  // uToken received by the supplier in exchange for the provided liquidity.
+  cosmos.base.v1beta1.Coin utoken = 3 [(gogoproto.nullable) = false];
+}
+
+// EventWithdraw is emitted on Msg/Withdraw
+message EventWithdraw {
+  // Liquidity supplier bech32 address.
+  string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // uToken sent to the module in exchange for the underlying asset.
+  cosmos.base.v1beta1.Coin utoken = 2 [(gogoproto.nullable) = false];
+  // Liquidity received by the supplier.
+  cosmos.base.v1beta1.Coin asset = 3 [(gogoproto.nullable) = false];
+}
+
+// EventCollaterize is emitted on Msg/Collaterize
+message EventCollaterize {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // uToken provided as a collateral.
+  cosmos.base.v1beta1.Coin utoken = 2 [(gogoproto.nullable) = false];
+}
+
+// EventDecollaterize is emitted on Msg/Decollateralize
+message EventDecollaterize {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // utoken removed from collateral.
+  cosmos.base.v1beta1.Coin utoken = 2 [(gogoproto.nullable) = false];
+}
+
+// EventBorrow is emitted on Msg/Borrow
+message EventBorrow {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Asset borrowed.
+  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+}
+
+// EventRepay is emitted on Msg/Repay
+message EventRepay {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Asset repaid
+  cosmos.base.v1beta1.Coin repaid = 2 [(gogoproto.nullable) = false];
+}
+
+// EventLiquidate is emitted on Msg/Liquidate
+message EventLiquidate {
+  // Liquidator bech32 address.
+  string liquidator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Borrower bech32 address.
+  string borrower = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Assets liquidated from the borrower
+  cosmos.base.v1beta1.Coin liquidated = 3 [(gogoproto.nullable) = false];
+}
+
+// EventInterestAccrual is emitted when interest accrues in EndBlock
+message EventInterestAccrual {
+  uint64 block_height = 1;
+  // Unix timestamp (in seconds)
+  uint64 timestamp = 2;
+
+  repeated cosmos.base.v1beta1.Coin total_interest = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin reserved       = 4 [(gogoproto.nullable) = false];
+}
+
+// EventRepayBadDebt is emitted when bad debt is detected and repayed
+// (potentially partially)
+message EventRepayBadDebt {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Asset repaid
+  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+}
+
+// EventReservesExhausted is emitted when the module reserves are exhausted
+// by paying off bad debts.
+message EventReservesExhausted {
+  // Borrower bech32 address.
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Outstanding bad debt
+  cosmos.base.v1beta1.Coin outstanding_debt = 2 [(gogoproto.nullable) = false];
+  // Module balance remaining
+  cosmos.base.v1beta1.Coin module_balance = 3 [(gogoproto.nullable) = false];
+  // Reserves remaining
+  cosmos.base.v1beta1.Coin reserves = 4 [(gogoproto.nullable) = false];
+}
+
+// EventFundOracle is emitted when sending rewards to oracle module
+message EventFundOracle {
+  // Assets sent to oracle module
+  repeated cosmos.base.v1beta1.Coin assets = 1 [(gogoproto.nullable) = false];
+}

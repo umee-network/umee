@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,19 +11,18 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	rpcClient "github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/rs/zerolog"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-
-	"github.com/umee-network/umee/price-feeder/telemetry"
-	umeeapp "github.com/umee-network/umee/v2/app"
-	umeeparams "github.com/umee-network/umee/v2/app/params"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type (
@@ -44,6 +44,7 @@ type (
 		GasAdjustment       float64
 		GRPCEndpoint        string
 		KeyringPassphrase   string
+		ChainHeight         *ChainHeight
 	}
 
 	passReader struct {
@@ -53,6 +54,7 @@ type (
 )
 
 func NewOracleClient(
+	ctx context.Context,
 	logger zerolog.Logger,
 	chainID string,
 	keyringBackend string,
@@ -70,7 +72,7 @@ func NewOracleClient(
 		return OracleClient{}, err
 	}
 
-	return OracleClient{
+	oracleClient := OracleClient{
 		Logger:              logger.With().Str("module", "oracle_client").Logger(),
 		ChainID:             chainID,
 		KeyringBackend:      keyringBackend,
@@ -85,7 +87,30 @@ func NewOracleClient(
 		Encoding:            umeeapp.MakeEncodingConfig(),
 		GasAdjustment:       gasAdjustment,
 		GRPCEndpoint:        grpcEndpoint,
-	}, nil
+	}
+
+	clientCtx, err := oracleClient.CreateClientContext()
+	if err != nil {
+		return OracleClient{}, err
+	}
+
+	blockHeight, err := rpc.GetChainHeight(clientCtx)
+	if err != nil {
+		return OracleClient{}, err
+	}
+
+	chainHeight, err := NewChainHeight(
+		ctx,
+		clientCtx.Client,
+		oracleClient.Logger,
+		blockHeight,
+	)
+	if err != nil {
+		return OracleClient{}, err
+	}
+	oracleClient.ChainHeight = chainHeight
+
+	return oracleClient, nil
 }
 
 func newPassReader(pass string) io.Reader {
@@ -125,7 +150,7 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 
 	// re-try voting until timeout
 	for lastCheckHeight < maxBlockHeight {
-		latestBlockHeight, err := rpcClient.GetChainHeight(clientCtx)
+		latestBlockHeight, err := oc.ChainHeight.GetChainHeight()
 		if err != nil {
 			return err
 		}
@@ -159,6 +184,8 @@ func (oc OracleClient) BroadcastTx(nextBlockHeight, timeoutHeight int64, msgs ..
 				Str("tx_hash", hash).
 				Uint32("tx_code", code).
 				Msg("failed to broadcast tx; retrying...")
+
+			time.Sleep(time.Second * 1)
 			continue
 		}
 
@@ -185,7 +212,7 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 		keyringInput = os.Stdin
 	}
 
-	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput)
+	kr, err := keyring.New("oracle", oc.KeyringBackend, oc.KeyringDir, keyringInput, oc.Encoding.Codec)
 	if err != nil {
 		return client.Context{}, err
 	}
@@ -206,24 +233,22 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 	if err != nil {
 		return client.Context{}, err
 	}
-
 	clientCtx := client.Context{
 		ChainID:           oc.ChainID,
-		JSONCodec:         oc.Encoding.Marshaler,
 		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
 		TxConfig:          oc.Encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             oc.Encoding.Marshaler,
+		Codec:             oc.Encoding.Codec,
 		LegacyAmino:       oc.Encoding.Amino,
 		Input:             os.Stdin,
 		NodeURI:           oc.TMRPC,
 		Client:            tmRPC,
 		Keyring:           kr,
 		FromAddress:       oc.OracleAddr,
-		FromName:          keyInfo.GetName(),
-		From:              keyInfo.GetName(),
+		FromName:          keyInfo.Name,
+		From:              keyInfo.Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,

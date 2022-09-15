@@ -13,18 +13,20 @@ import (
 	"time"
 
 	input "github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
@@ -101,7 +103,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(cmd.Context())
 	g, ctx := errgroup.WithContext(ctx)
 
 	// listen for and trap any OS signal to gracefully shutdown and exit
@@ -119,6 +121,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	oracleClient, err := client.NewOracleClient(
+		ctx,
 		logger,
 		cfg.Account.ChainID,
 		cfg.Keyring.Backend,
@@ -149,15 +152,26 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		deviations[deviation.Base] = threshold
 	}
 
+	endpoints := make(map[provider.Name]provider.Endpoint, len(cfg.ProviderEndpoints))
+	for _, endpoint := range cfg.ProviderEndpoints {
+		endpoints[endpoint.Name] = endpoint
+	}
+
 	oracle := oracle.New(
 		logger,
 		oracleClient,
 		cfg.CurrencyPairs,
 		providerTimeout,
 		deviations,
+		endpoints,
 	)
 
-	metrics, err := telemetry.New(cfg.Telemetry)
+	telemetryCfg := telemetry.Config{}
+	err = mapstructure.Decode(cfg.Telemetry, &telemetryCfg)
+	if err != nil {
+		return err
+	}
+	metrics, err := telemetry.New(telemetryCfg)
 	if err != nil {
 		return err
 	}
@@ -223,10 +237,11 @@ func startPriceFeeder(
 
 	srvErrCh := make(chan error, 1)
 	srv := &http.Server{
-		Handler:      rtr,
-		Addr:         cfg.Server.ListenAddr,
-		WriteTimeout: writeTimeout,
-		ReadTimeout:  readTimeout,
+		Handler:           rtr,
+		Addr:              cfg.Server.ListenAddr,
+		WriteTimeout:      writeTimeout,
+		ReadTimeout:       readTimeout,
+		ReadHeaderTimeout: readTimeout,
 	}
 
 	go func() {
@@ -237,7 +252,7 @@ func startPriceFeeder(
 	for {
 		select {
 		case <-ctx.Done():
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 			defer cancel()
 
 			logger.Info().Str("listen_addr", cfg.Server.ListenAddr).Msg("shutting down price-feeder server...")

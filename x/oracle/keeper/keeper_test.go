@@ -12,20 +12,22 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 const (
-	displayDenom string = umeeapp.DisplayDenom
-	bondDenom    string = umeeapp.BondDenom
+	displayDenom string = appparams.DisplayDenom
+	bondDenom    string = appparams.BondDenom
 )
 
 type IntegrationTestSuite struct {
@@ -42,8 +44,10 @@ const (
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
-	app := umeeapp.Setup(s.T(), false, 1)
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{
+	require := s.Require()
+	isCheckTx := false
+	app := umeeapp.Setup(s.T(), isCheckTx, 1)
+	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
 	})
@@ -51,21 +55,20 @@ func (s *IntegrationTestSuite) SetupTest() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
-	sh := staking.NewHandler(app.StakingKeeper)
+	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
-	s.Require().NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	s.Require().NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
-	_, err := sh(ctx, NewTestMsgCreateValidator(valAddr, valPubKey, amt))
-	s.Require().NoError(err)
-	_, err = sh(ctx, NewTestMsgCreateValidator(valAddr2, valPubKey2, amt))
-	s.Require().NoError(err)
+	sh.CreateValidator(valAddr, valPubKey, amt, true)
+	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
 
-	staking.EndBlocker(ctx, app.StakingKeeper)
+	staking.EndBlocker(ctx, *app.StakingKeeper)
 
 	s.app = app
 	s.ctx = ctx
@@ -88,7 +91,7 @@ var (
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(umeeapp.BondDenom, initTokens))
+	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
 // NewTestMsgCreateValidator test msg creator
@@ -206,7 +209,8 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
-	app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
+	err := app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
+	s.Require().NoError(err)
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())

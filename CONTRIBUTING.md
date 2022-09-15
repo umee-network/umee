@@ -48,19 +48,16 @@ We follow the Cosmos SDK [Coding Guidelines](https://github.com/cosmos/cosmos-sd
   - Prefer use of acceptance test framework, like [gocuke](https://github.com/regen-network/gocuke/)
   - For unit tests or integration tests use [go mock](https://github.com/golang/mock) for creating mocks. Generate mock interface implementations using `go generate`.
 
-## Architecture Decision Records (ADR)
+## Design Documents
 
-When proposing an architecture decision for the Umee network, please start by
+When proposing a design decision for the Umee network, please start by
 opening an [Issue](https://github.com/umee-network/umee/issues/new/choose) or a
 [Discussion](https://github.com/umee-network/umee/discussions/new) with a summary
 of the proposal.
 
 Once the proposal has been discussed and there is rough alignment on a high-level
-approach to the design, the [ADR creation process](https://github.com/umee-network/umee/blob/main/docs/architecture/PROCESS.md) can begin. We are following this process to ensure all involved parties
-are in agreement before any party begins coding the proposed implementation.
-
-If you would like to see examples of how these are written, please refer to the
-current [ADRs](https://github.com/umee-network/umee/tree/main/docs/architecture).
+approach to the design, a [design doc](https://github.com/umee-network/umee/blob/main/docs/design_docs/README.md) can be drafted in a dedicated pull request.
+We are following this process to ensure all involved parties are in agreement before any party begins coding the proposed implementation.
 
 ## Branching Model
 

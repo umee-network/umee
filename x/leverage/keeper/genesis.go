@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // InitGenesis initializes the x/leverage module state from a provided genesis state.
@@ -11,7 +12,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
 	for _, token := range genState.Registry {
-		if err := k.SetRegisteredToken(ctx, token); err != nil {
+		if err := k.SetTokenSettings(ctx, token); err != nil {
 			panic(err)
 		}
 	}
@@ -27,35 +28,24 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 		}
 	}
 
-	for _, setting := range genState.CollateralSettings {
-		borrower, err := sdk.AccAddressFromBech32(setting.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err = k.setCollateralSetting(ctx, borrower, setting.Denom, true); err != nil {
-			panic(err)
-		}
-	}
-
 	for _, collateral := range genState.Collateral {
 		borrower, err := sdk.AccAddressFromBech32(collateral.Address)
 		if err != nil {
 			panic(err)
 		}
 
-		if err = k.setCollateralAmount(ctx, borrower, collateral.Amount); err != nil {
+		if err = k.setCollateral(ctx, borrower, collateral.Amount); err != nil {
 			panic(err)
 		}
 	}
 
 	for _, reserve := range genState.Reserves {
-		if err := k.setReserveAmount(ctx, reserve); err != nil {
+		if err := k.setReserves(ctx, reserve); err != nil {
 			panic(err)
 		}
 	}
 
-	if err := k.SetLastInterestTime(ctx, genState.LastInterestTime); err != nil {
+	if err := k.setLastInterestTime(ctx, genState.LastInterestTime); err != nil {
 		panic(err)
 	}
 
@@ -83,10 +73,9 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.GetParams(ctx),
 		k.GetAllRegisteredTokens(ctx),
 		k.getAllAdjustedBorrows(ctx),
-		k.getAllCollateralSettings(ctx),
 		k.getAllCollateral(ctx),
 		k.GetAllReserves(ctx),
-		k.GetLastInterestTime(ctx),
+		k.getLastInterestTime(ctx),
 		k.getAllBadDebts(ctx),
 		k.getAllInterestScalars(ctx),
 		k.GetAllUTokenSupply(ctx),
@@ -103,7 +92,7 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
 			return err
@@ -121,29 +110,6 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 	return borrows
 }
 
-// getAllCollateralSettings returns collateral settings for all borrowers. Uses the
-// CollateralSetting struct found in GenesisState, which stores borrower address as a string.
-func (k Keeper) getAllCollateralSettings(ctx sdk.Context) []types.CollateralSetting {
-	prefix := types.KeyPrefixCollateralSetting
-	collateralSettings := []types.CollateralSetting{}
-
-	iterator := func(key, val []byte) error {
-		addr := types.AddressFromKey(key, prefix)
-		denom := types.DenomFromKeyWithAddress(key, prefix)
-
-		collateralSettings = append(collateralSettings, types.NewCollateralSetting(addr.String(), denom))
-
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return collateralSettings
-}
-
 // getAllCollateral returns all collateral across all borrowers and asset types. Uses the
 // CollateralAmount struct found in GenesisState, which stores borrower address as a string.
 func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
@@ -154,7 +120,7 @@ func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdk.Int
+		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled collateral amount should never happen
 			return err
@@ -170,29 +136,6 @@ func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
 	}
 
 	return collateral
-}
-
-// getAllBadDebts gets bad debt instances across all borrowers. Uses the
-// BadDebt struct found  in GenesisState.
-func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
-	prefix := types.KeyPrefixBadDebt
-	badDebts := []types.BadDebt{}
-
-	iterator := func(key, val []byte) error {
-		addr := types.AddressFromKey(key, prefix)
-		denom := types.DenomFromKeyWithAddress(key, prefix)
-
-		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
-
-		return nil
-	}
-
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
-
-	return badDebts
 }
 
 // getAllInterestScalars returns all interest scalars. Uses the InterestScalar struct found

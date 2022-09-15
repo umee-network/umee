@@ -4,58 +4,27 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
 	routeInterestScalars  = "interest-scalars"
+	routeExchangeRates    = "exchange-rates"
 	routeReserveAmount    = "reserve-amount"
 	routeCollateralAmount = "collateral-amount"
 	routeBorrowAmount     = "borrow-amount"
 	routeBorrowAPY        = "borrow-apy"
-	routeLendAPY          = "lend-apy"
+	routeSupplyAPY        = "supply-apy"
 )
 
 // RegisterInvariants registers the leverage module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
+	// these invariants run in O(N) time, with N = number of registered tokens
 	ir.RegisterRoute(types.ModuleName, routeReserveAmount, ReserveAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeCollateralAmount, CollateralAmountInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeBorrowAmount, BorrowAmountInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeBorrowAPY, BorrowAPYInvariant(k))
-	ir.RegisterRoute(types.ModuleName, routeLendAPY, LendAPYInvariant(k))
+	ir.RegisterRoute(types.ModuleName, routeSupplyAPY, SupplyAPYInvariant(k))
 	ir.RegisterRoute(types.ModuleName, routeInterestScalars, InterestScalarsInvariant(k))
-}
-
-// AllInvariants runs all invariants of the x/leverage module.
-func AllInvariants(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
-		res, stop := ReserveAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = CollateralAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAmountInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = BorrowAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = LendAPYInvariant(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		return InterestScalarsInvariant(k)(ctx)
-	}
+	ir.RegisterRoute(types.ModuleName, routeExchangeRates, ExchangeRatesInvariant(k))
 }
 
 // ReserveAmountInvariant checks that reserve amounts have non-negative balances
@@ -102,8 +71,10 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// CollateralAmountInvariant checks that collateral amounts have all positive values
-func CollateralAmountInvariant(k Keeper) sdk.Invariant {
+// InefficientCollateralAmountInvariant checks that collateral amounts have all positive values.
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
+func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
 			msg   string
@@ -146,8 +117,10 @@ func CollateralAmountInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// BorrowAmountInvariant checks that borrow amounts have all positive values
-func BorrowAmountInvariant(k Keeper) sdk.Invariant {
+// InefficientBorrowAmountInvariant checks that borrow amounts have all positive values
+// This runs in O(N) time where N is the number of participating addresses,
+// so it should not be enabled in production.
+func InefficientBorrowAmountInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
 			msg   string
@@ -202,7 +175,7 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms of registered tokens in the
 		// keeper, ensuring none have a negative borrow APY.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
 			borrowAPY := k.DeriveBorrowAPY(ctx, denom)
@@ -226,8 +199,8 @@ func BorrowAPYInvariant(k Keeper) sdk.Invariant {
 	}
 }
 
-// LendAPYInvariant checks that Lend APY have all positive values
-func LendAPYInvariant(k Keeper) sdk.Invariant {
+// SupplyAPYInvariant checks that Supply APY have all positive values
+func SupplyAPYInvariant(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) (string, bool) {
 		var (
 			msg   string
@@ -237,27 +210,27 @@ func LendAPYInvariant(k Keeper) sdk.Invariant {
 		tokenPrefix := types.KeyPrefixRegisteredToken
 
 		// Iterate through all denoms of registered tokens in the
-		// keeper, ensuring none have a negative lend APY.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		// keeper, ensuring none have a negative supply APY.
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
-			lendAPY := k.DeriveLendAPY(ctx, denom)
+			supplyAPY := k.DeriveSupplyAPY(ctx, denom)
 
-			if lendAPY.IsNegative() {
+			if supplyAPY.IsNegative() {
 				count++
-				msg += fmt.Sprintf("\t%s lend APY %s is negative\n", denom, lendAPY.String())
+				msg += fmt.Sprintf("\t%s supply APY %s is negative\n", denom, supplyAPY.String())
 			}
 			return nil
 		})
 		if err != nil {
-			msg += fmt.Sprintf("\tSome error occurred while iterating through the lend APY %+v\n", err)
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the supply APY %+v\n", err)
 		}
 
 		broken := count != 0
 
 		return sdk.FormatInvariant(
-			types.ModuleName, routeLendAPY,
-			fmt.Sprintf("number of negative lend APY found %d\n%s", count, msg),
+			types.ModuleName, routeSupplyAPY,
+			fmt.Sprintf("number of negative supply APY found %d\n%s", count, msg),
 		), broken
 	}
 }
@@ -274,7 +247,7 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 
 		// Iterate through all denoms of registered tokens in the
 		// keeper, ensuring none have an interest scalar less than one.
-		err := k.iterate(ctx, tokenPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
 			denom := types.DenomFromKey(key, tokenPrefix)
 
 			scalar := k.getInterestScalar(ctx, denom)
@@ -294,6 +267,42 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 		return sdk.FormatInvariant(
 			types.ModuleName, routeInterestScalars,
 			fmt.Sprintf("amount of interest scalars lower than one %d\n%s", count, msg),
+		), broken
+	}
+}
+
+// ExchangeRatesInvariant checks that all denoms have an uToken exchange rate >= 1
+func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
+	return func(ctx sdk.Context) (string, bool) {
+		var (
+			msg   string
+			count int
+		)
+
+		tokenPrefix := types.KeyPrefixRegisteredToken
+
+		// Iterate through all denoms of registered tokens in the
+		// keeper, ensuring none have an interest scalar less than one.
+		err := k.iterate(ctx, tokenPrefix, func(key, _ []byte) error {
+			denom := types.DenomFromKey(key, tokenPrefix)
+
+			exchangeRate := k.DeriveExchangeRate(ctx, denom)
+
+			if exchangeRate.LT(sdk.OneDec()) {
+				count++
+				msg += fmt.Sprintf("\t%s exchange rate %s is less than one\n", denom, exchangeRate.String())
+			}
+			return nil
+		})
+		if err != nil {
+			msg += fmt.Sprintf("\tSome error occurred while iterating through the uToken exchange rates %+v\n", err)
+		}
+
+		broken := count != 0
+
+		return sdk.FormatInvariant(
+			types.ModuleName, routeExchangeRates,
+			fmt.Sprintf("amount of uToken exchange rates lower than one %d\n%s", count, msg),
 		), broken
 	}
 }

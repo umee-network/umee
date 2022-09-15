@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -12,7 +13,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -20,7 +21,7 @@ var ten = sdk.MustNewDecFromStr("10")
 // Keeper of the oracle store
 type Keeper struct {
 	cdc        codec.BinaryCodec
-	storeKey   sdk.StoreKey
+	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
 	accountKeeper types.AccountKeeper
@@ -34,7 +35,7 @@ type Keeper struct {
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramspace paramstypes.Subspace,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
@@ -123,14 +124,10 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(types.EventTypeExchangeRateUpdate,
-			sdk.NewAttribute(types.EventAttrKeyDenom, denom),
-			sdk.NewAttribute(types.EventAttrKeyExchangeRate, exchangeRate.String()),
-		),
-	)
+	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
+		Denom: denom, Rate: exchangeRate})
 }
 
 // IterateExchangeRates iterates over USD rates in the store.
@@ -163,19 +160,18 @@ func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
 
 // GetFeederDelegation gets the account address to which the validator operator
 // delegated oracle vote rights.
-func (k Keeper) GetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress) (sdk.AccAddress, error) {
+func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.AccAddress, error) {
 	// check that the given validator exists
-	if val := k.StakingKeeper.Validator(ctx, operator); val == nil || !val.IsBonded() {
-		return nil, sdkerrors.Wrapf(stakingtypes.ErrNoValidatorFound, "validator %s is not active set", operator.String())
+	if val := k.StakingKeeper.Validator(ctx, vAddr); val == nil || !val.IsBonded() {
+		return nil, stakingtypes.ErrNoValidatorFound.Wrapf("validator %s is not in active set", vAddr)
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetFeederDelegationKey(operator))
+	bz := store.Get(types.GetFeederDelegationKey(vAddr))
 	if bz == nil {
-		// by default the right is delegated to the validator itself
-		return sdk.AccAddress(operator), nil
+		// no delegation, so validator itself must provide price feed
+		return sdk.AccAddress(vAddr), nil
 	}
-
 	return sdk.AccAddress(bz), nil
 }
 
@@ -387,7 +383,7 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	}
 }
 
-// ValidateFeeder returns the given feeder is allowed to feed the message or not.
+// ValidateFeeder returns error if the given feeder is not allowed to feed the message.
 func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	delegate, err := k.GetFeederDelegation(ctx, valAddr)
 	if err != nil {

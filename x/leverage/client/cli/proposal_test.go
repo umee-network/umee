@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/leverage/client/cli"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"github.com/umee-network/umee/v3/x/leverage/client/cli"
 )
 
 func TestParseUpdateRegistryProposal(t *testing.T) {
@@ -22,7 +22,7 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 	`)
 	os.WriteFile(filePath, bz, 0o644)
 
-	_, err := cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
+	_, err := cli.ParseUpdateRegistryProposal(encCfg.Codec, filePath)
 	require.Error(t, err)
 
 	// create a good proposal file and ensure parsing does not fail
@@ -39,11 +39,11 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 			"base_borrow_rate": "0.02",
 			"kink_borrow_rate": "0.2",
 			"max_borrow_rate": "1.5",
-			"kink_utilization_rate": "0.2",
+			"kink_utilization": "0.2",
 			"liquidation_incentive": "0.1",
 			"symbol_denom": "UMEE",
 			"exponent": 6,
-			"enable_msg_lend": true,
+			"enable_msg_supply": true,
 			"enable_msg_borrow": true,
 			"blacklist": false
 		}
@@ -51,6 +51,6 @@ func TestParseUpdateRegistryProposal(t *testing.T) {
 }`)
 	os.WriteFile(filePath, bz, 0o644)
 
-	_, err = cli.ParseUpdateRegistryProposal(encCfg.Marshaler, filePath)
+	_, err = cli.ParseUpdateRegistryProposal(encCfg.Codec, filePath)
 	require.NoError(t, err)
 }

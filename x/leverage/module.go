@@ -11,21 +11,23 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/client/cli"
-	"github.com/umee-network/umee/v2/x/leverage/keeper"
-	"github.com/umee-network/umee/v2/x/leverage/simulation"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v3/x/leverage/simulation"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
 	// TODO: Ensure x/leverage implements simulator and then uncomment.
+	// https://github.com/umee-network/umee/issues/644
 	// _ module.AppModuleSimulation = AppModule{}
 )
 
@@ -102,10 +104,10 @@ type AppModule struct {
 
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
+	bankKeeper    bankkeeper.Keeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk types.BankKeeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk bankkeeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,

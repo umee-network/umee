@@ -3,13 +3,14 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
 const (
@@ -19,149 +20,131 @@ const (
 	defaultSrvWriteTimeout = 15 * time.Second
 	defaultSrvReadTimeout  = 15 * time.Second
 	defaultProviderTimeout = 100 * time.Millisecond
-
-	ProviderKraken   = "kraken"
-	ProviderBinance  = "binance"
-	ProviderOsmosis  = "osmosis"
-	ProviderHuobi    = "huobi"
-	ProviderOkx      = "okx"
-	ProviderGate     = "gate"
-	ProviderCoinbase = "coinbase"
-	ProviderMock     = "mock"
 )
 
 var (
-	validate *validator.Validate = validator.New()
+	validate = validator.New()
 
 	// ErrEmptyConfigPath defines a sentinel error for an empty config path.
 	ErrEmptyConfigPath = errors.New("empty configuration file path")
 
 	// SupportedProviders defines a lookup table of all the supported currency API
 	// providers.
-	SupportedProviders = map[string]struct{}{
-		ProviderKraken:   {},
-		ProviderBinance:  {},
-		ProviderOsmosis:  {},
-		ProviderOkx:      {},
-		ProviderHuobi:    {},
-		ProviderGate:     {},
-		ProviderCoinbase: {},
-		ProviderMock:     {},
+	SupportedProviders = map[provider.Name]struct{}{
+		provider.ProviderKraken:   {},
+		provider.ProviderBinance:  {},
+		provider.ProviderOsmosis:  {},
+		provider.ProviderOkx:      {},
+		provider.ProviderHuobi:    {},
+		provider.ProviderGate:     {},
+		provider.ProviderCoinbase: {},
+		provider.ProviderFTX:      {},
+		provider.ProviderBitget:   {},
+		provider.ProviderMock:     {},
 	}
 
 	// maxDeviationThreshold is the maxmimum allowed amount of standard
 	// deviations which validators are able to set for a given asset.
 	maxDeviationThreshold = sdk.MustNewDecFromStr("3.0")
+
+	// SupportedQuotes defines a lookup table for which assets we support
+	// using as quotes.
+	SupportedQuotes = map[string]struct{}{
+		DenomUSD: {},
+		"USDC":   {},
+		"USDT":   {},
+		"DAI":    {},
+		"BTC":    {},
+		"ETH":    {},
+	}
 )
 
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server          Server         `toml:"server"`
-		CurrencyPairs   []CurrencyPair `toml:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Deviations      []Deviation    `toml:"deviation_thresholds"`
-		Account         Account        `toml:"account" validate:"required,gt=0,dive,required"`
-		Keyring         Keyring        `toml:"keyring" validate:"required,gt=0,dive,required"`
-		RPC             RPC            `toml:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry       Telemetry      `toml:"telemetry"`
-		GasAdjustment   float64        `toml:"gas_adjustment" validate:"required"`
-		ProviderTimeout string         `toml:"provider_timeout"`
+		Server            Server              `mapstructure:"server"`
+		CurrencyPairs     []CurrencyPair      `mapstructure:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations        []Deviation         `mapstructure:"deviation_thresholds"`
+		Account           Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
+		Keyring           Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
+		RPC               RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry         telemetry.Config    `mapstructure:"telemetry"`
+		GasAdjustment     float64             `mapstructure:"gas_adjustment" validate:"required"`
+		ProviderTimeout   string              `mapstructure:"provider_timeout"`
+		ProviderEndpoints []provider.Endpoint `mapstructure:"provider_endpoints" validate:"dive"`
 	}
 
 	// Server defines the API server configuration.
 	Server struct {
-		ListenAddr     string   `toml:"listen_addr"`
-		WriteTimeout   string   `toml:"write_timeout"`
-		ReadTimeout    string   `toml:"read_timeout"`
-		VerboseCORS    bool     `toml:"verbose_cors"`
-		AllowedOrigins []string `toml:"allowed_origins"`
+		ListenAddr     string   `mapstructure:"listen_addr"`
+		WriteTimeout   string   `mapstructure:"write_timeout"`
+		ReadTimeout    string   `mapstructure:"read_timeout"`
+		VerboseCORS    bool     `mapstructure:"verbose_cors"`
+		AllowedOrigins []string `mapstructure:"allowed_origins"`
 	}
 
 	// CurrencyPair defines a price quote of the exchange rate for two different
 	// currencies and the supported providers for getting the exchange rate.
 	CurrencyPair struct {
-		Base      string   `toml:"base" validate:"required"`
-		Quote     string   `toml:"quote" validate:"required"`
-		Providers []string `toml:"providers" validate:"required,gt=0,dive,required"`
+		Base      string          `mapstructure:"base" validate:"required"`
+		Quote     string          `mapstructure:"quote" validate:"required"`
+		Providers []provider.Name `mapstructure:"providers" validate:"required,gt=0,dive,required"`
 	}
 
 	// Deviation defines a maximum amount of standard deviations that a given asset can
 	// be from the median without being filtered out before voting.
 	Deviation struct {
-		Base      string `toml:"base" validate:"required"`
-		Threshold string `toml:"threshold" validate:"required"`
+		Base      string `mapstructure:"base" validate:"required"`
+		Threshold string `mapstructure:"threshold" validate:"required"`
 	}
 
 	// Account defines account related configuration that is related to the Umee
 	// network and transaction signing functionality.
 	Account struct {
-		ChainID   string `toml:"chain_id" validate:"required"`
-		Address   string `toml:"address" validate:"required"`
-		Validator string `toml:"validator" validate:"required"`
+		ChainID   string `mapstructure:"chain_id" validate:"required"`
+		Address   string `mapstructure:"address" validate:"required"`
+		Validator string `mapstructure:"validator" validate:"required"`
 	}
 
 	// Keyring defines the required Umee keyring configuration.
 	Keyring struct {
-		Backend string `toml:"backend" validate:"required"`
-		Dir     string `toml:"dir" validate:"required"`
+		Backend string `mapstructure:"backend" validate:"required"`
+		Dir     string `mapstructure:"dir" validate:"required"`
 	}
 
 	// RPC defines RPC configuration of both the Umee gRPC and Tendermint nodes.
 	RPC struct {
-		TMRPCEndpoint string `toml:"tmrpc_endpoint" validate:"required"`
-		GRPCEndpoint  string `toml:"grpc_endpoint" validate:"required"`
-		RPCTimeout    string `toml:"rpc_timeout" validate:"required"`
-	}
-
-	// Telemetry defines the configuration options for application telemetry.
-	Telemetry struct {
-		// Prefixed with keys to separate services
-		ServiceName string `toml:"service_name"`
-
-		// Enabled enables the application telemetry functionality. When enabled,
-		// an in-memory sink is also enabled by default. Operators may also enabled
-		// other sinks such as Prometheus.
-		Enabled bool `toml:"enabled"`
-
-		// Enable prefixing gauge values with hostname
-		EnableHostname bool `toml:"enable_hostname"`
-
-		// Enable adding hostname to labels
-		EnableHostnameLabel bool `toml:"enable_hostname_label"`
-
-		// Enable adding service to labels
-		EnableServiceLabel bool `toml:"enable_service_label"`
-
-		// GlobalLabels defines a global set of name/value label tuples applied to all
-		// metrics emitted using the wrapper functions defined in telemetry package.
-		//
-		// Example:
-		// [["chain_id", "cosmoshub-1"]]
-		GlobalLabels [][]string `toml:"global_labels"`
-
-		// Type determines which type of telemetry to use
-		// Valid values are "prometheus" or "generic"
-		Type string `toml:"type"`
+		TMRPCEndpoint string `mapstructure:"tmrpc_endpoint" validate:"required"`
+		GRPCEndpoint  string `mapstructure:"grpc_endpoint" validate:"required"`
+		RPCTimeout    string `mapstructure:"rpc_timeout" validate:"required"`
 	}
 )
 
-// telemetryValidation is custom validation for the Telemetry struct
+// telemetryValidation is custom validation for the Telemetry struct.
 func telemetryValidation(sl validator.StructLevel) {
-	tel := sl.Current().Interface().(Telemetry)
+	tel := sl.Current().Interface().(telemetry.Config)
 
-	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0 ||
-		len(tel.Type) == 0) {
+	if tel.Enabled && (len(tel.GlobalLabels) == 0 || len(tel.ServiceName) == 0) {
 		sl.ReportError(tel.Enabled, "enabled", "Enabled", "enabledNoOptions", "")
-	} else if tel.Enabled &&
-		(len(tel.Type) == 0 ||
-			(tel.Type != "prometheus" && tel.Type != "generic")) {
-		sl.ReportError(tel.Enabled, "type", "Type", "unsupportedTelemetryType", "")
+	}
+}
+
+// endpointValidation is custom validation for the ProviderEndpoint struct.
+func endpointValidation(sl validator.StructLevel) {
+	endpoint := sl.Current().Interface().(provider.Endpoint)
+
+	if len(endpoint.Name) < 1 || len(endpoint.Rest) < 1 || len(endpoint.Websocket) < 1 {
+		sl.ReportError(endpoint, "endpoint", "Endpoint", "unsupportedEndpointType", "")
+	}
+	if _, ok := SupportedProviders[endpoint.Name]; !ok {
+		sl.ReportError(endpoint.Name, "name", "Name", "unsupportedEndpointProvider", "")
 	}
 }
 
 // Validate returns an error if the Config object is invalid.
 func (c Config) Validate() error {
-	validate.RegisterStructValidation(telemetryValidation, Telemetry{})
+	validate.RegisterStructValidation(telemetryValidation, telemetry.Config{})
+	validate.RegisterStructValidation(endpointValidation, provider.Endpoint{})
 	return validate.Struct(c)
 }
 
@@ -174,12 +157,14 @@ func ParseConfig(configPath string) (Config, error) {
 		return cfg, ErrEmptyConfigPath
 	}
 
-	configData, err := ioutil.ReadFile(configPath)
-	if err != nil {
+	viper.AutomaticEnv()
+	viper.SetConfigFile(configPath)
+
+	if err := viper.ReadInConfig(); err != nil {
 		return cfg, fmt.Errorf("failed to read config: %w", err)
 	}
 
-	if _, err := toml.Decode(string(configData), &cfg); err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return cfg, fmt.Errorf("failed to decode config: %w", err)
 	}
 
@@ -196,14 +181,17 @@ func ParseConfig(configPath string) (Config, error) {
 		cfg.ProviderTimeout = defaultProviderTimeout.String()
 	}
 
-	pairs := make(map[string]map[string]struct{})
+	pairs := make(map[string]map[provider.Name]struct{})
 	coinQuotes := make(map[string]struct{})
 	for _, cp := range cfg.CurrencyPairs {
 		if _, ok := pairs[cp.Base]; !ok {
-			pairs[cp.Base] = make(map[string]struct{})
+			pairs[cp.Base] = make(map[provider.Name]struct{})
 		}
 		if strings.ToUpper(cp.Quote) != DenomUSD {
 			coinQuotes[cp.Quote] = struct{}{}
+		}
+		if _, ok := SupportedQuotes[strings.ToUpper(cp.Quote)]; !ok {
+			return cfg, fmt.Errorf("unsupported quote: %s", cp.Quote)
 		}
 
 		for _, provider := range cp.Providers {
@@ -227,14 +215,14 @@ func ParseConfig(configPath string) (Config, error) {
 	}
 
 	for base, providers := range pairs {
-		if _, ok := pairs[base]["mock"]; !ok && len(providers) < 3 {
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < 3 {
 			return cfg, fmt.Errorf("must have at least three providers for %s", base)
 		}
 	}
 
 	gatePairs := []string{}
 	for base, providers := range pairs {
-		if _, ok := providers["gate"]; ok {
+		if _, ok := providers[provider.ProviderGate]; ok {
 			gatePairs = append(gatePairs, base)
 		}
 	}

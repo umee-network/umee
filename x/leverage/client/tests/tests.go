@@ -1,22 +1,18 @@
 package tests
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/leverage/client/cli"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestInvalidQueries() {
-	val := s.network.Validators[0]
-
-	invalidQueries := []TestCase{
-		testQuery{
-			"query reserved - invalid denom",
-			cli.GetCmdQueryReserveAmount(),
+	invalidQueries := []testQuery{
+		{
+			"query market summary - invalid denom",
+			cli.GetCmdQueryMarketSummary(),
 			[]string{
 				"abcd",
 			},
@@ -24,69 +20,9 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
-		testQuery{
-			"query token market size - invalid denom",
-			cli.GetCmdQueryTokenMarketSize(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query available to borrow - invalid denom",
-			cli.GetCmdQueryAvailableBorrow(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query exchange rate - invalid denom",
-			cli.GetCmdQueryExchangeRate(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query market size - invalid denom",
-			cli.GetCmdQueryMarketSize(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query lend APY - invalid denom",
-			cli.GetCmdQueryLendAPY(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrow APY - invalid denom",
-			cli.GetCmdQueryBorrowAPY(),
-			[]string{
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query loaned - invalid address",
-			cli.GetCmdQueryLoaned(),
+		{
+			"query account balances - invalid address",
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				"xyz",
 			},
@@ -94,157 +30,9 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
-		testQuery{
-			"query loaned - invalid denom",
-			cli.GetCmdQueryLoaned(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed - invalid address",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed - invalid denom",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral - invalid address",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral - invalid denom",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral setting - invalid address",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				"xyz",
-				"u/uumee",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral setting - invalid denom",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				val.Address.String(),
-				"abcd",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query loaned value - invalid address",
-			cli.GetCmdQueryLoanedValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query loaned value - invalid denom",
-			cli.GetCmdQueryLoanedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral value - invalid address",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query collateral value - invalid denom",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=u/abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed value - invalid address",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrowed value - invalid denom",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=abcd", cli.FlagDenom),
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query borrow limit - invalid address",
-			cli.GetCmdQueryBorrowLimit(),
-			[]string{
-				"xyz",
-			},
-			true,
-			nil,
-			nil,
-		},
-		testQuery{
-			"query liquidation threshold - invalid address",
-			cli.GetCmdQueryLiquidationThreshold(),
+		{
+			"query account summary - invalid address",
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				"xyz",
 			},
@@ -255,14 +43,16 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
-	s.runTestCases(invalidQueries...)
+	s.runTestQueries(invalidQueries...)
 }
 
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
-	initialQueries := []TestCase{
-		testQuery{
+	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
+
+	initialQueries := []testQuery{
+		{
 			"query params",
 			cli.GetCmdQueryParams(),
 			[]string{},
@@ -272,9 +62,9 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Params: types.DefaultParams(),
 			},
 		},
-		testQuery{
+		{
 			"query registered tokens",
-			cli.GetCmdQueryAllRegisteredTokens(),
+			cli.GetCmdQueryRegisteredTokens(),
 			[]string{},
 			false,
 			&types.QueryRegisteredTokensResponse{},
@@ -282,101 +72,86 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				Registry: []types.Token{
 					{
 						// must match app/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:            umeeapp.BondDenom,
-						SymbolDenom:          umeeapp.DisplayDenom,
-						Exponent:             6,
-						ReserveFactor:        sdk.MustNewDecFromStr("0.1"),
-						CollateralWeight:     sdk.MustNewDecFromStr("0.05"),
-						LiquidationThreshold: sdk.MustNewDecFromStr("0.05"),
-						BaseBorrowRate:       sdk.MustNewDecFromStr("0.02"),
-						KinkBorrowRate:       sdk.MustNewDecFromStr("0.2"),
-						MaxBorrowRate:        sdk.MustNewDecFromStr("1.5"),
-						KinkUtilizationRate:  sdk.MustNewDecFromStr("0.2"),
-						LiquidationIncentive: sdk.MustNewDecFromStr("0.18"),
-						EnableMsgLend:        true,
-						EnableMsgBorrow:      true,
-						Blacklist:            false,
+						BaseDenom:              appparams.BondDenom,
+						SymbolDenom:            appparams.DisplayDenom,
+						Exponent:               6,
+						ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
+						CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
+						LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
+						BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
+						KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
+						MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
+						KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
+						LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
+						EnableMsgSupply:        true,
+						EnableMsgBorrow:        true,
+						Blacklist:              false,
+						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+						MaxSupply:              sdk.NewInt(100000000000),
 					},
 				},
 			},
 		},
-		testQuery{
-			"query reserve amount",
-			cli.GetCmdQueryReserveAmount(),
+		{
+			"query market summary - zero supply",
+			cli.GetCmdQueryMarketSummary(),
 			[]string{
-				umeeapp.BondDenom,
+				appparams.BondDenom,
 			},
 			false,
-			&types.QueryReserveAmountResponse{},
-			&types.QueryReserveAmountResponse{
-				Amount: sdk.ZeroInt(),
+			&types.QueryMarketSummaryResponse{},
+			&types.QueryMarketSummaryResponse{
+				SymbolDenom:        "UMEE",
+				Exponent:           6,
+				OraclePrice:        &oraclePrice,
+				UTokenExchangeRate: sdk.OneDec(),
+				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
+				// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
+				Supply_APY: sdk.MustNewDecFromStr("1.335"),
+				// This is an edge case technically - when effective supply, meaning
+				// module balance + total borrows, is zero, utilization (0/0) is
+				// interpreted as 100% so max borrow rate (150% APY) is used.
+				Borrow_APY:             sdk.MustNewDecFromStr("1.50"),
+				Supplied:               sdk.ZeroInt(),
+				Reserved:               sdk.ZeroInt(),
+				Collateral:             sdk.ZeroInt(),
+				Borrowed:               sdk.ZeroInt(),
+				Liquidity:              sdk.ZeroInt(),
+				MaximumBorrow:          sdk.ZeroInt(),
+				MaximumCollateral:      sdk.ZeroInt(),
+				MinimumLiquidity:       sdk.ZeroInt(),
+				UTokenSupply:           sdk.ZeroInt(),
+				AvailableBorrow:        sdk.ZeroInt(),
+				AvailableWithdraw:      sdk.ZeroInt(),
+				AvailableCollateralize: sdk.ZeroInt(),
 			},
-		},
-		testQuery{
-			"query exchange rate",
-			cli.GetCmdQueryExchangeRate(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryExchangeRateResponse{},
-			&types.QueryExchangeRateResponse{
-				ExchangeRate: sdk.OneDec(),
-			},
-		},
-		testQuery{
-			"query lend APY",
-			cli.GetCmdQueryLendAPY(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryLendAPYResponse{},
-			// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
-			// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
-			&types.QueryLendAPYResponse{APY: sdk.MustNewDecFromStr("1.335")},
-		},
-		testQuery{
-			"query borrow APY",
-			cli.GetCmdQueryBorrowAPY(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryBorrowAPYResponse{},
-			// This is an edge case technically - when effective supply, meaning
-			// module balance + total borrows, is zero, utilization (0/0) is
-			// interpreted as 100% so max borrow rate (150% APY) is used.
-			&types.QueryBorrowAPYResponse{APY: sdk.MustNewDecFromStr("1.50")},
 		},
 	}
 
-	lend := testTransaction{
-		"lend",
-		cli.GetCmdLendAsset(),
+	supply := testTransaction{
+		"supply",
+		cli.GetCmdSupply(),
 		[]string{
-			val.Address.String(),
 			"1000uumee",
 		},
 		nil,
 	}
 
-	setCollateral := testTransaction{
-		"set collateral",
-		cli.GetCmdSetCollateral(),
+	addCollateral := testTransaction{
+		"add collateral",
+		cli.GetCmdCollateralize(),
 		[]string{
-			val.Address.String(),
-			"u/uumee",
-			"true",
+			"1000u/uumee",
 		},
 		nil,
 	}
 
 	borrow := testTransaction{
 		"borrow",
-		cli.GetCmdBorrowAsset(),
+		cli.GetCmdBorrow(),
 		[]string{
-			val.Address.String(),
 			"50uumee",
 		},
 		nil,
@@ -387,299 +162,128 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdLiquidate(),
 		[]string{
 			val.Address.String(),
-			val.Address.String(),
-			"5uumee",
-			"1uumee",
+			"5uumee", // borrower liquidates itself, reduces borrow amount and collateral by 5
+			"uumee",
 		},
 		nil,
 	}
 
 	repay := testTransaction{
 		"repay",
-		cli.GetCmdRepayAsset(),
+		cli.GetCmdRepay(),
 		[]string{
-			val.Address.String(),
-			"51uumee",
+			"50uumee", // repays only the remaining borrowed balance, reduced automatically from 50
+		},
+		nil,
+	}
+
+	removeCollateral := testTransaction{
+		"remove collateral",
+		cli.GetCmdDecollateralize(),
+		[]string{
+			"895u/uumee", // 100 u/uumee will remain
 		},
 		nil,
 	}
 
 	withdraw := testTransaction{
 		"withdraw",
-		cli.GetCmdWithdrawAsset(),
+		cli.GetCmdWithdraw(),
 		[]string{
-			val.Address.String(),
-			"1000u/uumee",
+			"795u/uumee", // 200 u/uumee will remain
 		},
 		nil,
 	}
 
-	nonzeroQueries := []TestCase{
-		testQuery{
-			"query token market size",
-			cli.GetCmdQueryTokenMarketSize(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryTokenMarketSizeResponse{},
-			&types.QueryTokenMarketSizeResponse{MarketSize: sdk.NewInt(1001)},
-		},
-		testQuery{
-			"query available to borrow",
-			cli.GetCmdQueryAvailableBorrow(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryAvailableBorrowResponse{},
-			&types.QueryAvailableBorrowResponse{Amount: sdk.NewInt(955)},
-		},
-		testQuery{
-			"query market size",
-			cli.GetCmdQueryMarketSize(),
-			[]string{
-				umeeapp.BondDenom,
-			},
-			false,
-			&types.QueryMarketSizeResponse{},
-			&types.QueryMarketSizeResponse{MarketSizeUsd: sdk.MustNewDecFromStr("0.03424421")},
-		},
-		testQuery{
-			"query loaned - all",
-			cli.GetCmdQueryLoaned(),
+	nonzeroQueries := []testQuery{
+		{
+			"query account balances",
+			cli.GetCmdQueryAccountBalances(),
 			[]string{
 				val.Address.String(),
 			},
 			false,
-			&types.QueryLoanedResponse{},
-			&types.QueryLoanedResponse{
-				Loaned: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
+				Supplied: sdk.NewCoins(
+					sdk.NewInt64Coin(appparams.BondDenom, 1000),
 				),
-			},
-		},
-		testQuery{
-			"query loaned - denom",
-			cli.GetCmdQueryLoaned(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryLoanedResponse{},
-			&types.QueryLoanedResponse{
-				Loaned: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 1001),
-				),
-			},
-		},
-		testQuery{
-			"query borrowed - all",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowedResponse{},
-			&types.QueryBorrowedResponse{
-				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
-				),
-			},
-		},
-		testQuery{
-			"query borrowed - denom",
-			cli.GetCmdQueryBorrowed(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryBorrowedResponse{},
-			&types.QueryBorrowedResponse{
-				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(umeeapp.BondDenom, 47),
-				),
-			},
-		},
-		testQuery{
-			"query collateral setting",
-			cli.GetCmdQueryCollateralSetting(),
-			[]string{
-				val.Address.String(),
-				"u/uumee",
-			},
-			false,
-			&types.QueryCollateralSettingResponse{},
-			&types.QueryCollateralSettingResponse{
-				Enabled: true,
-			},
-		},
-		testQuery{
-			"query collateral - all",
-			cli.GetCmdQueryCollateral(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryCollateralResponse{},
-			&types.QueryCollateralResponse{
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin("u/uumee", 1000),
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
+				),
+				Borrowed: sdk.NewCoins(
+					sdk.NewInt64Coin(appparams.BondDenom, 51),
 				),
 			},
 		},
-		testQuery{
-			"query collateral - denom",
-			cli.GetCmdQueryCollateral(),
+		{
+			"query account summary",
+			cli.GetCmdQueryAccountSummary(),
 			[]string{
 				val.Address.String(),
-				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
 			},
 			false,
-			&types.QueryCollateralResponse{},
-			&types.QueryCollateralResponse{
+			&types.QueryAccountSummaryResponse{},
+			&types.QueryAccountSummaryResponse{
+				// This result is umee's oracle exchange rate from
+				// app/test_helpers.go/IntegrationTestNetworkConfig
+				// times the amount of umee, and then times params
+				// (1000 / 1000000) * 34.21 = 0.03421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
+				// (1000 / 1000000) * 34.21 = 0.03421
+				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
+				// (51 / 1000000) * 34.21 = 0.00174471
+				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
+				// (1000 / 1000000) * 34.21 * 0.05 = 0.0017105
+				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
+				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
+			},
+		},
+	}
+
+	postQueries := []testQuery{
+		{
+			"query account balances",
+			cli.GetCmdQueryAccountBalances(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
+				Supplied: sdk.NewCoins(
+					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
+				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin("u/uumee", 1000),
+					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
 				),
-			},
-		},
-		testQuery{
-			"query loaned value - all",
-			cli.GetCmdQueryLoanedValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryLoanedValueResponse{},
-			&types.QueryLoanedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				// This result is umee's oracle exchange rate times the
-				// amount loaned.
-				LoanedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query loaned value - denom",
-			cli.GetCmdQueryLoanedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryLoanedValueResponse{},
-			&types.QueryLoanedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				LoanedValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query collateral value - all",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryCollateralValueResponse{},
-			&types.QueryCollateralValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query collateral value - denom",
-			cli.GetCmdQueryCollateralValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=u/uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryCollateralValueResponse{},
-			&types.QueryCollateralValueResponse{
-				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
-				// (1001 / 1000000) umee * 34.21 = 0.03424421
-			},
-		},
-		testQuery{
-			"query borrowed value - all",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowedValueResponse{},
-			&types.QueryBorrowedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
-			},
-		},
-		testQuery{
-			"query borrowed value - denom",
-			cli.GetCmdQueryBorrowedValue(),
-			[]string{
-				val.Address.String(),
-				fmt.Sprintf("--%s=uumee", cli.FlagDenom),
-			},
-			false,
-			&types.QueryBorrowedValueResponse{},
-			&types.QueryBorrowedValueResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowedValue: sdk.MustNewDecFromStr("0.00160787"),
-				// (51 / 1000000) umee * 34.21 = 0.00160787
-			},
-		},
-		testQuery{
-			"query borrow limit",
-			cli.GetCmdQueryBorrowLimit(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryBorrowLimitResponse{},
-			&types.QueryBorrowLimitResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
-			},
-		},
-		testQuery{
-			"query liquidation threshold",
-			cli.GetCmdQueryLiquidationThreshold(),
-			[]string{
-				val.Address.String(),
-			},
-			false,
-			&types.QueryLiquidationThresholdResponse{},
-			&types.QueryLiquidationThresholdResponse{
-				// From app/test_helpers.go/IntegrationTestNetworkConfig
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017122105"),
-				// (1001 / 1000000) * 0.05 * 34.21 = 0.0017122105
+				Borrowed: sdk.NewCoins(),
 			},
 		},
 	}
 
 	// These queries do not require any borrower setup
-	s.runTestCases(initialQueries...)
+	s.runTestQueries(initialQueries...)
 
 	// These transactions will set up nonzero leverage positions and allow nonzero query results
-	s.runTestCases(
-		lend,
-		setCollateral,
+	s.runTestTransactions(
+		supply,
+		addCollateral,
 		borrow,
-		liquidate,
 	)
 
-	// These transactions are deferred to run after nonzero queries are finished
-	defer s.runTestCases(
+	// These queries run while the supplying and borrowing is active to produce nonzero output
+	s.runTestQueries(nonzeroQueries...)
+
+	// These transactions run after nonzero queries are finished
+	s.runTestTransactions(
+		liquidate,
 		repay,
+		removeCollateral,
 		withdraw,
 	)
 
-	// These queries run while the lending and borrowing is active to produce nonzero output
-	s.runTestCases(nonzeroQueries...)
+	// Confirm cleanup transaction effects
+	s.runTestQueries(postQueries...)
 }

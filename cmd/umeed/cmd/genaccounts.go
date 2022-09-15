@@ -26,7 +26,6 @@ const (
 	flagVestingAmt   = "vesting-amount"
 )
 
-// nolint: lll
 func addGenesisAccountCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-genesis-account [address_or_key_name] [coin][,[coin]]",
@@ -60,17 +59,20 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 				}
 
 				// attempt to lookup address from Keybase if no address was provided
-				kb, err := keyring.New(sdk.KeyringServiceName(), keyringBackend, clientCtx.HomeDir, inBuf)
+				kb, err := keyring.New(sdk.KeyringServiceName(), keyringBackend, clientCtx.HomeDir, inBuf, clientCtx.Codec)
 				if err != nil {
 					return err
 				}
 
 				info, err := kb.Key(args[0])
 				if err != nil {
-					return fmt.Errorf("failed to get address from Keybase: %w", err)
+					return fmt.Errorf("failed to get key from Keybase: %w", err)
+				}
+				addr, err = info.GetAddress()
+				if err != nil {
+					return fmt.Errorf("failed to get address from the key (info: %v): %w", info, err)
 				}
 
-				addr = info.GetAddress()
 			}
 
 			vestingStart, err := cmd.Flags().GetInt64(flagVestingStart)
@@ -98,19 +100,18 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 			baseAccount := authtypes.NewBaseAccount(addr, nil, 0, 0)
 
 			if !vestingAmt.IsZero() {
-				baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
-
-				if (balances.Coins.IsZero() && !baseVestingAccount.OriginalVesting.IsZero()) ||
-					baseVestingAccount.OriginalVesting.IsAnyGT(balances.Coins) {
+				a := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
+				if (balances.Coins.IsZero() && !a.OriginalVesting.IsZero()) ||
+					a.OriginalVesting.IsAnyGT(balances.Coins) {
 					return errors.New("vesting amount cannot be greater than total amount")
 				}
 
 				switch {
 				case vestingStart != 0 && vestingEnd != 0:
-					genAccount = authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, vestingStart)
+					genAccount = authvesting.NewContinuousVestingAccountRaw(a, vestingStart)
 
 				case vestingEnd != 0:
-					genAccount = authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
+					genAccount = authvesting.NewDelayedVestingAccountRaw(a)
 
 				default:
 					return errors.New("invalid vesting parameters; must supply start and end time or end time")
@@ -179,7 +180,8 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 		},
 	}
 
-	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|kwallet|pass|test)")
+	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend,
+		"Select keyring's backend (os|file|kwallet|pass|test)")
 	cmd.Flags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
 	cmd.Flags().String(flagVestingAmt, "", "amount of coins for vesting accounts")
 	cmd.Flags().Int64(flagVestingStart, 0, "schedule start time (unix epoch) for vesting accounts")

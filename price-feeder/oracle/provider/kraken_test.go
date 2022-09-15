@@ -11,15 +11,20 @@ import (
 )
 
 func TestKrakenProvider_GetTickerPrices(t *testing.T) {
-	p, err := NewKrakenProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "BTC", Quote: "USDT"})
+	p, err := NewKrakenProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "BTC", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		lastPrice := sdk.MustNewDecFromStr("34.69000000")
 		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		tickerMap := map[string]TickerPrice{}
-		tickerMap["ATOMUSDT"] = TickerPrice{
+		tickerMap := map[string]types.TickerPrice{}
+		tickerMap["ATOMUSDT"] = types.TickerPrice{
 			Price:  lastPrice,
 			Volume: volume,
 		}
@@ -38,13 +43,13 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 		lastPriceLuna := sdk.MustNewDecFromStr("41.35000000")
 		volume := sdk.MustNewDecFromStr("2396974.02000000")
 
-		tickerMap := map[string]TickerPrice{}
-		tickerMap["ATOMUSDT"] = TickerPrice{
+		tickerMap := map[string]types.TickerPrice{}
+		tickerMap["ATOMUSDT"] = types.TickerPrice{
 			Price:  lastPriceAtom,
 			Volume: volume,
 		}
 
-		tickerMap["LUNAUSDT"] = TickerPrice{
+		tickerMap["LUNAUSDT"] = types.TickerPrice{
 			Price:  lastPriceLuna,
 			Volume: volume,
 		}
@@ -64,14 +69,18 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.Error(t, err)
-		require.Equal(t, "failed to get ticker price for FOOBAR", err.Error())
+		require.EqualError(t, err, "kraken failed to get ticker price for FOOBAR")
 		require.Nil(t, prices)
 	})
 }
 
 func TestKrakenProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewKrakenProvider(context.TODO(), zerolog.Nop(), types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+	p, err := NewKrakenProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+	)
 	require.NoError(t, err)
 
 	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {

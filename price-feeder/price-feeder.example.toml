@@ -8,20 +8,28 @@ write_timeout = "20s"
 
 [[deviation_thresholds]]
 base = "USDT"
-threshold = "2"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "UMEE"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "ATOM"
+threshold = "1.5"
 
 [[currency_pairs]]
-base = "ATOM"
+base = "UMEE"
 providers = [
-  "binance",
+  "okx",
+  "gate"
 ]
 quote = "USDT"
 
 [[currency_pairs]]
-base = "ATOM"
+base = "UMEE"
 providers = [
-  "kraken",
-  "osmosis",
+  "ftx"
 ]
 quote = "USD"
 
@@ -29,8 +37,23 @@ quote = "USD"
 base = "USDT"
 providers = [
   "kraken",
-  "gate",
+  "ftx",
   "coinbase"
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "ftx",
+  "okx",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "kraken",
 ]
 quote = "USD"
 
@@ -49,10 +72,15 @@ rpc_timeout = "100ms"
 tmrpc_endpoint = "http://localhost:26657"
 
 [telemetry]
-enable_hostname = true
-enable_hostname_label = true
-enable_service_label = true
+enable-hostname = true
+enable-hostname-label = true
+enable-service-label = true
 enabled = true
-global_labels = [["chain-id", "umee-local-testnet"]]
-service_name = "price-feeder"
-type = "prometheus"
+global-labels = [["chain_id", "umee-local-testnet"]]
+service-name = "price-feeder"
+prometheus-retention-time = 100
+
+[[provider_endpoints]]
+name = "binance"
+rest = "https://api1.binance.com"
+websocket = "stream.binance.com:9443"

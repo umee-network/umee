@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 var _ types.QueryServer = Querier{}
@@ -19,6 +19,20 @@ type Querier struct {
 
 func NewQuerier(k Keeper) Querier {
 	return Querier{Keeper: k}
+}
+
+func (q Querier) Params(
+	goCtx context.Context,
+	req *types.QueryParams,
+) (*types.QueryParamsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := q.Keeper.GetParams(ctx)
+
+	return &types.QueryParamsResponse{Params: params}, nil
 }
 
 func (q Querier) RegisteredTokens(
@@ -42,503 +56,182 @@ func (q Querier) RegisteredTokens(
 	return resp, nil
 }
 
-func (q Querier) Params(
+func (q Querier) MarketSummary(
 	goCtx context.Context,
-	req *types.QueryParamsRequest,
-) (*types.QueryParamsResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := q.Keeper.GetParams(ctx)
-
-	return &types.QueryParamsResponse{Params: params}, nil
-}
-
-func (q Querier) Borrowed(
-	goCtx context.Context,
-	req *types.QueryBorrowedRequest,
-) (*types.QueryBorrowedResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(req.Denom) == 0 {
-		tokens := q.Keeper.GetBorrowerBorrows(ctx, borrower)
-
-		return &types.QueryBorrowedResponse{Borrowed: tokens}, nil
-	}
-
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	token := q.Keeper.GetBorrow(ctx, borrower, req.Denom)
-
-	return &types.QueryBorrowedResponse{Borrowed: sdk.NewCoins(token)}, nil
-}
-
-func (q Querier) BorrowedValue(
-	goCtx context.Context,
-	req *types.QueryBorrowedValueRequest,
-) (*types.QueryBorrowedValueResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	var tokens sdk.Coins
-
-	if len(req.Denom) == 0 {
-		tokens = q.Keeper.GetBorrowerBorrows(ctx, borrower)
-	} else {
-		if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-		}
-
-		tokens = sdk.NewCoins(q.Keeper.GetBorrow(ctx, borrower, req.Denom))
-	}
-
-	value, err := q.Keeper.TotalTokenValue(ctx, tokens)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryBorrowedValueResponse{BorrowedValue: value}, nil
-}
-
-func (q Querier) Loaned(
-	goCtx context.Context,
-	req *types.QueryLoanedRequest,
-) (*types.QueryLoanedResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	lender, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(req.Denom) == 0 {
-		tokens, err := q.Keeper.GetLenderLoaned(ctx, lender)
-		if err != nil {
-			return nil, err
-		}
-
-		return &types.QueryLoanedResponse{Loaned: tokens}, nil
-	}
-
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	token, err := q.Keeper.GetLoaned(ctx, lender, req.Denom)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryLoanedResponse{Loaned: sdk.NewCoins(token)}, nil
-}
-
-func (q Querier) LoanedValue(
-	goCtx context.Context,
-	req *types.QueryLoanedValueRequest,
-) (*types.QueryLoanedValueResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	lender, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	var tokens sdk.Coins
-
-	if len(req.Denom) == 0 {
-		tokens, err = q.Keeper.GetLenderLoaned(ctx, lender)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-			return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-		}
-
-		loaned, err := q.Keeper.GetLoaned(ctx, lender, req.Denom)
-		if err != nil {
-			return nil, err
-		}
-
-		tokens = sdk.NewCoins(loaned)
-	}
-
-	value, err := q.Keeper.TotalTokenValue(ctx, tokens)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryLoanedValueResponse{LoanedValue: value}, nil
-}
-
-func (q Querier) AvailableBorrow(
-	goCtx context.Context,
-	req *types.QueryAvailableBorrowRequest,
-) (*types.QueryAvailableBorrowResponse, error) {
+	req *types.QueryMarketSummary,
+) (*types.QueryMarketSummaryResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
+		return nil, status.Error(codes.InvalidArgument, "empty denom")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
 
-	amountAvailable := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
-
-	return &types.QueryAvailableBorrowResponse{Amount: amountAvailable}, nil
-}
-
-func (q Querier) BorrowAPY(
-	goCtx context.Context,
-	req *types.QueryBorrowAPYRequest,
-) (*types.QueryBorrowAPYResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
-
-	return &types.QueryBorrowAPYResponse{APY: borrowAPY}, nil
-}
-
-func (q Querier) LendAPY(
-	goCtx context.Context,
-	req *types.QueryLendAPYRequest,
-) (*types.QueryLendAPYResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
-
-	return &types.QueryLendAPYResponse{APY: lendAPY}, nil
-}
-
-func (q Querier) MarketSize(
-	goCtx context.Context,
-	req *types.QueryMarketSizeRequest,
-) (*types.QueryMarketSizeResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
+	token, err := q.Keeper.GetTokenSettings(ctx, req.Denom)
 	if err != nil {
 		return nil, err
-	}
-
-	marketSizeUSD, err := q.Keeper.TokenValue(ctx, marketSizeCoin)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryMarketSizeResponse{MarketSizeUsd: marketSizeUSD}, nil
-}
-
-func (q Querier) TokenMarketSize(
-	goCtx context.Context,
-	req *types.QueryTokenMarketSizeRequest,
-) (*types.QueryTokenMarketSizeResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	marketSizeCoin, err := q.Keeper.GetTotalLoaned(ctx, req.Denom)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryTokenMarketSizeResponse{MarketSize: marketSizeCoin.Amount}, nil
-}
-
-func (q Querier) ReserveAmount(
-	goCtx context.Context,
-	req *types.QueryReserveAmountRequest,
-) (*types.QueryReserveAmountResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-
-	amount := q.Keeper.GetReserveAmount(ctx, req.Denom)
-
-	return &types.QueryReserveAmountResponse{Amount: amount}, nil
-}
-
-func (q Querier) CollateralSetting(
-	goCtx context.Context,
-	req *types.QueryCollateralSettingRequest,
-) (*types.QueryCollateralSettingResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
-	}
-
-	setting := q.Keeper.GetCollateralSetting(ctx, borrower, req.Denom)
-
-	return &types.QueryCollateralSettingResponse{Enabled: setting}, nil
-}
-
-func (q Querier) Collateral(
-	goCtx context.Context,
-	req *types.QueryCollateralRequest,
-) (*types.QueryCollateralResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(req.Denom) == 0 {
-		tokens := q.Keeper.GetBorrowerCollateral(ctx, borrower)
-
-		return &types.QueryCollateralResponse{Collateral: tokens}, nil
-	}
-
-	if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
-	}
-
-	token := q.Keeper.GetCollateralAmount(ctx, borrower, req.Denom)
-
-	return &types.QueryCollateralResponse{Collateral: sdk.NewCoins(token)}, nil
-}
-
-func (q Querier) CollateralValue(
-	goCtx context.Context,
-	req *types.QueryCollateralValueRequest,
-) (*types.QueryCollateralValueResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	lender, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	var uTokens sdk.Coins
-
-	if len(req.Denom) == 0 {
-		uTokens = q.Keeper.GetBorrowerCollateral(ctx, lender)
-	} else {
-		if !q.Keeper.IsAcceptedUToken(ctx, req.Denom) {
-			return nil, status.Error(codes.InvalidArgument, "not accepted uToken denom")
-		}
-
-		collateral := q.Keeper.GetCollateralAmount(ctx, lender, req.Denom)
-
-		uTokens = sdk.NewCoins(collateral)
-	}
-
-	tokens, err := q.Keeper.ExchangeUTokens(ctx, uTokens)
-	if err != nil {
-		return nil, err
-	}
-
-	value, err := q.Keeper.TotalTokenValue(ctx, tokens)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryCollateralValueResponse{CollateralValue: value}, nil
-}
-
-func (q Querier) ExchangeRate(
-	goCtx context.Context,
-	req *types.QueryExchangeRateRequest,
-) (*types.QueryExchangeRateResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	if !q.Keeper.IsAcceptedToken(ctx, req.Denom) {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
 	}
 
 	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
+	supplyAPY := q.Keeper.DeriveSupplyAPY(ctx, req.Denom)
+	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
 
-	return &types.QueryExchangeRateResponse{ExchangeRate: rate}, nil
+	supplied, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
+	balance := q.Keeper.ModuleBalance(ctx, req.Denom).Amount
+	reserved := q.Keeper.GetReserves(ctx, req.Denom).Amount
+	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
+	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
+
+	uDenom := types.ToUTokenDenom(req.Denom)
+	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
+	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
+
+	// maxBorrow is based on MaxSupplyUtilization
+	maxBorrow := token.MaxSupplyUtilization.MulInt(supplied.Amount).TruncateInt()
+
+	// minimum liquidity respects both MaxSupplyUtilization and MinCollateralLiquidity
+	minLiquidityFromSupply := supplied.Amount.Sub(maxBorrow)
+	minLiquidityFromCollateral := token.MinCollateralLiquidity.Mul(rate.MulInt(uCollateral.Amount)).TruncateInt()
+	minLiquidity := sdk.MinInt(minLiquidityFromCollateral, minLiquidityFromSupply)
+
+	// availableBorrow respects both maxBorrow and minLiquidity
+	availableBorrow := liquidity.Sub(minLiquidity)
+	availableBorrow = sdk.MinInt(availableBorrow, maxBorrow.Sub(borrowed.Amount))
+	availableBorrow = sdk.MaxInt(availableBorrow, sdk.ZeroInt())
+
+	// availableWithdraw is based on minLiquidity
+	availableWithdraw := liquidity.Sub(minLiquidity)
+	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
+
+	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
+	maxCollateral, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
+	if token.MinCollateralLiquidity.IsPositive() {
+		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
+		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
+	}
+	availableCollateralize := maxCollateral.Sub(uCollateral.Amount)
+	availableCollateralize = sdk.MaxInt(availableCollateralize, sdk.ZeroInt())
+
+	resp := types.QueryMarketSummaryResponse{
+		SymbolDenom:            token.SymbolDenom,
+		Exponent:               token.Exponent,
+		UTokenExchangeRate:     rate,
+		Supply_APY:             supplyAPY,
+		Borrow_APY:             borrowAPY,
+		Supplied:               supplied.Amount,
+		Reserved:               reserved,
+		Collateral:             uCollateral.Amount,
+		Borrowed:               borrowed.Amount,
+		Liquidity:              balance.Sub(reserved),
+		MaximumBorrow:          maxBorrow,
+		MaximumCollateral:      maxCollateral,
+		MinimumLiquidity:       minLiquidity,
+		UTokenSupply:           uSupply.Amount,
+		AvailableBorrow:        availableBorrow,
+		AvailableWithdraw:      availableWithdraw,
+		AvailableCollateralize: availableCollateralize,
+	}
+
+	// Oracle price in response will be nil if it is unavailable
+	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
+		resp.OraclePrice = &oraclePrice
+	}
+
+	return &resp, nil
 }
 
-func (q Querier) BorrowLimit(
+func (q Querier) AccountBalances(
 	goCtx context.Context,
-	req *types.QueryBorrowLimitRequest,
-) (*types.QueryBorrowLimitResponse, error) {
+	req *types.QueryAccountBalances,
+) (*types.QueryAccountBalancesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
+		return nil, status.Error(codes.InvalidArgument, "empty address")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
-
-	limit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
+	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
+	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	return &types.QueryBorrowLimitResponse{BorrowLimit: limit}, nil
+	return &types.QueryAccountBalancesResponse{
+		Supplied:   supplied,
+		Collateral: collateral,
+		Borrowed:   borrowed,
+	}, nil
 }
 
-func (q Querier) LiquidationThreshold(
+func (q Querier) AccountSummary(
 	goCtx context.Context,
-	req *types.QueryLiquidationThresholdRequest,
-) (*types.QueryLiquidationThresholdResponse, error) {
+	req *types.QueryAccountSummary,
+) (*types.QueryAccountSummaryResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid address")
+		return nil, status.Error(codes.InvalidArgument, "empty address")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	borrower, err := sdk.AccAddressFromBech32(req.Address)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, borrower)
+	supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
+	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
+	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	t, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
+	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied)
+	if err != nil {
+		return nil, err
+	}
+	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed)
+	if err != nil {
+		return nil, err
+	}
+	collateralValue, err := q.Keeper.CalculateCollateralValue(ctx, collateral)
+	if err != nil {
+		return nil, err
+	}
+	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	if err != nil {
+		return nil, err
+	}
+	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryLiquidationThresholdResponse{LiquidationThreshold: t}, nil
+	return &types.QueryAccountSummaryResponse{
+		SuppliedValue:        suppliedValue,
+		CollateralValue:      collateralValue,
+		BorrowedValue:        borrowedValue,
+		BorrowLimit:          borrowLimit,
+		LiquidationThreshold: liquidationThreshold,
+	}, nil
 }
 
 func (q Querier) LiquidationTargets(
 	goCtx context.Context,
-	req *types.QueryLiquidationTargetsRequest,
+	req *types.QueryLiquidationTargets,
 ) (*types.QueryLiquidationTargetsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -559,44 +252,16 @@ func (q Querier) LiquidationTargets(
 	return &types.QueryLiquidationTargetsResponse{Targets: stringTargets}, nil
 }
 
-func (q Querier) MarketSummary(
+func (q Querier) BadDebts(
 	goCtx context.Context,
-	req *types.QueryMarketSummaryRequest,
-) (*types.QueryMarketSummaryResponse, error) {
+	req *types.QueryBadDebts,
+) (*types.QueryBadDebtsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid denom")
-	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	targets := q.Keeper.getAllBadDebts(ctx)
 
-	token, err := q.Keeper.GetRegisteredToken(ctx, req.Denom)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "not accepted Token denom")
-	}
-	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
-	lendAPY := q.Keeper.DeriveLendAPY(ctx, req.Denom)
-	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
-	marketSizeCoin, _ := q.Keeper.GetTotalLoaned(ctx, req.Denom)
-	availableBorrow := q.Keeper.GetAvailableToBorrow(ctx, req.Denom)
-	reserved := q.Keeper.GetReserveAmount(ctx, req.Denom)
-
-	resp := types.QueryMarketSummaryResponse{
-		SymbolDenom:        token.SymbolDenom,
-		Exponent:           token.Exponent,
-		UTokenExchangeRate: rate,
-		Lend_APY:           lendAPY,
-		Borrow_APY:         borrowAPY,
-		MarketSize:         marketSizeCoin.Amount,
-		AvailableBorrow:    availableBorrow,
-		Reserved:           reserved,
-	}
-
-	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
-		resp.OraclePrice = &oraclePrice
-	}
-
-	return &resp, nil
+	return &types.QueryBadDebtsResponse{Targets: targets}, nil
 }

@@ -5,8 +5,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+
+	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func TestGetExchangeRateKey(t *testing.T) {
@@ -16,7 +17,7 @@ func TestGetExchangeRateKey(t *testing.T) {
 		expectedKey []byte
 	}{
 		{
-			denom:       app.BondDenom,
+			denom:       appparams.BondDenom,
 			expectedKey: []byte{0x1, 0x75, 0x75, 0x6d, 0x65, 0x65, 0x0},
 		},
 		{

@@ -12,15 +12,14 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
-	binanceHost          = "stream.binance.com:9443"
-	binancePath          = "/ws/umeestream"
-	binancePairsEndpoint = "https://api1.binance.com/api/v3/ticker/price"
+	binanceWSHost   = "stream.binance.com:9443"
+	binanceWSPath   = "/ws/umeestream"
+	binanceRestHost = "https://api1.binance.com"
+	binanceRestPath = "/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -36,6 +35,7 @@ type (
 		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
+		endpoints       Endpoint
 		tickers         map[string]BinanceTicker      // Symbol => BinanceTicker
 		candles         map[string][]BinanceCandle    // Symbol => BinanceCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -83,15 +83,25 @@ type (
 func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
-	wsURL := url.URL{
-		Scheme: "wss",
-		Host:   binanceHost,
-		Path:   binancePath,
+	if (endpoints.Name) != ProviderBinance {
+		endpoints = Endpoint{
+			Name:      ProviderBinance,
+			Rest:      binanceRestHost,
+			Websocket: binanceWSHost,
+		}
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   endpoints.Websocket,
+		Path:   binanceWSPath,
+	}
+
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Binance websocket: %w", err)
 	}
@@ -99,7 +109,8 @@ func NewBinanceProvider(
 	provider := &BinanceProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "binance").Logger(),
+		logger:          logger.With().Str("provider", string(ProviderBinance)).Logger(),
+		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -115,8 +126,8 @@ func NewBinanceProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
-func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -131,8 +142,8 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 }
 
 // GetCandlePrices returns the candlePrices based on the provided pairs.
-func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
 		key := cp.String()
@@ -157,6 +168,7 @@ func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) erro
 	}
 
 	p.setSubscribedPairs(cps...)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderBinance, len(cps))
 	return nil
 }
 
@@ -199,32 +211,32 @@ func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *BinanceProvider) getTickerPrice(key string) (TickerPrice, error) {
+func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return TickerPrice{}, fmt.Errorf("binance provider failed to get ticker price for %s", key)
+		return types.TickerPrice{}, fmt.Errorf("binance failed to get ticker price for %s", key)
 	}
 
 	return ticker.toTickerPrice()
 }
 
-func (p *BinanceProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf("binance failed to get candle prices for %s", key)
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 		candleList = append(candleList, cp)
 	}
@@ -246,30 +258,14 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	tickerErr = json.Unmarshal(bz, &tickerResp)
 	if len(tickerResp.LastPrice) != 0 {
 		p.setTickerPair(tickerResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			config.ProviderBinance,
-		)
+		telemetryWebsocketMessage(ProviderBinance, MessageTypeTicker)
 		return
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"candle",
-			"provider",
-			config.ProviderBinance,
-		)
+		telemetryWebsocketMessage(ProviderBinance, MessageTypeCandle)
 		return
 	}
 
@@ -301,12 +297,12 @@ func (p *BinanceProvider) setCandlePair(candle BinanceCandle) {
 	p.candles[candle.Symbol] = candleList
 }
 
-func (ticker BinanceTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Binance", ticker.Symbol, ticker.LastPrice, ticker.Volume)
+func (ticker BinanceTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderBinance), ticker.Symbol, ticker.LastPrice, ticker.Volume)
 }
 
-func (candle BinanceCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice("Binance", candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
+func (candle BinanceCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(string(ProviderBinance), candle.Symbol, candle.Metadata.Close, candle.Metadata.Volume,
 		candle.Metadata.TimeStamp)
 }
 
@@ -333,12 +329,24 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 				p.keepReconnecting()
 			}
 		}
 	}
+}
+
+// disconnect disconnects the existing websocket connection.
+func (p *BinanceProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Binance websocket %v", err)
+	}
+	return nil
 }
 
 // reconnect closes the last WS connection then create a new one and subscribe to
@@ -348,10 +356,9 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 // the websocket server does not receive a pong frame back from the connection
 // within a 10 minute period, the connection will be disconnected.
 func (p *BinanceProvider) reconnect() error {
-	p.wsClient.Close()
-
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnect to binance websocket: %w", err)
 	}
@@ -359,13 +366,7 @@ func (p *BinanceProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		config.ProviderBinance,
-	)
+	telemetryWebsocketReconnect(ProviderBinance)
 	return p.subscribeChannels(currencyPairs...)
 }
 
@@ -408,7 +409,7 @@ func (p *BinanceProvider) subscribePairs(pairs ...string) error {
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 // ex.: map["ATOMUSDT" => {}, "UMEEUSDC" => {}].
 func (p *BinanceProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(binancePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + binanceRestPath)
 	if err != nil {
 		return nil, err
 	}

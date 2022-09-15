@@ -8,22 +8,23 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/simapp/helpers"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	appparams "github.com/umee-network/umee/v3/app/params"
+	umeesim "github.com/umee-network/umee/v3/util/sim"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // Simulation operation weights constants
-// nolint: gosec
 const (
-	OpWeightMsgAggregateExchangeRatePrevote = "op_weight_msg_exchange_rate_aggregate_prevote"
-	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"
-	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"
+	OpWeightMsgAggregateExchangeRatePrevote = "op_weight_msg_exchange_rate_aggregate_prevote" //nolint: gosec
+	OpWeightMsgAggregateExchangeRateVote    = "op_weight_msg_exchange_rate_aggregate_vote"    //nolint: gosec
+	OpWeightMsgDelegateFeedConsent          = "op_weight_msg_exchange_feed_consent"           //nolint: gosec
 
 	salt = "89b8164ca0b4b8703ae9ab25962f3dd6d1de5d656f5442971a93b2ca7893f654"
 )
@@ -55,7 +56,7 @@ func WeightedOperations(
 	appParams simtypes.AppParams,
 	cdc codec.JSONCodec,
 	ak types.AccountKeeper,
-	bk types.BankKeeper,
+	bk bankkeeper.Keeper,
 	k keeper.Keeper,
 ) simulation.WeightedOperations {
 	var (
@@ -102,34 +103,29 @@ func WeightedOperations(
 // SimulateMsgAggregateExchangeRatePrevote generates a MsgAggregateExchangeRatePrevote with random values.
 func SimulateMsgAggregateExchangeRatePrevote(
 	ak types.AccountKeeper,
-	bk types.BankKeeper,
+	bk bankkeeper.Keeper,
 	k keeper.Keeper,
 	voteHashMap map[string]string,
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-		simAccount, _ := simtypes.RandomAcc(r, accs)
+		simAccount := accs[1] // , _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgAggregateExchangeRatePrevote)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"unable to find validator",
-			), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// check for an existing prevote
 		_, err := k.GetAggregateExchangeRatePrevote(ctx, address)
 		if err == nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"prevote already exists for this validator",
-			), nil, nil
+			return noop("prevote already exists for this validator"), nil, nil
 		}
 
 		prices := make(map[string]sdk.Dec, len(acceptList))
@@ -139,54 +135,19 @@ func SimulateMsgAggregateExchangeRatePrevote(
 
 		exchangeRatesStr := GenerateExchangeRatesString(prices)
 		voteHash := types.GetAggregateVoteHash(salt, exchangeRatesStr, address)
-
 		feederAddr, _ := k.GetFeederDelegation(ctx, address)
 		feederSimAccount, _ := simtypes.FindAccount(accs, feederAddr)
-
-		feederAccount := ak.GetAccount(ctx, feederAddr)
-		spendable := bk.SpendableCoins(ctx, feederAccount.GetAddress())
-
-		fees, err := simtypes.RandomFees(r, ctx, spendable)
-		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRatePrevote,
-				"unable to generate fees",
-			), nil, err
-		}
-
 		msg := types.NewMsgAggregateExchangeRatePrevote(voteHash, feederAddr, address)
-
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
-		tx, err := helpers.GenTx(
-			txGen,
-			[]sdk.Msg{msg},
-			fees,
-			helpers.DefaultGenTxGas,
-			chainID,
-			[]uint64{feederAccount.GetAccountNumber()},
-			[]uint64{feederAccount.GetSequence()},
-			feederSimAccount.PrivKey,
-		)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
-		}
-
-		_, _, err = app.Deliver(txGen.TxEncoder(), tx)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
-		}
-
 		voteHashMap[address.String()] = exchangeRatesStr
 
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return deliver(r, app, ctx, ak, bk, feederSimAccount, msg, nil)
 	}
 }
 
 // SimulateMsgAggregateExchangeRateVote generates a MsgAggregateExchangeRateVote with random values.
 func SimulateMsgAggregateExchangeRateVote(
 	ak types.AccountKeeper,
-	bk types.BankKeeper,
+	bk bankkeeper.Keeper,
 	k keeper.Keeper,
 	voteHashMap map[string]string,
 ) simtypes.Operation {
@@ -195,84 +156,43 @@ func SimulateMsgAggregateExchangeRateVote(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgAggregateExchangeRateVote)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, address)
 		if val == nil || !val.IsBonded() {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to find validator",
-			), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// ensure vote hash exists
 		exchangeRatesStr, ok := voteHashMap[address.String()]
 		if !ok {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"vote hash does not exist",
-			), nil, nil
+			return noop("vote hash does not exist"), nil, nil
 		}
 
 		// get prevote
 		prevote, err := k.GetAggregateExchangeRatePrevote(ctx, address)
 		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.TypeMsgAggregateExchangeRateVote, "prevote not found"), nil, nil
+			return noop("prevote not found"), nil, nil
 		}
 
 		params := k.GetParams(ctx)
 		if (uint64(ctx.BlockHeight())/params.VotePeriod)-(prevote.SubmitBlock/params.VotePeriod) != 1 {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"reveal period of submitted vote does not match with registered prevote",
-			), nil, nil
+			return noop("reveal period of submitted vote does not match with registered prevote"), nil, nil
 		}
 
 		feederAddr, _ := k.GetFeederDelegation(ctx, address)
 		feederSimAccount, _ := simtypes.FindAccount(accs, feederAddr)
-		feederAccount := ak.GetAccount(ctx, feederAddr)
-		spendableCoins := bk.SpendableCoins(ctx, feederAddr)
-
-		fees, err := simtypes.RandomFees(r, ctx, spendableCoins)
-		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to generate fees",
-			), nil, err
-		}
-
 		msg := types.NewMsgAggregateExchangeRateVote(salt, exchangeRatesStr, feederAddr, address)
 
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
-		tx, err := helpers.GenTx(
-			txGen,
-			[]sdk.Msg{msg},
-			fees,
-			helpers.DefaultGenTxGas,
-			chainID,
-			[]uint64{feederAccount.GetAccountNumber()},
-			[]uint64{feederAccount.GetSequence()},
-			feederSimAccount.PrivKey,
-		)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
-		}
-
-		_, _, err = app.Deliver(txGen.TxEncoder(), tx)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
-		}
-
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return deliver(r, app, ctx, ak, bk, feederSimAccount, msg, nil)
 	}
 }
 
 // SimulateMsgDelegateFeedConsent generates a MsgDelegateFeedConsent with random values.
-func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper, k keeper.Keeper) simtypes.Operation {
+func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk bankkeeper.Keeper, k keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
@@ -280,56 +200,46 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk types.BankKeeper,
 		delegateAccount, _ := simtypes.RandomAcc(r, accs)
 		valAddress := sdk.ValAddress(simAccount.Address)
 		delegateValAddress := sdk.ValAddress(delegateAccount.Address)
-		account := ak.GetAccount(ctx, simAccount.Address)
+		noop := func(comment string) simtypes.OperationMsg {
+			return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(new(types.MsgDelegateFeedConsent)), comment)
+		}
 
 		// ensure the validator exists
 		val := k.StakingKeeper.Validator(ctx, valAddress)
 		if val == nil {
-			return simtypes.NoOpMsg(types.ModuleName, types.TypeMsgDelegateFeedConsent, "unable to find validator"), nil, nil
+			return noop("unable to find validator"), nil, nil
 		}
 
 		// ensure the target address is not a validator
 		val2 := k.StakingKeeper.Validator(ctx, delegateValAddress)
 		if val2 != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgDelegateFeedConsent,
-				"unable to delegate to validator",
-			), nil, nil
-		}
-
-		spendableCoins := bk.SpendableCoins(ctx, account.GetAddress())
-		fees, err := simtypes.RandomFees(r, ctx, spendableCoins)
-		if err != nil {
-			return simtypes.NoOpMsg(
-				types.ModuleName,
-				types.TypeMsgAggregateExchangeRateVote,
-				"unable to generate fees",
-			), nil, err
+			return noop("unable to delegate to validator"), nil, nil
 		}
 
 		msg := types.NewMsgDelegateFeedConsent(valAddress, delegateAccount.Address)
-
-		txGen := simappparams.MakeTestEncodingConfig().TxConfig
-		tx, err := helpers.GenTx(
-			txGen,
-			[]sdk.Msg{msg},
-			fees,
-			helpers.DefaultGenTxGas,
-			chainID,
-			[]uint64{account.GetAccountNumber()},
-			[]uint64{account.GetSequence()},
-			simAccount.PrivKey,
-		)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to generate mock tx"), nil, err
-		}
-
-		_, _, err = app.Deliver(txGen.TxEncoder(), tx)
-		if err != nil {
-			return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "unable to deliver tx"), nil, err
-		}
-
-		return simtypes.NewOperationMsg(msg, true, "", nil), nil, nil
+		return deliver(r, app, ctx, ak, bk, simAccount, msg, nil)
 	}
+}
+
+func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
+	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
+) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+	cfg := simappparams.MakeTestEncodingConfig()
+	o := simulation.OperationInput{
+		R:               r,
+		App:             app,
+		TxGen:           cfg.TxConfig,
+		Cdc:             cfg.Codec.(*codec.ProtoCodec),
+		Msg:             msg,
+		MsgType:         sdk.MsgTypeURL(msg),
+		Context:         ctx,
+		SimAccount:      from,
+		AccountKeeper:   ak,
+		Bankkeeper:      bk,
+		ModuleName:      types.ModuleName,
+		CoinsSpentInMsg: coins,
+	}
+
+	// note: leverage operations are more expensive!
+	return umeesim.GenAndDeliver(bk, o, appparams.DefaultGasLimit*50)
 }

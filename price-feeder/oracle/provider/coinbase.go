@@ -15,17 +15,16 @@ import (
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 )
 
 const (
-	coinbaseHost          = "ws-feed.exchange.coinbase.com"
-	coinbasePingCheck     = time.Second * 28 // should be < 30
-	coinbasePairsEndpoint = "https://api.exchange.coinbase.com/products"
-	timeLayout            = "2006-01-02T15:04:05.000000Z"
-	unixMinute            = 60000
+	coinbaseWSHost    = "ws-feed.exchange.coinbase.com"
+	coinbasePingCheck = time.Second * 28 // should be < 30
+	coinbaseRestHost  = "https://api.exchange.coinbase.com"
+	coinbaseRestPath  = "/products"
+	coinbaseTimeFmt   = "2006-01-02T15:04:05.000000Z"
+	unixMinute        = 60000
 )
 
 var _ Provider = (*CoinbaseProvider)(nil)
@@ -41,6 +40,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       Endpoint
 		trades          map[string][]CoinbaseTrade    // Symbol => []CoinbaseTrade
 		tickers         map[string]CoinbaseTicker     // Symbol => CoinbaseTicker
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -94,14 +94,23 @@ type (
 func NewCoinbaseProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
+	endpoints Endpoint,
 	pairs ...types.CurrencyPair,
 ) (*CoinbaseProvider, error) {
+	if endpoints.Name != ProviderCoinbase {
+		endpoints = Endpoint{
+			Name:      ProviderCoinbase,
+			Rest:      coinbaseRestHost,
+			Websocket: coinbaseWSHost,
+		}
+	}
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   coinbaseHost,
+		Host:   endpoints.Websocket,
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Coinbase websocket: %w", err)
 	}
@@ -109,8 +118,9 @@ func NewCoinbaseProvider(
 	provider := &CoinbaseProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "coinbase").Logger(),
+		logger:          logger.With().Str("provider", string(ProviderCoinbase)).Logger(),
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
+		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
 		tickers:         map[string]CoinbaseTicker{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -127,8 +137,8 @@ func NewCoinbaseProvider(
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -144,7 +154,7 @@ func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[str
 
 // GetCandlePrices returns candles based off of the saved trades map.
 // Candles need to be cut up into one-minute intervals.
-func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
+func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	tradeMap := make(map[string][]CoinbaseTrade, len(pairs))
 
 	for _, cp := range pairs {
@@ -159,7 +169,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 		return nil, fmt.Errorf("no trades have been received")
 	}
 
-	candles := make(map[string][]CandlePrice)
+	candles := make(map[string][]types.CandlePrice)
 
 	for cp := range tradeMap {
 		trades := tradeMap[cp]
@@ -168,7 +178,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			return time.Unix(trades[i].Time, 0).Before(time.Unix(trades[j].Time, 0))
 		})
 
-		candleSlice := []CandlePrice{
+		candleSlice := []types.CandlePrice{
 			{
 				Price:  sdk.ZeroDec(),
 				Volume: sdk.ZeroDec(),
@@ -183,7 +193,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			if trade.Time-startTime > unixMinute {
 				index++
 				startTime = trade.Time
-				candleSlice = append(candleSlice, CandlePrice{
+				candleSlice = append(candleSlice, types.CandlePrice{
 					Price:  sdk.ZeroDec(),
 					Volume: sdk.ZeroDec(),
 				})
@@ -199,7 +209,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 			}
 
 			volume := candleSlice[index].Volume.Add(size)
-			candleSlice[index] = CandlePrice{
+			candleSlice[index] = types.CandlePrice{
 				Volume:    volume,     // aggregate size
 				Price:     price,      // most recent price
 				TimeStamp: trade.Time, // most recent timestamp
@@ -223,20 +233,13 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		config.ProviderCoinbase,
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderCoinbase, len(cps))
 	return nil
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(coinbasePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + coinbaseRestPath)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +288,7 @@ func (p *CoinbaseProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
@@ -294,7 +297,7 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, e
 		return tickerPair.toTickerPrice()
 	}
 
-	return TickerPrice{}, fmt.Errorf("failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
@@ -333,6 +336,9 @@ func (p *CoinbaseProvider) handleReceivedMessages(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler.
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -372,32 +378,17 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		}
 
 		p.setTickerPair(coinbaseTicker)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			config.ProviderCoinbase,
-		)
+		telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTicker)
 		return
 	}
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"trade",
-		"provider",
-		config.ProviderCoinbase,
-	)
+
+	telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTrade)
 	p.setTradePair(coinbaseTrade)
 }
 
 // timeToUnix converts a Time in format "2006-01-02T15:04:05.000000Z" to unix
 func (tr CoinbaseTradeResponse) timeToUnix() int64 {
-	t, err := time.Parse(timeLayout, tr.Time)
+	t, err := time.Parse(coinbaseTimeFmt, tr.Time)
 	if err != nil {
 		return 0
 	}
@@ -458,7 +449,16 @@ func (p *CoinbaseProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(coinbasePingCheck)
 }
 
-// reconnect closes the last WS connection and creates a new one. If there’s a
+// disconnect disconnects the existing websocket connection.
+func (p *CoinbaseProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %v", err)
+	}
+	return nil
+}
+
+// reconnect creates a new websocket connection. If there’s a
 // network problem, the system will automatically disable the connection. The
 // connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds. To keep the connection stable:
@@ -469,10 +469,9 @@ func (p *CoinbaseProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *CoinbaseProvider) reconnect() error {
-	p.wsClient.Close()
-
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Coinbase websocket: %w", err)
 	}
@@ -481,13 +480,7 @@ func (p *CoinbaseProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		config.ProviderCoinbase,
-	)
+	telemetryWebsocketReconnect(ProviderCoinbase)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
@@ -501,9 +494,9 @@ func (p *CoinbaseProvider) pongHandler(appData string) error {
 	return nil
 }
 
-func (ticker CoinbaseTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice(
-		"Coinbase",
+func (ticker CoinbaseTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(
+		string(ProviderCoinbase),
 		coinbasePairToCurrencyPair(ticker.ProductID),
 		ticker.Price,
 		ticker.Volume,

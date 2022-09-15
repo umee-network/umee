@@ -12,9 +12,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/x/oracle/client/cli"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/oracle/client/cli"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 type IntegrationTestSuite struct {
@@ -29,11 +29,14 @@ func NewIntegrationTestSuite(cfg network.Config) *IntegrationTestSuite {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	s.T().Log("setting up integration test suite")
+	t := s.T()
+	t.Log("setting up integration test suite")
 
-	s.network = network.New(s.T(), s.cfg)
+	var err error
+	s.network, err = network.New(t, t.TempDir(), s.cfg)
+	s.Require().NoError(err)
 
-	_, err := s.network.WaitForHeight(1)
+	_, err = s.network.WaitForHeight(1)
 	s.Require().NoError(err)
 }
 
@@ -78,7 +81,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 				s.network.Validators[1].Address.String(),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(s.cfg.BondDenom, sdk.NewInt(10))).String()),
+				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
 			},
 			expectErr:    false,
 			expectedCode: 0,
@@ -173,7 +176,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
 
 	s.Require().Len(res.ExchangeRates, 1)
-	s.Require().Equal(res.ExchangeRates[0].Denom, umeeapp.DisplayDenom)
+	s.Require().Equal(res.ExchangeRates[0].Denom, appparams.DisplayDenom)
 	s.Require().False(res.ExchangeRates[0].Amount.IsZero())
 }
 

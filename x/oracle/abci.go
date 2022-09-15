@@ -3,8 +3,8 @@ package oracle
 import (
 	"time"
 
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -62,7 +62,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			}
 
 			// Set the exchange rate, emit ABCI event
-			k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate)
+			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
+				return err
+			}
 		}
 
 		// update miss counting & slashing

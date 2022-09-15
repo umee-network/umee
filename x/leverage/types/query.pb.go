@@ -31,23 +31,23 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryRegisteredTokens defines the request structure for the RegisteredTokens
-// gRPC service handler.
-type QueryRegisteredTokens struct {
+// QueryParams defines the request structure for the Params gRPC service
+// handler.
+type QueryParams struct {
 }
 
-func (m *QueryRegisteredTokens) Reset()         { *m = QueryRegisteredTokens{} }
-func (m *QueryRegisteredTokens) String() string { return proto.CompactTextString(m) }
-func (*QueryRegisteredTokens) ProtoMessage()    {}
-func (*QueryRegisteredTokens) Descriptor() ([]byte, []int) {
+func (m *QueryParams) Reset()         { *m = QueryParams{} }
+func (m *QueryParams) String() string { return proto.CompactTextString(m) }
+func (*QueryParams) ProtoMessage()    {}
+func (*QueryParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1e8137dcabb0ccc7, []int{0}
 }
-func (m *QueryRegisteredTokens) XXX_Unmarshal(b []byte) error {
+func (m *QueryParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryRegisteredTokens) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryRegisteredTokens.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryParams.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -57,526 +57,17 @@ func (m *QueryRegisteredTokens) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *QueryRegisteredTokens) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRegisteredTokens.Merge(m, src)
+func (m *QueryParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryParams.Merge(m, src)
 }
-func (m *QueryRegisteredTokens) XXX_Size() int {
+func (m *QueryParams) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryRegisteredTokens.DiscardUnknown(m)
+func (m *QueryParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryParams.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
-
-// QueryAvailableBorrowRequest defines the request structure for the
-// AvailableBorrow gRPC service handler.
-type QueryAvailableBorrowRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryAvailableBorrowRequest) Reset()         { *m = QueryAvailableBorrowRequest{} }
-func (m *QueryAvailableBorrowRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryAvailableBorrowRequest) ProtoMessage()    {}
-func (*QueryAvailableBorrowRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{1}
-}
-func (m *QueryAvailableBorrowRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryAvailableBorrowRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryAvailableBorrowRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryAvailableBorrowRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAvailableBorrowRequest.Merge(m, src)
-}
-func (m *QueryAvailableBorrowRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryAvailableBorrowRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAvailableBorrowRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryAvailableBorrowRequest proto.InternalMessageInfo
-
-func (m *QueryAvailableBorrowRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryAvailableBorrowResponse defines the response structure for the
-// AvailableBorrow gRPC service handler.
-type QueryAvailableBorrowResponse struct {
-	Amount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
-}
-
-func (m *QueryAvailableBorrowResponse) Reset()         { *m = QueryAvailableBorrowResponse{} }
-func (m *QueryAvailableBorrowResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryAvailableBorrowResponse) ProtoMessage()    {}
-func (*QueryAvailableBorrowResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{2}
-}
-func (m *QueryAvailableBorrowResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryAvailableBorrowResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryAvailableBorrowResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryAvailableBorrowResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAvailableBorrowResponse.Merge(m, src)
-}
-func (m *QueryAvailableBorrowResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryAvailableBorrowResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAvailableBorrowResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryAvailableBorrowResponse proto.InternalMessageInfo
-
-// QueryBorrowAPYRequest defines the request structure for the BorrowAPY
-// gRPC service handler.
-type QueryBorrowAPYRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryBorrowAPYRequest) Reset()         { *m = QueryBorrowAPYRequest{} }
-func (m *QueryBorrowAPYRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowAPYRequest) ProtoMessage()    {}
-func (*QueryBorrowAPYRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{3}
-}
-func (m *QueryBorrowAPYRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowAPYRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowAPYRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowAPYRequest.Merge(m, src)
-}
-func (m *QueryBorrowAPYRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowAPYRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowAPYRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowAPYRequest proto.InternalMessageInfo
-
-func (m *QueryBorrowAPYRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryBorrowAPYResponse defines the response structure for the BorrowAPY
-// gRPC service handler.
-type QueryBorrowAPYResponse struct {
-	APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=APY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"APY"`
-}
-
-func (m *QueryBorrowAPYResponse) Reset()         { *m = QueryBorrowAPYResponse{} }
-func (m *QueryBorrowAPYResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowAPYResponse) ProtoMessage()    {}
-func (*QueryBorrowAPYResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{4}
-}
-func (m *QueryBorrowAPYResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowAPYResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowAPYResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowAPYResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowAPYResponse.Merge(m, src)
-}
-func (m *QueryBorrowAPYResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowAPYResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowAPYResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowAPYResponse proto.InternalMessageInfo
-
-// QueryLendAPYRequest defines the request structure for the LendAPY
-// gRPC service handler.
-type QueryLendAPYRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryLendAPYRequest) Reset()         { *m = QueryLendAPYRequest{} }
-func (m *QueryLendAPYRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLendAPYRequest) ProtoMessage()    {}
-func (*QueryLendAPYRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{5}
-}
-func (m *QueryLendAPYRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLendAPYRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLendAPYRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLendAPYRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLendAPYRequest.Merge(m, src)
-}
-func (m *QueryLendAPYRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLendAPYRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLendAPYRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLendAPYRequest proto.InternalMessageInfo
-
-func (m *QueryLendAPYRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryLendAPYResponse defines the response structure for the LendAPY
-// gRPC service handler.
-type QueryLendAPYResponse struct {
-	APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=APY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"APY"`
-}
-
-func (m *QueryLendAPYResponse) Reset()         { *m = QueryLendAPYResponse{} }
-func (m *QueryLendAPYResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLendAPYResponse) ProtoMessage()    {}
-func (*QueryLendAPYResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{6}
-}
-func (m *QueryLendAPYResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLendAPYResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLendAPYResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLendAPYResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLendAPYResponse.Merge(m, src)
-}
-func (m *QueryLendAPYResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLendAPYResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLendAPYResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLendAPYResponse proto.InternalMessageInfo
-
-// QueryMarketSizeRequest defines the request structure for the Market Size in
-// USD gRPC service handler.
-type QueryMarketSizeRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryMarketSizeRequest) Reset()         { *m = QueryMarketSizeRequest{} }
-func (m *QueryMarketSizeRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryMarketSizeRequest) ProtoMessage()    {}
-func (*QueryMarketSizeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{7}
-}
-func (m *QueryMarketSizeRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryMarketSizeRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryMarketSizeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMarketSizeRequest.Merge(m, src)
-}
-func (m *QueryMarketSizeRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryMarketSizeRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMarketSizeRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryMarketSizeRequest proto.InternalMessageInfo
-
-func (m *QueryMarketSizeRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryMarketSizeResponse defines the response structure for the Market Size in
-// USD gRPC service handler.
-type QueryMarketSizeResponse struct {
-	MarketSizeUsd github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=market_size_usd,json=marketSizeUsd,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"market_size_usd"`
-}
-
-func (m *QueryMarketSizeResponse) Reset()         { *m = QueryMarketSizeResponse{} }
-func (m *QueryMarketSizeResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryMarketSizeResponse) ProtoMessage()    {}
-func (*QueryMarketSizeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{8}
-}
-func (m *QueryMarketSizeResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryMarketSizeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryMarketSizeResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryMarketSizeResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMarketSizeResponse.Merge(m, src)
-}
-func (m *QueryMarketSizeResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryMarketSizeResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMarketSizeResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryMarketSizeResponse proto.InternalMessageInfo
-
-// QueryTokenMarketSizeRequest defines the request structure for the Token
-// Market Size gRPC service handler.
-type QueryTokenMarketSizeRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryTokenMarketSizeRequest) Reset()         { *m = QueryTokenMarketSizeRequest{} }
-func (m *QueryTokenMarketSizeRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryTokenMarketSizeRequest) ProtoMessage()    {}
-func (*QueryTokenMarketSizeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{9}
-}
-func (m *QueryTokenMarketSizeRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryTokenMarketSizeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryTokenMarketSizeRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryTokenMarketSizeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTokenMarketSizeRequest.Merge(m, src)
-}
-func (m *QueryTokenMarketSizeRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryTokenMarketSizeRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTokenMarketSizeRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryTokenMarketSizeRequest proto.InternalMessageInfo
-
-func (m *QueryTokenMarketSizeRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryTokenMarketSizeResponse defines the response structure for the Token
-// Market Size gRPC service handler.
-type QueryTokenMarketSizeResponse struct {
-	MarketSize github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,1,opt,name=market_size,json=marketSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"market_size"`
-}
-
-func (m *QueryTokenMarketSizeResponse) Reset()         { *m = QueryTokenMarketSizeResponse{} }
-func (m *QueryTokenMarketSizeResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryTokenMarketSizeResponse) ProtoMessage()    {}
-func (*QueryTokenMarketSizeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{10}
-}
-func (m *QueryTokenMarketSizeResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryTokenMarketSizeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryTokenMarketSizeResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryTokenMarketSizeResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTokenMarketSizeResponse.Merge(m, src)
-}
-func (m *QueryTokenMarketSizeResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryTokenMarketSizeResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTokenMarketSizeResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryTokenMarketSizeResponse proto.InternalMessageInfo
-
-// QueryRegisteredTokensResponse defines the response structure for the
-// RegisteredTokens gRPC service handler.
-type QueryRegisteredTokensResponse struct {
-	Registry []Token `protobuf:"bytes,1,rep,name=registry,proto3" json:"registry"`
-}
-
-func (m *QueryRegisteredTokensResponse) Reset()         { *m = QueryRegisteredTokensResponse{} }
-func (m *QueryRegisteredTokensResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryRegisteredTokensResponse) ProtoMessage()    {}
-func (*QueryRegisteredTokensResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{11}
-}
-func (m *QueryRegisteredTokensResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryRegisteredTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryRegisteredTokensResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryRegisteredTokensResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRegisteredTokensResponse.Merge(m, src)
-}
-func (m *QueryRegisteredTokensResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryRegisteredTokensResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryRegisteredTokensResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryRegisteredTokensResponse proto.InternalMessageInfo
-
-func (m *QueryRegisteredTokensResponse) GetRegistry() []Token {
-	if m != nil {
-		return m.Registry
-	}
-	return nil
-}
-
-// QueryParamsRequest defines the request structure for the Params gRPC service
-// handler.
-type QueryParamsRequest struct {
-}
-
-func (m *QueryParamsRequest) Reset()         { *m = QueryParamsRequest{} }
-func (m *QueryParamsRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryParamsRequest) ProtoMessage()    {}
-func (*QueryParamsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{12}
-}
-func (m *QueryParamsRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryParamsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryParamsRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryParamsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryParamsRequest.Merge(m, src)
-}
-func (m *QueryParamsRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryParamsRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryParamsRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryParamsRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryParams proto.InternalMessageInfo
 
 // QueryParamsResponse defines the response structure for the Params gRPC
 // service handler.
@@ -588,7 +79,7 @@ func (m *QueryParamsResponse) Reset()         { *m = QueryParamsResponse{} }
 func (m *QueryParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryParamsResponse) ProtoMessage()    {}
 func (*QueryParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{13}
+	return fileDescriptor_1e8137dcabb0ccc7, []int{1}
 }
 func (m *QueryParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -617,132 +108,23 @@ func (m *QueryParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryParamsResponse proto.InternalMessageInfo
 
-func (m *QueryParamsResponse) GetParams() Params {
-	if m != nil {
-		return m.Params
-	}
-	return Params{}
-}
-
-// QueryBorrowedRequest defines the request structure for the Borrowed gRPC
-// service handler.
-type QueryBorrowedRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryBorrowedRequest) Reset()         { *m = QueryBorrowedRequest{} }
-func (m *QueryBorrowedRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedRequest) ProtoMessage()    {}
-func (*QueryBorrowedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{14}
-}
-func (m *QueryBorrowedRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowedRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedRequest.Merge(m, src)
-}
-func (m *QueryBorrowedRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowedRequest proto.InternalMessageInfo
-
-func (m *QueryBorrowedRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryBorrowedRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryBorrowedResponse defines the response structure for the Borrowed gRPC
-// service handler.
-type QueryBorrowedResponse struct {
-	Borrowed github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
-}
-
-func (m *QueryBorrowedResponse) Reset()         { *m = QueryBorrowedResponse{} }
-func (m *QueryBorrowedResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedResponse) ProtoMessage()    {}
-func (*QueryBorrowedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{15}
-}
-func (m *QueryBorrowedResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowedResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowedResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedResponse.Merge(m, src)
-}
-func (m *QueryBorrowedResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowedResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowedResponse proto.InternalMessageInfo
-
-func (m *QueryBorrowedResponse) GetBorrowed() github_com_cosmos_cosmos_sdk_types.Coins {
-	if m != nil {
-		return m.Borrowed
-	}
-	return nil
-}
-
-// QueryBorrowedValueRequest defines the request structure for the BorrowedValue
+// QueryRegisteredTokens defines the request structure for the RegisteredTokens
 // gRPC service handler.
-type QueryBorrowedValueRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+type QueryRegisteredTokens struct {
 }
 
-func (m *QueryBorrowedValueRequest) Reset()         { *m = QueryBorrowedValueRequest{} }
-func (m *QueryBorrowedValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedValueRequest) ProtoMessage()    {}
-func (*QueryBorrowedValueRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{16}
+func (m *QueryRegisteredTokens) Reset()         { *m = QueryRegisteredTokens{} }
+func (m *QueryRegisteredTokens) String() string { return proto.CompactTextString(m) }
+func (*QueryRegisteredTokens) ProtoMessage()    {}
+func (*QueryRegisteredTokens) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{2}
 }
-func (m *QueryBorrowedValueRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryRegisteredTokens) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryRegisteredTokens) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowedValueRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryRegisteredTokens.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -752,50 +134,36 @@ func (m *QueryBorrowedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowedValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedValueRequest.Merge(m, src)
+func (m *QueryRegisteredTokens) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRegisteredTokens.Merge(m, src)
 }
-func (m *QueryBorrowedValueRequest) XXX_Size() int {
+func (m *QueryRegisteredTokens) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowedValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedValueRequest.DiscardUnknown(m)
+func (m *QueryRegisteredTokens) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRegisteredTokens.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowedValueRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryRegisteredTokens proto.InternalMessageInfo
 
-func (m *QueryBorrowedValueRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
+// QueryRegisteredTokensResponse defines the response structure for the
+// RegisteredTokens gRPC service handler.
+type QueryRegisteredTokensResponse struct {
+	Registry []Token `protobuf:"bytes,1,rep,name=registry,proto3" json:"registry"`
 }
 
-func (m *QueryBorrowedValueRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
+func (m *QueryRegisteredTokensResponse) Reset()         { *m = QueryRegisteredTokensResponse{} }
+func (m *QueryRegisteredTokensResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRegisteredTokensResponse) ProtoMessage()    {}
+func (*QueryRegisteredTokensResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{3}
 }
-
-// QueryBorrowedValueResponse defines the response structure for the
-// BorrowedValue gRPC service handler.
-type QueryBorrowedValueResponse struct {
-	BorrowedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=borrowed_value,json=borrowedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrowed_value"`
-}
-
-func (m *QueryBorrowedValueResponse) Reset()         { *m = QueryBorrowedValueResponse{} }
-func (m *QueryBorrowedValueResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowedValueResponse) ProtoMessage()    {}
-func (*QueryBorrowedValueResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{17}
-}
-func (m *QueryBorrowedValueResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryRegisteredTokensResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowedValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryRegisteredTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowedValueResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryRegisteredTokensResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -805,322 +173,35 @@ func (m *QueryBorrowedValueResponse) XXX_Marshal(b []byte, deterministic bool) (
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowedValueResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowedValueResponse.Merge(m, src)
+func (m *QueryRegisteredTokensResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRegisteredTokensResponse.Merge(m, src)
 }
-func (m *QueryBorrowedValueResponse) XXX_Size() int {
+func (m *QueryRegisteredTokensResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowedValueResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowedValueResponse.DiscardUnknown(m)
+func (m *QueryRegisteredTokensResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRegisteredTokensResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowedValueResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryRegisteredTokensResponse proto.InternalMessageInfo
 
-// QueryCollateralValueRequest defines the request structure for the
-// CollateralValue gRPC service handler.
-type QueryCollateralValueRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryCollateralValueRequest) Reset()         { *m = QueryCollateralValueRequest{} }
-func (m *QueryCollateralValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralValueRequest) ProtoMessage()    {}
-func (*QueryCollateralValueRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{18}
-}
-func (m *QueryCollateralValueRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralValueRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralValueRequest.Merge(m, src)
-}
-func (m *QueryCollateralValueRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralValueRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralValueRequest proto.InternalMessageInfo
-
-func (m *QueryCollateralValueRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryCollateralValueRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryCollateralValueResponse defines the response structure for the
-// CollateralValue gRPC service handler.
-type QueryCollateralValueResponse struct {
-	CollateralValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=collateral_value,json=collateralValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_value"`
-}
-
-func (m *QueryCollateralValueResponse) Reset()         { *m = QueryCollateralValueResponse{} }
-func (m *QueryCollateralValueResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralValueResponse) ProtoMessage()    {}
-func (*QueryCollateralValueResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{19}
-}
-func (m *QueryCollateralValueResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralValueResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralValueResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralValueResponse.Merge(m, src)
-}
-func (m *QueryCollateralValueResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralValueResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralValueResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralValueResponse proto.InternalMessageInfo
-
-// QueryLoanedRequest defines the request structure for the Loaned gRPC service
-// handler.
-type QueryLoanedRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryLoanedRequest) Reset()         { *m = QueryLoanedRequest{} }
-func (m *QueryLoanedRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedRequest) ProtoMessage()    {}
-func (*QueryLoanedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{20}
-}
-func (m *QueryLoanedRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLoanedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLoanedRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLoanedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedRequest.Merge(m, src)
-}
-func (m *QueryLoanedRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLoanedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLoanedRequest proto.InternalMessageInfo
-
-func (m *QueryLoanedRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryLoanedRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryLoanedResponse defines the response structure for the Loaned gRPC
-// service handler.
-type QueryLoanedResponse struct {
-	Loaned github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=loaned,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"loaned"`
-}
-
-func (m *QueryLoanedResponse) Reset()         { *m = QueryLoanedResponse{} }
-func (m *QueryLoanedResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedResponse) ProtoMessage()    {}
-func (*QueryLoanedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{21}
-}
-func (m *QueryLoanedResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLoanedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLoanedResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLoanedResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedResponse.Merge(m, src)
-}
-func (m *QueryLoanedResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLoanedResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLoanedResponse proto.InternalMessageInfo
-
-func (m *QueryLoanedResponse) GetLoaned() github_com_cosmos_cosmos_sdk_types.Coins {
-	if m != nil {
-		return m.Loaned
-	}
-	return nil
-}
-
-// QueryLoanedValueRequest defines the request structure for the LoanedValue
-// gRPC service handler.
-type QueryLoanedValueRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryLoanedValueRequest) Reset()         { *m = QueryLoanedValueRequest{} }
-func (m *QueryLoanedValueRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedValueRequest) ProtoMessage()    {}
-func (*QueryLoanedValueRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{22}
-}
-func (m *QueryLoanedValueRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLoanedValueRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLoanedValueRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLoanedValueRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedValueRequest.Merge(m, src)
-}
-func (m *QueryLoanedValueRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLoanedValueRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedValueRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLoanedValueRequest proto.InternalMessageInfo
-
-func (m *QueryLoanedValueRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryLoanedValueRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryLoanedValueResponse defines the response structure for the LoanedValue
-// gRPC service handler.
-type QueryLoanedValueResponse struct {
-	LoanedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=loaned_value,json=loanedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"loaned_value"`
-}
-
-func (m *QueryLoanedValueResponse) Reset()         { *m = QueryLoanedValueResponse{} }
-func (m *QueryLoanedValueResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLoanedValueResponse) ProtoMessage()    {}
-func (*QueryLoanedValueResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{23}
-}
-func (m *QueryLoanedValueResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLoanedValueResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLoanedValueResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLoanedValueResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLoanedValueResponse.Merge(m, src)
-}
-func (m *QueryLoanedValueResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLoanedValueResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLoanedValueResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLoanedValueResponse proto.InternalMessageInfo
-
-// QueryReserveAmountRequest defines the request structure for the ReserveAmount
-// gRPC service handler.
-type QueryReserveAmountRequest struct {
+// QueryMarketSummary defines the request structure for the MarketSummary gRPC service handler.
+type QueryMarketSummary struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryReserveAmountRequest) Reset()         { *m = QueryReserveAmountRequest{} }
-func (m *QueryReserveAmountRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryReserveAmountRequest) ProtoMessage()    {}
-func (*QueryReserveAmountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{24}
+func (m *QueryMarketSummary) Reset()         { *m = QueryMarketSummary{} }
+func (m *QueryMarketSummary) String() string { return proto.CompactTextString(m) }
+func (*QueryMarketSummary) ProtoMessage()    {}
+func (*QueryMarketSummary) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{4}
 }
-func (m *QueryReserveAmountRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryMarketSummary) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryReserveAmountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryMarketSummary) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryReserveAmountRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryMarketSummary.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1130,668 +211,63 @@ func (m *QueryReserveAmountRequest) XXX_Marshal(b []byte, deterministic bool) ([
 		return b[:n], nil
 	}
 }
-func (m *QueryReserveAmountRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryReserveAmountRequest.Merge(m, src)
+func (m *QueryMarketSummary) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMarketSummary.Merge(m, src)
 }
-func (m *QueryReserveAmountRequest) XXX_Size() int {
+func (m *QueryMarketSummary) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryReserveAmountRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryReserveAmountRequest.DiscardUnknown(m)
+func (m *QueryMarketSummary) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMarketSummary.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryReserveAmountRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryMarketSummary proto.InternalMessageInfo
 
-func (m *QueryReserveAmountRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryReserveAmountResponse defines the response structure for the
-// ReserveAmount gRPC service handler.
-type QueryReserveAmountResponse struct {
-	Amount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"amount"`
-}
-
-func (m *QueryReserveAmountResponse) Reset()         { *m = QueryReserveAmountResponse{} }
-func (m *QueryReserveAmountResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryReserveAmountResponse) ProtoMessage()    {}
-func (*QueryReserveAmountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{25}
-}
-func (m *QueryReserveAmountResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryReserveAmountResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryReserveAmountResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryReserveAmountResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryReserveAmountResponse.Merge(m, src)
-}
-func (m *QueryReserveAmountResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryReserveAmountResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryReserveAmountResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryReserveAmountResponse proto.InternalMessageInfo
-
-// QueryCollateralSettingsRequest defines the request structure for the
-// CollateralSetting gRPC service handler.
-type QueryCollateralSettingRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryCollateralSettingRequest) Reset()         { *m = QueryCollateralSettingRequest{} }
-func (m *QueryCollateralSettingRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralSettingRequest) ProtoMessage()    {}
-func (*QueryCollateralSettingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{26}
-}
-func (m *QueryCollateralSettingRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralSettingRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralSettingRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralSettingRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralSettingRequest.Merge(m, src)
-}
-func (m *QueryCollateralSettingRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralSettingRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralSettingRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralSettingRequest proto.InternalMessageInfo
-
-func (m *QueryCollateralSettingRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryCollateralSettingRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryCollateralSettingsResponse defines the response structure for the
-// CollateralSetting gRPC service handler.
-type QueryCollateralSettingResponse struct {
-	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-}
-
-func (m *QueryCollateralSettingResponse) Reset()         { *m = QueryCollateralSettingResponse{} }
-func (m *QueryCollateralSettingResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralSettingResponse) ProtoMessage()    {}
-func (*QueryCollateralSettingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{27}
-}
-func (m *QueryCollateralSettingResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralSettingResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralSettingResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralSettingResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralSettingResponse.Merge(m, src)
-}
-func (m *QueryCollateralSettingResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralSettingResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralSettingResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralSettingResponse proto.InternalMessageInfo
-
-func (m *QueryCollateralSettingResponse) GetEnabled() bool {
-	if m != nil {
-		return m.Enabled
-	}
-	return false
-}
-
-// QueryCollateralRequest defines the request structure for the Collateral gRPC
-// service handler.
-type QueryCollateralRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryCollateralRequest) Reset()         { *m = QueryCollateralRequest{} }
-func (m *QueryCollateralRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralRequest) ProtoMessage()    {}
-func (*QueryCollateralRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{28}
-}
-func (m *QueryCollateralRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralRequest.Merge(m, src)
-}
-func (m *QueryCollateralRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralRequest proto.InternalMessageInfo
-
-func (m *QueryCollateralRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-func (m *QueryCollateralRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryCollateralResponse defines the response structure for the Collateral
-// gRPC service handler.
-type QueryCollateralResponse struct {
-	Collateral github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=collateral,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"collateral"`
-}
-
-func (m *QueryCollateralResponse) Reset()         { *m = QueryCollateralResponse{} }
-func (m *QueryCollateralResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryCollateralResponse) ProtoMessage()    {}
-func (*QueryCollateralResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{29}
-}
-func (m *QueryCollateralResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryCollateralResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryCollateralResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryCollateralResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryCollateralResponse.Merge(m, src)
-}
-func (m *QueryCollateralResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryCollateralResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryCollateralResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryCollateralResponse proto.InternalMessageInfo
-
-func (m *QueryCollateralResponse) GetCollateral() github_com_cosmos_cosmos_sdk_types.Coins {
-	if m != nil {
-		return m.Collateral
-	}
-	return nil
-}
-
-// QueryExchangeRateRequest defines the request structure for the ExchangeRate
-// gRPC service handler.
-type QueryExchangeRateRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryExchangeRateRequest) Reset()         { *m = QueryExchangeRateRequest{} }
-func (m *QueryExchangeRateRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryExchangeRateRequest) ProtoMessage()    {}
-func (*QueryExchangeRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{30}
-}
-func (m *QueryExchangeRateRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryExchangeRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryExchangeRateRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryExchangeRateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryExchangeRateRequest.Merge(m, src)
-}
-func (m *QueryExchangeRateRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryExchangeRateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryExchangeRateRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryExchangeRateRequest proto.InternalMessageInfo
-
-func (m *QueryExchangeRateRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryExchangeRateResponse defines the response structure for the ExchangeRate
-// gRPC service handler.
-type QueryExchangeRateResponse struct {
-	ExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=exchange_rate,json=exchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"exchange_rate"`
-}
-
-func (m *QueryExchangeRateResponse) Reset()         { *m = QueryExchangeRateResponse{} }
-func (m *QueryExchangeRateResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryExchangeRateResponse) ProtoMessage()    {}
-func (*QueryExchangeRateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{31}
-}
-func (m *QueryExchangeRateResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryExchangeRateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryExchangeRateResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryExchangeRateResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryExchangeRateResponse.Merge(m, src)
-}
-func (m *QueryExchangeRateResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryExchangeRateResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryExchangeRateResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryExchangeRateResponse proto.InternalMessageInfo
-
-// QueryBorrowLimitRequest defines the request structure for the BorrowLimit
-// gRPC service handler.
-type QueryBorrowLimitRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-}
-
-func (m *QueryBorrowLimitRequest) Reset()         { *m = QueryBorrowLimitRequest{} }
-func (m *QueryBorrowLimitRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowLimitRequest) ProtoMessage()    {}
-func (*QueryBorrowLimitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{32}
-}
-func (m *QueryBorrowLimitRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowLimitRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowLimitRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowLimitRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowLimitRequest.Merge(m, src)
-}
-func (m *QueryBorrowLimitRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowLimitRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowLimitRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowLimitRequest proto.InternalMessageInfo
-
-func (m *QueryBorrowLimitRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-// QueryBorrowLimitResponse defines the response structure for the BorrowLimit
-// gRPC service handler.
-type QueryBorrowLimitResponse struct {
-	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
-}
-
-func (m *QueryBorrowLimitResponse) Reset()         { *m = QueryBorrowLimitResponse{} }
-func (m *QueryBorrowLimitResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowLimitResponse) ProtoMessage()    {}
-func (*QueryBorrowLimitResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{33}
-}
-func (m *QueryBorrowLimitResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryBorrowLimitResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryBorrowLimitResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryBorrowLimitResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowLimitResponse.Merge(m, src)
-}
-func (m *QueryBorrowLimitResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryBorrowLimitResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowLimitResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryBorrowLimitResponse proto.InternalMessageInfo
-
-// QueryLiquidationThresholdRequest defines the request structure for the
-// LiquidationThreshold gRPC service handler.
-type QueryLiquidationThresholdRequest struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-}
-
-func (m *QueryLiquidationThresholdRequest) Reset()         { *m = QueryLiquidationThresholdRequest{} }
-func (m *QueryLiquidationThresholdRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationThresholdRequest) ProtoMessage()    {}
-func (*QueryLiquidationThresholdRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{34}
-}
-func (m *QueryLiquidationThresholdRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLiquidationThresholdRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLiquidationThresholdRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLiquidationThresholdRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationThresholdRequest.Merge(m, src)
-}
-func (m *QueryLiquidationThresholdRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLiquidationThresholdRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationThresholdRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLiquidationThresholdRequest proto.InternalMessageInfo
-
-func (m *QueryLiquidationThresholdRequest) GetAddress() string {
-	if m != nil {
-		return m.Address
-	}
-	return ""
-}
-
-// QueryLiquidationThresholdResponse defines the response structure for the
-// LiquidationThreshold gRPC service handler.
-type QueryLiquidationThresholdResponse struct {
-	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold"`
-}
-
-func (m *QueryLiquidationThresholdResponse) Reset()         { *m = QueryLiquidationThresholdResponse{} }
-func (m *QueryLiquidationThresholdResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationThresholdResponse) ProtoMessage()    {}
-func (*QueryLiquidationThresholdResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{35}
-}
-func (m *QueryLiquidationThresholdResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLiquidationThresholdResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLiquidationThresholdResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLiquidationThresholdResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationThresholdResponse.Merge(m, src)
-}
-func (m *QueryLiquidationThresholdResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLiquidationThresholdResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationThresholdResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLiquidationThresholdResponse proto.InternalMessageInfo
-
-// QueryLiquidationTargetsRequest defines the request structure for the
-// LiquidationTargets gRPC service handler.
-type QueryLiquidationTargetsRequest struct {
-}
-
-func (m *QueryLiquidationTargetsRequest) Reset()         { *m = QueryLiquidationTargetsRequest{} }
-func (m *QueryLiquidationTargetsRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationTargetsRequest) ProtoMessage()    {}
-func (*QueryLiquidationTargetsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{36}
-}
-func (m *QueryLiquidationTargetsRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLiquidationTargetsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLiquidationTargetsRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLiquidationTargetsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationTargetsRequest.Merge(m, src)
-}
-func (m *QueryLiquidationTargetsRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLiquidationTargetsRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationTargetsRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLiquidationTargetsRequest proto.InternalMessageInfo
-
-// QueryLiquidationTargetsResponse defines the response structure for the
-// LiquidationTargets gRPC service handler.
-type QueryLiquidationTargetsResponse struct {
-	Targets []string `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets,omitempty"`
-}
-
-func (m *QueryLiquidationTargetsResponse) Reset()         { *m = QueryLiquidationTargetsResponse{} }
-func (m *QueryLiquidationTargetsResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryLiquidationTargetsResponse) ProtoMessage()    {}
-func (*QueryLiquidationTargetsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{37}
-}
-func (m *QueryLiquidationTargetsResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryLiquidationTargetsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryLiquidationTargetsResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryLiquidationTargetsResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryLiquidationTargetsResponse.Merge(m, src)
-}
-func (m *QueryLiquidationTargetsResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryLiquidationTargetsResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryLiquidationTargetsResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryLiquidationTargetsResponse proto.InternalMessageInfo
-
-func (m *QueryLiquidationTargetsResponse) GetTargets() []string {
-	if m != nil {
-		return m.Targets
-	}
-	return nil
-}
-
-// QueryMarketSummaryRequest defines the request structure for the
-// MarketSummary gRPC service handler.
-type QueryMarketSummaryRequest struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-}
-
-func (m *QueryMarketSummaryRequest) Reset()         { *m = QueryMarketSummaryRequest{} }
-func (m *QueryMarketSummaryRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryMarketSummaryRequest) ProtoMessage()    {}
-func (*QueryMarketSummaryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{38}
-}
-func (m *QueryMarketSummaryRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryMarketSummaryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryMarketSummaryRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryMarketSummaryRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMarketSummaryRequest.Merge(m, src)
-}
-func (m *QueryMarketSummaryRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryMarketSummaryRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMarketSummaryRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryMarketSummaryRequest proto.InternalMessageInfo
-
-func (m *QueryMarketSummaryRequest) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
-}
-
-// QueryMarketSummaryResponse defines the response structure for the
-// MarketSummary gRPC service handler.
+// QueryMarketSummaryResponse defines the response structure for the MarketSummary gRPC service handler.
 type QueryMarketSummaryResponse struct {
-	SymbolDenom        string                                  `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`
-	Exponent           uint32                                  `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
-	OraclePrice        *github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
-	UTokenExchangeRate github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"uToken_exchange_rate"`
-	Lend_APY           github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,5,opt,name=lend_APY,json=lendAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"lend_APY"`
-	Borrow_APY         github_com_cosmos_cosmos_sdk_types.Dec  `protobuf:"bytes,6,opt,name=borrow_APY,json=borrowAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_APY"`
-	MarketSize         github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,7,opt,name=market_size,json=marketSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"market_size"`
-	AvailableBorrow    github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,8,opt,name=available_borrow,json=availableBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_borrow"`
-	Reserved           github_com_cosmos_cosmos_sdk_types.Int  `protobuf:"bytes,9,opt,name=reserved,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"reserved"`
+	// Symbol Denom is the human-readable representation of a token denom, for example "UMEE" or "ATOM".
+	SymbolDenom string `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`
+	// Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
+	Exponent uint32 `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
+	// Oracle Price is the current USD value of a base token. Exponent must be applied to reach the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+	OraclePrice *github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
+	// uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example, a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
+	UTokenExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"utoken_exchange_rate"`
+	// Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
+	Supply_APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=supply_APY,json=supplyAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"supply_apy"`
+	// Borrow APY is the current interest rate borrowers are being charged on their loans. For example, 0.2 would mean 20% APY.
+	Borrow_APY github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=borrow_APY,json=borrowAPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_apy"`
+	// Supplied is the total amount of tokens supplied to the the system by all suppliers, including any interest earned. This includes that tokens which have been borrowed out or enabled as collateral, but excludes reserves. Supplied is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	Supplied github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,7,opt,name=supplied,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"supplied"`
+	// Reserved is the total amount of tokens held in reserve by the module for emergencies. Reserves are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	Reserved github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,8,opt,name=reserved,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"reserved"`
+	// Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exhange rate is 1.2, then 5 UMEE have been collateralized.
+	Collateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,9,opt,name=collateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"collateral"`
+	// Borrowed is the total amount of debt in this token held across all borrowers. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	Borrowed github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,10,opt,name=borrowed,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"borrowed"`
+	// Liquidity is the amount of a token that has been supplied but not yet borrowed or reserved. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+	Liquidity github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,11,opt,name=liquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"liquidity"`
+	// Maximum Borrow is the amount of a token that is available for borrowing, including that which has already been borrowed out. This amount is less than total supply due to safety limits. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if borrowed is 3000000 uumee and maximum borrow is 4000000 uumee, then 1 UMEE is currently available for borrowing.
+	MaximumBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,12,opt,name=maximum_borrow,json=maximumBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_borrow"`
+	// Maximum Collateral is the amount of a token that can be collateralized, including that which is already collateral. This amount is less than total supply due to safety limits. It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
+	MaximumCollateral github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,13,opt,name=maximum_collateral,json=maximumCollateral,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"maximum_collateral"`
+	// Mimimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based on the current collateral. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if liquidity is 9000000 uumee and minimum liquidity is 8000000 uumee, then a maximum of 1 additional UMEE is currently available for borrowing or withdrawal.
+	MinimumLiquidity github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,14,opt,name=minimum_liquidity,json=minimumLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"minimum_liquidity"`
+	// uToken Supply is the total amount of a base token's associated uToken in circulation.
+	UTokenSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,15,opt,name=uToken_supply,json=uTokenSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"utoken_supply"`
+	// Available Borrow is the maximum additional amount of base tokens than can be borrowed based on current liquidity and system safety limits. It can also be calculated by MIN(maximum_borrow - borrowed, liquidity - minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and borrowing is temporarily unavailable.
+	AvailableBorrow github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,16,opt,name=available_borrow,json=availableBorrow,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_borrow"`
+	// Available Withdraw is the maximum amount of uTokens than can currently be withdrawn based on liquidity and system safety limits. It can also be calculated by (liquidity - minimum_liquidity). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and withdrawal is temporarily unavailable.
+	AvailableWithdraw github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,17,opt,name=available_withdraw,json=availableWithdraw,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_withdraw"`
+	// Available Collateralize is the maximum additional amount of uTokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
+	AvailableCollateralize github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=available_collateralize,json=availableCollateralize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"available_collateralize"`
 }
 
 func (m *QueryMarketSummaryResponse) Reset()         { *m = QueryMarketSummaryResponse{} }
 func (m *QueryMarketSummaryResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryMarketSummaryResponse) ProtoMessage()    {}
 func (*QueryMarketSummaryResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1e8137dcabb0ccc7, []int{39}
+	return fileDescriptor_1e8137dcabb0ccc7, []int{5}
 }
 func (m *QueryMarketSummaryResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1820,171 +296,426 @@ func (m *QueryMarketSummaryResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMarketSummaryResponse proto.InternalMessageInfo
 
-func (m *QueryMarketSummaryResponse) GetSymbolDenom() string {
-	if m != nil {
-		return m.SymbolDenom
-	}
-	return ""
+// QueryAccountBalances defines the request structure for the AccountBalances gRPC service handler.
+type QueryAccountBalances struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
 
-func (m *QueryMarketSummaryResponse) GetExponent() uint32 {
-	if m != nil {
-		return m.Exponent
-	}
-	return 0
+func (m *QueryAccountBalances) Reset()         { *m = QueryAccountBalances{} }
+func (m *QueryAccountBalances) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountBalances) ProtoMessage()    {}
+func (*QueryAccountBalances) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{6}
 }
+func (m *QueryAccountBalances) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAccountBalances) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAccountBalances.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAccountBalances) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountBalances.Merge(m, src)
+}
+func (m *QueryAccountBalances) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAccountBalances) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountBalances.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAccountBalances proto.InternalMessageInfo
+
+// QueryAccountBalancesResponse defines the response structure for the AccountBalances gRPC service handler.
+type QueryAccountBalancesResponse struct {
+	// Supplied contains all tokens the account has supplied, including interest earned. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+	Supplied github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=supplied,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"supplied"`
+	// Collateral contains all uTokens the account has collateralized. It is denominated in uTokens, so both exponent and uToken exchange rate from each coin's market_summary must be applied to convert to base token symbol denom.
+	Collateral github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=collateral,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"collateral"`
+	// Borrowed contains all tokens the account has borrowed, including interest owed. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+	Borrowed github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
+}
+
+func (m *QueryAccountBalancesResponse) Reset()         { *m = QueryAccountBalancesResponse{} }
+func (m *QueryAccountBalancesResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountBalancesResponse) ProtoMessage()    {}
+func (*QueryAccountBalancesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{7}
+}
+func (m *QueryAccountBalancesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAccountBalancesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAccountBalancesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAccountBalancesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountBalancesResponse.Merge(m, src)
+}
+func (m *QueryAccountBalancesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAccountBalancesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountBalancesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAccountBalancesResponse proto.InternalMessageInfo
+
+// QueryAccountSummary defines the request structure for the AccountSummary gRPC service handler.
+type QueryAccountSummary struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *QueryAccountSummary) Reset()         { *m = QueryAccountSummary{} }
+func (m *QueryAccountSummary) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountSummary) ProtoMessage()    {}
+func (*QueryAccountSummary) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{8}
+}
+func (m *QueryAccountSummary) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAccountSummary) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAccountSummary.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAccountSummary) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountSummary.Merge(m, src)
+}
+func (m *QueryAccountSummary) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAccountSummary) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountSummary.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAccountSummary proto.InternalMessageInfo
+
+// QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
+type QueryAccountSummaryResponse struct {
+	// Supplied Value is the sum of the USD value of all tokens the account has supplied, includng interest earned.
+	SuppliedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=supplied_value,json=suppliedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"supplied_value"`
+	// Collateral Value is the sum of the USD value of all uTokens the account has collateralized.
+	CollateralValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=collateral_value,json=collateralValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_value"`
+	// Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
+	BorrowedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=borrowed_value,json=borrowedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrowed_value"`
+	// Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
+	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
+	// Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
+	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold"`
+}
+
+func (m *QueryAccountSummaryResponse) Reset()         { *m = QueryAccountSummaryResponse{} }
+func (m *QueryAccountSummaryResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountSummaryResponse) ProtoMessage()    {}
+func (*QueryAccountSummaryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{9}
+}
+func (m *QueryAccountSummaryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAccountSummaryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAccountSummaryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAccountSummaryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountSummaryResponse.Merge(m, src)
+}
+func (m *QueryAccountSummaryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAccountSummaryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountSummaryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAccountSummaryResponse proto.InternalMessageInfo
+
+// QueryLiquidationTargets defines the request structure for the LiquidationTargets gRPC service handler.
+type QueryLiquidationTargets struct {
+}
+
+func (m *QueryLiquidationTargets) Reset()         { *m = QueryLiquidationTargets{} }
+func (m *QueryLiquidationTargets) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationTargets) ProtoMessage()    {}
+func (*QueryLiquidationTargets) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{10}
+}
+func (m *QueryLiquidationTargets) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationTargets) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationTargets.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationTargets) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationTargets.Merge(m, src)
+}
+func (m *QueryLiquidationTargets) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationTargets) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationTargets.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationTargets proto.InternalMessageInfo
+
+// QueryLiquidationTargetsResponse defines the response structure for the LiquidationTargets gRPC service handler.
+type QueryLiquidationTargetsResponse struct {
+	// Targets are the addresses of borrowers eligible for liquidation.
+	Targets []string `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets,omitempty"`
+}
+
+func (m *QueryLiquidationTargetsResponse) Reset()         { *m = QueryLiquidationTargetsResponse{} }
+func (m *QueryLiquidationTargetsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryLiquidationTargetsResponse) ProtoMessage()    {}
+func (*QueryLiquidationTargetsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{11}
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryLiquidationTargetsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryLiquidationTargetsResponse.Merge(m, src)
+}
+func (m *QueryLiquidationTargetsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryLiquidationTargetsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryLiquidationTargetsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryLiquidationTargetsResponse proto.InternalMessageInfo
+
+// QueryBadDebts defines the request structure for the
+// BedDebts gRPC service handler.
+type QueryBadDebts struct {
+}
+
+func (m *QueryBadDebts) Reset()         { *m = QueryBadDebts{} }
+func (m *QueryBadDebts) String() string { return proto.CompactTextString(m) }
+func (*QueryBadDebts) ProtoMessage()    {}
+func (*QueryBadDebts) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{12}
+}
+func (m *QueryBadDebts) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBadDebts) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBadDebts.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBadDebts) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBadDebts.Merge(m, src)
+}
+func (m *QueryBadDebts) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBadDebts) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBadDebts.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBadDebts proto.InternalMessageInfo
+
+// QueryBadDebtsResponse defines the response structure for the BedDebts gRPC service handler.
+type QueryBadDebtsResponse struct {
+	// Targets are borrow positions currently marked for bad debt repayment. Each contains an Address and a Denom.
+	Targets []BadDebt `protobuf:"bytes,1,rep,name=targets,proto3" json:"targets"`
+}
+
+func (m *QueryBadDebtsResponse) Reset()         { *m = QueryBadDebtsResponse{} }
+func (m *QueryBadDebtsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryBadDebtsResponse) ProtoMessage()    {}
+func (*QueryBadDebtsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1e8137dcabb0ccc7, []int{13}
+}
+func (m *QueryBadDebtsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryBadDebtsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryBadDebtsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryBadDebtsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryBadDebtsResponse.Merge(m, src)
+}
+func (m *QueryBadDebtsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryBadDebtsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryBadDebtsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryBadDebtsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*QueryRegisteredTokens)(nil), "umee.leverage.v1.QueryRegisteredTokens")
-	proto.RegisterType((*QueryAvailableBorrowRequest)(nil), "umee.leverage.v1.QueryAvailableBorrowRequest")
-	proto.RegisterType((*QueryAvailableBorrowResponse)(nil), "umee.leverage.v1.QueryAvailableBorrowResponse")
-	proto.RegisterType((*QueryBorrowAPYRequest)(nil), "umee.leverage.v1.QueryBorrowAPYRequest")
-	proto.RegisterType((*QueryBorrowAPYResponse)(nil), "umee.leverage.v1.QueryBorrowAPYResponse")
-	proto.RegisterType((*QueryLendAPYRequest)(nil), "umee.leverage.v1.QueryLendAPYRequest")
-	proto.RegisterType((*QueryLendAPYResponse)(nil), "umee.leverage.v1.QueryLendAPYResponse")
-	proto.RegisterType((*QueryMarketSizeRequest)(nil), "umee.leverage.v1.QueryMarketSizeRequest")
-	proto.RegisterType((*QueryMarketSizeResponse)(nil), "umee.leverage.v1.QueryMarketSizeResponse")
-	proto.RegisterType((*QueryTokenMarketSizeRequest)(nil), "umee.leverage.v1.QueryTokenMarketSizeRequest")
-	proto.RegisterType((*QueryTokenMarketSizeResponse)(nil), "umee.leverage.v1.QueryTokenMarketSizeResponse")
-	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umee.leverage.v1.QueryRegisteredTokensResponse")
-	proto.RegisterType((*QueryParamsRequest)(nil), "umee.leverage.v1.QueryParamsRequest")
+	proto.RegisterType((*QueryParams)(nil), "umee.leverage.v1.QueryParams")
 	proto.RegisterType((*QueryParamsResponse)(nil), "umee.leverage.v1.QueryParamsResponse")
-	proto.RegisterType((*QueryBorrowedRequest)(nil), "umee.leverage.v1.QueryBorrowedRequest")
-	proto.RegisterType((*QueryBorrowedResponse)(nil), "umee.leverage.v1.QueryBorrowedResponse")
-	proto.RegisterType((*QueryBorrowedValueRequest)(nil), "umee.leverage.v1.QueryBorrowedValueRequest")
-	proto.RegisterType((*QueryBorrowedValueResponse)(nil), "umee.leverage.v1.QueryBorrowedValueResponse")
-	proto.RegisterType((*QueryCollateralValueRequest)(nil), "umee.leverage.v1.QueryCollateralValueRequest")
-	proto.RegisterType((*QueryCollateralValueResponse)(nil), "umee.leverage.v1.QueryCollateralValueResponse")
-	proto.RegisterType((*QueryLoanedRequest)(nil), "umee.leverage.v1.QueryLoanedRequest")
-	proto.RegisterType((*QueryLoanedResponse)(nil), "umee.leverage.v1.QueryLoanedResponse")
-	proto.RegisterType((*QueryLoanedValueRequest)(nil), "umee.leverage.v1.QueryLoanedValueRequest")
-	proto.RegisterType((*QueryLoanedValueResponse)(nil), "umee.leverage.v1.QueryLoanedValueResponse")
-	proto.RegisterType((*QueryReserveAmountRequest)(nil), "umee.leverage.v1.QueryReserveAmountRequest")
-	proto.RegisterType((*QueryReserveAmountResponse)(nil), "umee.leverage.v1.QueryReserveAmountResponse")
-	proto.RegisterType((*QueryCollateralSettingRequest)(nil), "umee.leverage.v1.QueryCollateralSettingRequest")
-	proto.RegisterType((*QueryCollateralSettingResponse)(nil), "umee.leverage.v1.QueryCollateralSettingResponse")
-	proto.RegisterType((*QueryCollateralRequest)(nil), "umee.leverage.v1.QueryCollateralRequest")
-	proto.RegisterType((*QueryCollateralResponse)(nil), "umee.leverage.v1.QueryCollateralResponse")
-	proto.RegisterType((*QueryExchangeRateRequest)(nil), "umee.leverage.v1.QueryExchangeRateRequest")
-	proto.RegisterType((*QueryExchangeRateResponse)(nil), "umee.leverage.v1.QueryExchangeRateResponse")
-	proto.RegisterType((*QueryBorrowLimitRequest)(nil), "umee.leverage.v1.QueryBorrowLimitRequest")
-	proto.RegisterType((*QueryBorrowLimitResponse)(nil), "umee.leverage.v1.QueryBorrowLimitResponse")
-	proto.RegisterType((*QueryLiquidationThresholdRequest)(nil), "umee.leverage.v1.QueryLiquidationThresholdRequest")
-	proto.RegisterType((*QueryLiquidationThresholdResponse)(nil), "umee.leverage.v1.QueryLiquidationThresholdResponse")
-	proto.RegisterType((*QueryLiquidationTargetsRequest)(nil), "umee.leverage.v1.QueryLiquidationTargetsRequest")
-	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umee.leverage.v1.QueryLiquidationTargetsResponse")
-	proto.RegisterType((*QueryMarketSummaryRequest)(nil), "umee.leverage.v1.QueryMarketSummaryRequest")
+	proto.RegisterType((*QueryRegisteredTokens)(nil), "umee.leverage.v1.QueryRegisteredTokens")
+	proto.RegisterType((*QueryRegisteredTokensResponse)(nil), "umee.leverage.v1.QueryRegisteredTokensResponse")
+	proto.RegisterType((*QueryMarketSummary)(nil), "umee.leverage.v1.QueryMarketSummary")
 	proto.RegisterType((*QueryMarketSummaryResponse)(nil), "umee.leverage.v1.QueryMarketSummaryResponse")
+	proto.RegisterType((*QueryAccountBalances)(nil), "umee.leverage.v1.QueryAccountBalances")
+	proto.RegisterType((*QueryAccountBalancesResponse)(nil), "umee.leverage.v1.QueryAccountBalancesResponse")
+	proto.RegisterType((*QueryAccountSummary)(nil), "umee.leverage.v1.QueryAccountSummary")
+	proto.RegisterType((*QueryAccountSummaryResponse)(nil), "umee.leverage.v1.QueryAccountSummaryResponse")
+	proto.RegisterType((*QueryLiquidationTargets)(nil), "umee.leverage.v1.QueryLiquidationTargets")
+	proto.RegisterType((*QueryLiquidationTargetsResponse)(nil), "umee.leverage.v1.QueryLiquidationTargetsResponse")
+	proto.RegisterType((*QueryBadDebts)(nil), "umee.leverage.v1.QueryBadDebts")
+	proto.RegisterType((*QueryBadDebtsResponse)(nil), "umee.leverage.v1.QueryBadDebtsResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1/query.proto", fileDescriptor_1e8137dcabb0ccc7) }
 
 var fileDescriptor_1e8137dcabb0ccc7 = []byte{
-	// 1664 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0xcd, 0x6f, 0xdc, 0x44,
-	0x14, 0x8f, 0xdb, 0xe6, 0xeb, 0x25, 0x21, 0x65, 0x48, 0xc9, 0xd6, 0xa4, 0x9b, 0xd4, 0xe4, 0xab,
-	0x4d, 0xb3, 0x9b, 0x0f, 0x09, 0x89, 0x8f, 0x03, 0x49, 0x4b, 0x45, 0x4b, 0xa3, 0xa6, 0xdb, 0x0f,
-	0xd1, 0x5e, 0x8c, 0x77, 0x77, 0xd8, 0x58, 0xf1, 0xda, 0x1b, 0xdb, 0x9b, 0x36, 0x15, 0x12, 0x08,
-	0x21, 0x28, 0x12, 0x87, 0x4a, 0x70, 0x41, 0x82, 0x0b, 0xe2, 0x80, 0x38, 0xf1, 0x67, 0xf4, 0x58,
-	0x89, 0x0b, 0xe2, 0x50, 0x50, 0xcb, 0x1f, 0x82, 0x3c, 0xf3, 0xfc, 0xb5, 0xf6, 0x78, 0xb7, 0x4e,
-	0x7b, 0xca, 0x7a, 0xfc, 0xde, 0xef, 0xfd, 0x66, 0xfc, 0x9b, 0x37, 0xef, 0x4d, 0x60, 0xaa, 0xdd,
-	0xa4, 0xb4, 0x6c, 0xd0, 0x7d, 0x6a, 0x6b, 0x0d, 0x5a, 0xde, 0x5f, 0x2d, 0xef, 0xb5, 0xa9, 0x7d,
-	0x50, 0x6a, 0xd9, 0x96, 0x6b, 0x91, 0xe3, 0xde, 0xdb, 0x92, 0xff, 0xb6, 0xb4, 0xbf, 0x2a, 0x4f,
-	0x35, 0x2c, 0xab, 0x61, 0xd0, 0xb2, 0xd6, 0xd2, 0xcb, 0x9a, 0x69, 0x5a, 0xae, 0xe6, 0xea, 0x96,
-	0xe9, 0x70, 0x7b, 0x79, 0x3a, 0x81, 0x16, 0xf8, 0x72, 0x83, 0x89, 0x86, 0xd5, 0xb0, 0xd8, 0xcf,
-	0xb2, 0xf7, 0x0b, 0x47, 0x8b, 0x35, 0xcb, 0x69, 0x5a, 0x4e, 0xb9, 0xaa, 0x39, 0x9e, 0x53, 0x95,
-	0xba, 0xda, 0x6a, 0xb9, 0x66, 0xe9, 0x26, 0x7f, 0xaf, 0x4c, 0xc2, 0x89, 0x6b, 0x1e, 0xab, 0x0a,
-	0x6d, 0xe8, 0x8e, 0x4b, 0x6d, 0x5a, 0xbf, 0x61, 0xed, 0x52, 0xd3, 0x51, 0xd6, 0xe1, 0x0d, 0xf6,
-	0x62, 0x63, 0x5f, 0xd3, 0x0d, 0xad, 0x6a, 0xd0, 0x4d, 0xcb, 0xb6, 0xad, 0xbb, 0x15, 0xba, 0xd7,
-	0xa6, 0x8e, 0x4b, 0x26, 0xa0, 0xbf, 0x4e, 0x4d, 0xab, 0x59, 0x90, 0x66, 0xa4, 0xc5, 0xe1, 0x0a,
-	0x7f, 0x50, 0x3e, 0x85, 0xa9, 0x74, 0x27, 0xa7, 0x65, 0x99, 0x0e, 0x25, 0x17, 0x61, 0x40, 0x6b,
-	0x5a, 0x6d, 0xd3, 0xe5, 0x6e, 0x9b, 0xa5, 0x47, 0x4f, 0xa6, 0xfb, 0xfe, 0x7e, 0x32, 0x3d, 0xdf,
-	0xd0, 0xdd, 0x9d, 0x76, 0xb5, 0x54, 0xb3, 0x9a, 0x65, 0x24, 0xcc, 0xff, 0x2c, 0x3b, 0xf5, 0xdd,
-	0xb2, 0x7b, 0xd0, 0xa2, 0x4e, 0xe9, 0x92, 0xe9, 0x56, 0xd0, 0x5b, 0x59, 0x46, 0xd6, 0x1c, 0x7e,
-	0x63, 0xfb, 0x76, 0x36, 0xad, 0x3b, 0xf0, 0x7a, 0xa7, 0x39, 0x12, 0x7a, 0x1f, 0x8e, 0x6e, 0x6c,
-	0xdf, 0xce, 0xc1, 0xe6, 0x02, 0xad, 0x55, 0x3c, 0x57, 0x65, 0x09, 0x5e, 0x63, 0xd8, 0x57, 0xa8,
-	0x59, 0xef, 0x4a, 0xe4, 0x63, 0x98, 0x88, 0x1b, 0xbf, 0x30, 0x1a, 0x25, 0x9c, 0xe2, 0x96, 0x66,
-	0xef, 0x52, 0xf7, 0xba, 0x7e, 0x9f, 0x66, 0x33, 0xd9, 0x83, 0xc9, 0x84, 0x3d, 0x92, 0xb9, 0x05,
-	0xe3, 0x4d, 0x36, 0xaa, 0x3a, 0xfa, 0x7d, 0xaa, 0xb6, 0x9d, 0x7a, 0x4e, 0x62, 0x63, 0xcd, 0x00,
-	0xfc, 0xa6, 0x53, 0x0f, 0x14, 0xc5, 0x04, 0xd6, 0x2b, 0x4f, 0x0b, 0x15, 0x95, 0x70, 0x42, 0xb2,
-	0x57, 0x61, 0x24, 0x42, 0x36, 0xa7, 0xac, 0x20, 0x24, 0xaa, 0xdc, 0x81, 0x53, 0xa9, 0x1b, 0x22,
-	0x88, 0xf8, 0x36, 0x0c, 0xd9, 0xec, 0x9d, 0x7d, 0x50, 0x90, 0x66, 0x8e, 0x2e, 0x8e, 0xac, 0x4d,
-	0x96, 0x3a, 0xf7, 0x72, 0x89, 0xf9, 0x6c, 0x1e, 0xf3, 0x78, 0x54, 0x02, 0x73, 0x65, 0x02, 0x08,
-	0xc3, 0xde, 0xd6, 0x6c, 0xad, 0xe9, 0xe0, 0xc4, 0x95, 0x2d, 0x54, 0x90, 0x3f, 0x8a, 0x71, 0xde,
-	0x82, 0x81, 0x16, 0x1b, 0x61, 0x93, 0x1a, 0x59, 0x2b, 0x24, 0xa3, 0x70, 0x0f, 0x0c, 0x83, 0xd6,
-	0xca, 0x45, 0xd4, 0x18, 0x17, 0x3b, 0xad, 0xfb, 0xeb, 0x5b, 0x80, 0x41, 0xad, 0x5e, 0xb7, 0xa9,
-	0xe3, 0xe0, 0x0a, 0xfb, 0x8f, 0xe1, 0xca, 0x1f, 0x89, 0xae, 0xfc, 0x17, 0x52, 0x6c, 0x93, 0x79,
-	0x40, 0xc8, 0xac, 0x01, 0x43, 0x55, 0x1c, 0xc3, 0x15, 0x38, 0x59, 0xe2, 0xeb, 0x5a, 0xf2, 0xd2,
-	0x4c, 0x09, 0xd3, 0x4c, 0xe9, 0xbc, 0xa5, 0x9b, 0x9b, 0x2b, 0x1e, 0xb9, 0xdf, 0xff, 0x99, 0x5e,
-	0xec, 0xe1, 0x5b, 0x78, 0x0e, 0x4e, 0x25, 0x00, 0x57, 0x3e, 0x82, 0x93, 0x31, 0x06, 0xb7, 0x34,
-	0xa3, 0x4d, 0xf3, 0xce, 0xc7, 0x01, 0x39, 0x0d, 0x0c, 0xe7, 0x74, 0x13, 0x5e, 0xf1, 0xc3, 0xaa,
-	0xfb, 0xde, 0x9b, 0xbc, 0x9a, 0xaf, 0x46, 0xe1, 0x95, 0x2d, 0xd4, 0xfc, 0x79, 0xcb, 0x30, 0x34,
-	0x97, 0xda, 0x9a, 0x71, 0xa8, 0x39, 0x1c, 0xe0, 0x6e, 0x48, 0xc0, 0xe1, 0x2c, 0x6e, 0xc3, 0xf1,
-	0x5a, 0xf0, 0xea, 0x50, 0xf3, 0x18, 0xaf, 0xc5, 0x43, 0x28, 0x17, 0x50, 0xbb, 0x57, 0x2c, 0xcd,
-	0xcc, 0x2f, 0xaa, 0xfb, 0x7e, 0xb6, 0x44, 0x14, 0xe4, 0x5d, 0x83, 0x01, 0x83, 0x8d, 0xbc, 0x0c,
-	0x3d, 0x21, 0xb4, 0x72, 0x09, 0x53, 0x1e, 0x8f, 0x7d, 0xa8, 0xef, 0xd0, 0x84, 0x42, 0x12, 0x0a,
-	0xe7, 0x72, 0x0d, 0x46, 0x79, 0xc0, 0x43, 0xad, 0xff, 0x88, 0x11, 0x42, 0x2b, 0xab, 0xb8, 0x0f,
-	0x2a, 0xd4, 0xa1, 0xf6, 0x3e, 0xdd, 0x60, 0x87, 0x60, 0x76, 0xde, 0xac, 0xa3, 0xda, 0x3b, 0x5c,
-	0x5e, 0xf0, 0x39, 0x7c, 0x15, 0x93, 0x65, 0xa8, 0xc7, 0xeb, 0xd4, 0x75, 0x75, 0xb3, 0x91, 0x77,
-	0x61, 0xdf, 0x81, 0xa2, 0x08, 0x10, 0xa9, 0x17, 0x60, 0x90, 0x9a, 0x5e, 0x69, 0xc1, 0x4f, 0xa5,
-	0xa1, 0x8a, 0xff, 0xa8, 0x7c, 0x88, 0x47, 0x60, 0xe8, 0x9b, 0x97, 0xc5, 0xd7, 0x12, 0x4a, 0x25,
-	0x0a, 0x85, 0xf1, 0x77, 0x01, 0xc2, 0xad, 0xf1, 0x32, 0xe4, 0x1a, 0x81, 0x57, 0x56, 0x50, 0x67,
-	0x1f, 0xdc, 0xab, 0xed, 0x68, 0x66, 0x83, 0x56, 0x34, 0xb7, 0xcb, 0x79, 0xd9, 0x42, 0xa9, 0xc4,
-	0x3d, 0x90, 0xfb, 0x75, 0x18, 0xa3, 0x38, 0xae, 0xda, 0x9a, 0x9b, 0x57, 0x9b, 0xa3, 0x34, 0x02,
-	0xae, 0xac, 0xe3, 0x5a, 0xf1, 0xbc, 0x7a, 0x45, 0x6f, 0xea, 0x6e, 0xd7, 0x75, 0x0f, 0x36, 0x50,
-	0xcc, 0x29, 0xdc, 0x40, 0x3c, 0x89, 0xaa, 0x86, 0x37, 0x9e, 0x77, 0x03, 0x55, 0x43, 0x68, 0xe5,
-	0x3d, 0x98, 0xe1, 0xfb, 0x55, 0xdf, 0x6b, 0xeb, 0x75, 0x56, 0x57, 0xdf, 0xd8, 0xb1, 0xa9, 0xb3,
-	0x63, 0x19, 0xdd, 0x53, 0x99, 0xf2, 0x40, 0x82, 0xd3, 0x19, 0xee, 0x41, 0x0e, 0x3b, 0x61, 0x84,
-	0xef, 0x55, 0xd7, 0x37, 0xc8, 0xc9, 0x7f, 0xc2, 0x48, 0x09, 0xa6, 0xcc, 0xe0, 0xfe, 0x88, 0x32,
-	0xd1, 0xec, 0x06, 0x75, 0x83, 0x6a, 0xe2, 0x5d, 0x98, 0x16, 0x5a, 0x84, 0x5b, 0xc8, 0xe5, 0x43,
-	0x4c, 0xbf, 0xc3, 0x15, 0xff, 0x31, 0x48, 0x34, 0x58, 0x68, 0xb5, 0x9b, 0x4d, 0xcd, 0x4b, 0x21,
-	0x59, 0x82, 0xfb, 0xa5, 0x1f, 0x33, 0x4d, 0x87, 0x0f, 0xc6, 0x3a, 0x0d, 0xa3, 0xce, 0x41, 0xb3,
-	0x6a, 0x19, 0x6a, 0xd4, 0x77, 0x84, 0x8f, 0x5d, 0xf0, 0x86, 0x88, 0x0c, 0x43, 0xf4, 0x5e, 0xcb,
-	0x32, 0xa9, 0xe9, 0xb2, 0x6d, 0x38, 0x56, 0x09, 0x9e, 0x3d, 0x2d, 0x58, 0xb6, 0x56, 0x33, 0xa8,
-	0xda, 0xb2, 0xf5, 0x1a, 0x2d, 0x1c, 0x0d, 0xd6, 0x52, 0x7a, 0x1e, 0x2d, 0x70, 0x8c, 0x6d, 0x0f,
-	0x82, 0x7c, 0x02, 0x13, 0x6d, 0x56, 0x9e, 0xa9, 0xf1, 0xbd, 0x70, 0x2c, 0xd7, 0x67, 0x22, 0x1c,
-	0x2b, 0xba, 0xdd, 0xc8, 0x25, 0x18, 0x32, 0xa8, 0x59, 0x57, 0xbd, 0x92, 0xbe, 0x3f, 0x17, 0xea,
-	0xa0, 0xc1, 0x1b, 0x04, 0xb2, 0x05, 0x80, 0x7b, 0xc1, 0x03, 0x1b, 0xc8, 0x05, 0x36, 0x5c, 0xf5,
-	0xdb, 0x9e, 0xce, 0x6a, 0x79, 0xf0, 0xb0, 0xd5, 0xb2, 0x57, 0x70, 0x68, 0x7e, 0xaf, 0xa7, 0xf2,
-	0x38, 0x85, 0xa1, 0x5c, 0xa8, 0xe3, 0x5a, 0xbc, 0x67, 0x24, 0x97, 0xbd, 0x3a, 0x9b, 0x1d, 0x5e,
-	0xf5, 0xc2, 0x70, 0x2e, 0xc8, 0xc0, 0x7f, 0xed, 0xdb, 0x49, 0xe8, 0x67, 0x22, 0x25, 0x3f, 0x4a,
-	0x70, 0xbc, 0xb3, 0xb4, 0x27, 0x0b, 0xc9, 0xd2, 0x3a, 0xb5, 0x07, 0x90, 0xcb, 0x3d, 0x1a, 0xfa,
-	0xf2, 0x57, 0x96, 0xbe, 0xfc, 0xf3, 0xbf, 0xef, 0x8f, 0xcc, 0x91, 0x37, 0xcb, 0x89, 0xf6, 0xdd,
-	0x0e, 0x7c, 0x54, 0x97, 0xd3, 0xb8, 0x0b, 0x03, 0xbc, 0xa2, 0x27, 0xb3, 0x82, 0x38, 0xb1, 0xc6,
-	0x41, 0x9e, 0xeb, 0x62, 0x85, 0x1c, 0x66, 0x18, 0x07, 0x99, 0x14, 0x92, 0x1c, 0x78, 0xcb, 0x40,
-	0x3e, 0x87, 0x21, 0xbf, 0x2a, 0x26, 0xf3, 0x02, 0xd0, 0x8e, 0x76, 0x42, 0x5e, 0xe8, 0x6a, 0x87,
-	0xe1, 0x15, 0x16, 0x7e, 0x8a, 0xc8, 0xc9, 0xf0, 0x7e, 0xad, 0x4c, 0x7e, 0x90, 0x60, 0x2c, 0x56,
-	0x97, 0x93, 0xa5, 0x2e, 0xf0, 0xd1, 0xf2, 0x4d, 0x3e, 0xd7, 0x9b, 0x31, 0x12, 0x5a, 0x64, 0x84,
-	0x14, 0x32, 0x23, 0x26, 0xc4, 0x4b, 0x37, 0xef, 0x83, 0xf0, 0x0a, 0x4f, 0xf8, 0x41, 0x62, 0xd5,
-	0xb0, 0xf0, 0x83, 0xc4, 0xab, 0xdd, 0xac, 0x0f, 0xc2, 0xab, 0x3e, 0xf2, 0x9d, 0x04, 0x23, 0x91,
-	0xda, 0x92, 0x9c, 0xc9, 0x04, 0x8e, 0xad, 0xc5, 0xd9, 0x5e, 0x4c, 0x91, 0xc8, 0x3c, 0x23, 0x32,
-	0x43, 0x8a, 0x22, 0x22, 0xb8, 0x0e, 0x3f, 0x49, 0x30, 0xde, 0x71, 0xa5, 0x43, 0x96, 0x05, 0x71,
-	0xd2, 0xef, 0x8b, 0xe4, 0x52, 0xaf, 0xe6, 0x48, 0xed, 0x2c, 0xa3, 0x36, 0x4b, 0x94, 0x24, 0xb5,
-	0xce, 0x84, 0x43, 0xbe, 0x92, 0x60, 0x38, 0xb8, 0xda, 0x21, 0xd9, 0xc2, 0x0c, 0xaf, 0x68, 0xe4,
-	0xc5, 0xee, 0x86, 0x48, 0x66, 0x96, 0x91, 0x29, 0x92, 0x29, 0x91, 0x62, 0x54, 0xad, 0x75, 0x40,
-	0x3e, 0x83, 0x41, 0xbc, 0xd7, 0x21, 0x42, 0x21, 0xc4, 0x2e, 0x89, 0xe4, 0xf9, 0x6e, 0x66, 0xdd,
-	0xb7, 0x10, 0x3b, 0x68, 0xbc, 0xe8, 0x0f, 0x24, 0x80, 0xf0, 0x7e, 0x84, 0x88, 0x26, 0x97, 0xb8,
-	0x77, 0x91, 0xcf, 0xf4, 0x60, 0x89, 0x3c, 0xe6, 0x18, 0x8f, 0x69, 0x72, 0x2a, 0xc9, 0x23, 0x72,
-	0xac, 0x90, 0x9f, 0x25, 0x18, 0xef, 0xb8, 0xaf, 0x11, 0xca, 0x25, 0xfd, 0x32, 0x48, 0x28, 0x17,
-	0xc1, 0x35, 0x50, 0x56, 0x9e, 0x65, 0xc9, 0x55, 0x8d, 0xf2, 0xf3, 0xb2, 0x4d, 0xac, 0x2f, 0x12,
-	0x66, 0x9b, 0xb4, 0x86, 0x4b, 0x98, 0x6d, 0x52, 0x5b, 0xad, 0xac, 0x6c, 0x83, 0xc7, 0x93, 0xca,
-	0x9b, 0x29, 0xf2, 0xab, 0x04, 0xaf, 0x26, 0xfa, 0x1e, 0x22, 0x3a, 0x72, 0x44, 0x2d, 0x97, 0xbc,
-	0xd2, 0xbb, 0x03, 0x52, 0x3c, 0xc7, 0x28, 0xce, 0x93, 0xd9, 0x24, 0xc5, 0xc8, 0x6d, 0x82, 0x83,
-	0x84, 0xbe, 0x91, 0x00, 0x42, 0x2c, 0xa1, 0xd0, 0x12, 0x5d, 0x98, 0x50, 0x68, 0xc9, 0x26, 0x2b,
-	0x6b, 0xc3, 0x85, 0x8c, 0x58, 0x5a, 0xea, 0xb8, 0x09, 0x11, 0xea, 0x2c, 0xfd, 0x02, 0x46, 0xa8,
-	0x33, 0xc1, 0x05, 0x4b, 0x56, 0x5a, 0xea, 0xbc, 0x78, 0x21, 0x0f, 0x25, 0x18, 0x8d, 0xd5, 0x85,
-	0xa2, 0xd4, 0x9c, 0xd2, 0xdd, 0xc9, 0x4b, 0x3d, 0xd9, 0x22, 0xab, 0x05, 0xc6, 0xea, 0x34, 0x99,
-	0x4e, 0xb2, 0x8a, 0xd5, 0xb8, 0xec, 0x5c, 0x89, 0xb4, 0x5c, 0xc2, 0x73, 0x25, 0xd9, 0xcb, 0x09,
-	0xcf, 0x95, 0x94, 0x0e, 0x2e, 0xeb, 0x5c, 0x89, 0x76, 0x76, 0xe4, 0x0f, 0x09, 0x26, 0xd2, 0x7a,
-	0x2a, 0xb2, 0x26, 0x4a, 0x8c, 0xe2, 0xfe, 0x4d, 0x5e, 0x7f, 0x2e, 0x1f, 0x64, 0x5a, 0x66, 0x4c,
-	0xcf, 0x90, 0x85, 0x94, 0xcc, 0x9a, 0xd6, 0xcc, 0x91, 0xdf, 0x24, 0x20, 0xc9, 0xd6, 0x8a, 0xac,
-	0xf4, 0x10, 0x3c, 0xd6, 0xa7, 0xc9, 0xab, 0xcf, 0xe1, 0x81, 0x64, 0x97, 0x19, 0xd9, 0x05, 0x32,
-	0xd7, 0x85, 0x2c, 0x72, 0xf2, 0xd2, 0x5c, 0xac, 0x29, 0x13, 0xa6, 0xb9, 0xb4, 0x76, 0x4f, 0x98,
-	0xe6, 0x52, 0xfb, 0xbc, 0xac, 0x34, 0xe7, 0xa7, 0x5e, 0xee, 0xb1, 0x79, 0xf9, 0xd1, 0xd3, 0xa2,
-	0xf4, 0xf8, 0x69, 0x51, 0xfa, 0xf7, 0x69, 0x51, 0x7a, 0xf8, 0xac, 0xd8, 0xf7, 0xf8, 0x59, 0xb1,
-	0xef, 0xaf, 0x67, 0xc5, 0xbe, 0x3b, 0x2b, 0x91, 0xba, 0xde, 0x43, 0x59, 0x36, 0xa9, 0x7b, 0xd7,
-	0xb2, 0x77, 0x39, 0xe4, 0xfe, 0x5a, 0xf9, 0x5e, 0x88, 0xcb, 0xaa, 0xfc, 0xea, 0x00, 0xfb, 0x27,
-	0xd6, 0xfa, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff, 0xe1, 0x29, 0x34, 0x01, 0x6b, 0x1b, 0x00, 0x00,
+	// 1269 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xcf, 0x6f, 0xdc, 0x44,
+	0x14, 0xc7, 0xe3, 0xa4, 0xcd, 0x8f, 0xd9, 0xdd, 0x24, 0x1d, 0xb6, 0xc4, 0xdd, 0xb6, 0xbb, 0xa9,
+	0xdb, 0xb4, 0x69, 0x21, 0x76, 0xd3, 0x4a, 0x48, 0x08, 0x24, 0xd4, 0x6d, 0x41, 0x02, 0xa5, 0x55,
+	0xea, 0x36, 0xa0, 0xb4, 0x42, 0xd6, 0xac, 0x3d, 0x72, 0xac, 0xd8, 0x9e, 0xad, 0x3d, 0xbb, 0xc9,
+	0x72, 0x42, 0xdc, 0x91, 0x40, 0x88, 0x03, 0x47, 0xae, 0xfc, 0x25, 0x39, 0x56, 0xe2, 0x82, 0x90,
+	0x58, 0x20, 0xe1, 0xd4, 0x13, 0x7f, 0x02, 0xf2, 0xfc, 0xf0, 0x3a, 0xeb, 0x6c, 0xd9, 0x58, 0x70,
+	0x8a, 0x67, 0xe6, 0xbd, 0xcf, 0xfb, 0xce, 0x9b, 0xcc, 0x9b, 0xb7, 0xe0, 0x52, 0x27, 0xc0, 0xd8,
+	0xf0, 0x71, 0x17, 0x47, 0xc8, 0xc5, 0x46, 0x77, 0xdd, 0x78, 0xd1, 0xc1, 0x51, 0x4f, 0x6f, 0x47,
+	0x84, 0x12, 0xb8, 0x98, 0xac, 0xea, 0x72, 0x55, 0xef, 0xae, 0xd7, 0x2e, 0xb9, 0x84, 0xb8, 0x3e,
+	0x36, 0x50, 0xdb, 0x33, 0x50, 0x18, 0x12, 0x8a, 0xa8, 0x47, 0xc2, 0x98, 0xdb, 0xd7, 0xea, 0x39,
+	0x9a, 0x8b, 0x43, 0x1c, 0x7b, 0x72, 0xbd, 0x91, 0x5b, 0x4f, 0xd9, 0xdc, 0xa0, 0xea, 0x12, 0x97,
+	0xb0, 0x4f, 0x23, 0xf9, 0x92, 0x58, 0x9b, 0xc4, 0x01, 0x89, 0x8d, 0x16, 0x8a, 0x13, 0xa7, 0x16,
+	0xa6, 0x68, 0xdd, 0xb0, 0x89, 0x17, 0xf2, 0x75, 0xad, 0x02, 0x4a, 0x8f, 0x13, 0xd5, 0x9b, 0x28,
+	0x42, 0x41, 0xac, 0x3d, 0x04, 0x6f, 0x64, 0x86, 0x26, 0x8e, 0xdb, 0x24, 0x8c, 0x31, 0x7c, 0x07,
+	0x4c, 0xb7, 0xd9, 0x8c, 0xaa, 0x2c, 0x2b, 0xab, 0xa5, 0x3b, 0xaa, 0x3e, 0xbc, 0x3b, 0x9d, 0x7b,
+	0x34, 0xcf, 0x1c, 0xf4, 0x1b, 0x13, 0xa6, 0xb0, 0xd6, 0x96, 0xc0, 0x79, 0x86, 0x33, 0xb1, 0xeb,
+	0xc5, 0x14, 0x47, 0xd8, 0x79, 0x4a, 0x76, 0x71, 0x18, 0x6b, 0xcf, 0xc0, 0xe5, 0x13, 0x17, 0xd2,
+	0x88, 0xef, 0x82, 0xd9, 0x88, 0xad, 0x45, 0x3d, 0x55, 0x59, 0x9e, 0x5a, 0x2d, 0xdd, 0x59, 0xca,
+	0xc7, 0x64, 0x3e, 0x22, 0x64, 0x6a, 0xae, 0xdd, 0x02, 0x90, 0xb1, 0x1f, 0xa2, 0x68, 0x17, 0xd3,
+	0x27, 0x9d, 0x20, 0x40, 0x51, 0x0f, 0x56, 0xc1, 0x59, 0x07, 0x87, 0x24, 0x60, 0x3b, 0x98, 0x33,
+	0xf9, 0x40, 0xfb, 0xb2, 0x0c, 0x6a, 0x79, 0xe3, 0x54, 0xc5, 0x15, 0x50, 0x8e, 0x7b, 0x41, 0x8b,
+	0xf8, 0x56, 0xd6, 0xb7, 0xc4, 0xe7, 0x1e, 0x24, 0x53, 0xb0, 0x06, 0x66, 0xf1, 0x7e, 0x9b, 0x84,
+	0x38, 0xa4, 0xea, 0xe4, 0xb2, 0xb2, 0x5a, 0x31, 0xd3, 0x31, 0x7c, 0x0c, 0xca, 0x24, 0x42, 0xb6,
+	0x8f, 0xad, 0x76, 0xe4, 0xd9, 0x58, 0x9d, 0x4a, 0xdc, 0x9b, 0xfa, 0x41, 0xbf, 0xa1, 0xfc, 0xda,
+	0x6f, 0x5c, 0x77, 0x3d, 0xba, 0xd3, 0x69, 0xe9, 0x36, 0x09, 0x0c, 0x71, 0x4a, 0xfc, 0xcf, 0x5a,
+	0xec, 0xec, 0x1a, 0xb4, 0xd7, 0xc6, 0xb1, 0xfe, 0x00, 0xdb, 0x66, 0x89, 0x33, 0x36, 0x13, 0x04,
+	0xdc, 0x07, 0xd5, 0x0e, 0xdb, 0xb6, 0x85, 0xf7, 0xed, 0x1d, 0x14, 0xba, 0xd8, 0x8a, 0x10, 0xc5,
+	0xea, 0x19, 0x86, 0xfe, 0x28, 0x49, 0xc5, 0xf8, 0xe8, 0x57, 0xfd, 0x46, 0xb5, 0x43, 0xf3, 0x34,
+	0x13, 0xf2, 0x18, 0x1f, 0x8a, 0x49, 0x13, 0x51, 0x0c, 0x9f, 0x03, 0x10, 0x77, 0xda, 0x6d, 0xbf,
+	0x67, 0xdd, 0xdb, 0xdc, 0x56, 0xcf, 0xb2, 0x78, 0xef, 0x9f, 0x3a, 0x9e, 0x64, 0xa0, 0x76, 0xcf,
+	0x9c, 0xe3, 0xdf, 0xf7, 0x36, 0xb7, 0x13, 0x78, 0x8b, 0x44, 0x11, 0xd9, 0x63, 0xf0, 0xe9, 0xa2,
+	0x70, 0xc1, 0x60, 0x70, 0xfe, 0x9d, 0xc0, 0x3f, 0x01, 0xb3, 0x2c, 0x92, 0x87, 0x1d, 0x75, 0x26,
+	0x3d, 0x82, 0x71, 0xd1, 0x1f, 0x87, 0xd4, 0x4c, 0xfd, 0x13, 0x56, 0x84, 0x63, 0x1c, 0x75, 0xb1,
+	0xa3, 0xce, 0x16, 0x63, 0x49, 0x7f, 0xf8, 0x08, 0x00, 0x9b, 0xf8, 0x3e, 0xa2, 0x38, 0x42, 0xbe,
+	0x3a, 0x57, 0x88, 0x96, 0x21, 0x24, 0xda, 0xf8, 0xa6, 0xb1, 0xa3, 0x82, 0x62, 0xda, 0xa4, 0x3f,
+	0xdc, 0x00, 0x73, 0xbe, 0xf7, 0xa2, 0xe3, 0x39, 0x1e, 0xed, 0xa9, 0xa5, 0x42, 0xb0, 0x01, 0x00,
+	0x6e, 0x81, 0xf9, 0x00, 0xed, 0x7b, 0x41, 0x27, 0xb0, 0x78, 0x04, 0xb5, 0x5c, 0x08, 0x59, 0x11,
+	0x94, 0x26, 0x83, 0xc0, 0xcf, 0x01, 0x94, 0xd8, 0x4c, 0x22, 0x2b, 0x85, 0xd0, 0xe7, 0x04, 0xe9,
+	0xfe, 0x20, 0x9f, 0xcf, 0xc1, 0xb9, 0xc0, 0x0b, 0x19, 0x7e, 0x90, 0x8b, 0xf9, 0x42, 0xf4, 0x45,
+	0x01, 0xda, 0x48, 0x53, 0xe2, 0x80, 0x8a, 0xb8, 0xc8, 0xfc, 0x16, 0xa8, 0x0b, 0x0c, 0xfc, 0xc1,
+	0xe9, 0xc0, 0xaf, 0xfa, 0x8d, 0x8a, 0xb8, 0xc1, 0x1c, 0x63, 0x96, 0x39, 0xf5, 0x09, 0x1b, 0xc1,
+	0x6d, 0xb0, 0x88, 0xba, 0xc8, 0xf3, 0x51, 0xcb, 0xc7, 0x32, 0xf5, 0x8b, 0x85, 0x76, 0xb0, 0x90,
+	0x72, 0x06, 0xc9, 0x1f, 0xa0, 0xf7, 0x3c, 0xba, 0xe3, 0x44, 0x68, 0x4f, 0x3d, 0x57, 0x2c, 0xf9,
+	0x29, 0xe9, 0x33, 0x01, 0x82, 0x2e, 0x58, 0x1a, 0xe0, 0x07, 0xa7, 0xeb, 0x7d, 0x81, 0x55, 0x58,
+	0x28, 0xc6, 0x9b, 0x29, 0xee, 0x7e, 0x96, 0xa6, 0xdd, 0x06, 0x55, 0xf6, 0x02, 0xdc, 0xb3, 0x6d,
+	0xd2, 0x09, 0x69, 0x13, 0xf9, 0x28, 0xb4, 0x71, 0x0c, 0x55, 0x30, 0x83, 0x1c, 0x27, 0xc2, 0x71,
+	0x2c, 0xca, 0xbe, 0x1c, 0x6a, 0xbf, 0x4d, 0x82, 0x4b, 0x27, 0xb9, 0xa4, 0xcf, 0x86, 0x9b, 0x29,
+	0x38, 0xfc, 0xf1, 0xba, 0xa0, 0x73, 0x4d, 0x7a, 0xf2, 0x0e, 0xeb, 0xe2, 0x1d, 0xd6, 0xef, 0x13,
+	0x2f, 0x6c, 0xde, 0x4e, 0xf6, 0xf1, 0xd3, 0xef, 0x8d, 0xd5, 0x31, 0xf6, 0x91, 0x38, 0xc4, 0x99,
+	0x6a, 0xb4, 0x7b, 0xac, 0x82, 0x4c, 0xfe, 0xf7, 0xa1, 0xb2, 0xe5, 0xc5, 0xcd, 0x94, 0x97, 0xa9,
+	0xff, 0x61, 0x57, 0x12, 0xae, 0x19, 0xa2, 0x09, 0x11, 0xe9, 0x95, 0x2f, 0xf8, 0xe8, 0x03, 0xe9,
+	0x4f, 0x81, 0x8b, 0x27, 0x78, 0xa4, 0xe7, 0xb1, 0x05, 0xe6, 0x65, 0xca, 0xac, 0x2e, 0xf2, 0x3b,
+	0x98, 0x03, 0x4e, 0xf5, 0x2f, 0x94, 0xbc, 0xc4, 0x15, 0x49, 0xf9, 0x34, 0x81, 0x24, 0x97, 0x6b,
+	0x90, 0x1e, 0x01, 0x9e, 0x2c, 0x04, 0x5e, 0x18, 0x70, 0x38, 0x7a, 0x0b, 0xcc, 0xcb, 0x74, 0x08,
+	0xf0, 0x54, 0x31, 0xc5, 0x92, 0xc2, 0xb1, 0x8f, 0x41, 0x59, 0x3c, 0x91, 0xbe, 0x17, 0x78, 0x54,
+	0x74, 0x0d, 0xa7, 0x85, 0x96, 0x38, 0x63, 0x23, 0x41, 0x40, 0x1b, 0x9c, 0xe7, 0xc5, 0x91, 0x75,
+	0xb3, 0x16, 0xdd, 0x89, 0x70, 0xbc, 0x43, 0x7c, 0x47, 0x74, 0x08, 0xa7, 0x65, 0x57, 0x33, 0xb0,
+	0xa7, 0x92, 0xa5, 0x5d, 0x00, 0x4b, 0xec, 0x7c, 0x37, 0x32, 0x8b, 0x28, 0x72, 0x31, 0x8d, 0xb5,
+	0xf7, 0x40, 0x63, 0xc4, 0x52, 0x7a, 0xfc, 0x2a, 0x98, 0xa1, 0x7c, 0x8a, 0xdd, 0xc6, 0x39, 0x53,
+	0x0e, 0xb5, 0x05, 0x50, 0x61, 0xce, 0x4d, 0xe4, 0x3c, 0xc0, 0x2d, 0x1a, 0x6b, 0xa6, 0x68, 0x58,
+	0xe5, 0x44, 0xa6, 0x1f, 0x3d, 0xc6, 0x48, 0xfe, 0xf7, 0x73, 0xed, 0xa8, 0x70, 0x12, 0x0d, 0xa9,
+	0xb4, 0xbf, 0xf3, 0xf7, 0x0c, 0x38, 0xcb, 0xa0, 0xb0, 0x0d, 0xa6, 0x79, 0x9b, 0x0c, 0x2f, 0xe7,
+	0xbd, 0x33, 0x7d, 0x77, 0x6d, 0xe5, 0xb5, 0xcb, 0x52, 0x94, 0xb6, 0xfc, 0xd5, 0xcf, 0x7f, 0x7d,
+	0x37, 0x59, 0x83, 0xaa, 0x91, 0xfb, 0x71, 0xc0, 0x1b, 0x70, 0xf8, 0x83, 0x02, 0x16, 0x87, 0x7b,
+	0x6c, 0x78, 0x63, 0x04, 0x7d, 0xd8, 0xb0, 0x66, 0x8c, 0x69, 0x98, 0x0a, 0x7a, 0x8b, 0x09, 0x5a,
+	0x81, 0x57, 0xf3, 0x82, 0xa2, 0xd4, 0xc7, 0xa2, 0x5c, 0xc6, 0xd7, 0x0a, 0xa8, 0x1c, 0xef, 0xd1,
+	0xaf, 0x8d, 0x88, 0x77, 0xcc, 0xaa, 0xf6, 0xf6, 0x38, 0x56, 0xa9, 0xa4, 0x55, 0x26, 0x49, 0x83,
+	0xcb, 0x79, 0x49, 0x01, 0x73, 0xb0, 0x62, 0x11, 0xfd, 0x7b, 0x05, 0x2c, 0x0c, 0x3f, 0x02, 0xd7,
+	0x47, 0xc4, 0x1a, 0xb2, 0xab, 0xe9, 0xe3, 0xd9, 0xa5, 0xaa, 0x6e, 0x31, 0x55, 0xd7, 0xa0, 0x96,
+	0x57, 0x85, 0xb8, 0x8b, 0xd5, 0x92, 0x1a, 0xbe, 0x55, 0xc0, 0xfc, 0x50, 0x29, 0x5c, 0x79, 0x7d,
+	0x38, 0x99, 0xa9, 0xb5, 0xb1, 0xcc, 0x52, 0x51, 0x37, 0x99, 0xa8, 0xab, 0xf0, 0xca, 0x68, 0x51,
+	0x32, 0x57, 0x3f, 0x2a, 0x00, 0xe6, 0x6f, 0x1c, 0xbc, 0x39, 0x22, 0x60, 0xde, 0xb4, 0xb6, 0x3e,
+	0xb6, 0x69, 0xaa, 0x6f, 0x8d, 0xe9, 0xbb, 0x01, 0x57, 0xf2, 0xfa, 0x8e, 0x95, 0x20, 0x21, 0xa6,
+	0x07, 0x66, 0xe5, 0x35, 0x86, 0x8d, 0x11, 0xd1, 0xa4, 0x41, 0xed, 0xc6, 0xbf, 0x18, 0xa4, 0x22,
+	0xae, 0x32, 0x11, 0x97, 0xe1, 0xc5, 0xbc, 0x88, 0x16, 0x72, 0x2c, 0x27, 0x31, 0x6e, 0x3e, 0x3a,
+	0xf8, 0xb3, 0x3e, 0x71, 0x70, 0x58, 0x57, 0x5e, 0x1e, 0xd6, 0x95, 0x3f, 0x0e, 0xeb, 0xca, 0x37,
+	0x47, 0xf5, 0x89, 0x97, 0x47, 0xf5, 0x89, 0x5f, 0x8e, 0xea, 0x13, 0xcf, 0x6e, 0x67, 0x6a, 0x61,
+	0x02, 0x59, 0x0b, 0x31, 0xdd, 0x23, 0xd1, 0x2e, 0x27, 0x76, 0xef, 0x1a, 0xfb, 0x03, 0x2c, 0xab,
+	0x8c, 0xad, 0x69, 0xf6, 0x63, 0xfd, 0xee, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xc6, 0x7a, 0xa8,
+	0xe2, 0x73, 0x10, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1999,68 +730,20 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
+	// Params queries the parameters of the x/leverage module.
+	Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	// RegisteredTokens queries for all the registered tokens.
 	RegisteredTokens(ctx context.Context, in *QueryRegisteredTokens, opts ...grpc.CallOption) (*QueryRegisteredTokensResponse, error)
-	// Params queries the parameters of the x/leverage module.
-	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	// Borrowed queries for the borrowed amount of a user by token denomination.
-	// If the denomination is not supplied, the total for each borrowed token is
-	// returned.
-	Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error)
-	// BorrowedValue queries for the usd value of the borrowed amount of a user
-	// by token denomination.  If the denomination is not supplied, the sum across
-	// all borrowed tokens is returned.
-	BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error)
-	// Loaned queries for the amount of tokens loaned by a user by denomination.
-	// If the denomination is not supplied, the total for each loaned token is
-	// returned.
-	Loaned(ctx context.Context, in *QueryLoanedRequest, opts ...grpc.CallOption) (*QueryLoanedResponse, error)
-	// LoanedValue queries for the USD value loaned by a user by token
-	// denomination. If the denomination is not supplied, the sum across all
-	// loaned tokens is returned.
-	LoanedValue(ctx context.Context, in *QueryLoanedValueRequest, opts ...grpc.CallOption) (*QueryLoanedValueResponse, error)
-	// AvailableBorrow queries for the available amount to borrow of a specified
-	// denomination.
-	AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error)
-	// BorrowAPY queries for the borrow APY of a specified denomination.
-	BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error)
-	// LendAPY queries for the lend APY of a specified denomination.
-	LendAPY(ctx context.Context, in *QueryLendAPYRequest, opts ...grpc.CallOption) (*QueryLendAPYResponse, error)
-	// MarketSize queries for the Market Size in USD of a specified denomination,
-	// which is the USD value of total tokens loaned by all users plus borrow
-	// interest owed by all users.
-	MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error)
-	// TokenMarketSize queries for the Market Size in base tokens of a specified
-	// denomination, which is the total tokens loaned by all users plus borrow
-	// interest owed by all users.
-	TokenMarketSize(ctx context.Context, in *QueryTokenMarketSizeRequest, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error)
-	// ReserveAmount queries for the amount reserved of a specified denomination.
-	// If the token is not valid, the reserved amount is zero.
-	ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error)
-	// CollateralSetting queries a borrower's collateral setting (enabled or
-	// disabled) for a specified uToken denomination.
-	CollateralSetting(ctx context.Context, in *QueryCollateralSettingRequest, opts ...grpc.CallOption) (*QueryCollateralSettingResponse, error)
-	// Collateral queries the collateral amount of a user by token denomination.
-	// If the denomination is not supplied, all of the user's collateral tokens
-	// are returned.
-	Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error)
-	// CollateralValue queries for the total USD value of a user's collateral, or
-	// the USD value held as a given base asset's associated uToken denomination.
-	CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error)
-	// ExchangeRate queries the uToken exchange rate of a given uToken
-	// denomination.
-	ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error)
-	// BorrowLimit queries the borrow limit in USD of a given borrower.
-	BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error)
-	// LiquidationThreshold returns a maximum borrow value in USD above which a
-	// given borrower is eligible for liquidation.
-	LiquidationThreshold(ctx context.Context, in *QueryLiquidationThresholdRequest, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error)
-	// LiquidationTargets queries a list of all borrower addresses eligible for
-	// liquidation.
-	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
-	// MarketSummary queries a base asset's current borrowing and lending
-	// conditions.
-	MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
+	// MarketSummary queries a base asset's current borrowing and supplying conditions.
+	MarketSummary(ctx context.Context, in *QueryMarketSummary, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error)
+	// AccountBalances queries an account's current supply, collateral, and borrow positions.
+	AccountBalances(ctx context.Context, in *QueryAccountBalances, opts ...grpc.CallOption) (*QueryAccountBalancesResponse, error)
+	// AccountSummary queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
+	AccountSummary(ctx context.Context, in *QueryAccountSummary, opts ...grpc.CallOption) (*QueryAccountSummaryResponse, error)
+	// LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
+	LiquidationTargets(ctx context.Context, in *QueryLiquidationTargets, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error)
+	// BadDebts queries a list of borrow positions that have been marked for bad debt repayment.
+	BadDebts(ctx context.Context, in *QueryBadDebts, opts ...grpc.CallOption) (*QueryBadDebtsResponse, error)
 }
 
 type queryClient struct {
@@ -2069,6 +752,15 @@ type queryClient struct {
 
 func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 	return &queryClient{cc}
+}
+
+func (c *queryClient) Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
+	out := new(QueryParamsResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Params", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *queryClient) RegisteredTokens(ctx context.Context, in *QueryRegisteredTokens, opts ...grpc.CallOption) (*QueryRegisteredTokensResponse, error) {
@@ -2080,169 +772,7 @@ func (c *queryClient) RegisteredTokens(ctx context.Context, in *QueryRegisteredT
 	return out, nil
 }
 
-func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
-	out := new(QueryParamsResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Params", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) Borrowed(ctx context.Context, in *QueryBorrowedRequest, opts ...grpc.CallOption) (*QueryBorrowedResponse, error) {
-	out := new(QueryBorrowedResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Borrowed", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) BorrowedValue(ctx context.Context, in *QueryBorrowedValueRequest, opts ...grpc.CallOption) (*QueryBorrowedValueResponse, error) {
-	out := new(QueryBorrowedValueResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowedValue", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) Loaned(ctx context.Context, in *QueryLoanedRequest, opts ...grpc.CallOption) (*QueryLoanedResponse, error) {
-	out := new(QueryLoanedResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Loaned", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) LoanedValue(ctx context.Context, in *QueryLoanedValueRequest, opts ...grpc.CallOption) (*QueryLoanedValueResponse, error) {
-	out := new(QueryLoanedValueResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LoanedValue", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) AvailableBorrow(ctx context.Context, in *QueryAvailableBorrowRequest, opts ...grpc.CallOption) (*QueryAvailableBorrowResponse, error) {
-	out := new(QueryAvailableBorrowResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/AvailableBorrow", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) BorrowAPY(ctx context.Context, in *QueryBorrowAPYRequest, opts ...grpc.CallOption) (*QueryBorrowAPYResponse, error) {
-	out := new(QueryBorrowAPYResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowAPY", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) LendAPY(ctx context.Context, in *QueryLendAPYRequest, opts ...grpc.CallOption) (*QueryLendAPYResponse, error) {
-	out := new(QueryLendAPYResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LendAPY", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) MarketSize(ctx context.Context, in *QueryMarketSizeRequest, opts ...grpc.CallOption) (*QueryMarketSizeResponse, error) {
-	out := new(QueryMarketSizeResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSize", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) TokenMarketSize(ctx context.Context, in *QueryTokenMarketSizeRequest, opts ...grpc.CallOption) (*QueryTokenMarketSizeResponse, error) {
-	out := new(QueryTokenMarketSizeResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/TokenMarketSize", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) ReserveAmount(ctx context.Context, in *QueryReserveAmountRequest, opts ...grpc.CallOption) (*QueryReserveAmountResponse, error) {
-	out := new(QueryReserveAmountResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ReserveAmount", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) CollateralSetting(ctx context.Context, in *QueryCollateralSettingRequest, opts ...grpc.CallOption) (*QueryCollateralSettingResponse, error) {
-	out := new(QueryCollateralSettingResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/CollateralSetting", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) Collateral(ctx context.Context, in *QueryCollateralRequest, opts ...grpc.CallOption) (*QueryCollateralResponse, error) {
-	out := new(QueryCollateralResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/Collateral", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) CollateralValue(ctx context.Context, in *QueryCollateralValueRequest, opts ...grpc.CallOption) (*QueryCollateralValueResponse, error) {
-	out := new(QueryCollateralValueResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/CollateralValue", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) ExchangeRate(ctx context.Context, in *QueryExchangeRateRequest, opts ...grpc.CallOption) (*QueryExchangeRateResponse, error) {
-	out := new(QueryExchangeRateResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/ExchangeRate", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) BorrowLimit(ctx context.Context, in *QueryBorrowLimitRequest, opts ...grpc.CallOption) (*QueryBorrowLimitResponse, error) {
-	out := new(QueryBorrowLimitResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BorrowLimit", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) LiquidationThreshold(ctx context.Context, in *QueryLiquidationThresholdRequest, opts ...grpc.CallOption) (*QueryLiquidationThresholdResponse, error) {
-	out := new(QueryLiquidationThresholdResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationThreshold", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargetsRequest, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
-	out := new(QueryLiquidationTargetsResponse)
-	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationTargets", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryRequest, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
+func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummary, opts ...grpc.CallOption) (*QueryMarketSummaryResponse, error) {
 	out := new(QueryMarketSummaryResponse)
 	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/MarketSummary", in, out, opts...)
 	if err != nil {
@@ -2251,139 +781,106 @@ func (c *queryClient) MarketSummary(ctx context.Context, in *QueryMarketSummaryR
 	return out, nil
 }
 
+func (c *queryClient) AccountBalances(ctx context.Context, in *QueryAccountBalances, opts ...grpc.CallOption) (*QueryAccountBalancesResponse, error) {
+	out := new(QueryAccountBalancesResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/AccountBalances", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AccountSummary(ctx context.Context, in *QueryAccountSummary, opts ...grpc.CallOption) (*QueryAccountSummaryResponse, error) {
+	out := new(QueryAccountSummaryResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/AccountSummary", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) LiquidationTargets(ctx context.Context, in *QueryLiquidationTargets, opts ...grpc.CallOption) (*QueryLiquidationTargetsResponse, error) {
+	out := new(QueryLiquidationTargetsResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/LiquidationTargets", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) BadDebts(ctx context.Context, in *QueryBadDebts, opts ...grpc.CallOption) (*QueryBadDebtsResponse, error) {
+	out := new(QueryBadDebtsResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Query/BadDebts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
+	// Params queries the parameters of the x/leverage module.
+	Params(context.Context, *QueryParams) (*QueryParamsResponse, error)
 	// RegisteredTokens queries for all the registered tokens.
 	RegisteredTokens(context.Context, *QueryRegisteredTokens) (*QueryRegisteredTokensResponse, error)
-	// Params queries the parameters of the x/leverage module.
-	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
-	// Borrowed queries for the borrowed amount of a user by token denomination.
-	// If the denomination is not supplied, the total for each borrowed token is
-	// returned.
-	Borrowed(context.Context, *QueryBorrowedRequest) (*QueryBorrowedResponse, error)
-	// BorrowedValue queries for the usd value of the borrowed amount of a user
-	// by token denomination.  If the denomination is not supplied, the sum across
-	// all borrowed tokens is returned.
-	BorrowedValue(context.Context, *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error)
-	// Loaned queries for the amount of tokens loaned by a user by denomination.
-	// If the denomination is not supplied, the total for each loaned token is
-	// returned.
-	Loaned(context.Context, *QueryLoanedRequest) (*QueryLoanedResponse, error)
-	// LoanedValue queries for the USD value loaned by a user by token
-	// denomination. If the denomination is not supplied, the sum across all
-	// loaned tokens is returned.
-	LoanedValue(context.Context, *QueryLoanedValueRequest) (*QueryLoanedValueResponse, error)
-	// AvailableBorrow queries for the available amount to borrow of a specified
-	// denomination.
-	AvailableBorrow(context.Context, *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error)
-	// BorrowAPY queries for the borrow APY of a specified denomination.
-	BorrowAPY(context.Context, *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error)
-	// LendAPY queries for the lend APY of a specified denomination.
-	LendAPY(context.Context, *QueryLendAPYRequest) (*QueryLendAPYResponse, error)
-	// MarketSize queries for the Market Size in USD of a specified denomination,
-	// which is the USD value of total tokens loaned by all users plus borrow
-	// interest owed by all users.
-	MarketSize(context.Context, *QueryMarketSizeRequest) (*QueryMarketSizeResponse, error)
-	// TokenMarketSize queries for the Market Size in base tokens of a specified
-	// denomination, which is the total tokens loaned by all users plus borrow
-	// interest owed by all users.
-	TokenMarketSize(context.Context, *QueryTokenMarketSizeRequest) (*QueryTokenMarketSizeResponse, error)
-	// ReserveAmount queries for the amount reserved of a specified denomination.
-	// If the token is not valid, the reserved amount is zero.
-	ReserveAmount(context.Context, *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error)
-	// CollateralSetting queries a borrower's collateral setting (enabled or
-	// disabled) for a specified uToken denomination.
-	CollateralSetting(context.Context, *QueryCollateralSettingRequest) (*QueryCollateralSettingResponse, error)
-	// Collateral queries the collateral amount of a user by token denomination.
-	// If the denomination is not supplied, all of the user's collateral tokens
-	// are returned.
-	Collateral(context.Context, *QueryCollateralRequest) (*QueryCollateralResponse, error)
-	// CollateralValue queries for the total USD value of a user's collateral, or
-	// the USD value held as a given base asset's associated uToken denomination.
-	CollateralValue(context.Context, *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error)
-	// ExchangeRate queries the uToken exchange rate of a given uToken
-	// denomination.
-	ExchangeRate(context.Context, *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error)
-	// BorrowLimit queries the borrow limit in USD of a given borrower.
-	BorrowLimit(context.Context, *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error)
-	// LiquidationThreshold returns a maximum borrow value in USD above which a
-	// given borrower is eligible for liquidation.
-	LiquidationThreshold(context.Context, *QueryLiquidationThresholdRequest) (*QueryLiquidationThresholdResponse, error)
-	// LiquidationTargets queries a list of all borrower addresses eligible for
-	// liquidation.
-	LiquidationTargets(context.Context, *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error)
-	// MarketSummary queries a base asset's current borrowing and lending
-	// conditions.
-	MarketSummary(context.Context, *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error)
+	// MarketSummary queries a base asset's current borrowing and supplying conditions.
+	MarketSummary(context.Context, *QueryMarketSummary) (*QueryMarketSummaryResponse, error)
+	// AccountBalances queries an account's current supply, collateral, and borrow positions.
+	AccountBalances(context.Context, *QueryAccountBalances) (*QueryAccountBalancesResponse, error)
+	// AccountSummary queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
+	AccountSummary(context.Context, *QueryAccountSummary) (*QueryAccountSummaryResponse, error)
+	// LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
+	LiquidationTargets(context.Context, *QueryLiquidationTargets) (*QueryLiquidationTargetsResponse, error)
+	// BadDebts queries a list of borrow positions that have been marked for bad debt repayment.
+	BadDebts(context.Context, *QueryBadDebts) (*QueryBadDebtsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
 type UnimplementedQueryServer struct {
 }
 
+func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParams) (*QueryParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+}
 func (*UnimplementedQueryServer) RegisteredTokens(ctx context.Context, req *QueryRegisteredTokens) (*QueryRegisteredTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisteredTokens not implemented")
 }
-func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
+func (*UnimplementedQueryServer) MarketSummary(ctx context.Context, req *QueryMarketSummary) (*QueryMarketSummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarketSummary not implemented")
 }
-func (*UnimplementedQueryServer) Borrowed(ctx context.Context, req *QueryBorrowedRequest) (*QueryBorrowedResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Borrowed not implemented")
+func (*UnimplementedQueryServer) AccountBalances(ctx context.Context, req *QueryAccountBalances) (*QueryAccountBalancesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccountBalances not implemented")
 }
-func (*UnimplementedQueryServer) BorrowedValue(ctx context.Context, req *QueryBorrowedValueRequest) (*QueryBorrowedValueResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BorrowedValue not implemented")
+func (*UnimplementedQueryServer) AccountSummary(ctx context.Context, req *QueryAccountSummary) (*QueryAccountSummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccountSummary not implemented")
 }
-func (*UnimplementedQueryServer) Loaned(ctx context.Context, req *QueryLoanedRequest) (*QueryLoanedResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Loaned not implemented")
-}
-func (*UnimplementedQueryServer) LoanedValue(ctx context.Context, req *QueryLoanedValueRequest) (*QueryLoanedValueResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoanedValue not implemented")
-}
-func (*UnimplementedQueryServer) AvailableBorrow(ctx context.Context, req *QueryAvailableBorrowRequest) (*QueryAvailableBorrowResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AvailableBorrow not implemented")
-}
-func (*UnimplementedQueryServer) BorrowAPY(ctx context.Context, req *QueryBorrowAPYRequest) (*QueryBorrowAPYResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BorrowAPY not implemented")
-}
-func (*UnimplementedQueryServer) LendAPY(ctx context.Context, req *QueryLendAPYRequest) (*QueryLendAPYResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LendAPY not implemented")
-}
-func (*UnimplementedQueryServer) MarketSize(ctx context.Context, req *QueryMarketSizeRequest) (*QueryMarketSizeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MarketSize not implemented")
-}
-func (*UnimplementedQueryServer) TokenMarketSize(ctx context.Context, req *QueryTokenMarketSizeRequest) (*QueryTokenMarketSizeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TokenMarketSize not implemented")
-}
-func (*UnimplementedQueryServer) ReserveAmount(ctx context.Context, req *QueryReserveAmountRequest) (*QueryReserveAmountResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReserveAmount not implemented")
-}
-func (*UnimplementedQueryServer) CollateralSetting(ctx context.Context, req *QueryCollateralSettingRequest) (*QueryCollateralSettingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CollateralSetting not implemented")
-}
-func (*UnimplementedQueryServer) Collateral(ctx context.Context, req *QueryCollateralRequest) (*QueryCollateralResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Collateral not implemented")
-}
-func (*UnimplementedQueryServer) CollateralValue(ctx context.Context, req *QueryCollateralValueRequest) (*QueryCollateralValueResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CollateralValue not implemented")
-}
-func (*UnimplementedQueryServer) ExchangeRate(ctx context.Context, req *QueryExchangeRateRequest) (*QueryExchangeRateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExchangeRate not implemented")
-}
-func (*UnimplementedQueryServer) BorrowLimit(ctx context.Context, req *QueryBorrowLimitRequest) (*QueryBorrowLimitResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BorrowLimit not implemented")
-}
-func (*UnimplementedQueryServer) LiquidationThreshold(ctx context.Context, req *QueryLiquidationThresholdRequest) (*QueryLiquidationThresholdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LiquidationThreshold not implemented")
-}
-func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargetsRequest) (*QueryLiquidationTargetsResponse, error) {
+func (*UnimplementedQueryServer) LiquidationTargets(ctx context.Context, req *QueryLiquidationTargets) (*QueryLiquidationTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LiquidationTargets not implemented")
 }
-func (*UnimplementedQueryServer) MarketSummary(ctx context.Context, req *QueryMarketSummaryRequest) (*QueryMarketSummaryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MarketSummary not implemented")
+func (*UnimplementedQueryServer) BadDebts(ctx context.Context, req *QueryBadDebts) (*QueryBadDebtsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BadDebts not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
 	s.RegisterService(&_Query_serviceDesc, srv)
+}
+
+func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Params(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Query/Params",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Params(ctx, req.(*QueryParams))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_RegisteredTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -2404,332 +901,8 @@ func _Query_RegisteredTokens_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryParamsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Params(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/Params",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Params(ctx, req.(*QueryParamsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_Borrowed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowedRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Borrowed(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/Borrowed",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Borrowed(ctx, req.(*QueryBorrowedRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_BorrowedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowedValueRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).BorrowedValue(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/BorrowedValue",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowedValue(ctx, req.(*QueryBorrowedValueRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_Loaned_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLoanedRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Loaned(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/Loaned",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Loaned(ctx, req.(*QueryLoanedRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_LoanedValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLoanedValueRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).LoanedValue(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/LoanedValue",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LoanedValue(ctx, req.(*QueryLoanedValueRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_AvailableBorrow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryAvailableBorrowRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).AvailableBorrow(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/AvailableBorrow",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).AvailableBorrow(ctx, req.(*QueryAvailableBorrowRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_BorrowAPY_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowAPYRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).BorrowAPY(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/BorrowAPY",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowAPY(ctx, req.(*QueryBorrowAPYRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_LendAPY_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLendAPYRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).LendAPY(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/LendAPY",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LendAPY(ctx, req.(*QueryLendAPYRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_MarketSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryMarketSizeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).MarketSize(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/MarketSize",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).MarketSize(ctx, req.(*QueryMarketSizeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_TokenMarketSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryTokenMarketSizeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).TokenMarketSize(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/TokenMarketSize",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).TokenMarketSize(ctx, req.(*QueryTokenMarketSizeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_ReserveAmount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryReserveAmountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).ReserveAmount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/ReserveAmount",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ReserveAmount(ctx, req.(*QueryReserveAmountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_CollateralSetting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCollateralSettingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).CollateralSetting(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/CollateralSetting",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).CollateralSetting(ctx, req.(*QueryCollateralSettingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_Collateral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCollateralRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Collateral(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/Collateral",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Collateral(ctx, req.(*QueryCollateralRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_CollateralValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCollateralValueRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).CollateralValue(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/CollateralValue",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).CollateralValue(ctx, req.(*QueryCollateralValueRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_ExchangeRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryExchangeRateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).ExchangeRate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/ExchangeRate",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ExchangeRate(ctx, req.(*QueryExchangeRateRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_BorrowLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBorrowLimitRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).BorrowLimit(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/BorrowLimit",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).BorrowLimit(ctx, req.(*QueryBorrowLimitRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_LiquidationThreshold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLiquidationThresholdRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).LiquidationThreshold(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/LiquidationThreshold",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LiquidationThreshold(ctx, req.(*QueryLiquidationThresholdRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryLiquidationTargetsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).LiquidationTargets(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umee.leverage.v1.Query/LiquidationTargets",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargetsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryMarketSummaryRequest)
+	in := new(QueryMarketSummary)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2741,7 +914,79 @@ func _Query_MarketSummary_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/umee.leverage.v1.Query/MarketSummary",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummaryRequest))
+		return srv.(QueryServer).MarketSummary(ctx, req.(*QueryMarketSummary))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AccountBalances_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAccountBalances)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AccountBalances(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Query/AccountBalances",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AccountBalances(ctx, req.(*QueryAccountBalances))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AccountSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAccountSummary)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AccountSummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Query/AccountSummary",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AccountSummary(ctx, req.(*QueryAccountSummary))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_LiquidationTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryLiquidationTargets)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).LiquidationTargets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Query/LiquidationTargets",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).LiquidationTargets(ctx, req.(*QueryLiquidationTargets))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_BadDebts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryBadDebts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).BadDebts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Query/BadDebts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).BadDebts(ctx, req.(*QueryBadDebts))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2751,91 +996,39 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "RegisteredTokens",
-			Handler:    _Query_RegisteredTokens_Handler,
-		},
-		{
 			MethodName: "Params",
 			Handler:    _Query_Params_Handler,
 		},
 		{
-			MethodName: "Borrowed",
-			Handler:    _Query_Borrowed_Handler,
+			MethodName: "RegisteredTokens",
+			Handler:    _Query_RegisteredTokens_Handler,
 		},
 		{
-			MethodName: "BorrowedValue",
-			Handler:    _Query_BorrowedValue_Handler,
+			MethodName: "MarketSummary",
+			Handler:    _Query_MarketSummary_Handler,
 		},
 		{
-			MethodName: "Loaned",
-			Handler:    _Query_Loaned_Handler,
+			MethodName: "AccountBalances",
+			Handler:    _Query_AccountBalances_Handler,
 		},
 		{
-			MethodName: "LoanedValue",
-			Handler:    _Query_LoanedValue_Handler,
-		},
-		{
-			MethodName: "AvailableBorrow",
-			Handler:    _Query_AvailableBorrow_Handler,
-		},
-		{
-			MethodName: "BorrowAPY",
-			Handler:    _Query_BorrowAPY_Handler,
-		},
-		{
-			MethodName: "LendAPY",
-			Handler:    _Query_LendAPY_Handler,
-		},
-		{
-			MethodName: "MarketSize",
-			Handler:    _Query_MarketSize_Handler,
-		},
-		{
-			MethodName: "TokenMarketSize",
-			Handler:    _Query_TokenMarketSize_Handler,
-		},
-		{
-			MethodName: "ReserveAmount",
-			Handler:    _Query_ReserveAmount_Handler,
-		},
-		{
-			MethodName: "CollateralSetting",
-			Handler:    _Query_CollateralSetting_Handler,
-		},
-		{
-			MethodName: "Collateral",
-			Handler:    _Query_Collateral_Handler,
-		},
-		{
-			MethodName: "CollateralValue",
-			Handler:    _Query_CollateralValue_Handler,
-		},
-		{
-			MethodName: "ExchangeRate",
-			Handler:    _Query_ExchangeRate_Handler,
-		},
-		{
-			MethodName: "BorrowLimit",
-			Handler:    _Query_BorrowLimit_Handler,
-		},
-		{
-			MethodName: "LiquidationThreshold",
-			Handler:    _Query_LiquidationThreshold_Handler,
+			MethodName: "AccountSummary",
+			Handler:    _Query_AccountSummary_Handler,
 		},
 		{
 			MethodName: "LiquidationTargets",
 			Handler:    _Query_LiquidationTargets_Handler,
 		},
 		{
-			MethodName: "MarketSummary",
-			Handler:    _Query_MarketSummary_Handler,
+			MethodName: "BadDebts",
+			Handler:    _Query_BadDebts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "umee/leverage/v1/query.proto",
 }
 
-func (m *QueryRegisteredTokens) Marshal() (dAtA []byte, err error) {
+func (m *QueryParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2845,387 +1038,12 @@ func (m *QueryRegisteredTokens) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryRegisteredTokens) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryParams) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryRegisteredTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryAvailableBorrowRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryAvailableBorrowRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryAvailableBorrowRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryAvailableBorrowResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryAvailableBorrowResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryAvailableBorrowResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.Amount.Size()
-		i -= size
-		if _, err := m.Amount.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBorrowAPYRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBorrowAPYRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBorrowAPYRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBorrowAPYResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBorrowAPYResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBorrowAPYResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.APY.Size()
-		i -= size
-		if _, err := m.APY.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLendAPYRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLendAPYRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLendAPYRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLendAPYResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLendAPYResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLendAPYResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.APY.Size()
-		i -= size
-		if _, err := m.APY.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryMarketSizeRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryMarketSizeRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryMarketSizeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryMarketSizeResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryMarketSizeResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryMarketSizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.MarketSizeUsd.Size()
-		i -= size
-		if _, err := m.MarketSizeUsd.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryTokenMarketSizeRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryTokenMarketSizeRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryTokenMarketSizeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryTokenMarketSizeResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryTokenMarketSizeResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryTokenMarketSizeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.MarketSize.Size()
-		i -= size
-		if _, err := m.MarketSize.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryRegisteredTokensResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryRegisteredTokensResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryRegisteredTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Registry) > 0 {
-		for iNdEx := len(m.Registry) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Registry[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryParamsRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryParamsRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryParamsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -3266,7 +1084,7 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowedRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryRegisteredTokens) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3276,34 +1094,20 @@ func (m *QueryBorrowedRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowedRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryRegisteredTokens) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryRegisteredTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowedResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryRegisteredTokensResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3313,20 +1117,20 @@ func (m *QueryBorrowedResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowedResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryRegisteredTokensResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryRegisteredTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Borrowed) > 0 {
-		for iNdEx := len(m.Borrowed) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Registry) > 0 {
+		for iNdEx := len(m.Registry) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Borrowed[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Registry[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3340,7 +1144,7 @@ func (m *QueryBorrowedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowedValueRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryMarketSummary) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -3350,747 +1154,12 @@ func (m *QueryBorrowedValueRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowedValueRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryMarketSummary) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBorrowedValueResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBorrowedValueResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBorrowedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.BorrowedValue.Size()
-		i -= size
-		if _, err := m.BorrowedValue.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralValueRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralValueRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralValueResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralValueResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.CollateralValue.Size()
-		i -= size
-		if _, err := m.CollateralValue.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLoanedRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLoanedRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLoanedRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLoanedResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLoanedResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLoanedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Loaned) > 0 {
-		for iNdEx := len(m.Loaned) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Loaned[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLoanedValueRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLoanedValueRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLoanedValueRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLoanedValueResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLoanedValueResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLoanedValueResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.LoanedValue.Size()
-		i -= size
-		if _, err := m.LoanedValue.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryReserveAmountRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryReserveAmountRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryReserveAmountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryReserveAmountResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryReserveAmountResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryReserveAmountResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.Amount.Size()
-		i -= size
-		if _, err := m.Amount.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralSettingRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralSettingRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralSettingRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralSettingResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralSettingResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralSettingResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Enabled {
-		i--
-		if m.Enabled {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
-		}
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryCollateralResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryCollateralResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Collateral) > 0 {
-		for iNdEx := len(m.Collateral) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Collateral[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryExchangeRateRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryExchangeRateRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryExchangeRateRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryExchangeRateResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryExchangeRateResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryExchangeRateResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.ExchangeRate.Size()
-		i -= size
-		if _, err := m.ExchangeRate.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBorrowLimitRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBorrowLimitRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBorrowLimitRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBorrowLimitResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBorrowLimitResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBorrowLimitResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.BorrowLimit.Size()
-		i -= size
-		if _, err := m.BorrowLimit.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLiquidationThresholdRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLiquidationThresholdRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLiquidationThresholdRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLiquidationThresholdResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLiquidationThresholdResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLiquidationThresholdResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size := m.LiquidationThreshold.Size()
-		i -= size
-		if _, err := m.LiquidationThreshold.MarshalTo(dAtA[i:]); err != nil {
-			return 0, err
-		}
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLiquidationTargetsRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLiquidationTargetsRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLiquidationTargetsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryLiquidationTargetsResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryLiquidationTargetsResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryLiquidationTargetsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Targets) > 0 {
-		for iNdEx := len(m.Targets) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Targets[iNdEx])
-			copy(dAtA[i:], m.Targets[iNdEx])
-			i = encodeVarintQuery(dAtA, i, uint64(len(m.Targets[iNdEx])))
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryMarketSummaryRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryMarketSummaryRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryMarketSummaryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryMarketSummary) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -4126,15 +1195,29 @@ func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	var l int
 	_ = l
 	{
-		size := m.Reserved.Size()
+		size := m.AvailableCollateralize.Size()
 		i -= size
-		if _, err := m.Reserved.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.AvailableCollateralize.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0x4a
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x92
+	{
+		size := m.AvailableWithdraw.Size()
+		i -= size
+		if _, err := m.AvailableWithdraw.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x8a
 	{
 		size := m.AvailableBorrow.Size()
 		i -= size
@@ -4144,11 +1227,93 @@ func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 		i = encodeVarintQuery(dAtA, i, uint64(size))
 	}
 	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x82
+	{
+		size := m.UTokenSupply.Size()
+		i -= size
+		if _, err := m.UTokenSupply.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x7a
+	{
+		size := m.MinimumLiquidity.Size()
+		i -= size
+		if _, err := m.MinimumLiquidity.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x72
+	{
+		size := m.MaximumCollateral.Size()
+		i -= size
+		if _, err := m.MaximumCollateral.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x6a
+	{
+		size := m.MaximumBorrow.Size()
+		i -= size
+		if _, err := m.MaximumBorrow.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x62
+	{
+		size := m.Liquidity.Size()
+		i -= size
+		if _, err := m.Liquidity.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x5a
+	{
+		size := m.Borrowed.Size()
+		i -= size
+		if _, err := m.Borrowed.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x52
+	{
+		size := m.Collateral.Size()
+		i -= size
+		if _, err := m.Collateral.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x4a
+	{
+		size := m.Reserved.Size()
+		i -= size
+		if _, err := m.Reserved.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
 	dAtA[i] = 0x42
 	{
-		size := m.MarketSize.Size()
+		size := m.Supplied.Size()
 		i -= size
-		if _, err := m.MarketSize.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Supplied.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
@@ -4166,9 +1331,9 @@ func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	i--
 	dAtA[i] = 0x32
 	{
-		size := m.Lend_APY.Size()
+		size := m.Supply_APY.Size()
 		i -= size
-		if _, err := m.Lend_APY.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Supply_APY.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
@@ -4212,6 +1377,319 @@ func (m *QueryMarketSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryAccountBalances) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAccountBalances) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAccountBalances) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAccountBalancesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAccountBalancesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAccountBalancesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Borrowed) > 0 {
+		for iNdEx := len(m.Borrowed) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Borrowed[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Collateral) > 0 {
+		for iNdEx := len(m.Collateral) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Collateral[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Supplied) > 0 {
+		for iNdEx := len(m.Supplied) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Supplied[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAccountSummary) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAccountSummary) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAccountSummary) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAccountSummaryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAccountSummaryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAccountSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.LiquidationThreshold.Size()
+		i -= size
+		if _, err := m.LiquidationThreshold.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
+	{
+		size := m.BorrowLimit.Size()
+		i -= size
+		if _, err := m.BorrowLimit.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x22
+	{
+		size := m.BorrowedValue.Size()
+		i -= size
+		if _, err := m.BorrowedValue.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
+	{
+		size := m.CollateralValue.Size()
+		i -= size
+		if _, err := m.CollateralValue.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	{
+		size := m.SuppliedValue.Size()
+		i -= size
+		if _, err := m.SuppliedValue.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLiquidationTargets) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationTargets) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationTargets) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryLiquidationTargetsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryLiquidationTargetsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryLiquidationTargetsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for iNdEx := len(m.Targets) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Targets[iNdEx])
+			copy(dAtA[i:], m.Targets[iNdEx])
+			i = encodeVarintQuery(dAtA, i, uint64(len(m.Targets[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryBadDebts) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBadDebts) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBadDebts) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryBadDebtsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryBadDebtsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryBadDebtsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for iNdEx := len(m.Targets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Targets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -4223,151 +1701,7 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryRegisteredTokens) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *QueryAvailableBorrowRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryAvailableBorrowResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.Amount.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryBorrowAPYRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryBorrowAPYResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.APY.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryLendAPYRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryLendAPYResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.APY.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryMarketSizeRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryMarketSizeResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.MarketSizeUsd.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryTokenMarketSizeRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryTokenMarketSizeResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.MarketSize.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryRegisteredTokensResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Registry) > 0 {
-		for _, e := range m.Registry {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *QueryParamsRequest) Size() (n int) {
+func (m *QueryParams) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4387,31 +1721,23 @@ func (m *QueryParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowedRequest) Size() (n int) {
+func (m *QueryRegisteredTokens) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
 	return n
 }
 
-func (m *QueryBorrowedResponse) Size() (n int) {
+func (m *QueryRegisteredTokensResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.Borrowed) > 0 {
-		for _, e := range m.Borrowed {
+	if len(m.Registry) > 0 {
+		for _, e := range m.Registry {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -4419,304 +1745,7 @@ func (m *QueryBorrowedResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBorrowedValueRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryBorrowedValueResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.BorrowedValue.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryCollateralValueRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryCollateralValueResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.CollateralValue.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryLoanedRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryLoanedResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Loaned) > 0 {
-		for _, e := range m.Loaned {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *QueryLoanedValueRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryLoanedValueResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.LoanedValue.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryReserveAmountRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryReserveAmountResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.Amount.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryCollateralSettingRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryCollateralSettingResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Enabled {
-		n += 2
-	}
-	return n
-}
-
-func (m *QueryCollateralRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryCollateralResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Collateral) > 0 {
-		for _, e := range m.Collateral {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *QueryExchangeRateRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryExchangeRateResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.ExchangeRate.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryBorrowLimitRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryBorrowLimitResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.BorrowLimit.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryLiquidationThresholdRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryLiquidationThresholdResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.LiquidationThreshold.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	return n
-}
-
-func (m *QueryLiquidationTargetsRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *QueryLiquidationTargetsResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Targets) > 0 {
-		for _, s := range m.Targets {
-			l = len(s)
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *QueryMarketSummaryRequest) Size() (n int) {
+func (m *QueryMarketSummary) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -4748,16 +1777,154 @@ func (m *QueryMarketSummaryResponse) Size() (n int) {
 	}
 	l = m.UTokenExchangeRate.Size()
 	n += 1 + l + sovQuery(uint64(l))
-	l = m.Lend_APY.Size()
+	l = m.Supply_APY.Size()
 	n += 1 + l + sovQuery(uint64(l))
 	l = m.Borrow_APY.Size()
 	n += 1 + l + sovQuery(uint64(l))
-	l = m.MarketSize.Size()
-	n += 1 + l + sovQuery(uint64(l))
-	l = m.AvailableBorrow.Size()
+	l = m.Supplied.Size()
 	n += 1 + l + sovQuery(uint64(l))
 	l = m.Reserved.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	l = m.Collateral.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.Borrowed.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.Liquidity.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.MaximumBorrow.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.MaximumCollateral.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.MinimumLiquidity.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.UTokenSupply.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.AvailableBorrow.Size()
+	n += 2 + l + sovQuery(uint64(l))
+	l = m.AvailableWithdraw.Size()
+	n += 2 + l + sovQuery(uint64(l))
+	l = m.AvailableCollateralize.Size()
+	n += 2 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryAccountBalances) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAccountBalancesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Supplied) > 0 {
+		for _, e := range m.Supplied {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if len(m.Collateral) > 0 {
+		for _, e := range m.Collateral {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if len(m.Borrowed) > 0 {
+		for _, e := range m.Borrowed {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QueryAccountSummary) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAccountSummaryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.SuppliedValue.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.CollateralValue.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.BorrowedValue.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.BorrowLimit.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	l = m.LiquidationThreshold.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryLiquidationTargets) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryLiquidationTargetsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for _, s := range m.Targets {
+			l = len(s)
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QueryBadDebts) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryBadDebtsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Targets) > 0 {
+		for _, e := range m.Targets {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -4767,7 +1934,7 @@ func sovQuery(x uint64) (n int) {
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryRegisteredTokens) Unmarshal(dAtA []byte) error {
+func (m *QueryParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -4790,974 +1957,10 @@ func (m *QueryRegisteredTokens) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryRegisteredTokens: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryParams: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryRegisteredTokens: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryAvailableBorrowRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAvailableBorrowRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAvailableBorrowRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryAvailableBorrowResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAvailableBorrowResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAvailableBorrowResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryBorrowAPYRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowAPYRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowAPYRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryBorrowAPYResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowAPYResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowAPYResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field APY", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLendAPYRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLendAPYRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLendAPYRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLendAPYResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLendAPYResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLendAPYResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field APY", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryMarketSizeRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMarketSizeRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMarketSizeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryMarketSizeResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMarketSizeResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMarketSizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MarketSizeUsd", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.MarketSizeUsd.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryTokenMarketSizeRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryTokenMarketSizeResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTokenMarketSizeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MarketSize", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.MarketSize.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryRegisteredTokensResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryRegisteredTokensResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryRegisteredTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Registry", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Registry = append(m.Registry, Token{})
-			if err := m.Registry[len(m.Registry)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryParamsRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryParamsRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryParamsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryParams: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -5864,7 +2067,7 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryRegisteredTokens) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5887,76 +2090,12 @@ func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryRegisteredTokens: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryRegisteredTokens: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -5978,7 +2117,7 @@ func (m *QueryBorrowedRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryRegisteredTokensResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6001,15 +2140,15 @@ func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryRegisteredTokensResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryRegisteredTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Borrowed", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Registry", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6036,8 +2175,8 @@ func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Borrowed = append(m.Borrowed, types.Coin{})
-			if err := m.Borrowed[len(m.Borrowed)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Registry = append(m.Registry, Token{})
+			if err := m.Registry[len(m.Registry)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6062,7 +2201,7 @@ func (m *QueryBorrowedResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowedValueRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryMarketSummary) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6085,1980 +2224,10 @@ func (m *QueryBorrowedValueRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedValueRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryMarketSummary: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryBorrowedValueResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowedValueResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowedValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BorrowedValue", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.BorrowedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralValueRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralValueRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralValueResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralValueResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field CollateralValue", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.CollateralValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLoanedRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLoanedResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Loaned", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Loaned = append(m.Loaned, types.Coin{})
-			if err := m.Loaned[len(m.Loaned)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLoanedValueRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedValueRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedValueRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLoanedValueResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLoanedValueResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLoanedValueResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LoanedValue", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.LoanedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryReserveAmountRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryReserveAmountRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryReserveAmountRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryReserveAmountResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryReserveAmountResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryReserveAmountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralSettingRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralSettingRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralSettingRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralSettingResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralSettingResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralSettingResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Enabled", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.Enabled = bool(v != 0)
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryCollateralResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCollateralResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCollateralResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Collateral", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Collateral = append(m.Collateral, types.Coin{})
-			if err := m.Collateral[len(m.Collateral)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryExchangeRateRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryExchangeRateRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryExchangeRateRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryExchangeRateResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryExchangeRateResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryExchangeRateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ExchangeRate", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.ExchangeRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryBorrowLimitRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowLimitRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowLimitRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryBorrowLimitResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowLimitResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowLimitResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BorrowLimit", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.BorrowLimit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLiquidationThresholdRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLiquidationThresholdResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationThresholdResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationThreshold", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.LiquidationThreshold.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLiquidationTargetsRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryLiquidationTargetsResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Targets", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Targets = append(m.Targets, string(dAtA[iNdEx:postIndex]))
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryMarketSummaryRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMarketSummaryRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMarketSummaryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryMarketSummary: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -8266,7 +2435,7 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Lend_APY", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Supply_APY", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -8294,7 +2463,7 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Lend_APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Supply_APY.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -8334,7 +2503,7 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 7:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MarketSize", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Supplied", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -8362,11 +2531,283 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.MarketSize.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Supplied.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reserved", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Reserved.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Collateral", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Collateral.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Borrowed", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Borrowed.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Liquidity", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Liquidity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaximumBorrow", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaximumBorrow.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaximumCollateral", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaximumCollateral.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinimumLiquidity", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinimumLiquidity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UTokenSupply", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.UTokenSupply.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 16:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AvailableBorrow", wireType)
 			}
@@ -8400,9 +2841,9 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 9:
+		case 17:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Reserved", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AvailableWithdraw", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -8430,7 +2871,843 @@ func (m *QueryMarketSummaryResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Reserved.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.AvailableWithdraw.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 18:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AvailableCollateralize", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.AvailableCollateralize.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAccountBalances) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAccountBalances: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAccountBalances: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAccountBalancesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAccountBalancesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAccountBalancesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Supplied", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Supplied = append(m.Supplied, types.Coin{})
+			if err := m.Supplied[len(m.Supplied)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Collateral", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Collateral = append(m.Collateral, types.Coin{})
+			if err := m.Collateral[len(m.Collateral)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Borrowed", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Borrowed = append(m.Borrowed, types.Coin{})
+			if err := m.Borrowed[len(m.Borrowed)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAccountSummary) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAccountSummary: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAccountSummary: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAccountSummaryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAccountSummaryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAccountSummaryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SuppliedValue", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.SuppliedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CollateralValue", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.CollateralValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BorrowedValue", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.BorrowedValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BorrowLimit", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.BorrowLimit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationThreshold", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.LiquidationThreshold.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationTargets) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationTargets: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationTargets: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryLiquidationTargetsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryLiquidationTargetsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Targets", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Targets = append(m.Targets, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBadDebts) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBadDebts: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBadDebts: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryBadDebtsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryBadDebtsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryBadDebtsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Targets", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Targets = append(m.Targets, BadDebt{})
+			if err := m.Targets[len(m.Targets)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

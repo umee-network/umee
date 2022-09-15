@@ -22,17 +22,20 @@ The `price-feeder` tool is responsible for performing the following:
    on-chain to Umee's `x/oracle` module following Umee's [Oracle](https://github.com/umee-network/umee/tree/main/x/oracle/spec)
    specification.
 
+<!-- markdown-link-check-disable -->
 ## Providers
 
 The list of current supported providers:
 
 - [Binance](https://www.binance.com/en)
 - [Coinbase](https://www.coinbase.com/)
+- [FTX](https://ftx.com/)
 - [Gate](https://www.gate.io/)
 - [Huobi](https://www.huobi.com/en-us/)
 - [Kraken](https://www.kraken.com/en-us/)
 - [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
+<!-- markdown-link-check-enable -->
 
 ## Usage
 
@@ -48,6 +51,18 @@ $ price-feeder /path/to/price_feeder_config.toml
 ```
 
 ## Configuration
+
+### `telemetry`
+
+A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md).
+
+### `deviation`
+
+Deviation allows validators to set a custom amount of standard deviations around the median which is helpful if any providers become faulty. It should be noted that the default for this option is 1 standard deviation.
+
+### `provider_endpoints`
+
+The provider_endpoints option enables validators to setup their own API endpoints for a given provider.
 
 ### `server`
 

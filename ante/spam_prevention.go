@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // SpamPreventionDecorator defines a custom Umee AnteHandler decorator that is
@@ -56,63 +56,48 @@ func (spd *SpamPreventionDecorator) CheckOracleSpam(ctx sdk.Context, msgs []sdk.
 
 	curHeight := ctx.BlockHeight()
 	for _, msg := range msgs {
+		var err error
 		switch msg := msg.(type) {
 		case *oracletypes.MsgAggregateExchangeRatePrevote:
-			feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
-			if err != nil {
-				return err
-			}
-
-			valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
-			if err != nil {
-				return err
-			}
-
-			err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
-			if err != nil {
-				return err
-			}
-
-			if lastSubmittedHeight, ok := spd.oraclePrevoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(
-					sdkerrors.ErrInvalidRequest,
-					"validator has already submitted a pre-vote message at the current height",
-				)
-			}
-
-			spd.oraclePrevoteMap[msg.Validator] = curHeight
-			continue
-
+			err = spd.validate(ctx, msg.Feeder, msg.Validator, spd.oraclePrevoteMap, curHeight, "pre-vote")
 		case *oracletypes.MsgAggregateExchangeRateVote:
-			feederAddr, err := sdk.AccAddressFromBech32(msg.Feeder)
-			if err != nil {
-				return err
-			}
-
-			valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
-			if err != nil {
-				return err
-			}
-
-			err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr)
-			if err != nil {
-				return err
-			}
-
-			if lastSubmittedHeight, ok := spd.oracleVoteMap[msg.Validator]; ok && lastSubmittedHeight == curHeight {
-				return sdkerrors.Wrap(
-					sdkerrors.ErrInvalidRequest,
-					"validator has already submitted a vote message at the current height",
-				)
-			}
-
-			spd.oracleVoteMap[msg.Validator] = curHeight
-			continue
-
+			err = spd.validate(ctx, msg.Feeder, msg.Validator, spd.oracleVoteMap, curHeight, "vote")
 		default:
+			// non oracle msg: stop validation!
+			// NOTE: only tx which contains only oracle Msgs are considered oracle-prioritized
 			return nil
+		}
+		if err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+func (spd *SpamPreventionDecorator) validate(
+	ctx sdk.Context,
+	feeder,
+	validator string,
+	cache map[string]int64,
+	curHeight int64,
+	txType string,
+) error {
+	feederAddr, err := sdk.AccAddressFromBech32(feeder)
+	if err != nil {
+		return err
+	}
+	valAddr, err := sdk.ValAddressFromBech32(validator)
+	if err != nil {
+		return err
+	}
+	if err = spd.oracleKeeper.ValidateFeeder(ctx, feederAddr, valAddr); err != nil {
+		return err
+	}
+	if lastSubmitted, ok := cache[validator]; ok && lastSubmitted == curHeight {
+		return sdkerrors.ErrInvalidRequest.Wrapf(
+			"validator has already submitted a %s message at the current height", txType)
+	}
+	cache[validator] = curHeight
 	return nil
 }

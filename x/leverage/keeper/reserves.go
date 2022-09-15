@@ -3,57 +3,71 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-// GetReserveAmount gets the amount reserved of a specified token. On invalid
-// asset, the reserved amount is zero.
-func (k Keeper) GetReserveAmount(ctx sdk.Context, denom string) sdk.Int {
-	store := ctx.KVStore(k.storeKey)
-	key := types.CreateReserveAmountKey(denom)
-	amount := sdk.ZeroInt()
-
-	if bz := store.Get(key); bz != nil {
-		err := amount.Unmarshal(bz)
+// clearBlacklistedCollateral decollateralizes any blacklisted uTokens
+// from a borrower's collateral. It is used during liquidations and before
+// repaying bad debts with reserves to make any subsequent checks for
+// remaining collateral on the borrower's address more efficient.
+// Also returns a boolean indicating whether valid collateral remains.
+func (k Keeper) clearBlacklistedCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) (bool, error) {
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	hasCollateral := false
+	for _, coin := range collateral {
+		denom := types.ToTokenDenom(coin.Denom)
+		token, err := k.GetTokenSettings(ctx, denom)
 		if err != nil {
-			panic(err)
+			return false, err
+		}
+		if token.Blacklist {
+			// Decollateralize any blacklisted uTokens encountered
+			err := k.decollateralize(ctx, borrowerAddr, borrowerAddr, coin)
+			if err != nil {
+				return false, err
+			}
+		} else {
+			// At least one non-blacklisted uToken was found
+			hasCollateral = true
 		}
 	}
-
-	if amount.IsNegative() {
-		panic("negative reserve amount detected")
-	}
-
-	return amount
+	// Any remaining collateral is non-blacklisted
+	return hasCollateral, nil
 }
 
-// setReserveAmount sets the amount reserved of a specified token.
-func (k Keeper) setReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
-		return err
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	reserveKey := types.CreateReserveAmountKey(coin.Denom)
-
-	// save the new reserve amount
-	bz, err := coin.Amount.Marshal()
+// checkBadDebt detects if a borrower has zero non-blacklisted collateral,
+// and marks any remaining borrowed tokens as bad debt.
+func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+	// clear blacklisted collateral while checking for any remaining (valid) collateral
+	hasCollateral, err := k.clearBlacklistedCollateral(ctx, borrowerAddr)
 	if err != nil {
 		return err
 	}
 
-	store.Set(reserveKey, bz)
+	// mark bad debt if collateral is completely exhausted
+	if !hasCollateral {
+		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
+			// set a bad debt flag for each borrowed denom
+			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
 // RepayBadDebt uses reserves to repay borrower's debts of a given denom.
 // It returns a boolean representing whether full repayment was achieved.
+// This function assumes the borrower has already been verified to have
+// no collateral remaining.
 func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
 	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
-	reserved := k.GetReserveAmount(ctx, denom)
+	borrower := borrowerAddr.String()
+	reserved := k.GetReserves(ctx, denom).Amount
 
 	amountToRepay := sdk.MinInt(borrowed.Amount, reserved)
-	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, denom))
+	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, denom).Amount)
 
 	newBorrowed := borrowed.SubAmount(amountToRepay)
 	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))
@@ -63,46 +77,43 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			return false, err
 		}
 
-		if err := k.setReserveAmount(ctx, newReserved); err != nil {
+		if err := k.setReserves(ctx, newReserved); err != nil {
 			return false, err
 		}
 
-		// Because this action is not caused by a message, logging and
-		// events are here instead of msg_server.go
+		// This action is not caused by a message so we need to make an event here
+		asset := sdk.NewCoin(denom, amountToRepay)
 		k.Logger(ctx).Debug(
 			"bad debt repaid",
-			"borrower", borrowerAddr.String(),
-			"denom", denom,
-			"amount", amountToRepay.String(),
+			"borrower", borrower,
+			"asset", asset,
 		)
-
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeRepayBadDebt,
-				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-				sdk.NewAttribute(types.EventAttrDenom, denom),
-				sdk.NewAttribute(sdk.AttributeKeyAmount, amountToRepay.String()),
-			),
-		)
+		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
+			Borrower: borrower, Asset: asset,
+		})
+		if err != nil {
+			return false, err
+		}
 	}
+
+	newModuleBalance := k.ModuleBalance(ctx, denom)
 
 	// Reserve exhaustion logs track any bad debts that were not repaid
 	if newBorrowed.IsPositive() {
 		k.Logger(ctx).Debug(
 			"reserves exhausted",
-			"borrower", borrowerAddr.String(),
-			"denom", denom,
-			"amount", newBorrowed.Amount.String(),
+			"borrower", borrower,
+			"asset", newBorrowed,
+			"module balance", newModuleBalance,
+			"reserves", newReserved,
 		)
-
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeReservesExhausted,
-				sdk.NewAttribute(types.EventAttrBorrower, borrowerAddr.String()),
-				sdk.NewAttribute(types.EventAttrDenom, denom),
-				sdk.NewAttribute(sdk.AttributeKeyAmount, newBorrowed.Amount.String()),
-			),
-		)
+		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
+			Borrower: borrower, OutstandingDebt: newBorrowed,
+			ModuleBalance: newModuleBalance, Reserves: newReserved,
+		})
+		if err != nil {
+			return false, err
+		}
 	}
 
 	// True is returned on full repayment

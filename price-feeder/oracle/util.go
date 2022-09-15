@@ -81,6 +81,9 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 	for _, providerPrices := range prices {
 		for base := range providerPrices {
 			cp := providerPrices[base]
+			if len(cp) == 0 {
+				continue
+			}
 
 			if _, ok := weightedPrices[base]; !ok {
 				weightedPrices[base] = sdk.ZeroDec()
@@ -125,7 +128,7 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 // StandardDeviation returns maps of the standard deviations and means of assets.
 // Will skip calculating for an asset if there are less than 3 prices.
 func StandardDeviation(
-	prices map[string]map[string]sdk.Dec,
+	prices map[provider.Name]map[string]sdk.Dec,
 ) (map[string]sdk.Dec, map[string]sdk.Dec, error) {
 	var (
 		deviations = make(map[string]sdk.Dec)

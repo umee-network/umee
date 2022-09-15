@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -11,12 +12,12 @@ import (
 // module.
 type StakingKeeper interface {
 	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI
-	TotalBondedTokens(sdk.Context) sdk.Int
-	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)
+	TotalBondedTokens(sdk.Context) sdkmath.Int
+	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec) sdkmath.Int
 	Jail(sdk.Context, sdk.ConsAddress)
 	ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator
 	MaxValidators(sdk.Context) uint32
-	PowerReduction(ctx sdk.Context) (res sdk.Int)
+	PowerReduction(ctx sdk.Context) (res sdkmath.Int)
 }
 
 // DistributionKeeper defines the expected interface contract defined by the
@@ -44,7 +45,4 @@ type BankKeeper interface {
 	SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error
 	GetDenomMetaData(ctx sdk.Context, denom string) (banktypes.Metadata, bool)
 	SetDenomMetaData(ctx sdk.Context, denomMetaData banktypes.Metadata)
-
-	// only used for simulation
-	SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 }

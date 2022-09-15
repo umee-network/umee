@@ -13,9 +13,33 @@ const (
 	UTokenPrefix = "u/"
 )
 
-// UTokenFromTokenDenom returns the uToken denom given a token denom.
-func UTokenFromTokenDenom(tokenDenom string) string {
-	return UTokenPrefix + tokenDenom
+// HasUTokenPrefix detects the uToken prefix on a denom.
+func HasUTokenPrefix(denom string) bool {
+	return strings.HasPrefix(denom, UTokenPrefix)
+}
+
+// ToUTokenDenom adds the uToken prefix to a denom. Returns an empty string
+// instead if the prefix was already present.
+func ToUTokenDenom(denom string) string {
+	if HasUTokenPrefix(denom) {
+		return ""
+	}
+	return UTokenPrefix + denom
+}
+
+// ToTokenDenom strips the uToken prefix from a denom, or returns an empty
+// string if it was not present. Also returns an empty string if the prefix
+// was repeated multiple times.
+func ToTokenDenom(denom string) string {
+	if !HasUTokenPrefix(denom) {
+		return ""
+	}
+	s := strings.TrimPrefix(denom, UTokenPrefix)
+	if HasUTokenPrefix(s) {
+		// denom started with "u/u/"
+		return ""
+	}
+	return s
 }
 
 // Validate performs validation on an Token type returning an error if the Token
@@ -24,38 +48,37 @@ func (t Token) Validate() error {
 	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
 		return err
 	}
-	if strings.HasPrefix(t.BaseDenom, UTokenPrefix) {
+	if HasUTokenPrefix(t.BaseDenom) {
 		// prevent base asset denoms that start with "u/"
-		return sdkerrors.Wrap(ErrInvalidAsset, t.BaseDenom)
+		return ErrUToken.Wrap(t.BaseDenom)
 	}
 
 	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
 		return err
 	}
-	if strings.HasPrefix(t.SymbolDenom, UTokenPrefix) {
-		// prevent symbol (ticker) denoms that start with "u/"
-		return sdkerrors.Wrap(ErrInvalidAsset, t.SymbolDenom)
+	if HasUTokenPrefix(t.SymbolDenom) {
+		// prevent symbol denoms that start with "u/"
+		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
-	// Reserve factor and collateral weight range between 0 and 1, inclusive.
-	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GT(sdk.OneDec()) {
+	// Reserve factor is non-negative and less than 1.
+	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
 	}
-
-	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GT(sdk.OneDec()) {
+	// Collateral weight is non-negative and less than 1.
+	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
-
-	// Liquidation threshold ranges between collateral weight and 1, inclusive.
-	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GT(sdk.OneDec()) {
+	// Liquidation threshold is at least collateral weight, but less than 1.
+	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid liquidation threshold: %s", t.LiquidationThreshold)
 	}
 
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
 	// multiple interest rates being defined at exactly 0% or 100% utilization
 	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.
-	if !t.KinkUtilizationRate.IsPositive() || t.KinkUtilizationRate.GTE(sdk.OneDec()) {
-		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilizationRate)
+	if !t.KinkUtilization.IsPositive() || t.KinkUtilization.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilization)
 	}
 
 	// interest rates are non-negative; they do not need to have a maximum value
@@ -74,15 +97,55 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid liquidation incentive: %s", t.LiquidationIncentive)
 	}
 
-	// Blacklisted assets cannot have borrow or lend enabled
+	// Blacklisted assets cannot have borrow or supply enabled
 	if t.Blacklist {
 		if t.EnableMsgBorrow {
 			return fmt.Errorf("blacklisted assets cannot have borrowing enabled")
 		}
-		if t.EnableMsgLend {
-			return fmt.Errorf("blacklisted assets cannot have lending enabled")
+		if t.EnableMsgSupply {
+			return fmt.Errorf("blacklisted assets cannot have supplying enabled")
 		}
 	}
 
+	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be between 0 and 1")
+	}
+
+	if t.MaxSupplyUtilization.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupplyUtilization must be between 0 and 1")
+	}
+
+	if t.MinCollateralLiquidity.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MinCollateralLiquidity be between 0 and 1")
+	}
+
+	if t.MaxSupply.IsNegative() {
+		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupply must not be negative")
+	}
+
+	return nil
+}
+
+// AssertSupplyEnabled returns an error if a Token cannot be supplied.
+func (t Token) AssertSupplyEnabled() error {
+	if !t.EnableMsgSupply {
+		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)
+	}
+	return nil
+}
+
+// AssertBorrowEnabled returns an error if a Token cannot be borrowed.
+func (t Token) AssertBorrowEnabled() error {
+	if !t.EnableMsgBorrow {
+		return sdkerrors.Wrap(ErrBorrowNotAllowed, t.BaseDenom)
+	}
+	return nil
+}
+
+// AssertNotBlacklisted returns an error if a Token is blacklisted.
+func (t Token) AssertNotBlacklisted() error {
+	if t.Blacklist {
+		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
+	}
 	return nil
 }

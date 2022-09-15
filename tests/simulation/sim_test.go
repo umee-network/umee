@@ -19,7 +19,8 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 func init() {
@@ -75,14 +76,14 @@ func TestFullAppSimulation(t *testing.T) {
 		umeeapp.EmptyAppOptions{},
 		fauxMerkleModeOpt,
 	)
-	require.Equal(t, umeeapp.Name, app.Name())
+	require.Equal(t, appparams.Name, app.Name())
 
 	// run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(
 		t,
 		os.Stdout,
 		app.BaseApp,
-		appStateFn(app.AppCodec(), app.SimulationManager()),
+		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
 		simapp.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
@@ -156,7 +157,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				t,
 				os.Stdout,
 				app.BaseApp,
-				appStateFn(app.AppCodec(), app.SimulationManager()),
+				appStateFn(app.AppCodec(), app.StateSimulationManager),
 				simtypes.RandomAccounts,
 				simapp.SimulationOperations(app, app.AppCodec(), config),
 				app.ModuleAccountAddrs(),
@@ -227,7 +228,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		b,
 		os.Stdout,
 		app.BaseApp,
-		appStateFn(app.AppCodec(), app.SimulationManager()),
+		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
 		simapp.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),

@@ -12,17 +12,16 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/telemetry"
 
-	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 const (
-	gateHost          = "ws.gate.io"
-	gatePath          = "/v3"
-	gatePingCheck     = time.Second * 28 // should be < 30
-	gatePairsEndpoint = "https://api.gateio.ws/api/v4/spot/currency_pairs"
+	gateWSHost    = "ws.gate.io"
+	gateWSPath    = "/v3"
+	gatePingCheck = time.Second * 28 // should be < 30
+	gateRestHost  = "https://api.gateio.ws"
+	gateRestPath  = "/api/v4/spot/currency_pairs"
 )
 
 var _ Provider = (*GateProvider)(nil)
@@ -38,6 +37,7 @@ type (
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
+		endpoints       Endpoint
 		tickers         map[string]GateTicker         // Symbol => GateTicker
 		candles         map[string][]GateCandle       // Symbol => GateCandle
 		subscribedPairs map[string]types.CurrencyPair // Symbol => types.CurrencyPair
@@ -103,14 +103,28 @@ type (
 )
 
 // NewGateProvider creates a new GateProvider.
-func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.CurrencyPair) (*GateProvider, error) {
-	wsURL := url.URL{
-		Scheme: "wss",
-		Host:   gateHost,
-		Path:   gatePath,
+func NewGateProvider(
+	ctx context.Context,
+	logger zerolog.Logger,
+	endpoints Endpoint,
+	pairs ...types.CurrencyPair,
+) (*GateProvider, error) {
+	if endpoints.Name != ProviderGate {
+		endpoints = Endpoint{
+			Name:      ProviderGate,
+			Rest:      gateRestHost,
+			Websocket: gateWSHost,
+		}
 	}
 
-	wsConn, _, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	wsURL := url.URL{
+		Scheme: "wss",
+		Host:   endpoints.Websocket,
+		Path:   gateWSPath,
+	}
+
+	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Gate websocket: %w", err)
 	}
@@ -118,8 +132,9 @@ func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.
 	provider := &GateProvider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "gate").Logger(),
+		logger:          logger.With().Str("provider", string(ProviderGate)).Logger(),
 		reconnectTimer:  time.NewTicker(gatePingCheck),
+		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
 		candles:         map[string][]GateCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
@@ -136,8 +151,8 @@ func NewGateProvider(ctx context.Context, logger zerolog.Logger, pairs ...types.
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
-func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]TickerPrice, error) {
-	tickerPrices := make(map[string]TickerPrice, len(pairs))
+func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
+	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		price, err := p.getTickerPrice(currencyPair)
@@ -152,8 +167,8 @@ func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]
 }
 
 // GetCandlePrices returns the candlePrices based on the saved map
-func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]CandlePrice, error) {
-	candlePrices := make(map[string][]CandlePrice, len(pairs))
+func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
+	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, currencyPair := range pairs {
 		gp := currencyPairToGatePair(currencyPair)
@@ -168,20 +183,20 @@ func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string]
 	return candlePrices, nil
 }
 
-func (p *GateProvider) getCandlePrices(key string) ([]CandlePrice, error) {
+func (p *GateProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []CandlePrice{}, fmt.Errorf("failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
 	}
 
-	candleList := []CandlePrice{}
+	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
 		cp, err := candle.toCandlePrice()
 		if err != nil {
-			return []CandlePrice{}, err
+			return []types.CandlePrice{}, err
 		}
 
 		candleList = append(candleList, cp)
@@ -203,14 +218,7 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 		return err
 	}
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		config.ProviderGate,
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderGate, len(cps))
 	return nil
 }
 
@@ -260,7 +268,7 @@ func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
 	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
-func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error) {
+func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
@@ -269,7 +277,7 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (TickerPrice, error
 		return tickerPair.toTickerPrice()
 	}
 
-	return TickerPrice{}, fmt.Errorf("gate provider failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 }
 
 func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
@@ -296,6 +304,9 @@ func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-p.reconnectTimer.C: // reset by the pongHandler.
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
 			}
@@ -323,6 +334,9 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "":
 			break
 		default:
+			if err := p.disconnect(); err != nil {
+				p.logger.Err(err).Msg("error disconnecting")
+			}
 			err := p.reconnect()
 			if err != nil {
 				p.logger.Error().
@@ -386,15 +400,7 @@ func (p *GateProvider) messageReceivedTickerPrice(bz []byte) error {
 	gateTicker.Symbol = symbol
 
 	p.setTickerPair(gateTicker)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"ticker",
-		"provider",
-		config.ProviderGate,
-	)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeTicker)
 	return nil
 }
 
@@ -460,15 +466,7 @@ func (p *GateProvider) messageReceivedCandle(bz []byte) error {
 	}
 
 	p.setCandlePair(gateCandle)
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"candle",
-		"provider",
-		config.ProviderGate,
-	)
+	telemetryWebsocketMessage(ProviderGate, MessageTypeCandle)
 	return nil
 }
 
@@ -482,7 +480,7 @@ func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	// convert gate timestamp seconds -> milliseconds
-	candle.TimeStamp *= int64(time.Second / time.Millisecond)
+	candle.TimeStamp = SecondsToMilli(candle.TimeStamp)
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []GateCandle{}
 
@@ -519,7 +517,16 @@ func (p *GateProvider) resetReconnectTimer() {
 	p.reconnectTimer.Reset(gatePingCheck)
 }
 
-// reconnect closes the last WS connection and creates a new one. If there’s a
+// disconnect disconnects the existing websocket connection.
+func (p *GateProvider) disconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %v", err)
+	}
+	return nil
+}
+
+// reconnect creates a new websocket connection. If there’s a
 // network problem, the system will automatically disable the connection. The
 // connection will break automatically if the subscription is not established or
 // data has not been pushed for more than 30 seconds. To keep the connection stable:
@@ -530,10 +537,9 @@ func (p *GateProvider) resetReconnectTimer() {
 // 3. Expect a 'pong' as a response. If the response message is not received within
 // N seconds, please raise an error or reconnect.
 func (p *GateProvider) reconnect() error {
-	p.wsClient.Close()
-
 	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, _, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
+	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error reconnecting to Gate websocket: %w", err)
 	}
@@ -542,13 +548,7 @@ func (p *GateProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		config.ProviderGate,
-	)
+	telemetryWebsocketReconnect(ProviderGate)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 
@@ -564,7 +564,7 @@ func (p *GateProvider) pongHandler(appData string) error {
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
-	resp, err := http.Get(gatePairsEndpoint)
+	resp, err := http.Get(p.endpoints.Rest + gateRestPath)
 	if err != nil {
 		return nil, err
 	}
@@ -587,13 +587,13 @@ func (p *GateProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-func (ticker GateTicker) toTickerPrice() (TickerPrice, error) {
-	return newTickerPrice("Gate", ticker.Symbol, ticker.Last, ticker.Vol)
+func (ticker GateTicker) toTickerPrice() (types.TickerPrice, error) {
+	return types.NewTickerPrice(string(ProviderGate), ticker.Symbol, ticker.Last, ticker.Vol)
 }
 
-func (candle GateCandle) toCandlePrice() (CandlePrice, error) {
-	return newCandlePrice(
-		"Gate",
+func (candle GateCandle) toCandlePrice() (types.CandlePrice, error) {
+	return types.NewCandlePrice(
+		string(ProviderGate),
 		candle.Symbol,
 		candle.Close,
 		candle.Volume,

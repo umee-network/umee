@@ -26,21 +26,25 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
 type Params struct {
-	// The complete_liquidation_threshold determines how far over their borrow
+	// Complete Liquidation Threshold determines how far over their borrow
 	// limit a borrower must be in order for their positions to be liquidated
 	// fully in a single event.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
-	// The minimum_close_factor determines the portion of a borrower's position
+	// Minimum Close Factor determines the portion of a borrower's position
 	// that can be liquidated in a single event, when the borrower is just barely
 	// over their borrow limit.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`
-	// The oracle_reward_factor determines the portion of interest accrued on
+	// Oracle Reward Factor determines the portion of interest accrued on
 	// borrows that is sent to the oracle module to fund its reward pool.
 	OracleRewardFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=oracle_reward_factor,json=oracleRewardFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_reward_factor" yaml:"oracle_reward_factor"`
-	// The small_liquidation_size determines the USD value at which a borrow is
+	// Small Liquidation Size determines the USD value at which a borrow is
 	// considered small enough to be liquidated in a single transaction, bypassing
 	// dynamic close factor.
 	SmallLiquidationSize github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=small_liquidation_size,json=smallLiquidationSize,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"small_liquidation_size" yaml:"small_liquidation_size"`
+	// Direct Liquidation Fee is a reduction factor in liquidation incentive
+	// experienced by liquidators who choose to receive base assets instead of
+	// uTokens as liquidation rewards.
+	DirectLiquidationFee github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=direct_liquidation_fee,json=directLiquidationFee,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"direct_liquidation_fee" yaml:"direct_liquidation_fee"`
 }
 
 func (m *Params) Reset()      { *m = Params{} }
@@ -75,58 +79,80 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
-// Token defines a token, along with its capital metadata, in the Umee capital
-// facility that can be loaned and borrowed.
+// Token defines a token, along with its metadata and parameters, in the Umee
+// capital facility that can be supplied and borrowed.
 type Token struct {
-	// The base_denom defines the denomination of the underlying base token.
+	// Base Denom is the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
-	// The reserve factor defines what portion of accrued interest of the asset
-	// type goes to reserves.
+	// Reserve Factor defines what portion of accrued interest goes to reserves
+	// when this token is borrowed.
 	ReserveFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=reserve_factor,json=reserveFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reserve_factor" yaml:"reserve_factor"`
-	// The collateral_weight defines what amount of the total value of the asset
-	// can contribute to a users borrowing power. If the collateral_weight is
+	// Collateral Weight defines what portion of the total value of the asset
+	// can contribute to a users borrowing power. If the collateral weight is
 	// zero, using this asset as collateral against borrowing will be disabled.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
-	// The liquidation_threshold defines what amount of the total value of the
+	// Liquidation Threshold defines what amount of the total value of the
 	// asset can contribute to a user's liquidation threshold (above which they
 	// become eligible for liquidation).
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
-	// The base_borrow_rate defines the base interest rate for borrowing this
+	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
-	// The kink_borrow_rate defines the interest rate for borrowing this
-	// asset when utilization is at the 'kink' utilization value as defined
-	// on the utilization:interest graph.
+	// Kink Borrow Rate defines the interest rate for borrowing this
+	// asset when supply utilization is equal to 'kink_utilization'.
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
-	// The max_borrow_rate defines the interest rate for borrowing this
-	// asset (seen when utilization is 100%).
+	// Max Borrow Rate defines the interest rate for borrowing this
+	// asset when supply utilization is at its maximum.
 	MaxBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_rate" yaml:"max_borrow_rate"`
-	// The kink_utilization_rate defines the borrow utilization rate for this
-	// asset where the 'kink' on the utilization:interest graph occurs.
-	KinkUtilizationRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization_rate,json=kinkUtilizationRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization_rate" yaml:"kink_utilization_rate"`
-	// The liquidation_incentive determines the portion of bonus collateral of
+	// Kink Utilization defines the supply utilization value where
+	// the kink in the borrow interest rate function occurs.
+	KinkUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization,json=kinkUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization" yaml:"kink_utilization"`
+	// Liquidation Incentive determines the portion of bonus collateral of
 	// a token type liquidators receive as a liquidation reward.
 	LiquidationIncentive github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,9,opt,name=liquidation_incentive,json=liquidationIncentive,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_incentive" yaml:"liquidation_incentive"`
-	// The symbol_denom and exponent are solely used to update the oracle's accept
-	// list of allowed tokens.
+	// Symbol Denom is the human readable denomination of this token.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
-	Exponent    uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
-	// Allows lending and setting a collateral using this token. Note that
-	// withdrawing is always enabled. Disabling lending would be one step in
-	// phasing out an asset type.
-	EnableMsgLend bool `protobuf:"varint,12,opt,name=enable_msg_lend,json=enableMsgLend,proto3" json:"enable_msg_lend,omitempty" yaml:"enable_msg_lend"`
-	// Allows borrowing of this token. Note that repaying is always enabled.
-	// Disabling borrowing would be one step in phasing out an asset type, but
-	// could also be used from the start for asset types meant to be collateral
-	// only, like meTokens.
+	// Exponent is the power of ten by which to multiply, in order to convert
+	// an amount of the token denoted in its symbol denom to the actual amount
+	// of its base denom.
+	Exponent uint32 `protobuf:"varint,11,opt,name=exponent,proto3" json:"exponent,omitempty" yaml:"exponent"`
+	// Enable Msg Supply allows supplying for lending or collateral using this
+	// token. `false` means that a token can no longer be supplied.
+	// Note that withdrawing is always enabled. Disabling supply would
+	// be one step in phasing out an asset type.
+	EnableMsgSupply bool `protobuf:"varint,12,opt,name=enable_msg_supply,json=enableMsgSupply,proto3" json:"enable_msg_supply,omitempty" yaml:"enable_msg_supply"`
+	// Enable Msg Borrow allows borrowing of this token. Note that repaying is
+	// always enabled. Disabling borrowing would be one step in phasing out an
+	// asset type, but could also be used from the start for asset types meant
+	// to be collateral only, like meTokens.
 	EnableMsgBorrow bool `protobuf:"varint,13,opt,name=enable_msg_borrow,json=enableMsgBorrow,proto3" json:"enable_msg_borrow,omitempty" yaml:"enable_msg_borrow"`
-	// This should only be used to eliminate an asset completely. A blacklisted
+	// Blacklist should only be used to eliminate an asset completely. A blacklisted
 	// asset is treated as though its oracle price is zero, and thus ignored by
 	// calculations such as collateral value and borrow limit. Can still be repaid
-	// or withdrawn, but not liquidated. A blacklisted token must have enable_lend
-	// and enable_borrow set to false. Such tokens can be safely removed from the
+	// or withdrawn, but not liquidated. A blacklisted token must have enable_msg_supply
+	// and enable_msg_borrow set to false. Such tokens can be safely removed from the
 	// oracle and price feeder as well.
 	Blacklist bool `protobuf:"varint,14,opt,name=blacklist,proto3" json:"blacklist,omitempty"`
+	// Max Collateral Share specifies how much of the system's overall collateral
+	// can be provided by a given token. 1.0 means that the token has no restriction.
+	// 0.1 means maximum 10% of system's total collateral value can be provided by this token.
+	// Valid values: 0-1.
+	MaxCollateralShare github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,15,opt,name=max_collateral_share,json=maxCollateralShare,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_collateral_share" yaml:"max_collateral_share"`
+	// Max Supply Utilization specifies the maximum supply utilization a token is
+	// allowed to reach as a direct result of user borrowing. New borrows are not allowed when
+	// the supply utilization is above `max_supply_utilization`.
+	// Valid values: 0-1.
+	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
+	// Min Collateral Liquidity specifies the minimum collateral liquidity a token is
+	// allowed to reach as a direct result of users borrowing, collateralizing, or
+	// withdrawing assets. Liquidity can only drop below this value due to interest
+	// or liquidations.
+	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
+	// Max Supply is the maximum amount of tokens the protocol can hold.
+	// Adding more supply of the given token to the protocol will return an error.
+	// Must be a non negative value. 0 means that there is no limit.
+	// To mark a token as not valid for supply, `msg_supply` must be set to false.
+	MaxSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=max_supply,json=maxSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"max_supply" yaml:"max_supply"`
 }
 
 func (m *Token) Reset()         { *m = Token{} }
@@ -162,48 +188,6 @@ func (m *Token) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Token proto.InternalMessageInfo
 
-func (m *Token) GetBaseDenom() string {
-	if m != nil {
-		return m.BaseDenom
-	}
-	return ""
-}
-
-func (m *Token) GetSymbolDenom() string {
-	if m != nil {
-		return m.SymbolDenom
-	}
-	return ""
-}
-
-func (m *Token) GetExponent() uint32 {
-	if m != nil {
-		return m.Exponent
-	}
-	return 0
-}
-
-func (m *Token) GetEnableMsgLend() bool {
-	if m != nil {
-		return m.EnableMsgLend
-	}
-	return false
-}
-
-func (m *Token) GetEnableMsgBorrow() bool {
-	if m != nil {
-		return m.EnableMsgBorrow
-	}
-	return false
-}
-
-func (m *Token) GetBlacklist() bool {
-	if m != nil {
-		return m.Blacklist
-	}
-	return false
-}
-
 func init() {
 	proto.RegisterType((*Params)(nil), "umee.leverage.v1.Params")
 	proto.RegisterType((*Token)(nil), "umee.leverage.v1.Token")
@@ -212,56 +196,63 @@ func init() {
 func init() { proto.RegisterFile("umee/leverage/v1/leverage.proto", fileDescriptor_8cb1bf9ea641ecc6) }
 
 var fileDescriptor_8cb1bf9ea641ecc6 = []byte{
-	// 770 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0x4d, 0x6f, 0xeb, 0x44,
-	0x14, 0x8d, 0x21, 0xaf, 0x34, 0xf3, 0x5e, 0x92, 0xd6, 0x4d, 0xde, 0xb3, 0x1e, 0x21, 0xae, 0x46,
-	0x02, 0x75, 0xd3, 0x98, 0x02, 0xab, 0x2c, 0x43, 0x05, 0x6d, 0xd5, 0x02, 0x1a, 0x8a, 0x2a, 0xb1,
-	0xb1, 0x26, 0xce, 0x25, 0xb1, 0x32, 0xf6, 0x04, 0xcf, 0xe4, 0xa3, 0xdd, 0x20, 0x81, 0xd8, 0xb3,
-	0x64, 0x83, 0xd4, 0xdf, 0xc0, 0x8a, 0x9f, 0xd0, 0x65, 0x97, 0x88, 0x45, 0x84, 0xda, 0x0d, 0xeb,
-	0xfc, 0x02, 0xe4, 0x19, 0x27, 0x76, 0x42, 0x40, 0x8a, 0xca, 0xaa, 0x33, 0xe7, 0xde, 0x9e, 0x73,
-	0xe2, 0x73, 0x67, 0x06, 0xd9, 0xc3, 0x00, 0xc0, 0x61, 0x30, 0x82, 0x88, 0x76, 0xc1, 0x19, 0x1d,
-	0x2d, 0xd6, 0x8d, 0x41, 0xc4, 0x25, 0x37, 0x77, 0xe2, 0x86, 0xc6, 0x02, 0x1c, 0x1d, 0xbd, 0xae,
-	0x74, 0x79, 0x97, 0xab, 0xa2, 0x13, 0xaf, 0x74, 0x1f, 0xfe, 0x2d, 0x8f, 0xb6, 0xbe, 0xa0, 0x11,
-	0x0d, 0x84, 0xf9, 0x8b, 0x81, 0xea, 0x1e, 0x0f, 0x06, 0x0c, 0x24, 0xb8, 0xcc, 0xff, 0x76, 0xe8,
-	0x77, 0xa8, 0xf4, 0x79, 0xe8, 0xca, 0x5e, 0x04, 0xa2, 0xc7, 0x59, 0xc7, 0x7a, 0x63, 0xdf, 0x38,
-	0x28, 0xb4, 0xae, 0xee, 0xa6, 0x76, 0xee, 0x8f, 0xa9, 0xfd, 0x5e, 0xd7, 0x97, 0xbd, 0x61, 0xbb,
-	0xe1, 0xf1, 0xc0, 0xf1, 0xb8, 0x08, 0xb8, 0x48, 0xfe, 0x1c, 0x8a, 0x4e, 0xdf, 0x91, 0xd7, 0x03,
-	0x10, 0x8d, 0x63, 0xf0, 0x66, 0x53, 0xfb, 0xdd, 0x6b, 0x1a, 0xb0, 0x26, 0xfe, 0x6f, 0x76, 0x4c,
-	0x6a, 0xf3, 0x86, 0xf3, 0xb4, 0x7e, 0x39, 0x2f, 0x9b, 0xdf, 0xa1, 0x4a, 0xe0, 0x87, 0x7e, 0x30,
-	0x0c, 0x5c, 0x8f, 0x71, 0x01, 0xee, 0x37, 0xd4, 0x93, 0x3c, 0xb2, 0xde, 0x54, 0xa6, 0x2e, 0x36,
-	0x36, 0xf5, 0xb6, 0x36, 0xb5, 0x8e, 0x13, 0x13, 0x33, 0x81, 0x3f, 0x8e, 0xd1, 0x4f, 0x14, 0x18,
-	0x1b, 0xe0, 0x11, 0xf5, 0x18, 0xb8, 0x11, 0x8c, 0x69, 0xd4, 0x99, 0x1b, 0xc8, 0x3f, 0xcd, 0xc0,
-	0x3a, 0x4e, 0x4c, 0x4c, 0x0d, 0x13, 0x85, 0x26, 0x06, 0x7e, 0x34, 0xd0, 0x4b, 0x11, 0x50, 0xc6,
-	0x96, 0x3e, 0xa0, 0xf0, 0x6f, 0xc0, 0x7a, 0xa6, 0x3c, 0x7c, 0xbe, 0xb1, 0x87, 0x77, 0xb4, 0x87,
-	0xf5, 0xac, 0x98, 0x54, 0x54, 0x21, 0x13, 0xc7, 0x97, 0xfe, 0x0d, 0x34, 0xf3, 0x3f, 0xdf, 0xda,
-	0x39, 0xfc, 0x2b, 0x42, 0xcf, 0x2e, 0x79, 0x1f, 0x42, 0xf3, 0x23, 0x84, 0xda, 0x54, 0x80, 0xdb,
-	0x81, 0x90, 0x07, 0x96, 0xa1, 0xac, 0x54, 0x67, 0x53, 0x7b, 0x57, 0x93, 0xa7, 0x35, 0x4c, 0x0a,
-	0xf1, 0xe6, 0x38, 0x5e, 0x9b, 0x21, 0x2a, 0x45, 0x20, 0x20, 0x1a, 0x2d, 0x92, 0xd4, 0xe3, 0xf5,
-	0xe9, 0xc6, 0x3f, 0xa2, 0xaa, 0x75, 0x96, 0xd9, 0x30, 0x29, 0x26, 0x40, 0xf2, 0xf5, 0xc6, 0x68,
-	0xd7, 0xe3, 0x8c, 0x51, 0x09, 0x11, 0x65, 0xee, 0x18, 0xfc, 0x6e, 0x4f, 0x26, 0xc3, 0x73, 0xb6,
-	0xb1, 0xa4, 0x35, 0x9f, 0xe8, 0x15, 0x42, 0x4c, 0x76, 0x52, 0xec, 0x4a, 0x41, 0xe6, 0x0f, 0x06,
-	0xaa, 0xae, 0x3f, 0x4f, 0x7a, 0x72, 0x3e, 0xdb, 0x58, 0xbd, 0xa6, 0xd5, 0xff, 0xe5, 0x18, 0x55,
-	0xd8, 0xba, 0xe3, 0x23, 0xd0, 0x8e, 0x0a, 0xa2, 0xcd, 0xa3, 0x88, 0x8f, 0xdd, 0x88, 0xca, 0xf9,
-	0xd4, 0x9c, 0x6e, 0xac, 0xff, 0x2a, 0x13, 0x6c, 0x86, 0x0f, 0x93, 0x52, 0x0c, 0xb5, 0x14, 0x42,
-	0xa8, 0x84, 0x58, 0xb4, 0xef, 0x87, 0xfd, 0x25, 0xd1, 0xad, 0xa7, 0x89, 0xae, 0xf2, 0x61, 0x52,
-	0x8a, 0xa1, 0x8c, 0xe8, 0x00, 0x95, 0x03, 0x3a, 0x59, 0xd2, 0x7c, 0x4b, 0x69, 0x9e, 0x6c, 0xac,
-	0xf9, 0x32, 0xb9, 0x23, 0x96, 0xe9, 0x30, 0x29, 0x06, 0x74, 0x92, 0x51, 0xfc, 0xde, 0x40, 0x55,
-	0xe5, 0x6b, 0x28, 0x7d, 0xe6, 0xdf, 0xe8, 0x44, 0x94, 0xf0, 0xf6, 0xd3, 0x12, 0x5e, 0x4b, 0x8a,
-	0xc9, 0x5e, 0x8c, 0x7f, 0x95, 0xc2, 0xca, 0xc4, 0xea, 0x98, 0xf9, 0xa1, 0x07, 0xa1, 0xf4, 0x47,
-	0x60, 0x15, 0xfe, 0xbf, 0x31, 0x5b, 0x90, 0x2e, 0x8f, 0xd9, 0xe9, 0x1c, 0x36, 0x9b, 0xe8, 0x85,
-	0xb8, 0x0e, 0xda, 0x9c, 0x25, 0xb7, 0x01, 0x52, 0xda, 0xaf, 0x66, 0x53, 0x7b, 0x2f, 0xb9, 0x6a,
-	0x32, 0x55, 0x4c, 0x9e, 0xeb, 0xad, 0xbe, 0x11, 0x1c, 0xb4, 0x0d, 0x93, 0x01, 0x0f, 0x21, 0x94,
-	0xd6, 0xf3, 0x7d, 0xe3, 0xa0, 0xd8, 0xda, 0x9b, 0x4d, 0xed, 0xb2, 0xfe, 0xbf, 0x79, 0x05, 0x93,
-	0x45, 0x93, 0xd9, 0x42, 0x65, 0x08, 0x69, 0x9b, 0x81, 0x1b, 0x88, 0xae, 0xcb, 0x20, 0xec, 0x58,
-	0x2f, 0xf6, 0x8d, 0x83, 0xed, 0xd6, 0xeb, 0x34, 0xbb, 0x95, 0x06, 0x4c, 0x8a, 0x1a, 0xb9, 0x10,
-	0xdd, 0x73, 0x08, 0x3b, 0xe6, 0x09, 0xda, 0xcd, 0xb4, 0xe8, 0x94, 0xad, 0xa2, 0x62, 0xa9, 0xa5,
-	0x07, 0xfd, 0x1f, 0x2d, 0x98, 0x94, 0x17, 0x3c, 0x7a, 0x12, 0xcc, 0x1a, 0x2a, 0xb4, 0x19, 0xf5,
-	0xfa, 0xcc, 0x17, 0xd2, 0x2a, 0xc5, 0x0c, 0x24, 0x05, 0x9a, 0xf9, 0xbf, 0x6e, 0x6d, 0xa3, 0x75,
-	0x76, 0xf7, 0x50, 0x37, 0xee, 0x1f, 0xea, 0xc6, 0x9f, 0x0f, 0x75, 0xe3, 0xa7, 0xc7, 0x7a, 0xee,
-	0xfe, 0xb1, 0x9e, 0xfb, 0xfd, 0xb1, 0x9e, 0xfb, 0xfa, 0xfd, 0x4c, 0x2c, 0xf1, 0xe3, 0x7d, 0x18,
-	0x82, 0x1c, 0xf3, 0xa8, 0xaf, 0x36, 0xce, 0xe8, 0x03, 0x67, 0x92, 0xbe, 0xf7, 0x2a, 0xa4, 0xf6,
-	0x96, 0x7a, 0xc2, 0x3f, 0xfc, 0x3b, 0x00, 0x00, 0xff, 0xff, 0x81, 0x10, 0x21, 0x8d, 0x0d, 0x08,
-	0x00, 0x00,
+	// 896 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0xbf, 0x6f, 0x1b, 0x37,
+	0x14, 0xd6, 0xb5, 0xb6, 0x6b, 0x31, 0xb1, 0x64, 0x5f, 0x64, 0xe7, 0xd0, 0xba, 0x3a, 0x83, 0x40,
+	0x0b, 0x2f, 0xb1, 0x1a, 0xa4, 0x93, 0x47, 0x39, 0x48, 0xe3, 0x22, 0x49, 0x5b, 0x3a, 0x45, 0x80,
+	0x2e, 0x07, 0xea, 0xf4, 0x22, 0x11, 0xe2, 0x1d, 0x55, 0x92, 0xfa, 0xe5, 0xa5, 0x43, 0xd1, 0xa9,
+	0x4b, 0xc7, 0x2e, 0x05, 0x32, 0xf4, 0x0f, 0xe9, 0xe8, 0x31, 0x63, 0xd1, 0x41, 0x68, 0xed, 0xa5,
+	0xb3, 0xff, 0x82, 0xe2, 0xc8, 0x93, 0xee, 0xe4, 0xa8, 0x01, 0x0e, 0xca, 0xa4, 0xe3, 0xf7, 0x9e,
+	0xbe, 0xef, 0x23, 0xf9, 0xc8, 0x47, 0xe4, 0x0f, 0x22, 0x80, 0x06, 0x87, 0x21, 0x48, 0xda, 0x81,
+	0xc6, 0xf0, 0xfe, 0xfc, 0xfb, 0xa8, 0x2f, 0x85, 0x16, 0xee, 0x76, 0x92, 0x70, 0x34, 0x07, 0x87,
+	0xf7, 0x3f, 0xac, 0x75, 0x44, 0x47, 0x98, 0x60, 0x23, 0xf9, 0xb2, 0x79, 0xf8, 0x8f, 0x75, 0xb4,
+	0xf1, 0x35, 0x95, 0x34, 0x52, 0xee, 0x6f, 0x0e, 0xaa, 0x87, 0x22, 0xea, 0x73, 0xd0, 0x10, 0x70,
+	0xf6, 0xfd, 0x80, 0xb5, 0xa9, 0x66, 0x22, 0x0e, 0x74, 0x57, 0x82, 0xea, 0x0a, 0xde, 0xf6, 0xde,
+	0x3b, 0x70, 0x0e, 0xcb, 0xcd, 0x17, 0x17, 0x53, 0xbf, 0xf4, 0xd7, 0xd4, 0xff, 0xb4, 0xc3, 0x74,
+	0x77, 0xd0, 0x3a, 0x0a, 0x45, 0xd4, 0x08, 0x85, 0x8a, 0x84, 0x4a, 0x7f, 0xee, 0xa9, 0x76, 0xaf,
+	0xa1, 0x27, 0x7d, 0x50, 0x47, 0x0f, 0x21, 0xbc, 0x9e, 0xfa, 0x9f, 0x4c, 0x68, 0xc4, 0x8f, 0xf1,
+	0xdb, 0xd9, 0x31, 0xd9, 0x9f, 0x25, 0x3c, 0xc9, 0xe2, 0xcf, 0x67, 0x61, 0xf7, 0x07, 0x54, 0x8b,
+	0x58, 0xcc, 0xa2, 0x41, 0x14, 0x84, 0x5c, 0x28, 0x08, 0x5e, 0xd2, 0x50, 0x0b, 0xe9, 0xbd, 0x6f,
+	0x4c, 0x3d, 0x2d, 0x6c, 0xea, 0x23, 0x6b, 0x6a, 0x19, 0x27, 0x26, 0x6e, 0x0a, 0x9f, 0x24, 0xe8,
+	0x23, 0x03, 0x26, 0x06, 0x84, 0xa4, 0x21, 0x87, 0x40, 0xc2, 0x88, 0xca, 0xf6, 0xcc, 0xc0, 0xda,
+	0x6a, 0x06, 0x96, 0x71, 0x62, 0xe2, 0x5a, 0x98, 0x18, 0x34, 0x35, 0xf0, 0x93, 0x83, 0xf6, 0x54,
+	0x44, 0x39, 0x5f, 0x58, 0x40, 0xc5, 0xce, 0xc1, 0x5b, 0x37, 0x1e, 0xbe, 0x2a, 0xec, 0xe1, 0x63,
+	0xeb, 0x61, 0x39, 0x2b, 0x26, 0x35, 0x13, 0xc8, 0x6d, 0xc7, 0x19, 0x3b, 0x07, 0xe3, 0xa3, 0xcd,
+	0x24, 0x84, 0x7a, 0xe1, 0x2f, 0x2f, 0x01, 0xbc, 0x8d, 0xd5, 0x7c, 0x2c, 0x67, 0xc5, 0xa4, 0x66,
+	0x03, 0x39, 0x23, 0x8f, 0x00, 0x8e, 0xd7, 0x7e, 0x7d, 0xe5, 0x97, 0xf0, 0xef, 0x15, 0xb4, 0xfe,
+	0x5c, 0xf4, 0x20, 0x76, 0x3f, 0x47, 0xa8, 0x45, 0x15, 0x04, 0x6d, 0x88, 0x45, 0xe4, 0x39, 0xc6,
+	0xca, 0xee, 0xf5, 0xd4, 0xdf, 0xb1, 0xe4, 0x59, 0x0c, 0x93, 0x72, 0x32, 0x78, 0x98, 0x7c, 0xbb,
+	0x31, 0xaa, 0x48, 0x50, 0x20, 0x87, 0xf3, 0x8a, 0xb2, 0x65, 0xfe, 0x45, 0xe1, 0x49, 0xec, 0x5a,
+	0x9d, 0x45, 0x36, 0x4c, 0xb6, 0x52, 0x20, 0xdd, 0xc5, 0x11, 0xda, 0x09, 0x05, 0xe7, 0x54, 0x83,
+	0xa4, 0x3c, 0x18, 0x01, 0xeb, 0x74, 0x75, 0x5a, 0xc4, 0x5f, 0x16, 0x96, 0xf4, 0x66, 0x27, 0xeb,
+	0x06, 0x21, 0x26, 0xdb, 0x19, 0xf6, 0xc2, 0x40, 0xee, 0x8f, 0x0e, 0xda, 0x5d, 0x7e, 0xae, 0x6d,
+	0x05, 0x3f, 0x2b, 0xac, 0xbe, 0x6f, 0xd5, 0xff, 0xe7, 0x38, 0xd7, 0xf8, 0xb2, 0x63, 0xac, 0xd0,
+	0xb6, 0xd9, 0x88, 0x96, 0x90, 0x52, 0x8c, 0x02, 0x49, 0xf5, 0xac, 0x7a, 0x4f, 0x0b, 0xeb, 0xdf,
+	0xcd, 0x6d, 0x6c, 0x8e, 0x0f, 0x93, 0x4a, 0x02, 0x35, 0x0d, 0x42, 0xa8, 0x86, 0x44, 0xb4, 0xc7,
+	0xe2, 0xde, 0x82, 0xe8, 0xc6, 0x6a, 0xa2, 0x37, 0xf9, 0x30, 0xa9, 0x24, 0x50, 0x4e, 0xb4, 0x8f,
+	0xaa, 0x11, 0x1d, 0x2f, 0x68, 0x7e, 0x60, 0x34, 0x1f, 0x17, 0xd6, 0xdc, 0x4b, 0xef, 0xaa, 0x45,
+	0x3a, 0x4c, 0xb6, 0x22, 0x3a, 0xce, 0x29, 0xea, 0x74, 0x9a, 0x03, 0xcd, 0x38, 0x3b, 0x37, 0x0b,
+	0xef, 0x6d, 0xbe, 0x83, 0x69, 0xe6, 0xf8, 0x30, 0xa9, 0x26, 0xd0, 0xb7, 0x19, 0xf2, 0x46, 0x5d,
+	0xb1, 0x38, 0x84, 0x58, 0xb3, 0x21, 0x78, 0xe5, 0x77, 0x57, 0x57, 0x73, 0xd2, 0xc5, 0xba, 0x3a,
+	0x9d, 0xc1, 0xee, 0x31, 0xba, 0xad, 0x26, 0x51, 0x4b, 0xf0, 0xf4, 0xf8, 0x23, 0xa3, 0x7d, 0xf7,
+	0x7a, 0xea, 0xdf, 0x49, 0xef, 0xb8, 0x5c, 0x14, 0x93, 0x5b, 0x76, 0x68, 0xaf, 0x80, 0x06, 0xda,
+	0x84, 0x71, 0x5f, 0xc4, 0x10, 0x6b, 0xef, 0xd6, 0x81, 0x73, 0xb8, 0xd5, 0xbc, 0x73, 0x3d, 0xf5,
+	0xab, 0xf6, 0x7f, 0xb3, 0x08, 0x26, 0xf3, 0x24, 0xf7, 0x31, 0xda, 0x81, 0x98, 0xb6, 0x38, 0x04,
+	0x91, 0xea, 0x04, 0x6a, 0xd0, 0xef, 0xf3, 0x89, 0x77, 0xfb, 0xc0, 0x39, 0xdc, 0x6c, 0xee, 0x67,
+	0xa7, 0xf2, 0x8d, 0x14, 0x4c, 0xaa, 0x16, 0x7b, 0xaa, 0x3a, 0x67, 0x06, 0xb9, 0xc1, 0x64, 0x37,
+	0xd7, 0xdb, 0x7a, 0x0b, 0x93, 0x4d, 0xc9, 0x33, 0xd9, 0x02, 0x70, 0xf7, 0x51, 0xb9, 0xc5, 0x69,
+	0xd8, 0xe3, 0x4c, 0x69, 0xaf, 0x92, 0x30, 0x90, 0x0c, 0x30, 0xdd, 0x93, 0x8e, 0x83, 0xdc, 0x45,
+	0xa1, 0xba, 0x54, 0x82, 0x57, 0x5d, 0xb1, 0x7b, 0x2e, 0xe1, 0x4c, 0xba, 0x27, 0x1d, 0x9f, 0xcc,
+	0xd1, 0xb3, 0x04, 0x34, 0x4d, 0x23, 0xc9, 0xb6, 0x2b, 0xb1, 0x50, 0xa2, 0xdb, 0xab, 0x35, 0x8d,
+	0xe5, 0xac, 0x98, 0x24, 0x13, 0xb6, 0xab, 0x9c, 0xaf, 0xd6, 0x9f, 0x1d, 0xe4, 0x45, 0x2c, 0xce,
+	0xbb, 0xb6, 0xf5, 0xc4, 0xf4, 0xc4, 0xdb, 0x31, 0x4e, 0xbe, 0x29, 0xec, 0xc4, 0x9f, 0xbf, 0x25,
+	0x96, 0xf2, 0x62, 0xb2, 0x17, 0xb1, 0x38, 0x5b, 0x91, 0x27, 0xb3, 0x80, 0xdb, 0x42, 0x28, 0xb3,
+	0xef, 0xb9, 0x46, 0xfe, 0xa4, 0x80, 0xfc, 0x69, 0xac, 0xb3, 0x06, 0x97, 0x31, 0x61, 0x52, 0x9e,
+	0x4f, 0xfe, 0x78, 0xed, 0xdf, 0x57, 0xbe, 0xd3, 0x7c, 0x76, 0xf1, 0x4f, 0xbd, 0x74, 0x71, 0x59,
+	0x77, 0x5e, 0x5f, 0xd6, 0x9d, 0xbf, 0x2f, 0xeb, 0xce, 0x2f, 0x57, 0xf5, 0xd2, 0xeb, 0xab, 0x7a,
+	0xe9, 0xcf, 0xab, 0x7a, 0xe9, 0xbb, 0xcf, 0x72, 0x5a, 0xc9, 0xd3, 0xf1, 0x5e, 0x0c, 0x7a, 0x24,
+	0x64, 0xcf, 0x0c, 0x1a, 0xc3, 0x07, 0x8d, 0x71, 0xf6, 0xda, 0x34, 0xca, 0xad, 0x0d, 0xf3, 0x80,
+	0x7c, 0xf0, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x27, 0x40, 0xd6, 0x5c, 0x8b, 0x0a, 0x00, 0x00,
 }
 
 func (this *Token) Equal(that interface{}) bool {
@@ -304,7 +295,7 @@ func (this *Token) Equal(that interface{}) bool {
 	if !this.MaxBorrowRate.Equal(that1.MaxBorrowRate) {
 		return false
 	}
-	if !this.KinkUtilizationRate.Equal(that1.KinkUtilizationRate) {
+	if !this.KinkUtilization.Equal(that1.KinkUtilization) {
 		return false
 	}
 	if !this.LiquidationIncentive.Equal(that1.LiquidationIncentive) {
@@ -316,13 +307,25 @@ func (this *Token) Equal(that interface{}) bool {
 	if this.Exponent != that1.Exponent {
 		return false
 	}
-	if this.EnableMsgLend != that1.EnableMsgLend {
+	if this.EnableMsgSupply != that1.EnableMsgSupply {
 		return false
 	}
 	if this.EnableMsgBorrow != that1.EnableMsgBorrow {
 		return false
 	}
 	if this.Blacklist != that1.Blacklist {
+		return false
+	}
+	if !this.MaxCollateralShare.Equal(that1.MaxCollateralShare) {
+		return false
+	}
+	if !this.MaxSupplyUtilization.Equal(that1.MaxSupplyUtilization) {
+		return false
+	}
+	if !this.MinCollateralLiquidity.Equal(that1.MinCollateralLiquidity) {
+		return false
+	}
+	if !this.MaxSupply.Equal(that1.MaxSupply) {
 		return false
 	}
 	return true
@@ -347,6 +350,16 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.DirectLiquidationFee.Size()
+		i -= size
+		if _, err := m.DirectLiquidationFee.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x32
 	{
 		size := m.SmallLiquidationSize.Size()
 		i -= size
@@ -410,6 +423,52 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.MaxSupply.Size()
+		i -= size
+		if _, err := m.MaxSupply.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x92
+	{
+		size := m.MinCollateralLiquidity.Size()
+		i -= size
+		if _, err := m.MinCollateralLiquidity.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x8a
+	{
+		size := m.MaxSupplyUtilization.Size()
+		i -= size
+		if _, err := m.MaxSupplyUtilization.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1
+	i--
+	dAtA[i] = 0x82
+	{
+		size := m.MaxCollateralShare.Size()
+		i -= size
+		if _, err := m.MaxCollateralShare.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintLeverage(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x7a
 	if m.Blacklist {
 		i--
 		if m.Blacklist {
@@ -430,9 +489,9 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x68
 	}
-	if m.EnableMsgLend {
+	if m.EnableMsgSupply {
 		i--
-		if m.EnableMsgLend {
+		if m.EnableMsgSupply {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -463,9 +522,9 @@ func (m *Token) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i--
 	dAtA[i] = 0x4a
 	{
-		size := m.KinkUtilizationRate.Size()
+		size := m.KinkUtilization.Size()
 		i -= size
-		if _, err := m.KinkUtilizationRate.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.KinkUtilization.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintLeverage(dAtA, i, uint64(size))
@@ -567,6 +626,8 @@ func (m *Params) Size() (n int) {
 	n += 1 + l + sovLeverage(uint64(l))
 	l = m.SmallLiquidationSize.Size()
 	n += 1 + l + sovLeverage(uint64(l))
+	l = m.DirectLiquidationFee.Size()
+	n += 1 + l + sovLeverage(uint64(l))
 	return n
 }
 
@@ -592,7 +653,7 @@ func (m *Token) Size() (n int) {
 	n += 1 + l + sovLeverage(uint64(l))
 	l = m.MaxBorrowRate.Size()
 	n += 1 + l + sovLeverage(uint64(l))
-	l = m.KinkUtilizationRate.Size()
+	l = m.KinkUtilization.Size()
 	n += 1 + l + sovLeverage(uint64(l))
 	l = m.LiquidationIncentive.Size()
 	n += 1 + l + sovLeverage(uint64(l))
@@ -603,7 +664,7 @@ func (m *Token) Size() (n int) {
 	if m.Exponent != 0 {
 		n += 1 + sovLeverage(uint64(m.Exponent))
 	}
-	if m.EnableMsgLend {
+	if m.EnableMsgSupply {
 		n += 2
 	}
 	if m.EnableMsgBorrow {
@@ -612,6 +673,14 @@ func (m *Token) Size() (n int) {
 	if m.Blacklist {
 		n += 2
 	}
+	l = m.MaxCollateralShare.Size()
+	n += 1 + l + sovLeverage(uint64(l))
+	l = m.MaxSupplyUtilization.Size()
+	n += 2 + l + sovLeverage(uint64(l))
+	l = m.MinCollateralLiquidity.Size()
+	n += 2 + l + sovLeverage(uint64(l))
+	l = m.MaxSupply.Size()
+	n += 2 + l + sovLeverage(uint64(l))
 	return n
 }
 
@@ -783,6 +852,40 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.SmallLiquidationSize.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DirectLiquidationFee", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.DirectLiquidationFee.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1074,7 +1177,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field KinkUtilizationRate", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field KinkUtilization", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1102,7 +1205,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.KinkUtilizationRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.KinkUtilization.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1193,7 +1296,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 			}
 		case 12:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgLend", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgSupply", wireType)
 			}
 			var v int
 			for shift := uint(0); ; shift += 7 {
@@ -1210,7 +1313,7 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-			m.EnableMsgLend = bool(v != 0)
+			m.EnableMsgSupply = bool(v != 0)
 		case 13:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EnableMsgBorrow", wireType)
@@ -1251,6 +1354,142 @@ func (m *Token) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Blacklist = bool(v != 0)
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxCollateralShare", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxCollateralShare.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxSupplyUtilization", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxSupplyUtilization.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 17:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinCollateralLiquidity", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinCollateralLiquidity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 18:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxSupply", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowLeverage
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthLeverage
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxSupply.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipLeverage(dAtA[iNdEx:])

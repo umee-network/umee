@@ -7,7 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // Simulation parameter constants
@@ -16,6 +16,7 @@ const (
 	minimumCloseFactorKey           = "minimum_close_factor"
 	oracleRewardFactorKey           = "oracle_reward_factor"
 	smallLiquidationSizeKey         = "small_liquidation_size"
+	directLiquidationFeeKey         = "direct_liquidation_fee"
 )
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
@@ -35,6 +36,11 @@ func GenOracleRewardFactor(r *rand.Rand) sdk.Dec {
 
 // GenSmallLiquidationSize produces a randomized SmallLiquidationSize in the range of [0, 1000]
 func GenSmallLiquidationSize(r *rand.Rand) sdk.Dec {
+	return sdk.NewDec(int64(r.Intn(1000)))
+}
+
+// GenDirectLiquidationFee produces a randomized DirectLiquidationFee in the range of [0, 1000]
+func GenDirectLiquidationFee(r *rand.Rand) sdk.Dec {
 	return sdk.NewDec(int64(r.Intn(1000)))
 }
 
@@ -64,16 +70,22 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { smallLiquidationSize = GenSmallLiquidationSize(r) },
 	)
 
+	var directLiquidationFee sdk.Dec
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, directLiquidationFeeKey, &directLiquidationFee, simState.Rand,
+		func(r *rand.Rand) { smallLiquidationSize = GenDirectLiquidationFee(r) },
+	)
+
 	leverageGenesis := types.NewGenesisState(
 		types.Params{
 			CompleteLiquidationThreshold: completeLiquidationThreshold,
 			MinimumCloseFactor:           minimumCloseFactor,
 			OracleRewardFactor:           oracleRewardFactor,
 			SmallLiquidationSize:         smallLiquidationSize,
+			DirectLiquidationFee:         directLiquidationFee,
 		},
 		[]types.Token{},
 		[]types.AdjustedBorrow{},
-		[]types.CollateralSetting{},
 		[]types.Collateral{},
 		sdk.Coins{},
 		0,

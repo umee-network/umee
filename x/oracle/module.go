@@ -11,16 +11,17 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/umee-network/umee/v2/x/oracle/client/cli"
-	"github.com/umee-network/umee/v2/x/oracle/keeper"
-	simulation "github.com/umee-network/umee/v2/x/oracle/simulations"
-	"github.com/umee-network/umee/v2/x/oracle/types"
+	"github.com/umee-network/umee/v3/x/oracle/client/cli"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	simulation "github.com/umee-network/umee/v3/x/oracle/simulations"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 var (
@@ -105,14 +106,14 @@ type AppModule struct {
 
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
+	bankKeeper    bankkeeper.Keeper
 }
 
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
 	accountKeeper types.AccountKeeper,
-	bankKeeper types.BankKeeper,
+	bankKeeper bankkeeper.Keeper,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),

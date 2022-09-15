@@ -11,19 +11,19 @@ import (
 	"sync"
 	"time"
 
-	rpcclient "github.com/cosmos/cosmos-sdk/client/rpc"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/client"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
-	"github.com/umee-network/umee/price-feeder/telemetry"
-	oracletypes "github.com/umee-network/umee/v2/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // We define tickerSleep as the minimum timeout between each oracle loop. We
@@ -58,16 +58,18 @@ type Oracle struct {
 	closer *pfsync.Closer
 
 	providerTimeout    time.Duration
-	providerPairs      map[string][]types.CurrencyPair
+	providerPairs      map[provider.Name][]types.CurrencyPair
 	previousPrevote    *PreviousPrevote
 	previousVotePeriod float64
-	priceProviders     map[string]provider.Provider
+	priceProviders     map[provider.Name]provider.Provider
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
+	endpoints          map[provider.Name]provider.Endpoint
 
 	mtx             sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
+	paramCache      ParamCache
 }
 
 func New(
@@ -76,8 +78,9 @@ func New(
 	currencyPairs []config.CurrencyPair,
 	providerTimeout time.Duration,
 	deviations map[string]sdk.Dec,
+	endpoints map[provider.Name]provider.Endpoint,
 ) *Oracle {
-	providerPairs := make(map[string][]types.CurrencyPair)
+	providerPairs := make(map[provider.Name][]types.CurrencyPair)
 
 	for _, pair := range currencyPairs {
 		for _, provider := range pair.Providers {
@@ -93,10 +96,12 @@ func New(
 		closer:          pfsync.NewCloser(),
 		oracleClient:    oc,
 		providerPairs:   providerPairs,
-		priceProviders:  make(map[string]provider.Provider),
+		priceProviders:  make(map[provider.Name]provider.Provider),
 		previousPrevote: nil,
 		providerTimeout: providerTimeout,
 		deviations:      deviations,
+		paramCache:      ParamCache{},
+		endpoints:       endpoints,
 	}
 }
 
@@ -163,7 +168,7 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 // to determine prices. If candles are not available, uses the most recent prices
 // with VWAP. Warns the the user of any missing prices, and filters out any faulty
 // providers which do not report prices or candles within 2𝜎 of the others.
-func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList) error {
+func (o *Oracle) SetPrices(ctx context.Context) error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
 	providerPrices := make(provider.AggregatedProviderPrices)
@@ -186,8 +191,8 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 		}
 
 		g.Go(func() error {
-			prices := make(map[string]provider.TickerPrice, 0)
-			candles := make(map[string][]provider.CandlePrice, 0)
+			prices := make(map[string]types.TickerPrice, 0)
+			candles := make(map[string][]types.CandlePrice, 0)
 			ch := make(chan struct{})
 			errCh := make(chan error, 1)
 
@@ -195,13 +200,13 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 				defer close(ch)
 				prices, err = priceProvider.GetTickerPrices(currencyPairs...)
 				if err != nil {
-					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+					provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
 					errCh <- err
 				}
 
 				candles, err = priceProvider.GetCandlePrices(currencyPairs...)
 				if err != nil {
-					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+					provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
 					errCh <- err
 				}
 			}()
@@ -234,7 +239,7 @@ func (o *Oracle) SetPrices(ctx context.Context, acceptList oracletypes.DenomList
 	}
 
 	if err := g.Wait(); err != nil {
-		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
+		o.logger.Err(err).Msg("failed to get ticker prices from provider")
 	}
 
 	computedPrices, err := GetComputedPrices(
@@ -269,27 +274,32 @@ func GetComputedPrices(
 	logger zerolog.Logger,
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
-	providerPairs map[string][]types.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
-	// filter out any erroneous candles
-	filteredCandles, err := FilterCandleDeviations(
+	// convert any non-USD denominated candles into USD
+	convertedCandles, err := convertCandlesToUSD(
 		logger,
 		providerCandles,
+		providerPairs,
 		deviations,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// convert any non-USD denominated candles into USD.
-	convertedCandles, err := convertCandlesToUSD(filteredCandles, providerPairs)
+	// filter out any erroneous candles
+	filteredCandles, err := FilterCandleDeviations(
+		logger,
+		convertedCandles,
+		deviations,
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	// attempt to use candles for TVWAP calculations
-	tvwapPrices, err := ComputeTVWAP(convertedCandles)
+	tvwapPrices, err := ComputeTVWAP(filteredCandles)
 	if err != nil {
 		return nil, err
 	}
@@ -297,21 +307,26 @@ func GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		filteredProviderPrices, err := FilterTickerDeviations(
+		convertedTickers, err := convertTickersToUSD(
 			logger,
 			providerPrices,
+			providerPairs,
 			deviations,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		convertedTickers, err := convertTickersToUSD(filteredProviderPrices, providerPairs)
+		filteredProviderPrices, err := FilterTickerDeviations(
+			logger,
+			convertedTickers,
+			deviations,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		vwapPrices, err := ComputeVWAP(convertedTickers)
+		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
 		if err != nil {
 			return nil, err
 		}
@@ -326,18 +341,18 @@ func GetComputedPrices(
 // candles and tickers based on the base currency per provider.
 // Returns true if at least one of price or candle exists.
 func SetProviderTickerPricesAndCandles(
-	providerName string,
+	providerName provider.Name,
 	providerPrices provider.AggregatedProviderPrices,
 	providerCandles provider.AggregatedProviderCandles,
-	prices map[string]provider.TickerPrice,
-	candles map[string][]provider.CandlePrice,
+	prices map[string]types.TickerPrice,
+	candles map[string][]types.CandlePrice,
 	pair types.CurrencyPair,
 ) (success bool) {
 	if _, ok := providerPrices[providerName]; !ok {
-		providerPrices[providerName] = make(map[string]provider.TickerPrice)
+		providerPrices[providerName] = make(map[string]types.TickerPrice)
 	}
 	if _, ok := providerCandles[providerName]; !ok {
-		providerCandles[providerName] = make(map[string][]provider.CandlePrice)
+		providerCandles[providerName] = make(map[string][]types.CandlePrice)
 	}
 
 	tp, pricesOk := prices[pair.String()]
@@ -353,12 +368,29 @@ func SetProviderTickerPricesAndCandles(
 	return pricesOk || candlesOk
 }
 
+// GetParamCache returns the last updated parameters of the x/oracle module
+// if the current ParamCache is outdated, we will query it again.
+func (o *Oracle) GetParamCache(ctx context.Context, currentBlockHeigh int64) (oracletypes.Params, error) {
+	if !o.paramCache.IsOutdated(currentBlockHeigh) {
+		return *o.paramCache.params, nil
+	}
+
+	params, err := o.GetParams(ctx)
+	if err != nil {
+		return oracletypes.Params{}, err
+	}
+
+	o.checkAcceptList(params)
+	o.paramCache.Update(currentBlockHeigh, params)
+	return params, nil
+}
+
 // GetParams returns the current on-chain parameters of the x/oracle module.
-func (o *Oracle) GetParams() (oracletypes.Params, error) {
+func (o *Oracle) GetParams(ctx context.Context) (oracletypes.Params, error) {
 	grpcConn, err := grpc.Dial(
 		o.oracleClient.GRPCEndpoint,
 		// the Cosmos SDK doesn't support any transport security mechanism
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)
 	if err != nil {
@@ -368,10 +400,10 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	defer grpcConn.Close()
 	queryClient := oracletypes.NewQueryClient(grpcConn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParamsRequest{})
+	queryResponse, err := queryClient.Params(ctx, &oracletypes.QueryParams{})
 	if err != nil {
 		return oracletypes.Params{}, fmt.Errorf("failed to get x/oracle params: %w", err)
 	}
@@ -379,7 +411,7 @@ func (o *Oracle) GetParams() (oracletypes.Params, error) {
 	return queryResponse.Params, nil
 }
 
-func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (provider.Provider, error) {
+func (o *Oracle) getOrSetProvider(ctx context.Context, providerName provider.Name) (provider.Provider, error) {
 	var (
 		priceProvider provider.Provider
 		ok            bool
@@ -387,7 +419,13 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 
 	priceProvider, ok = o.priceProviders[providerName]
 	if !ok {
-		newProvider, err := NewProvider(ctx, providerName, o.logger, o.providerPairs[providerName]...)
+		newProvider, err := NewProvider(
+			ctx,
+			providerName,
+			o.logger,
+			o.endpoints[providerName],
+			o.providerPairs[providerName]...,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -401,33 +439,40 @@ func (o *Oracle) getOrSetProvider(ctx context.Context, providerName string) (pro
 
 func NewProvider(
 	ctx context.Context,
-	providerName string,
+	providerName provider.Name,
 	logger zerolog.Logger,
+	endpoint provider.Endpoint,
 	providerPairs ...types.CurrencyPair,
 ) (provider.Provider, error) {
 	switch providerName {
-	case config.ProviderBinance:
-		return provider.NewBinanceProvider(ctx, logger, providerPairs...)
+	case provider.ProviderBinance:
+		return provider.NewBinanceProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderKraken:
-		return provider.NewKrakenProvider(ctx, logger, providerPairs...)
+	case provider.ProviderKraken:
+		return provider.NewKrakenProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderOsmosis:
-		return provider.NewOsmosisProvider(), nil
+	case provider.ProviderOsmosis:
+		return provider.NewOsmosisProvider(endpoint), nil
 
-	case config.ProviderHuobi:
-		return provider.NewHuobiProvider(ctx, logger, providerPairs...)
+	case provider.ProviderHuobi:
+		return provider.NewHuobiProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderCoinbase:
-		return provider.NewCoinbaseProvider(ctx, logger, providerPairs...)
+	case provider.ProviderCoinbase:
+		return provider.NewCoinbaseProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderOkx:
-		return provider.NewOkxProvider(ctx, logger, providerPairs...)
+	case provider.ProviderOkx:
+		return provider.NewOkxProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderGate:
-		return provider.NewGateProvider(ctx, logger, providerPairs...)
+	case provider.ProviderGate:
+		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
 
-	case config.ProviderMock:
+	case provider.ProviderFTX:
+		return provider.NewFTXProvider(ctx, logger, endpoint, providerPairs...), nil
+
+	case provider.ProviderBitget:
+		return provider.NewBitgetProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil
 	}
 
@@ -446,26 +491,21 @@ func (o *Oracle) checkAcceptList(params oracletypes.Params) {
 func (o *Oracle) tick(ctx context.Context) error {
 	o.logger.Debug().Msg("executing oracle tick")
 
-	clientCtx, err := o.oracleClient.CreateClientContext()
-	if err != nil {
-		return err
-	}
-	oracleParams, err := o.GetParams()
-	if err != nil {
-		return err
-	}
-	if err := o.SetPrices(ctx, oracleParams.AcceptList); err != nil {
-		return err
-	}
-
-	o.checkAcceptList(oracleParams)
-
-	blockHeight, err := rpcclient.GetChainHeight(clientCtx)
+	blockHeight, err := o.oracleClient.ChainHeight.GetChainHeight()
 	if err != nil {
 		return err
 	}
 	if blockHeight < 1 {
 		return fmt.Errorf("expected positive block height")
+	}
+
+	oracleParams, err := o.GetParamCache(ctx, blockHeight)
+	if err != nil {
+		return err
+	}
+
+	if err := o.SetPrices(ctx); err != nil {
+		return err
 	}
 
 	// Get oracle vote period, next block height, current vote period, and index
@@ -536,7 +576,7 @@ func (o *Oracle) tick(ctx context.Context) error {
 			return err
 		}
 
-		currentHeight, err := rpcclient.GetChainHeight(clientCtx)
+		currentHeight, err := o.oracleClient.ChainHeight.GetChainHeight()
 		if err != nil {
 			return err
 		}

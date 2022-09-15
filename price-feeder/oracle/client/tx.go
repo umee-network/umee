@@ -26,7 +26,7 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 
 	txf = txf.WithGas(adjusted)
 
-	unsignedTx, err := tx.BuildUnsignedTx(txf, msgs...)
+	unsignedTx, err := txf.BuildUnsignedTx(msgs...)
 	if err != nil {
 		return nil, err
 	}

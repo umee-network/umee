@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"math/big"
 
+	sdkmath "cosmossdk.io/math"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -118,7 +119,7 @@ func (sk MockStakingKeeper) Validator(ctx sdk.Context, address sdk.ValAddress) s
 	return nil
 }
 
-func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdk.Int {
+func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdkmath.Int {
 	return sdk.ZeroInt()
 }
 
@@ -134,11 +135,13 @@ func (MockStakingKeeper) MaxValidators(sdk.Context) uint32 {
 	return 100
 }
 
-func (MockStakingKeeper) PowerReduction(ctx sdk.Context) (res sdk.Int) {
+func (MockStakingKeeper) PowerReduction(ctx sdk.Context) (res sdkmath.Int) {
 	return sdk.DefaultPowerReduction
 }
 
-func (MockStakingKeeper) Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec) {}
+func (MockStakingKeeper) Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec) sdkmath.Int {
+	return sdk.ZeroInt()
+}
 
 func (MockStakingKeeper) Jail(sdk.Context, sdk.ConsAddress) {}
 
@@ -195,15 +198,15 @@ func (MockValidator) GetConsAddr() (sdk.ConsAddress, error) {
 	return nil, nil
 }
 
-func (v MockValidator) GetTokens() sdk.Int {
+func (v MockValidator) GetTokens() sdkmath.Int {
 	return sdk.TokensFromConsensusPower(v.power, sdk.DefaultPowerReduction)
 }
 
-func (v MockValidator) GetBondedTokens() sdk.Int {
+func (v MockValidator) GetBondedTokens() sdkmath.Int {
 	return sdk.TokensFromConsensusPower(v.power, sdk.DefaultPowerReduction)
 }
 
-func (v MockValidator) GetConsensusPower(powerReduction sdk.Int) int64 {
+func (v MockValidator) GetConsensusPower(powerReduction sdkmath.Int) int64 {
 	return v.power
 }
 
@@ -215,7 +218,7 @@ func (v MockValidator) GetCommission() sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) GetMinSelfDelegation() sdk.Int {
+func (v MockValidator) GetMinSelfDelegation() sdkmath.Int {
 	return sdk.OneInt()
 }
 
@@ -235,10 +238,10 @@ func (v MockValidator) TokensFromSharesRoundUp(sdk.Dec) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) SharesFromTokens(amt sdk.Int) (sdk.Dec, error) {
+func (v MockValidator) SharesFromTokens(amt sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }
 
-func (v MockValidator) SharesFromTokensTruncated(amt sdk.Int) (sdk.Dec, error) {
+func (v MockValidator) SharesFromTokensTruncated(amt sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }

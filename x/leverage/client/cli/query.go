@@ -7,7 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v2/x/leverage/types"
+	"github.com/umee-network/umee/v3/util/cli"
+	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // Flag constants
@@ -26,60 +27,18 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryAllRegisteredTokens(),
 		GetCmdQueryParams(),
-		GetCmdQueryBorrowed(),
-		GetCmdQueryBorrowedValue(),
-		GetCmdQueryLoaned(),
-		GetCmdQueryLoanedValue(),
-		GetCmdQueryReserveAmount(),
-		GetCmdQueryCollateral(),
-		GetCmdQueryCollateralValue(),
-		GetCmdQueryCollateralSetting(),
-		GetCmdQueryExchangeRate(),
-		GetCmdQueryLendAPY(),
-		GetCmdQueryBorrowAPY(),
-		GetCmdQueryMarketSize(),
-		GetCmdQueryTokenMarketSize(),
-		GetCmdQueryBorrowLimit(),
-		GetCmdQueryLiquidationThreshold(),
-		GetCmdQueryLiquidationTargets(),
+		GetCmdQueryRegisteredTokens(),
 		GetCmdQueryMarketSummary(),
+		GetCmdQueryAccountBalances(),
+		GetCmdQueryAccountSummary(),
+		GetCmdQueryLiquidationTargets(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryAllRegisteredTokens returns a CLI command handler to query for all
-// the registered tokens in the x/leverage module.
-func GetCmdQueryAllRegisteredTokens() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "registered-tokens",
-		Args:  cobra.NoArgs,
-		Short: "Query for all the current registered tokens",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			resp, err := queryClient.RegisteredTokens(cmd.Context(), &types.QueryRegisteredTokens{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryParams returns a CLI command handler to query for the x/leverage
+// GetCmdQueryParams creates a Cobra command to query for the x/leverage
 // module parameters.
 func GetCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{
@@ -93,13 +52,8 @@ func GetCmdQueryParams() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			resp, err := queryClient.Params(cmd.Context(), &types.QueryParamsRequest{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			resp, err := queryClient.Params(cmd.Context(), &types.QueryParams{})
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -108,13 +62,13 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBorrowed returns a CLI command handler to query for the amount of
-// total borrowed tokens for a given address.
-func GetCmdQueryBorrowed() *cobra.Command {
+// GetCmdQueryRegisteredTokens creates a Cobra command to query for all
+// the registered tokens in the x/leverage module.
+func GetCmdQueryRegisteredTokens() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrowed [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of borrowed tokens for an address",
+		Use:   "registered-tokens",
+		Args:  cobra.NoArgs,
+		Short: "Query for all the current registered tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -122,165 +76,8 @@ func GetCmdQueryBorrowed() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryBorrowedRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.Borrowed(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryBorrowedValue returns a CLI command handler to query for the USD
-// value of total borrowed tokens for a given address.
-func GetCmdQueryBorrowedValue() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "borrowed-value [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total USD value of borrowed tokens for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryBorrowedValueRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.BorrowedValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryLoaned returns a CLI command handler to query for the amount of
-// tokens loaned by a given address.
-func GetCmdQueryLoaned() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "loaned [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of tokens loaned by an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLoanedRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.Loaned(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryLoanedValue returns a CLI command handler to query for the USD value of
-// total tokens loaned by a given address.
-func GetCmdQueryLoanedValue() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "loaned-value [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD value of tokens loaned by an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLoanedValueRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.LoanedValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryReserveAmount returns a CLI command handler to query for the
-// reserved amount of a specific token.
-func GetCmdQueryReserveAmount() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "reserved [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the amount reserved of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryReserveAmountRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.ReserveAmount(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			resp, err := queryClient.RegisteredTokens(cmd.Context(), &types.QueryRegisteredTokens{})
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -289,379 +86,7 @@ func GetCmdQueryReserveAmount() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCollateralSetting returns a CLI command handler to query for the collateral
-// setting of a specific token denom for an address.
-func GetCmdQueryCollateralSetting() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "collateral-setting [addr] [denom]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Query for the collateral setting of a specific denom for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryCollateralSettingRequest{
-				Address: args[0],
-				Denom:   args[1],
-			}
-
-			resp, err := queryClient.CollateralSetting(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryCollateral returns a CLI command handler to query for the amount of
-// total collateral tokens for a given address.
-func GetCmdQueryCollateral() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "collateral [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total amount of collateral tokens for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryCollateralRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.Collateral(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryCollateralValue returns a CLI command handler to query for the USD
-// value of total collateral tokens for a given address.
-func GetCmdQueryCollateralValue() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "collateral-value [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the total USD value of collateral tokens for an address",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryCollateralValueRequest{
-				Address: args[0],
-			}
-			if d, err := cmd.Flags().GetString(FlagDenom); len(d) > 0 && err == nil {
-				req.Denom = d
-			}
-
-			resp, err := queryClient.CollateralValue(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	cmd.Flags().String(FlagDenom, "", "Query for value of only a specific denomination")
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryExchangeRate returns a CLI command handler to query for the
-// exchange rate of a specific uToken.
-func GetCmdQueryExchangeRate() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "exchange-rate [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the exchange rate of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryExchangeRateRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.ExchangeRate(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryAvailableBorrow returns a CLI command handler to query for the
-// available amount to borrow of a specific denom.
-func GetCmdQueryAvailableBorrow() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "available-borrow [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the available amount to borrow of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryAvailableBorrowRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.AvailableBorrow(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryLendAPY returns a CLI command handler to query for the
-// lend APY of a specific uToken.
-func GetCmdQueryLendAPY() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "lend-apy [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the lend APY of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLendAPYRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.LendAPY(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryBorrowAPY returns a CLI command handler to query for the
-// borrow APY of a specific token.
-func GetCmdQueryBorrowAPY() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "borrow-apy [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the borrow APY of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryBorrowAPYRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.BorrowAPY(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryMarketSize returns a CLI command handler to query for the
-// Market Size of a specific token.
-func GetCmdQueryMarketSize() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "market-size [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the USD market size of a specified denomination",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryMarketSizeRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.MarketSize(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryTokenMarketSize returns a CLI command handler to query for the
-// Market Size of a specific token, in token denomination instead of USD.
-func GetCmdQueryTokenMarketSize() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "token-market-size [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the market size of a specified denomination measured in base tokens",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryTokenMarketSizeRequest{
-				Denom: args[0],
-			}
-
-			resp, err := queryClient.TokenMarketSize(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryBorrowLimit returns a CLI command handler to query for the
-// borrow limit of a specific borrower.
-func GetCmdQueryBorrowLimit() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "borrow-limit [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query for the borrow limit of a specified borrower",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryBorrowLimitRequest{
-				Address: args[0],
-			}
-
-			resp, err := queryClient.BorrowLimit(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryLiquidationThreshold returns a CLI command handler to query a
-// liquidation threshold of a specific borrower.
-func GetCmdQueryLiquidationThreshold() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "liquidation-threshold [addr]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Query a liquidation threshold of a specified borrower",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLiquidationThresholdRequest{
-				Address: args[0],
-			}
-
-			resp, err := queryClient.LiquidationThreshold(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdQueryMarketSummary returns a CLI command handler to query for the
+// GetCmdQueryMarketSummary creates a Cobra command to query for the
 // Market Summary of a specific token.
 func GetCmdQueryMarketSummary() *cobra.Command {
 	cmd := &cobra.Command{
@@ -675,17 +100,11 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryMarketSummaryRequest{
+			req := &types.QueryMarketSummary{
 				Denom: args[0],
 			}
-
 			resp, err := queryClient.MarketSummary(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
@@ -694,8 +113,62 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationTargets returns a CLI command handler to query for
-// all eligible liquidation targets
+// GetCmdQueryAccountBalances creates a Cobra command to query for the
+// supply, collateral, and borrow positions of an account.
+func GetCmdQueryAccountBalances() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "account-balances [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the total supplied, collateral, and borrowed tokens for an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryAccountBalances{
+				Address: args[0],
+			}
+			resp, err := queryClient.AccountBalances(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryAccountSummary creates a Cobra command to query for USD
+// values representing an account's positions and borrowing limits.
+func GetCmdQueryAccountSummary() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "account-summary [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for position USD values and borrowing limits for an address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryAccountSummary{
+				Address: args[0],
+			}
+			resp, err := queryClient.AccountSummary(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryLiquidationTargets creates a Cobra command to query for
+// all eligible liquidation targets.
 func GetCmdQueryLiquidationTargets() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidation-targets",
@@ -708,15 +181,9 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-
-			req := &types.QueryLiquidationTargetsRequest{}
-
+			req := &types.QueryLiquidationTargets{}
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 

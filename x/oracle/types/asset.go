@@ -2,10 +2,12 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
-	UmeeDenom       string = "uumee"
+	UmeeDenom       string = appparams.BondDenom
 	UmeeSymbol      string = "umee"
 	UmeeExponent           = uint32(6)
 	USDDenom        string = "USD"

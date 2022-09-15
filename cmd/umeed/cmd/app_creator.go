@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	stdlog "log"
 	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -11,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/snapshots"
+	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -18,16 +20,17 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
-	"github.com/umee-network/umee/v2/app/params"
+	"github.com/umee-network/umee/v3/ante"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type appCreator struct {
-	encCfg        params.EncodingConfig
+	encCfg        appparams.EncodingConfig
 	moduleManager module.BasicManager
 }
 
-func (ac appCreator) newApp(
+func (a appCreator) newApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -50,7 +53,7 @@ func (ac appCreator) newApp(
 	}
 
 	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
+	snapshotDB, err := dbm.NewDB("metadata", server.GetAppDBBackend(appOpts), snapshotDir)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create LevelDB database: %s", err))
 	}
@@ -59,37 +62,45 @@ func (ac appCreator) newApp(
 	if err != nil {
 		panic(fmt.Sprintf("failed to create snapshot store: %s", err))
 	}
+	snapshotOptions := snapshottypes.NewSnapshotOptions(
+		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
+		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
+	)
 
-	baseAppOpts := []func(*baseapp.BaseApp){
+	minGasPrices := cast.ToString(appOpts.Get(server.FlagMinGasPrices))
+	mustMinUmeeGasPrice(minGasPrices)
+
+	return umeeapp.New(
+		logger, db, traceStore, true, skipUpgradeHeights,
+		cast.ToString(appOpts.Get(flags.FlagHome)),
+		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+		a.encCfg,
+		appOpts,
 		baseapp.SetPruning(pruningOpts),
-		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
+		baseapp.SetMinGasPrices(minGasPrices),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
 		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
 		baseapp.SetHaltTime(cast.ToUint64(appOpts.Get(server.FlagHaltTime))),
 		baseapp.SetInterBlockCache(cache),
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshotStore(snapshotStore),
-		baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
-		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
-	}
-
-	return umeeapp.New(
-		logger,
-		db,
-		traceStore,
-		true,
-		skipUpgradeHeights,
-		cast.ToString(appOpts.Get(flags.FlagHome)),
-		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		ac.encCfg,
-		appOpts,
-		baseAppOpts...,
+		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
 	)
 }
 
+func mustMinUmeeGasPrice(minGasPrices string) {
+	gasPrices, err := sdk.ParseDecCoins(minGasPrices)
+	if err != nil {
+		stdlog.Fatalf("invalid minimum gas prices: %v", err)
+	}
+	if err := ante.AssertMinProtocolGasPrice(gasPrices); err != nil {
+		stdlog.Fatal("minimum-gas-price config in app.toml must be at least ",
+			appparams.MinMinGasPrice, " [", err, "]")
+	}
+}
+
 // appExport creates a new simapp, optionally at a given height.
-func (ac appCreator) appExport(
+func (a appCreator) appExport(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -116,7 +127,7 @@ func (ac appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		ac.encCfg,
+		a.encCfg,
 		appOpts,
 	)
 
