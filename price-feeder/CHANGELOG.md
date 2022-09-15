@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1328](https://github.com/umee-network/umee/pull/1328) Add bitget provider.
+- [1339](https://github.com/umee-network/umee/pull/1339) Add mexc provider.
 
 ### Bugs
 
