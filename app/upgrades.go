@@ -11,11 +11,12 @@ import (
 
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	v3upgrades "github.com/umee-network/umee/v3/app/upgrades/v3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-const UpgradeV3_0Plan = "v1.0-v3.0"
+const UpgradeV3_0Plan = "v1.1-v3.0"
 
 func (app UmeeApp) RegisterUpgradeHandlers() {
 	// v3 upgrade handler performs upgrade from v1->v3
@@ -30,7 +31,30 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 			}
 
 			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			if err != nil {
+				return vm, err
+			}
+
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate param of staking module",
+				"name", UpgradeV3_0Plan)
+			minCommissionRate, err := v3upgrades.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
+			if err != nil {
+				return vm, sdkerrors.Wrapf(
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate param of staking module",
+					UpgradeV3_0Plan)
+			}
+
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
+				"name", UpgradeV3_0Plan)
+			err = v3upgrades.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
+			if err != nil {
+				return vm, sdkerrors.Wrapf(
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate for validators",
+					UpgradeV3_0Plan)
+			}
+
+			return vm, err
 		})
 
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
