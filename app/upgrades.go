@@ -16,7 +16,7 @@ import (
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-const UpgradeV3_0Plan = "v1.0-v3.0"
+const UpgradeV3_0Plan = "v1.1-v3.0"
 
 func (app UmeeApp) RegisterUpgradeHandlers() {
 	// v3 upgrade handler performs upgrade from v1->v3
