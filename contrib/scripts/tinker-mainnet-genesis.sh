@@ -7,7 +7,7 @@
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
-MAINNET_EXPORTED_GENESIS_URL="${MAINNET_EXPORTED_GENESIS_URL:-"https://storage.googleapis.com/umeedropzone/jul-28-umee-1-export.json.gz"}"
+MAINNET_EXPORTED_GENESIS_URL="${MAINNET_EXPORTED_GENESIS_URL:-"https://storage.googleapis.com/umeedropzone/artemis-mainnet-set-15-exported-genesis.json.tar.gz"}"
 EXPORTED_GENESIS_UNPROCESSED="${EXPORTED_GENESIS_UNPROCESSED:-$CWD/umeemainnet.genesis.json}"
 EXPORTED_GENESIS_UNZIPED="${EXPORTED_GENESIS_UNZIPED:-$CWD/umeemainnet.genesis.json.gz}"
 
