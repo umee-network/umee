@@ -121,6 +121,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 - [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 - [1357](https://github.com/umee-network/umee/pull/1357) Interptex x/0 collateral liquidity as 100%
+- [1383](https://github.com/umee-network/umee/pull/1383) Remove potential panic during FeeAndPriority error case.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

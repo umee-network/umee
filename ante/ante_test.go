@@ -21,11 +21,10 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	app         *umeeapp.UmeeApp
-	anteHandler sdk.AnteHandler
-	ctx         sdk.Context
-	clientCtx   client.Context
-	txBuilder   client.TxBuilder
+	app       *umeeapp.UmeeApp
+	ctx       sdk.Context
+	clientCtx client.Context
+	txBuilder client.TxBuilder
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
