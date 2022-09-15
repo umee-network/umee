@@ -97,6 +97,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1319](https://github.com/umee-network/umee/pull/1319) Implemented MaxSupply.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
 - [1343](https://github.com/umee-network/umee/pull/1343) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
+- [1379](https://github.com/umee-network/umee/pull/1379) Add `mininumCommissionRate` update to all validators.
 
 ### Improvements
 
@@ -114,6 +115,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
 - [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
 - [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
+- [1385](https://github.com/umee-network/umee/pull/1385) Update v1.1-v3.0 upgrade plan name
 
 ### Bug Fixes
 
