@@ -19,7 +19,7 @@ The `price-feeder` tool is responsible for performing the following:
    Binance and Osmosis, based on operator configuration. These exchange rates
    are exposed via an API and are used to feed into the main oracle process.
 2. Taking aggregated exchange rate price data and submitting those exchange rates
-   on-chain to Umee's `x/oracle` module following Umee's [Oracle](https://github.com/umee-network/umee/tree/main/x/oracle/spec)
+   on-chain to Umee's `x/oracle` module following Umee's [Oracle](https://github.com/umee-network/umee/tree/main/x/oracle#readme)
    specification.
 
 <!-- markdown-link-check-disable -->
@@ -33,6 +33,7 @@ The list of current supported providers:
 - [Gate](https://www.gate.io/)
 - [Huobi](https://www.huobi.com/en-us/)
 - [Kraken](https://www.kraken.com/en-us/)
+- [Mexc](https://www.mexc.com/)
 - [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
 <!-- markdown-link-check-enable -->
