@@ -36,16 +36,10 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 		return sdk.Coins{}, priority, nil
 	}
 
-	var err error
 	if ctx.IsCheckTx() {
-		err = checkFees(ctx.MinGasPrices(), providedFees, gasLimit)
-	} else {
-		err = checkFees(nil, providedFees, gasLimit)
+		return providedFees, priority, checkFees(ctx.MinGasPrices(), providedFees, gasLimit)
 	}
-	if err != nil {
-		err = sdkerrors.Wrap(err, msgs[0].String())
-	}
-	return providedFees, priority, err
+	return providedFees, priority, checkFees(nil, providedFees, gasLimit)
 }
 
 func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error {
