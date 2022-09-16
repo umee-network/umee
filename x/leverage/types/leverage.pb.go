@@ -28,13 +28,15 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type Params struct {
 	// Complete Liquidation Threshold determines how far over their borrow
 	// limit a borrower must be in order for their positions to be liquidated
-	// fully in a single event. See minimum_close_factor for more details.
+	// fully in a single event. It represents how far between liquidation_threshold and
+	// collateral_value their borrowed value has progressed, with 0.5 being directly
+	// between the two.
 	// Valid values: 0-1.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
 	// Close Factor determines the portion of a borrower's position that can be
 	// liquidated in a single event. Minimum Close Factor is Close Factor at
 	// liquidation_threshold. 0.1 means that that 10% of the borrower position can
-	// be liquidated when the borrowed value passes the/ liquidation_threshold.
+	// be liquidated when the borrowed value passes the liquidation_threshold.
 	// close_factor scales linearly between minimum_close_factor and 1.0,
 	// reaching its maximum when borrowed value passed
 	// complete_liquidation_threshold. We can put it into the picture:

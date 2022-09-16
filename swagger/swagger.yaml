@@ -495,17 +495,46 @@ paths:
                       limit a borrower must be in order for their positions to
                       be liquidated
 
-                      fully in a single event.
+                      fully in a single event. It represents how far between
+                      liquidation_threshold and
+
+                      collateral_value their borrowed value has progressed, with
+                      0.5 being directly
+
+                      between the two.
+
+                      Valid values: 0-1.
                   minimum_close_factor:
                     type: string
-                    description: >-
-                      Minimum Close Factor determines the portion of a
-                      borrower's position
+                    description: |-
+                      borrowed           C := collateral
+                                  value                   value
+                       --- | ------- | ----- | -------- | ------->
+                        liquidation      complete
+                        threshold        liquidation
+                         * C             threshold * C
 
-                      that can be liquidated in a single event, when the
-                      borrower is just barely
+                      Valid values: 0-1.
+                    title: >-
+                      Close Factor determines the portion of a borrower's
+                      position that can be
 
-                      over their borrow limit.
+                      liquidated in a single event. Minimum Close Factor is
+                      Close Factor at
+
+                      liquidation_threshold. 0.1 means that that 10% of the
+                      borrower position can
+
+                      be liquidated when the borrowed value passes the
+                      liquidation_threshold.
+
+                      close_factor scales linearly between minimum_close_factor
+                      and 1.0,
+
+                      reaching its maximum when borrowed value passed
+
+                      complete_liquidation_threshold. We can put it into the
+                      picture:
                   oracle_reward_factor:
                     type: string
                     description: >-
@@ -514,6 +543,8 @@ paths:
 
                       borrows that is sent to the oracle module to fund its
                       reward pool.
+
+                      Valid values: 0-1.
                   small_liquidation_size:
                     type: string
                     description: >-
@@ -534,6 +565,8 @@ paths:
                       assets instead of
 
                       uTokens as liquidation rewards.
+
+                      Valid values: 0-1.
                 description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -591,6 +624,8 @@ paths:
                         goes to reserves
 
                         when this token is borrowed.
+
+                        Valid values: 0-1.
                     collateral_weight:
                       type: string
                       description: >-
@@ -602,38 +637,50 @@ paths:
 
                         zero, using this asset as collateral against borrowing
                         will be disabled.
+
+                        Valid values: 0-1.
                     liquidation_threshold:
                       type: string
                       description: >-
                         Liquidation Threshold defines what amount of the total
                         value of the
 
-                        asset can contribute to a user's liquidation threshold
-                        (above which they
+                        asset as a collateral can contribute to a user's
+                        liquidation threshold
 
-                        become eligible for liquidation).
+                        (above which they become eligible for liquidation).
+
+                        See also: min_close_factor.
+
+                        Valid values: 0-1.
                     base_borrow_rate:
                       type: string
-                      description: >-
+                      title: >-
                         Base Borrow Rate defines the minimum interest rate for
                         borrowing this
 
                         asset.
+
+                        Valid values: 0-inf
                     kink_borrow_rate:
                       type: string
-                      description: >-
+                      title: >-
                         Kink Borrow Rate defines the interest rate for borrowing
                         this
 
                         asset when supply utilization is equal to
                         'kink_utilization'.
+
+                        Valid values: 0-inf
                     max_borrow_rate:
                       type: string
-                      description: >-
+                      title: >-
                         Max Borrow Rate defines the interest rate for borrowing
                         this
 
                         asset when supply utilization is at its maximum.
+
+                        Valid values: 0-inf
                     kink_utilization:
                       type: string
                       description: >-
@@ -641,6 +688,8 @@ paths:
                         where
 
                         the kink in the borrow interest rate function occurs.
+
+                        Valid values: 0-1.
                     liquidation_incentive:
                       type: string
                       description: >-
@@ -649,6 +698,8 @@ paths:
 
                         a token type liquidators receive as a liquidation
                         reward.
+
+                        Valid values: 0-1.
                     symbol_denom:
                       type: string
                       description: >-
@@ -738,22 +789,25 @@ paths:
                         Valid values: 0-1.
                     min_collateral_liquidity:
                       type: string
-                      description: >-
-                        Min Collateral Liquidity specifies the minimum
-                        collateral liquidity a token is
+                      title: >-
+                        Min Collateral Liquidity specifies an allowed minimum
+                        allowed for the following function:
+                            collateral_liquidity(token) = available(token) / total_collateral(token)
+                        Borrowing, collateralizing, or withdrawing assets is not
+                        allowed when the
 
-                        allowed to reach as a direct result of users borrowing,
-                        collateralizing, or
+                        result of such action invalidates
+                        min_collateral_liquidity.
 
-                        withdrawing assets. Liquidity can only drop below this
-                        value due to interest
-
+                        Liquidity can only drop below this value due to interest
                         or liquidations.
+
+                        Valid values: 0 - ∞
                     max_supply:
                       type: string
                       description: >-
                         Max Supply is the maximum amount of tokens the protocol
-                        can hold.
+                        can hold measured in USD.
 
                         Adding more supply of the given token to the protocol
                         will return an error.
@@ -1435,24 +1489,54 @@ definitions:
     properties:
       complete_liquidation_threshold:
         type: string
-        description: |-
+        description: >-
           Complete Liquidation Threshold determines how far over their borrow
+
           limit a borrower must be in order for their positions to be liquidated
-          fully in a single event.
+
+          fully in a single event. It represents how far between
+          liquidation_threshold and
+
+          collateral_value their borrowed value has progressed, with 0.5 being
+          directly
+
+          between the two.
+
+          Valid values: 0-1.
       minimum_close_factor:
         type: string
-        description: >-
-          Minimum Close Factor determines the portion of a borrower's position
+        description: |-
+          borrowed           C := collateral
+                      value                   value
+           --- | ------- | ----- | -------- | ------->
+            liquidation      complete
+            threshold        liquidation
+             * C             threshold * C
 
-          that can be liquidated in a single event, when the borrower is just
-          barely
+          Valid values: 0-1.
+        title: >-
+          Close Factor determines the portion of a borrower's position that can
+          be
 
-          over their borrow limit.
+          liquidated in a single event. Minimum Close Factor is Close Factor at
+
+          liquidation_threshold. 0.1 means that that 10% of the borrower
+          position can
+
+          be liquidated when the borrowed value passes the
+          liquidation_threshold.
+
+          close_factor scales linearly between minimum_close_factor and 1.0,
+
+          reaching its maximum when borrowed value passed
+
+          complete_liquidation_threshold. We can put it into the picture:
       oracle_reward_factor:
         type: string
         description: |-
           Oracle Reward Factor determines the portion of interest accrued on
           borrows that is sent to the oracle module to fund its reward pool.
+          Valid values: 0-1.
       small_liquidation_size:
         type: string
         description: >-
@@ -1471,6 +1555,8 @@ definitions:
           of
 
           uTokens as liquidation rewards.
+
+          Valid values: 0-1.
     description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
@@ -1757,22 +1843,50 @@ definitions:
               limit a borrower must be in order for their positions to be
               liquidated
 
-              fully in a single event.
+              fully in a single event. It represents how far between
+              liquidation_threshold and
+
+              collateral_value their borrowed value has progressed, with 0.5
+              being directly
+
+              between the two.
+
+              Valid values: 0-1.
           minimum_close_factor:
             type: string
-            description: >-
-              Minimum Close Factor determines the portion of a borrower's
-              position
+            description: |-
+              borrowed           C := collateral
+                          value                   value
+               --- | ------- | ----- | -------- | ------->
+                liquidation      complete
+                threshold        liquidation
+                 * C             threshold * C
 
-              that can be liquidated in a single event, when the borrower is
-              just barely
+              Valid values: 0-1.
+            title: >-
+              Close Factor determines the portion of a borrower's position that
+              can be
 
-              over their borrow limit.
+              liquidated in a single event. Minimum Close Factor is Close Factor
+              at
+
+              liquidation_threshold. 0.1 means that that 10% of the borrower
+              position can
+
+              be liquidated when the borrowed value passes the
+              liquidation_threshold.
+
+              close_factor scales linearly between minimum_close_factor and 1.0,
+
+              reaching its maximum when borrowed value passed
+
+              complete_liquidation_threshold. We can put it into the picture:
           oracle_reward_factor:
             type: string
             description: |-
               Oracle Reward Factor determines the portion of interest accrued on
               borrows that is sent to the oracle module to fund its reward pool.
+              Valid values: 0-1.
           small_liquidation_size:
             type: string
             description: >-
@@ -1793,6 +1907,8 @@ definitions:
               instead of
 
               uTokens as liquidation rewards.
+
+              Valid values: 0-1.
         description: Params defines the parameters for the leverage module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
@@ -1815,6 +1931,8 @@ definitions:
                 reserves
 
                 when this token is borrowed.
+
+                Valid values: 0-1.
             collateral_weight:
               type: string
               description: >-
@@ -1826,38 +1944,49 @@ definitions:
 
                 zero, using this asset as collateral against borrowing will be
                 disabled.
+
+                Valid values: 0-1.
             liquidation_threshold:
               type: string
               description: >-
                 Liquidation Threshold defines what amount of the total value of
                 the
 
-                asset can contribute to a user's liquidation threshold (above
-                which they
+                asset as a collateral can contribute to a user's liquidation
+                threshold
 
-                become eligible for liquidation).
+                (above which they become eligible for liquidation).
+
+                See also: min_close_factor.
+
+                Valid values: 0-1.
             base_borrow_rate:
               type: string
-              description: >-
+              title: >-
                 Base Borrow Rate defines the minimum interest rate for borrowing
                 this
 
                 asset.
+
+                Valid values: 0-inf
             kink_borrow_rate:
               type: string
-              description: |-
+              title: |-
                 Kink Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is equal to 'kink_utilization'.
+                Valid values: 0-inf
             max_borrow_rate:
               type: string
-              description: |-
+              title: |-
                 Max Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is at its maximum.
+                Valid values: 0-inf
             kink_utilization:
               type: string
               description: |-
                 Kink Utilization defines the supply utilization value where
                 the kink in the borrow interest rate function occurs.
+                Valid values: 0-1.
             liquidation_incentive:
               type: string
               description: >-
@@ -1865,6 +1994,8 @@ definitions:
                 of
 
                 a token type liquidators receive as a liquidation reward.
+
+                Valid values: 0-1.
             symbol_denom:
               type: string
               description: Symbol Denom is the human readable denomination of this token.
@@ -1949,22 +2080,24 @@ definitions:
                 Valid values: 0-1.
             min_collateral_liquidity:
               type: string
-              description: >-
-                Min Collateral Liquidity specifies the minimum collateral
-                liquidity a token is
+              title: >-
+                Min Collateral Liquidity specifies an allowed minimum allowed
+                for the following function:
+                    collateral_liquidity(token) = available(token) / total_collateral(token)
+                Borrowing, collateralizing, or withdrawing assets is not allowed
+                when the
 
-                allowed to reach as a direct result of users borrowing,
-                collateralizing, or
+                result of such action invalidates min_collateral_liquidity.
 
-                withdrawing assets. Liquidity can only drop below this value due
-                to interest
+                Liquidity can only drop below this value due to interest or
+                liquidations.
 
-                or liquidations.
+                Valid values: 0 - ∞
             max_supply:
               type: string
               description: >-
-                Max Supply is the maximum amount of tokens the protocol can
-                hold.
+                Max Supply is the maximum amount of tokens the protocol can hold
+                measured in USD.
 
                 Adding more supply of the given token to the protocol will
                 return an error.
@@ -1994,6 +2127,8 @@ definitions:
           reserves
 
           when this token is borrowed.
+
+          Valid values: 0-1.
       collateral_weight:
         type: string
         description: >-
@@ -2003,40 +2138,46 @@ definitions:
 
           zero, using this asset as collateral against borrowing will be
           disabled.
+
+          Valid values: 0-1.
       liquidation_threshold:
         type: string
-        description: >-
+        description: |-
           Liquidation Threshold defines what amount of the total value of the
-
-          asset can contribute to a user's liquidation threshold (above which
-          they
-
-          become eligible for liquidation).
+          asset as a collateral can contribute to a user's liquidation threshold
+          (above which they become eligible for liquidation).
+          See also: min_close_factor.
+          Valid values: 0-1.
       base_borrow_rate:
         type: string
-        description: |-
+        title: |-
           Base Borrow Rate defines the minimum interest rate for borrowing this
           asset.
+          Valid values: 0-inf
       kink_borrow_rate:
         type: string
-        description: |-
+        title: |-
           Kink Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is equal to 'kink_utilization'.
+          Valid values: 0-inf
       max_borrow_rate:
         type: string
-        description: |-
+        title: |-
           Max Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is at its maximum.
+          Valid values: 0-inf
       kink_utilization:
         type: string
         description: |-
           Kink Utilization defines the supply utilization value where
           the kink in the borrow interest rate function occurs.
+          Valid values: 0-1.
       liquidation_incentive:
         type: string
         description: |-
           Liquidation Incentive determines the portion of bonus collateral of
           a token type liquidators receive as a liquidation reward.
+          Valid values: 0-1.
       symbol_denom:
         type: string
         description: Symbol Denom is the human readable denomination of this token.
@@ -2120,21 +2261,24 @@ definitions:
           Valid values: 0-1.
       min_collateral_liquidity:
         type: string
-        description: >-
-          Min Collateral Liquidity specifies the minimum collateral liquidity a
-          token is
+        title: >-
+          Min Collateral Liquidity specifies an allowed minimum allowed for the
+          following function:
+              collateral_liquidity(token) = available(token) / total_collateral(token)
+          Borrowing, collateralizing, or withdrawing assets is not allowed when
+          the
 
-          allowed to reach as a direct result of users borrowing,
-          collateralizing, or
+          result of such action invalidates min_collateral_liquidity.
 
-          withdrawing assets. Liquidity can only drop below this value due to
-          interest
+          Liquidity can only drop below this value due to interest or
+          liquidations.
 
-          or liquidations.
+          Valid values: 0 - ∞
       max_supply:
         type: string
         description: >-
-          Max Supply is the maximum amount of tokens the protocol can hold.
+          Max Supply is the maximum amount of tokens the protocol can hold
+          measured in USD.
 
           Adding more supply of the given token to the protocol will return an
           error.
