@@ -11,7 +11,7 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-// EnableLiquidator must be true at compile time to enable QueryLiquidationTargets
+// EnableLiquidator must be set to "true" at compile time to enable QueryLiquidationTargets
 var EnableLiquidator = ""
 
 var _ types.QueryServer = Querier{}
