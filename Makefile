@@ -9,7 +9,8 @@ LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
-HTTPS_GIT 		 := https://github.com/umee-network/umee.git
+HTTPS_GIT      := https://github.com/umee-network/umee.git
+LIQUIDATOR     := $(if $(LIQUIDATOR),true,false)
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -62,7 +63,8 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
+		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
@@ -71,6 +73,7 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
+	@echo "LIQUIDATOR:" $(LIQUIDATOR)
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
 build-no_cgo:
@@ -80,8 +83,12 @@ build-no_cgo:
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
+build-liquidator:
+	LIQUIDATOR=true $(MAKE) build
+
 install: go.sum
 	@echo "--> Installing..."
+	@echo "LIQUIDATOR:" $(LIQUIDATOR)
 	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 go-mod-cache: go.sum
