@@ -73,7 +73,6 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	@echo "LIQUIDATOR:" $(LIQUIDATOR)
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
 build-no_cgo:
@@ -88,7 +87,6 @@ build-liquidator:
 
 install: go.sum
 	@echo "--> Installing..."
-	@echo "LIQUIDATOR:" $(LIQUIDATOR)
 	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 go-mod-cache: go.sum
