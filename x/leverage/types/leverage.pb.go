@@ -46,8 +46,8 @@ type Params struct {
 	//             value                   value
 	//  --- | ------- | ----- | -------- | ------->
 	//   liquidation      complete
-	//   threshold        liquidation
-	//    * C             threshold * C
+	//   threshold *C     liquidation
+	//                    threshold * C
 	//
 	// Valid values: 0-1.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`

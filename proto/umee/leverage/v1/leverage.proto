@@ -34,8 +34,8 @@ message Params {
   //             value                   value
   //  --- | ------- | ----- | -------- | ------->
   //   liquidation      complete
-  //   threshold        liquidation
-  //    * C             threshold * C
+  //   threshold *C     liquidation
+  //                    threshold * C
   //
   // Valid values: 0-1.
   string minimum_close_factor = 3 [
