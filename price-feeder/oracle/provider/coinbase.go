@@ -14,7 +14,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -234,14 +233,7 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 	}
 
 	p.setSubscribedPairs(cps...)
-	telemetry.IncrCounter(
-		float32(len(cps)),
-		"websocket",
-		"subscribe",
-		"currency_pairs",
-		"provider",
-		string(ProviderCoinbase),
-	)
+	telemetryWebsocketSubscribeCurrencyPairs(ProviderCoinbase, len(cps))
 	return nil
 }
 
@@ -386,26 +378,11 @@ func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
 		}
 
 		p.setTickerPair(coinbaseTicker)
-		telemetry.IncrCounter(
-			1,
-			"websocket",
-			"message",
-			"type",
-			"ticker",
-			"provider",
-			string(ProviderCoinbase),
-		)
+		telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTicker)
 		return
 	}
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"message",
-		"type",
-		"trade",
-		"provider",
-		string(ProviderCoinbase),
-	)
+
+	telemetryWebsocketMessage(ProviderCoinbase, MessageTypeTrade)
 	p.setTradePair(coinbaseTrade)
 }
 
@@ -503,13 +480,7 @@ func (p *CoinbaseProvider) reconnect() error {
 
 	currencyPairs := p.subscribedPairsToSlice()
 
-	telemetry.IncrCounter(
-		1,
-		"websocket",
-		"reconnect",
-		"provider",
-		string(ProviderCoinbase),
-	)
+	telemetryWebsocketReconnect(ProviderCoinbase)
 	return p.SubscribeCurrencyPairs(currencyPairs...)
 }
 

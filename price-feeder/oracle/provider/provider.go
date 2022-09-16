@@ -25,6 +25,7 @@ const (
 	ProviderCoinbase Name = "coinbase"
 	ProviderFTX      Name = "ftx"
 	ProviderBitget   Name = "bitget"
+	ProviderMexc     Name = "mexc"
 	ProviderMock     Name = "mock"
 )
 
@@ -72,6 +73,11 @@ type (
 		Websocket string `toml:"websocket"`
 	}
 )
+
+// String cast provider name to string.
+func (n Name) String() string {
+	return string(n)
+}
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.

@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1328](https://github.com/umee-network/umee/pull/1328) Add bitget provider.
+- [1339](https://github.com/umee-network/umee/pull/1339) Add mexc provider.
 
 ### Bugs
 
@@ -72,6 +73,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#978](https://github.com/umee-network/umee/pull/978) Cleanup the oracle package by moving deviation & conversion logic.
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add type ProviderName.
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
+- [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
 
 ### Features
 

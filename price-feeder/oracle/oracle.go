@@ -200,13 +200,13 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 				defer close(ch)
 				prices, err = priceProvider.GetTickerPrices(currencyPairs...)
 				if err != nil {
-					telemetry.IncrCounter(1, "failure", "provider", "type", "ticker")
+					provider.TelemetryFailure(providerName, provider.MessageTypeTicker)
 					errCh <- err
 				}
 
 				candles, err = priceProvider.GetCandlePrices(currencyPairs...)
 				if err != nil {
-					telemetry.IncrCounter(1, "failure", "provider", "type", "candle")
+					provider.TelemetryFailure(providerName, provider.MessageTypeCandle)
 					errCh <- err
 				}
 			}()
@@ -471,6 +471,9 @@ func NewProvider(
 
 	case provider.ProviderBitget:
 		return provider.NewBitgetProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.ProviderMexc:
+		return provider.NewMexcProvider(ctx, logger, endpoint, providerPairs...)
 
 	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil

@@ -40,6 +40,7 @@ var (
 		provider.ProviderCoinbase: {},
 		provider.ProviderFTX:      {},
 		provider.ProviderBitget:   {},
+		provider.ProviderMexc:     {},
 		provider.ProviderMock:     {},
 	}
 
