@@ -26,9 +26,10 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
 type Params struct {
-	// Complete Liquidation Threshold determines how far between liquidation_threshold
-	// and collateral_value their borrowed value has progressed to allow full liquidation,
-	// with 0.5 being directly between the two.
+	// Complete Liquidation Threshold determines how far between
+	// liquidation_threshold (LT) and collateral_value (CV) a borrower's
+	// borrowed value must have progressed in order to allow a full liquidation.
+	// 0.3 indicates 30% of the way from LT to CV.
 	// Valid values: 0-1.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
 	// Close Factor determines the portion of a borrower's position that can be
@@ -36,7 +37,7 @@ type Params struct {
 	// liquidation_threshold. 0.1 means that that 10% of the borrower position can
 	// be liquidated when the borrowed value passes the liquidation_threshold.
 	// close_factor scales linearly between minimum_close_factor and 1.0,
-	// reaching its maximum when borrowed value passed
+	// reaching its maximum when borrowed value passes
 	// complete_liquidation_threshold. We can put it into the picture:
 	//
 	//             borrowed           C := collateral
@@ -46,7 +47,7 @@ type Params struct {
 	//
 	// liquidation = liquidation_threshold * C
 	// CL = L + (C-CL) * complete_liquidation_threshold
-	//    it is a USD value from where the complete liquidation is allowed.
+	//    is the borrowed value above which close factor will be 1.
 	//
 	// Valid values: 0-1.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`

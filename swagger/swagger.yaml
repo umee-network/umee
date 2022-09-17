@@ -490,12 +490,14 @@ paths:
                     type: string
                     description: >-
                       Complete Liquidation Threshold determines how far between
-                      liquidation_threshold
 
-                      and collateral_value their borrowed value has progressed
-                      to allow full liquidation,
+                      liquidation_threshold (LT) and collateral_value (CV) a
+                      borrower's
 
-                      with 0.5 being directly between the two.
+                      borrowed value must have progressed in order to allow a
+                      full liquidation.
+
+                      0.3 indicates 30% of the way from LT to CV.
 
                       Valid values: 0-1.
                   minimum_close_factor:
@@ -508,7 +510,7 @@ paths:
 
                       liquidation = liquidation_threshold * C
                       CL = L + (C-CL) * complete_liquidation_threshold
-                         it is a USD value from where the complete liquidation is allowed.
+                         is the borrowed value above which close factor will be 1.
 
                       Valid values: 0-1.
                     title: >-
@@ -527,7 +529,7 @@ paths:
                       close_factor scales linearly between minimum_close_factor
                       and 1.0,
 
-                      reaching its maximum when borrowed value passed
+                      reaching its maximum when borrowed value passes
 
                       complete_liquidation_threshold. We can put it into the
                       picture:
@@ -1487,12 +1489,13 @@ definitions:
         type: string
         description: >-
           Complete Liquidation Threshold determines how far between
-          liquidation_threshold
 
-          and collateral_value their borrowed value has progressed to allow full
-          liquidation,
+          liquidation_threshold (LT) and collateral_value (CV) a borrower's
 
-          with 0.5 being directly between the two.
+          borrowed value must have progressed in order to allow a full
+          liquidation.
+
+          0.3 indicates 30% of the way from LT to CV.
 
           Valid values: 0-1.
       minimum_close_factor:
@@ -1505,7 +1508,7 @@ definitions:
 
           liquidation = liquidation_threshold * C
           CL = L + (C-CL) * complete_liquidation_threshold
-             it is a USD value from where the complete liquidation is allowed.
+             is the borrowed value above which close factor will be 1.
 
           Valid values: 0-1.
         title: >-
@@ -1522,7 +1525,7 @@ definitions:
 
           close_factor scales linearly between minimum_close_factor and 1.0,
 
-          reaching its maximum when borrowed value passed
+          reaching its maximum when borrowed value passes
 
           complete_liquidation_threshold. We can put it into the picture:
       oracle_reward_factor:
@@ -1832,12 +1835,13 @@ definitions:
             type: string
             description: >-
               Complete Liquidation Threshold determines how far between
-              liquidation_threshold
 
-              and collateral_value their borrowed value has progressed to allow
-              full liquidation,
+              liquidation_threshold (LT) and collateral_value (CV) a borrower's
 
-              with 0.5 being directly between the two.
+              borrowed value must have progressed in order to allow a full
+              liquidation.
+
+              0.3 indicates 30% of the way from LT to CV.
 
               Valid values: 0-1.
           minimum_close_factor:
@@ -1850,7 +1854,7 @@ definitions:
 
               liquidation = liquidation_threshold * C
               CL = L + (C-CL) * complete_liquidation_threshold
-                 it is a USD value from where the complete liquidation is allowed.
+                 is the borrowed value above which close factor will be 1.
 
               Valid values: 0-1.
             title: >-
@@ -1868,7 +1872,7 @@ definitions:
 
               close_factor scales linearly between minimum_close_factor and 1.0,
 
-              reaching its maximum when borrowed value passed
+              reaching its maximum when borrowed value passes
 
               complete_liquidation_threshold. We can put it into the picture:
           oracle_reward_factor:
