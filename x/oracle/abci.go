@@ -23,19 +23,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	if isPeriodLastBlock(ctx, params.VotePeriod) {
 		// Build claim map over all validators in active set
 		validatorClaimMap := make(map[string]types.Claim)
-
 		powerReduction := k.StakingKeeper.PowerReduction(ctx)
-		iterator := k.StakingKeeper.ValidatorsPowerStoreIterator(ctx)
-		defer iterator.Close()
-
-		for ; iterator.Valid(); iterator.Next() {
-			validator := k.StakingKeeper.Validator(ctx, iterator.Value())
-
-			// Exclude not bonded validator
-			if validator.IsBonded() {
-				valAddr := validator.GetOperator()
-				validatorClaimMap[valAddr.String()] = types.NewClaim(validator.GetConsensusPower(powerReduction), 0, 0, valAddr)
-			}
+		for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+			addr := v.GetOperator()
+			validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
 		}
 
 		var (
