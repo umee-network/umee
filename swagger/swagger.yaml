@@ -489,19 +489,13 @@ paths:
                   complete_liquidation_threshold:
                     type: string
                     description: >-
-                      Complete Liquidation Threshold determines how far over
-                      their borrow
+                      Complete Liquidation Threshold determines how far between
+                      liquidation_threshold
 
-                      limit a borrower must be in order for their positions to
-                      be liquidated
+                      and collateral_value their borrowed value has progressed
+                      to allow full liquidation,
 
-                      fully in a single event. It represents how far between
-                      liquidation_threshold and
-
-                      collateral_value their borrowed value has progressed, with
-                      0.5 being directly
-
-                      between the two.
+                      with 0.5 being directly between the two.
 
                       Valid values: 0-1.
                   minimum_close_factor:
@@ -510,9 +504,11 @@ paths:
                       borrowed           C := collateral
                                   value                   value
                        --- | ------- | ----- | -------- | ------->
-                        liquidation      complete
-                        threshold *C     liquidation
-                                         threshold * C
+                           L                 CL
+
+                      liquidation = liquidation_threshold * C
+                      CL = L + (C-CL) * complete_liquidation_threshold
+                         it is a USD value from where the complete liquidation is allowed.
 
                       Valid values: 0-1.
                     title: >-
@@ -1490,17 +1486,13 @@ definitions:
       complete_liquidation_threshold:
         type: string
         description: >-
-          Complete Liquidation Threshold determines how far over their borrow
+          Complete Liquidation Threshold determines how far between
+          liquidation_threshold
 
-          limit a borrower must be in order for their positions to be liquidated
+          and collateral_value their borrowed value has progressed to allow full
+          liquidation,
 
-          fully in a single event. It represents how far between
-          liquidation_threshold and
-
-          collateral_value their borrowed value has progressed, with 0.5 being
-          directly
-
-          between the two.
+          with 0.5 being directly between the two.
 
           Valid values: 0-1.
       minimum_close_factor:
@@ -1509,9 +1501,11 @@ definitions:
           borrowed           C := collateral
                       value                   value
            --- | ------- | ----- | -------- | ------->
-            liquidation      complete
-            threshold *C     liquidation
-                             threshold * C
+               L                 CL
+
+          liquidation = liquidation_threshold * C
+          CL = L + (C-CL) * complete_liquidation_threshold
+             it is a USD value from where the complete liquidation is allowed.
 
           Valid values: 0-1.
         title: >-
@@ -1837,19 +1831,13 @@ definitions:
           complete_liquidation_threshold:
             type: string
             description: >-
-              Complete Liquidation Threshold determines how far over their
-              borrow
+              Complete Liquidation Threshold determines how far between
+              liquidation_threshold
 
-              limit a borrower must be in order for their positions to be
-              liquidated
+              and collateral_value their borrowed value has progressed to allow
+              full liquidation,
 
-              fully in a single event. It represents how far between
-              liquidation_threshold and
-
-              collateral_value their borrowed value has progressed, with 0.5
-              being directly
-
-              between the two.
+              with 0.5 being directly between the two.
 
               Valid values: 0-1.
           minimum_close_factor:
@@ -1858,9 +1846,11 @@ definitions:
               borrowed           C := collateral
                           value                   value
                --- | ------- | ----- | -------- | ------->
-                liquidation      complete
-                threshold *C     liquidation
-                                 threshold * C
+                   L                 CL
+
+              liquidation = liquidation_threshold * C
+              CL = L + (C-CL) * complete_liquidation_threshold
+                 it is a USD value from where the complete liquidation is allowed.
 
               Valid values: 0-1.
             title: >-
