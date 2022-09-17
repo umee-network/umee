@@ -214,7 +214,7 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"min_collateral_liquidity\""
   ];
 
-  // Max Supply is the maximum amount of tokens the protocol can hold measured in USD.
+  // Max Supply is the maximum amount of tokens the protocol can hold.
   // Adding more supply of the given token to the protocol will return an error.
   // Must be a non negative value. 0 means that there is no limit.
   // To mark a token as not valid for supply, `msg_supply` must be set to false.
