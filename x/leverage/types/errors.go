@@ -49,4 +49,7 @@ var (
 	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 604, "exchange rate less than one")
 	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
 	ErrExcessiveTimeElapsed    = sdkerrors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
+
+	// 7XX = Disabled Functionality
+	ErrNotLiquidatorNode = sdkerrors.Register(ModuleName, 700, "node has disabled liquidator queries")
 )

@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### State Machine Breaking
 
 - [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+- [#1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
 
 ### API Breaking
 
@@ -98,6 +99,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
 - [1343](https://github.com/umee-network/umee/pull/1343) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
 - [1379](https://github.com/umee-network/umee/pull/1379) Add `mininumCommissionRate` update to all validators.
+- [1395](https://github.com/umee-network/umee/pull/1395) Require compile-time flag to enable liquidation_targets query.
 
 ### Improvements
 
