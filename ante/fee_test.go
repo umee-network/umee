@@ -21,7 +21,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 
 	msgs := testdata.NewTestMsg(addr1)
 	require.NoError(suite.txBuilder.SetMsgs(msgs))
-	minGas := appparams.MinMinGasPrice
+	minGas := appparams.ProtocolMinGasPrice
 	mkFee := func(factor string) sdk.Coins {
 		return coin.NewDecBld(minGas).Scale(int64(appparams.DefaultGasLimit)).ScaleStr(factor).ToCoins()
 	}

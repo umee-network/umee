@@ -306,7 +306,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.GenesisState = appGenState
 	cfg.BondDenom = params.BondDenom
-	cfg.MinGasPrices = params.MinMinGasPrice.String()
+	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
 		return New(
 			val.Ctx.Logger,

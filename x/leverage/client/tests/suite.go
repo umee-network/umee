@@ -82,7 +82,7 @@ func (t testTransaction) Run(s *IntegrationTestSuite) {
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-		fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
+		fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.ProtocolMinGasPrice),
 	}
 
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, append(t.args, txFlags...))

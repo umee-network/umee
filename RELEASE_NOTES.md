@@ -16,6 +16,18 @@ Since umeemania, we spent time to hardened
   - borrow (will charge the user borrow interest),
   - any umee holder governs the `x/leverage` parameters like: token registry and borrow / supply settings. See more about the parameters in [leverage.proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/leverage.proto) file.
 - `x/oracle` module - a decentralized price oracle for the `x/leverage` module, as well as any app built in the Umee blockchain. In the future version we will offer oracle queries through IBC. Any Umee holders will govern oracle parameters defined in [oracle.proto](https://github.com/umee-network/umee/blob/main/proto/umee/oracle/v1/oracle.proto) file.
+- Cosmos v0.46 upgrade, which features:
+  - [`x/group`](https://tutorials.cosmos.network/tutorials/understanding-group/) module
+  - [`x/nft`](https://github.com/cosmos/cosmos-sdk/tree/v0.46.1/x/nft/spec) module
+  - [Transaction Tips](Transaction Tips and SIGN_MODE_DIRECT_AUX)
+  - [SIGN_MODE_DIRECT_AUX](Transaction Tips and SIGN_MODE_DIRECT_AUX)
+  - transaction prioritization
+- IBC v5.0
+
+#### Fees
+
+All transactions, except oracle messages, are required to pay gas. We implemented a consensus controlled `protocol_min_gas_price = 0.05uumee`. All **validators must** set their `minimum-gas-prices` settings in `app.yml` to a value at least `0.05uumee` (otherwise the node won't start). Transactions with gas price smaller then `protocol_min_gas_price` will fail during the DeliverTx (transaction execution) phase.
+Oracle transactions are free only if they are composed from the prevote and vote messages and have gas limit <= 140'000 gas.
 
 #### x/leverage settings
 
