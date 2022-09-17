@@ -176,9 +176,9 @@ type Token struct {
 	// Borrowing, collateralizing, or withdrawing assets is not allowed when the
 	// result of such action invalidates min_collateral_liquidity.
 	// Liquidity can only drop below this value due to interest or liquidations.
-	// Valid values: 0 - ∞
+	// Valid values: 0 - 1
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
-	// Max Supply is the maximum amount of tokens the protocol can hold measured in USD.
+	// Max Supply is the maximum amount of tokens the protocol can hold.
 	// Adding more supply of the given token to the protocol will return an error.
 	// Must be a non negative value. 0 means that there is no limit.
 	// To mark a token as not valid for supply, `msg_supply` must be set to false.

@@ -800,12 +800,12 @@ paths:
                         Liquidity can only drop below this value due to interest
                         or liquidations.
 
-                        Valid values: 0 - ∞
+                        Valid values: 0 - 1
                     max_supply:
                       type: string
                       description: >-
                         Max Supply is the maximum amount of tokens the protocol
-                        can hold measured in USD.
+                        can hold.
 
                         Adding more supply of the given token to the protocol
                         will return an error.
@@ -2086,12 +2086,12 @@ definitions:
                 Liquidity can only drop below this value due to interest or
                 liquidations.
 
-                Valid values: 0 - ∞
+                Valid values: 0 - 1
             max_supply:
               type: string
               description: >-
-                Max Supply is the maximum amount of tokens the protocol can hold
-                measured in USD.
+                Max Supply is the maximum amount of tokens the protocol can
+                hold.
 
                 Adding more supply of the given token to the protocol will
                 return an error.
@@ -2267,12 +2267,11 @@ definitions:
           Liquidity can only drop below this value due to interest or
           liquidations.
 
-          Valid values: 0 - ∞
+          Valid values: 0 - 1
       max_supply:
         type: string
         description: >-
-          Max Supply is the maximum amount of tokens the protocol can hold
-          measured in USD.
+          Max Supply is the maximum amount of tokens the protocol can hold.
 
           Adding more supply of the given token to the protocol will return an
           error.
