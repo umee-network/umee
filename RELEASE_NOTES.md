@@ -51,6 +51,6 @@ Each validator must run:
 - Price Feeder.
 - update `minimum-gas-prices` setting in `app.yml`. See [Fees](#fees) section above.
 
-Instructions: https://umeeversity.umee.cc/validators/mainnet-validator.html
+Instructions: [umeeversity/validator](https://umeeversity.umee.cc/validators/mainnet-validator.html)
 
 Failure to run Peggo and Price Feeder results in being slashed, as do certain types of misbehavior such as consistently submitting incorrect prices.
