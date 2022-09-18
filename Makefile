@@ -193,7 +193,6 @@ test-sim-benchmark-invariants
 ##                                 Protobuf                                  ##
 ###############################################################################
 
-#DOCKER_BUF := docker run -v $(shell pwd):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc11
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.7.0
 
 containerProtoVer=v0.7
@@ -222,7 +221,7 @@ proto-format:
 
 proto-lint:
 	@echo "Linting Protobuf files"
-	@$(DOCKER_BUF) lint --error-format=json
+#	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@echo "Checking for breaking changes"
