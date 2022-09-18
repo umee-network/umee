@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -9,8 +11,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ica "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/controller/types"
+	icahosttypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/types"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+
 	"github.com/umee-network/umee/v3/app/upgradev3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
@@ -24,6 +32,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 		UpgradeV3_0Plan,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_0Plan)
+			ctx.Logger().Info("Running setupBech32ibcKeeper")
 			err := setupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
 				return nil, sdkerrors.Wrapf(
@@ -64,6 +73,9 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				group.ModuleName,
 				nft.ModuleName,
 				bech32ibctypes.ModuleName,
+				icacontrollertypes.StoreKey,
+				icahosttypes.StoreKey,
+
 				oracletypes.ModuleName,
 				leveragetypes.ModuleName,
 			},
@@ -79,4 +91,35 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 // in the firstBeginBlocker assertions.
 func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
 	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
+}
+
+// setupIBCUpdate updates IBC from v2 to v5
+func setupIBCUpdate(ctx sdk.Context, app *UmeeApp, fromVM module.VersionMap) {
+	// manually set the ICA params
+	// the ICA module's default genesis has host and controller enabled.
+	// we want these to be enabled via gov param change.
+
+	// Add Interchain Accounts host module
+	// set the ICS27 consensus version so InitGenesis is not run
+	fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion()
+
+	// create ICS27 Controller submodule params, controller module not enabled.
+	controllerParams := icacontrollertypes.Params{ControllerEnabled: false}
+
+	// create ICS27 Host submodule params, host module not enabled.
+	hostParams := icahosttypes.Params{
+		HostEnabled:   false,
+		AllowMessages: []string{},
+	}
+
+	mod, found := app.mm.Modules[icatypes.ModuleName]
+	if !found {
+		panic(fmt.Sprintf("module %s is not in the module manager", icatypes.ModuleName))
+	}
+
+	icaMod, ok := mod.(ica.AppModule)
+	if !ok {
+		panic(fmt.Sprintf("expected module %s to be type %T, got %T", icatypes.ModuleName, ica.AppModule{}, mod))
+	}
+	icaMod.InitModule(ctx, controllerParams, hostParams)
 }
