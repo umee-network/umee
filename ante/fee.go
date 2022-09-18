@@ -63,7 +63,10 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
 	}
 
-	if requiredFees.IsAnyGT(fees) {
+	// Clear any zero coins from requiredFees in the case of zero min gas price
+	requiredFees = sdk.NewCoins(requiredFees...)
+
+	if !requiredFees.Empty() && !fees.IsAnyGTE(requiredFees) {
 		return sdkerrors.ErrInsufficientFee.Wrapf(
 			"insufficient fees; got: %s required: %s", fees, requiredFees)
 	}
