@@ -130,13 +130,6 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 		Denom: denom, Rate: exchangeRate})
 }
 
-// DeleteExchangeRate deletes the consensus exchange rate of USD denominated in
-// the denom asset from the store.
-func (k Keeper) DeleteExchangeRate(ctx sdk.Context, denom string) {
-	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetExchangeRateKey(denom))
-}
-
 // IterateExchangeRates iterates over USD rates in the store.
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
@@ -153,6 +146,15 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 		if handler(denom, dp.Dec) {
 			break
 		}
+	}
+}
+
+func (k Keeper) ClearExchangeRates(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
 	}
 }
 
