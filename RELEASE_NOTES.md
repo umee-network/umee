@@ -41,7 +41,7 @@ To run a node capable of supporting a liquidator, enable the query at compile ti
 In `v1.1.x` (current mainnet) we disabled Gravity Bridge (GB) module due to Ethereum PoS migration (_the merge_).
 This release is the first step to re-enable GB. We start by enabling validators update end evidence messages (`MsgValsetConfirm` and `MsgValsetUpdatedClaim`), but the bridge messages: batch creation, claims (both ways: Ethereum->Cosmos and Cosmos->Ethereum) remain disabled.
 
-See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/umee%2Fv3/module/RELEASE_NOTES.md) Release Notes.
+See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/module/v1.5.3-umee-1/module/RELEASE_NOTES.md) Release Notes.
 
 ### Update notes
 
