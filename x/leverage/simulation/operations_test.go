@@ -127,7 +127,7 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	var msg types.MsgSupply
 	s.unmarshal(&operationMsg, &msg)
 	s.Require().Equal("umee1ghekyjucln7y67ntx7cf27m9dpuxxemn8w6h33", msg.Supplier)
-	s.Require().Equal("4896096uumee", msg.Asset.String())
+	s.Require().Equal("23872177uumee", msg.Asset.String())
 	s.Require().Len(futureOperations, 0)
 }
 
