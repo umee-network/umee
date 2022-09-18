@@ -1,4 +1,4 @@
-gas_adjustment = 1.5
+gas_adjustment = 1
 
 [server]
 listen_addr = "0.0.0.0:7171"

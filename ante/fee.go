@@ -12,7 +12,7 @@ import (
 )
 
 // MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxMsgGasUsage = uint64(100_000)
+const MaxMsgGasUsage = uint64(140_000)
 
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
@@ -36,16 +36,10 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 		return sdk.Coins{}, priority, nil
 	}
 
-	var err error
 	if ctx.IsCheckTx() {
-		err = checkFees(ctx.MinGasPrices(), providedFees, gasLimit)
-	} else {
-		err = checkFees(nil, providedFees, gasLimit)
+		return providedFees, priority, checkFees(ctx.MinGasPrices(), providedFees, gasLimit)
 	}
-	if err != nil {
-		err = sdkerrors.Wrap(err, msgs[0].String())
-	}
-	return providedFees, priority, err
+	return providedFees, priority, checkFees(nil, providedFees, gasLimit)
 }
 
 func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error {

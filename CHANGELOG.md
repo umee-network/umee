@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### State Machine Breaking
 
 - [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+- [#1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
 
 ### API Breaking
 
@@ -97,6 +98,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1319](https://github.com/umee-network/umee/pull/1319) Implemented MaxSupply.
 - [1331](https://github.com/umee-network/umee/pull/1331) Implemented MinCollateralLiquidity.
 - [1343](https://github.com/umee-network/umee/pull/1343) RepayBadDebt and Liquidate automatically clear blacklisted collateral.
+- [1379](https://github.com/umee-network/umee/pull/1379) Add `mininumCommissionRate` update to all validators.
+- [1395](https://github.com/umee-network/umee/pull/1395) Require compile-time flag to enable liquidation_targets query.
 
 ### Improvements
 
@@ -114,6 +117,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
 - [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
 - [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
+- [1385](https://github.com/umee-network/umee/pull/1385) Update v1.1-v3.0 upgrade plan name
 
 ### Bug Fixes
 
@@ -121,6 +125,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1156](https://github.com/umee-network/umee/pull/1156) Propagate context correctly.
 - [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 - [1357](https://github.com/umee-network/umee/pull/1357) Interptex x/0 collateral liquidity as 100%
+- [1383](https://github.com/umee-network/umee/pull/1383) Remove potential panic during FeeAndPriority error case.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 

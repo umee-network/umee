@@ -49,6 +49,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Unix(0, 0),
 	})
 
+	// Enable liquidation queries for testing
+	keeper.EnableLiquidator = "true"
+
 	umeeToken := newToken(appparams.BondDenom, "UMEE")
 	atomIBCToken := newToken(atomDenom, "ATOM")
 
