@@ -105,16 +105,12 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 // AssertMinProtocolGasPrice returns an error if the provided gasPrices are lower then
 // the required by protocol.
 func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
-	for _, c := range gasPrices {
-		if c.Denom == appparams.MinMinGasPrice.Denom {
-			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
-				break // go to error below
-			}
-			return nil
-		}
+	if gasPrices.AmountOf(appparams.MinMinGasPrice.Denom).LT(appparams.MinMinGasPrice.Amount) {
+		return sdkerrors.ErrInsufficientFee.Wrapf(
+			"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
 	}
-	return sdkerrors.ErrInsufficientFee.Wrapf(
-		"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
+
+	return nil
 }
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
