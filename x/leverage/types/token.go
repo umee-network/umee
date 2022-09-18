@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	appparams "github.com/umee-network/umee/v3/app/params"
@@ -35,7 +34,7 @@ var (
 	DefaultMaxCollateralShare     = sdk.MustNewDecFromStr("1.00000000000000000")
 	DefaultMaxSupplyUtilization   = sdk.MustNewDecFromStr("1.00000000000000000")
 	DefaultMinCollateralLiquidity = sdk.MustNewDecFromStr("0.000000000000000000")
-	DefaultMaxSupply, _           = math.NewInt(100_000000_000000)
+	DefaultMaxSupply              = sdk.NewInt(100_000000_000000)
 )
 
 // HasUTokenPrefix detects the uToken prefix on a denom.
