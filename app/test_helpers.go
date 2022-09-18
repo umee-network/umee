@@ -236,7 +236,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Start with the default genesis state
 	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
 
-	// Default genesis doesn't have tokens in Token registry, so here we add one:
+	// Override default leverage registry with one more suitable for testing
 	var leverageGenState leveragetypes.GenesisState
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
