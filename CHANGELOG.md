@@ -48,8 +48,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### State Machine Breaking
 
-- [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
-- [#1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+- [1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1411](https://github.com/umee-network/umee/pull/1411) Set min gas price to zero for v3 release
 
 ### API Breaking
 
