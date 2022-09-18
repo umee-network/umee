@@ -18,14 +18,14 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
 - Cosmos v0.46 upgrade, which features:
   - [`x/group`](https://tutorials.cosmos.network/tutorials/understanding-group/) module
   - [`x/nft`](https://github.com/cosmos/cosmos-sdk/tree/v0.46.1/x/nft/spec) module
-  - [Transaction Tips](Transaction Tips and SIGN_MODE_DIRECT_AUX)
-  - [SIGN_MODE_DIRECT_AUX](Transaction Tips and SIGN_MODE_DIRECT_AUX)
+  - [Transaction Tips](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
+  - [SIGN_MODE_DIRECT_AUX](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
   - transaction prioritization
 - IBC v5.0
 
 #### Fees
 
-All transactions, except oracle messages, are required to pay gas. We implemented a consensus controlled `protocol_min_gas_price = 0.05uumee`. All **validators must** set their `minimum-gas-prices` settings in `app.yml` to a value at least `0.05uumee` (otherwise the node won't start). Transactions with gas price smaller then `protocol_min_gas_price` will fail during the DeliverTx (transaction execution) phase.
+All transactions, except oracle messages, are required to pay gas. We implemented a consensus controlled `protocol_min_gas_price = 0.05uumee`. All **validators must** set their `minimum-gas-prices` settings in `app.yml` to a value at least `0.05uumee` (otherwise the node won't start). Transactions with gas price smaller then `protocol_min_gas_price` will fail during the DeliverTx (transaction execution) phase. We recommend to use `0.05uumee` because this will be the default in Kepler.
 Oracle transactions are free only if they are composed from the prevote and vote messages and have gas limit <= 140'000 gas.
 
 #### x/leverage settings
@@ -39,9 +39,9 @@ To run a node capable of supporting a liquidator, enable the query at compile ti
 ### Gravity Bridge
 
 In `v1.1.x` (current mainnet) we disabled Gravity Bridge (GB) module due to Ethereum PoS migration (_the merge_).
-This release is the first step to re-enable GB. We start by enabling validators update end evidence messages (`ValsetConfirm`), but the bridge messages: batch creation, claims (both ways: Ethereum->Cosmos and Cosmos->Ethereum) remain disabled.
+This release is the first step to re-enable GB. We start by enabling validators update end evidence messages (`MsgValsetConfirm` and `MsgValsetUpdatedClaim`), but the bridge messages: batch creation, claims (both ways: Ethereum->Cosmos and Cosmos->Ethereum) remain disabled.
 
-See (TODO:) Gravity Bridge Release Notes.
+See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/umee%2Fv3/module/RELEASE_NOTES.md) Release Notes.
 
 ### Update notes
 
@@ -49,6 +49,7 @@ Each validator must run:
 
 - Peggo (Gravity Bridge Orchestrator).
 - Price Feeder.
+- update `minimum-gas-prices` setting in `app.yml`. See [Fees](#fees) section above.
 
 Instructions: https://umeeversity.umee.cc/validators/mainnet-validator.html
 
