@@ -35,7 +35,7 @@ var (
 	DefaultMaxCollateralShare     = sdk.MustNewDecFromStr("1.00000000000000000")
 	DefaultMaxSupplyUtilization   = sdk.MustNewDecFromStr("1.00000000000000000")
 	DefaultMinCollateralLiquidity = sdk.MustNewDecFromStr("0.000000000000000000")
-	DefaultMaxSupply, _           = math.NewIntFromString("100000000000000000000")
+	DefaultMaxSupply, _           = math.NewInt(100_000000_000000)
 )
 
 // HasUTokenPrefix detects the uToken prefix on a denom.
