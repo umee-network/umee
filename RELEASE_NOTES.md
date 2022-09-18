@@ -31,7 +31,11 @@ Oracle transactions are free only if they are composed from the prevote and vote
 
 #### x/leverage settings
 
-- TODO: important information about queries, and node parameters, eg: https://github.com/umee-network/umee/issues/1400
+The leverage module is by default compiled without support for the `liquidation_targets` query.
+
+Validators should NOT enable this query on their nodes - it is inefficient due to iterating over all borrower accounts, and can delay time-sensitive consensus operations when a sufficient number of addresses must be checked.
+
+To run a node capable of supporting a liquidator, enable the query at compile time using `LIQUIDATOR=true make install`.
 
 ### Gravity Bridge
 
