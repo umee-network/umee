@@ -23,7 +23,7 @@ const (
 
 var (
 	// MinMinGasPrice is the minimum value a validator can set for `minimum-gas-prices` his app.toml config
-	MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.05"))
+	MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 )
 
 func init() {
