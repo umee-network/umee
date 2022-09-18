@@ -19,11 +19,11 @@ var (
 )
 
 var (
-	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
-	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
+	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.4")
+	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.05")
 	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
-	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("100.00")
-	defaultDirectLiquidationFee         = sdk.MustNewDecFromStr("0.1")
+	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("500.00")
+	defaultDirectLiquidationFee         = sdk.MustNewDecFromStr("0.05")
 )
 
 func NewParams() Params {
