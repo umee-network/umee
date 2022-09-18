@@ -11,7 +11,7 @@ import (
 
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	v3upgrades "github.com/umee-network/umee/v3/app/upgrades/v3"
+	"github.com/umee-network/umee/v3/app/upgradev3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -27,30 +27,26 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 			err := setupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
 				return nil, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
+					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)
+			ctx.Logger().Info("Running module migrations")
 			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
 			if err != nil {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate param of staking module",
-				"name", UpgradeV3_0Plan)
-			minCommissionRate, err := v3upgrades.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
+			ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
+			minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate param of staking module",
+					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
 					UpgradeV3_0Plan)
 			}
-
-			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
-				"name", UpgradeV3_0Plan)
-			err = v3upgrades.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
+			err = upgradev3.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate for validators",
+					err, "%q Upgrade: failed to update minimum commission rate for validators",
 					UpgradeV3_0Plan)
 			}
 
