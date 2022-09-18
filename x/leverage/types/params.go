@@ -19,11 +19,14 @@ var (
 )
 
 var (
-	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.1")
-	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.01")
-	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
-	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("100.00")
-	defaultDirectLiquidationFee         = sdk.MustNewDecFromStr("0.1")
+	defaultMaxShareTrigger              uint64 = 100_000 // 100k USD
+	defaultCompleteLiquidationThreshold        = sdk.MustNewDecFromStr("0.1")
+	defaultMinimumCloseFactor                  = sdk.MustNewDecFromStr("0.01")
+	defaultOracleRewardFactor                  = sdk.MustNewDecFromStr("0.01")
+	defaultSmallLiquidationSize                = sdk.MustNewDecFromStr("100.00")
+	defaultDirectLiquidationFee                = sdk.MustNewDecFromStr("0.1")
+
+	oneDec = sdk.OneDec()
 )
 
 func NewParams() Params {
@@ -77,6 +80,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
+		MaxShareTrigger:              defaultMaxShareTrigger,
 		CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
 		MinimumCloseFactor:           defaultMinimumCloseFactor,
 		OracleRewardFactor:           defaultOracleRewardFactor,
@@ -87,6 +91,9 @@ func DefaultParams() Params {
 
 // validate a set of params
 func (p Params) Validate() error {
+	if p.MaxShareTrigger < 1 {
+		return ErrBadValue.Wrap("MaxShareTrigger must be at least 1USD")
+	}
 	if err := validateLiquidationThreshold(p.CompleteLiquidationThreshold); err != nil {
 		return err
 	}
@@ -111,8 +118,8 @@ func validateLiquidationThreshold(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if !v.IsPositive() {
-		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
+	if !v.IsPositive() || v.GT(oneDec) {
+		return fmt.Errorf("complete_liquidation_threshold must be in (0-1], got: %d", v)
 	}
 
 	return nil
