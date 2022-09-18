@@ -172,7 +172,7 @@ func defaultUmeeToken() Token {
 		// Liquidation
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.10"),
 		// Market limits
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
+		MaxCollateralShare:     sdk.MustNewDecFromStr("0.3"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.90"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.3"),
 		MaxSupply:              sdk.NewInt(1000_000000_000000),
