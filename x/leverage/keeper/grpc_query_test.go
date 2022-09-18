@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -14,7 +15,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 
 	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
 	require.NoError(err)
-	require.Len(resp.Registry, 3, "token registry length")
+	require.Len(resp.Registry, 2, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
@@ -22,7 +23,7 @@ func (s *IntegrationTestSuite) TestQuerier_Params() {
 
 	resp, err := s.queryClient.Params(ctx.Context(), &types.QueryParams{})
 	require.NoError(err)
-	require.Equal(types.DefaultParams(), resp.Params)
+	require.Equal(fixtures.Params(), resp.Params)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {

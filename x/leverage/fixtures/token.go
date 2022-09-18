@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// AtomDenom is an ibc denom to be used as ATOM's BaseDenom during testing
-	AtomDenom = "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D"
+	// AtomDenom is an ibc denom to be used as ATOM's BaseDenom during testing.
+	AtomDenom = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
 )
 
 // Token returns a valid token

@@ -52,9 +52,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 	// Enable liquidation queries for testing
 	keeper.EnableLiquidator = "true"
 
-	umeeToken := newToken(appparams.BondDenom, "UMEE")
-	atomIBCToken := newToken(atomDenom, "ATOM")
-
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
 		s.Require(),
@@ -69,9 +66,13 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app.LeverageKeeper = k
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(types.NewMultiHooks())
 
+	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, atomIBCToken))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE")))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM")))
+
+	// override DefaultGenesis params with fixtures.Params
+	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.LeverageKeeper))

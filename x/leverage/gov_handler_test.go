@@ -42,20 +42,19 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 	})
 
 	t.Run("valid proposal", func(t *testing.T) {
-		require.NoError(t, k.SetTokenSettings(ctx,
-			fixtures.Token("uosmo", "OSMO"),
-		))
-		require.NoError(t, k.SetTokenSettings(ctx,
-			fixtures.Token("uatom", "ATOM"),
-		))
+		for _, token := range types.DefaultRegistry() {
+			require.NoError(t, k.SetTokenSettings(ctx, token))
+		}
+
+		modifiedUmee := fixtures.Token("uumee", "UMEE")
+		modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
 
 		osmo := fixtures.Token("uosmo", "OSMO")
-		osmo.ReserveFactor = sdk.MustNewDecFromStr("0.3")
 		p := &types.UpdateRegistryProposal{
 			Title:       "test",
 			Description: "test",
 			Registry: []types.Token{
-				fixtures.Token("uumee", "UMEE"),
+				modifiedUmee,
 				osmo,
 			},
 		}
@@ -63,14 +62,17 @@ func TestUpdateRegistryProposalHandler(t *testing.T) {
 
 		// no tokens should have been deleted
 		tokens := k.GetAllRegisteredTokens(ctx)
-		require.Len(t, tokens, 4)
+		require.Len(t, tokens, 3)
 
-		_, err := k.GetTokenSettings(ctx, "uumee")
+		token, err := k.GetTokenSettings(ctx, "uumee")
 		require.NoError(t, err)
-
-		token, err := k.GetTokenSettings(ctx, "uosmo")
-		require.NoError(t, err)
-		require.Equal(t, "0.300000000000000000", token.ReserveFactor.String(),
+		require.Equal(t, "0.690000000000000000", token.ReserveFactor.String(),
 			"reserve factor is correctly set")
+
+		_, err = k.GetTokenSettings(ctx, "uosmo")
+		require.NoError(t, err)
+
+		_, err = k.GetTokenSettings(ctx, fixtures.AtomDenom)
+		require.NoError(t, err)
 	})
 }

@@ -11,30 +11,7 @@ import (
 
 const (
 	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix                  = "u/"
-	DefaultExponent               = uint32(6)
-	DefaultEnableMsgSupply        = true
-	DefaultEnableMsgBorrow        = true
-	DefaultBlacklist              = false
-	UmeeDenom              string = appparams.BondDenom
-	UmeeSymbol             string = "umee"
-	AtomDenom              string = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
-	AtomSymbol             string = "atom"
-)
-
-var (
-	DefaultReserveFactor          = sdk.MustNewDecFromStr("0.100000000000000000")
-	DefaultCollateralWeight       = sdk.MustNewDecFromStr("0.050000000000000000")
-	DefaultLiquidationThreshold   = sdk.MustNewDecFromStr("0.050000000000000000")
-	DefaultBaseBorrowRate         = sdk.MustNewDecFromStr("0.020000000000000000")
-	DefaultKinkBorrowRate         = sdk.MustNewDecFromStr("0.200000000000000000")
-	DefaultMaxBorrowRate          = sdk.MustNewDecFromStr("1.50000000000000000")
-	DefaultKinkUtilization        = sdk.MustNewDecFromStr("0.200000000000000000")
-	DefaultLiquidationIncentive   = sdk.MustNewDecFromStr("0.180000000000000000")
-	DefaultMaxCollateralShare     = sdk.MustNewDecFromStr("1.00000000000000000")
-	DefaultMaxSupplyUtilization   = sdk.MustNewDecFromStr("1.00000000000000000")
-	DefaultMinCollateralLiquidity = sdk.MustNewDecFromStr("0.000000000000000000")
-	DefaultMaxSupply              = sdk.NewInt(100_000000_000000)
+	UTokenPrefix = "u/"
 )
 
 // HasUTokenPrefix detects the uToken prefix on a denom.
@@ -174,38 +151,66 @@ func (t Token) AssertNotBlacklisted() error {
 	return nil
 }
 
-func NewDefaultRegistryToken(baseDenom, symbolDenom string) Token {
+func defaultUmeeToken() Token {
 	return Token{
-		BaseDenom:              baseDenom,
-		SymbolDenom:            symbolDenom,
-		Exponent:               DefaultExponent,
-		ReserveFactor:          DefaultReserveFactor,
-		CollateralWeight:       DefaultCollateralWeight,
-		LiquidationThreshold:   DefaultLiquidationThreshold,
-		BaseBorrowRate:         DefaultBaseBorrowRate,
-		KinkBorrowRate:         DefaultKinkBorrowRate,
-		MaxBorrowRate:          DefaultMaxBorrowRate,
-		KinkUtilization:        DefaultKinkUtilization,
-		LiquidationIncentive:   DefaultLiquidationIncentive,
-		EnableMsgSupply:        DefaultEnableMsgSupply,
-		EnableMsgBorrow:        DefaultEnableMsgBorrow,
-		Blacklist:              DefaultBlacklist,
-		MaxCollateralShare:     DefaultMaxCollateralShare,
-		MaxSupplyUtilization:   DefaultMaxSupplyUtilization,
-		MinCollateralLiquidity: DefaultMinCollateralLiquidity,
-		MaxSupply:              DefaultMaxSupply,
+		BaseDenom:       appparams.BondDenom,
+		SymbolDenom:     "UMEE",
+		Exponent:        6,
+		EnableMsgSupply: true,
+		EnableMsgBorrow: true,
+		Blacklist:       false,
+		// Reserves
+		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
+		// Interest rate model
+		BaseBorrowRate:  sdk.MustNewDecFromStr("0.05"),
+		KinkBorrowRate:  sdk.MustNewDecFromStr("0.10"),
+		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
+		KinkUtilization: sdk.MustNewDecFromStr("0.50"),
+		// Collateral
+		CollateralWeight:     sdk.MustNewDecFromStr("0.35"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
+		// Liquidation
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.10"),
+		// Market limits
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.90"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.3"),
+		MaxSupply:              sdk.NewInt(1000_000000_000000),
+	}
+}
+
+func defaultAtomToken() Token {
+	return Token{
+		// Denom matches mainnet (channel-1) ATOM
+		BaseDenom:       "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+		SymbolDenom:     "ATOM",
+		Exponent:        6,
+		EnableMsgSupply: true,
+		EnableMsgBorrow: true,
+		Blacklist:       false,
+		// Reserves
+		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
+		// Interest rate model
+		BaseBorrowRate:  sdk.MustNewDecFromStr("0.03"),
+		KinkBorrowRate:  sdk.MustNewDecFromStr("0.11"),
+		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
+		KinkUtilization: sdk.MustNewDecFromStr("0.70"),
+		// Collateral
+		CollateralWeight:     sdk.MustNewDecFromStr("0.70"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.80"),
+		// Liquidation
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
+		// Market limits
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.95"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.18"),
+		MaxSupply:              sdk.NewInt(0),
 	}
 }
 
 func DefaultRegistry() []Token {
 	return []Token{
-		NewDefaultRegistryToken(
-			UmeeDenom,
-			UmeeSymbol,
-		),
-		NewDefaultRegistryToken(
-			AtomDenom,
-			AtomSymbol,
-		),
+		defaultUmeeToken(),
+		defaultAtomToken(),
 	}
 }
