@@ -7,12 +7,13 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
+	require := s.Require()
 	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	claimMap := make(map[string]types.Claim)
 
 	// Empty Map
 	res := s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
-	s.Require().Equal(make(map[string]types.ExchangeRateBallot), res)
+	require.Empty(res)
 
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(
 		s.ctx, valAddr, types.AggregateExchangeRateVote{
@@ -33,10 +34,10 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 		Recipient: valAddr,
 	}
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
-	s.Require().Equal(map[string]types.ExchangeRateBallot{
-		"UMEE": {
-			types.NewVoteForTally(sdk.OneDec(), "UMEE", valAddr, 1),
-		},
+	require.Equal([]types.BallotDenom{
+		{
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdk.OneDec(), "UMEE", valAddr, 1)},
+			Denom:  "UMEE"},
 	}, res)
 }
 
