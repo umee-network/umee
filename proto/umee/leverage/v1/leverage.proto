@@ -8,12 +8,25 @@ option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
 option (gogoproto.goproto_getters_all) = false;
 
 // Params defines the parameters for the leverage module.
+// See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+// for more details.
 message Params {
   option (gogoproto.goproto_stringer) = false;
+
+  // Max Share Trigger specifies when token `max_collateral_share`, `max_supply`
+  // parameters can take an action. When token supply or it's collateral value
+  // is below `max_share_trigger`, the limitation is not checked.
+  // Valule in USD. 1 = 1 USD
+  // Valid values: 1-∞
+  uint64 max_share_trigger = 1 [
+    (gogoproto.moretags) = "yaml:\"max_share_trigger\""
+  ];
+
   // Complete Liquidation Threshold determines how far between
   // liquidation_threshold (LT) and collateral_value (CV) a borrower's
   // borrowed value must have progressed in order to allow a full liquidation.
   // 0.3 indicates 30% of the way from LT to CV.
+  // See also `minimum_close_factor` for more information.
   // Valid values: 0-1.
   string complete_liquidation_threshold = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -28,13 +41,13 @@ message Params {
   // reaching its maximum when borrowed value passes
   // complete_liquidation_threshold. We can put it into the picture:
   //
-  //             borrowed           C := collateral
+  //             borrowed          CV := collateral
   //             value                   value
   //  --- | ------- | ----- | -------- | ------->
-  //      L                 CL
+  //     LV                 CL
   //
-  // liquidation = liquidation_threshold * C
-  // CL = L + (C-CL) * complete_liquidation_threshold
+  // LV = liquidation value = liquidation_threshold * CV
+  // CL = LV + (CV-LV) * complete_liquidation_threshold
   //    is the borrowed value above which close factor will be 1.
   //
   // Valid values: 0-1.
@@ -72,6 +85,8 @@ message Params {
 
 // Token defines a token, along with its metadata and parameters, in the Umee
 // capital facility that can be supplied and borrowed.
+// See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+// for more details.
 message Token {
   option (gogoproto.equal) = true;
 
@@ -110,7 +125,7 @@ message Token {
 
   // Base Borrow Rate defines the minimum interest rate for borrowing this
   // asset.
-  // Valid values: 0-inf
+  // Valid values: 0-∞
   string base_borrow_rate = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -119,7 +134,7 @@ message Token {
 
   // Kink Borrow Rate defines the interest rate for borrowing this
   // asset when supply utilization is equal to 'kink_utilization'.
-  // Valid values: 0-inf
+  // Valid values: 0-∞
   string kink_borrow_rate = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -128,7 +143,7 @@ message Token {
 
   // Max Borrow Rate defines the interest rate for borrowing this
   // asset when supply utilization is at its maximum.
-  // Valid values: 0-inf
+  // Valid values: 0-∞
   string max_borrow_rate = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -195,6 +210,7 @@ message Token {
   // Max Supply Utilization specifies the maximum supply utilization a token is
   // allowed to reach as a direct result of user borrowing. New borrows are not allowed when
   // the supply utilization is above `max_supply_utilization`.
+  //    supply_utilization(token) = total_borrowed(token) / total_supply(token)
   // Valid values: 0-1.
   string max_supply_utilization = 16 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -202,8 +218,8 @@ message Token {
     (gogoproto.moretags)   = "yaml:\"max_supply_utilization\""
   ];
 
-  // Min Collateral Liquidity specifies an allowed minimum allowed for the following function:
-  //     collateral_liquidity(token) = available(token) / total_collateral(token)
+  // Min Collateral Liquidity specifies min limit for the following function:
+  //    collateral_liquidity(token) = available(token) / total_collateral(token)
   // Borrowing, collateralizing, or withdrawing assets is not allowed when the
   // result of such action invalidates min_collateral_liquidity.
   // Liquidity can only drop below this value due to interest or liquidations.

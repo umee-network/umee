@@ -486,6 +486,22 @@ paths:
               params:
                 type: object
                 properties:
+                  max_share_trigger:
+                    type: string
+                    format: uint64
+                    title: >-
+                      Max Share Trigger specifies when token
+                      `max_collateral_share`, `max_supply`
+
+                      parameters can take an action. When token supply or it's
+                      collateral value
+
+                      is below `max_share_trigger`, the limitation is not
+                      checked.
+
+                      Valule in USD. 1 = 1 USD
+
+                      Valid values: 1-∞
                   complete_liquidation_threshold:
                     type: string
                     description: >-
@@ -499,17 +515,19 @@ paths:
 
                       0.3 indicates 30% of the way from LT to CV.
 
+                      See also `minimum_close_factor` for more information.
+
                       Valid values: 0-1.
                   minimum_close_factor:
                     type: string
                     description: |-
-                      borrowed           C := collateral
+                      borrowed          CV := collateral
                                   value                   value
                        --- | ------- | ----- | -------- | ------->
-                           L                 CL
+                          LV                 CL
 
-                      liquidation = liquidation_threshold * C
-                      CL = L + (C-CL) * complete_liquidation_threshold
+                      LV = liquidation value = liquidation_threshold * CV
+                      CL = LV + (CV-LV) * complete_liquidation_threshold
                          is the borrowed value above which close factor will be 1.
 
                       Valid values: 0-1.
@@ -565,7 +583,13 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
-                description: Params defines the parameters for the leverage module.
+                description: >-
+                  Params defines the parameters for the leverage module.
+
+                  See
+                  https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                  for more details.
             description: >-
               QueryParamsResponse defines the response structure for the Params
               gRPC
@@ -659,7 +683,7 @@ paths:
 
                         asset.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     kink_borrow_rate:
                       type: string
                       title: >-
@@ -669,7 +693,7 @@ paths:
                         asset when supply utilization is equal to
                         'kink_utilization'.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     max_borrow_rate:
                       type: string
                       title: >-
@@ -678,7 +702,7 @@ paths:
 
                         asset when supply utilization is at its maximum.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     kink_utilization:
                       type: string
                       description: >-
@@ -783,14 +807,14 @@ paths:
 
                         the supply utilization is above
                         `max_supply_utilization`.
-
+                           supply_utilization(token) = total_borrowed(token) / total_supply(token)
                         Valid values: 0-1.
                     min_collateral_liquidity:
                       type: string
                       title: >-
-                        Min Collateral Liquidity specifies an allowed minimum
-                        allowed for the following function:
-                            collateral_liquidity(token) = available(token) / total_collateral(token)
+                        Min Collateral Liquidity specifies min limit for the
+                        following function:
+                           collateral_liquidity(token) = available(token) / total_collateral(token)
                         Borrowing, collateralizing, or withdrawing assets is not
                         allowed when the
 
@@ -820,6 +844,11 @@ paths:
                     parameters, in the Umee
 
                     capital facility that can be supplied and borrowed.
+
+                    See
+                    https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                    for more details.
             description: >-
               QueryRegisteredTokensResponse defines the response structure for
               the
@@ -1485,6 +1514,21 @@ definitions:
   umee.leverage.v1.Params:
     type: object
     properties:
+      max_share_trigger:
+        type: string
+        format: uint64
+        title: >-
+          Max Share Trigger specifies when token `max_collateral_share`,
+          `max_supply`
+
+          parameters can take an action. When token supply or it's collateral
+          value
+
+          is below `max_share_trigger`, the limitation is not checked.
+
+          Valule in USD. 1 = 1 USD
+
+          Valid values: 1-∞
       complete_liquidation_threshold:
         type: string
         description: >-
@@ -1497,17 +1541,19 @@ definitions:
 
           0.3 indicates 30% of the way from LT to CV.
 
+          See also `minimum_close_factor` for more information.
+
           Valid values: 0-1.
       minimum_close_factor:
         type: string
         description: |-
-          borrowed           C := collateral
+          borrowed          CV := collateral
                       value                   value
            --- | ------- | ----- | -------- | ------->
-               L                 CL
+              LV                 CL
 
-          liquidation = liquidation_threshold * C
-          CL = L + (C-CL) * complete_liquidation_threshold
+          LV = liquidation value = liquidation_threshold * CV
+          CL = LV + (CV-LV) * complete_liquidation_threshold
              is the borrowed value above which close factor will be 1.
 
           Valid values: 0-1.
@@ -1554,7 +1600,13 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
-    description: Params defines the parameters for the leverage module.
+    description: >-
+      Params defines the parameters for the leverage module.
+
+      See
+      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+      for more details.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
@@ -1831,6 +1883,21 @@ definitions:
       params:
         type: object
         properties:
+          max_share_trigger:
+            type: string
+            format: uint64
+            title: >-
+              Max Share Trigger specifies when token `max_collateral_share`,
+              `max_supply`
+
+              parameters can take an action. When token supply or it's
+              collateral value
+
+              is below `max_share_trigger`, the limitation is not checked.
+
+              Valule in USD. 1 = 1 USD
+
+              Valid values: 1-∞
           complete_liquidation_threshold:
             type: string
             description: >-
@@ -1843,17 +1910,19 @@ definitions:
 
               0.3 indicates 30% of the way from LT to CV.
 
+              See also `minimum_close_factor` for more information.
+
               Valid values: 0-1.
           minimum_close_factor:
             type: string
             description: |-
-              borrowed           C := collateral
+              borrowed          CV := collateral
                           value                   value
                --- | ------- | ----- | -------- | ------->
-                   L                 CL
+                  LV                 CL
 
-              liquidation = liquidation_threshold * C
-              CL = L + (C-CL) * complete_liquidation_threshold
+              LV = liquidation value = liquidation_threshold * CV
+              CL = LV + (CV-LV) * complete_liquidation_threshold
                  is the borrowed value above which close factor will be 1.
 
               Valid values: 0-1.
@@ -1903,7 +1972,13 @@ definitions:
               uTokens as liquidation rewards.
 
               Valid values: 0-1.
-        description: Params defines the parameters for the leverage module.
+        description: >-
+          Params defines the parameters for the leverage module.
+
+          See
+          https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+          for more details.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
@@ -1962,19 +2037,19 @@ definitions:
 
                 asset.
 
-                Valid values: 0-inf
+                Valid values: 0-∞
             kink_borrow_rate:
               type: string
               title: |-
                 Kink Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is equal to 'kink_utilization'.
-                Valid values: 0-inf
+                Valid values: 0-∞
             max_borrow_rate:
               type: string
               title: |-
                 Max Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is at its maximum.
-                Valid values: 0-inf
+                Valid values: 0-∞
             kink_utilization:
               type: string
               description: |-
@@ -2070,14 +2145,14 @@ definitions:
                 borrows are not allowed when
 
                 the supply utilization is above `max_supply_utilization`.
-
+                   supply_utilization(token) = total_borrowed(token) / total_supply(token)
                 Valid values: 0-1.
             min_collateral_liquidity:
               type: string
               title: >-
-                Min Collateral Liquidity specifies an allowed minimum allowed
-                for the following function:
-                    collateral_liquidity(token) = available(token) / total_collateral(token)
+                Min Collateral Liquidity specifies min limit for the following
+                function:
+                   collateral_liquidity(token) = available(token) / total_collateral(token)
                 Borrowing, collateralizing, or withdrawing assets is not allowed
                 when the
 
@@ -2105,6 +2180,11 @@ definitions:
             the Umee
 
             capital facility that can be supplied and borrowed.
+
+            See
+            https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+            for more details.
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
@@ -2147,19 +2227,19 @@ definitions:
         title: |-
           Base Borrow Rate defines the minimum interest rate for borrowing this
           asset.
-          Valid values: 0-inf
+          Valid values: 0-∞
       kink_borrow_rate:
         type: string
         title: |-
           Kink Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is equal to 'kink_utilization'.
-          Valid values: 0-inf
+          Valid values: 0-∞
       max_borrow_rate:
         type: string
         title: |-
           Max Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is at its maximum.
-          Valid values: 0-inf
+          Valid values: 0-∞
       kink_utilization:
         type: string
         description: |-
@@ -2251,14 +2331,14 @@ definitions:
           not allowed when
 
           the supply utilization is above `max_supply_utilization`.
-
+             supply_utilization(token) = total_borrowed(token) / total_supply(token)
           Valid values: 0-1.
       min_collateral_liquidity:
         type: string
         title: >-
-          Min Collateral Liquidity specifies an allowed minimum allowed for the
-          following function:
-              collateral_liquidity(token) = available(token) / total_collateral(token)
+          Min Collateral Liquidity specifies min limit for the following
+          function:
+             collateral_liquidity(token) = available(token) / total_collateral(token)
           Borrowing, collateralizing, or withdrawing assets is not allowed when
           the
 
@@ -2280,9 +2360,15 @@ definitions:
 
           To mark a token as not valid for supply, `msg_supply` must be set to
           false.
-    description: |-
+    description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
+
       capital facility that can be supplied and borrowed.
+
+      See
+      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+      for more details.
   cosmos.base.v1beta1.DecCoin:
     type: object
     properties:
