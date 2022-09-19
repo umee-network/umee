@@ -89,11 +89,12 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
-	var useGanache bool
-	if str := os.Getenv("UMEE_E2E_USE_GANACHE"); len(str) > 0 {
-		useGanache, err = strconv.ParseBool(str)
-		s.Require().NoError(err)
-	}
+	s.T().Logf("Ethereum and peggo are disable due to Ethereum PoS migration and PoW fork")
+	// var useGanache bool
+	// if str := os.Getenv("UMEE_E2E_USE_GANACHE"); len(str) > 0 {
+	// 	useGanache, err = strconv.ParseBool(str)
+	// 	s.Require().NoError(err)
+	// }
 
 	// The boostrapping phase is as follows:
 	//
@@ -107,20 +108,20 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 8. Deploy the Gravity Bridge contract.
 	// 9. Create and start Peggo (orchestrator) containers.
 	s.initNodes()
-	if useGanache {
-		s.runGanacheContainer()
-	} else {
-		s.initEthereum()
-		s.runEthContainer()
-	}
+	// if useGanache {
+	// 	s.runGanacheContainer()
+	// } else {
+	// 	s.initEthereum()
+	// 	s.runEthContainer()
+	// }
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
 	s.runPriceFeeder()
 	s.runGaiaNetwork()
 	s.runIBCRelayer()
-	s.runContractDeployment()
-	s.runOrchestrators()
+	// s.runContractDeployment()
+	// s.runOrchestrators()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -135,7 +136,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 	s.T().Log("tearing down e2e integration test suite...")
 
-	s.Require().NoError(s.dkrPool.Purge(s.ethResource))
+	// s.Require().NoError(s.dkrPool.Purge(s.ethResource))
 	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
 	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
 	s.Require().NoError(s.dkrPool.Purge(s.priceFeederResource))
@@ -144,9 +145,9 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 		s.Require().NoError(s.dkrPool.Purge(vc))
 	}
 
-	for _, oc := range s.orchResources {
-		s.Require().NoError(s.dkrPool.Purge(oc))
-	}
+	// for _, oc := range s.orchResources {
+	// 	s.Require().NoError(s.dkrPool.Purge(oc))
+	// }
 
 	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
 
