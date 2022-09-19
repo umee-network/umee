@@ -53,12 +53,14 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	var ibcStakeERC20Addr string
 	s.Run("deploy_stake_erc20 ibcStakeERC20Addr", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		s.Require().NotEmpty(ibcStakeDenom)
 		ibcStakeERC20Addr = s.deployERC20Token(ibcStakeDenom)
 	})
 
 	// send 300 stake tokens from Umee to Ethereum
 	s.Run("send_stake_tokens_to_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(ibcStakeDenom, math.NewInt(300))
@@ -70,6 +72,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	// send 300 stake tokens from Ethereum back to Umee
 	s.Run("send_stake_tokens_from_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxReceiver := 0
 		orchestratorIdxSender := 1
 		amount := uint64(300)
@@ -79,6 +82,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 }
 
 func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
+	s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 	// deploy photon ERC20 token contact
 	var photonERC20Addr string
 	s.Run("deploy_photon_erc20", func() {
@@ -98,6 +102,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Ethereum back to Umee
 	s.Run("send_photon_tokens_from_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxReceiver := 0
 		orchestratorIdxSender := 1
 		amount := uint64(100)
@@ -107,6 +112,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
+	s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 	// deploy umee ERC20 token contract
 	var umeeERC20Addr string
 	s.Run("deploy_umee_erc20", func() {

@@ -317,7 +317,7 @@ require (
 )
 
 replace (
-	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220831213229-254615a7be1d
+	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-1
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.1-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
