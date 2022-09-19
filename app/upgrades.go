@@ -11,7 +11,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	ica "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts"
 	icacontrollertypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/controller/types"
 	icahosttypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/types"

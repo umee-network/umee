@@ -1,4 +1,4 @@
-package v3
+package upgradev3
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
