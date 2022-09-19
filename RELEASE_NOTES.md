@@ -42,10 +42,16 @@ See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/module/
 
 ### Update notes
 
-Each validator must run:
+Each validator MUST:
 
 - Peggo (Gravity Bridge Orchestrator) v1.0.x.
 - [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder).
+- Update `config.toml` file by setting `mempool.version="v1"`:
+
+  ```
+  [mempool]
+  version = "v1"
+  ```
 
 Instructions: [umeeversity/validator](https://umeeversity.umee.cc/validators/mainnet-validator.html)
 
