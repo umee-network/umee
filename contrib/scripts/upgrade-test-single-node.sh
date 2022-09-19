@@ -28,6 +28,10 @@ UMEED_BIN_V1="${UMEED_BIN_V1:-$UMEED_BUILD_PATH/umeed-fix-testnet-halt}"
 UMEED_BIN_V2="${UMEED_BIN_V2:-$UMEED_BUILD_PATH/umeed-cosmwasm}"
 
 VOTING_PERIOD=${VOTING_PERIOD:-8}
+NODE_HOME=${NODE_HOME:-$CWD/node-data/n0}
+
+echo "Previous build binary : $UMEED_BIN_V1"
+echo "New build binary      : $UMEED_BIN_V2"
 
 hdir="$CHAIN_DIR/$CHAIN_ID"
 
@@ -38,9 +42,12 @@ hdir="$CHAIN_DIR/$CHAIN_ID"
 nodeDir="$hdir/$NODE_NAME"
 
 # Home flag for folder
-nodeHomeFlag="--home $nodeDir"
+nodeHomeFlag="$NODE_HOME"
 nodeUrlFlag="--node $NODE_URL"
 
+
+echo "NODE HOME : $nodeHomeFlag"
+echo "NODE URI : $nodeUrlFlag"
 # Common flags
 kbt="--keyring-backend test"
 cid="--chain-id $CHAIN_ID"
@@ -48,17 +55,27 @@ cid="--chain-id $CHAIN_ID"
 CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
 echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 
-UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 10))
+UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 20))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
-$UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
-  --upgrade-height $UPGRADE_HEIGHT --upgrade-info '{"binaries":{"linux/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-amd64","linux/arm64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-arm64","darwin/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-darwin-amd64"}}' \
-  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 10000uumee
+echo "Version of current running chain "
+$UMEED_BIN_V1 version 
 
-PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
+echo "Submiting the software-upgrade proposal : --title yeet "
+
+$UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
+  --upgrade-height $UPGRADE_HEIGHT \
+  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 100000uumee
+
+
+# PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
+PROPOSAL_ID=`$UMEED_BIN_V1 q gov proposals --status voting_period -o json $nodeHomeFlag | \
+jq -c '.proposals | .[] | select(.content.title == '\"yeet\"') | .proposal_id | tonumber'`
+
 echo proposal ID is $PROPOSAL_ID
 
-$UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes --fees 10000uumee
+echo "Voting on proposaal : $PROPOSAL_ID"
+$UMEED_BIN_V1 tx gov vote $PROPOSAL_ID yes -b block --from admin $nodeHomeFlag $cid $nodeUrlFlag $kbt  --yes --fees 100000uumee
 
 echo "..."
 echo "Finished voting on the proposal"
@@ -71,7 +88,8 @@ CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_he
 echo "Reached upgrade block height: $CURRENT_HEIGHT == $UPGRADE_HEIGHT"
 
 node_pid_value=$(cat $UMEED_V1_PID_FILE)
-
+# Just make sure before stop the process sleep 5 
+sleep 5 
 echo "Kill the process ID '$node_pid_value'"
 
 kill -s 15 $node_pid_value
@@ -86,7 +104,7 @@ sleep $VOTING_PERIOD
 # Starts a different file for logging
 nodeLogPath=$hdir.umeed-v2.log
 
-$UMEED_BIN_V2 $nodeHomeFlag start --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
+$UMEED_BIN_V2 $nodeHomeFlag start --grpc.address="0.0.0.0:9090" --grpc-web.enable=false > $nodeLogPath 2>&1 &
 
 # Gets the node pid
 echo $! > $UMEED_V1_PID_FILE

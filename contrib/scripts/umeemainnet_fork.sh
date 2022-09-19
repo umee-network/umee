@@ -21,6 +21,8 @@ UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/umeed-releases/umeed-v1.1.2-li
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key.json}"
 SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
+GH_URL="${GH_URL:-"https://github.com/umee-network/umee.git"}"
+MAINNET_VERSION="${MAINNET_VERSION:-"v1.1.2"}"
 
 # Loads another sources
 . $CWD/download-mainnet-umeed.sh
@@ -89,7 +91,13 @@ echo Replace generated genesis with tinkered genesis
 rm $nodeDir/$genesisConfigPath
 
 cp $UMEEMAINNET_GENESIS_PATH $nodeDir/$genesisConfigPath
+echo $nodeDir/$genesisConfigPath
 
+GOV_DEFAULT_PERIOD="30s"
+
+# sed -i -e "s/172800s/${GOV_DEFAULT_PERIOD}/g" $nodeDir/$genesisConfigPath
+jq '.app_state.gov.voting_params.voting_period = "30s"' $nodeDir/$genesisConfigPath >  $nodeDir/new-genesis.json
+cp $nodeDir/new-genesis.json $nodeDir/$genesisConfigPath
 perl -i -pe 's|fast_sync = true|fast_sync = false|g' $nodeCfg
 perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $nodeCfg
 perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|g' $nodeCfg
@@ -103,7 +111,7 @@ nodeLogPath=$hdir.umeed-main.log
 unset UMEE_ENABLE_BETA
 
 pid_path=$nodeDir.pid
-UMEE_ENABLE_BETA=false $UMEED_BIN_MAINNET $nodeHome start --grpc.address="0.0.0.0:9090" --x-crisis-skip-assert-invariants --grpc-web.enable=false --log_level $LOG_LEVEL > $nodeLogPath 2>&1 &
+UMEE_ENABLE_BETA=false $UMEED_BIN_MAINNET $nodeHome start --grpc.address="0.0.0.0:9090" --x-crisis-skip-assert-invariants --grpc-web.enable=false > $nodeLogPath 2>&1 &
 
 # Gets the node pid
 echo $! > $pid_path
@@ -128,7 +136,10 @@ echo "Current Block: $CURRENT_BLOCK_HEIGHT >= $WAIT_UNTIL_HEIGHT"
 # we should produce at least 20 blocks with the new version
 ((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+20))
 
-UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
+echo "Get the gov params "
+$UMEED_BIN_MAINNET q gov params -o json
+
+UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID NODE_HOME=$nodeHome LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
 sleep $SEC_AWAIT_NODE_START
@@ -136,12 +147,11 @@ sleep $SEC_AWAIT_NODE_START
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
 
 echo
-echo Upgrade Process Finish
+echo "👍 Upgrade Process Finish to $UMEED_BIN_CURRENT"
 echo
 
 pid_value=$(cat $pid_path)
 echo "Kill the process ID '$pid_value'"
-
 kill -s 15 $pid_value
 
 exit 0
