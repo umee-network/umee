@@ -59,6 +59,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	// send 300 stake tokens from Umee to Ethereum
 	s.Run("send_stake_tokens_to_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(ibcStakeDenom, math.NewInt(300))
@@ -70,6 +71,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	// send 300 stake tokens from Ethereum back to Umee
 	s.Run("send_stake_tokens_from_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxReceiver := 0
 		orchestratorIdxSender := 1
 		amount := uint64(300)
@@ -87,6 +89,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Umee to Ethereum
 	s.Run("send_photon_tokens_to_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(photonDenom, math.NewInt(100))
@@ -98,6 +101,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Ethereum back to Umee
 	s.Run("send_photon_tokens_from_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxReceiver := 0
 		orchestratorIdxSender := 1
 		amount := uint64(100)
@@ -115,6 +119,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxSender := 0
 		orchestratorIdxReceiver := 1
 		amount := sdk.NewCoin(appparams.BondDenom, math.NewInt(300))
@@ -126,6 +131,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Ethereum back to Umee
 	s.Run("send_uumee_tokens_from_eth", func() {
+		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
 		umeeValIdxReceiver := 0
 		orchestratorIdxSender := 1
 		amount := uint64(300)
