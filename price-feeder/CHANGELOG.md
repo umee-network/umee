@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bugs
+
+- [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
