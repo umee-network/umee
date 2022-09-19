@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.21
-	github.com/umee-network/umee/v3 v3.0.0
+	github.com/umee-network/umee/v3 v3.0.0-rc1
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v3 v3.0.1
