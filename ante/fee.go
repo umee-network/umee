@@ -53,7 +53,7 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		minGasPrices = sdk.DecCoins{appparams.MinMinGasPrice}
 	}
 
-	requiredFees := make(sdk.Coins, len(minGasPrices), 0)
+	requiredFees := sdk.NewCoins()
 
 	// Determine the required fees by multiplying each required minimum gas
 	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
