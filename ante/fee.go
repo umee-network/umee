@@ -53,18 +53,19 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		minGasPrices = sdk.DecCoins{appparams.ProtocolMinGasPrice}
 	}
 
-	requiredFees := make(sdk.Coins, len(minGasPrices))
+	requiredFees := sdk.NewCoins()
 
 	// Determine the required fees by multiplying each required minimum gas
 	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
+	// Zero fees are removed.
 	glDec := sdk.NewDec(int64(gasLimit))
-	for i, gp := range minGasPrices {
+	for _, gp := range minGasPrices {
+		if gasLimit == 0 || gp.IsZero() {
+			continue
+		}
 		fee := gp.Amount.Mul(glDec)
-		requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+		requiredFees = append(requiredFees, sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt()))
 	}
-
-	// Clear any zero coins from requiredFees in the case of zero min gas price
-	requiredFees = sdk.NewCoins(requiredFees...)
 
 	if !requiredFees.Empty() && !fees.IsAnyGTE(requiredFees) {
 		return sdkerrors.ErrInsufficientFee.Wrapf(
