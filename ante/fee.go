@@ -63,7 +63,10 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
 	}
 
-	if !fees.IsAnyGTE(requiredFees) {
+	// Clear any zero coins from requiredFees in the case of zero min gas price
+	requiredFees = sdk.NewCoins(requiredFees...)
+
+	if !requiredFees.Empty() && !fees.IsAnyGTE(requiredFees) {
 		return sdkerrors.ErrInsufficientFee.Wrapf(
 			"insufficient fees; got: %s required: %s", fees, requiredFees)
 	}
@@ -105,16 +108,12 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 // AssertMinProtocolGasPrice returns an error if the provided gasPrices are lower then
 // the required by protocol.
 func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
-	for _, c := range gasPrices {
-		if c.Denom == appparams.MinMinGasPrice.Denom {
-			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
-				break // go to error below
-			}
-			return nil
-		}
+	if gasPrices.AmountOf(appparams.MinMinGasPrice.Denom).LT(appparams.MinMinGasPrice.Amount) {
+		return sdkerrors.ErrInsufficientFee.Wrapf(
+			"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
 	}
-	return sdkerrors.ErrInsufficientFee.Wrapf(
-		"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
+
+	return nil
 }
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the

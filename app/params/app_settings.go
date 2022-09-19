@@ -21,10 +21,8 @@ const (
 	DefaultGasLimit = 200000
 )
 
-var (
-	// MinMinGasPrice is the minimum value a validator can set for `minimum-gas-prices` his app.toml config
-	MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.05"))
-)
+// MinMinGasPrice is the minimum value a validator can set for `minimum-gas-prices` his app.toml config
+var MinMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 
 func init() {
 	// XXX: If other upstream or external application's depend on any of Umee's
