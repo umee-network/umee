@@ -47,7 +47,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 
 			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
 				"name", UpgradeV3_0Plan)
-			err = v3upgrades.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
+			err = v3upgrades.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
 					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate for validators",
