@@ -696,8 +696,19 @@ func New(
 		bech32ibctypes.ModuleName,
 	)
 
-	// Uncomment if you want to set a custom migration order here.
-	// app.mm.SetOrderMigrations(custom order)
+	app.mm.SetOrderMigrations(
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
+		crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
+		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
+
+		oracletypes.ModuleName,
+		leveragetypes.ModuleName,
+		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
+	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
