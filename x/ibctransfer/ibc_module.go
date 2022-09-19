@@ -2,9 +2,9 @@ package ibctransfer
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfer "github.com/cosmos/ibc-go/v5/modules/apps/transfer"
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
+	ibcporttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
 	"github.com/umee-network/umee/v3/x/ibctransfer/keeper"
@@ -14,14 +14,14 @@ import (
 // methods.
 type IBCModule struct {
 	// embed the ICS-20 transfer's AppModule
-	ibctransfer.IBCModule
+	ibcporttypes.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(transferModule ibcporttypes.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
-		IBCModule: am,
+		IBCModule: transferModule,
 		keeper:    k,
 	}
 }
