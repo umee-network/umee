@@ -25,7 +25,7 @@ var (
 	// ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
 	// `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
 	// Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
-	ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.05"))
+	ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 )
 
 func init() {

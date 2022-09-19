@@ -48,8 +48,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### State Machine Breaking
 
-- [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
-- [#1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+- [1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1411](https://github.com/umee-network/umee/pull/1411) Set min gas price to zero for v3 release
 
 ### API Breaking
 
@@ -126,6 +127,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 - [1357](https://github.com/umee-network/umee/pull/1357) Interptex x/0 collateral liquidity as 100%
 - [1383](https://github.com/umee-network/umee/pull/1383) Remove potential panic during FeeAndPriority error case.
+- [1405](https://github.com/umee-network/umee/pull/1405) No longer skip MinCollateralLiquidity < 1 validation.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
