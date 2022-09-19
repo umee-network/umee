@@ -142,13 +142,20 @@ $UMEED_BIN_MAINNET q gov params -o json
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID NODE_HOME=$nodeHome LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
-sleep $SEC_AWAIT_NODE_START
+echo "Sleep for 180"
+sleep 180
 
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
-
 echo
 echo "👍 Upgrade Process Finish to $UMEED_BIN_CURRENT"
 echo
+
+
+echo "Query staking params "
+$UMEED_BIN_CURRENT q staking params | jq .
+
+echo "Print new version logs "
+cat $hdir.umeed-v2.log
 
 pid_value=$(cat $pid_path)
 echo "Kill the process ID '$pid_value'"
