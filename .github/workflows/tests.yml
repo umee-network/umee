@@ -144,7 +144,6 @@ jobs:
 
   mainnet-upgrade-v1-v3:
     needs: build-umeed
-    required: true
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
