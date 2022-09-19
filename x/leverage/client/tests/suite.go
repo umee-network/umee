@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
-
-	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 type IntegrationTestSuite struct {
@@ -82,7 +80,8 @@ func (t testTransaction) Run(s *IntegrationTestSuite) {
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-		fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
+		fmt.Sprintf("--%s=%s", flags.FlagGas, "10000000"),
+		fmt.Sprintf("--%s=%s", flags.FlagFees, "1000000uumee"),
 	}
 
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, t.command, append(t.args, txFlags...))

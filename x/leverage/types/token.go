@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
@@ -148,4 +149,68 @@ func (t Token) AssertNotBlacklisted() error {
 		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
 	}
 	return nil
+}
+
+func defaultUmeeToken() Token {
+	return Token{
+		BaseDenom:       appparams.BondDenom,
+		SymbolDenom:     "UMEE",
+		Exponent:        6,
+		EnableMsgSupply: true,
+		EnableMsgBorrow: true,
+		Blacklist:       false,
+		// Reserves
+		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
+		// Interest rate model
+		BaseBorrowRate:  sdk.MustNewDecFromStr("0.05"),
+		KinkBorrowRate:  sdk.MustNewDecFromStr("0.10"),
+		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
+		KinkUtilization: sdk.MustNewDecFromStr("0.50"),
+		// Collateral
+		CollateralWeight:     sdk.MustNewDecFromStr("0.35"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
+		// Liquidation
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.10"),
+		// Market limits
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.90"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.3"),
+		MaxSupply:              sdk.NewInt(1000_000000_000000),
+	}
+}
+
+func defaultAtomToken() Token {
+	return Token{
+		// Denom matches mainnet (channel-1) ATOM
+		BaseDenom:       "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+		SymbolDenom:     "ATOM",
+		Exponent:        6,
+		EnableMsgSupply: true,
+		EnableMsgBorrow: true,
+		Blacklist:       false,
+		// Reserves
+		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
+		// Interest rate model
+		BaseBorrowRate:  sdk.MustNewDecFromStr("0.03"),
+		KinkBorrowRate:  sdk.MustNewDecFromStr("0.11"),
+		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
+		KinkUtilization: sdk.MustNewDecFromStr("0.70"),
+		// Collateral
+		CollateralWeight:     sdk.MustNewDecFromStr("0.70"),
+		LiquidationThreshold: sdk.MustNewDecFromStr("0.80"),
+		// Liquidation
+		LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
+		// Market limits
+		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
+		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.95"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.18"),
+		MaxSupply:              sdk.NewInt(0),
+	}
+}
+
+func DefaultRegistry() []Token {
+	return []Token{
+		defaultUmeeToken(),
+		defaultAtomToken(),
+	}
 }
