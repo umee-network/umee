@@ -3,15 +3,15 @@ package oracle
 import (
 	"time"
 
-	"github.com/umee-network/umee/v3/x/oracle/keeper"
-	"github.com/umee-network/umee/v3/x/oracle/types"
-
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-// IsPeriodLastBlock returns true if we are at the last block of the period
-func IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
+// isPeriodLastBlock returns true if we are at the last block of the period
+func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
 }
 
@@ -20,26 +20,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
-	if IsPeriodLastBlock(ctx, params.VotePeriod) {
+	if isPeriodLastBlock(ctx, params.VotePeriod) {
 		// Build claim map over all validators in active set
 		validatorClaimMap := make(map[string]types.Claim)
-
-		maxValidators := k.StakingKeeper.MaxValidators(ctx)
-		iterator := k.StakingKeeper.ValidatorsPowerStoreIterator(ctx)
-		defer iterator.Close()
-
 		powerReduction := k.StakingKeeper.PowerReduction(ctx)
-
-		i := 0
-		for ; iterator.Valid() && i < int(maxValidators); iterator.Next() {
-			validator := k.StakingKeeper.Validator(ctx, iterator.Value())
-
-			// Exclude not bonded validator
-			if validator.IsBonded() {
-				valAddr := validator.GetOperator()
-				validatorClaimMap[valAddr.String()] = types.NewClaim(validator.GetConsensusPower(powerReduction), 0, 0, valAddr)
-				i++
-			}
+		for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+			addr := v.GetOperator()
+			validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
 		}
 
 		var (
@@ -52,17 +39,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 		}
 
-		// Clear all exchange rates
-		k.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
-			k.DeleteExchangeRate(ctx, denom)
-			return false
-		})
+		k.ClearExchangeRates(ctx)
 
-		// Organize votes to ballot by denom
-		// NOTE: **Filter out inactive or jailed validators**
-		voteMap := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
-
-		ballotDenomSlice := types.BallotMapToSlice(voteMap)
+		// NOTE: it filters out inactive or jailed validators
+		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for _, ballotDenom := range ballotDenomSlice {
@@ -106,14 +86,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	// Slash oracle providers who missed voting over the threshold and
 	// reset miss counters of all validators at the last block of slash window
-	if IsPeriodLastBlock(ctx, params.SlashWindow) {
+	if isPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
 	}
 
 	return nil
 }
 
-// Tally calculates the median and returns it. It sets the set of voters to be
+// Tally calculates and returns the median. It sets the set of voters to be
 // rewarded, i.e. voted within a reasonable spread from the weighted median to
 // the store. Note, the ballot is sorted by ExchangeRate.
 func Tally(
