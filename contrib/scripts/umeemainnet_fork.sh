@@ -152,10 +152,7 @@ echo
 
 
 echo "Query staking params "
-$UMEED_BIN_CURRENT q staking params | jq .
-
-echo "Print new version logs "
-cat $hdir.umeed-v2.log
+$UMEED_BIN_CURRENT q staking params
 
 pid_value=$(cat $pid_path)
 echo "Kill the process ID '$pid_value'"
