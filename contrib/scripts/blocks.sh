@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 
 # File with commonly used functions for other scripts
+set -e
 
 CHAIN_ID="${CHAIN_ID:-888}"
 NODE_URL="${NODE_URL:-"tcp://localhost:26657"}"
