@@ -23,10 +23,6 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - transaction prioritization
 - IBC v5.0
 
-#### Fees
-
-All transactions, except oracle messages, are required to pay gas. We implemented a consensus controlled `protocol_min_gas_price = 0.05uumee`. All **validators must** set their `minimum-gas-prices` settings in `app.yml` to a value at least `0.05uumee` (otherwise the node won't start). Transactions with gas price smaller then `protocol_min_gas_price` will fail during the DeliverTx (transaction execution) phase. We recommend to use `0.05uumee` because this will be the default in Kepler.
-Oracle transactions are free only if they are composed from the prevote and vote messages and have gas limit <= 140'000 gas.
 
 #### x/leverage settings
 
