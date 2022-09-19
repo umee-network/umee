@@ -5,6 +5,10 @@
 # USAGE: ./download-mainnet-umeed.sh
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# TODO: make sure we can run this locally using different OS
+# currently, it only works locally on Linux, so instead of downloading binary, we build it.
+#
 # UMEED_BIN_MAINNET_URL_TARBALL=${UMEED_BIN_MAINNET_URL_TARBALL:-"https://github.com/umee-network/umee/releases/download/v1.1.2/umeed-v1.1.2-linux-amd64.tar.gz"}
 # UMEED_BIN_MAINNET=${UMEED_BIN_MAINNET:-"$CWD/umeed-releases/umeed-v1.1.2-linux-amd64/umeed"}
 
