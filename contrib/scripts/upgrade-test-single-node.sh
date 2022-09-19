@@ -42,7 +42,7 @@ hdir="$CHAIN_DIR/$CHAIN_ID"
 nodeDir="$hdir/$NODE_NAME"
 
 # Home flag for folder
-nodeHomeFlag="$NODE_HOME"
+nodeHomeFlag="--home $NODE_HOME"
 nodeUrlFlag="--node $NODE_URL"
 
 
@@ -59,7 +59,7 @@ UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 20))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
 echo "Version of current running chain "
-$UMEED_BIN_V1 version 
+$UMEED_BIN_V1 version
 
 echo "Submiting the software-upgrade proposal : --title yeet "
 
@@ -88,8 +88,8 @@ CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_he
 echo "Reached upgrade block height: $CURRENT_HEIGHT == $UPGRADE_HEIGHT"
 
 node_pid_value=$(cat $UMEED_V1_PID_FILE)
-# Just make sure before stop the process sleep 5 
-sleep 5 
+# Just make sure before stop the process sleep 5
+sleep 5
 echo "Kill the process ID '$node_pid_value'"
 
 kill -s 15 $node_pid_value
