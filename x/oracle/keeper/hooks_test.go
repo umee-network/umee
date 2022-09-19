@@ -7,7 +7,7 @@ import (
 
 func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 	h := s.app.OracleKeeper.Hooks()
-	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 1)
+	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 2)
 
 	// require that an existing token does not change the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
@@ -15,7 +15,7 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 		SymbolDenom: appparams.DisplayDenom,
 		Exponent:    6,
 	})
-	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 1)
+	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 2)
 
 	// require a new registered token updates the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
@@ -23,5 +23,5 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 		SymbolDenom: "atom",
 		Exponent:    6,
 	})
-	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 2)
+	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 3)
 }

@@ -37,6 +37,11 @@ var (
 			SymbolDenom: UmeeSymbol,
 			Exponent:    UmeeExponent,
 		},
+		{
+			BaseDenom:   AtomDenom,
+			SymbolDenom: AtomSymbol,
+			Exponent:    AtomExponent,
+		},
 	}
 	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
 	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%

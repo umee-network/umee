@@ -36,7 +36,7 @@ func NewGenesisState(
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params:           DefaultParams(),
-		Registry:         []Token{},
+		Registry:         DefaultRegistry(),
 		LastInterestTime: 0,
 	}
 }
