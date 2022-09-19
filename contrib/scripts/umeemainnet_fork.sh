@@ -6,7 +6,7 @@
 # upgrade this fork with a software-upgrade proposal.
 
 # USAGE: ./umeemainnet_fork.sh
-set -e
+set +e
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
