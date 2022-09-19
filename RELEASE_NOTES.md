@@ -3,6 +3,21 @@
 
 # Release Notes
 
+## v3.1.0
+
+### Fees
+
+All transactions, except oracle messages, are required to pay gas. We implemented a consensus controlled `protocol_min_gas_price = 0.05uumee`. All **validators must** set their `minimum-gas-prices` settings in `app.yml` to a value at least `0.05uumee` (otherwise the node won't start). Transactions with gas price smaller then `protocol_min_gas_price` will fail during the DeliverTx (transaction execution) phase. We recommend to use `0.05uumee` because this will be the default in Kepler.
+Oracle transactions are free only if they are composed from the prevote and vote messages and have gas limit <= 140'000 gas.
+
+### Gravity Bridge
+
+This is the second and the last step for enabling Gravity Bridge.
+We enable all messages and slashing. All validators must run Peggo in a normal way.
+
+TODO: make sure the tag is correct:
+See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/module/v1.5.3-umee-2/module/RELEASE_NOTES.md) Release Notes.
+
 ## v3.0.0
 
 v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced our **lending** and **oracle** functionality.
@@ -22,7 +37,6 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - [SIGN_MODE_DIRECT_AUX](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
   - transaction prioritization
 - IBC v5.0
-
 
 #### x/leverage settings
 
