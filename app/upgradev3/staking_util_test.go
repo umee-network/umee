@@ -9,9 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-var (
-	_ StakingKeeper = &MockStakingKeeper{}
-)
+var _ StakingKeeper = &MockStakingKeeper{}
 
 // MockStakingKeeper imlements the StakingKeeper interface.
 type MockStakingKeeper struct {
@@ -98,9 +96,9 @@ func GenerateRandomTestCase() ([]sdk.ValAddress, MockStakingKeeper) {
 	return valAddrs, stakingKeeper
 }
 
-func NewMockStakingKeeper(validatros []types.Validator) MockStakingKeeper {
+func NewMockStakingKeeper(validators []types.Validator) MockStakingKeeper {
 	return MockStakingKeeper{
-		validators: validatros,
+		validators: validators,
 		params:     types.DefaultParams(),
 	}
 }

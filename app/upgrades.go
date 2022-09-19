@@ -54,7 +54,10 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
 					UpgradeV3_0Plan)
 			}
-			err = upgradev3.SetMinimumCommissionRateToValidatros(ctx, app.StakingKeeper, minCommissionRate)
+
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
+				"name", UpgradeV3_0Plan)
+			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate for validators",
