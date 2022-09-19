@@ -38,6 +38,9 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
 			}
 
+			ctx.Logger().Info("Running IBC migrations")
+			setupIBCUpdate(ctx, &app, fromVM)
+
 			ctx.Logger().Info("Running module migrations")
 			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
 			if err != nil {
