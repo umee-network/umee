@@ -104,7 +104,7 @@ perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|
 perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $nodeCfg
 perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $nodeCfg
 perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $nodeCfg
-perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $nodeCfg
+perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "1s"|g' $nodeCfg
 perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "0.05uumee"|g' $nodeApp
 
 nodeLogPath=$hdir.umeed-main.log
@@ -142,8 +142,8 @@ $UMEED_BIN_MAINNET q gov params -o json
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID NODE_HOME=$nodeHome LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
-echo "Sleep for 180"
-sleep 180
+echo "Sleep for 50s"
+sleep 50
 
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
 echo
