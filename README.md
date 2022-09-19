@@ -30,6 +30,7 @@ Umee will allow a multitude of decentralized debt products.
   - [Public](#public)
   - [Private](#private)
 - [Install](#install)
+  - [Swagger](#swagger)
 
 ## Releases
 
@@ -42,7 +43,7 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 |    v0.8.x    |    ✗    |      ✓       |  v0.45.x   | v2.0.x | v0.2.x |    v0.1.x    |                            |
 |    v1.x.x    |    ✓    |      ✗       |  v0.45.x   | v2.0.x | v0.2.x |     N/A      | umee/v1 module/v1.4.x-umee |
 |    v2.x.x    |    ✗    |      ✓       |  v0.45.x   | v2.3.x | v0.2.x |    v0.2.x    |   umee/v2 module/v1.4.x    |
-|    v3.x.x    |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.0.x |    v0.3.x    | umee/v3 module/v1.5.x-umee |
+|    v3.x.x    |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.0.x |    v1.0.x    | umee/v3 module/v1.5.x-umee |
 
 ## Active Networks
 
