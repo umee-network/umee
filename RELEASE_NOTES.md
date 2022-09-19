@@ -45,7 +45,6 @@ Each validator must run:
 
 - Peggo (Gravity Bridge Orchestrator).
 - [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder).
-- update `minimum-gas-prices` setting in `app.yml`. See [Fees](#fees) section above.
 
 Instructions: [umeeversity/validator](https://umeeversity.umee.cc/validators/mainnet-validator.html)
 
