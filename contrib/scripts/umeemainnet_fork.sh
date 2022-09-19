@@ -120,18 +120,13 @@ echo
 echo "Logs:"
 echo "  * tail -f $nodeLogPath"
 
-echo Wait for the node to load the genesis state and start to produce blocks D:
+echo Wait for the node to load the genesis state and start to produce blocks
 sleep $SEC_AWAIT_NODE_START
 
-# Any block number to be confirmed
-WAIT_UNTIL_HEIGHT=1000
-
-CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
-echo "Finish wait_until_block"
 
 CURRENT_BLOCK_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT get_block_current_height)
 
-echo "Current Block: $CURRENT_BLOCK_HEIGHT >= $WAIT_UNTIL_HEIGHT"
+echo "Current Block: $CURRENT_BLOCK_HEIGHT"
 
 # we should produce at least 20 blocks with the new version
 ((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+20))
@@ -142,8 +137,8 @@ $UMEED_BIN_MAINNET q gov params -o json
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID NODE_HOME=$nodeHome LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
-echo "Sleep for 50s"
-sleep 50
+echo "Sleep for 80s"
+sleep 80
 
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
 echo
