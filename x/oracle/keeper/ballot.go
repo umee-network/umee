@@ -40,7 +40,7 @@ func (k Keeper) OrganizeBallotByDenom(
 
 	// sort created ballots
 	for denom, ballot := range votes {
-		sort.Sort(ballot)
+		sort.Sort(ballot) // is this the danger zone?
 		votes[denom] = ballot
 	}
 	return types.BallotMapToSlice(votes)
