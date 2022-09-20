@@ -5,14 +5,13 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v3/util/genmap"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func voteTargetsWithUmee(voteTargets []string) []string {
-	for i := range voteTargets {
-		if voteTargets[i] == types.UmeeDenom {
-			return voteTargets
-		}
+	if genmap.Contains(types.UmeeDenom, voteTargets) {
+		return voteTargets
 	}
 	rewardDenoms := make([]string, len(voteTargets)+1)
 	rewardDenoms[0] = types.UmeeDenom
