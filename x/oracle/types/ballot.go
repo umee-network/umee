@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,14 +56,12 @@ func (pb ExchangeRateBallot) WeightedMedian() (sdk.Dec, error) {
 	if !sort.IsSorted(pb) {
 		return sdk.ZeroDec(), ErrBallotNotSorted
 	}
-	totalPower := pb.Power()
 
 	if pb.Len() > 0 {
+		totalPower := pb.Power()
 		var pivot int64
 		for _, v := range pb {
-			votePower := v.Power
-
-			pivot += votePower
+			pivot += v.Power
 			if pivot >= (totalPower / 2) {
 				return v.ExchangeRate, nil
 			}
@@ -148,19 +147,19 @@ func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 
 // Claim is an interface that directs its rewards to an attached bank account.
 type Claim struct {
-	Power     int64
-	Weight    int64
-	WinCount  int64
-	Recipient sdk.ValAddress
+	Power       int64
+	Weight      int64
+	TokensVoted int64
+	Validator   sdk.ValAddress
 }
 
 // NewClaim generates a Claim instance.
-func NewClaim(power, weight, winCount int64, recipient sdk.ValAddress) Claim {
+func NewClaim(power, weight, winCount int64, v sdk.ValAddress) Claim {
 	return Claim{
-		Power:     power,
-		Weight:    weight,
-		WinCount:  winCount,
-		Recipient: recipient,
+		Power:       power,
+		Weight:      weight,
+		TokensVoted: winCount,
+		Validator:   v,
 	}
 }
 
@@ -169,16 +168,11 @@ func ClaimMapToSlice(claims map[string]Claim) []Claim {
 	c := make([]Claim, len(claims))
 	i := 0
 	for _, claim := range claims {
-		c[i] = Claim{
-			Power:     claim.Power,
-			Weight:    claim.Weight,
-			WinCount:  claim.WinCount,
-			Recipient: claim.Recipient,
-		}
+		c[i] = claim // makes copy
 		i++
 	}
 	sort.Slice(c, func(i, j int) bool {
-		return c[i].Recipient.String() < c[j].Recipient.String()
+		return bytes.Compare(c[i].Validator, c[j].Validator) < 0
 	})
 	return c
 }

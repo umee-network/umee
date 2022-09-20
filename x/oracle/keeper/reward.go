@@ -36,7 +36,7 @@ func (k Keeper) RewardBallotWinners(
 		ballotPowerSum += winner.Weight
 	}
 
-	// return if the ballot is empty
+	// early return - ballot was empty.
 	if ballotPowerSum == 0 {
 		return
 	}
@@ -62,7 +62,7 @@ func (k Keeper) RewardBallotWinners(
 	var distributedReward sdk.Coins
 
 	for _, winner := range ballotWinners {
-		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
+		receiverVal := k.StakingKeeper.Validator(ctx, winner.Validator)
 		// in case absence of the validator, we just skip distribution
 		if receiverVal == nil {
 			continue

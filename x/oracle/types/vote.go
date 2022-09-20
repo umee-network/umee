@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -16,8 +17,8 @@ func NewAggregateExchangeRatePrevote(
 	submitBlock uint64,
 ) AggregateExchangeRatePrevote {
 	return AggregateExchangeRatePrevote{
-		Hash:        hash.String(),
-		Voter:       voter.String(),
+		Hash:        hash.String(),  // we could store bytes here!
+		Voter:       voter.String(), // we could store bytes here!
 		SubmitBlock: submitBlock,
 	}
 }
@@ -34,7 +35,7 @@ func NewAggregateExchangeRateVote(
 ) AggregateExchangeRateVote {
 	return AggregateExchangeRateVote{
 		ExchangeRateTuples: exchangeRateTuples,
-		Voter:              voter.String(),
+		Voter:              voter.String(), // we could use bytes here!
 	}
 }
 
@@ -76,7 +77,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 	tupleStrs := strings.Split(tuplesStr, ",")
 	tuples := make(ExchangeRateTuples, len(tupleStrs))
 
-	duplicateCheckMap := make(map[string]bool)
+	duplicateCheckMap := make(map[string]struct{})
 	for i, tupleStr := range tupleStrs {
 		denomAmountStr := strings.Split(tupleStr, ":")
 		if len(denomAmountStr) != 2 {
@@ -92,17 +93,15 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 		}
 
 		denom := strings.ToUpper(denomAmountStr[0])
-
 		tuples[i] = ExchangeRateTuple{
 			Denom:        denom,
 			ExchangeRate: decCoin,
 		}
 
 		if _, ok := duplicateCheckMap[denom]; ok {
-			return nil, fmt.Errorf("duplicated denom %s", denom)
+			return nil, sdkerrors.ErrInvalidCoins.Wrapf("duplicated denom %s", denom)
 		}
-
-		duplicateCheckMap[denom] = true
+		duplicateCheckMap[denom] = struct{}{}
 	}
 
 	return tuples, nil

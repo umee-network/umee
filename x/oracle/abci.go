@@ -63,12 +63,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
 			// Skip valid voters
-			if int(claim.WinCount) == voteTargetsLen {
+			// in MsgAggregateExchangeRateVote we filter tokens from the AcceptList.
+			if int(claim.TokensVoted) == voteTargetsLen {
 				continue
 			}
 
 			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
+			k.SetMissCounter(ctx, claim.Validator, k.GetMissCounter(ctx, claim.Validator)+1)
 		}
 
 		// Distribute rewards to ballot winners
@@ -81,7 +82,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		)
 
 		// Clear the ballot
-		k.ClearBallots(ctx, params.VotePeriod)
+		k.ClearPrevotes(ctx, params.VotePeriod)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
@@ -126,7 +127,7 @@ func Tally(
 			claim := validatorClaimMap[key]
 
 			claim.Weight += tallyVote.Power
-			claim.WinCount++
+			claim.TokensVoted++
 			validatorClaimMap[key] = claim
 		}
 	}
