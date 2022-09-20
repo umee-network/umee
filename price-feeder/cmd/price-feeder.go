@@ -14,6 +14,7 @@ import (
 
 	input "github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -193,8 +194,9 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 func getKeyringPassword() (string, error) {
 	reader := bufio.NewReader(os.Stdin)
 
+	backend := viper.Get("keyring.backend")
 	pass := os.Getenv(envVariablePass)
-	if pass == "" {
+	if pass == "" && backend != "test" {
 		return input.GetString("Enter keyring password", reader)
 	}
 	return pass, nil

@@ -208,6 +208,8 @@ func (oc OracleClient) CreateClientContext() (client.Context, error) {
 	var keyringInput io.Reader
 	if len(oc.KeyringPass) > 0 {
 		keyringInput = newPassReader(oc.KeyringPass)
+	} else if oc.KeyringBackend == "test" {
+		keyringInput = nil
 	} else {
 		keyringInput = os.Stdin
 	}
