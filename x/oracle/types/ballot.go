@@ -141,6 +141,9 @@ func BallotMapToSlice(votes map[string]ExchangeRateBallot) []BallotDenom {
 		i++
 	}
 	sort.Slice(b, func(i, j int) bool {
+		// another potential sort issue.
+		// need to see if "==" condition allows nondeterministic sorting.
+		// denoms would have to be duplicated.
 		return b[i].Denom < b[j].Denom
 	})
 	return b
