@@ -119,6 +119,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
 - [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
 - [1385](https://github.com/umee-network/umee/pull/1385) Update v1.1-v3.0 upgrade plan name
+- [1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers
 
 ### Bug Fixes
 
