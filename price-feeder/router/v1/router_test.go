@@ -14,6 +14,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
 )
 
@@ -23,6 +24,17 @@ var (
 	mockPrices = map[string]sdk.Dec{
 		"ATOM": sdk.MustNewDecFromStr("34.84"),
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
+	}
+
+	mockComputedPrices = map[provider.Name]map[string]sdk.Dec{
+		provider.ProviderBinance: {
+			"ATOM": sdk.MustNewDecFromStr("28.21000000"),
+			"UMEE": sdk.MustNewDecFromStr("1.13000000"),
+		},
+		provider.ProviderKraken: {
+			"ATOM": sdk.MustNewDecFromStr("28.268700"),
+			"UMEE": sdk.MustNewDecFromStr("1.13000000"),
+		},
 	}
 )
 
@@ -34,6 +46,14 @@ func (m mockOracle) GetLastPriceSyncTimestamp() time.Time {
 
 func (m mockOracle) GetPrices() map[string]sdk.Dec {
 	return mockPrices
+}
+
+func (m mockOracle) GetTvwapPrices() map[provider.Name]map[string]sdk.Dec {
+	return mockComputedPrices
+}
+
+func (m mockOracle) GetVwapPrices() map[provider.Name]map[string]sdk.Dec {
+	return mockComputedPrices
 }
 
 type mockMetrics struct{}
@@ -101,4 +121,32 @@ func (rts *RouterTestSuite) TestPrices() {
 	rts.Require().Equal(respBody.Prices["ATOM"], mockPrices["ATOM"])
 	rts.Require().Equal(respBody.Prices["UMEE"], mockPrices["UMEE"])
 	rts.Require().Equal(respBody.Prices["FOO"], sdk.Dec{})
+}
+
+func (rts *RouterTestSuite) TestComputedCandlePrice() {
+	req, err := http.NewRequest("GET", "/api/v1/computed_candle_prices", nil)
+	rts.Require().NoError(err)
+	response := rts.executeRequest(req)
+	rts.Require().Equal(http.StatusOK, response.Code)
+
+	var respBody v1.PricesPerProviderResponse
+	rts.Require().NoError(json.Unmarshal(response.Body.Bytes(), &respBody))
+	rts.Require().Equal(
+		respBody.Prices[provider.ProviderBinance]["ATOM"],
+		mockComputedPrices[provider.ProviderBinance]["ATOM"],
+	)
+}
+
+func (rts *RouterTestSuite) TestComputedTickerPrices() {
+	req, err := http.NewRequest("GET", "/api/v1/computed_ticker_prices", nil)
+	rts.Require().NoError(err)
+	response := rts.executeRequest(req)
+	rts.Require().Equal(http.StatusOK, response.Code)
+
+	var respBody v1.PricesPerProviderResponse
+	rts.Require().NoError(json.Unmarshal(response.Body.Bytes(), &respBody))
+	rts.Require().Equal(
+		respBody.Prices[provider.ProviderBinance]["ATOM"],
+		mockComputedPrices[provider.ProviderBinance]["ATOM"],
+	)
 }
