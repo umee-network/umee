@@ -41,7 +41,7 @@ func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic Implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
-	_, err := AggregateVoteHashFromHexString(msg.Hash)
+	_, err := AggregateVoteHashFromHex(msg.Hash)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidHash, "invalid vote hash (%s)", err)
 	}
@@ -124,7 +124,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	if len(msg.Salt) != 64 {
 		return ErrInvalidSaltLength
 	}
-	_, err = AggregateVoteHashFromHexString(msg.Salt)
+	_, err = AggregateVoteHashFromHex(msg.Salt)
 	if err != nil {
 		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must be a valid hex string")
 	}
