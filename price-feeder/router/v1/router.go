@@ -70,6 +70,16 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 		mChain.ThenFunc(r.pricesHandler()),
 	).Methods(httputil.MethodGET)
 
+	v1Router.Handle(
+		"/computed_candle_prices",
+		mChain.ThenFunc(r.candlePricesHandler()),
+	).Methods(httputil.MethodGET)
+
+	v1Router.Handle(
+		"/computed_ticker_prices",
+		mChain.ThenFunc(r.tickerPricesHandler()),
+	).Methods(httputil.MethodGET)
+
 	if r.cfg.Telemetry.Enabled {
 		v1Router.Handle(
 			"/metrics",
@@ -94,6 +104,27 @@ func (r *Router) pricesHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		resp := PricesResponse{
 			Prices: r.oracle.GetPrices(),
+		}
+
+		httputil.RespondWithJSON(w, http.StatusOK, resp)
+	}
+}
+
+func (r *Router) candlePricesHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+
+		resp := PricesPerProviderResponse{
+			Prices: r.oracle.GetTvwapPrices(),
+		}
+
+		httputil.RespondWithJSON(w, http.StatusOK, resp)
+	}
+}
+
+func (r *Router) tickerPricesHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		resp := PricesPerProviderResponse{
+			Prices: r.oracle.GetVwapPrices(),
 		}
 
 		httputil.RespondWithJSON(w, http.StatusOK, resp)
