@@ -42,6 +42,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.ClearExchangeRates(ctx)
 
 		// NOTE: it filters out inactive or jailed validators
+		// ^ Does the above comment mean OrganizeBallotByDenom does the filtering, or is it already done above?
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
