@@ -5,8 +5,20 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v3/util/genmap"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
+
+// prependUmeeIfUnique pushs `uumee` denom to the front of the list, if it is not yet included.
+func prependUmeeIfUnique(voteTargets []string) []string {
+	if genmap.Contains(types.UmeeDenom, voteTargets) {
+		return voteTargets
+	}
+	rewardDenoms := make([]string, len(voteTargets)+1)
+	rewardDenoms[0] = types.UmeeDenom
+	copy(rewardDenoms[1:], voteTargets)
+	return rewardDenoms
+}
 
 // RewardBallotWinners is executed at the end of every voting period, where we
 // give out a portion of seigniorage reward(reward-weight) to the oracle voters
@@ -18,15 +30,6 @@ func (k Keeper) RewardBallotWinners(
 	voteTargets []string,
 	ballotWinners []types.Claim,
 ) {
-	rewardDenoms := make([]string, len(voteTargets)+1)
-	rewardDenoms[0] = types.UmeeDenom
-
-	i := 1
-	for _, denom := range voteTargets {
-		rewardDenoms[i] = denom
-		i++
-	}
-
 	// sum weight of the claims
 	var ballotPowerSum int64
 	for _, winner := range ballotWinners {
@@ -39,8 +42,8 @@ func (k Keeper) RewardBallotWinners(
 	}
 
 	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
-
 	var periodRewards sdk.DecCoins
+	rewardDenoms := prependUmeeIfUnique(voteTargets)
 	for _, denom := range rewardDenoms {
 		rewardPool := k.GetRewardPool(ctx, denom)
 
