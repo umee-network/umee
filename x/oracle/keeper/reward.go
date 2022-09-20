@@ -16,7 +16,7 @@ func (k Keeper) RewardBallotWinners(
 	votePeriod int64,
 	rewardDistributionWindow int64,
 	voteTargets []string,
-	ballotWinners map[string]types.Claim,
+	ballotWinners []types.Claim,
 ) {
 	rewardDenoms := make([]string, len(voteTargets)+1)
 	rewardDenoms[0] = types.UmeeDenom
@@ -57,6 +57,7 @@ func (k Keeper) RewardBallotWinners(
 
 	// distribute rewards
 	var distributedReward sdk.Coins
+
 	for _, winner := range ballotWinners {
 		receiverVal := k.StakingKeeper.Validator(ctx, winner.Recipient)
 		// in case absence of the validator, we just skip distribution
