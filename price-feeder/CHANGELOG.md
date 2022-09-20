@@ -80,7 +80,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add type ProviderName.
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 - [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
-- [1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
+- [#1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
 
 ### Features
 
