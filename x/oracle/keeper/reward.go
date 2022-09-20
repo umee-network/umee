@@ -8,6 +8,18 @@ import (
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
+func voteTargetsWithUmee(voteTargets []string) []string {
+	for i := range voteTargets {
+		if voteTargets[i] == types.UmeeDenom {
+			return voteTargets
+		}
+	}
+	rewardDenoms := make([]string, len(voteTargets)+1)
+	rewardDenoms[0] = types.UmeeDenom
+	copy(rewardDenoms[1:], voteTargets)
+	return rewardDenoms
+}
+
 // RewardBallotWinners is executed at the end of every voting period, where we
 // give out a portion of seigniorage reward(reward-weight) to the oracle voters
 // that voted correctly.
@@ -18,15 +30,6 @@ func (k Keeper) RewardBallotWinners(
 	voteTargets []string,
 	ballotWinners map[string]types.Claim,
 ) {
-	rewardDenoms := make([]string, len(voteTargets)+1)
-	rewardDenoms[0] = types.UmeeDenom
-
-	i := 1
-	for _, denom := range voteTargets {
-		rewardDenoms[i] = denom
-		i++
-	}
-
 	// sum weight of the claims
 	var ballotPowerSum int64
 	for _, winner := range ballotWinners {
@@ -39,8 +42,8 @@ func (k Keeper) RewardBallotWinners(
 	}
 
 	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
-
 	var periodRewards sdk.DecCoins
+	rewardDenoms := voteTargetsWithUmee(voteTargets)
 	for _, denom := range rewardDenoms {
 		rewardPool := k.GetRewardPool(ctx, denom)
 
