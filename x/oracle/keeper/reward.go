@@ -9,7 +9,8 @@ import (
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-func voteTargetsWithUmee(voteTargets []string) []string {
+// prependUmeeIfUnique pushs `uumee` denom to the front of the list, if it is not yet included.
+func prependUmeeIfUnique(voteTargets []string) []string {
 	if genmap.Contains(types.UmeeDenom, voteTargets) {
 		return voteTargets
 	}
@@ -42,7 +43,7 @@ func (k Keeper) RewardBallotWinners(
 
 	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
 	var periodRewards sdk.DecCoins
-	rewardDenoms := voteTargetsWithUmee(voteTargets)
+	rewardDenoms := prependUmeeIfUnique(voteTargets)
 	for _, denom := range rewardDenoms {
 		rewardPool := k.GetRewardPool(ctx, denom)
 
