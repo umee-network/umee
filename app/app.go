@@ -189,6 +189,7 @@ var (
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		ibcfeetypes.ModuleName:      nil,
 		// icatypes.ModuleName:         nil,
+
 		gravitytypes.ModuleName:  {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:   nil,
