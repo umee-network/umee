@@ -29,10 +29,17 @@ Umee will allow a multitude of decentralized debt products.
 - [Active Networks](#active-networks)
   - [Public](#public)
   - [Private](#private)
-- [Install](#install)
+- [Setup](#setup)
   - [Swagger](#swagger)
 
+Other pages:
+
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](code_of_conduct.md)
+
 ## Releases
+
+Latest [Release Notes](RELEASE_NOTES.md).
 
 See [Release procedure](CONTRIBUTING.md#release-procedure) for more information about the release model.
 
@@ -57,7 +64,9 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 - [umee-betanet-1](networks/umee-betanet-1)
 - [umee-betanet-2](networks/umee-betanet-2)
 
-## Install
+## Setup
+
+Build and installation instructions are documented at [Umeeversity](https://umeeversity.umee.cc/validators/mainnet-validator.html).
 
 To install the `umeed` binary:
 

@@ -40,6 +40,8 @@ contributing has been established:
 
 ## Coding Guidelines
 
+Follow [Code of Conduct](code_of_conduct.md).
+
 We follow the Cosmos SDK [Coding Guidelines](https://github.com/cosmos/cosmos-sdk/blob/main/CODING_GUIDELINES.md). Specifically:
 
 - API & Design SHOULD be proposed and reviewed before the main implementaion.
