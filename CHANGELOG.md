@@ -175,6 +175,22 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - Convexity upgrade!!!
 
+## [v1.1.0](https://github.com/umee-network/umee/releases/tag/v1.1.0) - 2022-09-08
+
+### State Machine Breaking
+
+- [1358](https://github.com/umee-network/umee/pull/1358/files) Disable Gravity Bridge bridge messages.
+
+### Improvements
+
+- [#1355](https://github.com/umee-network/umee/pull/1355) Update tooling to go1.19 and CI to the latest setup (based on v3).
+
+## [v1.0.4](https://github.com/umee-network/umee/releases/tag/v1.0.4) - - 2022-09-08
+
+### Improvements
+
+- [#1353](https://github.com/umee-network/umee/pull/1353) Gravity Bridge update
+
 ## [v1.0.3](https://github.com/umee-network/umee/releases/tag/v1.0.3) - 2022-02-17
 
 ### State Machine Breaking
