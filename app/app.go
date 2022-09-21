@@ -102,9 +102,9 @@ import (
 	// icahostkeeper "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/keeper"
 	// icahosttypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/types"
 	// icatypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/types"
-	ibcfee "github.com/cosmos/ibc-go/v5/modules/apps/29-fee"
-	ibcfeekeeper "github.com/cosmos/ibc-go/v5/modules/apps/29-fee/keeper"
-	ibcfeetypes "github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
+	// ibcfee "github.com/cosmos/ibc-go/v5/modules/apps/29-fee"
+	// ibcfeekeeper "github.com/cosmos/ibc-go/v5/modules/apps/29-fee/keeper"
+	// ibcfeetypes "github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
 	ibctransfer "github.com/cosmos/ibc-go/v5/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -169,7 +169,8 @@ var (
 		ibc.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
 		// ica.AppModuleBasic{},
-		ibcfee.AppModuleBasic{},
+		// ibcfee.AppModuleBasic{},
+
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
@@ -187,7 +188,7 @@ var (
 		nft.ModuleName:                 nil,
 
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-		ibcfeetypes.ModuleName:      nil,
+		// ibcfeetypes.ModuleName:      nil,
 		// icatypes.ModuleName:         nil,
 
 		gravitytypes.ModuleName:  {authtypes.Minter, authtypes.Burner},
@@ -233,7 +234,7 @@ type UmeeApp struct {
 
 	UIBCTransferKeeper uibctransferkeeper.Keeper
 	IBCKeeper          *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	IBCFeeKeeper       ibcfeekeeper.Keeper
+	// IBCFeeKeeper       ibcfeekeeper.Keeper
 	// ICAControllerKeeper icacontrollerkeeper.Keeper
 	// ICAHostKeeper       icahostkeeper.Keeper
 
@@ -294,8 +295,8 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
-		ibchost.StoreKey, ibctransfertypes.StoreKey, // icacontrollertypes.StoreKey, icahosttypes.StoreKey,
-		ibcfeetypes.StoreKey,
+		ibchost.StoreKey, ibctransfertypes.StoreKey,
+		// icacontrollertypes.StoreKey, icahosttypes.StoreKey, ibcfeetypes.StoreKey,
 		gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
 	)
@@ -482,23 +483,25 @@ func New(
 		app.ScopedIBCKeeper,
 	)
 
-	app.IBCFeeKeeper = ibcfeekeeper.NewKeeper(
-		appCodec, keys[ibcfeetypes.StoreKey], app.GetSubspace(ibcfeetypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, // may be replaced with IBC middleware
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper,
-	)
-	// app.ICAControllerKeeper = icacontrollerkeeper.NewKeeper(
-	// 	appCodec, keys[icacontrollertypes.StoreKey], app.GetSubspace(icacontrollertypes.SubModuleName),
-	// 	app.IBCFeeKeeper, // use ics29 fee as ics4Wrapper in middleware stack
-	// 	app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
-	// 	scopedICAControllerKeeper, app.MsgServiceRouter(),
-	// )
-	// app.ICAHostKeeper = icahostkeeper.NewKeeper(
-	// 	appCodec, keys[icahosttypes.StoreKey], app.GetSubspace(icahosttypes.SubModuleName),
-	// 	app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
-	// 	app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
-	// )
+	/*
+		app.IBCFeeKeeper = ibcfeekeeper.NewKeeper(
+			appCodec, keys[ibcfeetypes.StoreKey], app.GetSubspace(ibcfeetypes.ModuleName),
+			app.IBCKeeper.ChannelKeeper, // may be replaced with IBC middleware
+			app.IBCKeeper.ChannelKeeper,
+			&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper,
+		)
+		app.ICAControllerKeeper = icacontrollerkeeper.NewKeeper(
+			appCodec, keys[icacontrollertypes.StoreKey], app.GetSubspace(icacontrollertypes.SubModuleName),
+			app.IBCFeeKeeper, // use ics29 fee as ics4Wrapper in middleware stack
+			app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+			scopedICAControllerKeeper, app.MsgServiceRouter(),
+		)
+		app.ICAHostKeeper = icahostkeeper.NewKeeper(
+			appCodec, keys[icahosttypes.StoreKey], app.GetSubspace(icahosttypes.SubModuleName),
+			app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+			app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
+		)
+	*/
 
 	// Middleware Stacks
 
@@ -506,7 +509,7 @@ func New(
 	// since fee middleware will wrap the IBCKeeper for underlying application.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCFeeKeeper, // ISC4 Wrapper: fee IBC middleware
+		app.IBCKeeper.ChannelKeeper, // Use app.IBCFeeKeeper when enabled ibcfee - ISC4 middleeware
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
 	)
@@ -527,7 +530,7 @@ func New(
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(ibcTransferKeeper)
-	transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
+	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
 	transferStack = uibctransfer.NewIBCModule(
 		transferStack, app.UIBCTransferKeeper)
 
@@ -631,7 +634,7 @@ func New(
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
 		ibctransfer.NewAppModule(ibcTransferKeeper), // we can use the non-wrapped module
-		ibcfee.NewAppModule(app.IBCFeeKeeper),
+		// ibcfee.NewAppModule(app.IBCFeeKeeper),
 		// ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
@@ -655,7 +658,7 @@ func New(
 		group.ModuleName,
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
-		ibcfeetypes.ModuleName,
+		// ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
@@ -673,7 +676,7 @@ func New(
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
-		ibcfeetypes.ModuleName,
+		// ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
@@ -684,7 +687,7 @@ func New(
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
 		crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
 		authz.ModuleName,
-		ibctransfertypes.ModuleName /* icatypes.ModuleName, */, ibcfeetypes.ModuleName,
+		ibctransfertypes.ModuleName, // icatypes.ModuleName, ibcfeetypes.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 
