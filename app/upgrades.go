@@ -8,12 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-
-	// ica "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts"
-	// icacontrollertypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/controller/types"
-	// icahosttypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/types"
-	// icatypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/types"
-
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v3/app/upgradev3"
