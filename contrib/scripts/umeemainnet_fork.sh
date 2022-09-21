@@ -128,15 +128,14 @@ CURRENT_BLOCK_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT get_block
 
 echo "Current Block: $CURRENT_BLOCK_HEIGHT"
 
-# we should produce at least 20 blocks with the new version
-((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+20))
-
 echo "Get the gov params "
 $UMEED_BIN_MAINNET q gov params -o json
 
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID NODE_HOME=$nodeHome LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
-echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
+# we should produce at least 40 blocks with the new version
+((WAIT_UNTIL_HEIGHT=CURRENT_BLOCK_HEIGHT+40))
+echo "UPGRADE FINISH, going to wait to produce 40 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
 echo "Sleep for 80s"
 sleep 80
 
