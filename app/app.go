@@ -587,7 +587,6 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
 		leveragetypes.ModuleName,
-		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	)
