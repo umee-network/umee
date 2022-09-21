@@ -46,7 +46,7 @@ Each validator MUST:
 
 - Run Peggo (Gravity Bridge Orchestrator) v1.0.x.
 - Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder).
-- Update `config.toml` file by setting `mempool.version="v1"`:
+- Update `config.toml` file by setting `mempool.version="v1"`. Ideally you should do it before the upgrade time, then at the upgrade switch binaries and start with the upgraded config:
 
   ```
   [mempool]
