@@ -95,11 +95,14 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 // Failing to set the native prefix will cause a chain halt on init genesis or
 // in the firstBeginBlocker assertions.
 func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
+	// TODO: remove, it was done in v3.0.0 release
 	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
 }
 
 // setupIBCUpdate updates IBC from v2 to v5
 func setupIBCUpdate(ctx sdk.Context, app *UmeeApp, fromVM module.VersionMap) {
+	// TODO: move to other upgradesv4 directory. (or upgradesv3_1)
+
 	// manually set the ICA params
 	// the ICA module's default genesis has host and controller enabled.
 	// we want these to be enabled via gov param change.
@@ -108,14 +111,14 @@ func setupIBCUpdate(ctx sdk.Context, app *UmeeApp, fromVM module.VersionMap) {
 	// set the ICS27 consensus version so InitGenesis is not run
 	fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion()
 
-	// create ICS27 Controller submodule params, controller module not enabled.
-	controllerParams := icacontrollertypes.Params{ControllerEnabled: false}
+	//// create ICS27 Controller submodule params, controller module not enabled.
+	// controllerParams := icacontrollertypes.Params{ControllerEnabled: false}
 
-	// create ICS27 Host submodule params, host module not enabled.
-	hostParams := icahosttypes.Params{
-		HostEnabled:   false,
-		AllowMessages: []string{},
-	}
+	//// create ICS27 Host submodule params, host module not enabled.
+	// hostParams := icahosttypes.Params{
+	// 	HostEnabled:   false,
+	// 	AllowMessages: []string{},
+	// }
 
 	mod, found := app.mm.Modules[icatypes.ModuleName]
 	if !found {
