@@ -13,6 +13,8 @@ import (
 	// icacontrollertypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/controller/types"
 	// icahosttypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/host/types"
 	// icatypes "github.com/cosmos/ibc-go/v5/modules/apps/27-interchain-accounts/types"
+	ibcfeetypes "github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
+
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
@@ -78,6 +80,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				bech32ibctypes.ModuleName,
 				// icacontrollertypes.StoreKey,
 				// icahosttypes.StoreKey,
+				ibcfeetypes.ModuleName,
 
 				oracletypes.ModuleName,
 				leveragetypes.ModuleName,
@@ -98,6 +101,7 @@ func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Conte
 
 // setupIBCUpdate updates IBC from v2 to v5
 func setupIBCUpdate(ctx sdk.Context, app *UmeeApp, fromVM module.VersionMap) {
+	fromVM[ibcfeetypes.ModuleName] = app.mm.Modules[ibcfeetypes.ModuleName].ConsensusVersion()
 
 	/****
 	 * we are not including ICA module in v3, so ICA migration will be postponed for later
