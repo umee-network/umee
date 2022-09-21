@@ -44,8 +44,8 @@ See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/module/
 
 Each validator MUST:
 
-- Run Peggo (Gravity Bridge Orchestrator) v1.0.x.
-- Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder).
+- Run Peggo (Gravity Bridge Orchestrator) v1.0.x
+- Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder) v1.0.x
 - Update `config.toml` file by setting `mempool.version="v1"`. Ideally you should do it before the upgrade time, then at the upgrade switch binaries and start with the upgraded config:
 
   ```toml
