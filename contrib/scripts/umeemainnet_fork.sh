@@ -6,41 +6,25 @@
 # upgrade this fork with a software-upgrade proposal.
 
 # USAGE: ./umeemainnet_fork.sh
+set -e
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-UMEED_BIN_MAINNET_URL_TARBALL=${UMEED_BIN_MAINNET_URL_TARBALL:-"https://github.com/umee-network/umee/releases/download/v1.0.3/umeed-v1.0.3-linux-amd64.tar.gz"}
-UMEED_BIN_MAINNET=${UMEED_BIN_MAINNET:-"$CWD/umeed-releases/umeed-v1.0.3-linux-amd64/umeed"}
-
-# Checks for the umeed v1 file
-if [ ! -f "$UMEED_BIN_MAINNET" ]; then
-  echo "$UMEED_BIN_MAINNET doesn't exist"
-
-  if [ -z $UMEED_BIN_MAINNET_URL_TARBALL ]; then
-    echo You need to set the UMEED_BIN_MAINNET_URL_TARBALL variable
-    exit 1
-  fi
-
-  UMEED_RELEASES_PATH=$CWD/umeed-releases
-  mkdir -p $UMEED_RELEASES_PATH
-  wget -c $UMEED_BIN_MAINNET_URL_TARBALL -O - | tar -xz -C $UMEED_RELEASES_PATH
-
-  UMEED_BIN_MAINNET_BASENAME=$(basename $UMEED_BIN_MAINNET_URL_TARBALL .tar.gz)
-  UMEED_BIN_MAINNET=$UMEED_RELEASES_PATH/$UMEED_BIN_MAINNET_BASENAME/umeed
-fi
 
 CHAIN_ID="${CHAIN_ID:-umeemain-local-testnet}"
 FORK_DIR="${FORK_DIR:-$CWD}"
 CHAIN_DIR="${CHAIN_DIR:-$FORK_DIR/node-data}"
 LOG_LEVEL="${LOG_LEVEL:-debug}"
 BLOCK_TIME="${BLOCK_TIME:-6}"
-UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.0-v3.0"}"
-MAINNET_EXPORTED_GENESIS_URL="${MAINNET_EXPORTED_GENESIS_URL:-"https://storage.googleapis.com/umeedropzone/jul-28-umee-1-export.json.gz"}"
+UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.1-v3.0"}"
 UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
-UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/tinkered_genesis.json}"
+UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/umeed-releases/umeed-v1.1.2-linux-amd64/umeed}"
+UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key.json}"
 SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
 
 # Loads another sources
+. $CWD/download-mainnet-umeed.sh
+UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tinker-mainnet-genesis.sh
 . $CWD/blocks.sh
 
 nodeHome="$CHAIN_DIR/$CHAIN_ID"
@@ -85,26 +69,7 @@ else
 fi
 
 # Checks for the tikered genesis file
-if [ ! -f "$UMEEMAINNET_GENESIS_PATH" ]; then
-  echo "$UMEEMAINNET_GENESIS_PATH doesn't exist"
-  EXPORTED_GENESIS_UNPROCESSED=$CWD/umeemainnet.genesis.json
 
-  if [ ! -f "$EXPORTED_GENESIS_UNPROCESSED" ]; then
-
-    EXPORTED_GENESIS_UNZIPED=$CWD/umeemainnet.genesis.json.gz
-
-    if [ ! -f $EXPORTED_GENESIS_UNZIPED ]; then
-      echo "$EXPORTED_GENESIS_UNZIPED doesn't exist, we need to curl it"
-      curl $MAINNET_EXPORTED_GENESIS_URL > $EXPORTED_GENESIS_UNZIPED
-    fi
-
-    echo "$EXPORTED_GENESIS_UNPROCESSED doesn't exist, we need to unpack"
-    gunzip -k $EXPORTED_GENESIS_UNZIPED
-  fi
-
-  echo "$EXPORTED_GENESIS_UNPROCESSED exists and ready to be processed"
-  EXPORTED_GENESIS_UNPROCESSED_PATH=$EXPORTED_GENESIS_UNPROCESSED COSMOS_GENESIS_TINKERER_SCRIPT=umeemainnet-fork.py EXPORTED_GENESIS_PROCESSED_PATH=$UMEEMAINNET_GENESIS_PATH $CWD/process_genesis.sh
-fi
 
 echo Remove everything from the $CHAIN_DIR
 rm -rf $CHAIN_DIR

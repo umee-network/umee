@@ -123,6 +123,10 @@ func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdkmath.Int {
 	return sdk.ZeroInt()
 }
 
+func (k MockStakingKeeper) GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator {
+	return nil
+}
+
 func (MockStakingKeeper) ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Iterator {
 	return sdk.KVStoreReversePrefixIterator(nil, nil)
 }

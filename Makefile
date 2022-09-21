@@ -9,7 +9,8 @@ LEDGER_ENABLED ?= true
 TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
-HTTPS_GIT 		 := https://github.com/umee-network/umee.git
+HTTPS_GIT      := https://github.com/umee-network/umee.git
+LIQUIDATOR     := $(if $(LIQUIDATOR),true,false)
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -62,7 +63,8 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
+		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
@@ -79,6 +81,9 @@ build-no_cgo:
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
+
+build-liquidator:
+	LIQUIDATOR=true $(MAKE) build
 
 install: go.sum
 	@echo "--> Installing..."
@@ -108,16 +113,13 @@ clean:
 docker-build:
 	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
 
-docker-build-debug:
-	@docker build -t umeenet/umeed-e2e --build-arg IMG_TAG=debug -f umee.e2e.Dockerfile .
-
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
-.PHONY: docker-build docker-build-debug docker-push-hermes docker-push-gaia
+.PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
 ##                              Tests & Linting                              ##
@@ -191,7 +193,6 @@ test-sim-benchmark-invariants
 ##                                 Protobuf                                  ##
 ###############################################################################
 
-#DOCKER_BUF := docker run -v $(shell pwd):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc11
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.7.0
 
 containerProtoVer=v0.7
@@ -220,7 +221,7 @@ proto-format:
 
 proto-lint:
 	@echo "Linting Protobuf files"
-	@$(DOCKER_BUF) lint --error-format=json
+#	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@echo "Checking for breaking changes"

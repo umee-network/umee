@@ -3,8 +3,9 @@ module github.com/umee-network/umee/price-feeder
 go 1.19
 
 require (
+	github.com/armon/go-metrics v0.4.1
 	github.com/cosmos/cosmos-sdk v0.46.1
-	github.com/go-playground/validator/v10 v10.11.0
+	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golangci/golangci-lint v1.49.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
@@ -16,7 +17,7 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.21
-	github.com/umee-network/umee/v3 v3.0.0
+	github.com/umee-network/umee/v3 v3.0.0-rc1
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -45,7 +46,6 @@ require (
 	github.com/Workiva/go-datastructures v1.0.53 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
-	github.com/armon/go-metrics v0.4.0 // indirect
 	github.com/ashanbrown/forbidigo v1.3.0 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/aws/aws-sdk-go v1.40.45 // indirect
@@ -73,7 +73,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.1 // indirect
-	github.com/cosmos/ibc-go/v5 v5.0.0-rc1.0.20220831174724-8045fcccbd30 // indirect
+	github.com/cosmos/ibc-go/v5 v5.0.0-rc2 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/creachadair/taskgroup v0.3.2 // indirect
@@ -90,7 +90,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1-0.20200219035652-afde56e7acac // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
-	github.com/ethereum/go-ethereum v1.10.23 // indirect
+	github.com/ethereum/go-ethereum v1.10.25 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
