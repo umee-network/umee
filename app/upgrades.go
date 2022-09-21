@@ -76,10 +76,10 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 			Added: []string{
 				group.ModuleName,
 				nft.ModuleName,
+				ibcfeetypes.ModuleName,
 				bech32ibctypes.ModuleName,
 				// icacontrollertypes.StoreKey,
 				// icahosttypes.StoreKey,
-				ibcfeetypes.ModuleName,
 
 				oracletypes.ModuleName,
 				leveragetypes.ModuleName,
