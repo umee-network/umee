@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -100,6 +102,12 @@ func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Conte
 
 // setupIBCUpdate updates IBC from v2 to v5
 func setupIBCUpdate(ctx sdk.Context, app *UmeeApp, fromVM module.VersionMap) {
+	s := ""
+	for k, v := range fromVM {
+		s = s + fmt.Sprintf(" %s%d ", k, v)
+	}
+	panic(s)
+
 	/****
 	 * we are not including ICA module in v3, so ICA migration will be postponed for later
 
