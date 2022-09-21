@@ -55,7 +55,7 @@ cid="--chain-id $CHAIN_ID"
 CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
 echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 
-UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 20))
+UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 32))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
 echo "Version of current running chain "
