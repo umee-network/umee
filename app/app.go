@@ -691,10 +691,11 @@ func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig) {
 		customante.HandlerOptions{
 			AccountKeeper:   app.AccountKeeper,
 			BankKeeper:      app.BankKeeper,
+			OracleKeeper:    app.OracleKeeper,
+			IBCKeeper:       app.IBCKeeper,
 			SignModeHandler: txConfig.SignModeHandler(),
 			FeegrantKeeper:  app.FeeGrantKeeper,
 			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
-			OracleKeeper:    app.OracleKeeper,
 		},
 	)
 	if err != nil {
