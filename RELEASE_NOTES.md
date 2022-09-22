@@ -23,7 +23,6 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - transaction prioritization
 - IBC v5.0
 
-
 #### x/leverage settings
 
 The leverage module is by default compiled without support for the `liquidation_targets` query.
@@ -35,16 +34,24 @@ To run a node capable of supporting a liquidator, enable the query at compile ti
 ### Gravity Bridge
 
 In `v1.1.x` (current mainnet) we disabled Gravity Bridge (GB) module due to Ethereum PoS migration (_the merge_).
-This release is the first step to re-enable GB. We start by enabling validators update end evidence messages (`MsgValsetConfirm` and `MsgValsetUpdatedClaim`), but the bridge messages: batch creation, claims (both ways: Ethereum->Cosmos and Cosmos->Ethereum) remain disabled.
+This release is the first step to re-enable GB. We start by enabling validators update and evidence messages (`MsgValsetConfirm` and `MsgValsetUpdatedClaim`), but the bridge messages: batch creation, claims (both ways: Ethereum->Cosmos and Cosmos->Ethereum) remain disabled.
+
+Validators are expected to run Peggo and update the valiator set in Gravity smart contract.
 
 See [Gravity Bridge](https://github.com/umee-network/Gravity-Bridge/blob/module/v1.5.3-umee-1/module/RELEASE_NOTES.md) Release Notes.
 
 ### Update notes
 
-Each validator must run:
+Each validator MUST:
 
-- Peggo (Gravity Bridge Orchestrator).
-- [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder).
+- Run Peggo (Gravity Bridge Orchestrator) v1.0.x
+- Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder) v1.0.x
+- Update `config.toml` file by setting `mempool.version="v1"`. Ideally you should do it before the upgrade time, then at the upgrade switch binaries and start with the upgraded config:
+
+  ```toml
+  [mempool]
+  version = "v1"
+  ```
 
 Instructions: [umeeversity/validator](https://umeeversity.umee.cc/validators/mainnet-validator.html)
 
