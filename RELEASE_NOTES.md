@@ -3,6 +3,8 @@
 
 # Release Notes
 
+Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
+
 ## v3.0.0
 
 v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced our **lending** and **oracle** functionality.
