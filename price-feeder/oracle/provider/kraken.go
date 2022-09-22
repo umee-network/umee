@@ -259,12 +259,8 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
-				if err != nil {
-					// if some error occurs continue to try to read the next message.
-					p.logger.Err(err).Msg("kraken: could not read message")
-					continue
-				}
-
+				// if some error occurs continue to try to read the next message.
+				p.logger.Err(err).Msg("kraken: could not read message")
 				continue
 			}
 
