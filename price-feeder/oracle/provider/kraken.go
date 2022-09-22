@@ -535,11 +535,6 @@ func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 	p.candles[candle.Symbol] = candleList
 }
 
-// ping to check websocket connection.
-func (p *KrakenProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
-}
-
 // subscribeTickers write the subscription msg to the provider.
 func (p *KrakenProvider) subscribeTickers(pairs ...string) error {
 	subsMsg := newKrakenTickerSubscriptionMsg(pairs...)
