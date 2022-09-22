@@ -16,15 +16,21 @@ CHAIN_DIR="${CHAIN_DIR:-$FORK_DIR/node-data}"
 LOG_LEVEL="${LOG_LEVEL:-debug}"
 BLOCK_TIME="${BLOCK_TIME:-6}"
 UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.1-v3.0"}"
-UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
-UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/umeed-releases/umeed-v1.1.2-linux-amd64/umeed}"
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key.json}"
 SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
+MAINNET_VERSION="${MAINNET_VERSION:-"v1.1.2"}"
 
-# Loads another sources
+UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
+# UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/umeed-releases/umeed-v1.1.2-linux-amd64/umeed}"
+
+# Loads another sources ,
+# It will download the mainnet binaries 
 . $CWD/download-mainnet-umeed.sh
+
+# It will download the mainnet genesis 
 UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tinker-mainnet-genesis.sh
+
 . $CWD/blocks.sh
 
 nodeHome="$CHAIN_DIR/$CHAIN_ID"
@@ -90,6 +96,13 @@ rm $nodeDir/$genesisConfigPath
 
 cp $UMEEMAINNET_GENESIS_PATH $nodeDir/$genesisConfigPath
 
+## Updating the gov proposal voting perioid to 30seconds 
+GOV_DEFAULT_PERIOD="30s"
+jq '.app_state.gov.voting_params.voting_period = "30s"' $nodeDir/$genesisConfigPath >  $nodeDir/new-genesis.json
+## Copy the new updated genesis
+cp $nodeDir/new-genesis.json $nodeDir/$genesisConfigPath
+
+
 perl -i -pe 's|fast_sync = true|fast_sync = false|g' $nodeCfg
 perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $nodeCfg
 perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|g' $nodeCfg
@@ -131,12 +144,13 @@ echo "Current Block: $CURRENT_BLOCK_HEIGHT >= $WAIT_UNTIL_HEIGHT"
 UMEED_V1_PID_FILE=$pid_path CHAIN_DIR=$CHAIN_DIR CHAIN_ID=$CHAIN_ID LOG_LEVEL=$LOG_LEVEL NODE_NAME=node UPGRADE_TITLE=$UPGRADE_TITLE UMEED_BIN_V1=$UMEED_BIN_MAINNET UMEED_BIN_V2=$UMEED_BIN_CURRENT $CWD/upgrade-test-single-node.sh
 
 echo "UPGRADE FINISH, going to wait to produce 20 blocks from: $CURRENT_BLOCK_HEIGHT to $WAIT_UNTIL_HEIGHT"
-sleep $SEC_AWAIT_NODE_START
+echo "Sleep for 50s, wait for upgrade binary to produce blocks for sometime"
+sleep 50
 
 CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_CURRENT wait_until_block $WAIT_UNTIL_HEIGHT
 
 echo
-echo Upgrade Process Finish
+echo "👍 Upgrade Process Finish to $UMEED_BIN_CURRENT"
 echo
 
 pid_value=$(cat $pid_path)

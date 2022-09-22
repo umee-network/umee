@@ -48,17 +48,20 @@ cid="--chain-id $CHAIN_ID"
 CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
 echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 
-UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 10))
+UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 20))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
+echo "Submitting the software-upgrade proposal..."
 $UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
-  --upgrade-height $UPGRADE_HEIGHT --upgrade-info '{"binaries":{"linux/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-amd64","linux/arm64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-arm64","darwin/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-darwin-amd64"}}' \
-  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 10000uumee
+  --upgrade-height $UPGRADE_HEIGHT \
+  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 100000uumee
 
+##
 PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
 echo proposal ID is $PROPOSAL_ID
 
-$UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes --fees 10000uumee
+echo "Voting on proposaal : $PROPOSAL_ID"
+$UMEED_BIN_V1 tx gov vote $PROPOSAL_ID yes -b block --from admin $nodeHomeFlag $cid $nodeUrlFlag $kbt  --yes --fees 100000uumee
 
 echo "..."
 echo "Finished voting on the proposal"
