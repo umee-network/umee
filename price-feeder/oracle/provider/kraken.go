@@ -457,11 +457,10 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 func (p *KrakenProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Kraken websocket %v", err)
+		p.logger.Err(err).Msg("error closing Kraken websocket")
 	}
 
 	p.logger.Debug().Msg("trying to reconnect")
-
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {

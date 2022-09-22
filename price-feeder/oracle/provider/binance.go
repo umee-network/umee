@@ -345,11 +345,10 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 func (p *BinanceProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing binance websocket %v", err)
+		p.logger.Err(err).Msg("error closing binance websocket")
 	}
 
 	p.logger.Debug().Msg("reconnecting websocket")
-
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
