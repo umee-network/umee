@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v3.0.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-09-22
+
 ### State Machine Breaking
 
 - [1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
