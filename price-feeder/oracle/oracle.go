@@ -475,6 +475,9 @@ func NewProvider(
 	case provider.ProviderMexc:
 		return provider.NewMexcProvider(ctx, logger, endpoint, providerPairs...)
 
+	case provider.ProviderCrypto:
+		return provider.NewCryptoProvider(ctx, logger, endpoint, providerPairs...)
+
 	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil
 	}
