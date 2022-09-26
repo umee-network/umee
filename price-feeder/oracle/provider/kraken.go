@@ -259,8 +259,16 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
+				if websocket.IsCloseError(err, websocket.CloseAbnormalClosure) {
+					p.logger.Err(err).Msg("WebSocket closed unexpectedly")
+					continue
+				}
+
 				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("kraken: could not read message")
+				p.logger.Err(err).Msg("could not read message")
+				if err := p.ping(); err != nil {
+					p.logger.Err(err).Msg("failed to send ping")
+				}
 				continue
 			}
 
@@ -529,6 +537,11 @@ func (p *KrakenProvider) setCandlePair(candle KrakenCandle) {
 		}
 	}
 	p.candles[candle.Symbol] = candleList
+}
+
+// ping to check websocket connection.
+func (p *KrakenProvider) ping() error {
+	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 // subscribeTickers write the subscription msg to the provider.
