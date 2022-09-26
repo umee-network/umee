@@ -47,10 +47,10 @@ type (
 		Result CryptoTickerResult `json:"result"`
 	}
 	CryptoTickerResult struct {
-		InstrumentName string             `json:"instrument_name"` // ex.: ATOM_USDT
-		Subscription   string             `json:"subscription"`    // ex.: ticker.ATOM_USDT
-		Channel		   string             `json:"channel"`         // ex.: ticker
-		Data           []CryptoTicker     `json:"data"`			   // ticker data
+		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
+		Subscription   string         `json:"subscription"`    // ex.: ticker.ATOM_USDT
+		Channel        string         `json:"channel"`         // ex.: ticker
+		Data           []CryptoTicker `json:"data"`            // ticker data
 	}
 	CryptoTicker struct {
 		HighestTrade float64 `json:"h"` // Price of the 24h highest trade
@@ -68,10 +68,10 @@ type (
 		Result CryptoCandleResult `json:"result"`
 	}
 	CryptoCandleResult struct {
-		InstrumentName string             `json:"instrument_name"` // ex.: ATOM_USDT
-		Subscription   string             `json:"subscription"`    // ex.: candlestick.1m.ATOM_USDT
-		Channel		   string             `json:"channel"`         // ex.: candlestick
-		Data           []CryptoCandle     `json:"data"`			   // candlestick data
+		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
+		Subscription   string         `json:"subscription"`    // ex.: candlestick.1m.ATOM_USDT
+		Channel        string         `json:"channel"`         // ex.: candlestick
+		Data           []CryptoCandle `json:"data"`            // candlestick data
 	}
 	CryptoCandle struct {
 		Open      float64 `json:"o"` // Price at open
@@ -130,7 +130,7 @@ func NewCryptoProvider(
 		Host:   endpoints.Websocket,
 		Path:   cryptoWSPath,
 	}
-	
+
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Crypto websocket: %w", err)
