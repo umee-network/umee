@@ -57,3 +57,8 @@ func (tk *TestKeeper) SetInterestScalar(ctx sdk.Context, denom string, scalar sd
 func (tk *TestKeeper) SetReserveAmount(ctx sdk.Context, coin sdk.Coin) error {
 	return tk.Keeper.setReserves(ctx, coin)
 }
+
+func (tk *TestKeeper) ClearCache() error {
+	tk.Keeper.tokenRegCache.Purge()
+	return nil
+}
