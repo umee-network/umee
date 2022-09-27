@@ -5,6 +5,15 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v3.0.1
+
+Fix v3.0.0 `Block.Header.LastResultsHash` problem.
+During inspections we found that `tx.GasUsage` didn't match across some nodes, causing chain halt:
+
+```
+ERR prevote step: ProposalBlock is invalid err="wrong Block.Header.LastResultsHash.  Expected EDEE3056AA71C73EC8B7089AAA5414D1298EF78ADC4D510498DB834E499E42C2, got 5ADF2EA7E0B31BA21E802071E1A9E4C4803259FE3AFFF17AAA53F93DA1D6264F" height=3216273 module=consensus round=68
+```
+
 ## v3.0.0
 
 v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced our **lending** and **oracle** functionality.
