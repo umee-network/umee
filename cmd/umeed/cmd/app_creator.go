@@ -55,13 +55,13 @@ func (a appCreator) newApp(
 	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
 	snapshotDB, err := dbm.NewDB("metadata", server.GetAppDBBackend(appOpts), snapshotDir)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create LevelDB database: %s", err))
+		panic(err)
 	}
-
 	snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create snapshot store: %s", err))
+		panic(err)
 	}
+
 	snapshotOptions := snapshottypes.NewSnapshotOptions(
 		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
 		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
