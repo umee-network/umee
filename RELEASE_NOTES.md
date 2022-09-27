@@ -3,6 +3,8 @@
 
 # Release Notes
 
+Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
+
 ## v3.0.0
 
 v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced our **lending** and **oracle** functionality.
@@ -22,6 +24,7 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - [SIGN_MODE_DIRECT_AUX](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
   - transaction prioritization
 - IBC v5.0
+- Minimum validator commission rate is set to 5% per [prop 16](https://www.mintscan.io/umee/proposals/16). Validators with smaller commission rate will be automatically updated.
 
 #### x/leverage settings
 
@@ -46,6 +49,15 @@ Each validator MUST:
 
 - Run Peggo (Gravity Bridge Orchestrator) v1.0.x
 - Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder) v1.0.x
+- Update `app.toml` file by setting `minimum-gas-prices = "0uumee"`:
+
+  ```toml
+  # The minimum gas prices a validator is willing to accept for processing a
+  # transaction. A transaction's fees must meet the minimum of any denomination
+  # specified in this config (e.g. 0.25token1;0.0001token2).
+  minimum-gas-prices = "0uumee"
+  ```
+
 - Update `config.toml` file by setting `mempool.version="v1"`. Ideally you should do it before the upgrade time, then at the upgrade switch binaries and start with the upgraded config:
 
   ```toml
