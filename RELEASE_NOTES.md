@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD013 -->
 <!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD040 -->
 
 # Release Notes
 
