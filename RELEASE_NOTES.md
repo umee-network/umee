@@ -6,6 +6,18 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v3.0.2
+
+Gravity Bridge update. In v3.0.0 we enabled Gravity Bridge, but there was an error in the way how the
+`ValsetUpdate` attestation is handled, causing the chain to halt in EndBlocker.
+The bug didn't involved any security issue and the bridge is safe.
+
+Update instructions:
+
+- stop the chain
+- swap the binary
+- restart (no additional coordination is required)
+
 ## v3.0.1
 
 Fix v3.0.0 `Block.Header.LastResultsHash` problem.

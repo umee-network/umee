@@ -1293,8 +1293,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqzi/CzI=
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-1.0.20220920174852-ca3dc9795c13 h1:pW4doyPRJOD64oxAT96enYa+ADAsFpLGlsoAlpITOC0=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-1.0.20220920174852-ca3dc9795c13/go.mod h1:UN4ehDuy5PA1YY7juvBMMulyiKv7uBMLUbTV/vONzH0=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2 h1:qb/enEHRxoPi26mZ4B5FDhaI8r7MAgaITJs35wdDXmY=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2/go.mod h1:UN4ehDuy5PA1YY7juvBMMulyiKv7uBMLUbTV/vONzH0=
 github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e h1:RCxnO359ieolUDIT1cF7Ic3ms4epgmZxzNiz1a2IBeU=
 github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e/go.mod h1:Prssr3u1p2ICcgkhtMaX55NZv7A7E2ernO6fKrpolSg=
 github.com/umee-network/cosmos-sdk v0.46.1-umee h1:htt48oCN/i0An5z8AS8ttXU3Dk7fiE/gWNvwQGGOJgs=
