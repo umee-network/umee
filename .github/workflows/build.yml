@@ -28,6 +28,7 @@ jobs:
           echo Build binaries already exists!
   
   build:
+    needs: file_existence
     runs-on: ubuntu-latest
     strategy:
       matrix:
