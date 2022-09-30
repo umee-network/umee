@@ -15,7 +15,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
         targetos: [darwin, linux]
-    name: Build Binaries fir macOs and Linux 
+    name: Build Binaries for macOs and Linux
     steps:
       - uses: actions/checkout@v3
       - name: Checking for build binaries already exists or not
