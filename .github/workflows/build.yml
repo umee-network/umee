@@ -15,33 +15,50 @@ jobs:
       matrix:
         arch: [amd64, arm64]
         targetos: [darwin, linux]
-    name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+    name: Build Binaries fir macOs and Linux 
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - name: Checking for build binaries already exists or not
+        id: check_files
+        uses: andstor/file-existence-action@v1
         with:
-          PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-      - name: Setup go
-        if: env.GIT_DIFF
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-          cache: true
-        env:
-          GOOS: ${{ matrix.targetos }}
-          GOARCH: ${{ matrix.arch }}
-      - name: Compile
-        if: env.GIT_DIFF
+          files: "cmd/umeed/umeed"
+
+      - name: Check Build binaries exists
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
-          go mod download
-          cd cmd/umeed
-          go build .
-      - uses: actions/upload-artifact@v3
-        if: env.GIT_DIFF
-        with:
-          name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
-          path: cmd/umeed/umeed
-          retention-days: 1
+          ls ./cmd/umeed
+          echo Build binaries already exists!
+
+      - name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+        # Build and upload when no binaries found
+        if: steps.check_files.outputs.files_exists != 'true'
+        steps:
+          - uses: actions/checkout@v3
+          - uses: technote-space/get-diff-action@v6.1.0
+            with:
+              PATTERNS: |
+                **/**.go
+                go.mod
+                go.sum
+          - name: Setup go
+            if: env.GIT_DIFF
+            uses: actions/setup-go@v3
+            with:
+              go-version: 1.19
+              cache: true
+            env:
+              GOOS: ${{ matrix.targetos }}
+              GOARCH: ${{ matrix.arch }}
+          - name: Compile
+            if: env.GIT_DIFF
+            run: |
+              go mod download
+              cd cmd/umeed
+              go build .
+          - uses: actions/upload-artifact@v3
+            if: env.GIT_DIFF
+            with:
+              name: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
+              path: cmd/umeed/umeed
+              retention-days: 1
