@@ -46,6 +46,18 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
+
+### Fixes
+
+- [1460](https://github.com/umee-network/umee/pull/1460) Bump Gravity Bridge.
+
+## [v3.0.1](https://github.com/umee-network/umee/releases/tag/v3.0.1) - 2022-09-28
+
+### Fixes
+
+- [1450](https://github.com/umee-network/umee/pull/1450) fix: token registry cache which caused v3.0.0 halt.
+
 ## [v3.0.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-09-22
 
 ### State Machine Breaking
