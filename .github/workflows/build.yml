@@ -9,36 +9,23 @@ on:
 
 # This workflow makes amd64 and arm64 binaries for macOS and Linux.
 jobs:
-  file_existence:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Checking for build binaries already exists or not
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "cmd/umeed/umeed"
-
-      - name: Check Build binaries exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: |
-          ls ./cmd/umeed
-          echo Build binaries already exists!
-  
   build:
-    needs: file_existence
     runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [amd64, arm64]
         targetos: [darwin, linux]
     name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
-    if: file_existence.steps.check_files.outputs.files_exists != 'true'
     steps:
       - uses: actions/checkout@v3
+      - name: Cache binaries
+        id: cache-binaries
+        uses: actions/cache@v3
+        with:
+          path: cmd/umeed/umeed
+          key: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
       - uses: technote-space/get-diff-action@v6.1.0
+        if: steps.cache-binaries.outputs.cache-hit != 'true'
         with:
           PATTERNS: |
             **/**.go
