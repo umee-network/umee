@@ -18,10 +18,11 @@ import (
 )
 
 const (
-	cryptoWSHost   = "stream.crypto.com"
-	cryptoWSPath   = "/v2/market"
-	cryptoRestHost = "https://api.crypto.com"
-	cryptoRestPath = "/v1/public/get-ticker"
+	cryptoWSHost        = "stream.crypto.com"
+	cryptoWSPath        = "/v2/market"
+	cryptoReconnectTime = time.Second * 30
+	cryptoRestHost      = "https://api.crypto.com"
+	cryptoRestPath      = "/v2/public/get-ticker"
 )
 
 var _ Provider = (*CryptoProvider)(nil)
@@ -71,43 +72,57 @@ type (
 		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
 		Subscription   string         `json:"subscription"`    // ex.: candlestick.1m.ATOM_USDT
 		Channel        string         `json:"channel"`         // ex.: candlestick
+		Interval       string         `json:"interval"`        // ex.: 1m
 		Data           []CryptoCandle `json:"data"`            // candlestick data
 	}
 	CryptoCandle struct {
-		Open      float64 `json:"o"` // Price at open
-		Close     float64 `json:"c"` // Price at close
-		High      float64 `json:"h"` // Price high during interval
-		Low       float64 `json:"l"` // Price low during interval
-		Volume    float64 `json:"v"` // Volume during interval
-		Timestamp int64   `json:"t"` // End time of candlestick (Unix timestamp)
+		InstrumentName string  `json:"i"` // ex.: ATOM_USDT
+		Open           float64 `json:"o"` // Price at open
+		Close          float64 `json:"c"` // Price at close
+		High           float64 `json:"h"` // Price high during interval
+		Low            float64 `json:"l"` // Price low during interval
+		Volume         float64 `json:"v"` // Volume during interval
+		Timestamp      int64   `json:"t"` // End time of candlestick (Unix timestamp)
 	}
 
 	CryptoSubscriptionMsg struct {
-		ID     uint16                   `json:"id"`
-		Method string                   `json:"method"` // Subscribe, Unsubscribe
+		ID     int64                    `json:"id"`
+		Method string                   `json:"method"` // subscribe, unsubscribe
 		Params CryptoSubscriptionParams `json:"params"`
-		Nonce  uint64                   `json:"nonce"`
+		Nonce  int64                    `json:"nonce"` // Current timestamp (milliseconds since the Unix epoch)
 	}
 	CryptoSubscriptionParams struct {
 		Channels []string `json:"channels"` // Channels to be subscribed ex. ticker.ATOM_USDT
 	}
 
 	CryptoPairsSummary struct {
-		ID     uint16            `json:"id"`
+		Code   int16             `json:"code"`
 		Method string            `json:"method"` // public/get-instruments
-		Code   uint16            `json:"code"`
 		Result CryptoInstruments `json:"result"`
 	}
 	CryptoInstruments struct {
-		Instruments []CryptoInstrument `json:"instruments"`
+		Data []CryptoTickerData `json:"data"`
 	}
-	CryptoInstrument struct {
-		InstrumentName       string `json:"instrument_name"`        // ex.: ATOM_USDT
-		QuoteCurrency        string `json:"quote_currency"`         // ex.: USDT
-		BaseCurrency         string `json:"base_currency"`          // ex.: ATOM
-		PriceDecimals        uint16 `json:"price_decimals"`         // Maximum decimal places for specifying price
-		QuantityDecimals     uint16 `json:"quantity_decimals"`      // Maximum decimal places for specifying quantity
-		MarginTradingEnabled bool   `json:"margin_trading_enabled"` // True or False
+	CryptoTickerData struct {
+		InstrumentName string  `json:"i"` // Instrument Name, e.g. BTC_USDT, ETH_CRO, etc.
+		BidPrice       float64 `json:"b"` // The current best bid price, null if there aren't any bids
+		AskPrice       float64 `json:"k"` // The current best ask price, null if there aren't any asks
+		LatestTrade    float64 `json:"a"` // The price of the latest trade, null if there weren't any trades
+		Timestamp      int64   `json:"t"` // Timestamp of the data
+		Volume         float64 `json:"v"` // The total 24h traded volume
+		HighestTrade   float64 `json:"h"` // Price of the 24h highest trade
+		LowestTrade    float64 `json:"l"` // Price of the 24h lowest trade, null if there weren't any trades
+		PriceChange    float64 `json:"c"` // 24-hour price change, null if there weren't any trades
+	}
+
+	CryptoHeartbeatResponse struct {
+		ID     int64  `json:"id"`
+		Method string `json:"method"` // public/heartbeat
+		Code   int16  `json:"code"`
+	}
+	CryptoHeartbeatRequest struct {
+		ID     int64  `json:"id"`
+		Method string `json:"method"` // public/respond-heartbeat
 	}
 )
 
@@ -214,16 +229,23 @@ func (p *CryptoProvider) subscribeChannels(cps ...types.CurrencyPair) error {
 
 // subscribeTickers subscribe all currency pairs into ticker channel.
 func (p *CryptoProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	channels := make([]string, len(cps))
+	pairs := make([]string, len(cps))
 
 	for i, cp := range cps {
-		channels[i] = currencyPairToCryptoPair(cp)
+		pairs[i] = currencyPairToCryptoPair(cp)
 	}
 
-	return p.subscribePairs(channels...)
+	var channels []string
+	for _, pair := range pairs {
+		channels = append(channels, "ticker."+pair)
+	}
+	subsMsg := newCryptoSubscriptionMsg(channels)
+	err := p.wsClient.WriteJSON(subsMsg)
+
+	return err
 }
 
-// subscribeCandles subscribe to the candle channel for all currency pairs.
+// subscribeCandles subscribe all currency pairs into candle channel.
 func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	pairs := make([]string, len(cps))
 
@@ -231,7 +253,14 @@ func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 		pairs[i] = currencyPairToCryptoPair(cp)
 	}
 
-	return p.subscribePairs(pairs...)
+	var channels []string
+	for _, pair := range pairs {
+		channels = append(channels, "candlestick.5m."+pair)
+	}
+	subsMsg := newCryptoSubscriptionMsg(channels)
+	err := p.wsClient.WriteJSON(subsMsg)
+
+	return err
 }
 
 // subscribedPairsToSlice returns the map of subscribed pairs as a slice.
@@ -274,21 +303,29 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 	return candles, nil
 }
 
-func (p *CryptoProvider) messageReceived(messageType int, bz []byte) {
+func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
 	if messageType != websocket.TextMessage {
 		return
 	}
 
 	var (
+		heartbeatResp CryptoHeartbeatResponse
+		//heartbeatErr  error
 		tickerResp CryptoTickerResponse
 		tickerErr  error
 		candleResp CryptoCandleResponse
 		candleErr  error
 	)
 
+	_ = json.Unmarshal(bz, &heartbeatResp)
+	if heartbeatResp.Method == "public/heartbeat" {
+		p.pong(bz, reconnectTicker)
+		return
+	}
+
 	// sometimes the message received is not a ticker or a candle response.
 	tickerErr = json.Unmarshal(bz, &tickerResp)
-	if tickerResp.Result.Channel == "tickers" {
+	if tickerResp.Result.Channel == "ticker" {
 		for _, tickerPair := range tickerResp.Result.Data {
 			p.setTickerPair(
 				tickerResp.Result.InstrumentName,
@@ -316,6 +353,37 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte) {
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
 		Msg("Error on receive message")
+}
+
+// pong return a heartbeat message when a "ping" is received and reset the
+// recconnect ticker because the connection is alive. After connected to crypto.com's
+// Websocket server, the server will send heartbeat periodically (30s interval).
+// When client receives an heartbeat message, it must respond back with the
+// public/respond-heartbeat method, using the same matching id,
+// within 5 seconds, or the connection will break.
+func (p *CryptoProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
+	reconnectTicker.Reset(cryptoReconnectTime)
+	var (
+		heartbeatResp CryptoHeartbeatResponse
+		heartbeatReq  CryptoHeartbeatRequest
+	)
+
+	if err := json.Unmarshal(bz, &heartbeatResp); err != nil {
+		p.logger.Err(err).Msg("could not unmarshal heartbeat")
+		return
+	}
+
+	heartbeatReq.ID = heartbeatResp.ID
+	heartbeatReq.Method = "public/respond-heartbeat"
+
+	if err := p.wsClient.WriteJSON(heartbeatReq); err != nil {
+		p.logger.Err(err).Msg("could not send pong message back")
+	}
+}
+
+// ping to check websocket connection
+func (p *CryptoProvider) ping() error {
+	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 func (p *CryptoProvider) setTickerPair(symbol string, tickerPair CryptoTicker) {
@@ -370,7 +438,7 @@ func (p *CryptoProvider) setCandlePair(symbol string, candlePair CryptoCandle) {
 }
 
 func (p *CryptoProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
+	reconnectTicker := time.NewTicker(cryptoReconnectTime)
 	defer reconnectTicker.Stop()
 
 	for {
@@ -380,8 +448,15 @@ func (p *CryptoProvider) handleWebSocketMsgs(ctx context.Context) {
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := p.wsClient.ReadMessage()
 			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("crypto: could not read message")
+				// If some error occurs, check if connection is alive
+				// and continue to try to read the next message.
+				p.logger.Err(err).Msg("failed to read message")
+				if err := p.ping(); err != nil {
+					p.logger.Err(err).Msg("failed to send ping")
+					if err := p.reconnect(); err != nil {
+						p.logger.Err(err).Msg("error reconnecting websocket")
+					}
+				}
 				continue
 			}
 
@@ -389,7 +464,7 @@ func (p *CryptoProvider) handleWebSocketMsgs(ctx context.Context) {
 				continue
 			}
 
-			p.messageReceived(messageType, bz)
+			p.messageReceived(messageType, bz, reconnectTicker)
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
@@ -435,13 +510,13 @@ func (p *CryptoProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 // subscribePairs write the subscription msg to the provider.
 func (p *CryptoProvider) subscribePairs(pairs ...string) error {
 	var err error
+	var channels []string
 	for _, cp := range pairs {
-		subsMsg := newCryptoSubscriptionMsg(cp)
-		err = p.wsClient.WriteJSON(subsMsg)
-		if err != nil {
-			return err
-		}
+		channels = append(channels, "ticker."+cp)
 	}
+	subsMsg := newCryptoSubscriptionMsg(channels)
+	err = p.wsClient.WriteJSON(subsMsg)
+
 	return err
 }
 
@@ -459,8 +534,8 @@ func (p *CryptoProvider) GetAvailablePairs() (map[string]struct{}, error) {
 		return nil, err
 	}
 
-	availablePairs := make(map[string]struct{}, len(pairsSummary.Result.Instruments))
-	for _, pairName := range pairsSummary.Result.Instruments {
+	availablePairs := make(map[string]struct{}, len(pairsSummary.Result.Data))
+	for _, pairName := range pairsSummary.Result.Data {
 		availablePairs[strings.ToUpper(pairName.InstrumentName)] = struct{}{}
 	}
 
@@ -474,13 +549,13 @@ func currencyPairToCryptoPair(cp types.CurrencyPair) string {
 }
 
 // newCryptoSubscriptionMsg returns a new subscription Msg.
-func newCryptoSubscriptionMsg(channels ...string) CryptoSubscriptionMsg {
+func newCryptoSubscriptionMsg(channels []string) CryptoSubscriptionMsg {
 	return CryptoSubscriptionMsg{
-		ID:     1,
-		Method: "Subscribe",
+		ID:     time.Now().Unix(),
+		Method: "subscribe",
 		Params: CryptoSubscriptionParams{
 			Channels: channels,
 		},
-		Nonce: 1,
+		Nonce: time.Now().UnixMilli(),
 	}
 }
