@@ -1,0 +1,36 @@
+package oracle
+
+import (
+	"sync"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
+)
+
+type (
+	PricesByProvider map[provider.Name]map[string]sdk.Dec
+
+	PricesWithMutex struct {
+		prices PricesByProvider
+		mx     sync.RWMutex
+	}
+)
+
+func (pwm *PricesWithMutex) GetPricesClone() PricesByProvider {
+	pwm.mx.RLock()
+	defer pwm.mx.RUnlock()
+	return pwm.clonePrices()
+}
+
+func (pwm *PricesWithMutex) clonePrices() PricesByProvider {
+	clone := make(PricesByProvider, len(pwm.prices))
+	for provider, prices := range pwm.prices {
+		pricesClone := make(map[string]sdk.Dec, len(prices))
+		for denom, price := range prices {
+			pricesClone[denom] = price
+		}
+		clone[provider] = pricesClone
+	}
+	return clone
+}

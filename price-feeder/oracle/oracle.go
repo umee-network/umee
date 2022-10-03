@@ -71,13 +71,8 @@ type Oracle struct {
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
 
-	tvwapsByProvider PricesByProvider
-	vwapsByProvider  PricesByProvider
-}
-
-type PricesByProvider struct {
-	prices map[provider.Name]map[string]sdk.Dec
-	mx     sync.RWMutex
+	tvwapsByProvider PricesWithMutex
+	vwapsByProvider  PricesWithMutex
 }
 
 func New(
@@ -171,18 +166,14 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
-// GetTvwapPrices returns the tvwapsByProvider map using a read lock
-func (o *Oracle) GetTvwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.tvwapsByProvider.mx.RLock()
-	defer o.tvwapsByProvider.mx.RUnlock()
-	return o.tvwapsByProvider.prices
+// GetTvwapPrices returns a copy of the tvwapsByProvider map
+func (o *Oracle) GetTvwapPrices() PricesByProvider {
+	return o.tvwapsByProvider.GetPricesClone()
 }
 
 // GetVwapPrices returns the vwapsByProvider map using a read lock
-func (o *Oracle) GetVwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.vwapsByProvider.mx.RLock()
-	defer o.vwapsByProvider.mx.RUnlock()
-	return o.vwapsByProvider.prices
+func (o *Oracle) GetVwapPrices() PricesByProvider {
+	return o.vwapsByProvider.GetPricesClone()
 }
 
 // SetPrices retrieves all the prices and candles from our set of providers as
