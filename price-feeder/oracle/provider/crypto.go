@@ -550,9 +550,9 @@ func currencyPairToCryptoPair(cp types.CurrencyPair) string {
 }
 
 // newCryptoSubscriptionMsg returns a new subscription Msg.
-func newCryptoSubscriptionMsg(ID int64, channels []string) CryptoSubscriptionMsg {
+func newCryptoSubscriptionMsg(id int64, channels []string) CryptoSubscriptionMsg {
 	return CryptoSubscriptionMsg{
-		ID:     ID,
+		ID:     id,
 		Method: "subscribe",
 		Params: CryptoSubscriptionParams{
 			Channels: channels,
