@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bugs
+
+- [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
@@ -76,6 +80,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add type ProviderName.
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 - [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
+- [#1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
 
 ### Features
 

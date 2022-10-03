@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	minGasPrice     = appparams.MinMinGasPrice.String()
+	minGasPrice     = appparams.ProtocolMinGasPrice.String()
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 )

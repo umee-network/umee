@@ -50,7 +50,7 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		}
 	} else {
 		// in deliverTx = use protocol min gas price
-		minGasPrices = sdk.DecCoins{appparams.MinMinGasPrice}
+		minGasPrices = sdk.DecCoins{appparams.ProtocolMinGasPrice}
 	}
 
 	requiredFees := sdk.NewCoins()
@@ -109,9 +109,9 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 // AssertMinProtocolGasPrice returns an error if the provided gasPrices are lower then
 // the required by protocol.
 func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
-	if gasPrices.AmountOf(appparams.MinMinGasPrice.Denom).LT(appparams.MinMinGasPrice.Amount) {
+	if gasPrices.AmountOf(appparams.ProtocolMinGasPrice.Denom).LT(appparams.ProtocolMinGasPrice.Amount) {
 		return sdkerrors.ErrInsufficientFee.Wrapf(
-			"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
+			"gas price too small; got: %v required min: %v", gasPrices, appparams.ProtocolMinGasPrice)
 	}
 
 	return nil

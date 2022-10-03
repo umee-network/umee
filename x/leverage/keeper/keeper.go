@@ -9,7 +9,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -22,8 +21,6 @@ type Keeper struct {
 	hooks        types.Hooks
 	bankKeeper   types.BankKeeper
 	oracleKeeper types.OracleKeeper
-
-	tokenRegCache simplelru.LRUCache
 }
 
 func NewKeeper(
@@ -38,19 +35,12 @@ func NewKeeper(
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 
-	const tokenRegCacheSize = 100
-	tokenRegCache, err := simplelru.NewLRU(tokenRegCacheSize, nil)
-	if err != nil {
-		return Keeper{}, err
-	}
-
 	return Keeper{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		paramSpace:    paramSpace,
-		bankKeeper:    bk,
-		oracleKeeper:  ok,
-		tokenRegCache: tokenRegCache,
+		cdc:          cdc,
+		storeKey:     storeKey,
+		paramSpace:   paramSpace,
+		bankKeeper:   bk,
+		oracleKeeper: ok,
 	}, nil
 }
 
