@@ -798,7 +798,7 @@ func (ots *OracleTestSuite) TestGetComputedPricesEmptyTvwap() {
 	for name, tc := range testCases {
 		tc := tc
 
-		ots.T().Run(name, func(t *testing.T) {
+		ots.Run(name, func() {
 			_, err := ots.oracle.GetComputedPrices(
 				tc.candles,
 				tc.prices,
