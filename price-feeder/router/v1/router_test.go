@@ -14,6 +14,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/umee-network/umee/price-feeder/config"
+	"github.com/umee-network/umee/price-feeder/oracle"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 	v1 "github.com/umee-network/umee/price-feeder/router/v1"
 )
@@ -48,11 +49,11 @@ func (m mockOracle) GetPrices() map[string]sdk.Dec {
 	return mockPrices
 }
 
-func (m mockOracle) GetTvwapPrices() map[provider.Name]map[string]sdk.Dec {
+func (m mockOracle) GetTvwapPrices() oracle.PricesByProvider {
 	return mockComputedPrices
 }
 
-func (m mockOracle) GetVwapPrices() map[provider.Name]map[string]sdk.Dec {
+func (m mockOracle) GetVwapPrices() oracle.PricesByProvider {
 	return mockComputedPrices
 }
 
