@@ -71,7 +71,7 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 	).Methods(httputil.MethodGET)
 
 	v1Router.Handle(
-		"/computed_candle_prices",
+		"/prices/providers/tvwap",
 		mChain.ThenFunc(r.candlePricesHandler()),
 	).Methods(httputil.MethodGET)
 
