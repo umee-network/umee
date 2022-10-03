@@ -18,11 +18,14 @@ import (
 )
 
 const (
-	cryptoWSHost        = "stream.crypto.com"
-	cryptoWSPath        = "/v2/market"
-	cryptoReconnectTime = time.Second * 30
-	cryptoRestHost      = "https://api.crypto.com"
-	cryptoRestPath      = "/v2/public/get-ticker"
+	cryptoWSHost          = "stream.crypto.com"
+	cryptoWSPath          = "/v2/market"
+	cryptoReconnectTime   = time.Second * 30
+	cryptoRestHost        = "https://api.crypto.com"
+	cryptoRestPath        = "/v2/public/get-ticker"
+	cryptoTickerChannel   = "ticker"
+	cryptoCandleChannel   = "candlestick"
+	cryptoHeartbeatMethod = "public/heartbeat"
 )
 
 var _ Provider = (*CryptoProvider)(nil)
@@ -70,7 +73,7 @@ type (
 	}
 	CryptoCandleResult struct {
 		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
-		Subscription   string         `json:"subscription"`    // ex.: candlestick.1m.ATOM_USDT
+		Subscription   string         `json:"subscription"`    // ex.: candlestick.5m.ATOM_USDT
 		Channel        string         `json:"channel"`         // ex.: candlestick
 		Interval       string         `json:"interval"`        // ex.: 1m
 		Data           []CryptoCandle `json:"data"`            // candlestick data
@@ -235,7 +238,7 @@ func (p *CryptoProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 		pairs[i] = currencyPairToCryptoPair(cp)
 	}
 
-	var channels []string
+	channels := []string{}
 	for _, pair := range pairs {
 		channels = append(channels, "ticker."+pair)
 	}
@@ -253,7 +256,7 @@ func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 		pairs[i] = currencyPairToCryptoPair(cp)
 	}
 
-	var channels []string
+	channels := []string{}
 	for _, pair := range pairs {
 		channels = append(channels, "candlestick.5m."+pair)
 	}
@@ -310,22 +313,21 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 
 	var (
 		heartbeatResp CryptoHeartbeatResponse
-		//heartbeatErr  error
 		tickerResp CryptoTickerResponse
 		tickerErr  error
 		candleResp CryptoCandleResponse
 		candleErr  error
 	)
 
+	// sometimes the message received is not a ticker or a candle response.
 	_ = json.Unmarshal(bz, &heartbeatResp)
-	if heartbeatResp.Method == "public/heartbeat" {
+	if heartbeatResp.Method == cryptoHeartbeatMethod {
 		p.pong(bz, reconnectTicker)
 		return
 	}
 
-	// sometimes the message received is not a ticker or a candle response.
 	tickerErr = json.Unmarshal(bz, &tickerResp)
-	if tickerResp.Result.Channel == "ticker" {
+	if tickerResp.Result.Channel == cryptoTickerChannel {
 		for _, tickerPair := range tickerResp.Result.Data {
 			p.setTickerPair(
 				tickerResp.Result.InstrumentName,
@@ -337,7 +339,7 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	}
 
 	candleErr = json.Unmarshal(bz, &candleResp)
-	if candleResp.Result.Channel == "candlestick" {
+	if candleResp.Result.Channel == cryptoCandleChannel {
 		for _, candlePair := range candleResp.Result.Data {
 			p.setCandlePair(
 				candleResp.Result.InstrumentName,
@@ -505,19 +507,6 @@ func (p *CryptoProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-// subscribePairs write the subscription msg to the provider.
-func (p *CryptoProvider) subscribePairs(pairs ...string) error {
-	var err error
-	var channels []string
-	for _, cp := range pairs {
-		channels = append(channels, "ticker."+cp)
-	}
-	subsMsg := newCryptoSubscriptionMsg(channels)
-	err = p.wsClient.WriteJSON(subsMsg)
-
-	return err
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
