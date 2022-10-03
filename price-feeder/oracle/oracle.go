@@ -312,9 +312,8 @@ func (o *Oracle) GetComputedPrices(
 		return nil, err
 	}
 
-	o.tvwapsByProvider.mx.Lock()
-	o.tvwapsByProvider.prices, _ = ComputeTvwapsByProvider(filteredCandles)
-	o.tvwapsByProvider.mx.Unlock()
+	computedPrices, _ := ComputeTvwapsByProvider(filteredCandles)
+	o.tvwapsByProvider.SetPrices(computedPrices)
 
 	// attempt to use candles for TVWAP calculations
 	tvwapPrices, err := ComputeTVWAP(filteredCandles)
@@ -344,9 +343,7 @@ func (o *Oracle) GetComputedPrices(
 			return nil, err
 		}
 
-		o.vwapsByProvider.mx.Lock()
-		o.vwapsByProvider.prices = ComputeVwapsByProvider(filteredProviderPrices)
-		o.vwapsByProvider.mx.Unlock()
+		o.vwapsByProvider.SetPrices(ComputeVwapsByProvider(filteredProviderPrices))
 
 		vwapPrices := ComputeVWAP(filteredProviderPrices)
 

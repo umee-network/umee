@@ -17,6 +17,13 @@ type (
 	}
 )
 
+func (pwm *PricesWithMutex) SetPrices(prices PricesByProvider) {
+	pwm.mx.Lock()
+	defer pwm.mx.Unlock()
+
+	pwm.prices = prices
+}
+
 func (pwm *PricesWithMutex) GetPricesClone() PricesByProvider {
 	pwm.mx.RLock()
 	defer pwm.mx.RUnlock()
