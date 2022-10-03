@@ -810,6 +810,7 @@ func (app *UmeeApp) SimulationManager() *module.SimulationManager {
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
+//
 // API server.
 func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
