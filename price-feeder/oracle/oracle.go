@@ -171,18 +171,21 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	return prices
 }
 
+// GetPrices returns the prices map using a read lock
+func (pbp *PricesByProvider) GetPrices() map[provider.Name]map[string]sdk.Dec {
+	pbp.mx.RLock()
+	defer pbp.mx.RUnlock()
+	return pbp.prices
+}
+
 // GetTvwapPrices returns the tvwapsByProvider map using a read lock
 func (o *Oracle) GetTvwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.tvwapsByProvider.mx.RLock()
-	defer o.tvwapsByProvider.mx.RUnlock()
-	return o.tvwapsByProvider.prices
+	return o.tvwapsByProvider.GetPrices()
 }
 
 // GetVwapPrices returns the vwapsByProvider map using a read lock
 func (o *Oracle) GetVwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.vwapsByProvider.mx.RLock()
-	defer o.vwapsByProvider.mx.RUnlock()
-	return o.vwapsByProvider.prices
+	return o.vwapsByProvider.GetPrices()
 }
 
 // SetPrices retrieves all the prices and candles from our set of providers as
