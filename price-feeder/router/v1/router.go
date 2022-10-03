@@ -76,7 +76,7 @@ func (r *Router) RegisterRoutes(rtr *mux.Router, prefix string) {
 	).Methods(httputil.MethodGET)
 
 	v1Router.Handle(
-		"/computed_ticker_prices",
+		"/prices/providers/vwap",
 		mChain.ThenFunc(r.tickerPricesHandler()),
 	).Methods(httputil.MethodGET)
 
