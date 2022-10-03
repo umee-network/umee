@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
@@ -313,10 +314,10 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 
 	var (
 		heartbeatResp CryptoHeartbeatResponse
-		tickerResp CryptoTickerResponse
-		tickerErr  error
-		candleResp CryptoCandleResponse
-		candleErr  error
+		tickerResp    CryptoTickerResponse
+		tickerErr     error
+		candleResp    CryptoCandleResponse
+		candleErr     error
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
@@ -540,7 +541,7 @@ func currencyPairToCryptoPair(cp types.CurrencyPair) string {
 // newCryptoSubscriptionMsg returns a new subscription Msg.
 func newCryptoSubscriptionMsg(channels []string) CryptoSubscriptionMsg {
 	return CryptoSubscriptionMsg{
-		ID:     time.Now().Unix(),
+		ID:     rand.Int63(),
 		Method: "subscribe",
 		Params: CryptoSubscriptionParams{
 			Channels: channels,
