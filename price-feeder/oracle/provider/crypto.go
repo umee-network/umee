@@ -49,45 +49,30 @@ type (
 	}
 
 	CryptoTickerResponse struct {
-		Method string             `json:"method"` // ex.: subscribe
 		Result CryptoTickerResult `json:"result"`
 	}
 	CryptoTickerResult struct {
 		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
-		Subscription   string         `json:"subscription"`    // ex.: ticker.ATOM_USDT
 		Channel        string         `json:"channel"`         // ex.: ticker
 		Data           []CryptoTicker `json:"data"`            // ticker data
 	}
 	CryptoTicker struct {
-		HighestTrade float64 `json:"h"` // Price of the 24h highest trade
-		Volume       float64 `json:"v"` // The total 24h traded volume
-		LatestTrade  float64 `json:"a"` // The price of the latest trade, null if there weren't any trades
-		LowestTrade  float64 `json:"l"` // Price of the 24h lowest trade, null if there weren't any trades
-		BidPrice     float64 `json:"b"` // The current best bid price, null if there aren't any bids
-		AskPrice     float64 `json:"k"` // The current best ask price, null if there aren't any asks
-		PriceChange  float64 `json:"c"` // 24-hour price change, null if there weren't any trades
-		Timestamp    int64   `json:"t"` // Timestamp of the data
+		Volume      float64 `json:"v"` // The total 24h traded volume
+		LatestTrade float64 `json:"a"` // The price of the latest trade, null if there weren't any trades
 	}
 
 	CryptoCandleResponse struct {
-		Method string             `json:"method"` // ex.: subscribe
 		Result CryptoCandleResult `json:"result"`
 	}
 	CryptoCandleResult struct {
 		InstrumentName string         `json:"instrument_name"` // ex.: ATOM_USDT
-		Subscription   string         `json:"subscription"`    // ex.: candlestick.5m.ATOM_USDT
 		Channel        string         `json:"channel"`         // ex.: candlestick
-		Interval       string         `json:"interval"`        // ex.: 1m
 		Data           []CryptoCandle `json:"data"`            // candlestick data
 	}
 	CryptoCandle struct {
-		InstrumentName string  `json:"i"` // ex.: ATOM_USDT
-		Open           float64 `json:"o"` // Price at open
-		Close          float64 `json:"c"` // Price at close
-		High           float64 `json:"h"` // Price high during interval
-		Low            float64 `json:"l"` // Price low during interval
-		Volume         float64 `json:"v"` // Volume during interval
-		Timestamp      int64   `json:"t"` // End time of candlestick (Unix timestamp)
+		Close     float64 `json:"c"` // Price at close
+		Volume    float64 `json:"v"` // Volume during interval
+		Timestamp int64   `json:"t"` // End time of candlestick (Unix timestamp)
 	}
 
 	CryptoSubscriptionMsg struct {
@@ -101,29 +86,18 @@ type (
 	}
 
 	CryptoPairsSummary struct {
-		Code   int16             `json:"code"`
-		Method string            `json:"method"` // public/get-instruments
 		Result CryptoInstruments `json:"result"`
 	}
 	CryptoInstruments struct {
 		Data []CryptoTickerData `json:"data"`
 	}
 	CryptoTickerData struct {
-		InstrumentName string  `json:"i"` // Instrument Name, e.g. BTC_USDT, ETH_CRO, etc.
-		BidPrice       float64 `json:"b"` // The current best bid price, null if there aren't any bids
-		AskPrice       float64 `json:"k"` // The current best ask price, null if there aren't any asks
-		LatestTrade    float64 `json:"a"` // The price of the latest trade, null if there weren't any trades
-		Timestamp      int64   `json:"t"` // Timestamp of the data
-		Volume         float64 `json:"v"` // The total 24h traded volume
-		HighestTrade   float64 `json:"h"` // Price of the 24h highest trade
-		LowestTrade    float64 `json:"l"` // Price of the 24h lowest trade, null if there weren't any trades
-		PriceChange    float64 `json:"c"` // 24-hour price change, null if there weren't any trades
+		InstrumentName string `json:"i"` // Instrument Name, e.g. BTC_USDT, ETH_CRO, etc.
 	}
 
 	CryptoHeartbeatResponse struct {
 		ID     int64  `json:"id"`
 		Method string `json:"method"` // public/heartbeat
-		Code   int16  `json:"code"`
 	}
 	CryptoHeartbeatRequest struct {
 		ID     int64  `json:"id"`
