@@ -65,16 +65,19 @@ type Oracle struct {
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
 	endpoints          map[provider.Name]provider.Endpoint
+	paramCache         ParamCache
 
-	pricesMutex sync.RWMutex
-	tvwapsMutex sync.RWMutex
-	vwapsMutex  sync.RWMutex
+	pricesMutex     sync.RWMutex
+	lastPriceSyncTS time.Time
+	prices          map[string]sdk.Dec
 
-	lastPriceSyncTS  time.Time
-	prices           map[string]sdk.Dec
-	tvwapsByProvider map[provider.Name]map[string]sdk.Dec
-	vwapsByProvider  map[provider.Name]map[string]sdk.Dec
-	paramCache       ParamCache
+	tvwapsByProvider PricesByProvider
+	vwapsByProvider  PricesByProvider
+}
+
+type PricesByProvider struct {
+	prices map[provider.Name]map[string]sdk.Dec
+	mx     sync.RWMutex
 }
 
 func New(
@@ -170,16 +173,16 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 
 // GetTvwapPrices returns the tvwapsByProvider map using a read lock
 func (o *Oracle) GetTvwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.tvwapsMutex.RLock()
-	defer o.tvwapsMutex.RUnlock()
-	return o.tvwapsByProvider
+	o.tvwapsByProvider.mx.RLock()
+	defer o.tvwapsByProvider.mx.RUnlock()
+	return o.tvwapsByProvider.prices
 }
 
 // GetVwapPrices returns the vwapsByProvider map using a read lock
 func (o *Oracle) GetVwapPrices() map[provider.Name]map[string]sdk.Dec {
-	o.vwapsMutex.RLock()
-	defer o.vwapsMutex.RUnlock()
-	return o.vwapsByProvider
+	o.vwapsByProvider.mx.RLock()
+	defer o.vwapsByProvider.mx.RUnlock()
+	return o.vwapsByProvider.prices
 }
 
 // SetPrices retrieves all the prices and candles from our set of providers as
@@ -318,9 +321,9 @@ func (o *Oracle) GetComputedPrices(
 		return nil, err
 	}
 
-	o.tvwapsMutex.Lock()
-	o.tvwapsByProvider, _ = ComputeTvwapsByProvider(filteredCandles)
-	o.tvwapsMutex.Unlock()
+	o.tvwapsByProvider.mx.Lock()
+	o.tvwapsByProvider.prices, _ = ComputeTvwapsByProvider(filteredCandles)
+	o.tvwapsByProvider.mx.Unlock()
 
 	// attempt to use candles for TVWAP calculations
 	tvwapPrices, err := ComputeTVWAP(filteredCandles)
@@ -350,9 +353,9 @@ func (o *Oracle) GetComputedPrices(
 			return nil, err
 		}
 
-		o.vwapsMutex.Lock()
-		o.vwapsByProvider = ComputeVwapsByProvider(filteredProviderPrices)
-		o.vwapsMutex.Unlock()
+		o.vwapsByProvider.mx.Lock()
+		o.vwapsByProvider.prices = ComputeVwapsByProvider(filteredProviderPrices)
+		o.vwapsByProvider.mx.Unlock()
 
 		vwapPrices := ComputeVWAP(filteredProviderPrices)
 
