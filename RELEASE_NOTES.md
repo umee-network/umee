@@ -1,7 +1,31 @@
 <!-- markdownlint-disable MD013 -->
 <!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD040 -->
 
 # Release Notes
+
+Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
+
+## v3.0.2
+
+Gravity Bridge update. In v3.0.0 we enabled Gravity Bridge, but there was an error in the way how the
+`ValsetUpdate` attestation is handled, causing the chain to halt in EndBlocker.
+The bug didn't involved any security issue and the bridge is safe.
+
+Update instructions:
+
+- stop the chain
+- swap the binary
+- restart (no additional coordination is required)
+
+## v3.0.1
+
+Fix v3.0.0 `Block.Header.LastResultsHash` problem.
+During inspections we found that `tx.GasUsage` didn't match across some nodes, causing chain halt:
+
+```
+ERR prevote step: ProposalBlock is invalid err="wrong Block.Header.LastResultsHash.  Expected EDEE3056AA71C73EC8B7089AAA5414D1298EF78ADC4D510498DB834E499E42C2, got 5ADF2EA7E0B31BA21E802071E1A9E4C4803259FE3AFFF17AAA53F93DA1D6264F" height=3216273 module=consensus round=68
+```
 
 ## v3.0.0
 
@@ -22,6 +46,7 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - [SIGN_MODE_DIRECT_AUX](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
   - transaction prioritization
 - IBC v5.0
+- Minimum validator commission rate is set to 5% per [prop 16](https://www.mintscan.io/umee/proposals/16). Validators with smaller commission rate will be automatically updated.
 
 #### x/leverage settings
 
@@ -46,6 +71,15 @@ Each validator MUST:
 
 - Run Peggo (Gravity Bridge Orchestrator) v1.0.x
 - Run [Price Feeder](https://github.com/umee-network/umee/tree/main/price-feeder) v1.0.x
+- Update `app.toml` file by setting `minimum-gas-prices = "0uumee"`:
+
+  ```toml
+  # The minimum gas prices a validator is willing to accept for processing a
+  # transaction. A transaction's fees must meet the minimum of any denomination
+  # specified in this config (e.g. 0.25token1;0.0001token2).
+  minimum-gas-prices = "0uumee"
+  ```
+
 - Update `config.toml` file by setting `mempool.version="v1"`. Ideally you should do it before the upgrade time, then at the upgrade switch binaries and start with the upgraded config:
 
   ```toml
