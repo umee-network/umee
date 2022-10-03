@@ -2,9 +2,10 @@ package provider
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/url"
 	"strings"
@@ -243,8 +244,13 @@ func (p *CryptoProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 	for _, pair := range pairs {
 		channels = append(channels, "ticker."+pair)
 	}
-	subsMsg := newCryptoSubscriptionMsg(channels)
-	err := p.wsClient.WriteJSON(subsMsg)
+
+	subsMsgID, err := rand.Int(rand.Reader, big.NewInt(1000))
+	if err != nil {
+		return err
+	}
+	subsMsg := newCryptoSubscriptionMsg(subsMsgID.Int64(), channels)
+	err = p.wsClient.WriteJSON(subsMsg)
 
 	return err
 }
@@ -261,8 +267,13 @@ func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 	for _, pair := range pairs {
 		channels = append(channels, "candlestick.5m."+pair)
 	}
-	subsMsg := newCryptoSubscriptionMsg(channels)
-	err := p.wsClient.WriteJSON(subsMsg)
+
+	subsMsgID, err := rand.Int(rand.Reader, big.NewInt(1000))
+	if err != nil {
+		return err
+	}
+	subsMsg := newCryptoSubscriptionMsg(subsMsgID.Int64(), channels)
+	err = p.wsClient.WriteJSON(subsMsg)
 
 	return err
 }
@@ -539,9 +550,9 @@ func currencyPairToCryptoPair(cp types.CurrencyPair) string {
 }
 
 // newCryptoSubscriptionMsg returns a new subscription Msg.
-func newCryptoSubscriptionMsg(channels []string) CryptoSubscriptionMsg {
+func newCryptoSubscriptionMsg(ID int64, channels []string) CryptoSubscriptionMsg {
 	return CryptoSubscriptionMsg{
-		ID:     rand.Int63(),
+		ID:     ID,
 		Method: "subscribe",
 		Params: CryptoSubscriptionParams{
 			Channels: channels,
