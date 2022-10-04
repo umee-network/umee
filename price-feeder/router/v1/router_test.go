@@ -125,7 +125,7 @@ func (rts *RouterTestSuite) TestPrices() {
 }
 
 func (rts *RouterTestSuite) TestTvwap() {
-	req, err := http.NewRequest("GET", "/api/v1/prices1/providers/tvwap", nil)
+	req, err := http.NewRequest("GET", "/api/v1/prices/providers/tvwap", nil)
 	rts.Require().NoError(err)
 	response := rts.executeRequest(req)
 	rts.Require().Equal(http.StatusOK, response.Code)
