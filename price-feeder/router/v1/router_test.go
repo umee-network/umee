@@ -124,8 +124,8 @@ func (rts *RouterTestSuite) TestPrices() {
 	rts.Require().Equal(respBody.Prices["FOO"], sdk.Dec{})
 }
 
-func (rts *RouterTestSuite) TestComputedCandlePrice() {
-	req, err := http.NewRequest("GET", "/api/v1/prices/providers/tvwap", nil)
+func (rts *RouterTestSuite) TestTvwap() {
+	req, err := http.NewRequest("GET", "/api/v1/prices1/providers/tvwap", nil)
 	rts.Require().NoError(err)
 	response := rts.executeRequest(req)
 	rts.Require().Equal(http.StatusOK, response.Code)
@@ -138,8 +138,8 @@ func (rts *RouterTestSuite) TestComputedCandlePrice() {
 	)
 }
 
-func (rts *RouterTestSuite) TestComputedTickerPrices() {
-	req, err := http.NewRequest("GET", "/api/prices/providers/vwap", nil)
+func (rts *RouterTestSuite) TestVwap() {
+	req, err := http.NewRequest("GET", "/api/v1/prices/providers/vwap", nil)
 	rts.Require().NoError(err)
 	response := rts.executeRequest(req)
 	rts.Require().Equal(http.StatusOK, response.Code)
