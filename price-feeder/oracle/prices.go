@@ -17,6 +17,7 @@ type (
 	}
 )
 
+// SetPrices sets the PricesWithMutex.prices value surounded by a write lock
 func (pwm *PricesWithMutex) SetPrices(prices PricesByProvider) {
 	pwm.mx.Lock()
 	defer pwm.mx.Unlock()
@@ -24,12 +25,15 @@ func (pwm *PricesWithMutex) SetPrices(prices PricesByProvider) {
 	pwm.prices = prices
 }
 
+// GetPricesClone retrieves a clone of PricesWithMutex.prices
+// surounded by a read lock
 func (pwm *PricesWithMutex) GetPricesClone() PricesByProvider {
 	pwm.mx.RLock()
 	defer pwm.mx.RUnlock()
 	return pwm.clonePrices()
 }
 
+// clonePrices returns a deep copy of PricesWithMutex.prices
 func (pwm *PricesWithMutex) clonePrices() PricesByProvider {
 	clone := make(PricesByProvider, len(pwm.prices))
 	for provider, prices := range pwm.prices {
