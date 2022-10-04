@@ -29,10 +29,10 @@ func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit s
 		return simtypes.NoOpMsg(o.ModuleName, o.MsgType, "message doesn't leave room for fees"), nil, nil
 	}
 
-	fees := coin.NewDecBld(appparams.ProtocolMinGasPrice).
+	fees := coin.NewDecBld(appparams.MinMinGasPrice).
 		Scale(int64(gasLimit)).ToCoins()
 	if _, hasNeg = spendable.SafeSub(fees...); hasNeg {
-		fund := coin.NewDecBld(appparams.ProtocolMinGasPrice).
+		fund := coin.NewDecBld(appparams.MinMinGasPrice).
 			Scale(int64(gasLimit * 1000)).ToCoins()
 		err := banktestutil.FundAccount(bk, o.Context, o.SimAccount.Address, fund)
 		if err != nil {

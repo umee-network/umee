@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 				s.network.Validators[1].Address.String(),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
-				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.ProtocolMinGasPrice),
+				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.MinMinGasPrice),
 			},
 			expectErr:    false,
 			expectedCode: 0,

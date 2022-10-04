@@ -8,9 +8,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v3/app/upgradev3"
+	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	v3upgrades "github.com/umee-network/umee/v3/app/upgrades/v3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -23,33 +24,33 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 		UpgradeV3_0Plan,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_0Plan)
-			ctx.Logger().Info("Running setupBech32ibcKeeper")
-			err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
+			err := setupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
 				return nil, sdkerrors.Wrapf(
-					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
+					err, "Calypso %q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
 			}
 
-			ctx.Logger().Info("Running module migrations")
+			ctx.Logger().Info("Upgrade handler execution finished, running migrations", "name", UpgradeV3_0Plan)
 			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
 			if err != nil {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
-			minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
+			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate param of staking module",
+				"name", UpgradeV3_0Plan)
+			minCommissionRate, err := v3upgrades.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate param of staking module",
 					UpgradeV3_0Plan)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
 				"name", UpgradeV3_0Plan)
-			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
+			err = v3upgrades.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
-					err, "%q Upgrade: failed to update minimum commission rate for validators",
+					err, "Calypso %q Upgrade: Unable to upgrade, failed to update minimum commission rate for validators",
 					UpgradeV3_0Plan)
 			}
 
@@ -67,9 +68,6 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 				group.ModuleName,
 				nft.ModuleName,
 				bech32ibctypes.ModuleName,
-				// icacontrollertypes.StoreKey,
-				// icahosttypes.StoreKey,
-
 				oracletypes.ModuleName,
 				leveragetypes.ModuleName,
 			},
@@ -78,4 +76,11 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 		app.SetStoreLoader(
 			upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
+}
+
+// Sets up bech32ibc module by setting the native account prefix to "umee".
+// Failing to set the native prefix will cause a chain halt on init genesis or
+// in the firstBeginBlocker assertions.
+func setupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
+	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
 }

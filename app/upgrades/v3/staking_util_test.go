@@ -1,4 +1,4 @@
-package upgradev3
+package v3
 
 import (
 	"crypto/rand"

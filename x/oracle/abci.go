@@ -77,7 +77,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			int64(params.VotePeriod),
 			int64(params.RewardDistributionWindow),
 			voteTargetDenoms,
-			claimSlice,
+			validatorClaimMap,
 		)
 
 		// Clear the ballot

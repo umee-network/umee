@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	"github.com/umee-network/umee/v3/util/coin"
 )
 
 const (
@@ -115,14 +116,16 @@ func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[strin
 			return nil, fmt.Errorf("duplicate token found in Osmosis response: %s", symbol)
 		}
 
-		price, err := coin.NewDecFromFloat(tr.Price)
+		priceRaw := strconv.FormatFloat(tr.Price, 'f', -1, 64)
+		price, err := sdk.NewDecFromStr(priceRaw)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read Osmosis price (%f) for %s", tr.Price, symbol)
+			return nil, fmt.Errorf("failed to read Osmosis price (%s) for %s", priceRaw, symbol)
 		}
 
-		volume, err := coin.NewDecFromFloat(tr.Volume)
+		volumeRaw := strconv.FormatFloat(tr.Volume, 'f', -1, 64)
+		volume, err := sdk.NewDecFromStr(volumeRaw)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read Osmosis volume (%f) for %s", tr.Volume, symbol)
+			return nil, fmt.Errorf("failed to read Osmosis volume (%s) for %s", volumeRaw, symbol)
 		}
 
 		tickerPrices[cp.String()] = types.TickerPrice{Price: price, Volume: volume}
@@ -174,9 +177,11 @@ func (p OsmosisProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 			if staleTime >= responseCandle.Time {
 				continue
 			}
+			closeStr := fmt.Sprintf("%f", responseCandle.Close)
+			volumeStr := fmt.Sprintf("%f", responseCandle.Volume)
 			candlePrices = append(candlePrices, types.CandlePrice{
-				Price:  coin.MustNewDecFromFloat(responseCandle.Close),
-				Volume: coin.MustNewDecFromFloat(responseCandle.Volume),
+				Price:  sdk.MustNewDecFromStr(closeStr),
+				Volume: sdk.MustNewDecFromStr(volumeStr),
 				// convert osmosis timestamp seconds -> milliseconds
 				TimeStamp: SecondsToMilli(responseCandle.Time),
 			})

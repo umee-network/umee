@@ -576,9 +576,7 @@ func New(
 	)
 
 	app.mm.SetOrderEndBlockers(
-		crisistypes.ModuleName,
-		oracletypes.ModuleName, // must be before gov and staking
-		govtypes.ModuleName, stakingtypes.ModuleName,
+		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName,
 		ibchost.ModuleName, ibctransfertypes.ModuleName,
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		slashingtypes.ModuleName, minttypes.ModuleName,
@@ -587,6 +585,7 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
 		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	)
@@ -691,11 +690,10 @@ func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig) {
 		customante.HandlerOptions{
 			AccountKeeper:   app.AccountKeeper,
 			BankKeeper:      app.BankKeeper,
-			OracleKeeper:    app.OracleKeeper,
-			IBCKeeper:       app.IBCKeeper,
 			SignModeHandler: txConfig.SignModeHandler(),
 			FeegrantKeeper:  app.FeeGrantKeeper,
 			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			OracleKeeper:    app.OracleKeeper,
 		},
 	)
 	if err != nil {
@@ -810,7 +808,6 @@ func (app *UmeeApp) SimulationManager() *module.SimulationManager {
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
-//
 // API server.
 func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
