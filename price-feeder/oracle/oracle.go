@@ -65,11 +65,14 @@ type Oracle struct {
 	oracleClient       client.OracleClient
 	deviations         map[string]sdk.Dec
 	endpoints          map[provider.Name]provider.Endpoint
+	paramCache         ParamCache
 
-	mtx             sync.RWMutex
+	pricesMutex     sync.RWMutex
 	lastPriceSyncTS time.Time
 	prices          map[string]sdk.Dec
-	paramCache      ParamCache
+
+	tvwapsByProvider PricesWithMutex
+	vwapsByProvider  PricesWithMutex
 }
 
 func New(
@@ -141,8 +144,8 @@ func (o *Oracle) Stop() {
 // GetLastPriceSyncTimestamp returns the latest timestamp at which prices where
 // fetched from the oracle's set of exchange rate providers.
 func (o *Oracle) GetLastPriceSyncTimestamp() time.Time {
-	o.mtx.RLock()
-	defer o.mtx.RUnlock()
+	o.pricesMutex.RLock()
+	defer o.pricesMutex.RUnlock()
 
 	return o.lastPriceSyncTS
 }
@@ -150,8 +153,8 @@ func (o *Oracle) GetLastPriceSyncTimestamp() time.Time {
 // GetPrices returns a copy of the current prices fetched from the oracle's
 // set of exchange rate providers.
 func (o *Oracle) GetPrices() map[string]sdk.Dec {
-	o.mtx.RLock()
-	defer o.mtx.RUnlock()
+	o.pricesMutex.RLock()
+	defer o.pricesMutex.RUnlock()
 
 	// Creates a new array for the prices in the oracle
 	prices := make(map[string]sdk.Dec, len(o.prices))
@@ -161,6 +164,16 @@ func (o *Oracle) GetPrices() map[string]sdk.Dec {
 	}
 
 	return prices
+}
+
+// GetTvwapPrices returns a copy of the tvwapsByProvider map
+func (o *Oracle) GetTvwapPrices() PricesByProvider {
+	return o.tvwapsByProvider.GetPricesClone()
+}
+
+// GetVwapPrices returns the vwapsByProvider map using a read lock
+func (o *Oracle) GetVwapPrices() PricesByProvider {
+	return o.vwapsByProvider.GetPricesClone()
 }
 
 // SetPrices retrieves all the prices and candles from our set of providers as
@@ -242,8 +255,7 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		o.logger.Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	computedPrices, err := GetComputedPrices(
-		o.logger,
+	computedPrices, err := o.GetComputedPrices(
 		providerCandles,
 		providerPrices,
 		o.providerPairs,
@@ -262,7 +274,9 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		}
 	}
 
+	o.pricesMutex.Lock()
 	o.prices = computedPrices
+	o.pricesMutex.Unlock()
 	return nil
 }
 
@@ -270,16 +284,16 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 // It returns candles' TVWAP if possible, if not possible (not available
 // or due to some staleness) it will use the most recent ticker prices
 // and the VWAP formula instead.
-func GetComputedPrices(
-	logger zerolog.Logger,
+func (o *Oracle) GetComputedPrices(
 	providerCandles provider.AggregatedProviderCandles,
 	providerPrices provider.AggregatedProviderPrices,
 	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
+
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := convertCandlesToUSD(
-		logger,
+		o.logger,
 		providerCandles,
 		providerPairs,
 		deviations,
@@ -290,13 +304,16 @@ func GetComputedPrices(
 
 	// filter out any erroneous candles
 	filteredCandles, err := FilterCandleDeviations(
-		logger,
+		o.logger,
 		convertedCandles,
 		deviations,
 	)
 	if err != nil {
 		return nil, err
 	}
+
+	computedPrices, _ := ComputeTvwapsByProvider(filteredCandles)
+	o.tvwapsByProvider.SetPrices(computedPrices)
 
 	// attempt to use candles for TVWAP calculations
 	tvwapPrices, err := ComputeTVWAP(filteredCandles)
@@ -308,7 +325,7 @@ func GetComputedPrices(
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
 		convertedTickers, err := convertTickersToUSD(
-			logger,
+			o.logger,
 			providerPrices,
 			providerPairs,
 			deviations,
@@ -318,7 +335,7 @@ func GetComputedPrices(
 		}
 
 		filteredProviderPrices, err := FilterTickerDeviations(
-			logger,
+			o.logger,
 			convertedTickers,
 			deviations,
 		)
@@ -326,10 +343,9 @@ func GetComputedPrices(
 			return nil, err
 		}
 
-		vwapPrices, err := ComputeVWAP(filteredProviderPrices)
-		if err != nil {
-			return nil, err
-		}
+		o.vwapsByProvider.SetPrices(ComputeVwapsByProvider(filteredProviderPrices))
+
+		vwapPrices := ComputeVWAP(filteredProviderPrices)
 
 		return vwapPrices, nil
 	}
