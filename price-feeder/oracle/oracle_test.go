@@ -806,7 +806,7 @@ func (ots *OracleTestSuite) TestGetComputedPricesEmptyTvwap() {
 				make(map[string]sdk.Dec),
 			)
 
-			require.ErrorContains(t, err, tc.expected)
+			require.ErrorContains(ots.T(), err, tc.expected)
 		})
 	}
 }
