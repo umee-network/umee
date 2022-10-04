@@ -42,7 +42,7 @@ v3.0.0 improves upon the _umeemania_ testnet release (v2.0.x) which introduced o
   - participate in governance of `x/leverage` [parameters](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/leverage.proto) file.
 - `x/oracle` module - a decentralized price oracle for the `x/leverage` module, as well as any app built in the Umee blockchain. UMEE holders set `x/oracle` [parameters](https://github.com/umee-network/umee/blob/main/proto/umee/oracle/v1/oracle.proto) by governance.
 - Cosmos v0.46 upgrade, which features:
-  - [`x/group`](https://tutorials.cosmos.network/tutorials/understanding-group/) module
+  - [`x/group`](https://tutorials.cosmos.network/tutorials/7-understand-sdk-modules/3-group.html) module
   - [`x/nft`](https://github.com/cosmos/cosmos-sdk/tree/v0.46.1/x/nft/spec) module
   - [Transaction Tips](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
   - [SIGN_MODE_DIRECT_AUX](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/RELEASE_NOTES.md#transaction-tips-and-sign_mode_direct_aux)
