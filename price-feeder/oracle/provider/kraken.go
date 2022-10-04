@@ -261,7 +261,6 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			if err != nil {
 				if websocket.IsCloseError(err, websocket.CloseAbnormalClosure) {
 					p.logger.Err(err).Msg("WebSocket closed unexpectedly")
-					p.keepReconnecting()
 					continue
 				}
 
@@ -269,7 +268,6 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 				p.logger.Err(err).Msg("could not read message")
 				if err := p.ping(); err != nil {
 					p.logger.Err(err).Msg("failed to send ping")
-					p.keepReconnecting()
 				}
 				continue
 			}
@@ -281,12 +279,8 @@ func (p *KrakenProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting")
-			}
 			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("attempted to reconnect")
-				p.keepReconnecting()
+				p.logger.Err(err).Msg("error reconnecting")
 			}
 		}
 	}
@@ -463,50 +457,23 @@ func (p *KrakenProvider) messageReceivedCandle(bz []byte) error {
 	return nil
 }
 
-// disconnect disconnects the existing websocket connection.
-func (p *KrakenProvider) disconnect() error {
+// reconnect closes the last WS connection then create a new one.
+func (p *KrakenProvider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Kraken websocket %v", err)
+		p.logger.Err(err).Msg("error closing Kraken websocket")
 	}
-	return nil
-}
 
-// reconnect creates a new websocket connection.
-func (p *KrakenProvider) reconnect() error {
 	p.logger.Debug().Msg("trying to reconnect")
-
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error connecting to Kraken websocket: %w", err)
 	}
 	p.wsClient = wsConn
-
-	currencyPairs := p.subscribedPairsToSlice()
-
 	telemetryWebsocketReconnect(ProviderKraken)
-	return p.subscribeChannels(currencyPairs...)
-}
 
-// keepReconnecting keeps trying to reconnect if an error occurs in recconnect.
-func (p *KrakenProvider) keepReconnecting() {
-	reconnectTicker := time.NewTicker(defaultReconnectTime)
-	defer reconnectTicker.Stop()
-	connectionTries := 1
-
-	for time := range reconnectTicker.C {
-		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
-			connectionTries++
-			continue
-		}
-
-		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
-		}
-		return
-	}
+	return p.subscribeChannels(p.subscribedPairsToSlice()...)
 }
 
 // messageReceivedSubscriptionStatus handle the subscription status message
@@ -543,7 +510,9 @@ func (p *KrakenProvider) messageReceivedSystemStatus(bz []byte) {
 		return
 	}
 
-	p.keepReconnecting()
+	if err := p.reconnect(); err != nil {
+		p.logger.Err(err).Msg("error reconnecting")
+	}
 }
 
 // setTickerPair sets an ticker to the map thread safe by the mutex.
