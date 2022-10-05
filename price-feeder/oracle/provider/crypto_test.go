@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/v3/util/coin"
 )
 
 func TestCryptoProvider_GetTickerPrices(t *testing.T) {
@@ -71,6 +72,43 @@ func TestCryptoProvider_GetTickerPrices(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
 		require.Equal(t, "crypto failed to get ticker price for FOO_BAR", err.Error())
+		require.Nil(t, prices)
+	})
+}
+
+func TestCryptoProvider_GetCandlePrices(t *testing.T) {
+	p, err := NewCryptoProvider(
+		context.TODO(),
+		zerolog.Nop(),
+		Endpoint{},
+		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
+	)
+	require.NoError(t, err)
+
+	t.Run("valid_request_single_candle", func(t *testing.T) {
+		price := 34.689998626708984000
+		volume := 2396974.000000000000000000
+		timeStamp := int64(1000000)
+
+		candle := CryptoCandle{
+			Volume:    volume,
+			Close:     price,
+			Timestamp: timeStamp,
+		}
+
+		p.setCandlePair("ATOM_USDT", candle)
+
+		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
+		require.NoError(t, err)
+		require.Len(t, prices, 1)
+		require.Equal(t, coin.MustNewDecFromFloat(price), prices["ATOMUSDT"][0].Price)
+		require.Equal(t, coin.MustNewDecFromFloat(volume), prices["ATOMUSDT"][0].Volume)
+		require.Equal(t, timeStamp*1000, prices["ATOMUSDT"][0].TimeStamp)
+	})
+
+	t.Run("invalid_request_invalid_candle", func(t *testing.T) {
+		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
+		require.EqualError(t, err, "crypto failed to get candle price for FOO_BAR")
 		require.Nil(t, prices)
 	})
 }

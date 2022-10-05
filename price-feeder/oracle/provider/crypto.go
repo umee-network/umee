@@ -18,16 +18,17 @@ import (
 )
 
 const (
-	cryptoWSHost                = "stream.crypto.com"
-	cryptoWSPath                = "/v2/market"
-	cryptoReconnectTime         = time.Second * 30
-	cryptoRestHost              = "https://api.crypto.com"
-	cryptoRestPath              = "/v2/public/get-ticker"
-	cryptoTickerChannel         = "ticker"
-	cryptoCandleChannel         = "candlestick"
-	cryptoHeartbeatMethod       = "public/heartbeat"
-	tickerSubscriptionMsgPrefix = "ticker."
-	candleSubscriptionMsgPrefix = "candlestick.5m."
+	cryptoWSHost             = "stream.crypto.com"
+	cryptoWSPath             = "/v2/market"
+	cryptoReconnectTime      = time.Second * 30
+	cryptoRestHost           = "https://api.crypto.com"
+	cryptoRestPath           = "/v2/public/get-ticker"
+	cryptoTickerChannel      = "ticker"
+	cryptoCandleChannel      = "candlestick"
+	cryptoHeartbeatMethod    = "public/heartbeat"
+	cryptoHeartbeatReqMethod = "public/respond-heartbeat"
+	cryptoTickerMsgPrefix    = "ticker."
+	cryptoCandleMsgPrefix    = "candlestick.5m."
 )
 
 var _ Provider = (*CryptoProvider)(nil)
@@ -214,7 +215,7 @@ func (p *CryptoProvider) subscribeTickers(cps ...types.CurrencyPair) error {
 
 	channels := []string{}
 	for _, pair := range pairs {
-		channels = append(channels, tickerSubscriptionMsgPrefix+pair)
+		channels = append(channels, cryptoTickerMsgPrefix+pair)
 	}
 	subsMsg := newCryptoSubscriptionMsg(channels)
 	err := p.wsClient.WriteJSON(subsMsg)
@@ -232,7 +233,7 @@ func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
 
 	channels := []string{}
 	for _, pair := range pairs {
-		channels = append(channels, candleSubscriptionMsgPrefix+pair)
+		channels = append(channels, cryptoCandleMsgPrefix+pair)
 	}
 	subsMsg := newCryptoSubscriptionMsg(channels)
 	err := p.wsClient.WriteJSON(subsMsg)
@@ -287,6 +288,7 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 
 	var (
 		heartbeatResp CryptoHeartbeatResponse
+		heartbeatErr  error
 		tickerResp    CryptoTickerResponse
 		tickerErr     error
 		candleResp    CryptoCandleResponse
@@ -294,7 +296,7 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	)
 
 	// sometimes the message received is not a ticker or a candle response.
-	_ = json.Unmarshal(bz, &heartbeatResp)
+	heartbeatErr = json.Unmarshal(bz, &heartbeatResp)
 	if heartbeatResp.Method == cryptoHeartbeatMethod {
 		p.pong(heartbeatResp, reconnectTicker)
 		return
@@ -326,6 +328,7 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 
 	p.logger.Error().
 		Int("length", len(bz)).
+		AnErr("heartbeat", heartbeatErr).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
 		Msg("Error on receive message")
@@ -340,9 +343,10 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 func (p *CryptoProvider) pong(heartbeatResp CryptoHeartbeatResponse, reconnectTicker *time.Ticker) {
 	reconnectTicker.Reset(cryptoReconnectTime)
 
-	var heartbeatReq CryptoHeartbeatRequest
-	heartbeatReq.ID = heartbeatResp.ID
-	heartbeatReq.Method = "public/respond-heartbeat"
+	heartbeatReq := CryptoHeartbeatRequest{
+		ID:     heartbeatResp.ID,
+		Method: cryptoHeartbeatReqMethod,
+	}
 
 	if err := p.wsClient.WriteJSON(heartbeatReq); err != nil {
 		p.logger.Err(err).Msg("could not send pong message back")
