@@ -290,8 +290,8 @@ github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY
 github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
 github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4Y=
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
-github.com/cosmos/iavl v0.19.1 h1:3gaq9b6SjiB0KBTygRnAvEGml2pQlu1TH8uma5g63Ys=
-github.com/cosmos/iavl v0.19.1/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
+github.com/cosmos/iavl v0.19.2-0.20220916140702-9b6be3095313 h1:R7CnaI/0OLwOusy7n9750n8fqQ3yCQ8OJQI2L3ws9RA=
+github.com/cosmos/iavl v0.19.2-0.20220916140702-9b6be3095313/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
 github.com/cosmos/ibc-go/v5 v5.0.0 h1:MkObdarpoICPHXoRg/Ne9NRix4j7eQlJZq74/uzH3Zc=
 github.com/cosmos/ibc-go/v5 v5.0.0/go.mod h1:Wqsguq98Iuns8tgTv8+xaGYbC+Q8zJfbpjzT6IgMJbs=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
@@ -1297,8 +1297,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqzi/CzI=
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006025452-f374edd2af79 h1:UXIvwFrERcMkG4SYXndNQkq1pO8gGwjTy8vkN698odI=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006025452-f374edd2af79/go.mod h1:UN4ehDuy5PA1YY7juvBMMulyiKv7uBMLUbTV/vONzH0=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb h1:QYqM/kfM35VGGjSfnRsJ9H5MU1F+QNvq594UkRTrbJc=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb/go.mod h1:p6/9i/72keNtS2PNNBu8Rebzd7K+GbFWJNWo/MojBto=
 github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e h1:RCxnO359ieolUDIT1cF7Ic3ms4epgmZxzNiz1a2IBeU=
 github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e/go.mod h1:Prssr3u1p2ICcgkhtMaX55NZv7A7E2ernO6fKrpolSg=
 github.com/umee-network/cosmos-sdk v0.46.1-umee h1:htt48oCN/i0An5z8AS8ttXU3Dk7fiE/gWNvwQGGOJgs=
