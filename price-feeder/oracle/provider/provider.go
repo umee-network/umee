@@ -26,6 +26,7 @@ const (
 	ProviderFTX      Name = "ftx"
 	ProviderBitget   Name = "bitget"
 	ProviderMexc     Name = "mexc"
+	ProviderCrypto   Name = "crypto"
 	ProviderMock     Name = "mock"
 )
 

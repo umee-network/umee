@@ -50,6 +50,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
 
+### Features
+
+- [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
