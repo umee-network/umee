@@ -9,9 +9,9 @@ import (
 // Test the reward giving mechanism
 func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 	// Add claim pools
-	claims := map[string]types.Claim{
-		valAddr.String():  types.NewClaim(10, 10, 0, valAddr),
-		valAddr2.String(): types.NewClaim(20, 20, 0, valAddr2),
+	claims := []types.Claim{
+		types.NewClaim(10, 10, 0, valAddr),
+		types.NewClaim(20, 20, 0, valAddr2),
 	}
 
 	// Prepare reward pool
@@ -38,7 +38,8 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 }
 
 func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroPower() {
-	s.app.OracleKeeper.RewardBallotWinners(s.ctx, 0, 0, []string{}, map[string]types.Claim{valAddr.String(): {}})
+	zeroClaim := types.NewClaim(0, 0, 0, valAddr)
+	s.app.OracleKeeper.RewardBallotWinners(s.ctx, 0, 0, []string{}, []types.Claim{zeroClaim})
 	outstandingRewardsDec := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
 	s.Require().Equal("", outstandingRewardsDec.String())
 }

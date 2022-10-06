@@ -46,10 +46,25 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
+
+### Fixes
+
+- [1460](https://github.com/umee-network/umee/pull/1460) Bump Gravity Bridge.
+
+## [v3.0.1](https://github.com/umee-network/umee/releases/tag/v3.0.1) - 2022-09-28
+
+### Fixes
+
+- [1450](https://github.com/umee-network/umee/pull/1450) fix: token registry cache which caused v3.0.0 halt.
+
+## [v3.0.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-09-22
+
 ### State Machine Breaking
 
-- [#1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
-- [#1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
+- [1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
+- [1411](https://github.com/umee-network/umee/pull/1411) Set min gas price to zero for v3 release
 
 ### API Breaking
 
@@ -126,6 +141,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1288](https://github.com/umee-network/umee/pull/1288) Safeguards LastInterestTime against time reversals and unintended interest from hard forks.
 - [1357](https://github.com/umee-network/umee/pull/1357) Interptex x/0 collateral liquidity as 100%
 - [1383](https://github.com/umee-network/umee/pull/1383) Remove potential panic during FeeAndPriority error case.
+- [1405](https://github.com/umee-network/umee/pull/1405) No longer skip MinCollateralLiquidity < 1 validation.
 
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/v2.0.2) - 2022-05-13
 
@@ -172,6 +188,22 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - Convexity upgrade!!!
+
+## [v1.1.0](https://github.com/umee-network/umee/releases/tag/v1.1.0) - 2022-09-08
+
+### State Machine Breaking
+
+- [1358](https://github.com/umee-network/umee/pull/1358/files) Disable Gravity Bridge bridge messages.
+
+### Improvements
+
+- [#1355](https://github.com/umee-network/umee/pull/1355) Update tooling to go1.19 and CI to the latest setup (based on v3).
+
+## [v1.0.4](https://github.com/umee-network/umee/releases/tag/v1.0.4) - - 2022-09-08
+
+### Improvements
+
+- [#1353](https://github.com/umee-network/umee/pull/1353) Gravity Bridge update
 
 ## [v1.0.3](https://github.com/umee-network/umee/releases/tag/v1.0.3) - 2022-02-17
 

@@ -443,7 +443,7 @@ func TestFailedSetProviderTickerPricesAndCandles(t *testing.T) {
 	require.False(t, success, "It should failed to set the prices, prices and candle are empty")
 }
 
-func TestSuccessGetComputedPricesCandles(t *testing.T) {
+func (ots *OracleTestSuite) TestSuccessGetComputedPricesCandles() {
 	providerCandles := make(provider.AggregatedProviderCandles, 1)
 	pair := types.CurrencyPair{
 		Base:  "ATOM",
@@ -467,19 +467,18 @@ func TestSuccessGetComputedPricesCandles(t *testing.T) {
 		provider.ProviderBinance: {pair},
 	}
 
-	prices, err := GetComputedPrices(
-		zerolog.Nop(),
+	prices, err := ots.oracle.GetComputedPrices(
 		providerCandles,
 		make(provider.AggregatedProviderPrices, 1),
 		providerPair,
 		make(map[string]sdk.Dec),
 	)
 
-	require.NoError(t, err, "It should successfully get computed candle prices")
-	require.Equal(t, prices[pair.Base], atomPrice)
+	require.NoError(ots.T(), err, "It should successfully get computed candle prices")
+	require.Equal(ots.T(), prices[pair.Base], atomPrice)
 }
 
-func TestSuccessGetComputedPricesTickers(t *testing.T) {
+func (ots *OracleTestSuite) TestSuccessGetComputedPricesTickers() {
 	providerPrices := make(provider.AggregatedProviderPrices, 1)
 	pair := types.CurrencyPair{
 		Base:  "ATOM",
@@ -500,19 +499,18 @@ func TestSuccessGetComputedPricesTickers(t *testing.T) {
 		provider.ProviderBinance: {pair},
 	}
 
-	prices, err := GetComputedPrices(
-		zerolog.Nop(),
+	prices, err := ots.oracle.GetComputedPrices(
 		make(provider.AggregatedProviderCandles, 1),
 		providerPrices,
 		providerPair,
 		make(map[string]sdk.Dec),
 	)
 
-	require.NoError(t, err, "It should successfully get computed ticker prices")
-	require.Equal(t, prices[pair.Base], atomPrice)
+	require.NoError(ots.T(), err, "It should successfully get computed ticker prices")
+	require.Equal(ots.T(), prices[pair.Base], atomPrice)
 }
 
-func TestGetComputedPricesCandlesConversion(t *testing.T) {
+func (ots *OracleTestSuite) TestGetComputedPricesCandlesConversion() {
 	btcPair := types.CurrencyPair{
 		Base:  "BTC",
 		Quote: "ETH",
@@ -596,25 +594,24 @@ func TestGetComputedPricesCandlesConversion(t *testing.T) {
 		provider.ProviderKraken:  {btcUSDPair},
 	}
 
-	prices, err := GetComputedPrices(
-		zerolog.Nop(),
+	prices, err := ots.oracle.GetComputedPrices(
 		providerCandles,
 		make(provider.AggregatedProviderPrices, 1),
 		providerPair,
 		make(map[string]sdk.Dec),
 	)
 
-	require.NoError(t, err,
+	require.NoError(ots.T(), err,
 		"It should successfully filter out bad candles and convert everything to USD",
 	)
-	require.Equal(t,
+	require.Equal(ots.T(),
 		ethUsdPrice.Mul(
 			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
 		prices[btcPair.Base],
 	)
 }
 
-func TestGetComputedPricesTickersConversion(t *testing.T) {
+func (ots *OracleTestSuite) TestGetComputedPricesTickersConversion() {
 	btcPair := types.CurrencyPair{
 		Base:  "BTC",
 		Quote: "ETH",
@@ -680,25 +677,24 @@ func TestGetComputedPricesTickersConversion(t *testing.T) {
 		provider.ProviderKraken:  {btcUSDPair},
 	}
 
-	prices, err := GetComputedPrices(
-		zerolog.Nop(),
+	prices, err := ots.oracle.GetComputedPrices(
 		make(provider.AggregatedProviderCandles, 1),
 		providerPrices,
 		providerPair,
 		make(map[string]sdk.Dec),
 	)
 
-	require.NoError(t, err,
+	require.NoError(ots.T(), err,
 		"It should successfully filter out bad tickers and convert everything to USD",
 	)
-	require.Equal(t,
+	require.Equal(ots.T(),
 		ethUsdPrice.Mul(
 			btcEthPrice).Add(btcUSDPrice).Quo(sdk.MustNewDecFromStr("2")),
 		prices[btcPair.Base],
 	)
 }
 
-func TestGetComputedPricesEmptyTvwap(t *testing.T) {
+func (ots *OracleTestSuite) TestGetComputedPricesEmptyTvwap() {
 	symbolUSDT := "USDT"
 	symbolUSD := "USD"
 	symbolDAI := "DAI"
@@ -802,16 +798,15 @@ func TestGetComputedPricesEmptyTvwap(t *testing.T) {
 	for name, tc := range testCases {
 		tc := tc
 
-		t.Run(name, func(t *testing.T) {
-			_, err := GetComputedPrices(
-				zerolog.Nop(),
+		ots.Run(name, func() {
+			_, err := ots.oracle.GetComputedPrices(
 				tc.candles,
 				tc.prices,
 				tc.pairs,
 				make(map[string]sdk.Dec),
 			)
 
-			require.ErrorContains(t, err, tc.expected)
+			require.ErrorContains(ots.T(), err, tc.expected)
 		})
 	}
 }

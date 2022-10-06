@@ -26,16 +26,34 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
 type Params struct {
-	// Complete Liquidation Threshold determines how far over their borrow
-	// limit a borrower must be in order for their positions to be liquidated
-	// fully in a single event.
+	// Complete Liquidation Threshold determines how far between
+	// liquidation_threshold (LT) and collateral_value (CV) a borrower's
+	// borrowed value must have progressed in order to allow a full liquidation.
+	// 0.3 indicates 30% of the way from LT to CV.
+	// Valid values: 0-1.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
-	// Minimum Close Factor determines the portion of a borrower's position
-	// that can be liquidated in a single event, when the borrower is just barely
-	// over their borrow limit.
+	// Close Factor determines the portion of a borrower's position that can be
+	// liquidated in a single event. Minimum Close Factor is Close Factor at
+	// liquidation_threshold. 0.1 means that that 10% of the borrower position can
+	// be liquidated when the borrowed value passes the liquidation_threshold.
+	// close_factor scales linearly between minimum_close_factor and 1.0,
+	// reaching its maximum when borrowed value passes
+	// complete_liquidation_threshold. We can put it into the picture:
+	//
+	//             borrowed           C := collateral
+	//             value                   value
+	//  --- | ------- | ----- | -------- | ------->
+	//      L                 CL
+	//
+	// liquidation = liquidation_threshold * C
+	// CL = L + (C-CL) * complete_liquidation_threshold
+	//    is the borrowed value above which close factor will be 1.
+	//
+	// Valid values: 0-1.
 	MinimumCloseFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=minimum_close_factor,json=minimumCloseFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_close_factor" yaml:"minimum_close_factor"`
 	// Oracle Reward Factor determines the portion of interest accrued on
 	// borrows that is sent to the oracle module to fund its reward pool.
+	// Valid values: 0-1.
 	OracleRewardFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=oracle_reward_factor,json=oracleRewardFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_reward_factor" yaml:"oracle_reward_factor"`
 	// Small Liquidation Size determines the USD value at which a borrow is
 	// considered small enough to be liquidated in a single transaction, bypassing
@@ -44,6 +62,7 @@ type Params struct {
 	// Direct Liquidation Fee is a reduction factor in liquidation incentive
 	// experienced by liquidators who choose to receive base assets instead of
 	// uTokens as liquidation rewards.
+	// Valid values: 0-1.
 	DirectLiquidationFee github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=direct_liquidation_fee,json=directLiquidationFee,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"direct_liquidation_fee" yaml:"direct_liquidation_fee"`
 }
 
@@ -86,29 +105,38 @@ type Token struct {
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
 	// Reserve Factor defines what portion of accrued interest goes to reserves
 	// when this token is borrowed.
+	// Valid values: 0-1.
 	ReserveFactor github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=reserve_factor,json=reserveFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reserve_factor" yaml:"reserve_factor"`
 	// Collateral Weight defines what portion of the total value of the asset
 	// can contribute to a users borrowing power. If the collateral weight is
 	// zero, using this asset as collateral against borrowing will be disabled.
+	// Valid values: 0-1.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
 	// Liquidation Threshold defines what amount of the total value of the
-	// asset can contribute to a user's liquidation threshold (above which they
-	// become eligible for liquidation).
+	// asset as a collateral can contribute to a user's liquidation threshold
+	// (above which they become eligible for liquidation).
+	// See also: min_close_factor.
+	// Valid values: 0-1.
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
 	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.
+	// Valid values: 0-inf
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
 	// Kink Borrow Rate defines the interest rate for borrowing this
 	// asset when supply utilization is equal to 'kink_utilization'.
+	// Valid values: 0-inf
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
 	// Max Borrow Rate defines the interest rate for borrowing this
 	// asset when supply utilization is at its maximum.
+	// Valid values: 0-inf
 	MaxBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_rate" yaml:"max_borrow_rate"`
 	// Kink Utilization defines the supply utilization value where
 	// the kink in the borrow interest rate function occurs.
+	// Valid values: 0-1.
 	KinkUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,8,opt,name=kink_utilization,json=kinkUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_utilization" yaml:"kink_utilization"`
 	// Liquidation Incentive determines the portion of bonus collateral of
 	// a token type liquidators receive as a liquidation reward.
+	// Valid values: 0-1.
 	LiquidationIncentive github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,9,opt,name=liquidation_incentive,json=liquidationIncentive,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_incentive" yaml:"liquidation_incentive"`
 	// Symbol Denom is the human readable denomination of this token.
 	SymbolDenom string `protobuf:"bytes,10,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty" yaml:"symbol_denom"`
@@ -143,10 +171,12 @@ type Token struct {
 	// the supply utilization is above `max_supply_utilization`.
 	// Valid values: 0-1.
 	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
-	// Min Collateral Liquidity specifies the minimum collateral liquidity a token is
-	// allowed to reach as a direct result of users borrowing, collateralizing, or
-	// withdrawing assets. Liquidity can only drop below this value due to interest
-	// or liquidations.
+	// Min Collateral Liquidity specifies an allowed minimum allowed for the following function:
+	//     collateral_liquidity(token) = available(token) / total_collateral(token)
+	// Borrowing, collateralizing, or withdrawing assets is not allowed when the
+	// result of such action invalidates min_collateral_liquidity.
+	// Liquidity can only drop below this value due to interest or liquidations.
+	// Valid values: 0 - 1
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
 	// Max Supply is the maximum amount of tokens the protocol can hold.
 	// Adding more supply of the given token to the protocol will return an error.
