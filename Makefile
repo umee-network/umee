@@ -221,7 +221,7 @@ proto-format:
 
 proto-lint:
 	@echo "Linting Protobuf files"
-#	@$(DOCKER_BUF) lint --error-format=json
+	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@echo "Checking for breaking changes"
