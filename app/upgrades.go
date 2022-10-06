@@ -15,10 +15,30 @@ import (
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-const UpgradeV3_0Plan = "v1.1-v3.0"
-
 func (app UmeeApp) RegisterUpgradeHandlers() {
-	// v3 upgrade handler performs upgrade from v1->v3
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	app.registerV3_0Upgrade(upgradeInfo)
+	app.registerV3_1Upgrade(upgradeInfo)
+}
+
+// performs upgrade from v3.0 -> v3.1 upgrade
+func (app UmeeApp) registerV3_1Upgrade(upgradeInfo upgradetypes.Plan) {
+	const UpgradeV3_1Plan = "v3.1.0"
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeV3_1Plan,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_1Plan)
+			return fromVM, nil
+		})
+}
+
+// performs upgrade from v1->v3
+func (app UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
+	const UpgradeV3_0Plan = "v1.1-v3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		UpgradeV3_0Plan,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -55,11 +75,6 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 
 			return vm, err
 		})
-
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		panic(err)
-	}
 
 	if upgradeInfo.Name == UpgradeV3_0Plan && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
