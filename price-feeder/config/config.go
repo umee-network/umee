@@ -41,6 +41,7 @@ var (
 		provider.ProviderFTX:      {},
 		provider.ProviderBitget:   {},
 		provider.ProviderMexc:     {},
+		provider.ProviderCrypto:   {},
 		provider.ProviderMock:     {},
 	}
 
