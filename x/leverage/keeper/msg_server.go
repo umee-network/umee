@@ -122,7 +122,7 @@ func (s msgServer) SupplyCollateral(
 	if err != nil {
 		return nil, err
 	}
-	if err = s.keeper.Collateralize(ctx, supplierAddr, msg.Asset); err != nil {
+	if err = s.keeper.Collateralize(ctx, supplierAddr, uToken); err != nil {
 		return nil, err
 	}
 
@@ -132,19 +132,21 @@ func (s msgServer) SupplyCollateral(
 		"supplied", msg.Asset.String(),
 		"received", uToken.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+	if err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
 		Supplier: msg.Supplier,
 		Asset:    msg.Asset,
 		Utoken:   uToken,
-	})
+	}); err != nil {
+		return nil, err
+	}
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", msg.Supplier,
-		"amount", msg.Asset.String(),
+		"amount", uToken.String(),
 	)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
 		Borrower: msg.Supplier,
-		Utoken:   msg.Asset,
+		Utoken:   uToken,
 	})
 	return &types.MsgSupplyCollateralResponse{
 		Collateralized: uToken,
