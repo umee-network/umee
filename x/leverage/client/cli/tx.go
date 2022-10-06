@@ -32,6 +32,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
+		GetCmdSupplyCollateral(),
 	)
 
 	return cmd
@@ -254,6 +255,35 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdSupplyCollateral creates a Cobra command to generate or broadcast a
+// transaction with a MsgSupply message.
+func GetCmdSupplyCollateral() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "supply-collateral [amount]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Supply and collateralize a specified amount of a supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgSupplyCollateral(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
