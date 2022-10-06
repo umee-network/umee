@@ -17,7 +17,7 @@ const (
 )
 
 // compute VWAP for each base by dividing the Σ {P * V} by Σ {V}
-func vwap(weightedPrices, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, error) {
+func vwap(weightedPrices, volumeSum map[string]sdk.Dec) map[string]sdk.Dec {
 	vwap := make(map[string]sdk.Dec)
 
 	for base, p := range weightedPrices {
@@ -30,7 +30,7 @@ func vwap(weightedPrices, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, err
 		}
 	}
 
-	return vwap, nil
+	return vwap
 }
 
 // ComputeVWAP computes the volume weighted average price for all price points
@@ -38,7 +38,7 @@ func vwap(weightedPrices, volumeSum map[string]sdk.Dec) (map[string]sdk.Dec, err
 // of provider => {<base> => <TickerPrice>, ...}.
 //
 // Ref: https://en.wikipedia.org/wiki/Volume-weighted_average_price
-func ComputeVWAP(prices provider.AggregatedProviderPrices) (map[string]sdk.Dec, error) {
+func ComputeVWAP(prices provider.AggregatedProviderPrices) map[string]sdk.Dec {
 	var (
 		weightedPrices = make(map[string]sdk.Dec)
 		volumeSum      = make(map[string]sdk.Dec)
@@ -122,7 +122,7 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 		}
 	}
 
-	return vwap(weightedPrices, volumeSum)
+	return vwap(weightedPrices, volumeSum), nil
 }
 
 // StandardDeviation returns maps of the standard deviations and means of assets.
@@ -183,4 +183,32 @@ func StandardDeviation(
 	}
 
 	return deviations, means, nil
+}
+
+// ComputeTvwapsByProvider computes the tvwap prices from candles for each provider separately and returns them
+// in a map separated by provider name
+func ComputeTvwapsByProvider(prices provider.AggregatedProviderCandles) (map[provider.Name]map[string]sdk.Dec, error) {
+	tvwaps := make(map[provider.Name]map[string]sdk.Dec)
+	var err error
+
+	for providerName, candles := range prices {
+		singleProviderCandles := provider.AggregatedProviderCandles{"providerName": candles}
+		tvwaps[providerName], err = ComputeTVWAP(singleProviderCandles)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return tvwaps, nil
+}
+
+// ComputeVwapsByProvider computes the vwap prices from tickers for each provider separately and returns them
+// in a map separated by provider name
+func ComputeVwapsByProvider(prices provider.AggregatedProviderPrices) map[provider.Name]map[string]sdk.Dec {
+	vwaps := make(map[provider.Name]map[string]sdk.Dec)
+
+	for providerName, tickers := range prices {
+		singleProviderCandles := provider.AggregatedProviderPrices{"providerName": tickers}
+		vwaps[providerName] = ComputeVWAP(singleProviderCandles)
+	}
+	return vwaps
 }
