@@ -152,17 +152,40 @@ endif
 
 .PHONY: run-tests $(TEST_TARGETS)
 
+###############################################################################
+###                                Linting                                  ###
+###############################################################################
+
+golangci_lint_cmd=golangci-lint
+golangci_version=v1.49.0
+
 lint:
-	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
-	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
+	@echo "--> Running linter with revive"
+	@go install github.com/mgechev/revive
+	@revive ./...
+
+lint-fix:
+	@echo "--> Running linter to fix the lint issues"
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golangci_version)
+	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+
+.PHONY: lint lint-fix
+
+format:
+	@go install mvdan.cc/gofumpt@latest
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golangci_version)
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
+	$(golangci_lint_cmd) run --fix
+
+.PHONY: format
+
 
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
 
-.PHONY: lint
 
 ###############################################################################
 ##                                Simulations                                ##
