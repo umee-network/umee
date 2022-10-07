@@ -60,7 +60,7 @@ echo '
   "messages": [
     {
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-      "authority": "'$admin_addr'",
+      "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
       "plan": {
         "name": "'$UPGRADE_TITLE'",
         "height": "'$UPGRADE_HEIGHT'",
@@ -74,14 +74,14 @@ echo '
 ' > $proposal_path
 
 echo "Submitting the software-upgrade proposal..."
-$UMEED_BIN_V1 tx gov submit-proposal $proposal_path -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee
+$UMEED_BIN_V1 tx gov submit-proposal $proposal_path -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee --gas 300000
 
 # $UMEED_BIN_V1 tx gov submit-proposal software-upgrade $proposal_path $UPGRADE_TITLE  --title yeet --description megayeet $cid --deposit 1000000000uumee \
 #   --upgrade-height $UPGRADE_HEIGHT --upgrade-info "doing an upgrade '-'" \
 #   -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee
 
 ##
-PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
+PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].id" -r)
 echo proposal ID is $PROPOSAL_ID
 
 echo "Voting on proposaal : $PROPOSAL_ID"
