@@ -186,10 +186,7 @@ func convertTickersToUSD(
 					return nil, err
 				}
 
-				vwap, err := ComputeVWAP(filteredTickers)
-				if err != nil {
-					return nil, err
-				}
+				vwap := ComputeVWAP(filteredTickers)
 
 				conversionRates[pair.Quote] = vwap[pair.Quote]
 				requiredConversions[pairProviderName] = pair

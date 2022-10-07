@@ -78,6 +78,30 @@ func (msg *MsgCollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgSupplyCollateral(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupplyCollateral {
+	return &MsgSupplyCollateral{
+		Supplier: supplier.String(),
+		Asset:    asset,
+	}
+}
+
+func (msg MsgSupplyCollateral) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgSupplyCollateral) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgSupplyCollateral) ValidateBasic() error {
+	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
+}
+
+func (msg *MsgSupplyCollateral) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Supplier)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgSupplyCollateral) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
 func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollateralize {
 	return &MsgDecollateralize{
 		Borrower: borrower.String(),
