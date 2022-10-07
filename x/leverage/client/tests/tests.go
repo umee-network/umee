@@ -134,7 +134,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"supply",
 		cli.GetCmdSupply(),
 		[]string{
-			"1000uumee",
+			"700uumee",
 		},
 		nil,
 	}
@@ -143,7 +143,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"add collateral",
 		cli.GetCmdCollateralize(),
 		[]string{
-			"1000u/uumee",
+			"700u/uumee",
+		},
+		nil,
+	}
+
+	supplyCollateral := testTransaction{
+		"supply collateral",
+		cli.GetCmdSupplyCollateral(),
+		[]string{
+			"300uumee",
 		},
 		nil,
 	}
@@ -270,6 +279,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	s.runTestTransactions(
 		supply,
 		addCollateral,
+		supplyCollateral,
 		borrow,
 	)
 

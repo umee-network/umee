@@ -108,6 +108,51 @@ func (s msgServer) Collateralize(
 	return &types.MsgCollateralizeResponse{}, err
 }
 
+func (s msgServer) SupplyCollateral(
+	goCtx context.Context,
+	msg *types.MsgSupplyCollateral,
+) (*types.MsgSupplyCollateralResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+	uToken, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
+	if err != nil {
+		return nil, err
+	}
+	if err = s.keeper.Collateralize(ctx, supplierAddr, uToken); err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"assets supplied",
+		"supplier", msg.Supplier,
+		"supplied", msg.Asset.String(),
+		"received", uToken.String(),
+	)
+	if err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+		Supplier: msg.Supplier,
+		Asset:    msg.Asset,
+		Utoken:   uToken,
+	}); err != nil {
+		return nil, err
+	}
+	s.keeper.Logger(ctx).Debug(
+		"collateral added",
+		"borrower", msg.Supplier,
+		"amount", uToken.String(),
+	)
+	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+		Borrower: msg.Supplier,
+		Utoken:   uToken,
+	})
+	return &types.MsgSupplyCollateralResponse{
+		Collateralized: uToken,
+	}, err
+}
+
 func (s msgServer) Decollateralize(
 	goCtx context.Context,
 	msg *types.MsgDecollateralize,
