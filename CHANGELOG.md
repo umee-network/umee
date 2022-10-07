@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [1471](https://github.com/umee-network/umee/pull/1471) Fix slash window progress query.
+
 ## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
 
 ### Fixes
