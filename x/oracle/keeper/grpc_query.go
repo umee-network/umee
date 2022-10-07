@@ -149,8 +149,8 @@ func (q querier) SlashWindow(
 	params := q.GetParams(ctx)
 
 	return &types.QuerySlashWindowResponse{
-		WindowProgress: (uint64(ctx.BlockHeight()) / params.VotePeriod) %
-			params.SlashWindow,
+		WindowProgress: (uint64(ctx.BlockHeight()) % params.SlashWindow) /
+			params.VotePeriod,
 	}, nil
 }
 
