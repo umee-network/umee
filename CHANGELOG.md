@@ -48,6 +48,29 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### State Machine Breaking
 
+- [1474](https://github.com/umee-network/umee/pull/1474) Enabled all Gravity Bridge claims.
+- [1479](https://github.com/umee-network/umee/pull/1479) Add MsgSupplyCollateral.
+
+### Fixes
+
+- [1471](https://github.com/umee-network/umee/pull/1471) Fix slash window progress query.
+
+## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
+
+### Fixes
+
+- [1460](https://github.com/umee-network/umee/pull/1460) Bump Gravity Bridge.
+
+## [v3.0.1](https://github.com/umee-network/umee/releases/tag/v3.0.1) - 2022-09-28
+
+### Fixes
+
+- [1450](https://github.com/umee-network/umee/pull/1450) fix: token registry cache which caused v3.0.0 halt.
+
+## [v3.0.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-09-22
+
+### State Machine Breaking
+
 - [1326](https://github.com/umee-network/umee/pull/1326) Setting protocol controlled min gas price.
 - [1401](https://github.com/umee-network/umee/pull/1401) Increased free gas oracle tx limit from 100k to 140k.
 - [1411](https://github.com/umee-network/umee/pull/1411) Set min gas price to zero for v3 release
