@@ -54,6 +54,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
 
+### Improvements
+
+- [1484](https://github.com/umee-network/umee/pull/1484) Standardize websocket connection error for providers.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
