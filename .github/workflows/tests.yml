@@ -177,12 +177,12 @@ jobs:
 
       - name: cache umeed mainnet
         uses: actions/cache@v3
-        id: umeed-v112
+        id: umeed-v302
         with:
-          path: ./contrib/scripts/umeed-releases/umeed-v1.1.2-linux-amd64/umeed
-          key: umeed-v112
+          path: ./contrib/scripts/umeed-releases/umeed-v3.0.2-linux-amd64/umeed
+          key: umeed-v302
       - name: download mainnet binary
-        if: steps.umeed-v112.outputs.cache-hit != 'true'
+        if: steps.umeed-v302.outputs.cache-hit != 'true'
         run: |
           ./contrib/scripts/download-mainnet-umeed.sh
       - name: cache mainnet tinkered genesis
@@ -195,7 +195,7 @@ jobs:
         if: steps.tinkered-genesis-sep-15.outputs.cache-hit != 'true'
         run: |
           ./contrib/scripts/tinker-mainnet-genesis.sh
-      - name: Fork mainnet and upgrade from v1.1.2 to v.3.x.x
+      - name: Fork mainnet and upgrade from v3.0.2 to v.3.x.x
         if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
         run: |
           ./contrib/scripts/umeemainnet_fork.sh

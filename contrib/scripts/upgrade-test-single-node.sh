@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 # Using an already running chain, starts a governance proposal to upgrade to a new binary version,
 # votes 'yes' on that proposal, waits to reach to reach an upgrade height and kills the process id
@@ -51,10 +51,34 @@ echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 30))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
+proposal_path=$CWD/proposal.json
+
+admin_addr=$($UMEED_BIN_V2 $kbt $nodeHomeFlag keys show admin -a)
+
+echo '
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "'$admin_addr'",
+      "plan": {
+        "name": "'$UPGRADE_TITLE'",
+        "height": "'$UPGRADE_HEIGHT'",
+        "info": "{\"binaries\": {\"linux/amd64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\",\"linux/arm64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\",\"darwin/amd64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\"}}"
+      }
+    }
+  ],
+  "deposit": "1000000000uumee"
+}
+
+' > $proposal_path
+
 echo "Submitting the software-upgrade proposal..."
-$UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
-  --upgrade-height $UPGRADE_HEIGHT \
-  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 100000uumee
+$UMEED_BIN_V1 tx gov submit-proposal $proposal_path -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee
+
+# $UMEED_BIN_V1 tx gov submit-proposal software-upgrade $proposal_path $UPGRADE_TITLE  --title yeet --description megayeet $cid --deposit 1000000000uumee \
+#   --upgrade-height $UPGRADE_HEIGHT --upgrade-info "doing an upgrade '-'" \
+#   -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee
 
 ##
 PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
