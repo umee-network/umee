@@ -106,7 +106,11 @@ func NewMexcProvider(
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to mexc websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderMexc,
+			err,
+		)
 	}
 
 	provider := &MexcProvider{
@@ -382,7 +386,11 @@ func (p *MexcProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("mexc: error reconnect to mexc websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderMexc,
+			err,
+		)
 	}
 	p.wsClient = wsConn
 	telemetryWebsocketReconnect(ProviderMexc)
