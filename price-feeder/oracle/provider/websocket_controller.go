@@ -53,9 +53,12 @@ func (c *WebsocketController) start() {
 	for {
 		err := c.connect() // attempt first connection immediately
 		if err == nil {
-			c.subscribe()
-			go c.readWebSocket()
-			return
+			err = c.subscribe()
+			if err == nil {
+				go c.readWebSocket()
+				return
+			}
+			c.close()
 		}
 		select {
 		case <-c.ctx.Done():
