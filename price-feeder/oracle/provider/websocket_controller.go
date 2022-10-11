@@ -14,35 +14,35 @@ import (
 type (
 	MessageHandler func(int, []byte)
 
+	// WebsocketController defines a provider agnostic websocket handler
+	// that manages reconnecting, subscribing, and recieiving messages
 	WebsocketController struct {
-		ctx            context.Context
-		providerName   Name
-		websocketUrl   url.URL
-		tickerSubMsg   string
-		candleSubMsg   string
-		messageHandler MessageHandler
-		logger         zerolog.Logger
-		client         *websocket.Conn
-		mu             sync.Mutex
+		ctx              context.Context
+		providerName     Name
+		websocketUrl     url.URL
+		subscriptionMsgs []string
+		messageHandler   MessageHandler
+		logger           zerolog.Logger
+		client           *websocket.Conn
+		mu               sync.Mutex
 	}
 )
 
-func NewWebsocketHandler(
+func NewWebsocketController(
 	ctx context.Context,
 	providerName Name,
 	websocketUrl url.URL,
-	tickerSubMsg string,
-	candleSubMsg string,
+	subscriptionMsgs []string,
 	messageHandler MessageHandler,
-	logger zerolog.Logger) *WebsocketController {
+	logger zerolog.Logger,
+) *WebsocketController {
 	return &WebsocketController{
-		ctx:            ctx,
-		providerName:   providerName,
-		websocketUrl:   websocketUrl,
-		tickerSubMsg:   tickerSubMsg,
-		candleSubMsg:   candleSubMsg,
-		messageHandler: messageHandler,
-		logger:         logger,
+		ctx:              ctx,
+		providerName:     providerName,
+		websocketUrl:     websocketUrl,
+		subscriptionMsgs: subscriptionMsgs,
+		messageHandler:   messageHandler,
+		logger:           logger,
 	}
 }
 
@@ -69,6 +69,7 @@ func (c *WebsocketController) start() {
 	}
 }
 
+// connect dials the websocket and sets the client to the established connection
 func (c *WebsocketController) connect() error {
 	conn, resp, err := websocket.DefaultDialer.Dial(c.websocketUrl.String(), nil)
 	defer resp.Body.Close()
@@ -85,12 +86,10 @@ func (c *WebsocketController) subscribe() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if err := c.client.WriteJSON(c.tickerSubMsg); err != nil {
-		return fmt.Errorf("error sending ticker subscription message: %w", err)
-	}
-
-	if err := c.client.WriteJSON(c.candleSubMsg); err != nil {
-		return fmt.Errorf("error sending candle subscription message: %w", err)
+	for message := range c.subscriptionMsgs {
+		if err := c.client.WriteJSON(message); err != nil {
+			return fmt.Errorf("error sending ticker subscription message: %w", err)
+		}
 	}
 	return nil
 }
@@ -122,6 +121,7 @@ func (c *WebsocketController) readWebSocket() {
 	}
 }
 
+// close sends a close message to the websocket and sets the client to nil
 func (c *WebsocketController) close() {
 	err := c.client.Close()
 	if err != nil {
@@ -132,6 +132,7 @@ func (c *WebsocketController) close() {
 	c.mu.Unlock()
 }
 
+// reconnect closes the current websocket and starts a new connection process
 func (c *WebsocketController) reconnect() {
 	c.close()
 	go c.start()

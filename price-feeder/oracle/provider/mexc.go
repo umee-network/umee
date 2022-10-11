@@ -103,33 +103,50 @@ func NewMexcProvider(
 		Path:   mexcWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderMexc,
-			err,
-		)
-	}
+	mexcLogger := logger.With().Str("provider", "mexc").Logger()
 
 	provider := &MexcProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "mexc").Logger(),
+		logger:          mexcLogger,
 		endpoints:       endpoints,
 		tickers:         map[string]types.TickerPrice{},
 		candles:         map[string][]types.CandlePrice{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleWebSocketMsgs(ctx)
+	subscriptionMsgs, _ := provider.getSubscriptionMsgs()
+
+	NewWebsocketController(
+		ctx,
+		ProviderMexc,
+		wsURL,
+		subscriptionMsgs,
+		provider.messageReceived,
+		mexcLogger,
+	).start()
 
 	return provider, nil
+}
+
+func (p *MexcProvider) getSubscriptionMsgs() ([]string, error) {
+	messages := []string{}
+
+	//Tickers
+	jsonMsg, err := json.Marshal(newMexcTickerSubscriptionMsg())
+	if err != nil {
+		return nil, err
+	}
+	messages = append(messages, string(jsonMsg))
+
+	// loop currency pairs
+	for i, cp := range cps {
+		pairs[i] = currencyPairToMexcPair(cp)
+	}
+
+	subsMsg := newMexcCandleSubscriptionMsg(cp)
+
+	return messages, nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
