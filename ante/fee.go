@@ -12,7 +12,7 @@ import (
 )
 
 // MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxMsgGasUsage = uint64(100_000)
+const MaxMsgGasUsage = uint64(140_000)
 
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
@@ -50,20 +50,24 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 		}
 	} else {
 		// in deliverTx = use protocol min gas price
-		minGasPrices = sdk.DecCoins{appparams.MinMinGasPrice}
+		minGasPrices = sdk.DecCoins{appparams.ProtocolMinGasPrice}
 	}
 
-	requiredFees := make(sdk.Coins, len(minGasPrices))
+	requiredFees := sdk.NewCoins()
 
 	// Determine the required fees by multiplying each required minimum gas
 	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
+	// Zero fees are removed.
 	glDec := sdk.NewDec(int64(gasLimit))
-	for i, gp := range minGasPrices {
+	for _, gp := range minGasPrices {
+		if gasLimit == 0 || gp.IsZero() {
+			continue
+		}
 		fee := gp.Amount.Mul(glDec)
-		requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+		requiredFees = append(requiredFees, sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt()))
 	}
 
-	if !fees.IsAnyGTE(requiredFees) {
+	if !requiredFees.Empty() && !fees.IsAnyGTE(requiredFees) {
 		return sdkerrors.ErrInsufficientFee.Wrapf(
 			"insufficient fees; got: %s required: %s", fees, requiredFees)
 	}
@@ -105,16 +109,12 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 // AssertMinProtocolGasPrice returns an error if the provided gasPrices are lower then
 // the required by protocol.
 func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
-	for _, c := range gasPrices {
-		if c.Denom == appparams.MinMinGasPrice.Denom {
-			if c.Amount.LT(appparams.MinMinGasPrice.Amount) {
-				break // go to error below
-			}
-			return nil
-		}
+	if gasPrices.AmountOf(appparams.ProtocolMinGasPrice.Denom).LT(appparams.ProtocolMinGasPrice.Amount) {
+		return sdkerrors.ErrInsufficientFee.Wrapf(
+			"gas price too small; got: %v required min: %v", gasPrices, appparams.ProtocolMinGasPrice)
 	}
-	return sdkerrors.ErrInsufficientFee.Wrapf(
-		"gas price too small; got: %v required min: %v", gasPrices, appparams.MinMinGasPrice)
+
+	return nil
 }
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the

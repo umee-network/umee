@@ -81,11 +81,11 @@ branch.
 
 ## Release procedure
 
-We follow semver (from v3.0.0):
+We follow [Semantic Versioning](https://semver.org/) (from v3.0.0):
 
 - major version update (eg 2.x.x -> 3.0.0) has API breaking changes or signals major feature update
 - minor version update (eg 2.1.x -> 2.2.0) has no API nor state machine breaking changes. It can provide new functionality or bug fixes.
-- patch version update (eg 2.1.0 -> 2.1.1) has no API nor state machine breaking changes nor new features. It only contains hot fixes.
+- patch version update (eg 2.1.0 -> 2.1.1) has no API nor state machine breaking changes nor new features. It only contains backwards compatible bug fixes.
 
 ### Major Release Procedure
 

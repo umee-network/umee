@@ -8,7 +8,7 @@ touch /root/.price-feeder/config.toml
 
 # setup price-feeder configuration
 tee /root/.price-feeder/config.toml <<EOF
-gas_adjustment = 1.5
+gas_adjustment = 1.2
 provider_timeout = "5000ms"
 
 [server]
@@ -70,4 +70,4 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 EOF
 
 # start price-feeder
-price-feeder /root/.price-feeder/config.toml
+price-feeder /root/.price-feeder/config.toml --log-level debug

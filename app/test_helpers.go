@@ -236,31 +236,33 @@ func IntegrationTestNetworkConfig() network.Config {
 	// Start with the default genesis state
 	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
 
-	// Default genesis doesn't have tokens in Token registry, so here we add one:
+	// Override default leverage registry with one more suitable for testing
 	var leverageGenState leveragetypes.GenesisState
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
 	}
-	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:              params.BondDenom,
-		SymbolDenom:            params.DisplayDenom,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100000000000),
-	})
+	leverageGenState.Registry = []leveragetypes.Token{
+		{
+			BaseDenom:              params.BondDenom,
+			SymbolDenom:            params.DisplayDenom,
+			Exponent:               6,
+			ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
+			CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
+			LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
+			BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
+			KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
+			MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
+			KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
+			LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
+			EnableMsgSupply:        true,
+			EnableMsgBorrow:        true,
+			Blacklist:              false,
+			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
+			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
+			MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
+			MaxSupply:              sdk.NewInt(100000000000),
+		},
+	}
 	bz, err := cdc.MarshalJSON(&leverageGenState)
 	if err != nil {
 		panic(err)
@@ -306,7 +308,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.GenesisState = appGenState
 	cfg.BondDenom = params.BondDenom
-	cfg.MinGasPrices = params.MinMinGasPrice.String()
+	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
 		return New(
 			val.Ctx.Logger,

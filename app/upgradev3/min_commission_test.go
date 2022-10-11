@@ -1,4 +1,4 @@
-package v3
+package upgradev3
 
 import (
 	"testing"
@@ -26,7 +26,7 @@ func TestUpdateMinimumCommissionRateParam(t *testing.T) {
 	require.Equal(t, minCommissionRate, updatedParams.MinCommissionRate)
 }
 
-func TestSetMinimumCommissionRateToValidatros(t *testing.T) {
+func TestSetMinimumCommissionRateToValidators(t *testing.T) {
 	ctx := sdk.NewContext(nil, tmproto.Header{}, false, nil)
 	valAddrs, sk := GenerateRandomTestCase()
 
@@ -36,7 +36,7 @@ func TestSetMinimumCommissionRateToValidatros(t *testing.T) {
 	require.NotNil(t, minCommissionRate)
 
 	// update min commisson rate to all validators
-	err = SetMinimumCommissionRateToValidatros(ctx, &sk, minCommissionRate)
+	err = SetMinimumCommissionRateToValidators(ctx, &sk, minCommissionRate)
 	require.NoError(t, err)
 
 	// get the validator
