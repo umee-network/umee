@@ -2,10 +2,7 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"testing"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
@@ -97,32 +94,4 @@ func TestMexcCurrencyPairToMexcPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	MexcSymbol := currencyPairToMexcPair(cp)
 	require.Equal(t, MexcSymbol, "ATOM_USDT")
-}
-
-func TestFull(t *testing.T) {
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	endpoints := Endpoint{
-		Name:      ProviderMexc,
-		Rest:      mexcRestHost,
-		Websocket: mexcWSHost,
-	}
-
-	logWriter := zerolog.ConsoleWriter{Out: os.Stderr}
-	logLvl := zerolog.InfoLevel
-	logger := zerolog.New(logWriter).Level(logLvl).With().Timestamp().Logger()
-
-	cps := make([]types.CurrencyPair, 0)
-	cps = append(cps, types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
-
-	provider, _ := NewMexcProvider(ctx, logger, endpoints, cps...)
-
-	time.Sleep(30 * time.Second)
-	prices, _ := provider.GetCandlePrices(cps...)
-	fmt.Printf("%+v\n", prices)
-
-	cancel()
-
-	time.Sleep(5 * time.Second)
 }
