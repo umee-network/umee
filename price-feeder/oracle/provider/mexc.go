@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 
@@ -120,7 +119,7 @@ func NewMexcProvider(
 		provider.messageReceived,
 		mexcLogger,
 	)
-	go controller.start()
+	go controller.Start()
 
 	return provider, nil
 }
@@ -208,10 +207,6 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 }
 
 func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	var (
 		tickerResp MexcTickerResponse
 		tickerErr  error

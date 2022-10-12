@@ -101,7 +101,7 @@ func TestMexcCurrencyPairToMexcPair(t *testing.T) {
 
 func TestFull(t *testing.T) {
 
-	ctx := context.TODO()
+	ctx, cancel := context.WithCancel(context.Background())
 
 	endpoints := Endpoint{
 		Name:      ProviderMexc,
@@ -115,11 +115,14 @@ func TestFull(t *testing.T) {
 
 	cps := make([]types.CurrencyPair, 0)
 	cps = append(cps, types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
-	cps = append(cps, types.CurrencyPair{Base: "JUNO", Quote: "USDT"})
 
 	provider, _ := NewMexcProvider(ctx, logger, endpoints, cps...)
 
-	time.Sleep(2 * time.Minute)
-	prices, _ := provider.getCandlePrices()
+	time.Sleep(30 * time.Second)
+	prices, _ := provider.GetCandlePrices(cps...)
 	fmt.Printf("%+v\n", prices)
+
+	cancel()
+
+	time.Sleep(5 * time.Second)
 }

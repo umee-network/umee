@@ -46,17 +46,17 @@ func NewWebsocketController(
 	}
 }
 
-func (c *WebsocketController) start() {
+func (c *WebsocketController) Start() {
 	connectTicker := time.NewTicker(defaultReconnectTime)
 	defer connectTicker.Stop()
 
 	for {
-		err := c.connect() // attempt first connection immediately
+		err := c.connect()
 		if err == nil {
+			go c.readWebSocket()
 			go c.ping()
 			err = c.subscribe()
 			if err == nil {
-				go c.readWebSocket()
 				return
 			}
 			c.close()
@@ -72,14 +72,16 @@ func (c *WebsocketController) start() {
 
 // connect dials the websocket and sets the client to the established connection
 func (c *WebsocketController) connect() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.logger.Info().Msg("connecting to websocket")
 	conn, resp, err := websocket.DefaultDialer.Dial(c.websocketUrl.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error connecting to websocket: %w", err)
 	}
-	c.mu.Lock()
 	c.client = conn
-	c.mu.Unlock()
 	return nil
 }
 
@@ -88,9 +90,9 @@ func (c *WebsocketController) subscribe() error {
 	defer c.mu.Unlock()
 
 	for _, jsonMessage := range c.subscriptionMsgs {
-		fmt.Printf("%+v\n", jsonMessage)
+		c.logger.Info().Msg(fmt.Sprintf("sending message: %+v", jsonMessage))
 		if err := c.client.WriteJSON(jsonMessage); err != nil {
-			return fmt.Errorf("error sending candle subscription message: %w", err)
+			return fmt.Errorf("error sending subscription message: %w", err)
 		}
 	}
 	return nil
@@ -101,19 +103,21 @@ func (c *WebsocketController) ping() {
 	defer pingTicker.Stop()
 
 	for {
+		if c.client == nil {
+			return
+		}
+		c.logger.Info().Msg("ping")
+		c.mu.Lock()
+		err := c.client.WriteMessage(1, []byte("ping"))
+		c.mu.Unlock()
+		if err != nil {
+			c.logger.Err(err).Msg("error sending ping message")
+		}
 		select {
 		case <-c.ctx.Done():
 			return
 		case <-pingTicker.C:
-			if c.client == nil {
-				return
-			}
-			c.mu.Lock()
-			err := c.client.WriteMessage(1, []byte("ping"))
-			c.mu.Unlock()
-			if err != nil {
-				return
-			}
+			continue
 		}
 	}
 }
@@ -125,6 +129,7 @@ func (c *WebsocketController) readWebSocket() {
 	for {
 		select {
 		case <-c.ctx.Done():
+			c.close()
 			return
 		case <-time.After(defaultReadNewWSMessage):
 			messageType, bz, err := c.client.ReadMessage()
@@ -133,12 +138,7 @@ func (c *WebsocketController) readWebSocket() {
 				c.reconnect()
 				return
 			}
-			if len(bz) > 0 {
-				if string(bz) == "pong" {
-					continue
-				}
-				c.messageHandler(messageType, bz)
-			}
+			c.readSuccess(messageType, bz)
 		case <-reconnectTicker.C:
 			c.reconnect()
 			return
@@ -146,20 +146,35 @@ func (c *WebsocketController) readWebSocket() {
 	}
 }
 
+func (c *WebsocketController) readSuccess(messageType int, bz []byte) {
+	c.logger.Info().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
+
+	if messageType != websocket.TextMessage || len(bz) <= 0 {
+		return
+	}
+	if string(bz) == "pong" {
+		c.client.PongHandler()
+		return
+	}
+	c.messageHandler(messageType, bz)
+}
+
 // close sends a close message to the websocket and sets the client to nil
 func (c *WebsocketController) close() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.logger.Info().Msg("closing websocket")
 	err := c.client.Close()
 	if err != nil {
 		c.logger.Err(err).Msg("error closing websocket")
 	}
-	c.mu.Lock()
 	c.client = nil
-	c.mu.Unlock()
 }
 
 // reconnect closes the current websocket and starts a new connection process
 func (c *WebsocketController) reconnect() {
 	c.close()
-	go c.start()
+	go c.Start()
 	telemetryWebsocketReconnect(c.providerName)
 }
