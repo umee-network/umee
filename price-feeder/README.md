@@ -28,6 +28,7 @@ The `price-feeder` tool is responsible for performing the following:
 The list of current supported providers:
 
 - [Binance](https://www.binance.com/en)
+- [Bitget](https://www.bitget.com/)
 - [Coinbase](https://www.coinbase.com/)
 - [Crypto](https://crypto.com/)
 - [FTX](https://ftx.com/)
