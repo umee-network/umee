@@ -125,7 +125,7 @@ func (c *WebsocketController) readWebSocket() {
 func (c *WebsocketController) close() {
 	err := c.client.Close()
 	if err != nil {
-		c.logger.Err(err).Msg(fmt.Sprintf("error closing websocket"))
+		c.logger.Err(err).Msg("error closing websocket")
 	}
 	c.mu.Lock()
 	c.client = nil
