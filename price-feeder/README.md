@@ -57,7 +57,7 @@ $ price-feeder /path/to/price_feeder_config.toml
 
 ### `telemetry`
 
-A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md).
+A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/3689d6f41ad8afa6e0f9b4ecb03b4d7f2d3a9e94/docs/docs/core/09-telemetry.md).
 
 ### `deviation`
 
@@ -121,7 +121,7 @@ functionality and for broadcasting signed pre-vote and vote oracle messages.
 ## Keyring
 
 Our keyring must be set up to sign transactions before running the price feeder.
-Additional info on the different keyring modes is available [here](https://docs.cosmos.network/master/run-node/keyring.html).
+Additional info on the different keyring modes is available [here](https://docs.cosmos.network/v0.46/run-node/keyring.html).
 **Please note that the `test` and `memory` modes are only for testing purposes.**
 **Do not use these modes for running the price feeder against mainnet.**
 
