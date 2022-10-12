@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -34,8 +33,6 @@ type (
 	// REF: https://mxcdevelop.github.io/apidocs/spot_v2_en/#k-line
 	// REF: https://mxcdevelop.github.io/apidocs/spot_v2_en/#overview
 	MexcProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -115,13 +112,11 @@ func NewMexcProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	subscriptionMsgs, _ := provider.getSubscriptionMsgs()
-
 	NewWebsocketController(
 		ctx,
 		ProviderMexc,
 		wsURL,
-		subscriptionMsgs,
+		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		mexcLogger,
 	).start()
@@ -129,24 +124,17 @@ func NewMexcProvider(
 	return provider, nil
 }
 
-func (p *MexcProvider) getSubscriptionMsgs() ([]string, error) {
-	messages := []string{}
+func (p *MexcProvider) getSubscriptionMsgs() []interface{} {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 
-	//Tickers
-	jsonMsg, err := json.Marshal(newMexcTickerSubscriptionMsg())
-	if err != nil {
-		return nil, err
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)+1)
+	for _, cp := range p.subscribedPairs {
+		mexcPair := currencyPairToMexcPair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newMexcCandleSubscriptionMsg(mexcPair))
 	}
-	messages = append(messages, string(jsonMsg))
-
-	// loop currency pairs
-	for i, cp := range cps {
-		pairs[i] = currencyPairToMexcPair(cp)
-	}
-
-	subsMsg := newMexcCandleSubscriptionMsg(cp)
-
-	return messages, nil
+	subscriptionMsgs = append(subscriptionMsgs, newMexcTickerSubscriptionMsg())
+	return subscriptionMsgs
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
@@ -183,55 +171,7 @@ func (p *MexcProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string]
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *MexcProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	return nil
-}
-
-// subscribeChannels subscribe to the ticker and candle channels for all currency pairs.
-func (p *MexcProvider) subscribeChannels(cps ...types.CurrencyPair) error {
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-
-	return p.subscribeCandles(cps...)
-}
-
-// subscribeTickers subscribe to the ticker channel for all currency pairs.
-func (p *MexcProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToMexcPair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribeCandles subscribe to the candle channel for all currency pairs.
-func (p *MexcProvider) subscribeCandles(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToMexcPair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *MexcProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
+	return nil // handled by the websocket controller
 }
 
 func (p *MexcProvider) getTickerPrice(key string) (types.TickerPrice, error) {
@@ -358,63 +298,6 @@ func (p *MexcProvider) setCandlePair(candleResp MexcCandleResponse) {
 	p.candles[candleResp.Symbol] = candleList
 }
 
-func (p *MexcProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
-	defer reconnectTicker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("mexc: could not read message")
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz)
-
-		case <-reconnectTicker.C:
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
-// reconnect closes the last WS connection then create a new one and subscribes to
-// all subscribed pairs in the ticker and candle pairs. If no ping is received
-// within 1 minute, the connection will be disconnected. It is recommended to
-// send a ping for 10-20 seconds
-func (p *MexcProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Mecx websocket %v", err)
-	}
-
-	p.logger.Debug().Msg("mexc: reconnecting websocket")
-
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderMexc,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-	telemetryWebsocketReconnect(ProviderMexc)
-
-	return p.subscribeChannels(p.subscribedPairsToSlice()...)
-}
-
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *MexcProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
@@ -423,19 +306,6 @@ func (p *MexcProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-// subscribePairs write the subscription msg to the provider.
-func (p *MexcProvider) subscribePairs(pairs ...string) error {
-	for _, cp := range pairs {
-		subsMsg := newMexcCandleSubscriptionMsg(cp)
-		err := p.wsClient.WriteJSON(subsMsg)
-		if err != nil {
-			return err
-		}
-	}
-	subsMsg := newMexcTickerSubscriptionMsg()
-	return p.wsClient.WriteJSON(subsMsg)
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.

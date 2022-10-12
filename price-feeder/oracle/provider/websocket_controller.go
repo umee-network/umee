@@ -20,7 +20,7 @@ type (
 		ctx              context.Context
 		providerName     Name
 		websocketUrl     url.URL
-		subscriptionMsgs []string
+		subscriptionMsgs []interface{}
 		messageHandler   MessageHandler
 		logger           zerolog.Logger
 		client           *websocket.Conn
@@ -32,7 +32,7 @@ func NewWebsocketController(
 	ctx context.Context,
 	providerName Name,
 	websocketUrl url.URL,
-	subscriptionMsgs []string,
+	subscriptionMsgs []interface{},
 	messageHandler MessageHandler,
 	logger zerolog.Logger,
 ) *WebsocketController {
@@ -86,9 +86,9 @@ func (c *WebsocketController) subscribe() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	for message := range c.subscriptionMsgs {
-		if err := c.client.WriteJSON(message); err != nil {
-			return fmt.Errorf("error sending ticker subscription message: %w", err)
+	for jsonMessage := range c.subscriptionMsgs {
+		if err := c.client.WriteJSON(jsonMessage); err != nil {
+			return fmt.Errorf("error sending candle subscription message: %w", err)
 		}
 	}
 	return nil
