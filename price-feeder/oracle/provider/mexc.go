@@ -112,14 +112,15 @@ func NewMexcProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	NewWebsocketController(
+	controller := NewWebsocketController(
 		ctx,
 		ProviderMexc,
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		mexcLogger,
-	).start()
+	)
+	go controller.start()
 
 	return provider, nil
 }

@@ -53,6 +53,7 @@ func (c *WebsocketController) start() {
 	for {
 		err := c.connect() // attempt first connection immediately
 		if err == nil {
+			go c.ping()
 			err = c.subscribe()
 			if err == nil {
 				go c.readWebSocket()
@@ -86,12 +87,35 @@ func (c *WebsocketController) subscribe() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	for jsonMessage := range c.subscriptionMsgs {
+	for _, jsonMessage := range c.subscriptionMsgs {
+		fmt.Printf("%+v\n", jsonMessage)
 		if err := c.client.WriteJSON(jsonMessage); err != nil {
 			return fmt.Errorf("error sending candle subscription message: %w", err)
 		}
 	}
 	return nil
+}
+
+func (c *WebsocketController) ping() {
+	pingTicker := time.NewTicker(defaultPingDuration)
+	defer pingTicker.Stop()
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case <-pingTicker.C:
+			if c.client == nil {
+				return
+			}
+			c.mu.Lock()
+			err := c.client.WriteMessage(1, []byte("ping"))
+			c.mu.Unlock()
+			if err != nil {
+				return
+			}
+		}
+	}
 }
 
 func (c *WebsocketController) readWebSocket() {
@@ -106,17 +130,18 @@ func (c *WebsocketController) readWebSocket() {
 			messageType, bz, err := c.client.ReadMessage()
 			if err != nil {
 				c.logger.Err(err).Msg("error reading websocket message")
-				if websocket.IsCloseError(err) {
-					c.reconnect()
-					return // stop reading from websocket after close error
-				}
-				continue // for other errors continue to try and read the next message
+				c.reconnect()
+				return
 			}
 			if len(bz) > 0 {
+				if string(bz) == "pong" {
+					continue
+				}
 				c.messageHandler(messageType, bz)
 			}
 		case <-reconnectTicker.C:
 			c.reconnect()
+			return
 		}
 	}
 }
