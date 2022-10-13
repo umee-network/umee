@@ -46,6 +46,10 @@ func NewWebsocketController(
 	}
 }
 
+// Start will contniously loop and attempt connecting to the websocket
+// until a successsful connection is made. It then starts the ping
+// service and read listener in new go routines and sends subscription
+// messages  using the passed in subscription messages
 func (c *WebsocketController) Start() {
 	connectTicker := time.NewTicker(defaultReconnectTime)
 	defer connectTicker.Stop()
@@ -85,6 +89,7 @@ func (c *WebsocketController) connect() error {
 	return nil
 }
 
+// subscribe sends the WebsocketControllers subscription messages to the websocket
 func (c *WebsocketController) subscribe() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -98,6 +103,7 @@ func (c *WebsocketController) subscribe() error {
 	return nil
 }
 
+// ping sends a ping to the server every defaultPingDuration
 func (c *WebsocketController) ping() {
 	pingTicker := time.NewTicker(defaultPingDuration)
 	defer pingTicker.Stop()
@@ -122,6 +128,9 @@ func (c *WebsocketController) ping() {
 	}
 }
 
+// readWebSocket contiously reads from the websocket and relays messages
+// to the passed in messageHandler. On websocket error this function
+// terminates and starts the reconnect process
 func (c *WebsocketController) readWebSocket() {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
