@@ -19,7 +19,7 @@ type (
 	WebsocketController struct {
 		ctx              context.Context
 		providerName     Name
-		websocketUrl     url.URL
+		websocketURL     url.URL
 		subscriptionMsgs []interface{}
 		messageHandler   MessageHandler
 		logger           zerolog.Logger
@@ -31,7 +31,7 @@ type (
 func NewWebsocketController(
 	ctx context.Context,
 	providerName Name,
-	websocketUrl url.URL,
+	websocketURL url.URL,
 	subscriptionMsgs []interface{},
 	messageHandler MessageHandler,
 	logger zerolog.Logger,
@@ -39,7 +39,7 @@ func NewWebsocketController(
 	return &WebsocketController{
 		ctx:              ctx,
 		providerName:     providerName,
-		websocketUrl:     websocketUrl,
+		websocketURL:     websocketURL,
 		subscriptionMsgs: subscriptionMsgs,
 		messageHandler:   messageHandler,
 		logger:           logger,
@@ -80,7 +80,7 @@ func (c *WebsocketController) connect() error {
 	defer c.mu.Unlock()
 
 	c.logger.Info().Msg("connecting to websocket")
-	conn, resp, err := websocket.DefaultDialer.Dial(c.websocketUrl.String(), nil)
+	conn, resp, err := websocket.DefaultDialer.Dial(c.websocketURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("error connecting to websocket: %w", err)
@@ -158,7 +158,7 @@ func (c *WebsocketController) readWebSocket() {
 func (c *WebsocketController) readSuccess(messageType int, bz []byte) {
 	c.logger.Info().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
 
-	if messageType != websocket.TextMessage || len(bz) <= 0 {
+	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
 	if string(bz) == "pong" {
