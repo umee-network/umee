@@ -15,7 +15,7 @@ type (
 	MessageHandler func(int, []byte)
 
 	// WebsocketController defines a provider agnostic websocket handler
-	// that manages reconnecting, subscribing, and recieiving messages
+	// that manages reconnecting, subscribing, and receiving messages
 	WebsocketController struct {
 		ctx              context.Context
 		providerName     Name
