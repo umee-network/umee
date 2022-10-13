@@ -126,7 +126,11 @@ func NewCryptoProvider(
 
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Crypto websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderCrypto,
+			err,
+		)
 	}
 	defer resp.Body.Close()
 
@@ -465,7 +469,11 @@ func (p *CryptoProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("crypto: error reconnecting to crypto websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderCrypto,
+			err,
+		)
 	}
 	p.wsClient = wsConn
 	telemetryWebsocketReconnect(ProviderCrypto)
