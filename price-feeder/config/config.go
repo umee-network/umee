@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
@@ -152,7 +154,7 @@ func (c Config) Validate() error {
 
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
-func ParseConfig(configPath string) (Config, error) {
+func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) (Config, error) {
 	var cfg Config
 
 	if configPath == "" {
@@ -216,9 +218,14 @@ func ParseConfig(configPath string) (Config, error) {
 		}
 	}
 
+	currencyProviderTracker, err := NewCurrencyProviderTracker(ctx, logger, cfg.CurrencyPairs...)
+	if err != nil {
+		return cfg, fmt.Errorf("failed to start currency provider tracker: %w", err)
+	}
+
 	for base, providers := range pairs {
-		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < 3 {
-			return cfg, fmt.Errorf("must have at least three providers for %s", base)
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < currencyProviderTracker.getCurrencyProviderMin()[base] {
+			return cfg, fmt.Errorf("must have at least %d providers for %s", currencyProviderTracker.getCurrencyProviderMin()[base], base)
 		}
 	}
 

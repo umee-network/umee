@@ -1,11 +1,13 @@
 package config_test
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/config"
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
@@ -199,7 +201,8 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	cfg, err := config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -276,7 +279,8 @@ enabled = false
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	cfg, err := config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -319,7 +323,8 @@ providers = [
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	_, err = config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -350,7 +355,8 @@ providers = [
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	_, err = config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -430,7 +436,8 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	cfg, err := config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -525,7 +532,8 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	_, err = config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -603,7 +611,8 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	os.Setenv("SERVER.READ_TIMEOUT", "10s")
 	os.Setenv("SERVER.VERBOSE_CORS", "false")
 
-	cfg, err := config.ParseConfig(tmpFile.Name())
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:888888", cfg.Server.ListenAddr)
