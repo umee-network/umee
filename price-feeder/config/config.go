@@ -218,14 +218,17 @@ func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) 
 		}
 	}
 
+	// Use currencyProviderTracker to check available exchanges for each currency pair
+	// and determine minimum amount of providers required for each pair
 	currencyProviderTracker, err := NewCurrencyProviderTracker(ctx, logger, cfg.CurrencyPairs...)
 	if err != nil {
 		return cfg, fmt.Errorf("failed to start currency provider tracker: %w", err)
 	}
 
 	for base, providers := range pairs {
-		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < currencyProviderTracker.getCurrencyProviderMin()[base] {
-			return cfg, fmt.Errorf("must have at least %d providers for %s", currencyProviderTracker.getCurrencyProviderMin()[base], base)
+		minProviders := currencyProviderTracker.getCurrencyProviderMin()[base]
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < minProviders {
+			return cfg, fmt.Errorf("must have at least %d providers for %s", minProviders, base)
 		}
 	}
 
