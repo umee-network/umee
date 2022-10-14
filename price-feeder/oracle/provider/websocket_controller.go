@@ -60,6 +60,7 @@ func (wsc *WebsocketController) Start() {
 
 	for {
 		if err := wsc.connect(); err != nil {
+			wsc.logger.Err(err).Send()
 			select {
 			case <-wsc.ctx.Done():
 				return
@@ -72,6 +73,7 @@ func (wsc *WebsocketController) Start() {
 		go wsc.ping()
 
 		if err := wsc.subscribe(); err != nil {
+			wsc.logger.Err(err).Send()
 			wsc.close()
 			continue
 		}
