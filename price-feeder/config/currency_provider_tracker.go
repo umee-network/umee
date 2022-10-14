@@ -88,8 +88,8 @@ func (t *CurrencyProviderTracker) getCurrencyProviders() map[string][]string {
 	return t.CurrencyProviders
 }
 
-func (t *CurrencyProviderTracker) getCurrencyProviderMin() map[string]int {
-	return t.CurrencyProviderMin
+func (t *CurrencyProviderTracker) getCurrencyProviderMin(base string) int {
+	return t.CurrencyProviderMin[base]
 }
 
 func (t *CurrencyProviderTracker) logCurrencyProviders() {

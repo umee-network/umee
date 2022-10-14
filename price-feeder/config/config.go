@@ -226,7 +226,7 @@ func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) 
 	}
 
 	for base, providers := range pairs {
-		minProviders := currencyProviderTracker.getCurrencyProviderMin()[base]
+		minProviders := currencyProviderTracker.getCurrencyProviderMin(base)
 		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < minProviders {
 			return cfg, fmt.Errorf("must have at least %d providers for %s", minProviders, base)
 		}
