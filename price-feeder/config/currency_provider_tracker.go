@@ -30,9 +30,9 @@ type (
 	CurrencyProviderTracker struct {
 		logger              zerolog.Logger
 		pairs               []CurrencyPair
-		coinIDSymbolMap     map[string]string    // ex: map["ATOM"] = "cosmos"
-		CurrencyProviders   map[string][]string  // map of price feeder currencies and what exchanges support them
-		CurrencyProviderMin map[string]int       // map of price feeder currencies and min required providers for them
+		coinIDSymbolMap     map[string]string   // ex: map["ATOM"] = "cosmos"
+		CurrencyProviders   map[string][]string // map of price feeder currencies and what exchanges support them
+		CurrencyProviderMin map[string]int      // map of price feeder currencies and min required providers for them
 	}
 
 	// List of assets on CoinGecko and their corresponding id and symbol.
