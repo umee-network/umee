@@ -69,8 +69,7 @@ func TestComputeVWAP(t *testing.T) {
 		tc := tc
 
 		t.Run(name, func(t *testing.T) {
-			vwap, err := oracle.ComputeVWAP(tc.prices)
-			require.NoError(t, err)
+			vwap := oracle.ComputeVWAP(tc.prices)
 			require.Len(t, vwap, len(tc.expected))
 
 			for k, v := range tc.expected {

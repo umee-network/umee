@@ -121,7 +121,11 @@ func NewKrakenProvider(
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderKraken,
+			err,
+		)
 	}
 
 	provider := &KrakenProvider{
@@ -468,7 +472,11 @@ func (p *KrakenProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error connecting to Kraken websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderKraken,
+			err,
+		)
 	}
 	p.wsClient = wsConn
 	telemetryWebsocketReconnect(ProviderKraken)

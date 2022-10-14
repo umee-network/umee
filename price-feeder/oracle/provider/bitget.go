@@ -129,7 +129,11 @@ func NewBitgetProvider(
 
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Bitget websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderBitget,
+			err,
+		)
 	}
 	defer resp.Body.Close()
 
@@ -408,7 +412,11 @@ func (p *BitgetProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error reconnecting to Bitget websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderBitget,
+			err,
+		)
 	}
 	p.wsClient = wsConn
 

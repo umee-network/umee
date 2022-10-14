@@ -124,7 +124,11 @@ func NewOkxProvider(
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Okx websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderOkx,
+			err,
+		)
 	}
 
 	provider := &OkxProvider{
@@ -417,7 +421,11 @@ func (p *OkxProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error reconnecting to Okx websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderOkx,
+			err,
+		)
 	}
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn

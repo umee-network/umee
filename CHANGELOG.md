@@ -46,6 +46,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### State Machine Breaking
+
+- [1474](https://github.com/umee-network/umee/pull/1474) Enabled all Gravity Bridge claims.
+- [1479](https://github.com/umee-network/umee/pull/1479) Add MsgSupplyCollateral.
+
+### Fixes
+
+- [1471](https://github.com/umee-network/umee/pull/1471) Fix slash window progress query.
+
 ## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
 
 ### Fixes

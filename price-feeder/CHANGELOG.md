@@ -50,12 +50,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
 
+### Features
+
+- [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
+
+### Improvements
+
+- [1484](https://github.com/umee-network/umee/pull/1484) Standardize websocket connection error for providers.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
 
 - [1328](https://github.com/umee-network/umee/pull/1328) Add bitget provider.
 - [1339](https://github.com/umee-network/umee/pull/1339) Add mexc provider.
+- [1445](https://github.com/umee-network/umee/pull/1445) Add computed prices api endpoints for debugging.
 
 ### Bugs
 

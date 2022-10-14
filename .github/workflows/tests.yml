@@ -131,7 +131,7 @@ jobs:
           path: ./cmd/umeed/umeed
           key: umeed-linux-amd64
 
-      - name: Move new version binary to build folder 
+      - name: Move new version binary to build folder
         if: steps.cache-binaries.outputs.cache-hit == 'true'
         run: |
           mkdir -p build
@@ -147,55 +147,3 @@ jobs:
         run: |
           sleep 1m
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
-
-  mainnet-upgrade-v1-v3:
-    needs: build-umeed
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
-        with:
-          PATTERNS: |
-            **/**.go
-            go.mod
-            go.sum
-
-      - name: Cache updated version binary
-        id: cache-binaries
-        uses: actions/cache@v3
-        with:
-          path: ./cmd/umeed/umeed
-          key: umeed-linux-amd64
-
-      - name: Move new version binary to build folder 
-        if: steps.cache-binaries.outputs.cache-hit == 'true'
-        run: |
-          mkdir -p build
-          cp ./cmd/umeed/umeed ./build/umeed
-          chmod +x ./build/umeed
-
-      - name: cache umeed mainnet
-        uses: actions/cache@v3
-        id: umeed-v112
-        with:
-          path: ./contrib/scripts/umeed-releases/umeed-v1.1.2-linux-amd64/umeed
-          key: umeed-v112
-      - name: download mainnet binary
-        if: steps.umeed-v112.outputs.cache-hit != 'true'
-        run: |
-          ./contrib/scripts/download-mainnet-umeed.sh
-      - name: cache mainnet tinkered genesis
-        uses: actions/cache@v3
-        id: tinkered-genesis-sep-15
-        with:
-          path: ./contrib/scripts/mainnet_tinkered_genesis.json
-          key: tinkered-genesis-sep-15
-      - name: tinkerer mainnet genesis
-        if: steps.tinkered-genesis-sep-15.outputs.cache-hit != 'true'
-        run: |
-          ./contrib/scripts/tinker-mainnet-genesis.sh
-      - name: Fork mainnet and upgrade from v1.1.2 to v.3.x.x
-        if: env.GIT_DIFF && steps.cache-binaries.outputs.cache-hit == 'true'
-        run: |
-          ./contrib/scripts/umeemainnet_fork.sh
