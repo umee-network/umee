@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
 type (
@@ -23,11 +24,14 @@ type (
 		subscriptionMsgs []interface{}
 		messageHandler   MessageHandler
 		logger           zerolog.Logger
-		client           *websocket.Conn
-		mu               sync.Mutex
+
+		mtx    sync.Mutex
+		client *websocket.Conn
 	}
 )
 
+// NewWebsocketController does nothing except initialize a new WebsocketController
+// and provider a reminder for what fields need to be passed in.
 func NewWebsocketController(
 	ctx context.Context,
 	providerName Name,
@@ -46,81 +50,82 @@ func NewWebsocketController(
 	}
 }
 
-// Start will contniously loop and attempt connecting to the websocket
-// until a successsful connection is made. It then starts the ping
+// Start will continuously loop and attempt connecting to the websocket
+// until a successful connection is made. It then starts the ping
 // service and read listener in new go routines and sends subscription
 // messages  using the passed in subscription messages
-func (c *WebsocketController) Start() {
+func (wsc *WebsocketController) Start() {
 	connectTicker := time.NewTicker(defaultReconnectTime)
 	defer connectTicker.Stop()
 
 	for {
-		err := c.connect()
-		if err == nil {
-			go c.readWebSocket()
-			go c.ping()
-			err = c.subscribe()
-			if err == nil {
+		if err := wsc.connect(); err != nil {
+			select {
+			case <-wsc.ctx.Done():
 				return
+			case <-connectTicker.C:
+				continue
 			}
-			c.close()
 		}
-		select {
-		case <-c.ctx.Done():
-			return
-		case <-connectTicker.C:
+
+		go wsc.readWebSocket()
+		go wsc.ping()
+
+		if err := wsc.subscribe(); err != nil {
+			wsc.close()
 			continue
 		}
+		return
 	}
 }
 
 // connect dials the websocket and sets the client to the established connection
-func (c *WebsocketController) connect() error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (wsc *WebsocketController) connect() error {
+	wsc.mtx.Lock()
+	defer wsc.mtx.Unlock()
 
-	c.logger.Info().Msg("connecting to websocket")
-	conn, resp, err := websocket.DefaultDialer.Dial(c.websocketURL.String(), nil)
+	wsc.logger.Debug().Msg("connecting to websocket")
+	conn, resp, err := websocket.DefaultDialer.Dial(wsc.websocketURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error connecting to websocket: %w", err)
+		return fmt.Errorf(types.ErrWebsocketDial.Error(), wsc.providerName, err)
 	}
-	c.client = conn
+	wsc.client = conn
 	return nil
 }
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket
-func (c *WebsocketController) subscribe() error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (wsc *WebsocketController) subscribe() error {
+	wsc.mtx.Lock()
+	defer wsc.mtx.Unlock()
 
-	for _, jsonMessage := range c.subscriptionMsgs {
-		c.logger.Info().Msg(fmt.Sprintf("sending message: %+v", jsonMessage))
-		if err := c.client.WriteJSON(jsonMessage); err != nil {
-			return fmt.Errorf("error sending subscription message: %w", err)
+	for _, jsonMessage := range wsc.subscriptionMsgs {
+		wsc.logger.Debug().Interface("msg", jsonMessage).Msg("sending websocket message")
+		if err := wsc.client.WriteJSON(jsonMessage); err != nil {
+			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
 	}
 	return nil
 }
 
 // ping sends a ping to the server every defaultPingDuration
-func (c *WebsocketController) ping() {
+func (wsc *WebsocketController) ping() {
 	pingTicker := time.NewTicker(defaultPingDuration)
 	defer pingTicker.Stop()
 
 	for {
-		if c.client == nil {
+		if wsc.client == nil {
 			return
 		}
-		c.logger.Info().Msg("ping")
-		c.mu.Lock()
-		err := c.client.WriteMessage(1, []byte("ping"))
-		c.mu.Unlock()
+		wsc.logger.Debug().Msg("ping")
+		wsc.mtx.Lock()
+		err := wsc.client.WriteMessage(1, []byte("ping"))
+		wsc.mtx.Unlock()
 		if err != nil {
-			c.logger.Err(err).Msg("error sending ping message")
+			wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
 		}
 		select {
-		case <-c.ctx.Done():
+		case <-wsc.ctx.Done():
 			return
 		case <-pingTicker.C:
 			continue
@@ -131,59 +136,58 @@ func (c *WebsocketController) ping() {
 // readWebSocket contiously reads from the websocket and relays messages
 // to the passed in messageHandler. On websocket error this function
 // terminates and starts the reconnect process
-func (c *WebsocketController) readWebSocket() {
+func (wsc *WebsocketController) readWebSocket() {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
 
 	for {
 		select {
-		case <-c.ctx.Done():
-			c.close()
+		case <-wsc.ctx.Done():
+			wsc.close()
 			return
 		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := c.client.ReadMessage()
+			messageType, bz, err := wsc.client.ReadMessage()
 			if err != nil {
-				c.logger.Err(err).Msg("error reading websocket message")
-				c.reconnect()
+				wsc.logger.Err(fmt.Errorf(types.ErrWebsocketRead.Error(), wsc.providerName, err)).Send()
+				wsc.reconnect()
 				return
 			}
-			c.readSuccess(messageType, bz)
+			wsc.readSuccess(messageType, bz)
 		case <-reconnectTicker.C:
-			c.reconnect()
+			wsc.reconnect()
 			return
 		}
 	}
 }
 
-func (c *WebsocketController) readSuccess(messageType int, bz []byte) {
-	c.logger.Info().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
+func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
+	wsc.logger.Debug().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
 
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
 	if string(bz) == "pong" {
-		c.client.PongHandler()
+		wsc.client.PongHandler()
 		return
 	}
-	c.messageHandler(messageType, bz)
+	wsc.messageHandler(messageType, bz)
 }
 
 // close sends a close message to the websocket and sets the client to nil
-func (c *WebsocketController) close() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (wsc *WebsocketController) close() {
+	wsc.mtx.Lock()
+	defer wsc.mtx.Unlock()
 
-	c.logger.Info().Msg("closing websocket")
-	err := c.client.Close()
-	if err != nil {
-		c.logger.Err(err).Msg("error closing websocket")
+	wsc.logger.Debug().Msg("closing websocket")
+	if err := wsc.client.Close(); err != nil {
+		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketClose.Error(), wsc.providerName, err)).Send()
 	}
-	c.client = nil
+	wsc.client = nil
 }
 
 // reconnect closes the current websocket and starts a new connection process
-func (c *WebsocketController) reconnect() {
-	c.close()
-	go c.Start()
-	telemetryWebsocketReconnect(c.providerName)
+func (wsc *WebsocketController) reconnect() {
+	wsc.close()
+	go wsc.Start()
+	telemetryWebsocketReconnect(wsc.providerName)
 }
