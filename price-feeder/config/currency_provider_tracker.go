@@ -19,8 +19,6 @@ const (
 	trackingPeriod           = time.Hour * 24
 )
 
-var CurrencyProviders = make(map[string][]string)
-
 type (
 	// CurrencyProviderTracker queries the CoinGecko API for all the exchanges that
 	// support the currency pairs set in the price feeder config. It will poll the API
