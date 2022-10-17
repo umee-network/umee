@@ -16,7 +16,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.0
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/ignite/cli v0.24.0
+	github.com/ignite/cli v0.24.1
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0
 	github.com/rs/zerolog v1.28.0
