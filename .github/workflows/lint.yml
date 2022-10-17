@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/*.go
@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
-      - uses: technote-space/get-diff-action@v6
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/*.proto
