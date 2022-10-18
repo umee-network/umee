@@ -18,6 +18,10 @@ threshold = "1.5"
 base = "ATOM"
 threshold = "1.5"
 
+[[deviation_thresholds]]
+base = "USDC"
+threshold = "1.5"
+
 [[currency_pairs]]
 base = "UMEE"
 providers = [
@@ -56,6 +60,15 @@ providers = [
   "kraken",
 ]
 quote = "USD"
+
+[[currency_pairs]]
+base = "USDC"
+providers = [
+  "okx",
+  "bitget",
+  "kraken",
+]
+quote = "USDT"
 
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
