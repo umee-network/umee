@@ -1317,8 +1317,8 @@ github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb/go.mod h1:p6/9i/72keNtS2PNNBu8Rebzd7K+GbFWJNWo/MojBto=
 github.com/umee-network/bech32-ibc v0.3.0 h1:WP0w6hG/B9WJ5hfUNx7Hd9pE0MJR/Lp9Y1NPjh03/40=
 github.com/umee-network/bech32-ibc v0.3.0/go.mod h1:PqMePY74J6wqJH7Yai1l94rPsEe6QVa9X8gt5/M5nIo=
-github.com/umee-network/cosmos-sdk v0.46.3-rc2-umee h1:BF6eqVQIL+NLw2ByDWGBeKLbF76s7pPDzh4CuOZZHVI=
-github.com/umee-network/cosmos-sdk v0.46.3-rc2-umee/go.mod h1:gE/3fqh8ek9b+Xk8CtdjOC+2rcQlfpg8ksqrbrcs4VM=
+github.com/umee-network/cosmos-sdk v0.46.3-rc3-umee h1:Ca41CUXgtchLh+yjeAQCeYdNktImrsKBZAqDYBavOt0=
+github.com/umee-network/cosmos-sdk v0.46.3-rc3-umee/go.mod h1:gE/3fqh8ek9b+Xk8CtdjOC+2rcQlfpg8ksqrbrcs4VM=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1 h1:+mkCCcOFKPnCmVYVcURKps1Xe+3zP90gSYGNfRkjoIY=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
