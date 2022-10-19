@@ -134,7 +134,7 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 }
 
 // setCurrencyProviderMin will set the minimum amount of providers for each currency
-// to the amount of exchanges that support them if its less than 3. Otherwise it is
+// to the amount of exchanges that support them if it's less than 3. Otherwise it is
 // set to 3 providers.
 func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
 	for base, exchanges := range t.CurrencyProviders {
