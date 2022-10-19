@@ -13,7 +13,7 @@ This is a state machine breaking release. Coordinated update is required.
 ### Gravity Bridge
 
 This is the second step for enabling Gravity Bridge.
-We enable all messages and Peggo was updated to handle the bridge pause.
+We enable all messages. Peggo was updated to handle the bridge pause.
 
 ### Update instructions
 
