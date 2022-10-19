@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
+- [1496](https://github.com/umee-network/umee/pull/1496) Dynamic provider minimum enforcement with CoinGecko API.
 
 ### Improvements
 
