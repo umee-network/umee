@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	coinGeckoRestUrl         = "https://api.coingecko.com/api/v3/coins"
+	coinGeckoRestURL         = "https://api.coingecko.com/api/v3/coins"
 	coinGeckoListEndpoint    = "list"
 	coinGeckoTickersEndpoint = "tickers"
 	trackingPeriod           = time.Hour * 24
@@ -89,7 +89,7 @@ func (t *CurrencyProviderTracker) logCurrencyProviders() {
 
 // setCoinIDSymbolMap gets list of assets on coingecko to cross reference coin symbol to id.
 func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
-	resp, err := http.Get(fmt.Sprintf("%s/%s", coinGeckoRestUrl, coinGeckoListEndpoint))
+	resp, err := http.Get(fmt.Sprintf("%s/%s", coinGeckoRestURL, coinGeckoListEndpoint))
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 	for _, pair := range t.pairs {
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
-		resp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestUrl, pairBaseID, coinGeckoTickersEndpoint))
+		resp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
 		if err != nil {
 			return err
 		}
