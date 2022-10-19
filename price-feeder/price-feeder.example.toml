@@ -93,8 +93,6 @@ global-labels = [["chain_id", "umee-local-testnet"]]
 service-name = "price-feeder"
 prometheus-retention-time = 100
 
-provider_min_override = false
-
 [[provider_endpoints]]
 name = "binance"
 rest = "https://api1.binance.com"
