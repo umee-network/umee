@@ -66,16 +66,17 @@ var (
 type (
 	// Config defines all necessary price-feeder configuration parameters.
 	Config struct {
-		Server            Server              `mapstructure:"server"`
-		CurrencyPairs     []CurrencyPair      `mapstructure:"currency_pairs" validate:"required,gt=0,dive,required"`
-		Deviations        []Deviation         `mapstructure:"deviation_thresholds"`
-		Account           Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
-		Keyring           Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
-		RPC               RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
-		Telemetry         telemetry.Config    `mapstructure:"telemetry"`
-		GasAdjustment     float64             `mapstructure:"gas_adjustment" validate:"required"`
-		ProviderTimeout   string              `mapstructure:"provider_timeout"`
-		ProviderEndpoints []provider.Endpoint `mapstructure:"provider_endpoints" validate:"dive"`
+		Server              Server              `mapstructure:"server"`
+		CurrencyPairs       []CurrencyPair      `mapstructure:"currency_pairs" validate:"required,gt=0,dive,required"`
+		Deviations          []Deviation         `mapstructure:"deviation_thresholds"`
+		Account             Account             `mapstructure:"account" validate:"required,gt=0,dive,required"`
+		Keyring             Keyring             `mapstructure:"keyring" validate:"required,gt=0,dive,required"`
+		RPC                 RPC                 `mapstructure:"rpc" validate:"required,gt=0,dive,required"`
+		Telemetry           telemetry.Config    `mapstructure:"telemetry"`
+		GasAdjustment       float64             `mapstructure:"gas_adjustment" validate:"required"`
+		ProviderTimeout     string              `mapstructure:"provider_timeout"`
+		ProviderMinOverride bool                `mapstructure:"provider_min_override"`
+		ProviderEndpoints   []provider.Endpoint `mapstructure:"provider_endpoints" validate:"dive"`
 	}
 
 	// Server defines the API server configuration.
@@ -154,7 +155,7 @@ func (c Config) Validate() error {
 
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
-func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) (Config, error) {
+func ParseConfig(configPath string) (Config, error) {
 	var cfg Config
 
 	if configPath == "" {
@@ -218,20 +219,6 @@ func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) 
 		}
 	}
 
-	// Use currencyProviderTracker to check available exchanges for each currency pair
-	// and determine minimum amount of providers required for each pair
-	currencyProviderTracker, err := NewCurrencyProviderTracker(ctx, logger, cfg.CurrencyPairs...)
-	if err != nil {
-		return cfg, fmt.Errorf("failed to start currency provider tracker: %w", err)
-	}
-
-	for base, providers := range pairs {
-		minProviders := currencyProviderTracker.getCurrencyProviderMin(base)
-		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < minProviders {
-			return cfg, fmt.Errorf("must have at least %d providers for %s", minProviders, base)
-		}
-	}
-
 	gatePairs := []string{}
 	for base, providers := range pairs {
 		if _, ok := providers[provider.ProviderGate]; ok {
@@ -254,4 +241,46 @@ func ParseConfig(ctx context.Context, logger zerolog.Logger, configPath string) 
 	}
 
 	return cfg, cfg.Validate()
+}
+
+// CheckProviderMins starts the currency provider tracker to check the amount of
+// providers available for a currency by querying CoinGecko's API. It will enforce
+// a provider minimum for a given currency based on its available providers.
+func CheckProviderMins(ctx context.Context, logger zerolog.Logger, cfg Config) error {
+	currencyProviderTracker, err := NewCurrencyProviderTracker(ctx, logger, cfg.CurrencyPairs...)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to start currency provider tracker")
+		// If currency tracker errors out and override flag is set, the price-feeder
+		// will run without enforcing provider minimums.
+		if cfg.ProviderMinOverride {
+			return nil
+		}
+	}
+
+	pairs := make(map[string]map[provider.Name]struct{})
+	for _, cp := range cfg.CurrencyPairs {
+		if _, ok := pairs[cp.Base]; !ok {
+			pairs[cp.Base] = make(map[provider.Name]struct{})
+		}
+		for _, provider := range cp.Providers {
+
+			pairs[cp.Base][provider] = struct{}{}
+		}
+	}
+
+	for base, providers := range pairs {
+		// If currency provider tracker errored, default to three providers as
+		// the minimum.
+		var minProviders int
+		if currencyProviderTracker != nil {
+			minProviders = currencyProviderTracker.CurrencyProviderMin[base]
+		} else {
+			minProviders = 3
+		}
+		if _, ok := pairs[base][provider.ProviderMock]; !ok && len(providers) < minProviders {
+			return fmt.Errorf("must have at least %d providers for %s", minProviders, base)
+		}
+	}
+
+	return nil
 }

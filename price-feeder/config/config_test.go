@@ -201,8 +201,7 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	cfg, err := config.ParseConfig(tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -279,8 +278,7 @@ enabled = false
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	cfg, err := config.ParseConfig(tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -323,8 +321,7 @@ providers = [
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	_, err = config.ParseConfig(tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -355,8 +352,7 @@ providers = [
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	_, err = config.ParseConfig(tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -436,8 +432,7 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	cfg, err := config.ParseConfig(tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:99999", cfg.Server.ListenAddr)
@@ -532,8 +527,7 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	_, err = tmpFile.Write(content)
 	require.NoError(t, err)
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	_, err = config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	_, err = config.ParseConfig(tmpFile.Name())
 	require.Error(t, err)
 }
 
@@ -611,8 +605,7 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	os.Setenv("SERVER.READ_TIMEOUT", "10s")
 	os.Setenv("SERVER.VERBOSE_CORS", "false")
 
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
-	cfg, err := config.ParseConfig(context.TODO(), logger, tmpFile.Name())
+	cfg, err := config.ParseConfig(tmpFile.Name())
 	require.NoError(t, err)
 
 	require.Equal(t, "0.0.0.0:888888", cfg.Server.ListenAddr)
@@ -625,4 +618,143 @@ global-labels = [["chain-id", "umee-local-testnet"]]
 	require.Len(t, cfg.CurrencyPairs[0].Providers, 3)
 	require.Equal(t, provider.ProviderKraken, cfg.CurrencyPairs[0].Providers[0])
 	require.Equal(t, provider.ProviderBinance, cfg.CurrencyPairs[0].Providers[1])
+}
+
+func TestCheckProviderMins_Valid(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	content := []byte(`
+gas_adjustment = 1.5
+
+[server]
+listen_addr = "0.0.0.0:99999"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
+
+[[currency_pairs]]
+base = "ATOM"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[[currency_pairs]]
+base = "UMEE"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[[currency_pairs]]
+base = "USDT"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[account]
+address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
+chain_id = "umee-local-testnet"
+
+[keyring]
+backend = "test"
+dir = "/Users/username/.umee"
+pass = "keyringPassword"
+
+[rpc]
+tmrpc_endpoint = "http://localhost:26657"
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100ms"
+
+[telemetry]
+enabled = false
+`)
+	_, err = tmpFile.Write(content)
+	require.NoError(t, err)
+
+	cfg, err := config.ParseConfig(tmpFile.Name())
+	require.NoError(t, err)
+
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	err = config.CheckProviderMins(context.TODO(), logger, cfg)
+	require.NoError(t, err)
+}
+
+func TestCheckProviderMins_Invalid(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "price-feeder*.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
+
+	content := []byte(`
+gas_adjustment = 1.5
+
+[server]
+listen_addr = "0.0.0.0:99999"
+read_timeout = "20s"
+verbose_cors = true
+write_timeout = "20s"
+
+[[currency_pairs]]
+base = "ATOM"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+]
+
+[[currency_pairs]]
+base = "UMEE"
+quote = "USDT"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[[currency_pairs]]
+base = "USDT"
+quote = "USD"
+providers = [
+	"kraken",
+	"binance",
+	"huobi"
+]
+
+[account]
+address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+validator = "umeevalcons14rjlkfzp56733j5l5nfk6fphjxymgf8mj04d5p"
+chain_id = "umee-local-testnet"
+
+[keyring]
+backend = "test"
+dir = "/Users/username/.umee"
+pass = "keyringPassword"
+
+[rpc]
+tmrpc_endpoint = "http://localhost:26657"
+grpc_endpoint = "localhost:9090"
+rpc_timeout = "100ms"
+
+[telemetry]
+enabled = false
+`)
+	_, err = tmpFile.Write(content)
+	require.NoError(t, err)
+
+	cfg, err := config.ParseConfig(tmpFile.Name())
+	require.NoError(t, err)
+
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	err = config.CheckProviderMins(context.TODO(), logger, cfg)
+	require.EqualError(t, err, "must have at least 3 providers for ATOM")
 }

@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	coinGeckoRestHost        = "https://api.coingecko.com/"
-	coinGeckoRestPath        = "api/v3/coins/"
+	coinGeckoRestUrl         = "https://api.coingecko.com/api/v3/coins"
 	coinGeckoListEndpoint    = "list"
 	coinGeckoTickersEndpoint = "tickers"
 	trackingPeriod           = time.Hour * 24
@@ -34,22 +33,22 @@ type (
 	}
 
 	// List of assets on CoinGecko and their corresponding id and symbol.
-	CoinGeckoCoinList struct {
+	coinList struct {
 		ID     string `json:"id"`     // ex: "cosmos"
 		Symbol string `json:"symbol"` // ex: "ATOM"
 	}
 
 	// CoinGecko ticker shows market data for a given currency pair including what
 	// exchanges they're on.
-	CoinGeckoCoinTickerResponse struct {
-		Tickers []CoinGeckoCoinTicker `json:"tickers"`
+	coinTickerResponse struct {
+		Tickers []coinTicker `json:"tickers"`
 	}
-	CoinGeckoCoinTicker struct {
-		Base   string              `json:"base"`   // CurrencyPair.Base
-		Target string              `json:"target"` // CurrencyPair.Quote
-		Market CoinGeckoCoinMarket `json:"market"`
+	coinTicker struct {
+		Base   string     `json:"base"`   // CurrencyPair.Base
+		Target string     `json:"target"` // CurrencyPair.Quote
+		Market coinMarket `json:"market"`
 	}
-	CoinGeckoCoinMarket struct {
+	coinMarket struct {
 		Name string `json:"name"` // ex: Binance
 	}
 )
@@ -82,29 +81,21 @@ func NewCurrencyProviderTracker(
 	return currencyProviderTracker, nil
 }
 
-func (t *CurrencyProviderTracker) getCurrencyProviders() map[string][]string {
-	return t.CurrencyProviders
-}
-
-func (t *CurrencyProviderTracker) getCurrencyProviderMin(base string) int {
-	return t.CurrencyProviderMin[base]
-}
-
 func (t *CurrencyProviderTracker) logCurrencyProviders() {
 	for currency, providers := range t.CurrencyProviders {
-		t.logger.Info().Msg(fmt.Sprintf("Providers supporting %s: %v", currency, providers))
+		t.logger.Info().Msg(fmt.Sprintf("providers supporting %s: %v", currency, providers))
 	}
 }
 
 // setCoinIDSymbolMap gets list of assets on coingecko to cross reference coin symbol to id.
 func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
-	resp, err := http.Get(coinGeckoRestHost + coinGeckoRestPath + coinGeckoListEndpoint)
+	resp, err := http.Get(fmt.Sprintf("%s/%s", coinGeckoRestUrl, coinGeckoListEndpoint))
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	var listResponse []CoinGeckoCoinList
+	var listResponse []coinList
 	if err := json.NewDecoder(resp.Body).Decode(&listResponse); err != nil {
 		return err
 	}
@@ -117,17 +108,17 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 }
 
 // setCurrencyProviders queries CoinGecko's tickers endpoint to get all the exchanges that
-// support each price feeder currency pair and store it in the CurrencyProviders map
+// support each price feeder currency pair and store it in the CurrencyProviders map.
 func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 	for _, pair := range t.pairs {
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
-		resp, err := http.Get(coinGeckoRestHost + coinGeckoRestPath + pairBaseID + "/" + coinGeckoTickersEndpoint)
+		resp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestUrl, pairBaseID, coinGeckoTickersEndpoint))
 		if err != nil {
 			return err
 		}
 		defer resp.Body.Close()
 
-		var tickerResponse CoinGeckoCoinTickerResponse
+		var tickerResponse coinTickerResponse
 		if err = json.NewDecoder(resp.Body).Decode(&tickerResponse); err != nil {
 			return err
 		}
@@ -146,7 +137,7 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 // to the amount of exchanges that support them if its less than 3. Otherwise it is
 // set to 3 providers.
 func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
-	for base, exchanges := range t.getCurrencyProviders() {
+	for base, exchanges := range t.CurrencyProviders {
 		if len(exchanges) < 3 {
 			t.CurrencyProviderMin[base] = len(exchanges)
 		} else {
@@ -156,7 +147,7 @@ func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
 }
 
 // trackCurrencyProviders resets CurrencyProviders map and logs out supported
-// exchanges for each currency every 24 hours
+// exchanges for each currency every 24 hours.
 func (t *CurrencyProviderTracker) trackCurrencyProviders(ctx context.Context) {
 	t.logCurrencyProviders()
 
