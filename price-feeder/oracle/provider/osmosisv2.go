@@ -180,7 +180,11 @@ func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) 
 	return nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker, pairs ...types.CurrencyPair) {
+func (p *OsmosisV2Provider) messageReceived(
+	messageType int,
+	bz []byte, reconnectTicker *time.Ticker,
+	pairs ...types.CurrencyPair,
+) {
 	if messageType != websocket.TextMessage {
 		return
 	}
