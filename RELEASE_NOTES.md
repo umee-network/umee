@@ -6,6 +6,10 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v3.0.3
+
+This release contains SDK patch related to [Dragonberry](https://forum.cosmos.network/t/ibc-security-advisory-dragonberry/7702) security advisory.
+
 ## v3.0.2
 
 Gravity Bridge update. In v3.0.0 we enabled Gravity Bridge, but there was an error in the way how the
