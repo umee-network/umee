@@ -15,7 +15,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
@@ -820,9 +819,6 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 	// Register new tendermint queries routes from grpc-gateway.
 	tmservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
-	// Register node gRPC service for grpc-gateway.
-	nodeservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
-
 	// Register grpc-gateway routes for all modules.
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
@@ -845,10 +841,6 @@ func (app *UmeeApp) RegisterTendermintService(clientCtx client.Context) {
 		app.interfaceRegistry,
 		app.Query,
 	)
-}
-
-func (app *UmeeApp) RegisterNodeService(clientCtx client.Context) {
-	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
 }
 
 // GetBaseApp is used solely for testing purposes.
