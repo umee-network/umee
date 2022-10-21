@@ -61,6 +61,7 @@ var (
 		"DAI":    {},
 		"BTC":    {},
 		"ETH":    {},
+		"ATOM":   {},
 	}
 )
 
@@ -268,6 +269,8 @@ func CheckProviderMins(ctx context.Context, logger zerolog.Logger, cfg Config) e
 			pairs[cp.Base][provider] = struct{}{}
 		}
 	}
+
+	fmt.Println("pairs", pairs)
 
 	for base, providers := range pairs {
 		// If currency provider tracker errored, default to three providers as

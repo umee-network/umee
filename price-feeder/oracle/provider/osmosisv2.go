@@ -10,27 +10,26 @@ import (
 	"sync"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-
-	"github.com/umee-network/umee/v3/util/coin"
 )
 
 const (
-	osmosisV2WSHost    = ""
-	osmosisV2WSPath    = ""
-	osmosisV2RestHost  = "https://api-osmosis.imperator.co"
-	osmosisV2RestPath  = "/pairs/v1/summary"
+	osmosisV2WSHost   = "api.osmo-api.network.umee.cc"
+	osmosisV2WSPath   = "ws"
+	osmosisV2RestHost = "https://api-osmosis.imperator.co"
+	osmosisV2RestPath = "/pairs/v1/summary"
 )
 
 var _ Provider = (*OsmosisV2Provider)(nil)
 
 type (
-	// OsmosisProvider defines an Oracle provider implemented by the Osmosis public
-	// API.
+	// OsmosisV2Provider defines an Oracle provider implemented by UMEE's
+	// Osmosis API.
 	//
-	// REF: https://api-osmosis.imperator.co/swagger/
+	// REF: https://github.com/umee-network/osmosis-api
 	OsmosisV2Provider struct {
 		wsURL           url.URL
 		wsClient        *websocket.Conn
@@ -42,27 +41,15 @@ type (
 		subscribedPairs map[string]types.CurrencyPair  // Symbol => types.CurrencyPair
 	}
 
-	OsmosisV2TickerResponse struct {
-		Pool        string          `json:"pool"`         // ex.: ATOMUSDT
-		TickerPrice OsmosisV2Ticker `json:"ticker_price"`
-	}
 	OsmosisV2Ticker struct {
-		Price  float64 `json:"price"`
-		Volume float64 `json:"volume"`
+		Price  string `json:"Price"`
+		Volume string `json:"Volume"`
 	}
 
-	OsmosisV2CandleResponse struct {
-		Pool        string          `json:"pool"`         // ex.: ATOMUSDT
-		TickerPrice OsmosisV2Candle `json:"candle_price"`
-	}
 	OsmosisV2Candle struct {
-		Time   int64   `json:"time"`
-		Close  float64 `json:"close"`
-		Volume float64 `json:"volume"`
-	}
-
-	OsmosisV2SubscriptionMsg struct {
-
+		Close   string `json:"Close"`
+		Volume  string `json:"Volume"`
+		EndTime int64  `json:"EndTime"`
 	}
 
 	// OsmosisV2PairsSummary defines the response structure for an Osmosis pairs
@@ -111,18 +98,14 @@ func NewOsmosisV2Provider(
 	provider := &OsmosisV2Provider{
 		wsURL:           wsURL,
 		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "crypto").Logger(),
+		logger:          logger.With().Str("provider", "osmosisv2").Logger(),
 		endpoints:       endpoints,
 		tickers:         map[string]types.TickerPrice{},
 		candles:         map[string][]types.CandlePrice{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
-
-	go provider.handleWebSocketMsgs(ctx)
+	go provider.handleWebSocketMsgs(ctx, pairs...)
 
 	return provider, nil
 }
@@ -132,7 +115,8 @@ func (p *OsmosisV2Provider) GetTickerPrices(pairs ...types.CurrencyPair) (map[st
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
 	for _, cp := range pairs {
-		price, err := p.getTickerPrice(cp.String())
+		key := currencyPairToOsmosisV2Pair(cp)
+		price, err := p.getTickerPrice(key)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +131,8 @@ func (p *OsmosisV2Provider) GetCandlePrices(pairs ...types.CurrencyPair) (map[st
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
 	for _, cp := range pairs {
-		prices, err := p.getCandlePrices(cp.String())
+		key := currencyPairToOsmosisV2Pair(cp)
+		prices, err := p.getCandlePrices(key)
 		if err != nil {
 			return nil, err
 		}
@@ -155,66 +140,6 @@ func (p *OsmosisV2Provider) GetCandlePrices(pairs ...types.CurrencyPair) (map[st
 	}
 
 	return candlePrices, nil
-}
-
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
-func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderCrypto, len(cps))
-	return nil
-}
-
-// subscribeChannels subscribe all currency pairs into ticker and candle channels.
-func (p *OsmosisV2Provider) subscribeChannels(cps ...types.CurrencyPair) error {
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-
-	return p.subscribeCandles(cps...)
-}
-
-// subscribeTickers subscribe all currency pairs into ticker channel.
-func (p *OsmosisV2Provider) subscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = cp.String()
-	}
-
-	subsMsg := newOsmosisV2SubscriptionMsg()
-	err := p.wsClient.WriteJSON(subsMsg)
-
-	return err
-}
-
-// subscribeCandles subscribe all currency pairs into candle channel.
-func (p *OsmosisV2Provider) subscribeCandles(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = cp.String()
-	}
-
-	subsMsg := newOsmosisV2SubscriptionMsg()
-	err := p.wsClient.WriteJSON(subsMsg)
-
-	return err
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *OsmosisV2Provider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *OsmosisV2Provider) getTickerPrice(key string) (types.TickerPrice, error) {
@@ -225,7 +150,7 @@ func (p *OsmosisV2Provider) getTickerPrice(key string) (types.TickerPrice, error
 	if !ok {
 		return types.TickerPrice{}, fmt.Errorf(
 			types.ErrTickerNotFound.Error(),
-			ProviderCrypto,
+			ProviderOsmosisV2,
 			key,
 		)
 	}
@@ -241,7 +166,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
 			types.ErrCandleNotFound.Error(),
-			ProviderCrypto,
+			ProviderOsmosisV2,
 			key,
 		)
 	}
@@ -249,46 +174,86 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candles, nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
+// SubscribeCurrencyPairs performs a no-op since the osmosis-api does not
+// have specific currency channels.
+func (p OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}
+
+func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker, pairs ...types.CurrencyPair) {
 	if messageType != websocket.TextMessage {
 		return
 	}
 
-	var (
-		tickerResp    OsmosisV2TickerResponse
-		tickerErr     error
-		candleResp    OsmosisV2CandleResponse
-		candleErr     error
-	)
-
-	tickerErr = json.Unmarshal(bz, &tickerResp)
-	if tickerResp.Result.Channel == cryptoTickerChannel {
-		for _, tickerPair := range tickerResp.Result.Data {
-			p.setTickerPair(
-				tickerResp.Result.InstrumentName,
-				tickerPair,
-			)
-			telemetryWebsocketMessage(ProviderCrypto, MessageTypeTicker)
-		}
+	// check if message is an ack first
+	if string(bz) == "ack" {
 		return
 	}
 
-	candleErr = json.Unmarshal(bz, &candleResp)
-	if candleResp.Result.Channel == cryptoCandleChannel {
-		for _, candlePair := range candleResp.Result.Data {
-			p.setCandlePair(
-				candleResp.Result.InstrumentName,
-				candlePair,
-			)
-			telemetryWebsocketMessage(ProviderCrypto, MessageTypeCandle)
+	var (
+		messageResp map[string]interface{}
+		messageErr  error
+		tickerResp  OsmosisV2Ticker
+		tickerErr   error
+		candleResp  OsmosisV2Candle
+		candleErr   error
+	)
+
+	messageErr = json.Unmarshal(bz, &messageResp)
+
+	// Check the response for currency pairs that the provider is subscribed
+	// to and determine whether it is a ticker or candle.
+	for _, pair := range pairs {
+		osmosisV2Pair := currencyPairToOsmosisV2Pair(pair)
+		if msg, ok := messageResp[osmosisV2Pair]; ok {
+			switch v := msg.(type) {
+			// ticker response
+			case map[string]interface{}:
+				tickerString, _ := json.Marshal(v)
+				tickerErr = json.Unmarshal(tickerString, &tickerResp)
+				if tickerErr != nil {
+					p.logger.Error().
+						Int("length", len(bz)).
+						AnErr("ticker", tickerErr).
+						Msg("Error on receive message")
+
+					return
+				}
+				p.setTickerPair(
+					osmosisV2Pair,
+					tickerResp,
+				)
+				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeTicker)
+
+				return
+
+			// candle response
+			case []interface{}:
+				// use latest candlestick in list
+				candleString, _ := json.Marshal(v[len(v)-1].(map[string]interface{}))
+				candleErr = json.Unmarshal(candleString, &candleResp)
+				if candleErr != nil {
+					p.logger.Error().
+						Int("length", len(bz)).
+						AnErr("candle", candleErr).
+						Msg("Error on receive message")
+
+					return
+				}
+				p.setCandlePair(
+					osmosisV2Pair,
+					candleResp,
+				)
+				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeCandle)
+
+				return
+			}
 		}
-		return
 	}
 
 	p.logger.Error().
 		Int("length", len(bz)).
-		AnErr("ticker", tickerErr).
-		AnErr("candle", candleErr).
+		AnErr("message", messageErr).
 		Msg("Error on receive message")
 }
 
@@ -301,12 +266,12 @@ func (p *OsmosisV2Provider) setTickerPair(symbol string, tickerPair OsmosisV2Tic
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	price, err := coin.NewDecFromFloat(tickerPair.Price)
+	price, err := sdk.NewDecFromStr(tickerPair.Price)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("osmosisv2: failed to parse ticker price")
 		return
 	}
-	volume, err := coin.NewDecFromFloat(tickerPair.Volume)
+	volume, err := sdk.NewDecFromStr(tickerPair.Volume)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("osmosisv2: failed to parse ticker volume")
 		return
@@ -322,12 +287,12 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	close, err := coin.NewDecFromFloat(candlePair.Close)
+	close, err := sdk.NewDecFromStr(candlePair.Close)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("osmosisv2: failed to parse candle close")
 		return
 	}
-	volume, err := coin.NewDecFromFloat(candlePair.Volume)
+	volume, err := sdk.NewDecFromStr(candlePair.Volume)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("osmosisv2: failed to parse candle volume")
 		return
@@ -336,7 +301,7 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 		Price:  close,
 		Volume: volume,
 		// convert seconds -> milli
-		TimeStamp: SecondsToMilli(candlePair.Time),
+		TimeStamp: SecondsToMilli(candlePair.EndTime),
 	}
 
 	staleTime := PastUnixTime(providerCandlePeriod)
@@ -352,8 +317,8 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 	p.candles[symbol] = candleList
 }
 
-func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(cryptoReconnectTime)
+func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context, pairs ...types.CurrencyPair) {
+	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
 
 	for {
@@ -379,7 +344,7 @@ func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context) {
 				continue
 			}
 
-			p.messageReceived(messageType, bz, reconnectTicker)
+			p.messageReceived(messageType, bz, reconnectTicker, pairs...)
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
@@ -389,10 +354,7 @@ func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context) {
 	}
 }
 
-// reconnect closes the last WS connection then create a new one and subscribes to
-// all subscribed pairs in the ticker and candle pairs. If no ping is received
-// within 1 minute, the connection will be disconnected. It is recommended to
-// send a ping for 10-20 seconds
+// reconnect closes the last WS connection then create a new one
 func (p *OsmosisV2Provider) reconnect() error {
 	err := p.wsClient.Close()
 	if err != nil {
@@ -413,7 +375,7 @@ func (p *OsmosisV2Provider) reconnect() error {
 	p.wsClient = wsConn
 	telemetryWebsocketReconnect(ProviderOsmosisV2)
 
-	return p.subscribeChannels(p.subscribedPairsToSlice()...)
+	return err
 }
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
@@ -452,9 +414,8 @@ func (p *OsmosisV2Provider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-// newOsmosisV2SubscriptionMsg returns a new subscription Msg.
-func newOsmosisV2SubscriptionMsg() OsmosisV2SubscriptionMsg {
-	return OsmosisV2SubscriptionMsg{
-
-	}
+// currencyPairToOsmosisV2Pair receives a currency pair and return osmosisv2
+// ticker symbol atomusdt@ticker.
+func currencyPairToOsmosisV2Pair(cp types.CurrencyPair) string {
+	return strings.ToUpper(cp.Base + "/" + cp.Quote)
 }
