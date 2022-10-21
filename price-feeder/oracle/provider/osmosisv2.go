@@ -176,7 +176,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 
 // SubscribeCurrencyPairs performs a no-op since the osmosis-api does not
 // have specific currency channels.
-func (p OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
 	return nil
 }
 
@@ -376,16 +376,6 @@ func (p *OsmosisV2Provider) reconnect() error {
 	telemetryWebsocketReconnect(ProviderOsmosisV2)
 
 	return err
-}
-
-// setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
-func (p *OsmosisV2Provider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
-	for _, cp := range cps {
-		p.subscribedPairs[cp.String()] = cp
-	}
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
