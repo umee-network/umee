@@ -103,6 +103,11 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	err = config.CheckProviderMins(cmd.Context(), logger, cfg)
+	if err != nil {
+		return err
+	}
+
 	ctx, cancel := context.WithCancel(cmd.Context())
 	g, ctx := errgroup.WithContext(ctx)
 
