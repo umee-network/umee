@@ -182,7 +182,7 @@ func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) 
 
 func (p *OsmosisV2Provider) messageReceived(
 	messageType int,
-	bz []byte, reconnectTicker *time.Ticker,
+	bz []byte,
 	pairs ...types.CurrencyPair,
 ) {
 	if messageType != websocket.TextMessage {
@@ -348,7 +348,7 @@ func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context, pairs ...ty
 				continue
 			}
 
-			p.messageReceived(messageType, bz, reconnectTicker, pairs...)
+			p.messageReceived(messageType, bz, pairs...)
 
 		case <-reconnectTicker.C:
 			if err := p.reconnect(); err != nil {
