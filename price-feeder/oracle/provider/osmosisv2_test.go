@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -128,14 +127,12 @@ func TestOsmosisV2Provider_SubscribeCurrencyPairs(t *testing.T) {
 
 	t.Run("ticker_prices_set", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "OSMO", Quote: "ATOM"})
-		fmt.Println("tickerPrices", prices)
 		require.NoError(t, err)
 		require.NotEmpty(t, prices["OSMOATOM"])
 	})
 
 	t.Run("candle_prices_set", func(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "OSMO", Quote: "ATOM"})
-		fmt.Println("candlePrices", prices)
 		require.NoError(t, err)
 		require.NotEmpty(t, prices["OSMOATOM"])
 	})
