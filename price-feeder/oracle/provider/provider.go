@@ -12,8 +12,8 @@ const (
 	defaultTimeout           = 10 * time.Second
 	defaultReadNewWSMessage  = 50 * time.Millisecond
 	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
-	defaultReconnectTime     = time.Minute * 20
-	maxReconnectionTries     = 3
+	defaultReconnectTime     = 2 * time.Minute
+	defaultPingDuration      = 15 * time.Second
 	providerCandlePeriod     = 10 * time.Minute
 
 	ProviderKraken   Name = "kraken"

@@ -102,6 +102,15 @@ Providing multiple providers is beneficial in case any provider fails to return
 market data. Prices per exchange rate are submitted on-chain via pre-vote and
 vote messages using a time-weighted average price (TVWAP).
 
+### `provider_min_override`
+
+At startup the amount of possible providers for a currency is checked by querying the
+CoinGecko API to enforce an acceptable minimum providers for a given currency pair. If
+this request fails and `provider_min_override` is set to true, the minimum is not enforced
+and the `price-feeder` is allowed to run irrespective of how many providers are provided
+for a given currency pair. `provider_min_override` will not take effect if CoinGecko
+requests are successful.
+
 ### `account`
 
 The `account` section contains the oracle's feeder and validator account information.

@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/*.go
@@ -22,6 +22,10 @@ jobs:
         with:
           go-version: 1.19
           cache: true
+      - name: revive lint
+        uses: morphy2k/revive-action@v2
+        with:
+          path: "./..."
       - name: golangci-lint main
         uses: golangci/golangci-lint-action@v3
         if: env.GIT_DIFF
@@ -59,7 +63,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
-      - uses: technote-space/get-diff-action@v6
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/*.proto
