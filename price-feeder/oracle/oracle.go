@@ -290,7 +290,6 @@ func (o *Oracle) GetComputedPrices(
 	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
-
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := convertCandlesToUSD(
 		o.logger,
@@ -493,6 +492,9 @@ func NewProvider(
 
 	case provider.ProviderCrypto:
 		return provider.NewCryptoProvider(ctx, logger, endpoint, providerPairs...)
+
+	case provider.ProviderFin:
+		return provider.NewFinProvider(endpoint), nil
 
 	case provider.ProviderMock:
 		return provider.NewMockProvider(), nil
