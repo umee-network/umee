@@ -63,7 +63,7 @@ message MsgBeginUnbondingResponse {}
 // MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
 message MsgSponsor {
   string                   sponsor    = 1;
-  uint64                   program_id = 2;
+  uint64                   program_ID = 2;
   cosmos.base.v1beta1.Coin asset      = 3 [(gogoproto.nullable) = false];
 }
 
