@@ -1,0 +1,88 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "umee/incentive/v1/incentive.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/incentive/types";
+
+// Msg defines the x/incentive module's Msg service.
+service Msg {
+  // Claim defines a method for claiming any pending incentive rewards.
+  rpc Claim(MsgClaim) returns (MsgClaimResponse);
+
+  // Lock defines a method for locking uToken collateral into a locking tier.
+  rpc Lock(MsgLock) returns (MsgLockResponse);
+
+  // BeginUnbonding defines a method for starting to unbond uToken collateral.
+  rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
+
+  // Sponsor defines a permissionless method for sponsoring an incentive program.
+  rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
+
+  // CreateProgram is used by governance proposals to create (but not fund) an incentive program.
+  rpc CreateProgram(MsgCreateProgram) returns (MsgCreateProgramResponse);
+}
+
+// MsgClaim represents a supplier's request to claim pending rewards.
+message MsgClaim {
+  string supplier = 1;
+}
+
+// MsgClaimResponse defines the Msg/Claim response type.
+message MsgClaimResponse {
+  repeated cosmos.base.v1beta1.Coin amount = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgLock represents a supplier's request to lock uToken collateral.
+message MsgLock {
+  string                   supplier = 1;
+  uint32                   tier     = 2;
+  cosmos.base.v1beta1.Coin amount   = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgLockResponse defines the Msg/Lock response type.
+message MsgLockResponse {}
+
+// MsgBeginUnbonding represents a supplier's request to begin unbonding uToken collateral.
+message MsgBeginUnbonding {
+  string                   supplier = 1;
+  uint32                   tier     = 2;
+  cosmos.base.v1beta1.Coin amount   = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.
+message MsgBeginUnbondingResponse {}
+
+// MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
+message MsgSponsor {
+  string                   sponsor    = 1;
+  uint64                   program_id = 2;
+  cosmos.base.v1beta1.Coin amount     = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSponsorResponse defines the Msg/Sponsor response type.
+message MsgSponsorResponse {}
+
+// MsgCreateProgram is used by governance to create an incentive program.
+message MsgCreateProgram {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string           title       = 2;
+  string           description = 3;
+  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgCreateProgramResponse defines the Msg/CreateProgram response type.
+message MsgCreateProgramResponse {}

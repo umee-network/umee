@@ -1,0 +1,62 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "umee/incentive/v1/incentive.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/incentive/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the x/incentive module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/params";
+  }
+
+  // IncentivePrograms queries for all incentives programs that have been passed
+  // by governance, including upcoming and completed ones.
+  rpc IncentivePrograms(QueryIncentiveProgramsRequest)
+      returns (QueryIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs";
+  }
+
+  // IncentiveProgram queries a single incentive program by ID.
+  rpc IncentiveProgram(QueryIncentiveProgramRequest)
+      returns (QueryIncentiveProgramResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_program/{id}";
+  }
+}
+
+// QueryParamsRequest defines the request structure for the Params gRPC service
+// handler.
+message QueryParamsRequest {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryIncentiveProgramsRequest defines the request structure for the IncentivePrograms
+// gRPC service handler.
+message QueryIncentiveProgramsRequest {}
+
+// QueryIncentiveProgramsResponse defines the response structure for the
+// IncentivePrograms gRPC service handler.
+message QueryIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryIncentiveProgramRequest defines the request structure for the IncentiveProgram
+// gRPC service handler.
+message QueryIncentiveProgramRequest {
+  // ID specifies which program to query for
+  uint64 id = 1;
+}
+
+// QueryIncentivePrograResponse defines the response structure for the
+// IncentiveProgram gRPC service handler.
+message QueryIncentiveProgramResponse {
+  IncentiveProgram program = 1 [(gogoproto.nullable) = false];
+}
