@@ -16,7 +16,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/ignite/cli v0.24.1
+	github.com/ignite/cli v0.25.1
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0
 	github.com/rs/zerolog v1.28.0
@@ -49,7 +49,7 @@ require (
 	github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24 // indirect
 	github.com/GaijinEntertainment/go-exhaustruct/v2 v2.3.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Microsoft/go-winio v0.5.2 // indirect
+	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/OpenPeeDeeP/depguard v1.1.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
@@ -301,7 +301,7 @@ require (
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2 // indirect
-	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde // indirect
+	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect

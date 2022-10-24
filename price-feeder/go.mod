@@ -18,7 +18,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.22
 	github.com/umee-network/umee/v3 v3.0.0-rc1
-	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
+	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0
 	google.golang.org/grpc v1.50.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -161,7 +161,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
-	github.com/ignite/cli v0.24.1 // indirect
+	github.com/ignite/cli v0.25.1 // indirect
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jgautheron/goconst v1.5.1 // indirect
