@@ -305,7 +305,7 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 		Price:  close,
 		Volume: volume,
 		// convert seconds -> milli
-		TimeStamp: SecondsToMilli(candlePair.EndTime),
+		TimeStamp: candlePair.EndTime,
 	}
 
 	staleTime := PastUnixTime(providerCandlePeriod)
