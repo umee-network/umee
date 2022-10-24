@@ -270,8 +270,6 @@ func CheckProviderMins(ctx context.Context, logger zerolog.Logger, cfg Config) e
 		}
 	}
 
-	fmt.Println("pairs", pairs)
-
 	for base, providers := range pairs {
 		// If currency provider tracker errored, default to three providers as
 		// the minimum.
