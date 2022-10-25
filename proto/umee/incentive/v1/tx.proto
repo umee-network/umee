@@ -25,6 +25,9 @@ service Msg {
 
   // CreateProgram is used by governance proposals to create (but not fund) an incentive program.
   rpc CreateProgram(MsgCreateProgram) returns (MsgCreateProgramResponse);
+
+  // CreateAndSponsorProgram is used by governance proposals to create and fund an incentive program.
+  rpc CreateAndSponsorProgram(MsgCreateAndSponsorProgram) returns (MsgCreateAndSponsorProgramResponse);
 }
 
 // MsgClaim represents a supplier's request to claim pending rewards.
@@ -86,3 +89,26 @@ message MsgCreateProgram {
 
 // MsgCreateProgramResponse defines the Msg/CreateProgram response type.
 message MsgCreateProgramResponse {}
+
+// MsgCreateAndSponsorProgram is used by governance to create an incentive program
+// and fund it in the same transaction. The sponsor address should be the community
+// fund or an agreed upon address - program reward funds will be taken from that address
+// when the incentive program passes governance.
+message MsgCreateAndSponsorProgram {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string           title       = 2;
+  string           description = 3;
+  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+
+  // sponsor is the address of the community fund or an address from which program rewards will be taken.
+  string sponsor = 5;
+}
+
+// MsgCreateAndSponsorProgramResponse defines the Msg/CreateAndSponsorProgram response type.
+message MsgCreateAndSponsorProgramResponse {}
