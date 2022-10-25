@@ -297,8 +297,8 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 		return
 	}
 	candle := types.CandlePrice{
-		Price:  close,
-		Volume: volume,
+		Price:     close,
+		Volume:    volume,
 		TimeStamp: candlePair.EndTime,
 	}
 
