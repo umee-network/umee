@@ -171,9 +171,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	}
 
 	candleList := []types.CandlePrice{}
-	for _, candle := range candles {
-		candleList = append(candleList, candle)
-	}
+	candleList = append(candleList, candles...)
 
 	return candleList, nil
 }

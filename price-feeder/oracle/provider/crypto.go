@@ -283,9 +283,7 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 	}
 
 	candleList := []types.CandlePrice{}
-	for _, candle := range candles {
-		candleList = append(candleList, candle)
-	}
+	candleList = append(candleList, candles...)
 
 	return candleList, nil
 }
