@@ -103,7 +103,7 @@ func TestOsmosisV2Provider_GetCandlePrices(t *testing.T) {
 		require.Len(t, prices, 1)
 		require.Equal(t, sdk.MustNewDecFromStr(price), prices["OSMOATOM"][0].Price)
 		require.Equal(t, sdk.MustNewDecFromStr(volume), prices["OSMOATOM"][0].Volume)
-		require.Equal(t, time*1000, prices["OSMOATOM"][0].TimeStamp)
+		require.Equal(t, time, prices["OSMOATOM"][0].TimeStamp)
 	})
 
 	t.Run("invalid_request_invalid_candle", func(t *testing.T) {
@@ -123,7 +123,7 @@ func TestOsmosisV2Provider_SubscribeCurrencyPairs(t *testing.T) {
 	require.NoError(t, err)
 
 	// wait for response from osmosis-api
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 10)
 
 	t.Run("ticker_prices_set", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "OSMO", Quote: "ATOM"})

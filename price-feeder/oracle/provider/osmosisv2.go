@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/websocket"
@@ -32,7 +31,6 @@ type (
 	// REF: https://github.com/umee-network/osmosis-api
 	OsmosisV2Provider struct {
 		wsURL           url.URL
-		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -85,27 +83,28 @@ func NewOsmosisV2Provider(
 		Path:   osmosisV2WSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderOsmosisV2,
-			err,
-		)
-	}
-	defer resp.Body.Close()
+	osmosisV2Logger := logger.With().Str("provider", "osmosisv2").Logger()
 
 	provider := &OsmosisV2Provider{
 		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "osmosisv2").Logger(),
+		logger:          osmosisV2Logger,
 		endpoints:       endpoints,
 		tickers:         map[string]types.TickerPrice{},
 		candles:         map[string][]types.CandlePrice{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	go provider.handleWebSocketMsgs(ctx, pairs...)
+	provider.setSubscribedPairs(pairs...)
+
+	controller := NewWebsocketController(
+		ctx,
+		ProviderOsmosisV2,
+		wsURL,
+		[]interface{}{""},
+		provider.messageReceived,
+		osmosisV2Logger,
+	)
+	go controller.Start()
 
 	return provider, nil
 }
@@ -171,7 +170,12 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 		)
 	}
 
-	return candles, nil
+	candleList := []types.CandlePrice{}
+	for _, candle := range candles {
+		candleList = append(candleList, candle)
+	}
+
+	return candleList, nil
 }
 
 // SubscribeCurrencyPairs performs a no-op since the osmosis-api does not
@@ -180,11 +184,7 @@ func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) 
 	return nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(
-	messageType int,
-	bz []byte,
-	pairs ...types.CurrencyPair,
-) {
+func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
@@ -207,7 +207,7 @@ func (p *OsmosisV2Provider) messageReceived(
 
 	// Check the response for currency pairs that the provider is subscribed
 	// to and determine whether it is a ticker or candle.
-	for _, pair := range pairs {
+	for _, pair := range p.subscribedPairs {
 		osmosisV2Pair := currencyPairToOsmosisV2Pair(pair)
 		if msg, ok := messageResp[osmosisV2Pair]; ok {
 			switch v := msg.(type) {
@@ -261,11 +261,6 @@ func (p *OsmosisV2Provider) messageReceived(
 		Msg("Error on receive message")
 }
 
-// ping to check websocket connection
-func (p *OsmosisV2Provider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
-}
-
 func (p *OsmosisV2Provider) setTickerPair(symbol string, tickerPair OsmosisV2Ticker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
@@ -304,14 +299,12 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 	candle := types.CandlePrice{
 		Price:  close,
 		Volume: volume,
-		// convert seconds -> milli
 		TimeStamp: candlePair.EndTime,
 	}
 
 	staleTime := PastUnixTime(providerCandlePeriod)
 	candleList := []types.CandlePrice{}
 	candleList = append(candleList, candle)
-
 	for _, c := range p.candles[symbol] {
 		if staleTime < c.TimeStamp {
 			candleList = append(candleList, c)
@@ -321,65 +314,14 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 	p.candles[symbol] = candleList
 }
 
-func (p *OsmosisV2Provider) handleWebSocketMsgs(ctx context.Context, pairs ...types.CurrencyPair) {
-	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
-	defer reconnectTicker.Stop()
+// setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
+func (p *OsmosisV2Provider) setSubscribedPairs(cps ...types.CurrencyPair) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// If some error occurs, check if connection is alive
-				// and continue to try to read the next message.
-				p.logger.Err(err).Msg("failed to read message")
-				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("failed to send ping")
-					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting websocket")
-					}
-				}
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz, pairs...)
-
-		case <-reconnectTicker.C:
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
+	for _, cp := range cps {
+		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-// reconnect closes the last WS connection then create a new one
-func (p *OsmosisV2Provider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		p.logger.Err(err).Msg("error closing osmosisv2 websocket")
-	}
-
-	p.logger.Debug().Msg("osmosisv2: reconnecting websocket")
-
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderOsmosisV2,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-	telemetryWebsocketReconnect(ProviderOsmosisV2)
-
-	return err
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
