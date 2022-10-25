@@ -34,3 +34,6 @@ secret.yml
 build
 
 dist/
+
+# OSX
+*.DS_Store
