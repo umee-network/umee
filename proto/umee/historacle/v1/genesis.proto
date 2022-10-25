@@ -1,0 +1,17 @@
+syntax = "proto3";
+package umee.historacle.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "umee/historacle/v1/historacle.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/historacle/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// GenesisState defines the historacle module's genesis state.
+message GenesisState {
+  Params                               params          = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin medians         = 2 [(gogoproto.nullable) = false];
+  repeated HistoricPrice               historic_prices = 3 [(gogoproto.nullable) = false];
+}
