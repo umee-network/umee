@@ -10,8 +10,8 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the historacle Msg service.
 service Msg {
-  // StampPeriod defines the interface for which governance
-  // can set the stamp period.
+  // UpdateStampPeriod defines the interface which governance
+  // can use to set the stamp period.
   rpc UpdateStampPeriod(MsgUpdateStampPeriod)
       returns (MsgUpdateStampPeriodResponse);
 }
