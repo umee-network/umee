@@ -111,6 +111,11 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 // support each price feeder currency pair and store it in the CurrencyProviders map.
 func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 	for _, pair := range t.pairs {
+		// OSMO/ATOM is supported by UMEE's osmosis-api.
+		if pair.Base == "OSMO" && pair.Quote == "ATOM" {
+			t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], "osmosisv2")
+		}
+
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
 		resp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
 		if err != nil {
