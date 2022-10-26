@@ -148,7 +148,7 @@ func (msg MsgCreateProgram) ValidateBasic() error {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
 
-	if err := validateAbstract(msg); err != nil {
+	if err := msg.ValidateAbstract(); err != nil {
 		return err
 	}
 
@@ -173,7 +173,7 @@ func (msg MsgCreateProgram) ValidateBasic() error {
 	return nil
 }
 
-func validateAbstract(c MsgCreateProgram) error {
+func (c *MsgCreateProgram) ValidateAbstract() error {
 	title := c.GetTitle()
 	if len(strings.TrimSpace(title)) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
@@ -203,6 +203,92 @@ func (msg MsgCreateProgram) GetSignBytes() []byte {
 
 // GetSigners implements Msg
 func (msg MsgCreateProgram) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string, program IncentiveProgram,
+) *MsgCreateAndSponsorProgram {
+	return &MsgCreateAndSponsorProgram{
+		Title:       title,
+		Description: description,
+		Program:     program,
+		Authority:   authority,
+		Sponsor:     sponsor,
+	}
+}
+
+func (msg MsgCreateAndSponsorProgram) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgCreateAndSponsorProgram) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg MsgCreateAndSponsorProgram) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+func (msg *MsgCreateAndSponsorProgram) GetTitle() string { return msg.Title }
+
+func (msg *MsgCreateAndSponsorProgram) GetDescription() string { return msg.Description }
+
+func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+
+	if err := msg.ValidateAbstract(); err != nil {
+		return err
+	}
+
+	/*
+		TODO: General validation
+		if err := msg.Program.Validate(); err != nil {
+			return err
+		}
+	*/
+
+	// Additional rules apply to incentive programs which are still being proposed
+	if msg.Program.Id != 0 {
+		return ErrInvalidProgramID.Wrapf("%d", msg.Program.Id)
+	}
+	if !msg.Program.RemainingRewards.IsZero() {
+		return ErrNonzeroRemainingRewards.Wrap(msg.Program.RemainingRewards.String())
+	}
+	if !msg.Program.FundedRewards.IsZero() {
+		return ErrNonzeroFundedRewards.Wrap(msg.Program.FundedRewards.String())
+	}
+
+	return nil
+}
+
+func (c *MsgCreateAndSponsorProgram) ValidateAbstract() error {
+	title := c.GetTitle()
+	if len(strings.TrimSpace(title)) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
+	}
+	if len(title) > gov1b1.MaxTitleLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
+			gov1b1.MaxTitleLength)
+	}
+
+	description := c.GetDescription()
+	if len(description) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
+	}
+	if len(description) > gov1b1.MaxDescriptionLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
+			gov1b1.MaxDescriptionLength)
+	}
+
+	return nil
+}
+
+// GetSignBytes implements Msg
+func (msg MsgCreateAndSponsorProgram) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
