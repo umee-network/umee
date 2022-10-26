@@ -23,7 +23,6 @@ service Query {
 message QueryMedians {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
-
   // denom defines the denomination to query for.
   string denom = 1;
 }
