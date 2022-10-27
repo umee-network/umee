@@ -38,6 +38,7 @@ The list of current supported providers:
 - [Mexc](https://www.mexc.com/)
 - [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
+- [OsmosisV2](https://github.com/umee-network/osmosis-api)
 <!-- markdown-link-check-enable -->
 
 ## Usage

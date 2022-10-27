@@ -203,7 +203,10 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 		)
 	}
 
-	return candles, nil
+	candleList := []types.CandlePrice{}
+	candleList = append(candleList, candles...)
+
+	return candleList, nil
 }
 
 func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
