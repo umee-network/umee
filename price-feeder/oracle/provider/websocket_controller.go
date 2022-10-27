@@ -163,8 +163,6 @@ func (wsc *WebsocketController) readWebSocket() {
 }
 
 func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
-	wsc.logger.Debug().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
-
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
