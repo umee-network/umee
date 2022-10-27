@@ -282,7 +282,10 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 		)
 	}
 
-	return candles, nil
+	candleList := []types.CandlePrice{}
+	candleList = append(candleList, candles...)
+
+	return candleList, nil
 }
 
 func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
