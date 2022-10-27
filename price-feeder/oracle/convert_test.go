@@ -199,7 +199,7 @@ func TestConvertTickersToUSD(t *testing.T) {
 		provider.ProviderKraken:  {usdtPair},
 	}
 
-	convertedTickers, err := convertTickersToUSD(
+	convertedTickers, err := ConvertTickersToUSD(
 		zerolog.Nop(),
 		providerPrices,
 		providerPairs,
@@ -253,7 +253,7 @@ func TestConvertTickersToUSDFiltering(t *testing.T) {
 		provider.ProviderHuobi:   {usdtPair},
 	}
 
-	covertedDeviation, err := convertTickersToUSD(
+	covertedDeviation, err := ConvertTickersToUSD(
 		zerolog.Nop(),
 		providerPrices,
 		providerPairs,

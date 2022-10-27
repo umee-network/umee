@@ -324,7 +324,7 @@ func (o *Oracle) GetComputedPrices(
 	// If TVWAP candles are not available or were filtered out due to staleness,
 	// use most recent prices & VWAP instead.
 	if len(tvwapPrices) == 0 {
-		convertedTickers, err := convertTickersToUSD(
+		convertedTickers, err := ConvertTickersToUSD(
 			o.logger,
 			providerPrices,
 			providerPairs,
