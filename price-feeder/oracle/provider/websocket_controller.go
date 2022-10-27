@@ -119,7 +119,6 @@ func (wsc *WebsocketController) ping() {
 		if wsc.client == nil {
 			return
 		}
-		wsc.logger.Debug().Msg("ping")
 		wsc.mtx.Lock()
 		err := wsc.client.WriteMessage(1, []byte("ping"))
 		wsc.mtx.Unlock()
@@ -163,8 +162,6 @@ func (wsc *WebsocketController) readWebSocket() {
 }
 
 func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
-	wsc.logger.Debug().Msg(fmt.Sprintf("%d: %s", messageType, string(bz)))
-
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
