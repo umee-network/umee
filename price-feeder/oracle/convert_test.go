@@ -99,7 +99,7 @@ func TestConvertCandlesToUSD(t *testing.T) {
 		provider.ProviderKraken:  {usdtPair},
 	}
 
-	convertedCandles, err := convertCandlesToUSD(
+	convertedCandles, err := ConvertCandlesToUSD(
 		zerolog.Nop(),
 		providerCandles,
 		providerPairs,
@@ -160,7 +160,7 @@ func TestConvertCandlesToUSDFiltering(t *testing.T) {
 		provider.ProviderOkx:     {usdtPair},
 	}
 
-	convertedCandles, err := convertCandlesToUSD(
+	convertedCandles, err := ConvertCandlesToUSD(
 		zerolog.Nop(),
 		providerCandles,
 		providerPairs,

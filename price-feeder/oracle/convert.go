@@ -38,7 +38,7 @@ func getUSDBasedProviders(
 // within the deviation threshold set by the config.
 //
 // Ref: https://github.com/umee-network/umee/blob/4348c3e433df8c37dd98a690e96fc275de609bc1/price-feeder/oracle/filter.go#L41
-func convertCandlesToUSD(
+func ConvertCandlesToUSD(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
 	providerPairs map[provider.Name][]types.CurrencyPair,
