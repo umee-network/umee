@@ -60,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1484](https://github.com/umee-network/umee/pull/1484) Standardize websocket connection error for providers.
 - [1509](https://github.com/umee-network/umee/pull/1509) Update price feeder example config.
-- [1527](https://github.com/umee-network/umee/pull/1527) Update convertTickersToUSD to public.
+- [1527](https://github.com/umee-network/umee/pull/1527) Update convertTickersToUSD and convertCandlesToUSD to public.
 
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
