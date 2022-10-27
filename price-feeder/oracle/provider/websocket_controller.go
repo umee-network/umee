@@ -119,7 +119,6 @@ func (wsc *WebsocketController) ping() {
 		if wsc.client == nil {
 			return
 		}
-		wsc.logger.Debug().Msg("ping")
 		wsc.mtx.Lock()
 		err := wsc.client.WriteMessage(1, []byte("ping"))
 		wsc.mtx.Unlock()
