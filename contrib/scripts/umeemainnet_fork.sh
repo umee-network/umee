@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 # Start a single node chain from an exported genesis file,
 # process the genesis file if it wasn't already,
@@ -15,20 +15,18 @@ FORK_DIR="${FORK_DIR:-$CWD}"
 CHAIN_DIR="${CHAIN_DIR:-$FORK_DIR/node-data}"
 LOG_LEVEL="${LOG_LEVEL:-debug}"
 BLOCK_TIME="${BLOCK_TIME:-1}"
-UPGRADE_TITLE="${UPGRADE_TITLE:-"v1.1-v3.0"}"
+UPGRADE_TITLE="${UPGRADE_TITLE:-"v3.1.0"}"
 UMEEMAINNET_GENESIS_PATH="${UMEEMAINNET_GENESIS_PATH:-$CWD/mainnet_tinkered_genesis.json}"
 NODE_PRIV_KEY="${NODE_PRIV_KEY:-$FORK_DIR/priv_validator_key.json}"
 SEC_AWAIT_NODE_START="${SEC_AWAIT_NODE_START:-80}"
-MAINNET_VERSION="${MAINNET_VERSION:-"v1.1.2"}"
 
 UMEED_BIN_CURRENT="${UMEED_BIN_CURRENT:-$FORK_DIR/../../build/umeed}"
-# UMEED_BIN_MAINNET="${UMEED_BIN_MAINNET:-$FORK_DIR/umeed-releases/umeed-v1.1.2-linux-amd64/umeed}"
 
 # Loads another sources ,
-# It will download the mainnet binaries 
+# It will download the mainnet binaries
 . $CWD/download-mainnet-umeed.sh
 
-# It will download the mainnet genesis 
+# It will download the mainnet genesis
 UMEEMAINNET_GENESIS_PATH=$UMEEMAINNET_GENESIS_PATH . $CWD/tinker-mainnet-genesis.sh
 
 . $CWD/blocks.sh
@@ -96,7 +94,7 @@ rm $nodeDir/$genesisConfigPath
 
 cp $UMEEMAINNET_GENESIS_PATH $nodeDir/$genesisConfigPath
 
-## Updating the gov proposal voting perioid to 20seconds 
+## Updating the gov proposal voting perioid to 20seconds
 jq '.app_state.gov.voting_params.voting_period = "20s"' $nodeDir/$genesisConfigPath >  $nodeDir/new-genesis.json
 ## Copy the new updated genesis
 cp $nodeDir/new-genesis.json $nodeDir/$genesisConfigPath
