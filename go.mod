@@ -9,7 +9,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-alpha8
 	github.com/cosmos/cosmos-sdk v0.46.3
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v5 v5.0.0
+	github.com/cosmos/ibc-go/v5 v5.0.1
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
@@ -323,11 +323,16 @@ require (
 )
 
 replace (
+	// use umee gravity bridge
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb
+	// replace ics23 for dragonberry
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
+	// use umee sdk fork
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.3-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
+	// Use cosmos flavored protocol buffers
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+	// replace osmosis bech32 with umee bech32
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0
 )
