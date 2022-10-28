@@ -122,15 +122,16 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 // it in the CurrencyProviders map.
 func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 	for _, pair := range t.pairs {
+		// check if CoinGecko API supports pair
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
-		resp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
+		coinGeckoResp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
 		if err != nil {
 			return err
 		}
-		defer resp.Body.Close()
+		defer coinGeckoResp.Body.Close()
 
 		var tickerResponse coinTickerResponse
-		if err = json.NewDecoder(resp.Body).Decode(&tickerResponse); err != nil {
+		if err = json.NewDecoder(coinGeckoResp.Body).Decode(&tickerResponse); err != nil {
 			return err
 		}
 
@@ -141,13 +142,14 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 		}
 
 		// check if osmosis-api supports pair
-		resp, err = http.Get(fmt.Sprintf("%s/%s", osmosisV2RestURL, osmosisV2AssetPairsEndpoint))
+		osmosisResp, err := http.Get(fmt.Sprintf("%s/%s", osmosisV2RestURL, osmosisV2AssetPairsEndpoint))
 		if err != nil {
 			return err
 		}
+		defer osmosisResp.Body.Close()
 
 		var assetPairsResponse []assetPair
-		if err = json.NewDecoder(resp.Body).Decode(&assetPairsResponse); err != nil {
+		if err = json.NewDecoder(osmosisResp.Body).Decode(&assetPairsResponse); err != nil {
 			return err
 		}
 
