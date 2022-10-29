@@ -19,6 +19,7 @@ contrib/scripts/umeemainnet.*
 contrib/scripts/cosmos-genesis-tinkerer
 contrib/scripts/mainnet_tinkered_genesis.json
 contrib/scripts/preprocessing.json
+contrib/scripts/proposal.json
 contrib/scripts/umeed-releases
 # preprocessing can appear from the shell curdir that is cosmos-genesis-tinkerer is running
 preprocessing.json
