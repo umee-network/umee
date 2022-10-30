@@ -38,7 +38,6 @@ linters:
     - nakedret
     - nolintlint
     - prealloc
-    - revive
     - staticcheck
     - stylecheck
     - typecheck
@@ -60,19 +59,6 @@ issues:
 linters-settings:
   dogsled:
     max-blank-identifiers: 3
-  revive:
-    # Sets the default failure confidence. Default: 0.8
-    # This means that linting errors with less than 0.8 confidence will be ignored.
-    confidence: 0
-    # Sets the default severity to "warning"
-    severity: warning
-    # Sets the error code for failures with severity "error"
-    errorCode: 1
-    # Sets the error code for failures with severity "warning"
-    warningCode: 1
-    rules:
-      - name: package-comments
-        Disabled : true
   misspell:
     locale: US
   nolintlint:
