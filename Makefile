@@ -161,7 +161,6 @@ cover-html: test-unit-cover
 ###############################################################################
 
 golangci_lint_cmd=golangci-lint
-golangci_version=v1.49.0
 
 lint:
 	@echo "--> Running linter with revive"
@@ -170,8 +169,8 @@ lint:
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"
-	@go install mvdan.cc/gofumpt@latest
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golangci_version)
+	@go install github.com/mvdan/gofumpt
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
 	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
