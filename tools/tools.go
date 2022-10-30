@@ -9,6 +9,6 @@ package tools
 
 import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "github.com/mgechev/revive/revivelib"
+	_ "github.com/mgechev/revive"
 	_ "mvdan.cc/gofumpt"
 )
