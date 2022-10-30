@@ -64,6 +64,11 @@ linters-settings:
     # Sets the default failure confidence. Default: 0.8
     # This means that linting errors with less than 0.8 confidence will be ignored.
     confidence: 0
+    rules:
+      - name: exported
+        disabled : true
+      - name: package-comments
+        disabled : true
   misspell:
     locale: US
   nolintlint:
