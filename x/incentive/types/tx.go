@@ -259,8 +259,8 @@ func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
 	return nil
 }
 
-func (c *MsgCreateAndSponsorProgram) ValidateAbstract() error {
-	title := c.GetTitle()
+func (msg *MsgCreateAndSponsorProgram) ValidateAbstract() error {
+	title := msg.GetTitle()
 	if len(strings.TrimSpace(title)) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
 	}
@@ -269,7 +269,7 @@ func (c *MsgCreateAndSponsorProgram) ValidateAbstract() error {
 			gov1b1.MaxTitleLength)
 	}
 
-	description := c.GetDescription()
+	description := msg.GetDescription()
 	if len(description) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
 	}
