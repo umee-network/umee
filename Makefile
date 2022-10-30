@@ -122,7 +122,7 @@ docker-push-gaia:
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
-##                              Tests & Linting                              ##
+##                                   Tests                                   ##
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
@@ -150,7 +150,11 @@ else
 	@go test -mod=readonly $(ARGS) $(TEST_PACKAGES)
 endif
 
-.PHONY: run-tests $(TEST_TARGETS)
+cover-html: test-unit-cover
+	@echo "--> Opening in the browser"
+	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
+
+.PHONY: cover-html run-tests $(TEST_TARGETS)
 
 ###############################################################################
 ###                                Linting                                  ###
@@ -162,7 +166,7 @@ golangci_version=v1.49.0
 lint:
 	@echo "--> Running linter with revive"
 	@go install github.com/mgechev/revive
-	@revive ./...
+	@revive -config .revive.toml -formatter friendly ./...
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"
@@ -173,13 +177,6 @@ lint-fix:
 	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
 
 .PHONY: lint lint-fix
-
-
-cover-html: test-unit-cover
-	@echo "--> Opening in the browser"
-	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
-
-
 
 ###############################################################################
 ##                                Simulations                                ##

@@ -61,9 +61,8 @@ linters-settings:
   dogsled:
     max-blank-identifiers: 3
   revive:
-    # Sets the default failure confidence.
+    # Sets the default failure confidence. Default: 0.8
     # This means that linting errors with less than 0.8 confidence will be ignored.
-    # Default: 0.8
     confidence: 0
   misspell:
     locale: US
