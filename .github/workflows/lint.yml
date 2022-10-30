@@ -25,7 +25,7 @@ jobs:
       - name: revive lint
         uses: morphy2k/revive-action@v2
         with:
-          config: ./revive.toml
+          config: .revive.toml
           exclude: "*.pb.go;*.pb.gw.go;*.pulsar.go;swagger/..."
           path: "./..."
       - name: golangci-lint main
