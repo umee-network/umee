@@ -21,7 +21,7 @@ confidence = 0
 [rule.if-return]
 [rule.increment-decrement]
 [rule.indent-error-flow]
-[rule.package-comments]
+#[rule.package-comments]
 [rule.range]
 [rule.receiver-naming]
 [rule.redefines-builtin-id]
