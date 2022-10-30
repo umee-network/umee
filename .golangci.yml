@@ -71,8 +71,6 @@ linters-settings:
     # Sets the error code for failures with severity "warning"
     warningCode: 1
     rules:
-      - name: exported
-        Disabled : true
       - name: package-comments
         Disabled : true
   misspell:
