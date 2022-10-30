@@ -69,7 +69,7 @@ linters-settings:
     # Sets the error code for failures with severity "error"
     errorCode: 1
     # Sets the error code for failures with severity "warning"
-    warningCode: 0
+    warningCode: 1
     rules:
       - name: exported
         Disabled : true
