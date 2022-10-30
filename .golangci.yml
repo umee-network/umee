@@ -74,7 +74,6 @@ linters-settings:
     # List of rules to enable explicitly should be a subset of .revive.toml
     # so only critical rules cause CI to fail instead of just generating annotations.
     rules:
-      - name: empty-lines
       - name: blank-imports
       - name: context-as-argument
       - name: context-keys-type
