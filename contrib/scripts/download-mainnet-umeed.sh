@@ -11,7 +11,7 @@ is_macos() {
 architecture=$(uname -m)
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-MAINNET_VERSION=${MAINNET_VERSION:-"v1.1.2"}
+MAINNET_VERSION=${MAINNET_VERSION:-"v3.0.2"}
 
 download_mainnet_binary(){
   # Checks for the umeed v1 file
