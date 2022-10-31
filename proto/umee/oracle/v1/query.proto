@@ -82,7 +82,7 @@ service Query {
   rpc Medians(QueryMedians)
       returns (QueryMediansResponse) {
     option (google.api.http).get =
-        "/umee/historacle/v1/denoms/medians";
+        "/umee/oracle/v1/denoms/medians";
   }
 }
 
