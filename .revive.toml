@@ -1,0 +1,66 @@
+# Sets the default severity to "error"
+severity = "error"
+
+# Sets the default failure confidence. This means that linting errors
+# with less than 0 confidence will be ignored.
+confidence = 0
+
+# https://github.com/mgechev/revive#configuration
+
+# Recommended configuration, minus [rule.exported] and [rule.package-comments]
+[rule.blank-imports]
+[rule.context-as-argument]
+[rule.context-keys-type]
+[rule.dot-imports]
+[rule.empty-block]
+[rule.error-return]
+[rule.error-strings]
+[rule.error-naming]
+[rule.errorf]
+#[rule.exported]
+[rule.if-return]
+[rule.increment-decrement]
+[rule.indent-error-flow]
+#[rule.package-comments]
+[rule.range]
+[rule.receiver-naming]
+[rule.redefines-builtin-id]
+[rule.superfluous-else]
+[rule.time-naming]
+[rule.unexported-return]
+[rule.unreachable-code]
+[rule.unused-parameter]
+[rule.var-declaration]
+[rule.var-naming]
+
+# Additional rules
+[rule.atomic]
+[rule.bool-literal-in-expr]
+[rule.constant-logical-expr]
+[rule.datarace]
+[rule.duplicated-imports]
+[rule.early-return]
+#[rule.empty-lines]
+[rule.get-return]
+[rule.identical-branches]
+[rule.modifies-value-receiver]
+#[rule.optimize-operands-order]
+[rule.range-val-address]
+[rule.range-val-in-closure]
+[rule.string-of-int]
+[rule.struct-tag]
+[rule.time-equal]
+[rule.unconditional-recursion]
+#[rule.unexported-naming]
+#[rule.unhandled-error]
+[rule.unnecessary-stmt]
+#[rule.unused-receiver]
+#[rule.use-any]
+#[rule.useless-break]
+[rule.waitgroup-by-value]
+
+# Rules that we might want to enable
+#[rule.bare-return]
+#[rule.deep-exit]
+#[rule.defer]
+#[rule.import-shadowing]

@@ -60,14 +60,40 @@ issues:
 linters-settings:
   dogsled:
     max-blank-identifiers: 3
-  revive:
-    # Sets the default failure confidence.
-    # This means that linting errors with less than 0.8 confidence will be ignored.
-    # Default: 0.8
-    confidence: 0
   misspell:
     locale: US
   nolintlint:
     allow-unused: false
     allow-leading-space: true
     require-explanation: false
+  revive:
+    confidence: 0
+    severity: error
+    error-code: 1
+    warning-code: 0
+    # List of rules to enable explicitly should be a subset of .revive.toml
+    # so only critical rules cause CI to fail instead of just generating annotations.
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: empty-block
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: errorf
+      - name: exported
+      # - name: if-return
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: range
+      # - name: receiver-naming
+      # - name: redefines-builtin-id
+      - name: superfluous-else
+      - name: time-naming
+      - name: unexported-return
+      - name: unreachable-code
+      # - name: unused-parameter
+      - name: var-declaration
+      # - name: var-naming

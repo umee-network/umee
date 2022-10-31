@@ -12,21 +12,23 @@ const (
 	defaultTimeout           = 10 * time.Second
 	defaultReadNewWSMessage  = 50 * time.Millisecond
 	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
-	defaultReconnectTime     = time.Minute * 20
-	maxReconnectionTries     = 3
+	defaultReconnectTime     = 2 * time.Minute
+	defaultPingDuration      = 15 * time.Second
 	providerCandlePeriod     = 10 * time.Minute
 
-	ProviderKraken   Name = "kraken"
-	ProviderBinance  Name = "binance"
-	ProviderOsmosis  Name = "osmosis"
-	ProviderHuobi    Name = "huobi"
-	ProviderOkx      Name = "okx"
-	ProviderGate     Name = "gate"
-	ProviderCoinbase Name = "coinbase"
-	ProviderFTX      Name = "ftx"
-	ProviderBitget   Name = "bitget"
-	ProviderMexc     Name = "mexc"
-	ProviderMock     Name = "mock"
+	ProviderKraken    Name = "kraken"
+	ProviderBinance   Name = "binance"
+	ProviderOsmosis   Name = "osmosis"
+	ProviderOsmosisV2 Name = "osmosisv2"
+	ProviderHuobi     Name = "huobi"
+	ProviderOkx       Name = "okx"
+	ProviderGate      Name = "gate"
+	ProviderCoinbase  Name = "coinbase"
+	ProviderFTX       Name = "ftx"
+	ProviderBitget    Name = "bitget"
+	ProviderMexc      Name = "mexc"
+	ProviderCrypto    Name = "crypto"
+	ProviderMock      Name = "mock"
 )
 
 var ping = []byte("ping")

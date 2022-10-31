@@ -1,3 +1,5 @@
+# This workflow helps with creating docker images.
+# This job will only be triggered when a tag [price-feeder/(vX.X.x) is pushed
 name: Release price-feeder
 
 on:

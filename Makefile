@@ -122,7 +122,7 @@ docker-push-gaia:
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
-##                              Tests & Linting                              ##
+##                                   Tests                                   ##
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
@@ -150,19 +150,32 @@ else
 	@go test -mod=readonly $(ARGS) $(TEST_PACKAGES)
 endif
 
-.PHONY: run-tests $(TEST_TARGETS)
-
-lint:
-	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
-	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
-
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
+.PHONY: cover-html run-tests $(TEST_TARGETS)
 
-.PHONY: lint
+###############################################################################
+###                                Linting                                  ###
+###############################################################################
+
+golangci_lint_cmd=golangci-lint
+
+lint:
+	@echo "--> Running linter with revive"
+	@go install github.com/mgechev/revive
+	@revive -config .revive.toml -formatter friendly ./...
+
+lint-fix:
+	@echo "--> Running linter to fix the lint issues"
+	@go install mvdan.cc/gofumpt
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
+	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+
+.PHONY: lint lint-fix
 
 ###############################################################################
 ##                                Simulations                                ##
@@ -193,7 +206,7 @@ test-sim-benchmark-invariants
 ##                                 Protobuf                                  ##
 ###############################################################################
 
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.7.0
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.8.0
 
 containerProtoVer=v0.7
 containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
@@ -221,7 +234,7 @@ proto-format:
 
 proto-lint:
 	@echo "Linting Protobuf files"
-#	@$(DOCKER_BUF) lint --error-format=json
+	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@echo "Checking for breaking changes"
