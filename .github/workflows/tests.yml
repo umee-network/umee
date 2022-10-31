@@ -23,7 +23,7 @@ jobs:
       - name: Install tparse
         if: steps.cache-go-tparse.outputs.cache-hit != 'true'
         run: |
-          go get github.com/mfridman/tparse@v0.11.1
+          go install github.com/mfridman/tparse@v0.11.1
 
   test-unit-cover:
     runs-on: ubuntu-latest
