@@ -28,7 +28,9 @@ The `price-feeder` tool is responsible for performing the following:
 The list of current supported providers:
 
 - [Binance](https://www.binance.com/en)
+- [Bitget](https://www.bitget.com/)
 - [Coinbase](https://www.coinbase.com/)
+- [Crypto](https://crypto.com/)
 - [FTX](https://ftx.com/)
 - [Gate](https://www.gate.io/)
 - [Huobi](https://www.huobi.com/en-us/)
@@ -36,6 +38,7 @@ The list of current supported providers:
 - [Mexc](https://www.mexc.com/)
 - [Okx](https://www.okx.com/)
 - [Osmosis](https://app.osmosis.zone/)
+- [OsmosisV2](https://github.com/umee-network/osmosis-api)
 <!-- markdown-link-check-enable -->
 
 ## Usage
@@ -55,7 +58,7 @@ $ price-feeder /path/to/price_feeder_config.toml
 
 ### `telemetry`
 
-A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/telemetry.md).
+A set of options for the application's telemetry, which is disabled by default. An in-memory sink is the default, but Prometheus is also supported. We use the [cosmos sdk telemetry package](https://github.com/cosmos/cosmos-sdk/blob/3689d6f41ad8afa6e0f9b4ecb03b4d7f2d3a9e94/docs/docs/core/09-telemetry.md).
 
 ### `deviation`
 
@@ -100,6 +103,15 @@ Providing multiple providers is beneficial in case any provider fails to return
 market data. Prices per exchange rate are submitted on-chain via pre-vote and
 vote messages using a time-weighted average price (TVWAP).
 
+### `provider_min_override`
+
+At startup the amount of possible providers for a currency is checked by querying the
+CoinGecko API to enforce an acceptable minimum providers for a given currency pair. If
+this request fails and `provider_min_override` is set to true, the minimum is not enforced
+and the `price-feeder` is allowed to run irrespective of how many providers are provided
+for a given currency pair. `provider_min_override` will not take effect if CoinGecko
+requests are successful.
+
 ### `account`
 
 The `account` section contains the oracle's feeder and validator account information.
@@ -119,7 +131,7 @@ functionality and for broadcasting signed pre-vote and vote oracle messages.
 ## Keyring
 
 Our keyring must be set up to sign transactions before running the price feeder.
-Additional info on the different keyring modes is available [here](https://docs.cosmos.network/master/run-node/keyring.html).
+Additional info on the different keyring modes is available [here](https://docs.cosmos.network/v0.46/run-node/keyring.html).
 **Please note that the `test` and `memory` modes are only for testing purposes.**
 **Do not use these modes for running the price feeder against mainnet.**
 

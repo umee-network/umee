@@ -50,12 +50,25 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
 
+### Features
+
+- [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
+- [1496](https://github.com/umee-network/umee/pull/1496) Dynamic provider minimum enforcement with CoinGecko API.
+- [1510](https://github.com/umee-network/umee/pull/1510) Integrate osmosis-api provider into price-feeder.
+
+### Improvements
+
+- [1484](https://github.com/umee-network/umee/pull/1484) Standardize websocket connection error for providers.
+- [1509](https://github.com/umee-network/umee/pull/1509) Update price feeder example config.
+- [1527](https://github.com/umee-network/umee/pull/1527) Update convertTickersToUSD and convertCandlesToUSD to public.
+
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 
 ### Features
 
 - [1328](https://github.com/umee-network/umee/pull/1328) Add bitget provider.
 - [1339](https://github.com/umee-network/umee/pull/1339) Add mexc provider.
+- [1445](https://github.com/umee-network/umee/pull/1445) Add computed prices api endpoints for debugging.
 
 ### Bugs
 
@@ -80,6 +93,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#1175](https://github.com/umee-network/umee/pull/1175) Add type ProviderName.
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 - [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
+- [#1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
+- [#1442](https://github.com/umee-network/umee/pull/1442) Remove unnecessary method in recconection logic.
 
 ### Features
 

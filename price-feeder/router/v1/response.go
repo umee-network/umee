@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
 // Response constants
@@ -26,6 +27,10 @@ type (
 	// rates from the oracle.
 	PricesResponse struct {
 		Prices map[string]sdk.Dec `json:"prices"`
+	}
+
+	PricesPerProviderResponse struct {
+		Prices map[provider.Name]map[string]sdk.Dec `json:"providers"`
 	}
 )
 

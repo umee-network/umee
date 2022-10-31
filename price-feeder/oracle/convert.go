@@ -38,7 +38,7 @@ func getUSDBasedProviders(
 // within the deviation threshold set by the config.
 //
 // Ref: https://github.com/umee-network/umee/blob/4348c3e433df8c37dd98a690e96fc275de609bc1/price-feeder/oracle/filter.go#L41
-func convertCandlesToUSD(
+func ConvertCandlesToUSD(
 	logger zerolog.Logger,
 	candles provider.AggregatedProviderCandles,
 	providerPairs map[provider.Name][]types.CurrencyPair,
@@ -128,12 +128,12 @@ func convertCandlesToUSD(
 	return candles, nil
 }
 
-// convertTickersToUSD converts any tickers which are not quoted in USD to USD,
+// ConvertTickersToUSD converts any tickers which are not quoted in USD to USD,
 // using the conversion rates of other tickers. It will also filter out any tickers
 // not within the deviation threshold set by the config.
 //
 // Ref: https://github.com/umee-network/umee/blob/4348c3e433df8c37dd98a690e96fc275de609bc1/price-feeder/oracle/filter.go#L41
-func convertTickersToUSD(
+func ConvertTickersToUSD(
 	logger zerolog.Logger,
 	tickers provider.AggregatedProviderPrices,
 	providerPairs map[provider.Name][]types.CurrencyPair,
@@ -186,10 +186,7 @@ func convertTickersToUSD(
 					return nil, err
 				}
 
-				vwap, err := ComputeVWAP(filteredTickers)
-				if err != nil {
-					return nil, err
-				}
+				vwap := ComputeVWAP(filteredTickers)
 
 				conversionRates[pair.Quote] = vwap[pair.Quote]
 				requiredConversions[pairProviderName] = pair
