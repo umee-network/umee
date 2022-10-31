@@ -1,54 +1,57 @@
 <!-- markdownlint-disable MD013 -->
-# Upgrade Instructions
+
+# Betanet-2
+
+## Upgrade Instructions
 
 This document contains a rough outline for the steps required to upgrade a node
 running on `umee-betanet-1` to `umee-betanet-2`:
 
 1. Stop the `gorc` service (if validator)
 
-    ```bash
-    $ systemctl stop gorc
-    ```
+   ```bash
+   $ systemctl stop gorc
+   ```
 
 2. Stop the `geth` service (if validator)
 
-    ```bash
-    $ systemctl stop geth
-    ```
+   ```bash
+   $ systemctl stop geth
+   ```
 
 3. Update `geth` service to run on Rinkeby and restart service (if validator)
 
-    ```bash
-    $ vim /etc/systemd/system/geth.service
-    # use --rinkeby instead of --goerli
-    $ systemctl daemon-reload
-    $ systemctl start geth
-    ```
+   ```bash
+   $ vim /etc/systemd/system/geth.service
+   # use --rinkeby instead of --goerli
+   $ systemctl daemon-reload
+   $ systemctl start geth
+   ```
 
 4. Stop the `umeed` service
 
-    ```bash
-    $ systemctl stop umeed
-    ```
+   ```bash
+   $ systemctl stop umeed
+   ```
 
 5. Reset state (this removes data and other files)
 
-    ```bash
-    $ umeed unsafe-reset-all
-    ```
+   ```bash
+   $ umeed unsafe-reset-all
+   ```
 
 6. Remove the old genesis file
 
-    ```bash
-    $ rm -fr $HOME/.umee/config/genesis.json
-    ```
+   ```bash
+   $ rm -fr $HOME/.umee/config/genesis.json
+   ```
 
 7. (Optional) If you plan on using different Ethereum or Umee keys for `gorc`, then remove
    `gorc` keystore (since we're redeploying gravity on **Rinkeby**)
 
-    ```bash
-    $ rm -fr $HOME/gorc/keystore/**
-    ```
+   ```bash
+   $ rm -fr $HOME/gorc/keystore/**
+   ```
 
 8. Update `umeed` binary to version v0.2.0
 9. Update `gorc` binary to version v0.2.10+
