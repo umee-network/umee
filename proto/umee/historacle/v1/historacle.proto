@@ -2,7 +2,6 @@ syntax = "proto3";
 package umee.historacle.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 import "umee/oracle/v1/oracle.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/historacle/types";
@@ -23,6 +22,5 @@ message HistoricPrice {
         (gogoproto.castrepeated) = "ExchangeRateTuples",
         (gogoproto.nullable)     = false
       ];
-
   uint64 block_num = 2;
 }

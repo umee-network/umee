@@ -1,7 +1,6 @@
 syntax = "proto3";
 package umee.historacle.v1;
 
-import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/msg/v1/msg.proto";
 
