@@ -5,7 +5,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"gopkg.in/yaml.v3"
 )
 
 const blocksPerDay = 86400 / 5
@@ -69,12 +68,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 			validateTierWeight,
 		),
 	}
-}
-
-// String implements the Stringer interface.
-func (p Params) String() string {
-	out, _ := yaml.Marshal(p)
-	return string(out)
 }
 
 // ParamKeyTable returns the x/leverage module's parameter KeyTable expected by

@@ -7,7 +7,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	"gopkg.in/yaml.v3"
 
 	"github.com/umee-network/umee/v3/util/checkers"
 )
@@ -119,11 +118,6 @@ func NewMsgCreateProgram(authority, title, description string, program Incentive
 	}
 }
 
-func (msg MsgCreateProgram) String() string {
-	out, _ := yaml.Marshal(msg)
-	return string(out)
-}
-
 func (msg MsgCreateProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
@@ -196,11 +190,6 @@ func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string
 		Authority:   authority,
 		Sponsor:     sponsor,
 	}
-}
-
-func (msg MsgCreateAndSponsorProgram) String() string {
-	out, _ := yaml.Marshal(msg)
-	return string(out)
 }
 
 func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
