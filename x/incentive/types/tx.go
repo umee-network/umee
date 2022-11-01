@@ -26,9 +26,6 @@ func NewMsgClaim(supplier sdk.AccAddress) *MsgClaim {
 	}
 }
 
-func (msg MsgClaim) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgClaim) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgClaim) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Supplier)
 	return err
@@ -52,9 +49,6 @@ func NewMsgLock(supplier sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgLock {
 	}
 }
 
-func (msg MsgLock) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgLock) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgLock) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Supplier, msg.Tier, &msg.Asset)
 }
@@ -77,9 +71,6 @@ func NewMsgBeginUnbonding(supplier sdk.AccAddress, tier uint32, asset sdk.Coin) 
 	}
 }
 
-func (msg MsgBeginUnbonding) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgBeginUnbonding) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgBeginUnbonding) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Supplier, msg.Tier, &msg.Asset)
 }
@@ -101,9 +92,6 @@ func NewMsgSponsor(sponsor sdk.AccAddress, programID uint64, asset sdk.Coin) *Ms
 		Asset:   asset,
 	}
 }
-
-func (msg MsgSponsor) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgSponsor) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgSponsor) ValidateBasic() error {
 	if msg.Program == 0 {
@@ -131,17 +119,10 @@ func NewMsgCreateProgram(authority, title, description string, program Incentive
 	}
 }
 
-func (msg MsgCreateProgram) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgCreateProgram) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg MsgCreateProgram) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
 }
-
-func (msg *MsgCreateProgram) GetTitle() string { return msg.Title }
-
-func (msg *MsgCreateProgram) GetDescription() string { return msg.Description }
 
 func (msg MsgCreateProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
@@ -174,7 +155,7 @@ func (msg MsgCreateProgram) ValidateBasic() error {
 }
 
 func (msg *MsgCreateProgram) ValidateAbstract() error {
-	title := msg.GetTitle()
+	title := msg.Title
 	if len(strings.TrimSpace(title)) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
 	}
@@ -183,7 +164,7 @@ func (msg *MsgCreateProgram) ValidateAbstract() error {
 			gov1b1.MaxTitleLength)
 	}
 
-	description := msg.GetDescription()
+	description := msg.Description
 	if len(description) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
 	}
@@ -217,17 +198,10 @@ func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string
 	}
 }
 
-func (msg MsgCreateAndSponsorProgram) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgCreateAndSponsorProgram) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg MsgCreateAndSponsorProgram) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
 }
-
-func (msg *MsgCreateAndSponsorProgram) GetTitle() string { return msg.Title }
-
-func (msg *MsgCreateAndSponsorProgram) GetDescription() string { return msg.Description }
 
 func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
@@ -260,7 +234,7 @@ func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
 }
 
 func (msg *MsgCreateAndSponsorProgram) ValidateAbstract() error {
-	title := msg.GetTitle()
+	title := msg.Title
 	if len(strings.TrimSpace(title)) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
 	}
@@ -269,7 +243,7 @@ func (msg *MsgCreateAndSponsorProgram) ValidateAbstract() error {
 			gov1b1.MaxTitleLength)
 	}
 
-	description := msg.GetDescription()
+	description := msg.Description
 	if len(description) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
 	}
