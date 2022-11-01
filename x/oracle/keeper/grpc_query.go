@@ -254,5 +254,5 @@ func (q querier) AggregateVotes(
 func (q querier) Medians(
 	_ context.Context, _ *types.QueryMedians,
 ) (*types.QueryMediansResponse, error) {
-	return &types.QueryMediansResponse{}, nil
+	return nil, types.ErrNotImplemented
 }
