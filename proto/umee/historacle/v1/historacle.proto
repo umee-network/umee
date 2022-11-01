@@ -1,0 +1,28 @@
+syntax = "proto3";
+package umee.historacle.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "umee/oracle/v1/oracle.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/historacle/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Params defines the parameters for the historacle module.
+message Params {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_stringer) = false;
+  uint64 stamp_period                 = 1;
+  uint64 prune_period                 = 2;
+}
+
+// HistoricPrice is an instance of a price "stamp"
+message HistoricPrice {
+  umee.oracle.v1.ExchangeRateTuple exchange_rates = 1 [
+        (gogoproto.castrepeated) = "ExchangeRateTuples",
+        (gogoproto.nullable)     = false
+      ];
+
+  uint64 block_num = 2;
+}

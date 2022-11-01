@@ -1,0 +1,39 @@
+syntax = "proto3";
+package umee.historacle.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "umee/oracle/v1/oracle.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/historacle/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Query defines the gRPC querier service.
+service Query {
+  // Medians returns medians of all denoms
+  rpc Medians(QueryMedians)
+      returns (QueryMediansResponse) {
+    option (google.api.http).get =
+        "/umee/historacle/v1/denoms/medians";
+  }
+}
+
+// QueryMedians is the request type for the Query/Medians RPC Response.
+message QueryMedians {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+  // denom defines the denomination to query for.
+  string denom = 1;
+}
+
+// QueryMediansResponse is response type for the
+// Query/Medians RPC method.
+message QueryMediansResponse {
+  // medians defines a list of the medians for all stamped denoms.
+  repeated cosmos.base.v1beta1.DecCoin medians = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable)     = false
+  ];
+}

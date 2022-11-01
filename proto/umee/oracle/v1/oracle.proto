@@ -41,8 +41,6 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  uint64 stamp_period = 9;
-  uint64 prune_period = 10;
 }
 
 // Denom - the object to hold configurations of each denom
@@ -99,13 +97,4 @@ message ExchangeRateTuple {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-}
-
-// HistoricPrice defines the object used to stamp prices.
-message HistoricPrice {
-  repeated umee.oracle.v1.ExchangeRateTuple exchange_rates = 1 [
-        (gogoproto.castrepeated) = "ExchangeRateTuples",
-        (gogoproto.nullable)     = false
-      ];
-  uint64 height = 2;
 }
