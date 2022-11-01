@@ -18,8 +18,8 @@ import (
 const (
 	osmosisV2WSHost   = "api.osmo-api.network.umee.cc"
 	osmosisV2WSPath   = "ws"
-	osmosisV2RestHost = "https://api-osmosis.imperator.co"
-	osmosisV2RestPath = "/pairs/v1/summary"
+	osmosisV2RestHost = "https://api.osmo-api.network.umee.cc"
+	osmosisV2RestPath = "/assetpairs"
 )
 
 var _ Provider = (*OsmosisV2Provider)(nil)
