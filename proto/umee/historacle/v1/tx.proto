@@ -9,16 +9,16 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the historacle Msg service.
 service Msg {
-    // StampPeriod defines the interface for which governance
-    // can use to set the stamp period.
-    rpc UpdateStampPeriod(MsgUpdateStampPeriod)
-        returns (MsgUpdateStampPeriodResponse);
+    // UpdateParams defines the interface for which governance
+    // can use to set the stamp period and the prune period.
+    rpc UpdateParams(MsgUpdateParams)
+        returns (MsgUpdateParamsResponse);
   }
 
 
-// MsgUpdateStampPeriod represents a message for governance to update the
-// stamp period.
-message MsgUpdateStampPeriod {
+// MsgUpdateParams represents a message for governance to update the
+// stamp period and the prune period.
+message MsgUpdateParams {
     option (gogoproto.equal)           = false;
     option (gogoproto.goproto_getters) = false;
     option (cosmos.msg.v1.signer) = "authority";
@@ -30,6 +30,6 @@ message MsgUpdateStampPeriod {
     uint64         prune_period = 5;
 }
 
-// MsgUpdateStampPeriodResponse defines the
-// Msg/UpdateStampPeriodResponse response type.
-message MsgUpdateStampPeriodResponse {}
+// MsgUpdateParamsResponse defines the
+// Msg/UpdateParamsResponse response type.
+message MsgUpdateParamsResponse {}

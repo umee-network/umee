@@ -11,7 +11,11 @@ option (gogoproto.goproto_getters_all) = false;
 // Params defines the parameters for the historacle module.
 message Params {
   option (gogoproto.equal)            = true;
+  // Stamp Period represents the amount of blocks the historacle module
+  // waits before recording a set of prices from the oracle.
   uint64 stamp_period                 = 1;
+  // Prune Period represents the maximum amount of blocks which we want
+  // to keep a record of our set of exchange rates.
   uint64 prune_period                 = 2;
 }
 

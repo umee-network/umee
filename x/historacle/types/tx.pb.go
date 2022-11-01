@@ -29,9 +29,9 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgUpdateStampPeriod represents a message for governance to update the
-// stamp period.
-type MsgUpdateStampPeriod struct {
+// MsgUpdateParams represents a message for governance to update the
+// stamp period and the prune period.
+type MsgUpdateParams struct {
 	Authority   string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
@@ -39,18 +39,18 @@ type MsgUpdateStampPeriod struct {
 	PrunePeriod uint64 `protobuf:"varint,5,opt,name=prune_period,json=prunePeriod,proto3" json:"prune_period,omitempty"`
 }
 
-func (m *MsgUpdateStampPeriod) Reset()         { *m = MsgUpdateStampPeriod{} }
-func (m *MsgUpdateStampPeriod) String() string { return proto.CompactTextString(m) }
-func (*MsgUpdateStampPeriod) ProtoMessage()    {}
-func (*MsgUpdateStampPeriod) Descriptor() ([]byte, []int) {
+func (m *MsgUpdateParams) Reset()         { *m = MsgUpdateParams{} }
+func (m *MsgUpdateParams) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParams) ProtoMessage()    {}
+func (*MsgUpdateParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9745bbb29468c03c, []int{0}
 }
-func (m *MsgUpdateStampPeriod) XXX_Unmarshal(b []byte) error {
+func (m *MsgUpdateParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgUpdateStampPeriod) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgUpdateParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgUpdateStampPeriod.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgUpdateParams.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -60,35 +60,35 @@ func (m *MsgUpdateStampPeriod) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *MsgUpdateStampPeriod) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgUpdateStampPeriod.Merge(m, src)
+func (m *MsgUpdateParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParams.Merge(m, src)
 }
-func (m *MsgUpdateStampPeriod) XXX_Size() int {
+func (m *MsgUpdateParams) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgUpdateStampPeriod) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgUpdateStampPeriod.DiscardUnknown(m)
+func (m *MsgUpdateParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParams.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgUpdateStampPeriod proto.InternalMessageInfo
+var xxx_messageInfo_MsgUpdateParams proto.InternalMessageInfo
 
-// MsgUpdateStampPeriodResponse defines the
-// Msg/UpdateStampPeriodResponse response type.
-type MsgUpdateStampPeriodResponse struct {
+// MsgUpdateParamsResponse defines the
+// Msg/UpdateParamsResponse response type.
+type MsgUpdateParamsResponse struct {
 }
 
-func (m *MsgUpdateStampPeriodResponse) Reset()         { *m = MsgUpdateStampPeriodResponse{} }
-func (m *MsgUpdateStampPeriodResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgUpdateStampPeriodResponse) ProtoMessage()    {}
-func (*MsgUpdateStampPeriodResponse) Descriptor() ([]byte, []int) {
+func (m *MsgUpdateParamsResponse) Reset()         { *m = MsgUpdateParamsResponse{} }
+func (m *MsgUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParamsResponse) ProtoMessage()    {}
+func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9745bbb29468c03c, []int{1}
 }
-func (m *MsgUpdateStampPeriodResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgUpdateStampPeriodResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgUpdateParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgUpdateStampPeriodResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgUpdateParamsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -98,49 +98,49 @@ func (m *MsgUpdateStampPeriodResponse) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (m *MsgUpdateStampPeriodResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgUpdateStampPeriodResponse.Merge(m, src)
+func (m *MsgUpdateParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParamsResponse.Merge(m, src)
 }
-func (m *MsgUpdateStampPeriodResponse) XXX_Size() int {
+func (m *MsgUpdateParamsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgUpdateStampPeriodResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgUpdateStampPeriodResponse.DiscardUnknown(m)
+func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParamsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgUpdateStampPeriodResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*MsgUpdateStampPeriod)(nil), "umee.historacle.v1.MsgUpdateStampPeriod")
-	proto.RegisterType((*MsgUpdateStampPeriodResponse)(nil), "umee.historacle.v1.MsgUpdateStampPeriodResponse")
+	proto.RegisterType((*MsgUpdateParams)(nil), "umee.historacle.v1.MsgUpdateParams")
+	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "umee.historacle.v1.MsgUpdateParamsResponse")
 }
 
 func init() { proto.RegisterFile("umee/historacle/v1/tx.proto", fileDescriptor_9745bbb29468c03c) }
 
 var fileDescriptor_9745bbb29468c03c = []byte{
-	// 345 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x91, 0xbf, 0x4e, 0x32, 0x41,
-	0x14, 0xc5, 0x77, 0x3f, 0xe0, 0x4b, 0x18, 0x68, 0xdc, 0x10, 0xdd, 0x20, 0x19, 0xfe, 0x54, 0xc4,
-	0xc4, 0x1d, 0x81, 0xce, 0xd2, 0x9e, 0x84, 0x60, 0x6c, 0x6c, 0xcc, 0xb2, 0x4c, 0x86, 0x89, 0xec,
-	0xde, 0xc9, 0xcc, 0xec, 0x0a, 0xad, 0x95, 0xa5, 0x8f, 0xc0, 0x23, 0xf8, 0x18, 0xc4, 0x8a, 0xd2,
-	0x52, 0xa1, 0xd0, 0xc7, 0x30, 0x3b, 0x1b, 0x02, 0x09, 0x14, 0x76, 0x7b, 0xcf, 0xef, 0xe4, 0x9c,
-	0xbd, 0x73, 0xd1, 0x79, 0x1c, 0x52, 0x4a, 0x26, 0x5c, 0x69, 0x90, 0x7e, 0x30, 0xa5, 0x24, 0xe9,
-	0x10, 0x3d, 0xf3, 0x84, 0x04, 0x0d, 0x8e, 0x93, 0x42, 0x6f, 0x07, 0xbd, 0xa4, 0x53, 0xad, 0x30,
-	0x60, 0x60, 0x30, 0x49, 0xbf, 0x32, 0x67, 0xf5, 0x2c, 0x00, 0x15, 0x82, 0x22, 0xa1, 0x62, 0x69,
-	0x42, 0xa8, 0x58, 0x06, 0x5a, 0xef, 0x36, 0xaa, 0xf4, 0x15, 0xbb, 0x13, 0x63, 0x5f, 0xd3, 0x5b,
-	0xed, 0x87, 0x62, 0x40, 0x25, 0x87, 0xb1, 0x53, 0x43, 0x45, 0x3f, 0xd6, 0x13, 0x90, 0x5c, 0xcf,
-	0x5d, 0xbb, 0x61, 0xb7, 0x8b, 0xc3, 0x9d, 0xe0, 0x54, 0x50, 0x41, 0x73, 0x3d, 0xa5, 0xee, 0x3f,
-	0x43, 0xb2, 0xc1, 0x69, 0xa0, 0xd2, 0x98, 0xaa, 0x40, 0x72, 0xa1, 0x39, 0x44, 0x6e, 0xce, 0xb0,
-	0x7d, 0xc9, 0x69, 0xa2, 0xb2, 0x4a, 0x4b, 0x1e, 0x84, 0x69, 0x71, 0xf3, 0x0d, 0xbb, 0x9d, 0x1f,
-	0x96, 0xd4, 0x5e, 0x71, 0x13, 0x95, 0x85, 0x8c, 0x23, 0xba, 0xb5, 0x14, 0x32, 0x8b, 0xd1, 0x32,
-	0xcb, 0xf5, 0xe9, 0xcb, 0xa2, 0x6e, 0xfd, 0x2c, 0xea, 0xd6, 0xf3, 0xf7, 0xdb, 0xc5, 0xee, 0xaf,
-	0x5a, 0x18, 0xd5, 0x8e, 0xed, 0x32, 0xa4, 0x4a, 0x40, 0xa4, 0x68, 0x37, 0x41, 0xb9, 0xbe, 0x62,
-	0x0e, 0xa0, 0x93, 0xc3, 0x7d, 0xdb, 0xde, 0xe1, 0x63, 0x7a, 0xc7, 0xd2, 0xaa, 0x57, 0x7f, 0x75,
-	0x6e, 0x7b, 0x6f, 0x06, 0xcb, 0x2f, 0x6c, 0x2d, 0xd7, 0xd8, 0x5e, 0xad, 0xb1, 0xfd, 0xb9, 0xc6,
-	0xf6, 0xeb, 0x06, 0x5b, 0xab, 0x0d, 0xb6, 0x3e, 0x36, 0xd8, 0xba, 0xef, 0x32, 0xae, 0x27, 0xf1,
-	0xc8, 0x0b, 0x20, 0x24, 0x69, 0xf2, 0x65, 0x44, 0xf5, 0x13, 0xc8, 0x47, 0x33, 0x90, 0xa4, 0x47,
-	0x66, 0xfb, 0xf7, 0xd7, 0x73, 0x41, 0xd5, 0xe8, 0xbf, 0xb9, 0x5e, 0xef, 0x37, 0x00, 0x00, 0xff,
-	0xff, 0x27, 0x9b, 0xb0, 0xd6, 0x1f, 0x02, 0x00, 0x00,
+	// 343 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x91, 0xb1, 0x4e, 0x02, 0x31,
+	0x18, 0xc7, 0xef, 0x04, 0x4c, 0x28, 0x24, 0x26, 0x0d, 0x91, 0x13, 0x4d, 0x41, 0x5c, 0x88, 0xc6,
+	0x6b, 0x80, 0xcd, 0xd1, 0x9d, 0x84, 0x90, 0xb8, 0xb8, 0xe8, 0x71, 0x34, 0xa5, 0x91, 0x5e, 0x9b,
+	0xb6, 0x87, 0xb0, 0x3a, 0x39, 0xfa, 0x08, 0x3c, 0x82, 0x2f, 0x61, 0xc2, 0xc8, 0xe8, 0xa8, 0x30,
+	0xe8, 0x63, 0x98, 0xeb, 0x85, 0x80, 0xb8, 0xb8, 0xf5, 0xfb, 0xff, 0x7e, 0xf9, 0xda, 0xaf, 0x1f,
+	0x38, 0x8e, 0x39, 0x21, 0x78, 0xc8, 0xb4, 0x11, 0x2a, 0x08, 0x47, 0x04, 0x8f, 0x9b, 0xd8, 0x4c,
+	0x7c, 0xa9, 0x84, 0x11, 0x10, 0x26, 0xd0, 0xdf, 0x40, 0x7f, 0xdc, 0xac, 0x94, 0xa8, 0xa0, 0xc2,
+	0x62, 0x9c, 0x9c, 0x52, 0xb3, 0x52, 0x0e, 0x85, 0xe6, 0x42, 0x63, 0xae, 0x69, 0xd2, 0x81, 0x6b,
+	0x9a, 0x82, 0xfa, 0x9b, 0x0b, 0x0e, 0x3a, 0x9a, 0xde, 0xc8, 0x41, 0x60, 0x48, 0x37, 0x50, 0x01,
+	0xd7, 0xf0, 0x04, 0xe4, 0x83, 0xd8, 0x0c, 0x85, 0x62, 0x66, 0xea, 0xb9, 0x35, 0xb7, 0x91, 0xef,
+	0x6d, 0x02, 0x58, 0x02, 0x39, 0xc3, 0xcc, 0x88, 0x78, 0x7b, 0x96, 0xa4, 0x05, 0xac, 0x81, 0xc2,
+	0x80, 0xe8, 0x50, 0x31, 0x69, 0x98, 0x88, 0xbc, 0x8c, 0x65, 0xdb, 0x11, 0x3c, 0x05, 0x45, 0x6d,
+	0x02, 0x2e, 0xef, 0x24, 0x51, 0x4c, 0x0c, 0xbc, 0x6c, 0xcd, 0x6d, 0x64, 0x7b, 0x05, 0x9b, 0x75,
+	0x6d, 0x94, 0x28, 0x52, 0xc5, 0x11, 0x59, 0x2b, 0xb9, 0x54, 0xb1, 0x59, 0xaa, 0x5c, 0x1d, 0x3e,
+	0xcf, 0xaa, 0xce, 0xf7, 0xac, 0xea, 0x3c, 0x7d, 0xbd, 0x9e, 0x6f, 0x5e, 0x55, 0x3f, 0x02, 0xe5,
+	0x9d, 0x31, 0x7a, 0x44, 0x4b, 0x11, 0x69, 0xd2, 0xa2, 0x20, 0xd3, 0xd1, 0x14, 0xde, 0x83, 0xe2,
+	0xaf, 0x29, 0xcf, 0xfc, 0xbf, 0xbf, 0xe7, 0xef, 0xf4, 0xa8, 0x5c, 0xfc, 0x43, 0x5a, 0x5f, 0x74,
+	0xdd, 0x9d, 0x7f, 0x22, 0x67, 0xbe, 0x44, 0xee, 0x62, 0x89, 0xdc, 0x8f, 0x25, 0x72, 0x5f, 0x56,
+	0xc8, 0x59, 0xac, 0x90, 0xf3, 0xbe, 0x42, 0xce, 0x6d, 0x8b, 0x32, 0x33, 0x8c, 0xfb, 0x7e, 0x28,
+	0x38, 0x4e, 0x9a, 0x5e, 0x46, 0xc4, 0x3c, 0x0a, 0xf5, 0x60, 0x0b, 0x3c, 0x6e, 0xe3, 0xc9, 0xf6,
+	0x9a, 0xcd, 0x54, 0x12, 0xdd, 0xdf, 0xb7, 0x4b, 0x6a, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0xfc,
+	0x4c, 0x9f, 0xd1, 0x06, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -155,9 +155,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// StampPeriod defines the interface for which governance
-	// can use to set the stamp period.
-	UpdateStampPeriod(ctx context.Context, in *MsgUpdateStampPeriod, opts ...grpc.CallOption) (*MsgUpdateStampPeriodResponse, error)
+	// UpdateParams defines the interface for which governance
+	// can use to set the stamp period and the prune period.
+	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 }
 
 type msgClient struct {
@@ -168,9 +168,9 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) UpdateStampPeriod(ctx context.Context, in *MsgUpdateStampPeriod, opts ...grpc.CallOption) (*MsgUpdateStampPeriodResponse, error) {
-	out := new(MsgUpdateStampPeriodResponse)
-	err := c.cc.Invoke(ctx, "/umee.historacle.v1.Msg/UpdateStampPeriod", in, out, opts...)
+func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error) {
+	out := new(MsgUpdateParamsResponse)
+	err := c.cc.Invoke(ctx, "/umee.historacle.v1.Msg/UpdateParams", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -179,37 +179,37 @@ func (c *msgClient) UpdateStampPeriod(ctx context.Context, in *MsgUpdateStampPer
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// StampPeriod defines the interface for which governance
-	// can use to set the stamp period.
-	UpdateStampPeriod(context.Context, *MsgUpdateStampPeriod) (*MsgUpdateStampPeriodResponse, error)
+	// UpdateParams defines the interface for which governance
+	// can use to set the stamp period and the prune period.
+	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
 type UnimplementedMsgServer struct {
 }
 
-func (*UnimplementedMsgServer) UpdateStampPeriod(ctx context.Context, req *MsgUpdateStampPeriod) (*MsgUpdateStampPeriodResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateStampPeriod not implemented")
+func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
 	s.RegisterService(&_Msg_serviceDesc, srv)
 }
 
-func _Msg_UpdateStampPeriod_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgUpdateStampPeriod)
+func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).UpdateStampPeriod(ctx, in)
+		return srv.(MsgServer).UpdateParams(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.historacle.v1.Msg/UpdateStampPeriod",
+		FullMethod: "/umee.historacle.v1.Msg/UpdateParams",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).UpdateStampPeriod(ctx, req.(*MsgUpdateStampPeriod))
+		return srv.(MsgServer).UpdateParams(ctx, req.(*MsgUpdateParams))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -219,15 +219,15 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "UpdateStampPeriod",
-			Handler:    _Msg_UpdateStampPeriod_Handler,
+			MethodName: "UpdateParams",
+			Handler:    _Msg_UpdateParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "umee/historacle/v1/tx.proto",
 }
 
-func (m *MsgUpdateStampPeriod) Marshal() (dAtA []byte, err error) {
+func (m *MsgUpdateParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -237,12 +237,12 @@ func (m *MsgUpdateStampPeriod) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgUpdateStampPeriod) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgUpdateParams) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgUpdateStampPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -281,7 +281,7 @@ func (m *MsgUpdateStampPeriod) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgUpdateStampPeriodResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgUpdateParamsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -291,12 +291,12 @@ func (m *MsgUpdateStampPeriodResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgUpdateStampPeriodResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgUpdateParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgUpdateStampPeriodResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -315,7 +315,7 @@ func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *MsgUpdateStampPeriod) Size() (n int) {
+func (m *MsgUpdateParams) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -342,7 +342,7 @@ func (m *MsgUpdateStampPeriod) Size() (n int) {
 	return n
 }
 
-func (m *MsgUpdateStampPeriodResponse) Size() (n int) {
+func (m *MsgUpdateParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -357,7 +357,7 @@ func sovTx(x uint64) (n int) {
 func sozTx(x uint64) (n int) {
 	return sovTx(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *MsgUpdateStampPeriod) Unmarshal(dAtA []byte) error {
+func (m *MsgUpdateParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -380,10 +380,10 @@ func (m *MsgUpdateStampPeriod) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgUpdateStampPeriod: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgUpdateParams: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgUpdateStampPeriod: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgUpdateParams: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -541,7 +541,7 @@ func (m *MsgUpdateStampPeriod) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgUpdateStampPeriodResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -564,10 +564,10 @@ func (m *MsgUpdateStampPeriodResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgUpdateStampPeriodResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgUpdateStampPeriodResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

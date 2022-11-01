@@ -26,7 +26,11 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the historacle module.
 type Params struct {
+	// Stamp Period represents the amount of blocks the historacle module
+	// waits before recording a set of prices from the oracle.
 	StampPeriod uint64 `protobuf:"varint,1,opt,name=stamp_period,json=stampPeriod,proto3" json:"stamp_period,omitempty"`
+	// Prune Period represents the maximum amount of blocks which we want
+	// to keep a record of our set of exchange rates.
 	PrunePeriod uint64 `protobuf:"varint,2,opt,name=prune_period,json=prunePeriod,proto3" json:"prune_period,omitempty"`
 }
 
