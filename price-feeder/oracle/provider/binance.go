@@ -73,6 +73,11 @@ type (
 		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 
+	BinanceSubscriptionResp struct {
+		Result string `json:"result"`
+		ID     uint16 `json:"id"`
+	}
+
 	// BinancePairSummary defines the response structure for a Binance pair
 	// summary.
 	BinancePairSummary struct {
@@ -211,15 +216,12 @@ func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, erro
 }
 
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	var (
-		tickerResp BinanceTicker
-		tickerErr  error
-		candleResp BinanceCandle
-		candleErr  error
+		tickerResp    BinanceTicker
+		tickerErr     error
+		candleResp    BinanceCandle
+		candleErr     error
+		subscribeResp BinanceSubscriptionResp
 	)
 
 	tickerErr = json.Unmarshal(bz, &tickerResp)
@@ -233,6 +235,12 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	if len(candleResp.Metadata.Close) != 0 {
 		p.setCandlePair(candleResp)
 		telemetryWebsocketMessage(ProviderBinance, MessageTypeCandle)
+		return
+	}
+
+	// We don't need this message but this prevents logging an error
+	json.Unmarshal(bz, &subscribeResp)
+	if subscribeResp.ID == 1 {
 		return
 	}
 
