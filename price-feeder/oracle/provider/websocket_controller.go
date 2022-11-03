@@ -23,6 +23,7 @@ type (
 		websocketURL     url.URL
 		subscriptionMsgs []interface{}
 		messageHandler   MessageHandler
+		pingDuration     time.Duration
 		logger           zerolog.Logger
 
 		mtx    sync.Mutex
@@ -38,6 +39,7 @@ func NewWebsocketController(
 	websocketURL url.URL,
 	subscriptionMsgs []interface{},
 	messageHandler MessageHandler,
+	pingDuration time.Duration,
 	logger zerolog.Logger,
 ) *WebsocketController {
 	return &WebsocketController{
@@ -46,6 +48,7 @@ func NewWebsocketController(
 		websocketURL:     websocketURL,
 		subscriptionMsgs: subscriptionMsgs,
 		messageHandler:   messageHandler,
+		pingDuration:     pingDuration,
 		logger:           logger,
 	}
 }
@@ -112,18 +115,22 @@ func (wsc *WebsocketController) subscribe() error {
 
 // ping sends a ping to the server every defaultPingDuration
 func (wsc *WebsocketController) ping() {
-	pingTicker := time.NewTicker(defaultPingDuration)
+	if wsc.pingDuration == time.Duration(0) {
+		return // disable ping loop if duration is zero
+	}
+	pingTicker := time.NewTicker(wsc.pingDuration)
 	defer pingTicker.Stop()
 
 	for {
+		wsc.mtx.Lock()
 		if wsc.client == nil {
 			return
 		}
-		wsc.mtx.Lock()
 		err := wsc.client.WriteMessage(1, []byte("ping"))
 		wsc.mtx.Unlock()
 		if err != nil {
 			wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
+			return
 		}
 		select {
 		case <-wsc.ctx.Done():
@@ -134,9 +141,11 @@ func (wsc *WebsocketController) ping() {
 	}
 }
 
-// readWebSocket contiously reads from the websocket and relays messages
+// readWebSocket continuously reads from the websocket and relays messages
 // to the passed in messageHandler. On websocket error this function
-// terminates and starts the reconnect process
+// terminates and starts the reconnect process.
+// Some providers (Binance) will only allow a valid connection for 24 hours
+// so we manually disconnect and reconnect every 23 hours (defaultMaxConnectionTime)
 func (wsc *WebsocketController) readWebSocket() {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
@@ -165,6 +174,7 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
+	// handle some providers (mexc) not sending a valid pong response code
 	if string(bz) == "pong" {
 		wsc.client.PongHandler()
 		return

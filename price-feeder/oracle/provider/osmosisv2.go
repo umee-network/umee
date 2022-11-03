@@ -102,6 +102,7 @@ func NewOsmosisV2Provider(
 		wsURL,
 		[]interface{}{""},
 		provider.messageReceived,
+		defaultPingDuration,
 		osmosisV2Logger,
 	)
 	go controller.Start()

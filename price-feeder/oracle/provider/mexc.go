@@ -117,6 +117,7 @@ func NewMexcProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
+		defaultPingDuration,
 		mexcLogger,
 	)
 	go controller.Start()

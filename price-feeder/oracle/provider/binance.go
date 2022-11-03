@@ -100,33 +100,45 @@ func NewBinanceProvider(
 		Path:   binanceWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBinance,
-			err,
-		)
-	}
+	binanceLogger := logger.With().Str("provider", string(ProviderBinance)).Logger()
 
 	provider := &BinanceProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(ProviderBinance)).Logger(),
+		logger:          binanceLogger,
 		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleWebSocketMsgs(ctx)
+	controller := NewWebsocketController(
+		ctx,
+		ProviderBinance,
+		wsURL,
+		provider.getSubscriptionMsgs(),
+		provider.messageReceived,
+		time.Duration(0),
+		binanceLogger,
+	)
+	go controller.Start()
 
 	return provider, nil
+}
+
+func (p *BinanceProvider) getSubscriptionMsgs() []interface{} {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
+	for _, cp := range p.subscribedPairs {
+		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceTickerPair))
+
+		binanceCandlePair := currencyPairToBinanceCandlePair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceCandlePair))
+	}
+	return subscriptionMsgs
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
@@ -163,56 +175,7 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderBinance, len(cps))
-	return nil
-}
-
-// subscribeChannels subscribe to the ticker and candle channels for all currency pairs.
-func (p *BinanceProvider) subscribeChannels(cps ...types.CurrencyPair) error {
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-
-	return p.subscribeCandles(cps...)
-}
-
-// subscribeTickers subscribe to the ticker channel for all currency pairs.
-func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToBinanceTickerPair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribeCandles subscribe to the candle channel for all currency pairs.
-func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToBinanceCandlePair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
+	return nil // handled by the websocket controller
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
@@ -310,64 +273,6 @@ func (candle BinanceCandle) toCandlePrice() (types.CandlePrice, error) {
 		candle.Metadata.TimeStamp)
 }
 
-func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
-	defer reconnectTicker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("could not read message")
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz)
-
-		case <-reconnectTicker.C:
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
-// reconnect closes the last WS connection then create a new one and subscribe to
-// all subscribed pairs in the ticker and candle pais. A single connection to
-// stream.binance.com is only valid for 24 hours; expect to be disconnected at the
-// 24 hour mark. The websocket server will send a ping frame every 3 minutes. If
-// the websocket server does not receive a pong frame back from the connection
-// within a 10 minute period, the connection will be disconnected.
-func (p *BinanceProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		p.logger.Err(err).Msg("error closing binance websocket")
-	}
-
-	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBinance,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-	telemetryWebsocketReconnect(ProviderBinance)
-
-	return p.subscribeChannels(p.subscribedPairsToSlice()...)
-}
-
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
@@ -376,12 +281,6 @@ func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-// subscribePairs write the subscription msg to the provider.
-func (p *BinanceProvider) subscribePairs(pairs ...string) error {
-	subsMsg := newBinanceSubscriptionMsg(pairs...)
-	return p.wsClient.WriteJSON(subsMsg)
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
