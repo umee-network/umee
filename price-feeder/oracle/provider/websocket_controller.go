@@ -132,6 +132,7 @@ func (wsc *WebsocketController) ping() {
 			wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
 			return
 		}
+		wsc.logger.Debug().Msg("ping")
 		select {
 		case <-wsc.ctx.Done():
 			return
@@ -174,6 +175,11 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
+	msg := string(bz)
+	if len(msg) > 128 {
+		msg = msg[:128]
+	}
+	wsc.logger.Debug().Str("msg", msg).Msg("received websocket message")
 	// handle some providers (mexc) not sending a valid pong response code
 	if string(bz) == "pong" {
 		wsc.client.PongHandler()
