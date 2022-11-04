@@ -23,11 +23,11 @@ service Msg {
   // Sponsor defines a permissionless method for sponsoring an incentive program.
   rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
 
-  // CreateProgram is used by governance proposals to create (but not fund) an incentive program.
-  rpc CreateProgram(MsgCreateProgram) returns (MsgCreateProgramResponse);
+  // GovCreateProgram is used by governance proposals to create (but not fund) an incentive program.
+  rpc GovCreateProgram(MsgGovCreateProgram) returns (MsgGovCreateProgramResponse);
 
-  // CreateAndSponsorProgram is used by governance proposals to create and fund an incentive program.
-  rpc CreateAndSponsorProgram(MsgCreateAndSponsorProgram) returns (MsgCreateAndSponsorProgramResponse);
+  // GovCreateAndSponsorProgram is used by governance proposals to create and fund an incentive program.
+  rpc GovCreateAndSponsorProgram(MsgGovCreateAndSponsorProgram) returns (MsgGovCreateAndSponsorProgramResponse);
 }
 
 // MsgClaim represents a account's request to claim pending rewards.
@@ -73,8 +73,8 @@ message MsgSponsor {
 // MsgSponsorResponse defines the Msg/Sponsor response type.
 message MsgSponsorResponse {}
 
-// MsgCreateProgram is used by governance to create an incentive program.
-message MsgCreateProgram {
+// MsgGovCreateProgram is used by governance to create an incentive program.
+message MsgGovCreateProgram {
   option (gogoproto.equal)           = true;
   option (gogoproto.goproto_getters) = false;
   option (cosmos.msg.v1.signer)      = "authority";
@@ -86,14 +86,14 @@ message MsgCreateProgram {
   IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
 }
 
-// MsgCreateProgramResponse defines the Msg/CreateProgram response type.
-message MsgCreateProgramResponse {}
+// MsgGovCreateProgramResponse defines the Msg/CreateProgram response type.
+message MsgGovCreateProgramResponse {}
 
-// MsgCreateAndSponsorProgram is used by governance to create an incentive program
+// MsgGovCreateAndSponsorProgram is used by governance to create an incentive program
 // and fund it in the same transaction. The sponsor address should be the community
 // fund or an agreed upon account - program reward funds will be taken from that address
 // when the incentive program passes governance.
-message MsgCreateAndSponsorProgram {
+message MsgGovCreateAndSponsorProgram {
   option (gogoproto.equal)           = true;
   option (gogoproto.goproto_getters) = false;
   option (cosmos.msg.v1.signer)      = "authority";
@@ -108,5 +108,5 @@ message MsgCreateAndSponsorProgram {
   string sponsor = 5;
 }
 
-// MsgCreateAndSponsorProgramResponse defines the Msg/CreateAndSponsorProgram response type.
-message MsgCreateAndSponsorProgramResponse {}
+// MsgGovCreateAndSponsorProgramResponse defines the Msg/CreateAndSponsorProgram response type.
+message MsgGovCreateAndSponsorProgramResponse {}

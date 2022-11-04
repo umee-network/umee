@@ -16,8 +16,8 @@ var (
 	_ sdk.Msg = &MsgBeginUnbonding{}
 	_ sdk.Msg = &MsgBond{}
 	_ sdk.Msg = &MsgSponsor{}
-	_ sdk.Msg = &MsgCreateProgram{}
-	_ sdk.Msg = &MsgCreateAndSponsorProgram{}
+	_ sdk.Msg = &MsgGovCreateProgram{}
+	_ sdk.Msg = &MsgGovCreateAndSponsorProgram{}
 )
 
 func NewMsgClaim(account sdk.AccAddress) *MsgClaim {
@@ -110,8 +110,8 @@ func (msg *MsgSponsor) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgCreateProgram(authority, title, description string, program IncentiveProgram) *MsgCreateProgram {
-	return &MsgCreateProgram{
+func NewMsgCreateProgram(authority, title, description string, program IncentiveProgram) *MsgGovCreateProgram {
+	return &MsgGovCreateProgram{
 		Title:       title,
 		Description: description,
 		Program:     program,
@@ -119,7 +119,7 @@ func NewMsgCreateProgram(authority, title, description string, program Incentive
 	}
 }
 
-func (msg MsgCreateProgram) ValidateBasic() error {
+func (msg MsgGovCreateProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
@@ -130,19 +130,19 @@ func (msg MsgCreateProgram) ValidateBasic() error {
 }
 
 // GetSignBytes implements Msg
-func (msg MsgCreateProgram) GetSignBytes() []byte {
+func (msg MsgGovCreateProgram) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg MsgCreateProgram) GetSigners() []sdk.AccAddress {
+func (msg MsgGovCreateProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
 func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string, program IncentiveProgram,
-) *MsgCreateAndSponsorProgram {
-	return &MsgCreateAndSponsorProgram{
+) *MsgGovCreateAndSponsorProgram {
+	return &MsgGovCreateAndSponsorProgram{
 		Title:       title,
 		Description: description,
 		Program:     program,
@@ -151,7 +151,7 @@ func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string
 	}
 }
 
-func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
+func (msg MsgGovCreateAndSponsorProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
@@ -165,13 +165,13 @@ func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
 }
 
 // GetSignBytes implements Msg
-func (msg MsgCreateAndSponsorProgram) GetSignBytes() []byte {
+func (msg MsgGovCreateAndSponsorProgram) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg MsgCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
+func (msg MsgGovCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
