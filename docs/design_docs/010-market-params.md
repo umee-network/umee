@@ -18,11 +18,13 @@ Several new parameters and alternatives are being proposed.
 ## Decision
 
 Parameters we decide to use will be listed below in subsections:
+
 - Max Collateral Share
 - Max Supply Utilization
 - Min Collateral Liquidity
 
 Rejected or alternative implementations will appear in the alternatives section:
+
 - Max Collateral Utilization
 
 ### Useful Definitions
@@ -59,11 +61,11 @@ Implementing `MaxSupplyUtilization` would restrict `MsgBorrow` from increasing `
 
 It may or may not restrict `MsgWithdraw` from decreasing `total_supply(token)` below a desired level - adding this restriction might trap suppliers in a liquidity crisis in exchange for keeping more supply available for `MsgLiquidate`.
 
-| Message Type | Current Decision |
-| - | - |
-| `MsgBorrow` | Restrict |
-| `MsgWithdraw` | Allow |
-| `MsgLiquidate` | Allow |
+| Message Type   | Current Decision |
+| -------------- | ---------------- |
+| `MsgBorrow`    | Restrict         |
+| `MsgWithdraw`  | Allow            |
+| `MsgLiquidate` | Allow            |
 
 `MaxSupplyUtilization` could still be indirectly exceeded by borrow interest accruing.
 
@@ -106,11 +108,11 @@ Implementing `MinCollateralLiquidity` would restrict `MsgBorrow` and `MsgWithdra
 
 It may or may not allow `MsgLiquidate` to decrease `available_supply` under the same conditions, to prevent crises.
 
-| Message Type | Current Decision |
-| - | - |
-| `MsgBorrow` | Restrict |
-| `MsgWithdraw` | Restrict |
-| `MsgLiquidate` | Allow |
+| Message Type   | Current Decision |
+| -------------- | ---------------- |
+| `MsgBorrow`    | Restrict         |
+| `MsgWithdraw`  | Restrict         |
+| `MsgLiquidate` | Allow            |
 
 `MinCollateralLiquidity` could still be indirectly exceeded by supply interest accruing on a collateral denom's uToken exchange rate.
 
@@ -140,11 +142,11 @@ High collateral utilization is dangerous for the system: When collateral utiliza
 
 Let's draw the following scenario to picture the liquidators risk:
 
-> | User | Supply | Collateral | Borrowed |
-> | - | - | - | - |
-> | Alice| $1.2M BTC | - | - |
-> | Bob | - | $1.5M LUNA | $1M BTC |
-> | Charlie | - | $2M BTC | $1.4M LUNA |
+> | User    | Supply    | Collateral | Borrowed   |
+> | ------- | --------- | ---------- | ---------- |
+> | Alice   | $1.2M BTC | -          | -          |
+> | Bob     | -         | $1.5M LUNA | $1M BTC    |
+> | Charlie | -         | $2M BTC    | $1.4M LUNA |
 >
 > - Charlie predicts Luna collapse and sells the Luna.
 > - Luna is sinking and Bob's position has to be liquidated. However:
@@ -156,8 +158,10 @@ Let's draw the following scenario to picture the liquidators risk:
 ## Consequences
 
 ### Positive
+
 - Multiple ways of preserving market health
 - Per-token parameters allow fine grained control
 
 ### Negative
+
 - Users may find restrictions unfair, e.g. "why can't I borrow just because other people's collateral is too high?"

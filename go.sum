@@ -297,8 +297,8 @@ github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY
 github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
 github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4Y=
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
-github.com/cosmos/iavl v0.19.3 h1:cESO0OwTTxQm5rmyESKW+zESheDUYI7CcZDWWDwnuxg=
-github.com/cosmos/iavl v0.19.3/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
+github.com/cosmos/iavl v0.19.4 h1:t82sN+Y0WeqxDLJRSpNd8YFX5URIrT+p8n6oJbJ2Dok=
+github.com/cosmos/iavl v0.19.4/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
 github.com/cosmos/ibc-go/v5 v5.0.1 h1:ZI5xCi6RDOL+hyu6Wx/w6JoAYFlOoK5hijsRTVWo+RA=
 github.com/cosmos/ibc-go/v5 v5.0.1/go.mod h1:LX0DHLW3dfi/1e4BJzi8MGLWmQ4DSraPEgVjyo3VzAo=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
@@ -1322,8 +1322,8 @@ github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb/go.mod h1:p6/9i/72keNtS2PNNBu8Rebzd7K+GbFWJNWo/MojBto=
 github.com/umee-network/bech32-ibc v0.3.0 h1:WP0w6hG/B9WJ5hfUNx7Hd9pE0MJR/Lp9Y1NPjh03/40=
 github.com/umee-network/bech32-ibc v0.3.0/go.mod h1:PqMePY74J6wqJH7Yai1l94rPsEe6QVa9X8gt5/M5nIo=
-github.com/umee-network/cosmos-sdk v0.46.3-umee h1:q1tSnFHyxAc/EdJRPHVawvLWrMRVB1NMk/qgTvMrnRo=
-github.com/umee-network/cosmos-sdk v0.46.3-umee/go.mod h1:AynIAjXwtS3T/ApdhNCz/7/KGMbZSUBbKRTcbukb2ic=
+github.com/umee-network/cosmos-sdk v0.46.4-umee h1:Wk1PiriCoT2YuYn87J8Tjm0zkHAKKa4HMPq190O+Pig=
+github.com/umee-network/cosmos-sdk v0.46.4-umee/go.mod h1:b5usG7aBEEvhaatYCdV6orFbDUsj4BG1V6UtKwNcJeQ=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1 h1:+mkCCcOFKPnCmVYVcURKps1Xe+3zP90gSYGNfRkjoIY=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
