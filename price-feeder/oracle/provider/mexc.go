@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 
@@ -118,6 +119,7 @@ func NewMexcProvider(
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		defaultPingDuration,
+		websocket.PingMessage,
 		mexcLogger,
 	)
 	go controller.Start()

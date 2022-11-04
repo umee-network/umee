@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -121,6 +122,7 @@ func NewBinanceProvider(
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		time.Duration(0),
+		websocket.PingMessage,
 		binanceLogger,
 	)
 	go controller.Start()

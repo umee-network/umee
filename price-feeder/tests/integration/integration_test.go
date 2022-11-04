@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -66,7 +67,13 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			provider:      provider.ProviderBitget,
 			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
 		},
+		{
+			provider:      provider.ProviderGate,
+			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
+		},
 	}
+
+	//testCases = testCases[5:6]
 
 	for _, testCase := range testCases {
 		tc := testCase
@@ -81,23 +88,26 @@ func (s *IntegrationTestSuite) runPriceTest(t *testing.T, providerName provider.
 	ctx, cancel := context.WithCancel(context.Background())
 	pvd, _ := oracle.NewProvider(ctx, providerName, s.logger, provider.Endpoint{}, currencyPairs...)
 
-	time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
+	for _, i := range []int{1, 2, 3, 4, 5, 6, 7} {
+		fmt.Printf(">>>>>>>>>>> RUN %d\n", i)
+		time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
 
-	currencyPairKey := currencyPairs[0].String()
+		currencyPairKey := currencyPairs[0].String()
 
-	// verify ticker price for currency pair is above zero
-	tickerPrices, _ := pvd.GetTickerPrices(currencyPairs...)
-	if _, ok := tickerPrices[currencyPairKey]; !ok {
-		t.Fatal("ticker prices did not contain required currency pair")
+		// verify ticker price for currency pair is above zero
+		tickerPrices, _ := pvd.GetTickerPrices(currencyPairs...)
+		if _, ok := tickerPrices[currencyPairKey]; !ok {
+			t.Fatal("ticker prices did not contain required currency pair")
+		}
+		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
+
+		// verify candle price for currency pair is above zero
+		candlePrices, _ := pvd.GetCandlePrices(currencyPairs...)
+		if _, ok := candlePrices[currencyPairKey]; !ok {
+			t.Fatal("candle prices did not contain required currency pair")
+		}
+		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
+
 	}
-	require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
-
-	// verify candle price for currency pair is above zero
-	candlePrices, _ := pvd.GetCandlePrices(currencyPairs...)
-	if _, ok := candlePrices[currencyPairKey]; !ok {
-		t.Fatal("candle prices did not contain required currency pair")
-	}
-	require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
-
 	cancel()
 }

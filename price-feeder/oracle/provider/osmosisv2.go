@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -102,6 +103,7 @@ func NewOsmosisV2Provider(
 		[]interface{}{""},
 		provider.messageReceived,
 		defaultPingDuration,
+		websocket.PingMessage,
 		osmosisV2Logger,
 	)
 	go controller.Start()

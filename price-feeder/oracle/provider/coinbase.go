@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -125,7 +126,8 @@ func NewCoinbaseProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
-		time.Duration(0),
+		defaultPingDuration,
+		websocket.PingMessage,
 		coinbaseLogger,
 	)
 	go controller.Start()

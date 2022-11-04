@@ -130,6 +130,7 @@ func NewKrakenProvider(
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		time.Duration(0),
+		websocket.PingMessage,
 		krakenLogger,
 	)
 	go controller.Start()

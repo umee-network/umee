@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
 	"github.com/umee-network/umee/price-feeder/oracle/types"
@@ -140,6 +141,7 @@ func NewGateProvider(
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
 		defaultPingDuration,
+		websocket.PingMessage,
 		gateLogger,
 	)
 	go controller.Start()

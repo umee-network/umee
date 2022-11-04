@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -142,7 +143,8 @@ func NewBitgetProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
-		time.Second*25, // ref: https://bitgetlimited.github.io/apidoc/en/spot/#connect
+		defaultPingDuration,
+		websocket.TextMessage,
 		bitgetLogger,
 	)
 	go controller.Start()

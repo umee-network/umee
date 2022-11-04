@@ -24,6 +24,7 @@ type (
 		subscriptionMsgs []interface{}
 		messageHandler   MessageHandler
 		pingDuration     time.Duration
+		pingMessageType  uint
 		logger           zerolog.Logger
 
 		mtx    sync.Mutex
@@ -40,6 +41,7 @@ func NewWebsocketController(
 	subscriptionMsgs []interface{},
 	messageHandler MessageHandler,
 	pingDuration time.Duration,
+	pingMessageType uint,
 	logger zerolog.Logger,
 ) *WebsocketController {
 	return &WebsocketController{
@@ -49,6 +51,7 @@ func NewWebsocketController(
 		subscriptionMsgs: subscriptionMsgs,
 		messageHandler:   messageHandler,
 		pingDuration:     pingDuration,
+		pingMessageType:  pingMessageType,
 		logger:           logger,
 	}
 }
@@ -72,8 +75,10 @@ func (wsc *WebsocketController) Start() {
 			}
 		}
 
+		wsc.client.SetPingHandler((wsc.pingHandler))
+		wsc.client.SetPongHandler(wsc.pongHandler)
 		go wsc.readWebSocket()
-		go wsc.ping()
+		go wsc.pingLoop()
 
 		if err := wsc.subscribe(); err != nil {
 			wsc.logger.Err(err).Send()
@@ -82,6 +87,19 @@ func (wsc *WebsocketController) Start() {
 		}
 		return
 	}
+}
+
+func (wsc *WebsocketController) pongHandler(appData string) error {
+	wsc.logger.Debug().Str("msg", appData).Msg("pong received")
+	return nil
+}
+
+func (wsc *WebsocketController) pingHandler(appData string) error {
+	wsc.logger.Debug().Str("msg", appData).Msg("ping received")
+	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
+		wsc.logger.Error().Err(err).Msg("error sending pong")
+	}
+	return nil
 }
 
 // connect dials the websocket and sets the client to the established connection
@@ -114,7 +132,7 @@ func (wsc *WebsocketController) subscribe() error {
 }
 
 // ping sends a ping to the server every defaultPingDuration
-func (wsc *WebsocketController) ping() {
+func (wsc *WebsocketController) pingLoop() {
 	if wsc.pingDuration == time.Duration(0) {
 		return // disable ping loop if duration is zero
 	}
@@ -122,17 +140,11 @@ func (wsc *WebsocketController) ping() {
 	defer pingTicker.Stop()
 
 	for {
-		wsc.mtx.Lock()
-		if wsc.client == nil {
-			return
-		}
-		err := wsc.client.WriteMessage(websocket.PingMessage, []byte("ping"))
-		wsc.mtx.Unlock()
+		err := wsc.ping()
 		if err != nil {
-			wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
 			return
 		}
-		wsc.logger.Debug().Msg("ping")
+		wsc.logger.Debug().Msg("ping sent")
 		select {
 		case <-wsc.ctx.Done():
 			return
@@ -140,6 +152,22 @@ func (wsc *WebsocketController) ping() {
 			continue
 		}
 	}
+}
+
+func (wsc *WebsocketController) ping() error {
+	wsc.mtx.Lock()
+	defer wsc.mtx.Unlock()
+
+	var err error
+	if wsc.client == nil {
+		err = fmt.Errorf("unable to ping closed connection")
+	} else {
+		err = wsc.client.WriteMessage(int(wsc.pingMessageType), []byte("ping"))
+	}
+	if err != nil {
+		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
+	}
+	return err
 }
 
 // readWebSocket continuously reads from the websocket and relays messages
