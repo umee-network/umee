@@ -30,6 +30,11 @@ endif
 
 build_tags = netgo
 
+#  experimental feature 
+ifeq ($(EXPERIMENTAL),true)
+	build_tags += experimental
+endif
+
 ifeq ($(LEDGER_ENABLED),true)
   ifeq ($(OS),Windows_NT)
     GCCEXE = $(shell where gcc.exe 2> NUL)
@@ -131,13 +136,23 @@ TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
 TEST_COVERAGE_PROFILE=coverage.txt
 
-test-unit: ARGS=-timeout=10m -tags='norace'
+UNIT_TEST_TAGS = norace 
+TEST_RACE_TAGS = ""
+TEST_E2E_TAGS = ""
+
+ifeq ($(EXPERIMENTAL),true)
+	UNIT_TEST_TAGS	+= experimental
+	TEST_RACE_TAGS 	+= experimental
+	TEST_E2E_TAGS 	+= experimental
+endif
+
+test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
+test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-race: ARGS=-timeout=10m -race
+test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
+test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
