@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -35,8 +34,6 @@ type (
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#tickers-channel
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#candlesticks-channel
 	BitgetProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -127,33 +124,46 @@ func NewBitgetProvider(
 		Path:   bitgetWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBitget,
-			err,
-		)
-	}
-	defer resp.Body.Close()
+	bitgetLogger := logger.With().Str("provider", string(ProviderBitget)).Logger()
 
 	provider := &BitgetProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(ProviderBitget)).Logger(),
+		logger:          bitgetLogger,
 		endpoints:       endpoints,
 		tickers:         map[string]BitgetTicker{},
 		candles:         map[string][]BitgetCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleWebSocketMsgs(ctx)
+	controller := NewWebsocketController(
+		ctx,
+		ProviderBinance,
+		wsURL,
+		provider.getSubscriptionMsgs(),
+		provider.messageReceived,
+		time.Second*25, // ref: https://bitgetlimited.github.io/apidoc/en/spot/#connect
+		bitgetLogger,
+	)
+	go controller.Start()
 
 	return provider, nil
+}
+
+func (p *BitgetProvider) getSubscriptionMsgs() []interface{} {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	subscriptionMsgs := make([]interface{}, 0, 1)
+	cps := make([]types.CurrencyPair, 0, len(p.subscribedPairs))
+	for _, cp := range p.subscribedPairs {
+		cps = append(cps, cp)
+	}
+
+	bitgetTickerSubscriptionMsg := newBitgetTickerSubscriptionMsg(cps)
+	subscriptionMsgs = append(subscriptionMsgs, bitgetTickerSubscriptionMsg)
+
+	return subscriptionMsgs
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -189,85 +199,11 @@ func (p *BitgetProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 // SubscribeCurrencyPairs subscribe all currency pairs into
 // ticker and candle channels.
 func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderBitget, len(cps))
-	return nil
-}
-
-// subscribeChannels subscribe all currency pairs into ticker and candle channels.
-func (p *BitgetProvider) subscribeChannels(cps ...types.CurrencyPair) error {
-	bitgetSubscriptionMsg := newBitgetTickerSubscriptionMsg(cps)
-	return p.wsClient.WriteJSON(bitgetSubscriptionMsg)
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as slice
-func (p *BitgetProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
-}
-
-func (p *BitgetProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(bitgetReconnectTime)
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// If some error occurs, check if connection is alive
-				// and continue to try to read the next message.
-				p.logger.Err(err).Msg("failed to read message")
-				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("failed to send ping")
-					if err := p.disconnect(); err != nil {
-						p.logger.Err(err).Msg("error disconnecting websocket")
-					}
-					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting websocket")
-					}
-				}
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz, reconnectTicker)
-
-		case <-reconnectTicker.C:
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting websocket")
-			}
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting websocket")
-			}
-		}
-	}
+	return nil // handled by the websocket controller
 }
 
 // messageReceived handles the received data from the Bitget websocket.
-func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
-	if messageType == websocket.PingMessage {
-		p.pong(bz, reconnectTicker)
-		return
-	}
-
+func (p *BitgetProvider) messageReceived(messageType int, bz []byte) {
 	var (
 		tickerResp           BitgetTicker
 		tickerErr            error
@@ -288,7 +224,7 @@ func (p *BitgetProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	}
 
 	err = json.Unmarshal(bz, &subscriptionResponse)
-	if err != nil && subscriptionResponse.Event == "subscribe" {
+	if err == nil && subscriptionResponse.Event == "subscribe" {
 		p.logger.Debug().
 			Str("InstID", subscriptionResponse.Arg.InstID).
 			Str("Channel", subscriptionResponse.Arg.Channel).
@@ -347,35 +283,6 @@ func (bcr BitgetCandleResponse) ToBitgetCandle() (BitgetCandle, error) {
 	}, nil
 }
 
-// pong return a heartbeat message when a "ping" is received and reset the
-// recconnect ticker because the connection is alive. After connected to Bitget's
-// Websocket server, the server will send heartbeat periodically (5s interval).
-// When client receives an heartbeat message, it should respond with a matching
-// "pong" message which has the same integer in it, e.g. {"ping": 1492420473027}
-// and then the return pong message should be {"pong": 1492420473027}.
-func (p *BitgetProvider) pong(bz []byte, reconnectTicker *time.Ticker) {
-	reconnectTicker.Reset(bitgetReconnectTime)
-	var heartbeat struct {
-		Ping uint64 `json:"ping"`
-	}
-
-	if err := json.Unmarshal(bz, &heartbeat); err != nil {
-		p.logger.Err(err).Msg("could not unmarshal heartbeat")
-		return
-	}
-
-	if err := p.wsClient.WriteJSON(struct {
-		Pong uint64 `json:"pong"`
-	}{Pong: heartbeat.Ping}); err != nil {
-		p.logger.Err(err).Msg("could not send pong message back")
-	}
-}
-
-// ping to check websocket connection
-func (p *BitgetProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
-}
-
 func (p *BitgetProvider) setTickerPair(ticker BitgetTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
@@ -395,35 +302,6 @@ func (p *BitgetProvider) setCandlePair(candle BitgetCandle) {
 		}
 	}
 	p.candles[candle.Arg.InstID] = candleList
-}
-
-// disconnect disconnects the existing websocket connection.
-func (p *BitgetProvider) disconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Bitget websocket %v", err)
-	}
-	return nil
-}
-
-// reconnect creates a new websocket connection.
-func (p *BitgetProvider) reconnect() error {
-	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBitget,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-
-	currencyPairs := p.subscribedPairsToSlice()
-
-	telemetryWebsocketReconnect(ProviderBitget)
-	return p.subscribeChannels(currencyPairs...)
 }
 
 func (p *BitgetProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {

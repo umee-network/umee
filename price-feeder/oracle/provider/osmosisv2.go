@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
@@ -184,10 +183,6 @@ func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) 
 }
 
 func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	// check if message is an ack first
 	if string(bz) == "ack" {
 		return
