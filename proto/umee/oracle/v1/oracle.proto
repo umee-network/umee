@@ -43,10 +43,10 @@ message Params {
   ];
   // Stamp Period represents the amount of blocks the historacle module
   // waits before recording a set of prices from the oracle.
-  uint64 stamp_period                 = 9;
+  uint64 stamp_period = 9;
   // Prune Period represents the maximum amount of blocks which we want
   // to keep a record of our set of exchange rates.
-  uint64 prune_period                 = 10;
+  uint64 prune_period = 10;
 }
 
 // Denom - the object to hold configurations of each denom
@@ -108,8 +108,8 @@ message ExchangeRateTuple {
 // HistoricPrice is an instance of a price "stamp"
 message HistoricPrice {
   ExchangeRateTuple exchange_rates = 1 [
-        (gogoproto.castrepeated) = "ExchangeRateTuples",
-        (gogoproto.nullable)     = false
-      ];
+    (gogoproto.castrepeated) = "ExchangeRateTuples",
+    (gogoproto.nullable)     = false
+  ];
   uint64 block_num = 2;
 }
