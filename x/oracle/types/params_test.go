@@ -121,6 +121,28 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidateStampPeriod(t *testing.T) {
+	err := validateStampPeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateStampPeriod(uint64(0))
+	require.ErrorContains(t, err, "stamp period must be positive: 0")
+
+	err = validateStampPeriod(uint64(10))
+	require.Nil(t, err)
+}
+
+func TestValidatePrunePeriod(t *testing.T) {
+	err := validatePrunePeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validatePrunePeriod(uint64(0))
+	require.ErrorContains(t, err, "prune period must be positive: 0")
+
+	err = validatePrunePeriod(uint64(10))
+	require.Nil(t, err)
+}
+
 func TestParamsEqual(t *testing.T) {
 	p1 := DefaultParams()
 	err := p1.Validate()
@@ -165,6 +187,13 @@ func TestParamsEqual(t *testing.T) {
 	p7 := DefaultParams()
 	p7.RewardDistributionWindow = 0
 	err = p7.Validate()
+	require.Error(t, err)
+
+	// PrunePeriod < StampPeriod
+	p8 := DefaultParams()
+	p8.StampPeriod = 10
+	p8.PrunePeriod = 1
+	err = p8.Validate()
 	require.Error(t, err)
 
 	// empty name

@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/binary"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 )
@@ -23,6 +25,8 @@ var (
 	KeyPrefixMissCounter                  = []byte{0x03} // prefix for each key to a miss counter
 	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
 	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
+	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
+	KeyPrefixHistoricPrice                = []byte{0x07} // prefix for each key to a historic price
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -54,4 +58,21 @@ func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
 func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixAggregateExchangeRateVote...)
 	return append(key, address.MustLengthPrefix(v)...)
+}
+
+// GetMedianKey - stored by *denom*
+func GetMedianKey(denom string) (key []byte) {
+	key = append(key, KeyPrefixMedian...)
+	key = append(key, []byte(denom)...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// GetHistoricPriceKey - stored by *denom* and *block*
+func GetHistoricPriceKey(denom string, blockNum uint64) (key []byte) {
+	key = append(key, KeyPrefixHistoricPrice...)
+	key = append(key, []byte(denom)...)
+	block := make([]byte, 8)
+	binary.LittleEndian.PutUint64(block, uint64(blockNum))
+	key = append(key, block...)
+	return append(key, 0) // append 0 for null-termination
 }
