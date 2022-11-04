@@ -14,7 +14,7 @@ WORKDIR /src/app/
 COPY go.mod go.sum* ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 make install
+RUN make install
 RUN cd price-feeder && make install
 
 # Fetch peggo (gravity bridge) binary
