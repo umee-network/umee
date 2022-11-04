@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,8 +34,6 @@ type (
 	//
 	// REF: https://www.coinbase.io/docs/websocket/index.html
 	CoinbaseProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
@@ -109,35 +106,49 @@ func NewCoinbaseProvider(
 		Host:   endpoints.Websocket,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderCoinbase,
-			err,
-		)
-	}
+	coinbaseLogger := logger.With().Str("provider", string(ProviderCoinbase)).Logger()
 
 	provider := &CoinbaseProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(ProviderCoinbase)).Logger(),
+		logger:          coinbaseLogger,
 		reconnectTimer:  time.NewTicker(coinbasePingCheck),
 		endpoints:       endpoints,
 		trades:          map[string][]CoinbaseTrade{},
 		tickers:         map[string]CoinbaseTicker{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
-	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleReceivedMessages(ctx)
+	controller := NewWebsocketController(
+		ctx,
+		ProviderBinance,
+		wsURL,
+		provider.getSubscriptionMsgs(),
+		provider.messageReceived,
+		time.Duration(0),
+		coinbaseLogger,
+	)
+	go controller.Start()
 
 	return provider, nil
+}
+
+func (p *CoinbaseProvider) getSubscriptionMsgs() []interface{} {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	subscriptionMsgs := make([]interface{}, 0, 1)
+
+	topics := make([]string, len(p.subscribedPairs))
+	index := 0
+
+	for _, cp := range p.subscribedPairs {
+		topics[index] = currencyPairToCoinbasePair(cp)
+		index++
+	}
+	msg := newCoinbaseSubscription(topics...)
+	subscriptionMsgs = append(subscriptionMsgs, msg)
+	return subscriptionMsgs
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -228,17 +239,7 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 
 // SubscribeCurrencyPairs subscribes to websockets for all currency pairs.
 func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribe(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderCoinbase, len(cps))
-	return nil
+	return nil // handled by the websocket controller
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
@@ -266,32 +267,6 @@ func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return availablePairs, nil
 }
 
-// subscribe subscribes to the coinbase "ticker" and "match" websockets.
-func (p *CoinbaseProvider) subscribe(cps ...types.CurrencyPair) error {
-	topics := make([]string, len(cps))
-	index := 0
-
-	for _, cp := range cps {
-		topics[index] = currencyPairToCoinbasePair(cp)
-		index++
-	}
-
-	tickerMsg := newCoinbaseSubscription(topics...)
-	if err := p.subscribePairs(tickerMsg); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *CoinbaseProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
-}
-
 func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
@@ -316,45 +291,7 @@ func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
 	return trades, nil
 }
 
-func (p *CoinbaseProvider) handleReceivedMessages(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("could not read message")
-				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("could not send ping")
-				}
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.resetReconnectTimer()
-			p.messageReceived(messageType, bz)
-
-		case <-p.reconnectTimer.C: // reset by the pongHandler.
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting")
-			}
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
 func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	var coinbaseTrade CoinbaseTradeResponse
 	if err := json.Unmarshal(bz, &coinbaseTrade); err != nil {
 		p.logger.Error().Err(err).Msg("unable to unmarshal response")
@@ -434,11 +371,6 @@ func (p *CoinbaseProvider) setTradePair(tradeResponse CoinbaseTradeResponse) {
 	p.trades[tradeResponse.ProductID] = tradeList
 }
 
-// subscribePairs write the subscription msg to the provider.
-func (p *CoinbaseProvider) subscribePairs(msg CoinbaseSubscriptionMsg) error {
-	return p.wsClient.WriteJSON(msg)
-}
-
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *CoinbaseProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
@@ -447,59 +379,6 @@ func (p *CoinbaseProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-func (p *CoinbaseProvider) resetReconnectTimer() {
-	p.reconnectTimer.Reset(coinbasePingCheck)
-}
-
-// disconnect disconnects the existing websocket connection.
-func (p *CoinbaseProvider) disconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Coinbase websocket %v", err)
-	}
-	return nil
-}
-
-// reconnect creates a new websocket connection. If there’s a
-// network problem, the system will automatically disable the connection. The
-// connection will break automatically if the subscription is not established or
-// data has not been pushed for more than 30 seconds. To keep the connection stable:
-// 1. Set a timer of N seconds whenever a response message is received, where N is
-// less than 30.
-// 2. If the timer is triggered, which means that no new message is received within
-// N seconds, send the String 'ping'.
-// 3. Expect a 'pong' as a response. If the response message is not received within
-// N seconds, please raise an error or reconnect.
-func (p *CoinbaseProvider) reconnect() error {
-	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderCoinbase,
-			err,
-		)
-	}
-	wsConn.SetPongHandler(p.pongHandler)
-	p.wsClient = wsConn
-
-	currencyPairs := p.subscribedPairsToSlice()
-
-	telemetryWebsocketReconnect(ProviderCoinbase)
-	return p.SubscribeCurrencyPairs(currencyPairs...)
-}
-
-// ping to check websocket connection.
-func (p *CoinbaseProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
-}
-
-func (p *CoinbaseProvider) pongHandler(appData string) error {
-	p.resetReconnectTimer()
-	return nil
 }
 
 func (ticker CoinbaseTicker) toTickerPrice() (types.TickerPrice, error) {

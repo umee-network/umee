@@ -54,6 +54,14 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			provider:      provider.ProviderKraken,
 			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
 		},
+		{
+			provider:      provider.ProviderOsmosisV2,
+			currencyPairs: []types.CurrencyPair{{Base: "OSMO", Quote: "ATOM"}},
+		},
+		{
+			provider:      provider.ProviderCoinbase,
+			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
+		},
 	}
 
 	for _, testCase := range testCases {
