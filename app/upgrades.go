@@ -15,6 +15,16 @@ import (
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
+func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	app.registerV3_0Upgrade(upgradeInfo)
+	app.registerV3_1Upgrade(upgradeInfo)
+}
+
 // performs upgrade from v3.0 -> v3.1
 func (app *UmeeApp) registerV3_1Upgrade(_ upgradetypes.Plan) {
 	const UpgradeV3_1Plan = "v3.1.0"

@@ -132,58 +132,62 @@ var (
 	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
-	ModuleBasics = module.NewBasicManager(
-		append([]module.AppModuleBasic{
-			auth.AppModuleBasic{},
-			genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
-			BankModule{},
-			capability.AppModuleBasic{},
-			StakingModule{},
-			MintModule{},
-			distr.AppModuleBasic{},
-			GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers())},
-			params.AppModuleBasic{},
-			CrisisModule{},
-			SlashingModule{},
-			feegrantmodule.AppModuleBasic{},
-			upgrade.AppModuleBasic{},
-			evidence.AppModuleBasic{},
-			authzmodule.AppModuleBasic{},
-			groupmodule.AppModuleBasic{},
-			vesting.AppModuleBasic{},
-			nftmodule.AppModuleBasic{},
-			ibc.AppModuleBasic{},
-			ibctransfer.AppModuleBasic{},
-			gravity.AppModuleBasic{},
-			leverage.AppModuleBasic{},
-			oracle.AppModuleBasic{},
-			bech32ibc.AppModuleBasic{},
-		}, setCustomModuleBasics()...)...,
-	)
+	ModuleBasics module.BasicManager
 
 	// module account permissions
-	maccPerms = func() map[string][]string {
-		perms := map[string][]string{
-			authtypes.FeeCollectorName:     nil,
-			distrtypes.ModuleName:          nil,
-			minttypes.ModuleName:           {authtypes.Minter},
-			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-			govtypes.ModuleName:            {authtypes.Burner},
-			nft.ModuleName:                 nil,
-
-			ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-			gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
-			leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-			oracletypes.ModuleName:      nil,
-		}
-
-		for k, v := range setCustomMaccPerms() {
-			perms[k] = v
-		}
-		return perms
-	}()
+	maccPerms map[string][]string
 )
+
+func init() {
+	moduleBasics := []module.AppModuleBasic{
+		auth.AppModuleBasic{},
+		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+		BankModule{},
+		capability.AppModuleBasic{},
+		StakingModule{},
+		MintModule{},
+		distr.AppModuleBasic{},
+		GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers())},
+		params.AppModuleBasic{},
+		CrisisModule{},
+		SlashingModule{},
+		feegrantmodule.AppModuleBasic{},
+		upgrade.AppModuleBasic{},
+		evidence.AppModuleBasic{},
+		authzmodule.AppModuleBasic{},
+		groupmodule.AppModuleBasic{},
+		vesting.AppModuleBasic{},
+		nftmodule.AppModuleBasic{},
+		ibc.AppModuleBasic{},
+		ibctransfer.AppModuleBasic{},
+		gravity.AppModuleBasic{},
+		leverage.AppModuleBasic{},
+		oracle.AppModuleBasic{},
+		bech32ibc.AppModuleBasic{},
+	}
+	if Experimental {
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
+	}
+	ModuleBasics = module.NewBasicManager(moduleBasics...)
+
+	maccPerms = map[string][]string{
+		authtypes.FeeCollectorName:     nil,
+		distrtypes.ModuleName:          nil,
+		minttypes.ModuleName:           {authtypes.Minter},
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:            {authtypes.Burner},
+		nft.ModuleName:                 nil,
+
+		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName:      nil,
+	}
+	if Experimental {
+		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
+	}
+}
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
 // the Cosmos SDK's BaseApp.
@@ -670,7 +674,7 @@ func New(
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// Make sure it's called after `app.mm` and `app.configurator` are set.
-	app.registerUpgradeHandlers()
+	app.RegisterUpgradeHandlers(Experimental)
 
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata.RegisterQueryServer(app.GRPCQueryRouter(), testdata.QueryImpl{})

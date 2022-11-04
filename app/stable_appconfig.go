@@ -27,6 +27,10 @@ import (
 	leverageclient "github.com/umee-network/umee/v3/x/leverage/client"
 )
 
+// Experimental is a flag which determines expermiental features.
+// It's set via build flag.
+const Experimental = false
+
 var (
 	WasmProposalsEnabled        = "false"
 	EnableSpecificWasmProposals = ""
@@ -38,14 +42,6 @@ var (
 // pass into the application.
 func GetWasmEnabledProposals() []wasm.ProposalType {
 	return []wasm.ProposalType{}
-}
-
-func setCustomModuleBasics() []module.AppModuleBasic {
-	return []module.AppModuleBasic{}
-}
-
-func setCustomMaccPerms() map[string][]string {
-	return map[string][]string{}
 }
 
 func setCustomKVStoreKeys() []string {
@@ -119,13 +115,3 @@ func (app *UmeeApp) setCustomKeepers(
 }
 
 func (app *UmeeApp) initializeCustomScopedKeepers() {}
-
-func (app *UmeeApp) registerUpgradeHandlers() {
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		panic(err)
-	}
-
-	app.registerV3_0Upgrade(upgradeInfo)
-	app.registerV3_1Upgrade(upgradeInfo)
-}
