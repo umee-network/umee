@@ -32,9 +32,9 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgClaim represents a supplier's request to claim pending rewards.
+// MsgClaim represents a account's request to claim pending rewards.
 type MsgClaim struct {
-	Supplier string `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
+	Account string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 }
 
 func (m *MsgClaim) Reset()         { *m = MsgClaim{} }
@@ -70,9 +70,9 @@ func (m *MsgClaim) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgClaim proto.InternalMessageInfo
 
-func (m *MsgClaim) GetSupplier() string {
+func (m *MsgClaim) GetAccount() string {
 	if m != nil {
-		return m.Supplier
+		return m.Account
 	}
 	return ""
 }
@@ -122,25 +122,25 @@ func (m *MsgClaimResponse) GetAmount() github_com_cosmos_cosmos_sdk_types.Coins 
 	return nil
 }
 
-// MsgLock represents a supplier's request to lock uToken collateral.
-type MsgLock struct {
-	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-	Tier     uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
+// MsgBond represents a account's request to bond uToken collateral.
+type MsgBond struct {
+	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Tier    uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
+	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
 }
 
-func (m *MsgLock) Reset()         { *m = MsgLock{} }
-func (m *MsgLock) String() string { return proto.CompactTextString(m) }
-func (*MsgLock) ProtoMessage()    {}
-func (*MsgLock) Descriptor() ([]byte, []int) {
+func (m *MsgBond) Reset()         { *m = MsgBond{} }
+func (m *MsgBond) String() string { return proto.CompactTextString(m) }
+func (*MsgBond) ProtoMessage()    {}
+func (*MsgBond) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d04c68bb9e1f6306, []int{2}
 }
-func (m *MsgLock) XXX_Unmarshal(b []byte) error {
+func (m *MsgBond) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgLock) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgBond) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgLock.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgBond.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -150,55 +150,55 @@ func (m *MsgLock) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *MsgLock) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgLock.Merge(m, src)
+func (m *MsgBond) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBond.Merge(m, src)
 }
-func (m *MsgLock) XXX_Size() int {
+func (m *MsgBond) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgLock) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgLock.DiscardUnknown(m)
+func (m *MsgBond) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBond.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgLock proto.InternalMessageInfo
+var xxx_messageInfo_MsgBond proto.InternalMessageInfo
 
-func (m *MsgLock) GetSupplier() string {
+func (m *MsgBond) GetAccount() string {
 	if m != nil {
-		return m.Supplier
+		return m.Account
 	}
 	return ""
 }
 
-func (m *MsgLock) GetTier() uint32 {
+func (m *MsgBond) GetTier() uint32 {
 	if m != nil {
 		return m.Tier
 	}
 	return 0
 }
 
-func (m *MsgLock) GetAsset() types.Coin {
+func (m *MsgBond) GetAsset() types.Coin {
 	if m != nil {
 		return m.Asset
 	}
 	return types.Coin{}
 }
 
-// MsgLockResponse defines the Msg/Lock response type.
-type MsgLockResponse struct {
+// MsgBondResponse defines the Msg/Lock response type.
+type MsgBondResponse struct {
 }
 
-func (m *MsgLockResponse) Reset()         { *m = MsgLockResponse{} }
-func (m *MsgLockResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgLockResponse) ProtoMessage()    {}
-func (*MsgLockResponse) Descriptor() ([]byte, []int) {
+func (m *MsgBondResponse) Reset()         { *m = MsgBondResponse{} }
+func (m *MsgBondResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgBondResponse) ProtoMessage()    {}
+func (*MsgBondResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d04c68bb9e1f6306, []int{3}
 }
-func (m *MsgLockResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgBondResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgLockResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgBondResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgLockResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgBondResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -208,23 +208,23 @@ func (m *MsgLockResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
-func (m *MsgLockResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgLockResponse.Merge(m, src)
+func (m *MsgBondResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBondResponse.Merge(m, src)
 }
-func (m *MsgLockResponse) XXX_Size() int {
+func (m *MsgBondResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgLockResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgLockResponse.DiscardUnknown(m)
+func (m *MsgBondResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBondResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgLockResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgBondResponse proto.InternalMessageInfo
 
-// MsgBeginUnbonding represents a supplier's request to begin unbonding uToken collateral.
+// MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 type MsgBeginUnbonding struct {
-	Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-	Tier     uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Asset    types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
+	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Tier    uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
+	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
 }
 
 func (m *MsgBeginUnbonding) Reset()         { *m = MsgBeginUnbonding{} }
@@ -260,9 +260,9 @@ func (m *MsgBeginUnbonding) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgBeginUnbonding proto.InternalMessageInfo
 
-func (m *MsgBeginUnbonding) GetSupplier() string {
+func (m *MsgBeginUnbonding) GetAccount() string {
 	if m != nil {
-		return m.Supplier
+		return m.Account
 	}
 	return ""
 }
@@ -497,7 +497,7 @@ var xxx_messageInfo_MsgCreateProgramResponse proto.InternalMessageInfo
 
 // MsgCreateAndSponsorProgram is used by governance to create an incentive program
 // and fund it in the same transaction. The sponsor address should be the community
-// fund or an agreed upon address - program reward funds will be taken from that address
+// fund or an agreed upon account - program reward funds will be taken from that address
 // when the incentive program passes governance.
 type MsgCreateAndSponsorProgram struct {
 	// authority is the address of the governance account.
@@ -505,7 +505,7 @@ type MsgCreateAndSponsorProgram struct {
 	Title       string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Program     IncentiveProgram `protobuf:"bytes,4,opt,name=program,proto3" json:"program"`
-	// sponsor is the address of the community fund or an address from which program rewards will be taken.
+	// sponsor is the address of the community fund or an account from which program rewards will be taken.
 	Sponsor string `protobuf:"bytes,5,opt,name=sponsor,proto3" json:"sponsor,omitempty"`
 }
 
@@ -582,8 +582,8 @@ var xxx_messageInfo_MsgCreateAndSponsorProgramResponse proto.InternalMessageInfo
 func init() {
 	proto.RegisterType((*MsgClaim)(nil), "umeenetwork.umee.incentive.v1.MsgClaim")
 	proto.RegisterType((*MsgClaimResponse)(nil), "umeenetwork.umee.incentive.v1.MsgClaimResponse")
-	proto.RegisterType((*MsgLock)(nil), "umeenetwork.umee.incentive.v1.MsgLock")
-	proto.RegisterType((*MsgLockResponse)(nil), "umeenetwork.umee.incentive.v1.MsgLockResponse")
+	proto.RegisterType((*MsgBond)(nil), "umeenetwork.umee.incentive.v1.MsgBond")
+	proto.RegisterType((*MsgBondResponse)(nil), "umeenetwork.umee.incentive.v1.MsgBondResponse")
 	proto.RegisterType((*MsgBeginUnbonding)(nil), "umeenetwork.umee.incentive.v1.MsgBeginUnbonding")
 	proto.RegisterType((*MsgBeginUnbondingResponse)(nil), "umeenetwork.umee.incentive.v1.MsgBeginUnbondingResponse")
 	proto.RegisterType((*MsgSponsor)(nil), "umeenetwork.umee.incentive.v1.MsgSponsor")
@@ -597,51 +597,51 @@ func init() {
 func init() { proto.RegisterFile("umee/incentive/v1/tx.proto", fileDescriptor_d04c68bb9e1f6306) }
 
 var fileDescriptor_d04c68bb9e1f6306 = []byte{
-	// 700 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x55, 0xbf, 0x6f, 0xd3, 0x40,
-	0x14, 0x8e, 0xdb, 0xa4, 0x6d, 0x5e, 0x55, 0xa0, 0x56, 0x44, 0x53, 0x23, 0x9c, 0x60, 0xa1, 0x12,
-	0x90, 0x6a, 0x37, 0xad, 0xf8, 0xb9, 0x35, 0x9d, 0x10, 0x44, 0x20, 0x57, 0x2c, 0x0c, 0x20, 0xc7,
-	0x39, 0x5d, 0x4f, 0xad, 0xef, 0x2c, 0xdf, 0x25, 0x6d, 0x11, 0x13, 0x13, 0x1b, 0x6c, 0xac, 0x9d,
-	0x99, 0x18, 0xf8, 0x13, 0x18, 0x3a, 0x56, 0x4c, 0x4c, 0x80, 0xda, 0x01, 0x24, 0xfe, 0x09, 0x74,
-	0xf6, 0xd9, 0x49, 0x5b, 0xb5, 0x49, 0x3b, 0x30, 0x30, 0xf9, 0xde, 0xbd, 0xf7, 0xbd, 0xef, 0x7b,
-	0xcf, 0x77, 0xef, 0xc0, 0xe8, 0x04, 0x08, 0x39, 0x84, 0xfa, 0x88, 0x0a, 0xd2, 0x45, 0x4e, 0xb7,
-	0xee, 0x88, 0x2d, 0x3b, 0x8c, 0x98, 0x60, 0xfa, 0x55, 0xe9, 0xa3, 0x48, 0x6c, 0xb2, 0x68, 0xdd,
-	0x96, 0x6b, 0x3b, 0x8b, 0xb3, 0xbb, 0x75, 0xc3, 0xf4, 0x19, 0x0f, 0x18, 0x77, 0x5a, 0x1e, 0x97,
-	0xb8, 0x16, 0x12, 0x5e, 0xdd, 0xf1, 0x19, 0xa1, 0x09, 0xdc, 0x98, 0x4d, 0xfc, 0x2f, 0x63, 0xcb,
-	0x49, 0x0c, 0xe5, 0x9a, 0x51, 0xd0, 0x80, 0x63, 0xc9, 0x18, 0x70, 0xac, 0x1c, 0x25, 0xcc, 0x30,
-	0x4b, 0x00, 0x72, 0xa5, 0x76, 0xaf, 0x1d, 0x17, 0xd9, 0x53, 0x12, 0x87, 0x58, 0x73, 0x30, 0xd1,
-	0xe4, 0x78, 0x65, 0xc3, 0x23, 0x81, 0x6e, 0xc0, 0x04, 0xef, 0x84, 0xe1, 0x06, 0x41, 0x51, 0x59,
-	0xab, 0x6a, 0xb5, 0xa2, 0x9b, 0xd9, 0xd6, 0x26, 0x5c, 0x4a, 0xe3, 0x5c, 0xc4, 0x43, 0x46, 0x39,
-	0xd2, 0x7d, 0x18, 0xf3, 0x02, 0xd6, 0xa1, 0xa2, 0xac, 0x55, 0x47, 0x6b, 0x93, 0x8b, 0xb3, 0xb6,
-	0x12, 0x2b, 0x2b, 0xb3, 0x55, 0x65, 0xf6, 0x0a, 0x23, 0xb4, 0xb1, 0xb0, 0xfb, 0xbd, 0x92, 0xfb,
-	0xf8, 0xa3, 0x52, 0xc3, 0x44, 0xac, 0x75, 0x5a, 0xb6, 0xcf, 0x02, 0x55, 0x99, 0xfa, 0xcc, 0xf3,
-	0xf6, 0xba, 0x23, 0xb6, 0x43, 0xc4, 0x63, 0x00, 0x77, 0x55, 0x6a, 0x2b, 0x84, 0xf1, 0x26, 0xc7,
-	0x8f, 0x99, 0xbf, 0x7e, 0x9a, 0x3e, 0x5d, 0x87, 0xbc, 0x90, 0xfb, 0x23, 0x55, 0xad, 0x36, 0xe5,
-	0xc6, 0x6b, 0xfd, 0x36, 0x14, 0x3c, 0xce, 0x91, 0x28, 0x8f, 0x56, 0xb5, 0xd3, 0xe5, 0xe5, 0xa5,
-	0x3c, 0x37, 0x89, 0xb6, 0xa6, 0xe1, 0xa2, 0x62, 0x4c, 0x2b, 0xb5, 0x5e, 0xc1, 0x74, 0x93, 0xe3,
-	0x06, 0xc2, 0x84, 0x3e, 0xa3, 0x2d, 0x46, 0xdb, 0x84, 0xe2, 0x7f, 0x25, 0xe7, 0x0a, 0xcc, 0x1e,
-	0xe3, 0xce, 0x84, 0x6d, 0x02, 0x34, 0x39, 0x5e, 0x95, 0x06, 0x8b, 0xf4, 0x32, 0x8c, 0xf3, 0x64,
-	0xa9, 0x04, 0xa5, 0xa6, 0xf4, 0x84, 0x11, 0xc3, 0x91, 0x17, 0xc4, 0x92, 0xf2, 0x6e, 0x6a, 0x9e,
-	0x57, 0x55, 0x09, 0xf4, 0x1e, 0x71, 0x26, 0xe7, 0x8f, 0x96, 0x1c, 0x93, 0x08, 0x79, 0x02, 0x3d,
-	0x55, 0x0c, 0x77, 0xa0, 0xe8, 0x75, 0xc4, 0x1a, 0x8b, 0x88, 0xd8, 0x4e, 0x74, 0x35, 0xca, 0x5f,
-	0x3f, 0xcf, 0x97, 0x14, 0xd1, 0x72, 0xbb, 0x1d, 0x21, 0xce, 0x57, 0x45, 0x24, 0x0b, 0xeb, 0x85,
-	0xea, 0x25, 0x28, 0x08, 0x22, 0x36, 0x50, 0xac, 0xb8, 0xe8, 0x26, 0x86, 0x5e, 0x85, 0xc9, 0x36,
-	0xe2, 0x7e, 0x44, 0x42, 0x41, 0x18, 0x8d, 0x55, 0x17, 0xdd, 0xfe, 0x2d, 0xfd, 0x49, 0xaf, 0xd6,
-	0x7c, 0x5c, 0x93, 0x63, 0x9f, 0x7a, 0x21, 0xed, 0x87, 0xa9, 0xa1, 0x14, 0xab, 0x4a, 0xd3, 0x2c,
-	0x0f, 0x2e, 0xbf, 0xdd, 0xa9, 0xe4, 0x7e, 0xef, 0x54, 0xb4, 0x37, 0xbf, 0x3e, 0xdd, 0xea, 0x09,
-	0xb4, 0x0c, 0x28, 0x1f, 0x2d, 0x36, 0xeb, 0xc4, 0xbb, 0x11, 0x30, 0x32, 0xe7, 0x32, 0x6d, 0xab,
-	0x4e, 0xfd, 0x2f, 0x3d, 0xe9, 0x3f, 0x6a, 0x85, 0x43, 0x47, 0xed, 0xc4, 0x6e, 0x5d, 0x07, 0xeb,
-	0xe4, 0x86, 0xa4, 0x7d, 0x5b, 0xfc, 0x52, 0x80, 0xd1, 0x26, 0xc7, 0xba, 0x07, 0x85, 0x64, 0x28,
-	0xdd, 0x18, 0x20, 0x34, 0x9d, 0x4a, 0x86, 0x33, 0x64, 0x60, 0x36, 0xbe, 0x5e, 0x40, 0x3e, 0x1e,
-	0x2b, 0x73, 0x83, 0x81, 0x32, 0xce, 0xb0, 0x87, 0x8b, 0xcb, 0xf2, 0xbf, 0x86, 0x0b, 0x47, 0x26,
-	0xc6, 0xc2, 0xe0, 0x0c, 0x87, 0x11, 0xc6, 0xbd, 0xb3, 0x22, 0x32, 0x76, 0x0c, 0xe3, 0xe9, 0x58,
-	0xb8, 0x39, 0x38, 0x89, 0x0a, 0x35, 0xea, 0x43, 0x87, 0x66, 0x44, 0xdb, 0x30, 0x75, 0xf8, 0xbe,
-	0x0f, 0xf3, 0x23, 0xfa, 0x01, 0xc6, 0xdd, 0x33, 0x02, 0x32, 0xea, 0x0f, 0x1a, 0xcc, 0x9c, 0x74,
-	0xc3, 0xee, 0x0f, 0x9b, 0xf4, 0x18, 0xd4, 0x58, 0x3e, 0x37, 0x34, 0x55, 0xd6, 0x78, 0xb4, 0xbb,
-	0x6f, 0x6a, 0x7b, 0xfb, 0xa6, 0xf6, 0x73, 0xdf, 0xd4, 0xde, 0x1f, 0x98, 0xb9, 0xbd, 0x03, 0x33,
-	0xf7, 0xed, 0xc0, 0xcc, 0x3d, 0xaf, 0xf7, 0xbd, 0x80, 0x32, 0xf5, 0xbc, 0xe2, 0x89, 0x0d, 0xa7,
-	0xbb, 0xe4, 0x6c, 0xf5, 0x3d, 0xd8, 0xf1, 0x83, 0xd8, 0x1a, 0x8b, 0x9f, 0xea, 0xa5, 0xbf, 0x01,
-	0x00, 0x00, 0xff, 0xff, 0x38, 0x59, 0x78, 0x83, 0x74, 0x08, 0x00, 0x00,
+	// 694 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x55, 0xbf, 0x6f, 0xd3, 0x4e,
+	0x14, 0x8f, 0xdb, 0xa4, 0xfd, 0xe6, 0x55, 0xfd, 0x42, 0xad, 0x88, 0xa6, 0x46, 0x38, 0xc1, 0xaa,
+	0x20, 0x20, 0xd5, 0x6e, 0x5a, 0xf1, 0x73, 0x6b, 0x3a, 0x21, 0x14, 0x81, 0x5c, 0xb1, 0x30, 0x80,
+	0x1c, 0xfb, 0x74, 0x3d, 0xb5, 0xbe, 0x8b, 0x7c, 0x97, 0xb4, 0x95, 0x98, 0x98, 0xd8, 0x60, 0x63,
+	0xed, 0xcc, 0xc4, 0xc0, 0x9f, 0xc0, 0xd0, 0xb1, 0x62, 0x62, 0x02, 0xd4, 0x0e, 0x20, 0xf1, 0x4f,
+	0xa0, 0xb3, 0xcf, 0x4e, 0xda, 0x2a, 0xad, 0xdb, 0x81, 0x81, 0xc9, 0xf7, 0xee, 0x7d, 0x3e, 0xef,
+	0x7d, 0xde, 0xf3, 0xdd, 0x3b, 0x30, 0x7a, 0x21, 0x42, 0x0e, 0xa1, 0x3e, 0xa2, 0x82, 0xf4, 0x91,
+	0xd3, 0x6f, 0x3a, 0x62, 0xdb, 0xee, 0x46, 0x4c, 0x30, 0xfd, 0x9a, 0xf4, 0x51, 0x24, 0xb6, 0x58,
+	0xb4, 0x61, 0xcb, 0xb5, 0x9d, 0xe1, 0xec, 0x7e, 0xd3, 0x30, 0x7d, 0xc6, 0x43, 0xc6, 0x9d, 0x8e,
+	0xc7, 0x25, 0xaf, 0x83, 0x84, 0xd7, 0x74, 0x7c, 0x46, 0x68, 0x42, 0x37, 0xe6, 0x12, 0xff, 0xcb,
+	0xd8, 0x72, 0x12, 0x43, 0xb9, 0x66, 0x15, 0x35, 0xe4, 0x58, 0x66, 0x0c, 0x39, 0x56, 0x8e, 0x0a,
+	0x66, 0x98, 0x25, 0x04, 0xb9, 0x52, 0xbb, 0xd7, 0x4f, 0x8a, 0x1c, 0x28, 0x89, 0x21, 0xd6, 0x3c,
+	0xfc, 0xd7, 0xe6, 0x78, 0x75, 0xd3, 0x23, 0xa1, 0x5e, 0x85, 0x49, 0xcf, 0xf7, 0x59, 0x8f, 0x8a,
+	0xaa, 0x56, 0xd7, 0x1a, 0x65, 0x37, 0x35, 0xad, 0x2d, 0xb8, 0x9c, 0xa2, 0x5c, 0xc4, 0xbb, 0x8c,
+	0x72, 0xa4, 0xfb, 0x30, 0xe1, 0x85, 0x0a, 0x3c, 0xde, 0x98, 0x5a, 0x9a, 0xb3, 0x95, 0x54, 0x59,
+	0x97, 0xad, 0xea, 0xb2, 0x57, 0x19, 0xa1, 0xad, 0xc5, 0xbd, 0x6f, 0xb5, 0xc2, 0x87, 0xef, 0xb5,
+	0x06, 0x26, 0x62, 0xbd, 0xd7, 0xb1, 0x7d, 0x16, 0xaa, 0xba, 0xd4, 0x67, 0x81, 0x07, 0x1b, 0x8e,
+	0xd8, 0xe9, 0x22, 0x1e, 0x13, 0xb8, 0xab, 0x42, 0x5b, 0x14, 0x26, 0xdb, 0x1c, 0xb7, 0x18, 0x0d,
+	0x46, 0xab, 0xd3, 0x75, 0x28, 0x0a, 0x82, 0xa2, 0xea, 0x58, 0x5d, 0x6b, 0x4c, 0xbb, 0xf1, 0x5a,
+	0xbf, 0x03, 0x25, 0x8f, 0x73, 0x24, 0xaa, 0xe3, 0x75, 0xed, 0x74, 0x71, 0x45, 0x29, 0xce, 0x4d,
+	0xd0, 0xd6, 0x0c, 0x5c, 0x52, 0xf9, 0xd2, 0x3a, 0xad, 0x6d, 0x98, 0x91, 0x5b, 0x08, 0x13, 0xfa,
+	0x8c, 0x76, 0x18, 0x0d, 0x08, 0xc5, 0x7f, 0x47, 0xcc, 0x55, 0x98, 0x3b, 0x91, 0x39, 0x93, 0xb5,
+	0x05, 0xd0, 0xe6, 0x78, 0x4d, 0x1a, 0x2c, 0x92, 0x7a, 0x78, 0xb2, 0x4c, 0xf5, 0xf0, 0x81, 0xa7,
+	0x1b, 0x31, 0x1c, 0x79, 0x61, 0x2c, 0xa9, 0xe8, 0xa6, 0xe6, 0x45, 0x55, 0x55, 0x40, 0x1f, 0x24,
+	0xce, 0xe4, 0xfc, 0xd6, 0x92, 0x23, 0x12, 0x21, 0x4f, 0xa0, 0xa7, 0x2a, 0xc3, 0x5d, 0x28, 0x7b,
+	0x3d, 0xb1, 0xce, 0x22, 0x22, 0x76, 0x12, 0x5d, 0xad, 0xea, 0x97, 0x4f, 0x0b, 0x15, 0x95, 0x68,
+	0x25, 0x08, 0x22, 0xc4, 0xf9, 0x9a, 0x88, 0x64, 0x61, 0x03, 0xa8, 0x5e, 0x81, 0x92, 0x20, 0x62,
+	0x13, 0xc5, 0x8a, 0xcb, 0x6e, 0x62, 0xe8, 0x75, 0x98, 0x0a, 0x10, 0xf7, 0x23, 0xd2, 0x15, 0x84,
+	0xd1, 0x58, 0x75, 0xd9, 0x1d, 0xde, 0xd2, 0x9f, 0x0c, 0x6a, 0x2d, 0xc6, 0x35, 0x39, 0xf6, 0xa9,
+	0x57, 0xd1, 0x7e, 0x94, 0x1a, 0x4a, 0xb1, 0xaa, 0x34, 0x8d, 0xf2, 0xf0, 0xca, 0x9b, 0xdd, 0x5a,
+	0xe1, 0xd7, 0x6e, 0x4d, 0x7b, 0xfd, 0xf3, 0xe3, 0xed, 0x81, 0x40, 0xcb, 0x80, 0xea, 0xf1, 0x62,
+	0xb3, 0x4e, 0xbc, 0x1d, 0x03, 0x23, 0x73, 0xae, 0xd0, 0x40, 0x75, 0xea, 0x5f, 0xe9, 0xc9, 0xf0,
+	0x51, 0x2b, 0x1d, 0x39, 0x6a, 0x23, 0xbb, 0x35, 0x0f, 0xd6, 0xe8, 0x86, 0xa4, 0x7d, 0x5b, 0xfa,
+	0x5c, 0x82, 0xf1, 0x36, 0xc7, 0xba, 0x07, 0xa5, 0x64, 0x1c, 0xdd, 0x3c, 0x43, 0x68, 0x3a, 0x91,
+	0x0c, 0x27, 0x27, 0x30, 0x1b, 0x5d, 0x2f, 0xa0, 0x18, 0x8f, 0x94, 0x1b, 0x67, 0x13, 0x25, 0xce,
+	0xb0, 0xf3, 0xe1, 0xb2, 0xf8, 0xaf, 0xe0, 0xff, 0x63, 0xf3, 0x62, 0x31, 0x47, 0x84, 0x23, 0x0c,
+	0xe3, 0xfe, 0x79, 0x19, 0x59, 0x76, 0x0c, 0x93, 0xe9, 0x58, 0xb8, 0x75, 0x76, 0x10, 0x05, 0x35,
+	0x9a, 0xb9, 0xa1, 0x59, 0xa2, 0x1d, 0x98, 0x3e, 0x7a, 0xdf, 0xf3, 0xfc, 0x88, 0x61, 0x82, 0x71,
+	0xef, 0x9c, 0x84, 0x2c, 0xf5, 0x7b, 0x0d, 0x66, 0x47, 0xdd, 0xb0, 0x07, 0x79, 0x83, 0x9e, 0xa0,
+	0x1a, 0x2b, 0x17, 0xa6, 0xa6, 0xca, 0x5a, 0x8f, 0xf7, 0x0e, 0x4c, 0x6d, 0xff, 0xc0, 0xd4, 0x7e,
+	0x1c, 0x98, 0xda, 0xbb, 0x43, 0xb3, 0xb0, 0x7f, 0x68, 0x16, 0xbe, 0x1e, 0x9a, 0x85, 0xe7, 0xcd,
+	0xa1, 0xd7, 0x4f, 0x86, 0x5e, 0x50, 0x79, 0x62, 0xc3, 0xe9, 0x2f, 0x3b, 0xdb, 0x43, 0x4f, 0x75,
+	0xfc, 0x18, 0x76, 0x26, 0xe2, 0x47, 0x7a, 0xf9, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x1e, 0x87,
+	0xc0, 0x8d, 0x6e, 0x08, 0x00, 0x00,
 }
 
 func (this *MsgCreateProgram) Equal(that interface{}) bool {
@@ -728,8 +728,8 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOption) (*MsgClaimResponse, error)
-	// Lock defines a method for locking uToken collateral into a locking tier.
-	Lock(ctx context.Context, in *MsgLock, opts ...grpc.CallOption) (*MsgLockResponse, error)
+	// Bond defines a method for bonding uToken collateral into reward tier.
+	Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an incentive program.
@@ -757,9 +757,9 @@ func (c *msgClient) Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOp
 	return out, nil
 }
 
-func (c *msgClient) Lock(ctx context.Context, in *MsgLock, opts ...grpc.CallOption) (*MsgLockResponse, error) {
-	out := new(MsgLockResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/Lock", in, out, opts...)
+func (c *msgClient) Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error) {
+	out := new(MsgBondResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/Bond", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -806,8 +806,8 @@ func (c *msgClient) CreateAndSponsorProgram(ctx context.Context, in *MsgCreateAn
 type MsgServer interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(context.Context, *MsgClaim) (*MsgClaimResponse, error)
-	// Lock defines a method for locking uToken collateral into a locking tier.
-	Lock(context.Context, *MsgLock) (*MsgLockResponse, error)
+	// Bond defines a method for bonding uToken collateral into reward tier.
+	Bond(context.Context, *MsgBond) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an incentive program.
@@ -825,8 +825,8 @@ type UnimplementedMsgServer struct {
 func (*UnimplementedMsgServer) Claim(ctx context.Context, req *MsgClaim) (*MsgClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Claim not implemented")
 }
-func (*UnimplementedMsgServer) Lock(ctx context.Context, req *MsgLock) (*MsgLockResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Lock not implemented")
+func (*UnimplementedMsgServer) Bond(ctx context.Context, req *MsgBond) (*MsgBondResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Bond not implemented")
 }
 func (*UnimplementedMsgServer) BeginUnbonding(ctx context.Context, req *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BeginUnbonding not implemented")
@@ -863,20 +863,20 @@ func _Msg_Claim_Handler(srv interface{}, ctx context.Context, dec func(interface
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_Lock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgLock)
+func _Msg_Bond_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgBond)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).Lock(ctx, in)
+		return srv.(MsgServer).Bond(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/Lock",
+		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/Bond",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).Lock(ctx, req.(*MsgLock))
+		return srv.(MsgServer).Bond(ctx, req.(*MsgBond))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -962,8 +962,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_Claim_Handler,
 		},
 		{
-			MethodName: "Lock",
-			Handler:    _Msg_Lock_Handler,
+			MethodName: "Bond",
+			Handler:    _Msg_Bond_Handler,
 		},
 		{
 			MethodName: "BeginUnbonding",
@@ -1006,10 +1006,10 @@ func (m *MsgClaim) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Supplier) > 0 {
-		i -= len(m.Supplier)
-		copy(dAtA[i:], m.Supplier)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Supplier)))
+	if len(m.Account) > 0 {
+		i -= len(m.Account)
+		copy(dAtA[i:], m.Account)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Account)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1053,7 +1053,7 @@ func (m *MsgClaimResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgLock) Marshal() (dAtA []byte, err error) {
+func (m *MsgBond) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1063,12 +1063,12 @@ func (m *MsgLock) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgLock) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgBond) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgLock) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgBond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1088,17 +1088,17 @@ func (m *MsgLock) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	if len(m.Supplier) > 0 {
-		i -= len(m.Supplier)
-		copy(dAtA[i:], m.Supplier)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Supplier)))
+	if len(m.Account) > 0 {
+		i -= len(m.Account)
+		copy(dAtA[i:], m.Account)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Account)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgLockResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgBondResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1108,12 +1108,12 @@ func (m *MsgLockResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgLockResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgBondResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgLockResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgBondResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1156,10 +1156,10 @@ func (m *MsgBeginUnbonding) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	if len(m.Supplier) > 0 {
-		i -= len(m.Supplier)
-		copy(dAtA[i:], m.Supplier)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Supplier)))
+	if len(m.Account) > 0 {
+		i -= len(m.Account)
+		copy(dAtA[i:], m.Account)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Account)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1435,7 +1435,7 @@ func (m *MsgClaim) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Supplier)
+	l = len(m.Account)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1457,13 +1457,13 @@ func (m *MsgClaimResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgLock) Size() (n int) {
+func (m *MsgBond) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Supplier)
+	l = len(m.Account)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1475,7 +1475,7 @@ func (m *MsgLock) Size() (n int) {
 	return n
 }
 
-func (m *MsgLockResponse) Size() (n int) {
+func (m *MsgBondResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1490,7 +1490,7 @@ func (m *MsgBeginUnbonding) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Supplier)
+	l = len(m.Account)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -1643,7 +1643,7 @@ func (m *MsgClaim) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Supplier", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Account", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1671,7 +1671,7 @@ func (m *MsgClaim) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Supplier = string(dAtA[iNdEx:postIndex])
+			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1778,7 +1778,7 @@ func (m *MsgClaimResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgLock) Unmarshal(dAtA []byte) error {
+func (m *MsgBond) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1801,15 +1801,15 @@ func (m *MsgLock) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgLock: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgBond: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgLock: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgBond: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Supplier", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Account", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1837,7 +1837,7 @@ func (m *MsgLock) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Supplier = string(dAtA[iNdEx:postIndex])
+			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
@@ -1912,7 +1912,7 @@ func (m *MsgLock) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgLockResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgBondResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1935,10 +1935,10 @@ func (m *MsgLockResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgLockResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgBondResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgLockResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgBondResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -1993,7 +1993,7 @@ func (m *MsgBeginUnbonding) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Supplier", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Account", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2021,7 +2021,7 @@ func (m *MsgBeginUnbonding) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Supplier = string(dAtA[iNdEx:postIndex])
+			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {

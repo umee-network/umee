@@ -14,8 +14,8 @@ service Msg {
   // Claim defines a method for claiming any pending incentive rewards.
   rpc Claim(MsgClaim) returns (MsgClaimResponse);
 
-  // Lock defines a method for locking uToken collateral into a locking tier.
-  rpc Lock(MsgLock) returns (MsgLockResponse);
+  // Bond defines a method for bonding uToken collateral into reward tier.
+  rpc Bond(MsgBond) returns (MsgBondResponse);
 
   // BeginUnbonding defines a method for starting to unbond uToken collateral.
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
@@ -30,9 +30,9 @@ service Msg {
   rpc CreateAndSponsorProgram(MsgCreateAndSponsorProgram) returns (MsgCreateAndSponsorProgramResponse);
 }
 
-// MsgClaim represents a supplier's request to claim pending rewards.
+// MsgClaim represents a account's request to claim pending rewards.
 message MsgClaim {
-  string supplier = 1;
+  string account = 1;
 }
 
 // MsgClaimResponse defines the Msg/Claim response type.
@@ -43,21 +43,21 @@ message MsgClaimResponse {
   ];
 }
 
-// MsgLock represents a supplier's request to lock uToken collateral.
-message MsgLock {
-  string                   supplier = 1;
-  uint32                   tier     = 2;
-  cosmos.base.v1beta1.Coin asset    = 3 [(gogoproto.nullable) = false];
+// MsgBond represents a account's request to bond uToken collateral.
+message MsgBond {
+  string                   account = 1;
+  uint32                   tier    = 2;
+  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
 }
 
-// MsgLockResponse defines the Msg/Lock response type.
-message MsgLockResponse {}
+// MsgBondResponse defines the Msg/Lock response type.
+message MsgBondResponse {}
 
-// MsgBeginUnbonding represents a supplier's request to begin unbonding uToken collateral.
+// MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 message MsgBeginUnbonding {
-  string                   supplier = 1;
-  uint32                   tier     = 2;
-  cosmos.base.v1beta1.Coin asset    = 3 [(gogoproto.nullable) = false];
+  string                   account = 1;
+  uint32                   tier    = 2;
+  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
 }
 
 // MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.
@@ -91,7 +91,7 @@ message MsgCreateProgramResponse {}
 
 // MsgCreateAndSponsorProgram is used by governance to create an incentive program
 // and fund it in the same transaction. The sponsor address should be the community
-// fund or an agreed upon address - program reward funds will be taken from that address
+// fund or an agreed upon account - program reward funds will be taken from that address
 // when the incentive program passes governance.
 message MsgCreateAndSponsorProgram {
   option (gogoproto.equal)           = true;
@@ -104,7 +104,7 @@ message MsgCreateAndSponsorProgram {
   string           description = 3;
   IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
 
-  // sponsor is the address of the community fund or an address from which program rewards will be taken.
+  // sponsor is the address of the community fund or an account from which program rewards will be taken.
   string sponsor = 5;
 }
 

@@ -52,8 +52,8 @@ message IncentiveProgram {
   // duration is the length of the incentive program in blocks.
   uint64 duration = 3;
 
-  // lock_denom defines the denomination of the incentivized collateral uToken.
-  string lock_denom = 4;
+  // denom defines the denomination of the incentivized collateral uToken.
+  string denom = 4;
 
   // total_rewards are total amount of rewards which can be distributed to
   // suppliers by this program. This is set to its final value when the program

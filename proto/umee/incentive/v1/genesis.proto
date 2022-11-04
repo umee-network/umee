@@ -12,29 +12,29 @@ message GenesisState {
   Params                    params               = 1 [(gogoproto.nullable) = false];
   repeated IncentiveProgram programs             = 2 [(gogoproto.nullable) = false];
   uint32                    next_program_id      = 3;
-  repeated cosmos.base.v1beta1.Coin total_locked = 4 [
+  repeated cosmos.base.v1beta1.Coin total_bonded = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  repeated LockAmount        lock_amounts        = 5 [(gogoproto.nullable) = false];
+  repeated BondAmount        bond_amounts        = 5 [(gogoproto.nullable) = false];
   repeated PendingReward     pending_rewards     = 6 [(gogoproto.nullable) = false];
   repeated RewardBasis       reward_bases        = 7 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 8 [(gogoproto.nullable) = false];
   repeated Unbonding         unbondings          = 9 [(gogoproto.nullable) = false];
 }
 
-// LockAmount tracks the amount of coins of one uToken denomination locked into a
-// given tier by a single supplier.
-message LockAmount {
-  string                   supplier = 1;
-  uint32                   tier     = 2;
-  cosmos.base.v1beta1.Coin amount   = 3 [(gogoproto.nullable) = false];
+// BondAmount tracks the amount of coins of one uToken denomination bonded to a
+// given reward tier by a single account.
+message BondAmount {
+  string                   account = 1;
+  uint32                   tier    = 2;
+  cosmos.base.v1beta1.Coin amount  = 3 [(gogoproto.nullable) = false];
 }
 
-// PendingReward tracks the amount of rewards that a given supplier has calculated
+// PendingReward tracks the amount of rewards that a given account has calculated
 // but not yet claimed.
 message PendingReward {
-  string   supplier                                = 1;
+  string   account                                 = 1;
   repeated cosmos.base.v1beta1.Coin pending_reward = 2 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
@@ -42,11 +42,11 @@ message PendingReward {
 }
 
 // RewardBasis tracks the value of a given tier and lock denom's RewardAccumulator
-// at the last time a specific supplier calculated pending rewards for it.
+// at the last time a specific account calculated pending rewards for it.
 message RewardBasis {
-  string   supplier                                 = 1;
+  string   account                                  = 1;
   uint32   tier                                     = 2;
-  string   lock_denom                               = 3;
+  string   denom                                    = 3;
   repeated cosmos.base.v1beta1.DecCoin reward_basis = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
@@ -54,12 +54,12 @@ message RewardBasis {
 }
 
 // RewardAccumulator is a global reward tracking struct that indicates the amount
-// of rewards that a single unit of lock_denom would have acucmulated if it was
-// locked at a given tier since genesis.
+// of rewards that a single unit of denom would have acucmulated if it was bonded
+// at a given tier since genesis.
 message RewardAccumulator {
   uint32   tier                                     = 1;
-  string   lock_denom                               = 2;
-  repeated cosmos.base.v1beta1.DecCoin reward_basis = 4 [
+  string   denom                                    = 2;
+  repeated cosmos.base.v1beta1.DecCoin reward_basis = 3 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
@@ -67,8 +67,8 @@ message RewardAccumulator {
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
 message Unbonding {
-  string                   supplier = 1;
-  uint32                   tier     = 2;
-  uint64                   end      = 3;
-  cosmos.base.v1beta1.Coin amount   = 4 [(gogoproto.nullable) = false];
+  string                   account = 1;
+  uint32                   tier    = 2;
+  uint64                   end     = 3;
+  cosmos.base.v1beta1.Coin amount  = 4 [(gogoproto.nullable) = false];
 }

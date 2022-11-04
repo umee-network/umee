@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	amino = codec.NewLegacyAmino()
+	amino     = codec.NewLegacyAmino()
 	ModuleCdc = codec.NewAminoCodec(amino)
 )
 
@@ -24,7 +24,7 @@ func init() {
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaim{}, "umee/incentive/MsgClaim", nil)
-	cdc.RegisterConcrete(&MsgLock{}, "umee/incentive/MsgLock", nil)
+	cdc.RegisterConcrete(&MsgBond{}, "umee/incentive/MsgBond", nil)
 	cdc.RegisterConcrete(&MsgBeginUnbonding{}, "umee/incentive/MsgBeginUnbonding", nil)
 	cdc.RegisterConcrete(&MsgSponsor{}, "umee/incentive/MsgSponsor", nil)
 	cdc.RegisterConcrete(&MsgCreateProgram{}, "umee/incentive/MsgCreateProgram", nil)
@@ -34,7 +34,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&MsgClaim{},
-		&MsgLock{},
+		&MsgBond{},
 		&MsgBeginUnbonding{},
 		&MsgSponsor{},
 		&MsgCreateProgram{},

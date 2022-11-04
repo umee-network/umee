@@ -14,24 +14,25 @@ import (
 var (
 	_ sdk.Msg = &MsgClaim{}
 	_ sdk.Msg = &MsgBeginUnbonding{}
-	_ sdk.Msg = &MsgLock{}
+	_ sdk.Msg = &MsgBond{}
 	_ sdk.Msg = &MsgSponsor{}
 	_ sdk.Msg = &MsgCreateProgram{}
+	_ sdk.Msg = &MsgCreateAndSponsorProgram{}
 )
 
-func NewMsgClaim(supplier sdk.AccAddress) *MsgClaim {
+func NewMsgClaim(account sdk.AccAddress) *MsgClaim {
 	return &MsgClaim{
-		Supplier: supplier.String(),
+		Account: account.String(),
 	}
 }
 
 func (msg *MsgClaim) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Supplier)
+	_, err := sdk.AccAddressFromBech32(msg.Account)
 	return err
 }
 
 func (msg *MsgClaim) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Supplier)
+	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -40,42 +41,42 @@ func (msg *MsgClaim) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLock(supplier sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgLock {
-	return &MsgLock{
-		Supplier: supplier.String(),
-		Tier:     tier,
-		Asset:    asset,
+func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
+	return &MsgBond{
+		Account: account.String(),
+		Tier:    tier,
+		Asset:   asset,
 	}
 }
 
-func (msg *MsgLock) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Supplier, msg.Tier, &msg.Asset)
+func (msg *MsgBond) ValidateBasic() error {
+	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
-func (msg *MsgLock) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Supplier)
+func (msg *MsgBond) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgLock) GetSignBytes() []byte {
+func (msg *MsgBond) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBeginUnbonding(supplier sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBeginUnbonding {
+func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBeginUnbonding {
 	return &MsgBeginUnbonding{
-		Supplier: supplier.String(),
-		Tier:     tier,
-		Asset:    asset,
+		Account: account.String(),
+		Tier:    tier,
+		Asset:   asset,
 	}
 }
 
 func (msg *MsgBeginUnbonding) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Supplier, msg.Tier, &msg.Asset)
+	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
 func (msg *MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Supplier)
+	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
@@ -122,51 +123,9 @@ func (msg MsgCreateProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
-
-	if err := msg.ValidateAbstract(); err != nil {
+	if err := validateIncentiveProposal(msg.Title, msg.Description, msg.Program); err != nil {
 		return err
 	}
-
-	/*
-		TODO: General validation
-		if err := msg.Program.Validate(); err != nil {
-			return err
-		}
-	*/
-
-	// Additional rules apply to incentive programs which are still being proposed
-	if msg.Program.Id != 0 {
-		return ErrInvalidProgramID.Wrapf("%d", msg.Program.Id)
-	}
-	if !msg.Program.RemainingRewards.IsZero() {
-		return ErrNonzeroRemainingRewards.Wrap(msg.Program.RemainingRewards.String())
-	}
-	if !msg.Program.FundedRewards.IsZero() {
-		return ErrNonzeroFundedRewards.Wrap(msg.Program.FundedRewards.String())
-	}
-
-	return nil
-}
-
-func (msg *MsgCreateProgram) ValidateAbstract() error {
-	title := msg.Title
-	if len(strings.TrimSpace(title)) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
-	}
-	if len(title) > gov1b1.MaxTitleLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
-			gov1b1.MaxTitleLength)
-	}
-
-	description := msg.Description
-	if len(description) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
-	}
-	if len(description) > gov1b1.MaxDescriptionLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
-			gov1b1.MaxDescriptionLength)
-	}
-
 	return nil
 }
 
@@ -196,51 +155,12 @@ func (msg MsgCreateAndSponsorProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
-
-	if err := msg.ValidateAbstract(); err != nil {
+	if _, err := sdk.AccAddressFromBech32(msg.Sponsor); err != nil {
+		return sdkerrors.Wrap(err, "invalid sponsor address")
+	}
+	if err := validateIncentiveProposal(msg.Title, msg.Description, msg.Program); err != nil {
 		return err
 	}
-
-	/*
-		TODO: General validation
-		if err := msg.Program.Validate(); err != nil {
-			return err
-		}
-	*/
-
-	// Additional rules apply to incentive programs which are still being proposed
-	if msg.Program.Id != 0 {
-		return ErrInvalidProgramID.Wrapf("%d", msg.Program.Id)
-	}
-	if !msg.Program.RemainingRewards.IsZero() {
-		return ErrNonzeroRemainingRewards.Wrap(msg.Program.RemainingRewards.String())
-	}
-	if !msg.Program.FundedRewards.IsZero() {
-		return ErrNonzeroFundedRewards.Wrap(msg.Program.FundedRewards.String())
-	}
-
-	return nil
-}
-
-func (msg *MsgCreateAndSponsorProgram) ValidateAbstract() error {
-	title := msg.Title
-	if len(strings.TrimSpace(title)) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
-	}
-	if len(title) > gov1b1.MaxTitleLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
-			gov1b1.MaxTitleLength)
-	}
-
-	description := msg.Description
-	if len(description) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
-	}
-	if len(description) > gov1b1.MaxDescriptionLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
-			gov1b1.MaxDescriptionLength)
-	}
-
 	return nil
 }
 
@@ -253,6 +173,38 @@ func (msg MsgCreateAndSponsorProgram) GetSignBytes() []byte {
 // GetSigners implements Msg
 func (msg MsgCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
+}
+
+func validateIncentiveProposal(title, description string, program IncentiveProgram) error {
+	if len(strings.TrimSpace(title)) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
+	}
+	if len(title) > gov1b1.MaxTitleLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
+			gov1b1.MaxTitleLength)
+	}
+
+	if len(description) == 0 {
+		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
+	}
+	if len(description) > gov1b1.MaxDescriptionLength {
+		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
+			gov1b1.MaxDescriptionLength)
+	}
+
+	if program.Id != 0 {
+		return ErrInvalidProgramID.Wrapf("%d", program.Id)
+	}
+	if !program.RemainingRewards.IsZero() {
+		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
+	}
+	if !program.FundedRewards.IsZero() {
+		return ErrNonzeroFundedRewards.Wrap(program.FundedRewards.String())
+	}
+	if err := program.Validate(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func validateSenderAsset(sender string, asset *sdk.Coin) error {
