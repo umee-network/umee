@@ -138,7 +138,7 @@ func NewBitgetProvider(
 
 	controller := NewWebsocketController(
 		ctx,
-		ProviderBinance,
+		ProviderBitget,
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,

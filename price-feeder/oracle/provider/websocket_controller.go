@@ -126,7 +126,7 @@ func (wsc *WebsocketController) ping() {
 		if wsc.client == nil {
 			return
 		}
-		err := wsc.client.WriteMessage(1, []byte("ping"))
+		err := wsc.client.WriteMessage(websocket.PingMessage, []byte("ping"))
 		wsc.mtx.Unlock()
 		if err != nil {
 			wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()

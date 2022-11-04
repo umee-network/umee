@@ -125,7 +125,7 @@ func NewKrakenProvider(
 
 	controller := NewWebsocketController(
 		ctx,
-		ProviderBinance,
+		ProviderKraken,
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,

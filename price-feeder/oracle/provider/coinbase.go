@@ -121,7 +121,7 @@ func NewCoinbaseProvider(
 
 	controller := NewWebsocketController(
 		ctx,
-		ProviderBinance,
+		ProviderCoinbase,
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
