@@ -249,3 +249,11 @@ func (q querier) AggregateVotes(
 		AggregateVotes: votes,
 	}, nil
 }
+
+// Medians currently performs a no-op.
+func (q querier) Medians(
+	goCtx context.Context,
+	req *types.QueryMedians,
+) (*types.QueryMediansResponse, error) {
+	return nil, types.ErrNotImplemented
+}
