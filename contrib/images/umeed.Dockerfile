@@ -5,7 +5,7 @@ RUN apk add --no-cache $PACKAGES
 WORKDIR /src/app/
 COPY . .
 # Build the binary
-RUN CGO_ENABLED=0 make install
+RUN make install
 
 
 FROM alpine:3.14
