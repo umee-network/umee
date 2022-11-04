@@ -35,6 +35,9 @@ service Msg {
   // Liquidate allows a user to repay a different user's borrowed coins in exchange for some
   // of the target's collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
+
+  // SupplyCollateral combines the Supply and Collateralize actions.
+  rpc SupplyCollateral(MsgSupplyCollateral) returns (MsgSupplyCollateralResponse);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -104,6 +107,13 @@ message MsgLiquidate {
   string reward_denom = 4;
 }
 
+// MsgSupplyCollateral represents a user's request to supply and collateralize assets to the module.
+message MsgSupplyCollateral {
+  // Supplier is the account address supplying assets and the signer of the message.
+  string                   supplier = 1;
+  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
+}
+
 // MsgSupplyResponse defines the Msg/Supply response type.
 message MsgSupplyResponse {
   // Received is the amount of uTokens received.
@@ -142,4 +152,10 @@ message MsgLiquidateResponse {
   // Reward is the amount of base tokens that the liquidator received from
   // the module as reward for the liquidation.
   cosmos.base.v1beta1.Coin reward = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSupplyCollateralResponse defines the Msg/SupplyCollateral response type.
+message MsgSupplyCollateralResponse {
+  // Collateralized is the amount of uTokens collateralized.
+  cosmos.base.v1beta1.Coin collateralized = 1 [(gogoproto.nullable) = false];
 }

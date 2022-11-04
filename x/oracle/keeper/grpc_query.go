@@ -149,8 +149,8 @@ func (q querier) SlashWindow(
 	params := q.GetParams(ctx)
 
 	return &types.QuerySlashWindowResponse{
-		WindowProgress: (uint64(ctx.BlockHeight()) / params.VotePeriod) %
-			params.SlashWindow,
+		WindowProgress: (uint64(ctx.BlockHeight()) % params.SlashWindow) /
+			params.VotePeriod,
 	}, nil
 }
 
@@ -248,4 +248,12 @@ func (q querier) AggregateVotes(
 	return &types.QueryAggregateVotesResponse{
 		AggregateVotes: votes,
 	}, nil
+}
+
+// Medians currently performs a no-op.
+func (q querier) Medians(
+	goCtx context.Context,
+	req *types.QueryMedians,
+) (*types.QueryMediansResponse, error) {
+	return nil, types.ErrNotImplemented
 }

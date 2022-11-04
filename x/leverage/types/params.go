@@ -20,13 +20,11 @@ var (
 
 var (
 	defaultMaxShareTrigger              uint64 = 100_000 // 100k USD
-	defaultCompleteLiquidationThreshold        = sdk.MustNewDecFromStr("0.1")
-	defaultMinimumCloseFactor                  = sdk.MustNewDecFromStr("0.01")
+	defaultCompleteLiquidationThreshold        = sdk.MustNewDecFromStr("0.4")
+	defaultMinimumCloseFactor                  = sdk.MustNewDecFromStr("0.05")
 	defaultOracleRewardFactor                  = sdk.MustNewDecFromStr("0.01")
-	defaultSmallLiquidationSize                = sdk.MustNewDecFromStr("100.00")
-	defaultDirectLiquidationFee                = sdk.MustNewDecFromStr("0.1")
-
-	oneDec = sdk.OneDec()
+	defaultSmallLiquidationSize                = sdk.MustNewDecFromStr("500.00")
+	defaultDirectLiquidationFee                = sdk.MustNewDecFromStr("0.05")
 )
 
 func NewParams() Params {

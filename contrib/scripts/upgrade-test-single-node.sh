@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 # Using an already running chain, starts a governance proposal to upgrade to a new binary version,
 # votes 'yes' on that proposal, waits to reach to reach an upgrade height and kills the process id
@@ -48,17 +48,44 @@ cid="--chain-id $CHAIN_ID"
 CURRENT_HEIGHT=$(CHAIN_ID=$CHAIN_ID UMEED_BIN=$UMEED_BIN_V1 get_block_current_height)
 echo blockchain CURRENT_HEIGHT is $CURRENT_HEIGHT
 
-UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 10))
+UPGRADE_HEIGHT=$(($CURRENT_HEIGHT + 30))
 echo blockchain UPGRADE_HEIGHT is $UPGRADE_HEIGHT
 
-$UMEED_BIN_V1 tx gov submit-proposal software-upgrade $UPGRADE_TITLE --deposit 1000000000uumee \
-  --upgrade-height $UPGRADE_HEIGHT --upgrade-info '{"binaries":{"linux/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-amd64","linux/arm64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-linux-arm64","darwin/amd64":"https://github.com/cosmos/gaia/releases/download/v6.0.0-rc1/gaiad-v6.0.0-rc1-darwin-amd64"}}' \
-  -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --title yeet --description megayeet $cid --yes --fees 10000uumee
+proposal_path=$CWD/proposal.json
 
-PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].proposal_id" -r)
+admin_addr=$($UMEED_BIN_V2 $kbt $nodeHomeFlag keys show admin -a)
+
+echo '
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
+      "plan": {
+        "name": "'$UPGRADE_TITLE'",
+        "height": "'$UPGRADE_HEIGHT'",
+        "info": "{\"binaries\": {\"linux/amd64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\",\"linux/arm64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\",\"darwin/amd64\":\"https://example.com/gaia.zip?checksum=sha256:aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f\"}}"
+      }
+    }
+  ],
+  "deposit": "1000000000uumee"
+}
+
+' > $proposal_path
+
+echo "Submitting the software-upgrade proposal..."
+$UMEED_BIN_V1 tx gov submit-proposal $proposal_path -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee --gas 300000
+
+# $UMEED_BIN_V1 tx gov submit-proposal software-upgrade $proposal_path $UPGRADE_TITLE  --title yeet --description megayeet $cid --deposit 1000000000uumee \
+#   --upgrade-height $UPGRADE_HEIGHT --upgrade-info "doing an upgrade '-'" \
+#   -b block $nodeHomeFlag --from admin $nodeUrlFlag $kbt --yes --fees 100000uumee
+
+##
+PROPOSAL_ID=$($UMEED_BIN_V1 q gov $nodeUrlFlag proposals -o json | jq ".proposals[-1].id" -r)
 echo proposal ID is $PROPOSAL_ID
 
-$UMEED_BIN_V1 tx gov vote -b async --from admin $nodeUrlFlag $kbt $PROPOSAL_ID yes $nodeHomeFlag $cid --yes --fees 10000uumee
+echo "Voting on proposaal : $PROPOSAL_ID"
+$UMEED_BIN_V1 tx gov vote $PROPOSAL_ID yes -b block --from admin $nodeHomeFlag $cid $nodeUrlFlag $kbt  --yes --fees 100000uumee
 
 echo "..."
 echo "Finished voting on the proposal"

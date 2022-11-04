@@ -103,7 +103,11 @@ func NewBinanceProvider(
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Binance websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderBinance,
+			err,
+		)
 	}
 
 	provider := &BinanceProvider{
@@ -329,24 +333,11 @@ func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
 			p.messageReceived(messageType, bz)
 
 		case <-reconnectTicker.C:
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting")
-			}
 			if err := p.reconnect(); err != nil {
 				p.logger.Err(err).Msg("error reconnecting")
-				p.keepReconnecting()
 			}
 		}
 	}
-}
-
-// disconnect disconnects the existing websocket connection.
-func (p *BinanceProvider) disconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Binance websocket %v", err)
-	}
-	return nil
 }
 
 // reconnect closes the last WS connection then create a new one and subscribe to
@@ -356,38 +347,25 @@ func (p *BinanceProvider) disconnect() error {
 // the websocket server does not receive a pong frame back from the connection
 // within a 10 minute period, the connection will be disconnected.
 func (p *BinanceProvider) reconnect() error {
+	err := p.wsClient.Close()
+	if err != nil {
+		p.logger.Err(err).Msg("error closing binance websocket")
+	}
+
 	p.logger.Debug().Msg("reconnecting websocket")
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error reconnect to binance websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderBinance,
+			err,
+		)
 	}
 	p.wsClient = wsConn
-
-	currencyPairs := p.subscribedPairsToSlice()
-
 	telemetryWebsocketReconnect(ProviderBinance)
-	return p.subscribeChannels(currencyPairs...)
-}
 
-// keepReconnecting keeps trying to reconnect if an error occurs in reconnect.
-func (p *BinanceProvider) keepReconnecting() {
-	reconnectTicker := time.NewTicker(defaultReconnectTime)
-	defer reconnectTicker.Stop()
-	connectionTries := 1
-
-	for time := range reconnectTicker.C {
-		if err := p.reconnect(); err != nil {
-			p.logger.Err(err).Msgf("attempted to reconnect %d times at %s", connectionTries, time.String())
-			connectionTries++
-			continue
-		}
-
-		if connectionTries > maxReconnectionTries {
-			p.logger.Warn().Msgf("failed to reconnect %d times", connectionTries)
-		}
-		return
-	}
+	return p.subscribeChannels(p.subscribedPairsToSlice()...)
 }
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.

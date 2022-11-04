@@ -112,7 +112,11 @@ func NewCoinbaseProvider(
 	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to Coinbase websocket: %w", err)
+		return nil, fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderCoinbase,
+			err,
+		)
 	}
 
 	provider := &CoinbaseProvider{
@@ -473,7 +477,11 @@ func (p *CoinbaseProvider) reconnect() error {
 	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("error reconnecting to Coinbase websocket: %w", err)
+		return fmt.Errorf(
+			types.ErrWebsocketDial.Error(),
+			ProviderCoinbase,
+			err,
+		)
 	}
 	wsConn.SetPongHandler(p.pongHandler)
 	p.wsClient = wsConn
