@@ -11,6 +11,7 @@ You should use the following address as the `authority`: `"umee10d07y265gmmuvt4z
 
 ## State Sync Providers
 
+- https://polkachu.com/state_sync/umee
 - https://theamsolutions.info/umee-services
 - https://stakeangle.com/state-sync/umee
 - https://book.testnet.run/umee/state-sync
