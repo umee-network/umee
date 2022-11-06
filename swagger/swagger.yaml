@@ -499,17 +499,19 @@ paths:
 
                       0.3 indicates 30% of the way from LT to CV.
 
+                      See also `minimum_close_factor` for more information.
+
                       Valid values: 0-1.
                   minimum_close_factor:
                     type: string
                     description: |-
-                      borrowed           C := collateral
+                      borrowed          CV := collateral
                                   value                   value
                        --- | ------- | ----- | -------- | ------->
-                           L                 CL
+                          LV                 CL
 
-                      liquidation = liquidation_threshold * C
-                      CL = L + (C-CL) * complete_liquidation_threshold
+                      LV = liquidation value = liquidation_threshold * CV
+                      CL = LV + (CV-LV) * complete_liquidation_threshold
                          is the borrowed value above which close factor will be 1.
 
                       Valid values: 0-1.
@@ -565,7 +567,13 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
-                description: Params defines the parameters for the leverage module.
+                description: >-
+                  Params defines the parameters for the leverage module.
+
+                  See
+                  https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                  for more details.
             description: >-
               QueryParamsResponse defines the response structure for the Params
               gRPC
@@ -659,7 +667,7 @@ paths:
 
                         asset.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     kink_borrow_rate:
                       type: string
                       title: >-
@@ -669,7 +677,7 @@ paths:
                         asset when supply utilization is equal to
                         'kink_utilization'.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     max_borrow_rate:
                       type: string
                       title: >-
@@ -678,7 +686,7 @@ paths:
 
                         asset when supply utilization is at its maximum.
 
-                        Valid values: 0-inf
+                        Valid values: 0-∞
                     kink_utilization:
                       type: string
                       description: >-
@@ -783,14 +791,14 @@ paths:
 
                         the supply utilization is above
                         `max_supply_utilization`.
-
+                           supply_utilization(token) = total_borrowed(token) / total_supply(token)
                         Valid values: 0-1.
                     min_collateral_liquidity:
                       type: string
                       title: >-
-                        Min Collateral Liquidity specifies an allowed minimum
-                        allowed for the following function:
-                            collateral_liquidity(token) = available(token) / total_collateral(token)
+                        Min Collateral Liquidity specifies min limit for the
+                        following function:
+                           collateral_liquidity(token) = available(token) / total_collateral(token)
                         Borrowing, collateralizing, or withdrawing assets is not
                         allowed when the
 
@@ -820,6 +828,11 @@ paths:
                     parameters, in the Umee
 
                     capital facility that can be supplied and borrowed.
+
+                    See
+                    https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                    for more details.
             description: >-
               QueryRegisteredTokensResponse defines the response structure for
               the
@@ -847,6 +860,68 @@ paths:
                     value:
                       type: string
                       format: byte
+      tags:
+        - Query
+  /umee/historacle/v1/denoms/medians:
+    get:
+      summary: Medians returns medians of all denoms
+      operationId: Medians
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              medians:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: medians defines a list of the medians for all stamped denoms.
+            description: |-
+              QueryMediansResponse is response type for the
+              Query/Medians RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
+          type: string
       tags:
         - Query
   /umee/oracle/v1/denoms/active_exchange_rates:
@@ -1007,6 +1082,22 @@ paths:
                     format: uint64
                   min_valid_per_window:
                     type: string
+                  stamp_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Stamp Period represents the amount of blocks the
+                      historacle module
+
+                      waits before recording a set of prices from the oracle.
+                  prune_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Prune Period represents the maximum amount of blocks which
+                      we want
+
+                      to keep a record of our set of exchange rates.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -1497,17 +1588,19 @@ definitions:
 
           0.3 indicates 30% of the way from LT to CV.
 
+          See also `minimum_close_factor` for more information.
+
           Valid values: 0-1.
       minimum_close_factor:
         type: string
         description: |-
-          borrowed           C := collateral
+          borrowed          CV := collateral
                       value                   value
            --- | ------- | ----- | -------- | ------->
-               L                 CL
+              LV                 CL
 
-          liquidation = liquidation_threshold * C
-          CL = L + (C-CL) * complete_liquidation_threshold
+          LV = liquidation value = liquidation_threshold * CV
+          CL = LV + (CV-LV) * complete_liquidation_threshold
              is the borrowed value above which close factor will be 1.
 
           Valid values: 0-1.
@@ -1554,7 +1647,13 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
-    description: Params defines the parameters for the leverage module.
+    description: >-
+      Params defines the parameters for the leverage module.
+
+      See
+      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+      for more details.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
@@ -1843,17 +1942,19 @@ definitions:
 
               0.3 indicates 30% of the way from LT to CV.
 
+              See also `minimum_close_factor` for more information.
+
               Valid values: 0-1.
           minimum_close_factor:
             type: string
             description: |-
-              borrowed           C := collateral
+              borrowed          CV := collateral
                           value                   value
                --- | ------- | ----- | -------- | ------->
-                   L                 CL
+                  LV                 CL
 
-              liquidation = liquidation_threshold * C
-              CL = L + (C-CL) * complete_liquidation_threshold
+              LV = liquidation value = liquidation_threshold * CV
+              CL = LV + (CV-LV) * complete_liquidation_threshold
                  is the borrowed value above which close factor will be 1.
 
               Valid values: 0-1.
@@ -1903,7 +2004,13 @@ definitions:
               uTokens as liquidation rewards.
 
               Valid values: 0-1.
-        description: Params defines the parameters for the leverage module.
+        description: >-
+          Params defines the parameters for the leverage module.
+
+          See
+          https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+          for more details.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
@@ -1962,19 +2069,19 @@ definitions:
 
                 asset.
 
-                Valid values: 0-inf
+                Valid values: 0-∞
             kink_borrow_rate:
               type: string
               title: |-
                 Kink Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is equal to 'kink_utilization'.
-                Valid values: 0-inf
+                Valid values: 0-∞
             max_borrow_rate:
               type: string
               title: |-
                 Max Borrow Rate defines the interest rate for borrowing this
                 asset when supply utilization is at its maximum.
-                Valid values: 0-inf
+                Valid values: 0-∞
             kink_utilization:
               type: string
               description: |-
@@ -2070,14 +2177,14 @@ definitions:
                 borrows are not allowed when
 
                 the supply utilization is above `max_supply_utilization`.
-
+                   supply_utilization(token) = total_borrowed(token) / total_supply(token)
                 Valid values: 0-1.
             min_collateral_liquidity:
               type: string
               title: >-
-                Min Collateral Liquidity specifies an allowed minimum allowed
-                for the following function:
-                    collateral_liquidity(token) = available(token) / total_collateral(token)
+                Min Collateral Liquidity specifies min limit for the following
+                function:
+                   collateral_liquidity(token) = available(token) / total_collateral(token)
                 Borrowing, collateralizing, or withdrawing assets is not allowed
                 when the
 
@@ -2105,6 +2212,11 @@ definitions:
             the Umee
 
             capital facility that can be supplied and borrowed.
+
+            See
+            https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+            for more details.
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
@@ -2147,19 +2259,19 @@ definitions:
         title: |-
           Base Borrow Rate defines the minimum interest rate for borrowing this
           asset.
-          Valid values: 0-inf
+          Valid values: 0-∞
       kink_borrow_rate:
         type: string
         title: |-
           Kink Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is equal to 'kink_utilization'.
-          Valid values: 0-inf
+          Valid values: 0-∞
       max_borrow_rate:
         type: string
         title: |-
           Max Borrow Rate defines the interest rate for borrowing this
           asset when supply utilization is at its maximum.
-          Valid values: 0-inf
+          Valid values: 0-∞
       kink_utilization:
         type: string
         description: |-
@@ -2251,14 +2363,14 @@ definitions:
           not allowed when
 
           the supply utilization is above `max_supply_utilization`.
-
+             supply_utilization(token) = total_borrowed(token) / total_supply(token)
           Valid values: 0-1.
       min_collateral_liquidity:
         type: string
         title: >-
-          Min Collateral Liquidity specifies an allowed minimum allowed for the
-          following function:
-              collateral_liquidity(token) = available(token) / total_collateral(token)
+          Min Collateral Liquidity specifies min limit for the following
+          function:
+             collateral_liquidity(token) = available(token) / total_collateral(token)
           Borrowing, collateralizing, or withdrawing assets is not allowed when
           the
 
@@ -2280,9 +2392,15 @@ definitions:
 
           To mark a token as not valid for supply, `msg_supply` must be set to
           false.
-    description: |-
+    description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
+
       capital facility that can be supplied and borrowed.
+
+      See
+      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+      for more details.
   cosmos.base.v1beta1.DecCoin:
     type: object
     properties:
@@ -2385,6 +2503,18 @@ definitions:
         format: uint64
       min_valid_per_window:
         type: string
+      stamp_period:
+        type: string
+        format: uint64
+        description: |-
+          Stamp Period represents the amount of blocks the historacle module
+          waits before recording a set of prices from the oracle.
+      prune_period:
+        type: string
+        format: uint64
+        description: |-
+          Prune Period represents the maximum amount of blocks which we want
+          to keep a record of our set of exchange rates.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2558,6 +2688,27 @@ definitions:
     description: |-
       QueryFeederDelegationResponse is response type for the
       Query/FeederDelegation RPC method.
+  umee.oracle.v1.QueryMediansResponse:
+    type: object
+    properties:
+      medians:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: medians defines a list of the medians for all stamped denoms.
+    description: |-
+      QueryMediansResponse is response type for the
+      Query/Medians RPC method.
   umee.oracle.v1.QueryMissCounterResponse:
     type: object
     properties:
@@ -2605,6 +2756,18 @@ definitions:
             format: uint64
           min_valid_per_window:
             type: string
+          stamp_period:
+            type: string
+            format: uint64
+            description: |-
+              Stamp Period represents the amount of blocks the historacle module
+              waits before recording a set of prices from the oracle.
+          prune_period:
+            type: string
+            format: uint64
+            description: |-
+              Prune Period represents the maximum amount of blocks which we want
+              to keep a record of our set of exchange rates.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object
