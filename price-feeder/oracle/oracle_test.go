@@ -716,7 +716,7 @@ func (ots *OracleTestSuite) TestGetComputedPricesEmptyTvwap() {
 		pairETHtoUSDT,
 		pairETHtoDAI,
 	}
-	krakenPairsETH := append(basePairsETH, pairETHtoUSD)
+	krakenPairsETH := append(basePairsETH, pairETHtoUSD) //nolint:gocritic // we mean to append to a different slice
 
 	pairUSDTtoUSD := types.CurrencyPair{
 		Base:  symbolUSDT,
