@@ -139,7 +139,7 @@ func (rts *RouterTestSuite) TestTvwap() {
 }
 
 func (rts *RouterTestSuite) TestVwap() {
-	req, err := http.NewRequest("GET", "/api/v1/prices/providers/vwap", nil)
+	req, err := http.NewRequest("GET", "/api/v1/prices/providers/vwap", nil) //nolint:usestdlibvars // I think we should in fact fix this.
 	rts.Require().NoError(err)
 	response := rts.executeRequest(req)
 	rts.Require().Equal(http.StatusOK, response.Code)
