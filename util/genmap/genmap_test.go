@@ -1,12 +1,16 @@
 package genmap
 
-import "testing"
-import "github.com/stretchr/testify/require"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestPick(t *testing.T) {
 	require := require.New(t)
 	m := map[string]int{
-		"one": 1, "two": 2, "three": 3}
+		"one": 1, "two": 2, "three": 3,
+	}
 
 	m2 := Pick(m, []string{"one"})
 	require.Equal(map[string]int{"one": 1}, m2)

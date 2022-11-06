@@ -21,12 +21,10 @@ const (
 	DefaultGasLimit = 200000
 )
 
-var (
-	// ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
-	// `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
-	// Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
-	ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
-)
+// ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
+// `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
+// Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
+var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 
 func init() {
 	// XXX: If other upstream or external application's depend on any of Umee's

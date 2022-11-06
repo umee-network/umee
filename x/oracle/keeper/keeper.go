@@ -127,7 +127,8 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
 	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
-		Denom: denom, Rate: exchangeRate})
+		Denom: denom, Rate: exchangeRate,
+	})
 }
 
 // IterateExchangeRates iterates over USD rates in the store.

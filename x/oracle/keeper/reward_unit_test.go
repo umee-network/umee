@@ -21,5 +21,4 @@ func TestPrependUmeeIfUnique(t *testing.T) {
 	for i, tc := range tcs {
 		require.Equal(tc.out, prependUmeeIfUnique(tc.in), i)
 	}
-
 }

@@ -1,5 +1,5 @@
 run:
-  tests: false
+  tests: true
   skip-dirs:
     - tests/e2e
     - tests/simulation
@@ -13,11 +13,6 @@ run:
 
 linters:
   enable:
-    # - dupl
-    # - nestif
-    # - rowserrcheck -- enable when it will support generics
-    # - whitespace
-    # - wsl
     - asciicheck
     - bodyclose
     - depguard
@@ -26,18 +21,16 @@ linters:
     - exportloopref
     - goconst
     - gocritic
-    - gofmt
-    - goimports
+    - gofumpt
     - gosec
     - gosimple
     - govet
     - grouper
     - ineffassign
-    - lll
+      #    - lll
     - misspell
     - nakedret
     - nolintlint
-    - prealloc
     - revive
     - staticcheck
     - stylecheck
