@@ -165,9 +165,10 @@ func init() {
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 	}
-	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
-	}
+
+	// append experimental modules
+	moduleBasics = append(moduleBasics, customModuleBasics()...)
+
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
 
 	maccPerms = map[string][]string{
@@ -184,8 +185,10 @@ func init() {
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:      nil,
 	}
-	if Experimental {
-		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
+
+	// append experimental module account perms
+	for k, v := range customMaccPerms() {
+		maccPerms[k] = v
 	}
 }
 
@@ -294,7 +297,7 @@ func New(
 			ibchost.StoreKey, ibctransfertypes.StoreKey,
 			gravitytypes.StoreKey,
 			leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
-		}, setCustomKVStoreKeys()...)...,
+		}, customKVStoreKeys()...)...,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -543,7 +546,7 @@ func New(
 		),
 	)
 
-	app.setCustomKeepers(bApp, keys, appCodec, govRouter, homePath, appOpts, wasmOpts)
+	app.customKeepers(bApp, keys, appCodec, govRouter, homePath, appOpts, wasmOpts)
 
 	/****  Module Options ****/
 
@@ -585,7 +588,7 @@ func New(
 			leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 			oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 			bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
-		}, app.setCustomModuleManager()...)...,
+		}, app.customModuleManager()...)...,
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -608,7 +611,7 @@ func New(
 			oracletypes.ModuleName,
 			gravitytypes.ModuleName,
 			bech32ibctypes.ModuleName,
-		}, setCustomOrderBeginBlocker()...)...,
+		}, customOrderBeginBlocker()...)...,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -626,7 +629,7 @@ func New(
 			leveragetypes.ModuleName,
 			gravitytypes.ModuleName,
 			bech32ibctypes.ModuleName,
-		}, setCustomOrderEndBlocker()...)...,
+		}, customOrderEndBlocker()...)...,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -648,7 +651,7 @@ func New(
 			leveragetypes.ModuleName,
 			gravitytypes.ModuleName,
 			bech32ibctypes.ModuleName,
-		}, setCustomOrderInitGenesis()...)...,
+		}, customOrderInitGenesis()...)...,
 	)
 
 	app.mm.SetOrderMigrations(
@@ -664,7 +667,7 @@ func New(
 			leveragetypes.ModuleName,
 			gravitytypes.ModuleName,
 			bech32ibctypes.ModuleName,
-		}, setCustomOrderMigrations()...)...,
+		}, customOrderMigrations()...)...,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -674,7 +677,7 @@ func New(
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// Make sure it's called after `app.mm` and `app.configurator` are set.
-	app.RegisterUpgradeHandlers(Experimental)
+	app.registerUpgradeHandlers()
 
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata.RegisterQueryServer(app.GRPCQueryRouter(), testdata.QueryImpl{})
@@ -733,7 +736,7 @@ func New(
 func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
 	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) {
 
-	anteHandler, err := app.setCustomAnteHandler(txConfig, wasmConfig, wasmStoreKey)
+	anteHandler, err := app.customAnteHandler(txConfig, wasmConfig, wasmStoreKey)
 	if err != nil {
 		panic(err)
 	}
@@ -950,5 +953,5 @@ func initParamsKeeper(
 }
 
 func getGovProposalHandlers() []govclient.ProposalHandler {
-	return setCustomProposalHanndlers()
+	return customProposalHanndlers()
 }

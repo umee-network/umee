@@ -5,7 +5,7 @@ go 1.19
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
 	cosmossdk.io/math v1.0.0-beta.3
-	github.com/CosmWasm/wasmd v0.29.0-pio-1
+	github.com/CosmWasm/wasmd v0.29.0
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
 	github.com/cosmos/cosmos-proto v1.0.0-alpha8
 	github.com/cosmos/cosmos-sdk v0.46.4
@@ -21,8 +21,8 @@ require (
 	github.com/mgechev/revive v1.2.4
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0
-	github.com/regen-network/cosmos-proto v0.3.1
 	github.com/prometheus/client_golang v1.13.0
+	github.com/regen-network/cosmos-proto v0.3.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.6.1
@@ -327,7 +327,7 @@ require (
 )
 
 replace (
-	github.com/CosmWasm/wasmd => github.com/provenance-io/wasmd v0.29.0-pio-1
+	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.4-umee

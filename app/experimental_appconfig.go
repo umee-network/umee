@@ -36,7 +36,7 @@ import (
 
 // Experimental is a flag which determines expermiental features.
 // It's set via build flag.
-const Experimental = false
+const Experimental = true
 
 var (
 	// WasmProposalsEnabled enables all x/wasm proposals when it's value is "true"
@@ -77,40 +77,31 @@ func GetWasmEnabledProposals() []wasm.ProposalType {
 	return proposals
 }
 
-func setCustomKVStoreKeys() []string {
-	return []string{wasm.StoreKey}
+func customModuleBasics() []module.AppModuleBasic {
+	return []module.AppModuleBasic{wasm.AppModuleBasic{}}
 }
 
-func (app *UmeeApp) setCustomModuleManager() []module.AppModule {
+func customMaccPerms() map[string][]string {
+	return map[string][]string{wasm.ModuleName: {authtypes.Burner}}
+}
+
+func customKVStoreKeys() []string { return []string{wasm.StoreKey} }
+
+func (app *UmeeApp) customModuleManager() []module.AppModule {
 	return []module.AppModule{
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 	}
 }
 
-func setCustomOrderInitGenesis() []string {
-	return []string{
-		// wasm after ibc transfer
-		wasm.ModuleName,
-	}
-}
+func customOrderInitGenesis() []string { return []string{wasm.ModuleName} }
 
-func setCustomOrderBeginBlocker() []string {
-	return []string{
-		wasm.ModuleName,
-	}
-}
+func customOrderBeginBlocker() []string { return []string{wasm.ModuleName} }
 
-func setCustomOrderEndBlocker() []string {
-	return []string{
-		wasm.ModuleName,
-	}
-}
+func customOrderEndBlocker() []string { return []string{wasm.ModuleName} }
 
-func setCustomOrderMigrations() []string {
-	return []string{wasm.ModuleName}
-}
+func customOrderMigrations() []string { return []string{wasm.ModuleName} }
 
-func setCustomProposalHanndlers() []govclient.ProposalHandler {
+func customProposalHanndlers() []govclient.ProposalHandler {
 	return append([]govclient.ProposalHandler{
 		paramsclient.ProposalHandler,
 		distrclient.ProposalHandler,
@@ -122,7 +113,7 @@ func setCustomProposalHanndlers() []govclient.ProposalHandler {
 	}, wasmclient.ProposalHandlers...)
 }
 
-func (app *UmeeApp) setCustomAnteHandler(txConfig client.TxConfig,
+func (app *UmeeApp) customAnteHandler(txConfig client.TxConfig,
 	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) (sdk.AnteHandler, error) {
 	return customante.NewAnteHandler(
 		customante.HandlerOptions{
@@ -160,7 +151,7 @@ func (app *UmeeApp) registerCustomProposals(
 	}
 }
 
-func (app *UmeeApp) setCustomKeepers(
+func (app *UmeeApp) customKeepers(
 	bApp *baseapp.BaseApp, keys map[string]*storetypes.KVStoreKey, appCodec codec.Codec,
 	govRouter govv1beta1.Router, homePath string, appOpts servertypes.AppOptions,
 	wasmOpts []wasm.Option,
@@ -204,3 +195,5 @@ func initCustomParamsKeeper(paramsKeeper *paramskeeper.Keeper) {
 func (app *UmeeApp) initializeCustomScopedKeepers() {
 	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
 }
+
+func (app *UmeeApp) registerUpgradeHandlers() { app.RegisterUpgradeHandlers(Experimental) }

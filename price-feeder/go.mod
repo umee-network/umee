@@ -39,7 +39,7 @@ require (
 	github.com/Antonboom/nilnil v0.1.1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
-	github.com/CosmWasm/wasmd v0.29.0-pio-1 // indirect
+	github.com/CosmWasm/wasmd v0.29.0 // indirect
 	github.com/CosmWasm/wasmvm v1.1.1 // indirect
 	github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24 // indirect
 	github.com/GaijinEntertainment/go-exhaustruct/v2 v2.3.0 // indirect
@@ -304,7 +304,7 @@ require (
 )
 
 replace (
-	github.com/CosmWasm/wasmd => github.com/provenance-io/wasmd v0.29.0-pio-1
+	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220831213229-254615a7be1d
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.4-umee
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1

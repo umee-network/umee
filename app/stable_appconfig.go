@@ -40,33 +40,25 @@ var (
 // GetWasmEnabledProposals parses the WasmProposalsEnabled and
 // EnableSpecificWasmProposals values to produce a list of enabled proposals to
 // pass into the application.
-func GetWasmEnabledProposals() []wasm.ProposalType {
-	return []wasm.ProposalType{}
-}
+func GetWasmEnabledProposals() []wasm.ProposalType { return []wasm.ProposalType{} }
 
-func setCustomKVStoreKeys() []string {
-	return []string{}
-}
+func customModuleBasics() []module.AppModuleBasic { return []module.AppModuleBasic{} }
 
-func setCustomOrderInitGenesis() []string {
-	return []string{}
-}
+func customMaccPerms() map[string][]string { return map[string][]string{} }
 
-func setCustomOrderBeginBlocker() []string {
-	return []string{}
-}
+func customKVStoreKeys() []string { return []string{} }
 
-func setCustomOrderEndBlocker() []string {
-	return []string{}
-}
+func customOrderInitGenesis() []string { return []string{} }
 
-func setCustomOrderMigrations() []string {
-	return []string{}
-}
+func customOrderBeginBlocker() []string { return []string{} }
+
+func customOrderEndBlocker() []string { return []string{} }
+
+func customOrderMigrations() []string { return []string{} }
 
 func initCustomParamsKeeper(_ *paramskeeper.Keeper) {}
 
-func setCustomProposalHanndlers() []govclient.ProposalHandler {
+func customProposalHanndlers() []govclient.ProposalHandler {
 	return []govclient.ProposalHandler{
 		paramsclient.ProposalHandler,
 		distrclient.ProposalHandler,
@@ -78,7 +70,7 @@ func setCustomProposalHanndlers() []govclient.ProposalHandler {
 	}
 }
 
-func (app *UmeeApp) setCustomAnteHandler(txConfig client.TxConfig,
+func (app *UmeeApp) customAnteHandler(txConfig client.TxConfig,
 	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) (sdk.AnteHandler, error) {
 	return customante.NewAnteHandler(
 		customante.HandlerOptions{
@@ -94,9 +86,7 @@ func (app *UmeeApp) setCustomAnteHandler(txConfig client.TxConfig,
 	)
 }
 
-func (app *UmeeApp) setCustomModuleManager() []module.AppModule {
-	return []module.AppModule{}
-}
+func (app *UmeeApp) customModuleManager() []module.AppModule { return []module.AppModule{} }
 
 func (app *UmeeApp) registerCustomExtensions() {}
 
@@ -106,7 +96,7 @@ func (app *UmeeApp) registerCustomProposals(
 ) {
 }
 
-func (app *UmeeApp) setCustomKeepers(
+func (app *UmeeApp) customKeepers(
 	_ *baseapp.BaseApp,
 	_ map[string]*storetypes.KVStoreKey,
 	_ codec.Codec, _ govv1beta1.Router, _ string,
@@ -115,3 +105,5 @@ func (app *UmeeApp) setCustomKeepers(
 }
 
 func (app *UmeeApp) initializeCustomScopedKeepers() {}
+
+func (app *UmeeApp) registerUpgradeHandlers() { app.RegisterUpgradeHandlers(Experimental) }
