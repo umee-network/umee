@@ -10,6 +10,15 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
+// these constants are used during testing.
+const (
+	volume        = "2396974.02000000"
+	lastPriceAtom = "34.69000000"
+	lastPrice     = "34.69000000"
+	lastPriceLuna = "41.35000000"
+	price         = "34.689998626708984000"
+)
+
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	p, err := NewBinanceProvider(
 		context.TODO(),
@@ -20,9 +29,6 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		lastPrice := "34.69000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]BinanceTicker{}
 		tickerMap["ATOMUSDT"] = BinanceTicker{
 			Symbol:    "ATOMUSDT",
@@ -40,10 +46,6 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
-		lastPriceAtom := "34.69000000"
-		lastPriceLuna := "41.35000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]BinanceTicker{}
 		tickerMap["ATOMUSDT"] = BinanceTicker{
 			Symbol:    "ATOMUSDT",

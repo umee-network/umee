@@ -93,7 +93,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_bad_response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, "/tokens/v2/all", req.URL.String())
-			_, _ = rw.Write([]byte(`FOO`)) //nolint:errcheck
+			_, _ = rw.Write([]byte(`FOO`))
 		}))
 		defer server.Close()
 
@@ -174,7 +174,7 @@ func TestOsmosisProvider_GetAvailablePairs(t *testing.T) {
 					}
 				]
 			}`
-			rw.Write([]byte(resp))
+			_, _ = rw.Write([]byte(resp))
 		}))
 		defer server.Close()
 

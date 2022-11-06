@@ -731,7 +731,7 @@ func (ots *OracleTestSuite) TestGetComputedPricesEmptyTvwap() {
 		pairDAItoUSD,
 	}
 
-	krakenPairs := append(krakenPairsETH, stablecoinPairs...)
+	krakenPairs := append(krakenPairsETH, stablecoinPairs...) //nolint:gocritic // we mean to append to a different slice
 
 	volume := sdk.MustNewDecFromStr("881272.00")
 	ethUsdPrice := sdk.MustNewDecFromStr("9989.02")
