@@ -12,20 +12,29 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/types"
 )
 
+const (
+	defaultReadNewWSMessage  = 50 * time.Millisecond
+	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
+	defaultReconnectTime     = 2 * time.Minute
+	defaultPingDuration      = 15 * time.Second
+)
+
 type (
 	MessageHandler func(int, []byte)
 
 	// WebsocketController defines a provider agnostic websocket handler
 	// that manages reconnecting, subscribing, and receiving messages
 	WebsocketController struct {
-		ctx              context.Context
-		providerName     Name
-		websocketURL     url.URL
-		subscriptionMsgs []interface{}
-		messageHandler   MessageHandler
-		pingDuration     time.Duration
-		pingMessageType  uint
-		logger           zerolog.Logger
+		parentCtx           context.Context
+		websocketCtx        context.Context
+		websocketCancelFunc context.CancelFunc
+		providerName        Name
+		websocketURL        url.URL
+		subscriptionMsgs    []interface{}
+		messageHandler      MessageHandler
+		pingDuration        time.Duration
+		pingMessageType     uint
+		logger              zerolog.Logger
 
 		mtx    sync.Mutex
 		client *websocket.Conn
@@ -45,7 +54,7 @@ func NewWebsocketController(
 	logger zerolog.Logger,
 ) *WebsocketController {
 	return &WebsocketController{
-		ctx:              ctx,
+		parentCtx:        ctx,
 		providerName:     providerName,
 		websocketURL:     websocketURL,
 		subscriptionMsgs: subscriptionMsgs,
@@ -68,15 +77,13 @@ func (wsc *WebsocketController) Start() {
 		if err := wsc.connect(); err != nil {
 			wsc.logger.Err(err).Send()
 			select {
-			case <-wsc.ctx.Done():
+			case <-wsc.parentCtx.Done():
 				return
 			case <-connectTicker.C:
 				continue
 			}
 		}
 
-		wsc.client.SetPingHandler((wsc.pingHandler))
-		wsc.client.SetPongHandler(wsc.pongHandler)
 		go wsc.readWebSocket()
 		go wsc.pingLoop()
 
@@ -114,6 +121,9 @@ func (wsc *WebsocketController) connect() error {
 		return fmt.Errorf(types.ErrWebsocketDial.Error(), wsc.providerName, err)
 	}
 	wsc.client = conn
+	wsc.websocketCtx, wsc.websocketCancelFunc = context.WithCancel(wsc.parentCtx)
+	wsc.client.SetPingHandler((wsc.pingHandler))
+	wsc.client.SetPongHandler(wsc.pongHandler)
 	return nil
 }
 
@@ -127,6 +137,18 @@ func (wsc *WebsocketController) subscribe() error {
 		if err := wsc.client.WriteJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
+	}
+	return nil
+}
+
+// SendJSON sends a json message to the websocket connection using the Websocket
+// Controller mutex to ensure multiple writes do not happen at once
+func (wsc *WebsocketController) SendJSON(msg interface{}) error {
+	wsc.mtx.Lock()
+	defer wsc.mtx.Unlock()
+
+	if err := wsc.client.WriteJSON(msg); err != nil {
+		return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 	}
 	return nil
 }
@@ -146,7 +168,7 @@ func (wsc *WebsocketController) pingLoop() {
 		}
 		wsc.logger.Debug().Msg("ping sent")
 		select {
-		case <-wsc.ctx.Done():
+		case <-wsc.websocketCtx.Done():
 			return
 		case <-pingTicker.C:
 			continue
@@ -181,7 +203,7 @@ func (wsc *WebsocketController) readWebSocket() {
 
 	for {
 		select {
-		case <-wsc.ctx.Done():
+		case <-wsc.websocketCtx.Done():
 			wsc.close()
 			return
 		case <-time.After(defaultReadNewWSMessage):
@@ -203,16 +225,18 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage || len(bz) == 0 {
 		return
 	}
+
+	// mexc and bitget do not send a valid pong response code so check for it here
+	if string(bz) == "pong" {
+		wsc.pongHandler(string(bz))
+		return
+	}
+
 	msg := string(bz)
 	if len(msg) > 128 {
 		msg = msg[:128]
 	}
 	wsc.logger.Debug().Str("msg", msg).Msg("received websocket message")
-	// handle some providers (mexc) not sending a valid pong response code
-	if string(bz) == "pong" {
-		wsc.client.PongHandler()
-		return
-	}
 	wsc.messageHandler(messageType, bz)
 }
 
@@ -222,6 +246,7 @@ func (wsc *WebsocketController) close() {
 	defer wsc.mtx.Unlock()
 
 	wsc.logger.Debug().Msg("closing websocket")
+	wsc.websocketCancelFunc()
 	if err := wsc.client.Close(); err != nil {
 		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketClose.Error(), wsc.providerName, err)).Send()
 	}

@@ -74,7 +74,13 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			provider:      provider.ProviderOkx,
 			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
 		},
+		{
+			provider:      provider.ProviderCrypto,
+			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
+		},
 	}
+
+	testCases = testCases[8:9]
 
 	for _, testCase := range testCases {
 		tc := testCase
