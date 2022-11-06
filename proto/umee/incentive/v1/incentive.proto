@@ -8,6 +8,8 @@ option go_package = "github.com/umee-network/umee/v3/x/incentive/types";
 
 // Params defines the parameters for the incentive module.
 message Params {
+  option (gogoproto.equal) = true;
+
   // max_unbondings defines the maximum amount of concurrent unbondings an address can have.
   uint32 max_unbondings = 1;
 

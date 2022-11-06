@@ -16,6 +16,7 @@ var (
 	_ sdk.Msg = &MsgBeginUnbonding{}
 	_ sdk.Msg = &MsgBond{}
 	_ sdk.Msg = &MsgSponsor{}
+	_ sdk.Msg = &MsgGovSetParams{}
 	_ sdk.Msg = &MsgGovCreateProgram{}
 	_ sdk.Msg = &MsgGovCreateAndSponsorProgram{}
 )
@@ -110,6 +111,36 @@ func (msg *MsgSponsor) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgGovSetParams(authority, title, description string, params Params) *MsgGovSetParams {
+	return &MsgGovSetParams{
+		Title:       title,
+		Description: description,
+		Params:      params,
+		Authority:   authority,
+	}
+}
+
+func (msg MsgGovSetParams) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+	if err := validateProposal(msg.Title, msg.Description); err != nil {
+		return err
+	}
+	return msg.Params.Validate()
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovSetParams) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovSetParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
 func NewMsgCreateProgram(authority, title, description string, program IncentiveProgram) *MsgGovCreateProgram {
 	return &MsgGovCreateProgram{
 		Title:       title,
@@ -123,7 +154,10 @@ func (msg MsgGovCreateProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
-	if err := validateIncentiveProposal(msg.Title, msg.Description, msg.Program); err != nil {
+	if err := validateProposal(msg.Title, msg.Description); err != nil {
+		return err
+	}
+	if err := validateProposedIncentiveProgram(msg.Program); err != nil {
 		return err
 	}
 	return nil
@@ -158,7 +192,10 @@ func (msg MsgGovCreateAndSponsorProgram) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Sponsor); err != nil {
 		return sdkerrors.Wrap(err, "invalid sponsor address")
 	}
-	if err := validateIncentiveProposal(msg.Title, msg.Description, msg.Program); err != nil {
+	if err := validateProposal(msg.Title, msg.Description); err != nil {
+		return err
+	}
+	if err := validateProposedIncentiveProgram(msg.Program); err != nil {
 		return err
 	}
 	return nil
@@ -175,7 +212,7 @@ func (msg MsgGovCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-func validateIncentiveProposal(title, description string, program IncentiveProgram) error {
+func validateProposal(title, description string) error {
 	if len(strings.TrimSpace(title)) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
 	}
@@ -183,7 +220,6 @@ func validateIncentiveProposal(title, description string, program IncentiveProgr
 		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
 			gov1b1.MaxTitleLength)
 	}
-
 	if len(description) == 0 {
 		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
 	}
@@ -191,7 +227,12 @@ func validateIncentiveProposal(title, description string, program IncentiveProgr
 		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
 			gov1b1.MaxDescriptionLength)
 	}
+	return nil
+}
 
+// validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
+// to incentive programs which have not yet been funded or passed by governance
+func validateProposedIncentiveProgram(program IncentiveProgram) error {
 	if program.Id != 0 {
 		return ErrInvalidProgramID.Wrapf("%d", program.Id)
 	}
@@ -201,10 +242,7 @@ func validateIncentiveProposal(title, description string, program IncentiveProgr
 	if !program.FundedRewards.IsZero() {
 		return ErrNonzeroFundedRewards.Wrap(program.FundedRewards.String())
 	}
-	if err := program.Validate(); err != nil {
-		return err
-	}
-	return nil
+	return program.Validate()
 }
 
 func validateSenderAsset(sender string, asset *sdk.Coin) error {
