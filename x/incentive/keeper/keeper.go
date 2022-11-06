@@ -38,8 +38,9 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // ModuleBalance returns the amount of a given token held in the x/incentive module account
-func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Int {
-	return k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
+func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
+	amount := k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(types.ModuleName)).AmountOf(denom)
+	return sdk.NewCoin(denom, amount)
 }
 
 // Claim claims any pending rewards belonging to an address.
