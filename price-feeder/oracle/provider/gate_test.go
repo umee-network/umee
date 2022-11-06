@@ -20,9 +20,6 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		lastPrice := "34.69000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]GateTicker{}
 		tickerMap["ATOM_USDT"] = GateTicker{
 			Symbol: "ATOM_USDT",
@@ -40,9 +37,7 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
-		lastPriceAtom := "34.69000000"
-		lastPriceUMEE := "41.35000000"
-		volume := "2396974.02000000"
+		lastPriceAtom := lastPriceAtom
 
 		tickerMap := map[string]GateTicker{}
 		tickerMap["ATOM_USDT"] = GateTicker{
@@ -53,7 +48,7 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 
 		tickerMap["UMEE_USDT"] = GateTicker{
 			Symbol: "UMEE_USDT",
-			Last:   lastPriceUMEE,
+			Last:   lastPriceUmee,
 			Vol:    volume,
 		}
 
@@ -66,7 +61,7 @@ func TestGateProvider_GetTickerPrices(t *testing.T) {
 		require.Len(t, prices, 2)
 		require.Equal(t, sdk.MustNewDecFromStr(lastPriceAtom), prices["ATOMUSDT"].Price)
 		require.Equal(t, sdk.MustNewDecFromStr(volume), prices["ATOMUSDT"].Volume)
-		require.Equal(t, sdk.MustNewDecFromStr(lastPriceUMEE), prices["UMEEUSDT"].Price)
+		require.Equal(t, sdk.MustNewDecFromStr(lastPriceUmee), prices["UMEEUSDT"].Price)
 		require.Equal(t, sdk.MustNewDecFromStr(volume), prices["UMEEUSDT"].Volume)
 	})
 

@@ -16,6 +16,7 @@ func TestOsmosisProvider_GetTickerPrices(t *testing.T) {
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, "/tokens/v2/all", req.URL.String())
+			//nolint:goconst
 			resp := `[
 				{
 					"price": 100.22,

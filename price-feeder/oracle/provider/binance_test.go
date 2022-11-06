@@ -17,6 +17,7 @@ const (
 	lastPrice     = "34.69000000"
 	lastPriceLuna = "41.35000000"
 	price         = "34.689998626708984000"
+	lastPriceUmee = "41.35000000"
 )
 
 func TestBinanceProvider_GetTickerPrices(t *testing.T) {

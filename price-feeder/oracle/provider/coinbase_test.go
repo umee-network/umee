@@ -20,9 +20,6 @@ func TestCoinbaseProvider_GetTickerPrices(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
-		lastPrice := "34.69000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]CoinbaseTicker{}
 		tickerMap["ATOM-USDT"] = CoinbaseTicker{
 			Price:  lastPrice,
@@ -39,10 +36,6 @@ func TestCoinbaseProvider_GetTickerPrices(t *testing.T) {
 	})
 
 	t.Run("valid_request_multi_ticker", func(t *testing.T) {
-		lastPriceAtom := "34.69000000"
-		lastPriceUmee := "41.35000000"
-		volume := "2396974.02000000"
-
 		tickerMap := map[string]CoinbaseTicker{}
 		tickerMap["ATOM-USDT"] = CoinbaseTicker{
 			Price:  lastPriceAtom,
