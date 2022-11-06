@@ -27,13 +27,13 @@ func (s msgServer) Claim(
 	return &types.MsgClaimResponse{}, types.ErrNotImplemented
 }
 
-func (s msgServer) Lock(
+func (s msgServer) Bond(
 	goCtx context.Context,
-	msg *types.MsgLock,
-) (*types.MsgLockResponse, error) {
+	msg *types.MsgBond,
+) (*types.MsgBondResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgLockResponse{}, types.ErrNotImplemented
+	return &types.MsgBondResponse{}, types.ErrNotImplemented
 }
 
 func (s msgServer) BeginUnbonding(
@@ -54,11 +54,29 @@ func (s msgServer) Sponsor(
 	return &types.MsgSponsorResponse{}, types.ErrNotImplemented
 }
 
-func (s msgServer) CreateProgram(
+func (s msgServer) GovSetParams(
 	goCtx context.Context,
-	msg *types.MsgCreateProgram,
-) (*types.MsgCreateProgramResponse, error) {
+	msg *types.MsgGovSetParams,
+) (*types.MsgGovSetParamsResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgCreateProgramResponse{}, types.ErrNotImplemented
+	return &types.MsgGovSetParamsResponse{}, types.ErrNotImplemented
+}
+
+func (s msgServer) GovCreateProgram(
+	goCtx context.Context,
+	msg *types.MsgGovCreateProgram,
+) (*types.MsgGovCreateProgramResponse, error) {
+	// TODO: Implement
+
+	return &types.MsgGovCreateProgramResponse{}, types.ErrNotImplemented
+}
+
+func (s msgServer) GovCreateAndSponsorProgram(
+	goCtx context.Context,
+	msg *types.MsgGovCreateAndSponsorProgram,
+) (*types.MsgGovCreateAndSponsorProgramResponse, error) {
+	// TODO: Implement
+
+	return &types.MsgGovCreateAndSponsorProgramResponse{}, types.ErrNotImplemented
 }
