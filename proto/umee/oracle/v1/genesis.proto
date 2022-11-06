@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "umee/oracle/v1/oracle.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/oracle/types";
@@ -22,6 +23,8 @@ message GenesisState {
       [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin medians         = 7 [(gogoproto.nullable) = false];
+  repeated HistoricPrice               historic_prices = 8 [(gogoproto.nullable) = false];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

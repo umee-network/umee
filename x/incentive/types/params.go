@@ -4,22 +4,9 @@ import (
 	fmt "fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"gopkg.in/yaml.v3"
 )
 
 const blocksPerDay = 86400 / 5
-
-var _ paramtypes.ParamSet = &Params{}
-
-var (
-	KeyMaxUnbondings           = []byte("MaxUnbondings")
-	KeyUnbondingDurationLong   = []byte("KeyUnbondingDurationLong")
-	KeyUnbondingDurationMiddle = []byte("KeyUnbondingDurationMiddle")
-	KeyUnbondingDurationShort  = []byte("KeyUnbondingDurationShort")
-	KeyTierWeightMiddle        = []byte("KeyTierWeightMiddle")
-	KeyTierWeightShort         = []byte("KeyTierWeightShort")
-)
 
 var (
 	defaultMaxUnbondings           = uint32(20)
@@ -29,59 +16,6 @@ var (
 	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
 	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
 )
-
-func NewParams() Params {
-	return Params{}
-}
-
-// ParamSetPairs implements the ParamSet interface and returns all the key/value
-// pairs pairs of x/incentive module's parameters.
-func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
-	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(
-			KeyMaxUnbondings,
-			&p.MaxUnbondings,
-			validateMaxUnbondings,
-		),
-		paramtypes.NewParamSetPair(
-			KeyUnbondingDurationLong,
-			&p.UnbondingDurationLong,
-			validateLockDuration,
-		),
-		paramtypes.NewParamSetPair(
-			KeyUnbondingDurationMiddle,
-			&p.UnbondingDurationMiddle,
-			validateLockDuration,
-		),
-		paramtypes.NewParamSetPair(
-			KeyUnbondingDurationShort,
-			&p.UnbondingDurationShort,
-			validateLockDuration,
-		),
-		paramtypes.NewParamSetPair(
-			KeyTierWeightMiddle,
-			&p.TierWeightMiddle,
-			validateTierWeight,
-		),
-		paramtypes.NewParamSetPair(
-			KeyTierWeightShort,
-			&p.TierWeightShort,
-			validateTierWeight,
-		),
-	}
-}
-
-// String implements the Stringer interface.
-func (p Params) String() string {
-	out, _ := yaml.Marshal(p)
-	return string(out)
-}
-
-// ParamKeyTable returns the x/leverage module's parameter KeyTable expected by
-// the x/params module.
-func ParamKeyTable() paramtypes.KeyTable {
-	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
-}
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {

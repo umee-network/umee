@@ -11,12 +11,12 @@ import (
 // Validate performs validation on an IncentiveProgram type returning an error
 // if the program is invalid.
 func (ip IncentiveProgram) Validate() error {
-	if err := sdk.ValidateDenom(ip.LockDenom); err != nil {
+	if err := sdk.ValidateDenom(ip.Denom); err != nil {
 		return err
 	}
-	if !strings.HasPrefix(ip.LockDenom, leveragetypes.UTokenPrefix) {
-		// only allow base asset denoms that start with "u/"
-		return sdkerrors.Wrap(ErrNotUToken, ip.LockDenom)
+	if !strings.HasPrefix(ip.Denom, leveragetypes.UTokenPrefix) {
+		// only allow uToken denoms
+		return sdkerrors.Wrap(ErrNotUToken, ip.Denom)
 	}
 
 	// TODO: Finish validate logic
