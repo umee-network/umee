@@ -48,6 +48,9 @@ issues:
     - linters:
         - lll
       source: "https://"
+    - text: "leading space"
+      linters:
+        - nolintlint
   max-same-issues: 50
 
 linters-settings:

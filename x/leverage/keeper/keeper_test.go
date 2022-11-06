@@ -26,7 +26,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 	s.supply(borrower, coin(atomDenom, 100_000000))
 	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
 	s.borrow(borrower, coin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 60_000000))
+	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 60_000000)) //nolint:errcheck
 
 	// create a supplier that will exceed token's default MaxSupply
 	whale := s.newAccount(coin(umeeDenom, 1_000_000_000000))
@@ -158,7 +158,7 @@ func (s *IntegrationTestSuite) TestWithdraw() {
 	s.supply(borrower, coin(atomDenom, 100_000000))
 	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
 	s.borrow(borrower, coin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 40_000000))
+	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 40_000000)) //nolint:errcheck
 
 	// create an additional UMEE supplier
 	other := s.newAccount(coin(umeeDenom, 100_000000))

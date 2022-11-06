@@ -107,6 +107,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	suite.checkFeeAnte(oracleTx, sdk.Coins{}, suite.ctx.WithIsCheckTx(false))
 }
 
+//nolint:unused
 func (suite *IntegrationTestSuite) checkFeeFailed(tx sdk.Tx, ctx sdk.Context) {
 	_, _, err := ante.FeeAndPriority(ctx, tx)
 	suite.Require().ErrorIs(err, sdkerrors.ErrInsufficientFee)

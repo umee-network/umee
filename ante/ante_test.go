@@ -45,7 +45,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 }
 
 // CreateTestTx is a helper function to create a tx given multiple inputs.
-func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums, accSeqs []uint64, chainID string) (xauthsigning.Tx, error) { //nolint:statticcheck
+func (suite *IntegrationTestSuite) CreateTestTx(privs []cryptotypes.PrivKey, accNums, accSeqs []uint64, chainID string) (xauthsigning.Tx, error) { //nolint:stylecheck
 	var sigsV2 []signing.SignatureV2
 	for i, priv := range privs {
 		sigV2 := signing.SignatureV2{

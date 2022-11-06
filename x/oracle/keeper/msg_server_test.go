@@ -8,7 +8,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/umee-network/umee/v3/x/oracle/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -35,22 +34,22 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRatePrevote() {
 	s.Require().NoError(err)
 	hash := oracletypes.GetAggregateVoteHash(salt, exchangeRatesStr, valAddr)
 
-	invalidHash := &types.MsgAggregateExchangeRatePrevote{
+	invalidHash := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      "invalid_hash",
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
-	invalidFeeder := &types.MsgAggregateExchangeRatePrevote{
+	invalidFeeder := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    "invalid_feeder",
 		Validator: valAddr.String(),
 	}
-	invalidValidator := &types.MsgAggregateExchangeRatePrevote{
+	invalidValidator := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: "invalid_val",
 	}
-	validMsg := &types.MsgAggregateExchangeRatePrevote{
+	validMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
@@ -76,18 +75,18 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	hash := oracletypes.GetAggregateVoteHash(salt, ratesStr, valAddr)
 	hashInvalidRate := oracletypes.GetAggregateVoteHash(salt, ratesStrInvalidCoin, valAddr)
 
-	prevoteMsg := &types.MsgAggregateExchangeRatePrevote{
+	prevoteMsg := &oracletypes.MsgAggregateExchangeRatePrevote{
 		Hash:      hash.String(),
 		Feeder:    addr.String(),
 		Validator: valAddr.String(),
 	}
-	voteMsg := &types.MsgAggregateExchangeRateVote{
+	voteMsg := &oracletypes.MsgAggregateExchangeRateVote{
 		Feeder:        addr.String(),
 		Validator:     valAddr.String(),
 		Salt:          salt,
 		ExchangeRates: ratesStr,
 	}
-	voteMsgInvalidRate := &types.MsgAggregateExchangeRateVote{
+	voteMsgInvalidRate := &oracletypes.MsgAggregateExchangeRateVote{
 		Feeder:        addr.String(),
 		Validator:     valAddr.String(),
 		Salt:          salt,
@@ -103,18 +102,18 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 
 	// No existing prevote
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
-	s.Require().EqualError(err, sdkerrors.Wrap(types.ErrNoAggregatePrevote, valAddr.String()).Error())
+	s.Require().EqualError(err, sdkerrors.Wrap(oracletypes.ErrNoAggregatePrevote, valAddr.String()).Error())
 	_, err = s.msgServer.AggregateExchangeRatePrevote(sdk.WrapSDKContext(ctx), prevoteMsg)
 	s.Require().NoError(err)
 	// Reveal period mismatch
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
-	s.Require().EqualError(err, types.ErrRevealPeriodMissMatch.Error())
+	s.Require().EqualError(err, oracletypes.ErrRevealPeriodMissMatch.Error())
 
 	// Valid
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(
 		ctx,
 		valAddr,
-		types.NewAggregateExchangeRatePrevote(
+		oracletypes.NewAggregateExchangeRatePrevote(
 			hash, valAddr, 1,
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsg)
@@ -129,7 +128,7 @@ func (s *IntegrationTestSuite) TestMsgServer_AggregateExchangeRateVote() {
 	s.app.OracleKeeper.SetAggregateExchangeRatePrevote(
 		ctx,
 		valAddr,
-		types.NewAggregateExchangeRatePrevote(
+		oracletypes.NewAggregateExchangeRatePrevote(
 			hashInvalidRate, valAddr, 1,
 		))
 	_, err = s.msgServer.AggregateExchangeRateVote(sdk.WrapSDKContext(ctx), voteMsgInvalidRate)
@@ -148,7 +147,7 @@ func (s *IntegrationTestSuite) TestMsgServer_DelegateFeedConsent() {
 	feederAcc := app.AccountKeeper.NewAccountWithAddress(ctx, feederAddr)
 	app.AccountKeeper.SetAccount(ctx, feederAcc)
 
-	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), &types.MsgDelegateFeedConsent{
+	_, err := s.msgServer.DelegateFeedConsent(sdk.WrapSDKContext(ctx), &oracletypes.MsgDelegateFeedConsent{
 		Operator: valAddr.String(),
 		Delegate: feederAddr.String(),
 	})
