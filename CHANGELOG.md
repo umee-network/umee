@@ -48,6 +48,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
 
+### State Machine Breaking
+
+- [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
+
 ### Features
 
 - [1513](https://github.com/umee-network/umee/pull/1513) New query service exposing chain information via new RPC route. See [cosmos-sdk/11582](https://github.com/cosmos/cosmos-sdk/issues/11582).

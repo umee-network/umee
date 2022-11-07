@@ -6,21 +6,20 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v3.1.0
+## v3.2.0
 
 This is a state machine breaking release. Coordinated update is required.
 
-Updates:
+Highlights:
 
-- New `leverage/MsgSupplyCollateral` message which combines functionality of both supply and collaterization.
-- New chain `/cosmos/base/node/v1beta1/config` query gRPC endpoint was integrated providing chain information such us `bond_denom`, `gas_prices`... See [cosmos-sdk/11582](https://github.com/cosmos/cosmos-sdk/issues/11582) for more details.
+- .
 
 Please see the [CHANGELOG](https://github.com/umee-network/umee/blob/v3.1.0/CHANGELOG.md) for an exhaustive list of changes.
 
 ### Gravity Bridge
 
-This is the second step for enabling Gravity Bridge.
-We enable all messages. Peggo was updated to handle the bridge pause.
+This is the final step for enabling Gravity Bridge. We enable slashing.
+Validators must run Peggo and must process claims to not be slashed.
 
 ### Update instructions
 
@@ -29,5 +28,3 @@ We enable all messages. Peggo was updated to handle the bridge pause.
 - Run latest Price Feeder (v1.0.0)
 - Swap binaries.
 - Restart the chain.
-
-Validators are required to run Peggo in order to sync the Gravity Bridge messages.
