@@ -38,6 +38,10 @@ func getLogger() zerolog.Logger {
 
 func (s *IntegrationTestSuite) TestWebsocketProviders() {
 
+	if testing.Short() {
+		s.T().Skip("skipping integration test in short mode")
+	}
+
 	testCases := []struct {
 		provider      provider.Name
 		currencyPairs []types.CurrencyPair

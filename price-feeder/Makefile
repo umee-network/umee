@@ -45,7 +45,7 @@ install: go.sum
 
 test-unit:
 	@echo "--> Running tests"
-	@go test -mod=readonly -race ./... -v
+	@go test -short -mod=readonly -race ./... -v
 
 .PHONY: test-unit
 
