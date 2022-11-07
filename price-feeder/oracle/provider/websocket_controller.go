@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/url"
 	"sync"
 	"time"
@@ -13,10 +14,11 @@ import (
 )
 
 const (
-	defaultReadNewWSMessage  = 50 * time.Millisecond
-	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
-	defaultReconnectTime     = 2 * time.Minute
-	defaultPingDuration      = 15 * time.Second
+	defaultReadNewWSMessage   = 50 * time.Millisecond
+	defaultMaxConnectionTime  = time.Hour * 23 // should be < 24h
+	defaultPingDuration       = 15 * time.Second
+	startingReconnectDuration = 5 * time.Second
+	maxRetryMultiplier        = 25 // max retry duration: 52m5s
 )
 
 type (
@@ -36,8 +38,9 @@ type (
 		pingMessageType     uint
 		logger              zerolog.Logger
 
-		mtx    sync.Mutex
-		client *websocket.Conn
+		mtx              sync.Mutex
+		client           *websocket.Conn
+		reconnectCounter uint
 	}
 )
 
@@ -70,7 +73,7 @@ func NewWebsocketController(
 // service and read listener in new go routines and sends subscription
 // messages  using the passed in subscription messages
 func (wsc *WebsocketController) Start() {
-	connectTicker := time.NewTicker(defaultReconnectTime)
+	connectTicker := time.NewTicker(time.Millisecond)
 	defer connectTicker.Stop()
 
 	for {
@@ -80,6 +83,7 @@ func (wsc *WebsocketController) Start() {
 			case <-wsc.parentCtx.Done():
 				return
 			case <-connectTicker.C:
+				connectTicker.Reset(wsc.iterateRetryCounter())
 				continue
 			}
 		}
@@ -111,7 +115,16 @@ func (wsc *WebsocketController) connect() error {
 	wsc.websocketCtx, wsc.websocketCancelFunc = context.WithCancel(wsc.parentCtx)
 	wsc.client.SetPingHandler((wsc.pingHandler))
 	wsc.client.SetPongHandler(wsc.pongHandler)
+	wsc.reconnectCounter = 0
 	return nil
+}
+
+func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
+	if wsc.reconnectCounter < 25 {
+		wsc.reconnectCounter++
+	}
+	multiplier := math.Pow(float64(wsc.reconnectCounter), 2)
+	return startingReconnectDuration * time.Duration(multiplier)
 }
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket

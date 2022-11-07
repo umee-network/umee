@@ -88,8 +88,6 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 		},
 	}
 
-	//testCases = testCases[9:10]
-
 	for _, testCase := range testCases {
 		tc := testCase
 		s.T().Run(string(tc.provider), func(t *testing.T) {
