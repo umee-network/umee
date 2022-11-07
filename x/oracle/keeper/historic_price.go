@@ -60,7 +60,7 @@ func (k Keeper) setMedian(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	historicPrices := k.GetStampPeriodHistoricPrices(ctx, denom)
+	historicPrices := k.GetHistoricPrices(ctx, denom)
 
 	median := median(historicPrices)
 
@@ -94,63 +94,46 @@ func (k Keeper) GetHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 ) []types.HistoricPrice {
-	store := ctx.KVStore(k.storeKey)
 	denom = strings.ToUpper(denom)
 	historicPrices := []types.HistoricPrice{}
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		bz := store.Get(iter.Key())
-		historicPrice := types.HistoricPrice{}
-		k.cdc.MustUnmarshal(bz, &historicPrice)
+	k.IterateHistoricPrices(ctx, denom, func(exchangeRate sdk.Dec, blockNum uint64) bool {
+		historicPrices = append(historicPrices, types.HistoricPrice{
+			ExchangeRates: types.ExchangeRateTuple{
+				Denom:        denom,
+				ExchangeRate: exchangeRate,
+			},
+			BlockNum: blockNum,
+		})
 
-		if historicPrice.ExchangeRates.Denom == denom {
-			historicPrices = append(historicPrices, historicPrice)
-		}
-	}
+		return false
+	})
 
 	return historicPrices
 }
 
-// GetStampPeriodHistoricPrices returns all the historic prices of a
-// given denom in the last stamp period.
-func (k Keeper) GetStampPeriodHistoricPrices(
+// IterateHistoricPrices iterates over historic prices of a given
+// denom in the store.
+func (k Keeper) IterateHistoricPrices(
 	ctx sdk.Context,
 	denom string,
-) []types.HistoricPrice {
+	handler func(sdk.Dec, uint64) bool,
+) {
 	store := ctx.KVStore(k.storeKey)
-	denom = strings.ToUpper(denom)
-	historicPrices := []types.HistoricPrice{}
 
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
 	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		bz := store.Get(iter.Key())
-		historicPrice := types.HistoricPrice{}
-		k.cdc.MustUnmarshal(bz, &historicPrice)
 
-		historicPriceAge := uint64(ctx.BlockHeight()) - historicPrice.BlockNum
-		if historicPrice.ExchangeRates.Denom == denom && historicPriceAge <= k.StampPeriod(ctx) {
-			historicPrices = append(historicPrices, historicPrice)
+	for ; iter.Valid(); iter.Next() {
+		key := iter.Key()
+		historicPriceDenom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-9])
+		if historicPriceDenom != denom {
+			continue
 		}
-	}
-
-	return historicPrices
-}
-
-// IterateHistoricPrices iterates over historic prices in the store.
-func (k Keeper) IterateHistoricPrices(ctx sdk.Context, handler func(types.ExchangeRateTuple, uint64) bool) {
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
 		historicPrice := types.HistoricPrice{}
 
 		k.cdc.MustUnmarshal(iter.Value(), &historicPrice)
-		if handler(historicPrice.ExchangeRates, historicPrice.BlockNum) {
+		if handler(historicPrice.ExchangeRates.ExchangeRate, historicPrice.BlockNum) {
 			break
 		}
 	}
@@ -162,9 +145,9 @@ func (k Keeper) IterateHistoricPrices(ctx sdk.Context, handler func(types.Exchan
 func (k Keeper) AddHistoricPrice(
 	ctx sdk.Context,
 	denom string,
+	exchangeRate sdk.Dec,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	exchangeRate, _ := k.GetExchangeRate(ctx, denom)
 	exchangeRateTuple := types.ExchangeRateTuple{
 		Denom:        denom,
 		ExchangeRate: exchangeRate,

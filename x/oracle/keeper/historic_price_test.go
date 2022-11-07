@@ -16,7 +16,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
 
-	app.OracleKeeper.AddHistoricPrice(ctx, displayDenom)
+	app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, rate)
 	historicPrice, err := app.OracleKeeper.GetHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()))
 	s.Require().NoError(err)
 	s.Require().Equal(historicPrice, types.HistoricPrice{
@@ -40,7 +40,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		s.Require().NoError(err)
 		s.Require().Equal(rate, newRate)
 
-		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom)
+		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, rate)
 		historicPrice, err = app.OracleKeeper.GetHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()))
 		s.Require().NoError(err)
 		s.Require().Equal(historicPrice, types.HistoricPrice{
@@ -62,18 +62,22 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().NoError(err)
 	s.Require().Equal(median, sdk.MustNewDecFromStr("1.15"))
 
-	// delete first historic price
+	// delete first historic price and check median was updated
 	app.OracleKeeper.DeleteHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
 	s.Require().NoError(err)
+
+	median, err = app.OracleKeeper.GetMedian(ctx, displayDenom)
+	s.Require().NoError(err)
+	s.Require().Equal(median, sdk.MustNewDecFromStr("1.2"))
 
 	historicPrices = app.OracleKeeper.GetHistoricPrices(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(len(historicPrices), 3)
 
+	// check historic prices and medians get cleared
 	app.OracleKeeper.ClearHistoricPrices(ctx)
 	s.Require().NoError(err)
 
-	// check historic prices and medians get cleared
 	historicPrices = app.OracleKeeper.GetHistoricPrices(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(len(historicPrices), 0)
