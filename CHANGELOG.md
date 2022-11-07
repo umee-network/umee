@@ -61,6 +61,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1471](https://github.com/umee-network/umee/pull/1471) Fix slash window progress query.
 - [1501](https://github.com/umee-network/umee/pull/1501) Cosmos SDK patch release.
+- [1550](https://github.com/umee-network/umee/pull/1550) Use a newer golangci-lint, find lints masked by diff-only ci linting. 
 
 ## [v3.0.3](https://github.com/umee-network/umee/releases/tag/v3.0.3) - 2022-10-21
 
