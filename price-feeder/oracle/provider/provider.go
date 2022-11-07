@@ -40,9 +40,6 @@ type (
 
 		// GetAvailablePairs return all available pairs symbol to susbscribe.
 		GetAvailablePairs() (map[string]struct{}, error)
-
-		// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
-		SubscribeCurrencyPairs(...types.CurrencyPair) error
 	}
 
 	// Name name of an oracle provider. Usually it is an exchange

@@ -239,11 +239,6 @@ func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[str
 	return candles, nil
 }
 
-// SubscribeCurrencyPairs subscribes to websockets for all currency pairs.
-func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	return nil // handled by the websocket controller
-}
-
 // GetAvailablePairs returns all pairs to which the provider can subscribe.
 func (p *CoinbaseProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(p.endpoints.Rest + coinbaseRestPath)

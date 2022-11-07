@@ -178,11 +178,6 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
-func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	return nil // handled by the websocket controller
-}
-
 func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()

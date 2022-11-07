@@ -178,12 +178,6 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candleList, nil
 }
 
-// SubscribeCurrencyPairs performs a no-op since the osmosis-api does not
-// have specific currency channels.
-func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
-}
-
 func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 	// check if message is an ack first
 	if string(bz) == "ack" {

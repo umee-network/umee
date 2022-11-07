@@ -198,12 +198,6 @@ func (p *BitgetProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into
-// ticker and candle channels.
-func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	return nil // handled by the websocket controller
-}
-
 // messageReceived handles the received data from the Bitget websocket.
 func (p *BitgetProvider) messageReceived(messageType int, bz []byte) {
 	var (

@@ -185,11 +185,6 @@ func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
-func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	return nil // handled by the websocket controller
-}
-
 // messageReceived handles the received data from the Huobi websocket. All return
 // data of websocket Market APIs are compressed with GZIP so they need to be
 // decompressed.

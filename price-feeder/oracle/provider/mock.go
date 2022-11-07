@@ -114,11 +114,6 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 	return candles, nil
 }
 
-// SubscribeCurrencyPairs performs a no-op since mock does not use websockets
-func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
-}
-
 // GetAvailablePairs return all available pairs symbol to susbscribe.
 func (p MockProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	resp, err := http.Get(p.baseURL)

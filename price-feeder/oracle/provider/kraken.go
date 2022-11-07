@@ -186,11 +186,6 @@ func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 	return candlePrices, nil
 }
 
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
-func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	return nil // handled by the websocket controller
-}
-
 func (candle KrakenCandle) toCandlePrice() (types.CandlePrice, error) {
 	return types.NewCandlePrice(
 		string(ProviderKraken),

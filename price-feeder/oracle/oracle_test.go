@@ -39,10 +39,6 @@ func (m mockProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]typ
 	return candles, nil
 }
 
-func (m mockProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
-	return nil
-}
-
 func (m mockProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	return map[string]struct{}{}, nil
 }
@@ -57,10 +53,6 @@ func (m failingProvider) GetTickerPrices(_ ...types.CurrencyPair) (map[string]ty
 
 func (m failingProvider) GetCandlePrices(_ ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	return nil, fmt.Errorf("unable to get candle prices")
-}
-
-func (m failingProvider) SubscribeCurrencyPairs(_ ...types.CurrencyPair) error {
-	return nil
 }
 
 func (m failingProvider) GetAvailablePairs() (map[string]struct{}, error) {

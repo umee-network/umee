@@ -217,8 +217,3 @@ func (p OsmosisProvider) GetAvailablePairs() (map[string]struct{}, error) {
 
 	return availablePairs, nil
 }
-
-// SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
-func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
-}
