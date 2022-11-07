@@ -12,7 +12,7 @@ This is a state machine breaking release. Coordinated update is required.
 
 Highlights:
 
-- .
+- [placeholder]
 
 Please see the [CHANGELOG](https://github.com/umee-network/umee/blob/v3.1.0/CHANGELOG.md) for an exhaustive list of changes.
 
