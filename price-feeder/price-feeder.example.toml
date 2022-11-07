@@ -1,5 +1,5 @@
 gas_adjustment = 1
-gas_price = "0.0001uume"
+gas_price = "0uumee"
 
 [server]
 listen_addr = "0.0.0.0:7171"
