@@ -78,9 +78,13 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			provider:      provider.ProviderHuobi,
 			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
 		},
+		{
+			provider:      provider.ProviderCrypto,
+			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USD"}},
+		},
 	}
 
-	//testCases = testCases[8:9]
+	//testCases = testCases[9:10]
 
 	for _, testCase := range testCases {
 		tc := testCase

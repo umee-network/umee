@@ -37,8 +37,7 @@ type (
 	//
 	// REF: https://exchange-docs.crypto.com/spot/index.html#introduction
 	CryptoProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -122,33 +121,50 @@ func NewCryptoProvider(
 		Path:   cryptoWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderCrypto,
-			err,
-		)
-	}
-	defer resp.Body.Close()
+	cryptoLogger := logger.With().Str("provider", "crypto").Logger()
 
 	provider := &CryptoProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", "crypto").Logger(),
+		logger:          cryptoLogger,
 		endpoints:       endpoints,
 		tickers:         map[string]types.TickerPrice{},
 		candles:         map[string][]types.CandlePrice{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleWebSocketMsgs(ctx)
+	provider.wsc = NewWebsocketController(
+		ctx,
+		ProviderCrypto,
+		wsURL,
+		provider.getSubscriptionMsgs(),
+		provider.messageReceived,
+		time.Duration(0),
+		websocket.PingMessage,
+		cryptoLogger,
+	)
+	go provider.wsc.Start()
 
 	return provider, nil
+}
+
+func (p *CryptoProvider) getSubscriptionMsgs() []interface{} {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
+	for _, cp := range p.subscribedPairs {
+		cryptoPair := currencyPairToCryptoPair(cp)
+		channel := cryptoTickerMsgPrefix + cryptoPair
+		msg := newCryptoSubscriptionMsg([]string{channel})
+		subscriptionMsgs = append(subscriptionMsgs, msg)
+
+		cryptoPair = currencyPairToCryptoPair(cp)
+		channel = cryptoCandleMsgPrefix + cryptoPair
+		msg = newCryptoSubscriptionMsg([]string{channel})
+		subscriptionMsgs = append(subscriptionMsgs, msg)
+	}
+	return subscriptionMsgs
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -185,70 +201,7 @@ func (p *CryptoProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 
 // SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
 func (p *CryptoProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderCrypto, len(cps))
-	return nil
-}
-
-// subscribeChannels subscribe all currency pairs into ticker and candle channels.
-func (p *CryptoProvider) subscribeChannels(cps ...types.CurrencyPair) error {
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-
-	return p.subscribeCandles(cps...)
-}
-
-// subscribeTickers subscribe all currency pairs into ticker channel.
-func (p *CryptoProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToCryptoPair(cp)
-	}
-
-	channels := []string{}
-	for _, pair := range pairs {
-		channels = append(channels, cryptoTickerMsgPrefix+pair)
-	}
-	subsMsg := newCryptoSubscriptionMsg(channels)
-	err := p.wsClient.WriteJSON(subsMsg)
-
-	return err
-}
-
-// subscribeCandles subscribe all currency pairs into candle channel.
-func (p *CryptoProvider) subscribeCandles(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToCryptoPair(cp)
-	}
-
-	channels := []string{}
-	for _, pair := range pairs {
-		channels = append(channels, cryptoCandleMsgPrefix+pair)
-	}
-	subsMsg := newCryptoSubscriptionMsg(channels)
-	err := p.wsClient.WriteJSON(subsMsg)
-
-	return err
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *CryptoProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
+	return nil // handled by the websocket controller
 }
 
 func (p *CryptoProvider) getTickerPrice(key string) (types.TickerPrice, error) {
@@ -286,7 +239,7 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 	return candleList, nil
 }
 
-func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTicker *time.Ticker) {
+func (p *CryptoProvider) messageReceived(messageType int, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
@@ -303,7 +256,7 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 	// sometimes the message received is not a ticker or a candle response.
 	heartbeatErr = json.Unmarshal(bz, &heartbeatResp)
 	if heartbeatResp.Method == cryptoHeartbeatMethod {
-		p.pong(heartbeatResp, reconnectTicker)
+		p.pong(heartbeatResp)
 		return
 	}
 
@@ -345,22 +298,15 @@ func (p *CryptoProvider) messageReceived(messageType int, bz []byte, reconnectTi
 // When client receives an heartbeat message, it must respond back with the
 // public/respond-heartbeat method, using the same matching id,
 // within 5 seconds, or the connection will break.
-func (p *CryptoProvider) pong(heartbeatResp CryptoHeartbeatResponse, reconnectTicker *time.Ticker) {
-	reconnectTicker.Reset(cryptoReconnectTime)
-
+func (p *CryptoProvider) pong(heartbeatResp CryptoHeartbeatResponse) {
 	heartbeatReq := CryptoHeartbeatRequest{
 		ID:     heartbeatResp.ID,
 		Method: cryptoHeartbeatReqMethod,
 	}
 
-	if err := p.wsClient.WriteJSON(heartbeatReq); err != nil {
+	if err := p.wsc.SendJSON(heartbeatReq); err != nil {
 		p.logger.Err(err).Msg("could not send pong message back")
 	}
-}
-
-// ping to check websocket connection
-func (p *CryptoProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
 }
 
 func (p *CryptoProvider) setTickerPair(symbol string, tickerPair CryptoTicker) {
@@ -408,70 +354,6 @@ func (p *CryptoProvider) setCandlePair(symbol string, candlePair CryptoCandle) {
 	}
 
 	p.candles[symbol] = candleList
-}
-
-func (p *CryptoProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(cryptoReconnectTime)
-	defer reconnectTicker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// If some error occurs, check if connection is alive
-				// and continue to try to read the next message.
-				p.logger.Err(err).Msg("failed to read message")
-				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("failed to send ping")
-					if err := p.reconnect(); err != nil {
-						p.logger.Err(err).Msg("error reconnecting websocket")
-					}
-				}
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz, reconnectTicker)
-
-		case <-reconnectTicker.C:
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
-// reconnect closes the last WS connection then create a new one and subscribes to
-// all subscribed pairs in the ticker and candle pairs. If no ping is received
-// within 1 minute, the connection will be disconnected. It is recommended to
-// send a ping for 10-20 seconds
-func (p *CryptoProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		p.logger.Err(err).Msg("error closing crypto websocket")
-	}
-
-	p.logger.Debug().Msg("crypto: reconnecting websocket")
-
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderCrypto,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-	telemetryWebsocketReconnect(ProviderCrypto)
-
-	return p.subscribeChannels(p.subscribedPairsToSlice()...)
 }
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.

@@ -96,19 +96,6 @@ func (wsc *WebsocketController) Start() {
 	}
 }
 
-func (wsc *WebsocketController) pongHandler(appData string) error {
-	wsc.logger.Debug().Str("msg", appData).Msg("pong received")
-	return nil
-}
-
-func (wsc *WebsocketController) pingHandler(appData string) error {
-	wsc.logger.Debug().Str("msg", appData).Msg("ping received")
-	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
-		wsc.logger.Error().Err(err).Msg("error sending pong")
-	}
-	return nil
-}
-
 // connect dials the websocket and sets the client to the established connection
 func (wsc *WebsocketController) connect() error {
 	wsc.mtx.Lock()
@@ -130,7 +117,6 @@ func (wsc *WebsocketController) connect() error {
 // subscribe sends the WebsocketControllers subscription messages to the websocket
 func (wsc *WebsocketController) subscribe() error {
 	for _, jsonMessage := range wsc.subscriptionMsgs {
-		wsc.logger.Debug().Interface("msg", jsonMessage).Msg("sending websocket message")
 		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
@@ -167,7 +153,6 @@ func (wsc *WebsocketController) pingLoop() {
 		if err != nil {
 			return
 		}
-		wsc.logger.Debug().Msg("ping sent")
 		select {
 		case <-wsc.websocketCtx.Done():
 			return
@@ -250,4 +235,15 @@ func (wsc *WebsocketController) reconnect() {
 	wsc.close()
 	go wsc.Start()
 	telemetryWebsocketReconnect(wsc.providerName)
+}
+
+func (wsc *WebsocketController) pongHandler(appData string) error {
+	return nil
+}
+
+func (wsc *WebsocketController) pingHandler(appData string) error {
+	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
+		wsc.logger.Error().Err(err).Msg("error sending pong")
+	}
+	return nil
 }
