@@ -114,8 +114,7 @@ func (wsc *WebsocketController) connect() error {
 	}
 	wsc.client = conn
 	wsc.websocketCtx, wsc.websocketCancelFunc = context.WithCancel(wsc.parentCtx)
-	wsc.client.SetPingHandler((wsc.pingHandler))
-	wsc.client.SetPongHandler(wsc.pongHandler)
+	wsc.client.SetPingHandler(wsc.pingHandler)
 	wsc.reconnectCounter = 0
 	return nil
 }
@@ -226,10 +225,6 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	}
 	// mexc and bitget do not send a valid pong response code so check for it here
 	if string(bz) == "pong" {
-		err := wsc.pongHandler(string(bz))
-		if err != nil {
-			wsc.logger.Error().Err(err).Msg("error handling pong")
-		}
 		return
 	}
 	wsc.messageHandler(messageType, bz)
@@ -255,10 +250,8 @@ func (wsc *WebsocketController) reconnect() {
 	telemetryWebsocketReconnect(wsc.providerName)
 }
 
-func (wsc *WebsocketController) pongHandler(appData string) error {
-	return nil
-}
-
+// pingHandler is called by the websocket library whenever a ping message is received
+// and responds with a pong message to the server
 func (wsc *WebsocketController) pingHandler(appData string) error {
 	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
 		wsc.logger.Error().Err(err).Msg("error sending pong")
