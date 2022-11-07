@@ -134,7 +134,7 @@ func NewHuobiProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
-		time.Duration(0),
+		disabledPingDuration,
 		websocket.PingMessage,
 		huobiLogger,
 	)

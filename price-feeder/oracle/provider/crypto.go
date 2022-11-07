@@ -139,7 +139,7 @@ func NewCryptoProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
-		time.Duration(0),
+		disabledPingDuration,
 		websocket.PingMessage,
 		cryptoLogger,
 	)

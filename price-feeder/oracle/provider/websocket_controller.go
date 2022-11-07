@@ -17,6 +17,7 @@ const (
 	defaultReadNewWSMessage   = 50 * time.Millisecond
 	defaultMaxConnectionTime  = time.Hour * 23 // should be < 24h
 	defaultPingDuration       = 15 * time.Second
+	disabledPingDuration      = time.Duration(0)
 	startingReconnectDuration = 5 * time.Second
 	maxRetryMultiplier        = 25 // max retry duration: 52m5s
 )
@@ -156,8 +157,8 @@ func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 
 // ping sends a ping to the server every defaultPingDuration
 func (wsc *WebsocketController) pingLoop() {
-	if wsc.pingDuration == time.Duration(0) {
-		return // disable ping loop if duration is zero
+	if wsc.pingDuration == disabledPingDuration {
+		return // disable ping loop if disabledPingDuration
 	}
 	pingTicker := time.NewTicker(wsc.pingDuration)
 	defer pingTicker.Stop()

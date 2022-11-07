@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -122,7 +121,7 @@ func NewBinanceProvider(
 		wsURL,
 		provider.getSubscriptionMsgs(),
 		provider.messageReceived,
-		time.Duration(0),
+		disabledPingDuration,
 		websocket.PingMessage,
 		binanceLogger,
 	)
