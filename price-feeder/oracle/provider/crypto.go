@@ -331,7 +331,7 @@ func (p *CryptoProvider) setCandlePair(symbol string, candlePair CryptoCandle) {
 		symbol,
 		candlePair.Close,
 		candlePair.Volume,
-		candlePair.Timestamp,
+		SecondsToMilli(candlePair.Timestamp),
 	)
 	if err != nil {
 		p.logger.Warn().Err(err).Msg("crypto: failed to parse candle")
