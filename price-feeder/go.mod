@@ -17,7 +17,7 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.22
-	github.com/umee-network/umee/v3 v3.0.0-rc1
+	github.com/umee-network/umee/v3 v3.1.0
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0
 	google.golang.org/grpc v1.50.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -300,9 +300,16 @@ require (
 )
 
 replace (
+	// Use the umee gravity bridge fork
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220831213229-254615a7be1d
+	// use the umee sdk fork
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.4-umee
+	// use cosmos flavored protocol buffers
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+	// use bech32-ibc, umee fork
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0
+	// we get umee from the folder above this one
 	github.com/umee-network/umee/v3 => ../
+	// ics23
+	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 )
