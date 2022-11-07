@@ -212,7 +212,10 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 	}
 	// mexc and bitget do not send a valid pong response code so check for it here
 	if string(bz) == "pong" {
-		wsc.pongHandler(string(bz))
+		err := wsc.pongHandler(string(bz))
+		if err != nil {
+			wsc.logger.Error().Err(err).Msg("error handling pong")
+		}
 		return
 	}
 	wsc.messageHandler(messageType, bz)

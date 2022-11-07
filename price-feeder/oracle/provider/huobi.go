@@ -231,7 +231,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	json.Unmarshal(bz, &subscribeResp)
+	err = json.Unmarshal(bz, &subscribeResp)
 	if subscribeResp.Status == "ok" {
 		return
 	}
@@ -240,6 +240,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 		Int("length", len(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
+		AnErr("subscribeResp", err).
 		Msg("Error on receive message")
 }
 

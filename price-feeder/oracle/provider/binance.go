@@ -216,11 +216,12 @@ func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, erro
 
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	var (
-		tickerResp    BinanceTicker
-		tickerErr     error
-		candleResp    BinanceCandle
-		candleErr     error
-		subscribeResp BinanceSubscriptionResp
+		tickerResp       BinanceTicker
+		tickerErr        error
+		candleResp       BinanceCandle
+		candleErr        error
+		subscribeResp    BinanceSubscriptionResp
+		subscribeRespErr error
 	)
 
 	tickerErr = json.Unmarshal(bz, &tickerResp)
@@ -238,7 +239,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 	}
 
 	// We don't need this message but this prevents logging an error
-	json.Unmarshal(bz, &subscribeResp)
+	subscribeRespErr = json.Unmarshal(bz, &subscribeResp)
 	if subscribeResp.ID == 1 {
 		return
 	}
@@ -247,6 +248,7 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		Int("length", len(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
+		AnErr("subscribeResp", subscribeRespErr).
 		Msg("Error on receive message")
 }
 
