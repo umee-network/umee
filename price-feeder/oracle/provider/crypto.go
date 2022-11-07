@@ -13,8 +13,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-
-	"github.com/umee-network/umee/v3/util/coin"
 )
 
 const (
@@ -58,9 +56,9 @@ type (
 		Data           []CryptoTicker `json:"data"`            // ticker data
 	}
 	CryptoTicker struct {
-		InstrumentName string  `json:"i"` // Instrument Name, e.g. BTC_USDT, ETH_CRO, etc.
-		Volume         float64 `json:"v"` // The total 24h traded volume
-		LatestTrade    float64 `json:"a"` // The price of the latest trade, null if there weren't any trades
+		InstrumentName string `json:"i"` // Instrument Name, e.g. BTC_USDT, ETH_CRO, etc.
+		Volume         string `json:"v"` // The total 24h traded volume
+		LatestTrade    string `json:"a"` // The price of the latest trade, null if there weren't any trades
 	}
 
 	CryptoCandleResponse struct {
@@ -72,9 +70,9 @@ type (
 		Data           []CryptoCandle `json:"data"`            // candlestick data
 	}
 	CryptoCandle struct {
-		Close     float64 `json:"c"` // Price at close
-		Volume    float64 `json:"v"` // Volume during interval
-		Timestamp int64   `json:"t"` // End time of candlestick (Unix timestamp)
+		Close     string `json:"c"` // Price at close
+		Volume    string `json:"v"` // Volume during interval
+		Timestamp int64  `json:"t"` // End time of candlestick (Unix timestamp)
 	}
 
 	CryptoSubscriptionMsg struct {
@@ -369,42 +367,34 @@ func (p *CryptoProvider) setTickerPair(symbol string, tickerPair CryptoTicker) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	price, err := coin.NewDecFromFloat(tickerPair.LatestTrade)
+	tickerPrice, err := types.NewTickerPrice(
+		string(ProviderCrypto),
+		symbol,
+		tickerPair.LatestTrade,
+		tickerPair.Volume,
+	)
 	if err != nil {
-		p.logger.Warn().Err(err).Msg("crypto: failed to parse ticker price")
-		return
-	}
-	volume, err := coin.NewDecFromFloat(tickerPair.Volume)
-	if err != nil {
-		p.logger.Warn().Err(err).Msg("crypto: failed to parse ticker volume")
+		p.logger.Warn().Err(err).Msg("crypto: failed to parse ticker")
 		return
 	}
 
-	p.tickers[symbol] = types.TickerPrice{
-		Price:  price,
-		Volume: volume,
-	}
+	p.tickers[symbol] = tickerPrice
 }
 
 func (p *CryptoProvider) setCandlePair(symbol string, candlePair CryptoCandle) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
-	close, err := coin.NewDecFromFloat(candlePair.Close)
+	candle, err := types.NewCandlePrice(
+		string(ProviderCrypto),
+		symbol,
+		candlePair.Close,
+		candlePair.Volume,
+		candlePair.Timestamp,
+	)
 	if err != nil {
-		p.logger.Warn().Err(err).Msg("crypto: failed to parse candle close")
+		p.logger.Warn().Err(err).Msg("crypto: failed to parse candle")
 		return
-	}
-	volume, err := coin.NewDecFromFloat(candlePair.Volume)
-	if err != nil {
-		p.logger.Warn().Err(err).Msg("crypto: failed to parse candle volume")
-		return
-	}
-	candle := types.CandlePrice{
-		Price:  close,
-		Volume: volume,
-		// convert seconds -> milli
-		TimeStamp: SecondsToMilli(candlePair.Timestamp),
 	}
 
 	staleTime := PastUnixTime(providerCandlePeriod)
