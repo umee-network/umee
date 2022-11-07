@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/rs/zerolog"
@@ -87,4 +88,21 @@ func TestHuobiCurrencyPairToHuobiPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	binanceSymbol := currencyPairToHuobiTickerPair(cp)
 	require.Equal(t, binanceSymbol, "market.atomusdt.ticker")
+}
+
+func TestHuobiProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &HuobiProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	provider.setSubscribedPairs(cps...)
+	subMsgs := provider.getSubscriptionMsgs()
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"sub\":\"market.atomusdt.ticker\"}", string(msg))
+
+	msg, _ = json.Marshal(subMsgs[1])
+	require.Equal(t, "{\"sub\":\"market.atomusdt.kline.1min\"}", string(msg))
 }

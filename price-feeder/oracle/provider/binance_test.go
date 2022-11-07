@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -81,4 +82,21 @@ func TestBinanceCurrencyPairToBinancePair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	binanceSymbol := currencyPairToBinanceTickerPair(cp)
 	require.Equal(t, binanceSymbol, "atomusdt@ticker")
+}
+
+func TestBinanceProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &BinanceProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	provider.setSubscribedPairs(cps...)
+	subMsgs := provider.getSubscriptionMsgs()
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"method\":\"SUBSCRIBE\",\"params\":[\"atomusdt@ticker\"],\"id\":1}", string(msg))
+
+	msg, _ = json.Marshal(subMsgs[1])
+	require.Equal(t, "{\"method\":\"SUBSCRIBE\",\"params\":[\"atomusdt@kline_1m\"],\"id\":1}", string(msg))
 }

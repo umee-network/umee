@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -81,4 +82,21 @@ func TestGateCurrencyPairToGatePair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	GateSymbol := currencyPairToGatePair(cp)
 	require.Equal(t, GateSymbol, "ATOM_USDT")
+}
+
+func TestGateProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &GateProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	provider.setSubscribedPairs(cps...)
+	subMsgs := provider.getSubscriptionMsgs()
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"method\":\"ticker.subscribe\",\"params\":[\"ATOM_USDT\"],\"id\":1}", string(msg))
+
+	msg, _ = json.Marshal(subMsgs[1])
+	require.Equal(t, "{\"method\":\"kline.subscribe\",\"params\":[\"ATOM_USDT\",60],\"id\":2}", string(msg))
 }

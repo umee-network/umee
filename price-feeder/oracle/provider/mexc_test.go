@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -92,7 +91,6 @@ func TestMexcProvider_getSubscriptionMsgs(t *testing.T) {
 	}
 	provider.setSubscribedPairs(cps...)
 	subMsgs := provider.getSubscriptionMsgs()
-	fmt.Printf("%+v\n", subMsgs)
 
 	msg, _ := json.Marshal(subMsgs[0])
 	require.Equal(t, "{\"op\":\"sub.kline\",\"symbol\":\"ATOM_USDT\",\"interval\":\"Min1\"}", string(msg))

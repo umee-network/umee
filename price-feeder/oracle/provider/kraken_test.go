@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -92,4 +93,21 @@ func TestNormalizeKrakenBTCPair(t *testing.T) {
 
 	atomSymbol := normalizeKrakenBTCPair("ATOM/USDT")
 	require.Equal(t, atomSymbol, "ATOM/USDT")
+}
+
+func TestKrakenProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &KrakenProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	provider.setSubscribedPairs(cps...)
+	subMsgs := provider.getSubscriptionMsgs()
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"event\":\"subscribe\",\"pair\":[\"ATOM/USDT\"],\"subscription\":{\"name\":\"ticker\"}}", string(msg))
+
+	msg, _ = json.Marshal(subMsgs[1])
+	require.Equal(t, "{\"event\":\"subscribe\",\"pair\":[\"ATOM/USDT\"],\"subscription\":{\"name\":\"ohlc\"}}", string(msg))
 }
