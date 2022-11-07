@@ -116,6 +116,7 @@ func (wsc *WebsocketController) connect() error {
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket
 func (wsc *WebsocketController) subscribe() error {
+	telemetryWebsocketSubscribeCurrencyPairs(wsc.providerName, len(wsc.subscriptionMsgs))
 	for _, jsonMessage := range wsc.subscriptionMsgs {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)

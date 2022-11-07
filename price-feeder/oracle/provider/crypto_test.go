@@ -8,7 +8,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/oracle/types"
-	"github.com/umee-network/umee/v3/util/coin"
 )
 
 func TestCryptoProvider_GetTickerPrices(t *testing.T) {
@@ -86,8 +85,8 @@ func TestCryptoProvider_GetCandlePrices(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("valid_request_single_candle", func(t *testing.T) {
-		price := 34.689998626708984000
-		volume := 2396974.000000000000000000
+		price := "34.689998626708984000"
+		volume := "2396974.000000000000000000"
 		timeStamp := int64(1000000)
 
 		candle := CryptoCandle{
@@ -101,30 +100,18 @@ func TestCryptoProvider_GetCandlePrices(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "ATOM", Quote: "USDT"})
 		require.NoError(t, err)
 		require.Len(t, prices, 1)
-		require.Equal(t, coin.MustNewDecFromFloat(price), prices["ATOMUSDT"][0].Price)
-		require.Equal(t, coin.MustNewDecFromFloat(volume), prices["ATOMUSDT"][0].Volume)
-		require.Equal(t, timeStamp*1000, prices["ATOMUSDT"][0].TimeStamp)
+		priceDec, _ := sdk.NewDecFromStr(price)
+		volumeDec, _ := sdk.NewDecFromStr(volume)
+
+		require.Equal(t, priceDec, prices["ATOMUSDT"][0].Price)
+		require.Equal(t, volumeDec, prices["ATOMUSDT"][0].Volume)
+		require.Equal(t, timeStamp, prices["ATOMUSDT"][0].TimeStamp)
 	})
 
 	t.Run("invalid_request_invalid_candle", func(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.EqualError(t, err, "crypto failed to get candle price for FOO_BAR")
 		require.Nil(t, prices)
-	})
-}
-
-func TestCryptoProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewOkxProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-	require.NoError(t, err)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.ErrorContains(t, err, "currency pairs is empty")
 	})
 }
 
