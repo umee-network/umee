@@ -78,6 +78,7 @@ type (
 		Sub string `json:"sub"` // channel to subscribe market.$symbol.ticker
 	}
 
+	// HuobiSubscriptionResp the response structure for a Huobi subscription response
 	HuobiSubscriptionResp struct {
 		Status string `json:"status"`
 	}

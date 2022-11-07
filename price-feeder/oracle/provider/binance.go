@@ -71,6 +71,7 @@ type (
 		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 
+	// BinanceSubscriptionResp the response structure for a binance subscription response
 	BinanceSubscriptionResp struct {
 		Result string `json:"result"`
 		ID     uint16 `json:"id"`
@@ -238,7 +239,6 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	// We don't need this message but this prevents logging an error
 	subscribeRespErr = json.Unmarshal(bz, &subscribeResp)
 	if subscribeResp.ID == 1 {
 		return
