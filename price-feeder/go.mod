@@ -302,6 +302,8 @@ require (
 replace (
 	// Use the umee gravity bridge fork
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220831213229-254615a7be1d
+	// dragonberry patch
+	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	// use the umee sdk fork
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.4-umee
 	// use cosmos flavored protocol buffers
@@ -310,6 +312,4 @@ replace (
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0
 	// we get umee from the folder above this one
 	github.com/umee-network/umee/v3 => ../
-	// ics23
-	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 )
