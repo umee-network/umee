@@ -129,12 +129,9 @@ func (wsc *WebsocketController) connect() error {
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket
 func (wsc *WebsocketController) subscribe() error {
-	wsc.mtx.Lock()
-	defer wsc.mtx.Unlock()
-
 	for _, jsonMessage := range wsc.subscriptionMsgs {
 		wsc.logger.Debug().Interface("msg", jsonMessage).Msg("sending websocket message")
-		if err := wsc.client.WriteJSON(jsonMessage); err != nil {
+		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
 	}
@@ -147,6 +144,10 @@ func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
+	if wsc.client == nil {
+		return fmt.Errorf("unable to send JSON on a closed connection")
+	}
+	wsc.logger.Debug().Interface("msg", msg).Msg("sending websocket message")
 	if err := wsc.client.WriteJSON(msg); err != nil {
 		return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 	}
@@ -180,12 +181,10 @@ func (wsc *WebsocketController) ping() error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
-	var err error
 	if wsc.client == nil {
-		err = fmt.Errorf("unable to ping closed connection")
-	} else {
-		err = wsc.client.WriteMessage(int(wsc.pingMessageType), []byte("ping"))
+		return fmt.Errorf("unable to ping closed connection")
 	}
+	err := wsc.client.WriteMessage(int(wsc.pingMessageType), []byte("ping"))
 	if err != nil {
 		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
 	}
@@ -222,21 +221,14 @@ func (wsc *WebsocketController) readWebSocket() {
 }
 
 func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage || len(bz) == 0 {
+	if len(bz) == 0 {
 		return
 	}
-
 	// mexc and bitget do not send a valid pong response code so check for it here
 	if string(bz) == "pong" {
 		wsc.pongHandler(string(bz))
 		return
 	}
-
-	msg := string(bz)
-	if len(msg) > 128 {
-		msg = msg[:128]
-	}
-	wsc.logger.Debug().Str("msg", msg).Msg("received websocket message")
 	wsc.messageHandler(messageType, bz)
 }
 
