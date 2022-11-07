@@ -394,8 +394,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/esimonov/ifshort v1.0.4 h1:6SID4yGWfRae/M7hkVDVVyppy8q/v9OuxNdmjLQStBA=
 github.com/esimonov/ifshort v1.0.4/go.mod h1:Pe8zjlRrJ80+q2CxHLfEOfTwxCZ4O+MuhcHcfgNWTk0=
 github.com/ethereum/go-ethereum v1.10.17/go.mod h1:Lt5WzjM07XlXc95YzrhosmR4J9Ahd6X2wyEV2SvGhk0=
-github.com/ethereum/go-ethereum v1.10.25 h1:5dFrKJDnYf8L6/5o42abCE6a9yJm9cs4EJVRyYMr55s=
-github.com/ethereum/go-ethereum v1.10.25/go.mod h1:EYFyF19u3ezGLD4RqOkLq+ZCXzYbLoNDdZlMt7kyKFg=
+github.com/ethereum/go-ethereum v1.10.26 h1:i/7d9RBBwiXCEuyduBQzJw/mKmnvzsN14jqBmytw72s=
+github.com/ethereum/go-ethereum v1.10.26/go.mod h1:EYFyF19u3ezGLD4RqOkLq+ZCXzYbLoNDdZlMt7kyKFg=
 github.com/ettle/strcase v0.1.1 h1:htFueZyVeE1XNnMEfbqp5r67qAN/4r6ya1ysq8Q+Zcw=
 github.com/ettle/strcase v0.1.1/go.mod h1:hzDLsPC7/lwKyBOywSHEP89nt2pDgdy+No1NBA9o9VY=
 github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c h1:8ISkoahWXwZR41ois5lSJBSVw4D0OV19Ht/JSTzvSv0=
@@ -1318,8 +1318,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqzi/CzI=
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb h1:QYqM/kfM35VGGjSfnRsJ9H5MU1F+QNvq594UkRTrbJc=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb/go.mod h1:p6/9i/72keNtS2PNNBu8Rebzd7K+GbFWJNWo/MojBto=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-3 h1:oxVcUBcfWDcGBms7M5OMEuFoE+RJVWT2hsEkqS5zy1s=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-3/go.mod h1:ij4MmyaxHmljTohtd7IGwN66fdZyGVTM7DAPPqRB8Tk=
 github.com/umee-network/bech32-ibc v0.3.0 h1:WP0w6hG/B9WJ5hfUNx7Hd9pE0MJR/Lp9Y1NPjh03/40=
 github.com/umee-network/bech32-ibc v0.3.0/go.mod h1:PqMePY74J6wqJH7Yai1l94rPsEe6QVa9X8gt5/M5nIo=
 github.com/umee-network/cosmos-sdk v0.46.4-umee h1:Wk1PiriCoT2YuYn87J8Tjm0zkHAKKa4HMPq190O+Pig=

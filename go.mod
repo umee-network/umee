@@ -10,7 +10,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.46.4
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v5 v5.0.1
-	github.com/ethereum/go-ethereum v1.10.25
+	github.com/ethereum/go-ethereum v1.10.26
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
 	github.com/golangci/golangci-lint v1.50.1
@@ -19,8 +19,7 @@ require (
 	github.com/ignite/cli v0.25.1
 	github.com/mgechev/revive v1.2.4
 	github.com/ory/dockertest/v3 v3.9.1
-	github.com/osmosis-labs/bech32-ibc v0.3.0
-	github.com/regen-network/cosmos-proto v0.3.1
+	github.com/osmosis-labs/bech32-ibc v0.3.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.6.1
@@ -243,6 +242,7 @@ require (
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
 	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/regen-network/cosmos-proto v0.3.1 // indirect
 	github.com/rivo/uniseg v0.4.2 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/rs/cors v1.8.2 // indirect
@@ -324,7 +324,7 @@ require (
 )
 
 replace (
-	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-2.0.20221006173606-324093db11fb
+	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-3
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.4-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
