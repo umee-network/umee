@@ -21,5 +21,5 @@ func (ip IncentiveProgram) Validate() error {
 
 	// TODO: Finish validate logic
 
-	return nil
+	return ErrNotImplemented
 }
