@@ -72,7 +72,7 @@ func GetHistoricPriceKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixHistoricPrice...)
 	key = append(key, []byte(denom)...)
 	block := make([]byte, 8)
-	binary.LittleEndian.PutUint64(block, uint64(blockNum))
+	binary.LittleEndian.PutUint64(block, blockNum)
 	key = append(key, block...)
 	return append(key, 0) // append 0 for null-termination
 }
