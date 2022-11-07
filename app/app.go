@@ -122,6 +122,10 @@ import (
 	"github.com/umee-network/umee/v3/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+
+	ibcratelimit "github.com/umee-network/umee/v3/x/ibc-rate-limit"
+	ibcratelimitkeeper "github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
+	ibcratelimittypes "github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
 )
 
 var (
@@ -161,6 +165,7 @@ var (
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
+		ibcratelimit.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -173,10 +178,11 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		nft.ModuleName:                 nil,
 
-		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
-		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		oracletypes.ModuleName:      nil,
+		ibctransfertypes.ModuleName:  {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
+		leveragetypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName:       nil,
+		ibcratelimittypes.ModuleName: nil,
 	}
 )
 
@@ -221,6 +227,7 @@ type UmeeApp struct {
 	LeverageKeeper     leveragekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
+	ibcRateLimitKeeper ibcratelimitkeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -276,7 +283,7 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey, ibcratelimittypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -450,6 +457,13 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
+	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey], app.GetSubspace(ibcratelimittypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibchost.StoreKey],
@@ -459,26 +473,49 @@ func New(
 		app.ScopedIBCKeeper,
 	)
 
+	// Create IBC Router
+	// create static IBC router, add transfer route, then set and seal it
+	ibcRouter := ibcporttypes.NewRouter()
+
+	// Middleware Stacks
+
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
+		app.ibcRateLimitKeeper, // ISC4 Wrapper: IBC Rate Limit middleware
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.ScopedTransferKeeper,
 	)
+
 	app.UIBCTransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	ibcTransferModule := ibctransfer.NewAppModule(ibcTransferKeeper)
-	uibcTransferIBCModule := uibctransfer.NewIBCModule(
-		ibctransfer.NewIBCModule(ibcTransferKeeper), app.UIBCTransferKeeper)
-	// create static IBC router, add transfer route, then set and seal it
-	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, uibcTransferIBCModule)
+
+	// Create Transfer Stack
+	// SendPacket, since it is originating from the application to core IBC:
+	// transferKeeper.SendPacket -> ibcratelimit.SendPacket -> channel.SendPacket
+
+	// RecvPacket, message that originates from core IBC and goes down to app, the flow is the other way
+	// channel.RecvPacket -> ibcratelimit.OnRecvPacket -> transfer.OnRecvPacket
+
+	// transfer stack contains (from top to bottom):
+	// - Umee IBC Transfer
+	// - IBC Rate Limit Middleware
+
+	// create IBC module from bottom to top of stack
+	var transferStack ibcporttypes.IBCModule
+	transferStack = uibctransfer.NewIBCModule(
+		ibctransfer.NewIBCModule(ibcTransferKeeper),
+		app.UIBCTransferKeeper,
+	)
+	transferStack = ibcratelimit.NewIBCMiddleware(transferStack, app.ibcRateLimitKeeper)
+
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
+	// Add transfer stack to IBC Router
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
@@ -548,7 +585,7 @@ func New(
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
-		ibcTransferModule,
+		ibctransfer.NewAppModule(ibcTransferKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),

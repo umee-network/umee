@@ -1,0 +1,43 @@
+syntax = "proto3";
+package umee.ibcratelimit.v1beta1;
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "umee/ibc_rate_limit/v1beta1/ibc_rate_limit.proto";
+
+
+option go_package = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the x/leverage module.
+  rpc Params(QueryParams) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/ibc_rate_limit/v1/params";
+  }
+
+  // RateLimits 
+  rpc RateLimits(QueryRateLimits) returns (QueryRateLimitsResponse) {
+    option (google.api.http).get = "/umee/ibc_rate_limit/v1/rate_limits";
+  }
+}
+
+// QueryParams defines the request structure for the Params gRPC service
+// handler.
+message QueryParams {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryRateLimits
+message QueryRateLimits{}
+
+// QueryRateLimitsResponse defines 
+message QueryRateLimitsResponse{
+    repeated RateLimit rate_limits = 1 [(gogoproto.nullable) = false];
+}
+
