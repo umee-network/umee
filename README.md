@@ -50,12 +50,6 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 ### Public
 
 - [umee-1](networks/umee-1)
-- [umeemania-1](networks/umeemania-1)
-
-### Private
-
-- [umee-betanet-1](networks/umee-betanet-1)
-- [umee-betanet-2](networks/umee-betanet-2)
 
 ## Install
 
