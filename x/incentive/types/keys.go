@@ -13,6 +13,8 @@ const (
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
+
+	QuerierRoute = ModuleName
 )
 
 // KVStore key prefixes
