@@ -32,14 +32,10 @@ func GetTxCmd() *cobra.Command {
 // transaction with a MsgClaim message.
 func GetCmdClaim() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim [addr]",
-		Args:  cobra.ExactArgs(1),
+		Use:   "claim",
+		Args:  cobra.ExactArgs(0),
 		Short: "Claim any pending incentive rewards",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := cmd.Flags().Set(flags.FlagFrom, args[0]); err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
