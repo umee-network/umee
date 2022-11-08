@@ -66,7 +66,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	s.Require().NoError(err)
 	s.Require().Equal(voteRes, vote)
 
-	s.app.OracleKeeper.ClearPrevotes(s.ctx, 0)
+	s.app.OracleKeeper.ClearVotes(s.ctx, 0)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().Error(err)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)

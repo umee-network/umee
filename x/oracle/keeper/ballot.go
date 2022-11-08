@@ -44,8 +44,8 @@ func (k Keeper) OrganizeBallotByDenom(
 	return types.BallotMapToSlice(votes)
 }
 
-// ClearPrevotes clears all tallied prevotes and votes from the store.
-func (k Keeper) ClearPrevotes(ctx sdk.Context, votePeriod uint64) {
+// ClearVotes clears all tallied prevotes and votes from the store.
+func (k Keeper) ClearVotes(ctx sdk.Context, votePeriod uint64) {
 	currentHeight := uint64(ctx.BlockHeight())
 	k.IterateAggregateExchangeRatePrevotes(
 		ctx,

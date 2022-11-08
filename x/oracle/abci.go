@@ -82,7 +82,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		)
 
 		// Clear the ballot
-		k.ClearPrevotes(ctx, params.VotePeriod)
+		k.ClearVotes(ctx, params.VotePeriod)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
