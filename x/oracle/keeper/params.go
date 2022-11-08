@@ -70,7 +70,7 @@ func (k Keeper) StampPeriod(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// SetStampPeriod updates the amount of blocks the historacle module waits
+// SetStampPeriod updates the amount of blocks the oracle module waits
 // between recording a set of prices.
 func (k Keeper) SetStampPeriod(ctx sdk.Context, stampPeriod uint64) {
 	k.paramSpace.Set(ctx, types.KeyStampPeriod, stampPeriod)
