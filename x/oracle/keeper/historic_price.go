@@ -94,7 +94,6 @@ func (k Keeper) GetHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 ) []types.HistoricPrice {
-	denom = strings.ToUpper(denom)
 	historicPrices := []types.HistoricPrice{}
 
 	k.IterateHistoricPrices(ctx, denom, func(exchangeRate sdk.Dec, blockNum uint64) bool {
