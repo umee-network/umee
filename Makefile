@@ -61,6 +61,8 @@ endif
 whitespace :=
 whitespace += $(whitespace)
 comma := ,
+
+build_tags += $(BUILD_TAGS)
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
@@ -70,6 +72,10 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
 		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
+
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
