@@ -23,7 +23,7 @@ func median(prices []types.HistoricPrice) sdk.Dec {
 	})
 
 	var medianPrice sdk.Dec
-	if lenPrices%2 == 0 {
+	if lenPrices % 2 == 0 {
 		medianPrice = prices[lenPrices/2-1].ExchangeRates.ExchangeRate.
 			Add(prices[lenPrices/2].ExchangeRates.ExchangeRate).
 			QuoInt64(2)
