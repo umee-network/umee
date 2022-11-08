@@ -131,8 +131,7 @@ func (k Keeper) IterateHistoricPrices(
 		if historicPriceDenom != denom {
 			continue
 		}
-		historicPrice := types.HistoricPrice{}
-
+		var historicPrice types.HistoricPrice
 		k.cdc.MustUnmarshal(iter.Value(), &historicPrice)
 		if handler(historicPrice.ExchangeRates.ExchangeRate, historicPrice.BlockNum) {
 			break
