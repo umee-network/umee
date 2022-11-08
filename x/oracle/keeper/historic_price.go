@@ -114,6 +114,7 @@ func (k Keeper) GetHistoricPrices(
 
 // IterateHistoricPrices iterates over historic prices of a given
 // denom in the store.
+// Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateHistoricPrices(
 	ctx sdk.Context,
 	denom string,
