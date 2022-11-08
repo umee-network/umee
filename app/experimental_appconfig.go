@@ -22,7 +22,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
@@ -75,14 +74,6 @@ func GetWasmEnabledProposals() []wasm.ProposalType {
 	}
 
 	return proposals
-}
-
-func customModuleBasics() []module.AppModuleBasic {
-	return []module.AppModuleBasic{wasm.AppModuleBasic{}}
-}
-
-func customMaccPerms() map[string][]string {
-	return map[string][]string{wasm.ModuleName: {authtypes.Burner}}
 }
 
 func customKVStoreKeys() []string { return []string{wasm.StoreKey} }

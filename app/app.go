@@ -166,8 +166,9 @@ func init() {
 		bech32ibc.AppModuleBasic{},
 	}
 
-	// append experimental modules
-	moduleBasics = append(moduleBasics, customModuleBasics()...)
+	if Experimental {
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
+	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
 
@@ -186,9 +187,8 @@ func init() {
 		oracletypes.ModuleName:      nil,
 	}
 
-	// append experimental module account perms
-	for k, v := range customMaccPerms() {
-		maccPerms[k] = v
+	if Experimental {
+		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
 	}
 }
 

@@ -42,10 +42,6 @@ var (
 // pass into the application.
 func GetWasmEnabledProposals() []wasm.ProposalType { return []wasm.ProposalType{} }
 
-func customModuleBasics() []module.AppModuleBasic { return []module.AppModuleBasic{} }
-
-func customMaccPerms() map[string][]string { return map[string][]string{} }
-
 func customKVStoreKeys() []string { return []string{} }
 
 func customOrderInitGenesis() []string { return []string{} }
