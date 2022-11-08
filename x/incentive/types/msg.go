@@ -86,7 +86,7 @@ func (msg *MsgBeginUnbonding) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgSponsor(sponsor sdk.AccAddress, programID uint64, asset sdk.Coin) *MsgSponsor {
+func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *MsgSponsor {
 	return &MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: programID,
