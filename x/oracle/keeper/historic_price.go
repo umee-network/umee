@@ -59,11 +59,8 @@ func (k Keeper) setMedian(
 	denom string,
 ) {
 	store := ctx.KVStore(k.storeKey)
-
 	historicPrices := k.GetHistoricPrices(ctx, denom)
-
 	median := median(historicPrices)
-
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
 	denom = strings.ToUpper(denom)
 	store.Set(types.GetMedianKey(denom), bz)
