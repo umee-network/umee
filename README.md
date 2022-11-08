@@ -49,6 +49,7 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 ### Public
 
 - [umee-1](networks/umee-1)
+- [canon-2](networks/canon-2)
 
 ## Install
 
