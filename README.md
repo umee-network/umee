@@ -28,7 +28,6 @@ Umee will allow a multitude of decentralized debt products.
   - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
-  - [Private](#private)
 - [Install](#install)
   - [Swagger](#swagger)
 
@@ -50,12 +49,7 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 ### Public
 
 - [umee-1](networks/umee-1)
-- [umeemania-1](networks/umeemania-1)
-
-### Private
-
-- [umee-betanet-1](networks/umee-betanet-1)
-- [umee-betanet-2](networks/umee-betanet-2)
+- [canon-2](networks/canon-2)
 
 ## Install
 
@@ -70,3 +64,29 @@ $ make install
 - To enable it, modify the node config at `$UMEE_HOME/config/app.toml` to `api.swagger` `true`
 - Run the node normally `umeed start`
 - Enter the swagger docs `http://localhost:1317/swagger/`
+
+### Cosmovisor
+
+> [Docs](https://github.com/cosmos/cosmos-sdk/tree/main/tools/cosmovisor)
+> Note: `cosmovisor` only works for upgrades in the `umeed`, for off-chain processes updates like `peggo` or `price-feeder`, manual steps are required.
+
+- `cosmovisor` is a small process manager for Cosmos SDK application binaries that monitors the governance module for incoming chain upgrade proposals. If it sees a proposal that gets approved, `cosmovisor` can automatically download
+ the new binary, stop the current binary, switch from the old binary to the new one, and finally restart the node with the new binary.
+
+- Install it with go
+
+```shell
+go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+```
+
+- For the usual use of `cosmovisor`, we recomend setting theses env variables
+
+```shell
+export DAEMON_NAME=umeed
+export DAEMON_HOME={NODE_HOME}
+export DAEMON_RESTART_AFTER_UPGRADE=true
+export DAEMON_ALLOW_DOWNLOAD_BINARIES=true
+export DAEMON_PREUPGRADE_MAX_RETRIES=3
+```
+
+- To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`

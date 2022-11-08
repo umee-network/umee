@@ -25,11 +25,14 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the leverage module.
+// See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+// for more details.
 type Params struct {
 	// Complete Liquidation Threshold determines how far between
 	// liquidation_threshold (LT) and collateral_value (CV) a borrower's
 	// borrowed value must have progressed in order to allow a full liquidation.
 	// 0.3 indicates 30% of the way from LT to CV.
+	// See also `minimum_close_factor` for more information.
 	// Valid values: 0-1.
 	CompleteLiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=complete_liquidation_threshold,json=completeLiquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"complete_liquidation_threshold" yaml:"complete_liquidation_threshold"`
 	// Close Factor determines the portion of a borrower's position that can be
@@ -40,13 +43,13 @@ type Params struct {
 	// reaching its maximum when borrowed value passes
 	// complete_liquidation_threshold. We can put it into the picture:
 	//
-	//             borrowed           C := collateral
+	//             borrowed          CV := collateral
 	//             value                   value
 	//  --- | ------- | ----- | -------- | ------->
-	//      L                 CL
+	//     LV                 CL
 	//
-	// liquidation = liquidation_threshold * C
-	// CL = L + (C-CL) * complete_liquidation_threshold
+	// LV = liquidation value = liquidation_threshold * CV
+	// CL = LV + (CV-LV) * complete_liquidation_threshold
 	//    is the borrowed value above which close factor will be 1.
 	//
 	// Valid values: 0-1.
@@ -100,6 +103,8 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 
 // Token defines a token, along with its metadata and parameters, in the Umee
 // capital facility that can be supplied and borrowed.
+// See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+// for more details.
 type Token struct {
 	// Base Denom is the denomination of the underlying base token.
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
@@ -120,15 +125,15 @@ type Token struct {
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
 	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.
-	// Valid values: 0-inf
+	// Valid values: 0-∞
 	BaseBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=base_borrow_rate,json=baseBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"base_borrow_rate" yaml:"base_borrow_rate"`
 	// Kink Borrow Rate defines the interest rate for borrowing this
 	// asset when supply utilization is equal to 'kink_utilization'.
-	// Valid values: 0-inf
+	// Valid values: 0-∞
 	KinkBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=kink_borrow_rate,json=kinkBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"kink_borrow_rate" yaml:"kink_borrow_rate"`
 	// Max Borrow Rate defines the interest rate for borrowing this
 	// asset when supply utilization is at its maximum.
-	// Valid values: 0-inf
+	// Valid values: 0-∞
 	MaxBorrowRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=max_borrow_rate,json=maxBorrowRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_borrow_rate" yaml:"max_borrow_rate"`
 	// Kink Utilization defines the supply utilization value where
 	// the kink in the borrow interest rate function occurs.
@@ -169,10 +174,11 @@ type Token struct {
 	// Max Supply Utilization specifies the maximum supply utilization a token is
 	// allowed to reach as a direct result of user borrowing. New borrows are not allowed when
 	// the supply utilization is above `max_supply_utilization`.
+	//    supply_utilization(token) = total_borrowed(token) / total_supply(token)
 	// Valid values: 0-1.
 	MaxSupplyUtilization github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,16,opt,name=max_supply_utilization,json=maxSupplyUtilization,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"max_supply_utilization" yaml:"max_supply_utilization"`
-	// Min Collateral Liquidity specifies an allowed minimum allowed for the following function:
-	//     collateral_liquidity(token) = available(token) / total_collateral(token)
+	// Min Collateral Liquidity specifies min limit for the following function:
+	//    collateral_liquidity(token) = available(token) / total_collateral(token)
 	// Borrowing, collateralizing, or withdrawing assets is not allowed when the
 	// result of such action invalidates min_collateral_liquidity.
 	// Liquidity can only drop below this value due to interest or liquidations.
