@@ -78,7 +78,7 @@ func NewOsmosisV2Provider(
 	}
 
 	wsURL := url.URL{
-		Scheme: "wss",
+		Scheme: "ws",
 		Host:   endpoints.Websocket,
 		Path:   osmosisV2WSPath,
 	}
@@ -194,6 +194,12 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 	)
 
 	messageErr = json.Unmarshal(bz, &messageResp)
+	if messageErr != nil {
+		p.logger.Error().
+			Int("length", len(bz)).
+			AnErr("message", messageErr).
+			Msg("Error on receive message")
+	}
 
 	// Check the response for currency pairs that the provider is subscribed
 	// to and determine whether it is a ticker or candle.
@@ -210,20 +216,21 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 						Int("length", len(bz)).
 						AnErr("ticker", tickerErr).
 						Msg("Error on receive message")
-
-					return
+					continue
 				}
 				p.setTickerPair(
 					osmosisV2Pair,
 					tickerResp,
 				)
 				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeTicker)
-
-				return
+				continue
 
 			// candle response
 			case []interface{}:
-				// use latest candlestick in list
+				// use latest candlestick in list if there is one
+				if len(v) == 0 {
+					continue
+				}
 				candleString, _ := json.Marshal(v[len(v)-1].(map[string]interface{}))
 				candleErr = json.Unmarshal(candleString, &candleResp)
 				if candleErr != nil {
@@ -231,24 +238,17 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 						Int("length", len(bz)).
 						AnErr("candle", candleErr).
 						Msg("Error on receive message")
-
-					return
+					continue
 				}
 				p.setCandlePair(
 					osmosisV2Pair,
 					candleResp,
 				)
 				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeCandle)
-
-				return
+				continue
 			}
 		}
 	}
-
-	p.logger.Error().
-		Int("length", len(bz)).
-		AnErr("message", messageErr).
-		Msg("Error on receive message")
 }
 
 func (p *OsmosisV2Provider) setTickerPair(symbol string, tickerPair OsmosisV2Ticker) {

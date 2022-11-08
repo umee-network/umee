@@ -108,10 +108,10 @@ func (wsc *WebsocketController) connect() error {
 
 	wsc.logger.Debug().Msg("connecting to websocket")
 	conn, resp, err := websocket.DefaultDialer.Dial(wsc.websocketURL.String(), nil)
-	defer resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf(types.ErrWebsocketDial.Error(), wsc.providerName, err)
 	}
+	defer resp.Body.Close()
 	wsc.client = conn
 	wsc.websocketCtx, wsc.websocketCancelFunc = context.WithCancel(wsc.parentCtx)
 	wsc.client.SetPingHandler(wsc.pingHandler)

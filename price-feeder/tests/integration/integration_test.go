@@ -59,8 +59,15 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			currencyPairs: []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}},
 		},
 		{
-			provider:      provider.ProviderOsmosisV2,
-			currencyPairs: []types.CurrencyPair{{Base: "OSMO", Quote: "ATOM"}},
+			provider: provider.ProviderOsmosisV2,
+			currencyPairs: []types.CurrencyPair{
+				{Base: "OSMO", Quote: "ATOM"},
+				{Base: "ATOM", Quote: "JUNO"},
+				{Base: "ATOM", Quote: "STARGAZE"},
+				{Base: "OSMO", Quote: "WBTC"},
+				{Base: "OSMO", Quote: "WETH"},
+				{Base: "OSMO", Quote: "CRO"},
+			},
 		},
 		{
 			provider:      provider.ProviderCoinbase,
@@ -103,21 +110,26 @@ func (s *IntegrationTestSuite) runPriceTest(t *testing.T, providerName provider.
 
 	time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
 
-	currencyPairKey := currencyPairs[0].String()
-
 	// verify ticker price for currency pair is above zero
-	tickerPrices, _ := pvd.GetTickerPrices(currencyPairs...)
-	if _, ok := tickerPrices[currencyPairKey]; !ok {
-		t.Fatal("ticker prices did not contain required currency pair")
-	}
-	require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
+	tickerPrices, err := pvd.GetTickerPrices(currencyPairs...)
+	require.NoError(t, err)
 
 	// verify candle price for currency pair is above zero
-	candlePrices, _ := pvd.GetCandlePrices(currencyPairs...)
-	if _, ok := candlePrices[currencyPairKey]; !ok {
-		t.Fatal("candle prices did not contain required currency pair")
+	candlePrices, err := pvd.GetCandlePrices(currencyPairs...)
+	require.NoError(t, err)
+
+	for _, cp := range currencyPairs {
+		currencyPairKey := cp.String()
+		if _, ok := tickerPrices[currencyPairKey]; !ok {
+			t.Fatalf("ticker prices did not contain required currency pair: %s", currencyPairKey)
+		}
+		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
+
+		if _, ok := candlePrices[currencyPairKey]; !ok {
+			t.Fatalf("candle prices did not contain required currency pair: %s", currencyPairKey)
+		}
+		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
 	}
-	require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
 
 	cancel()
 }
