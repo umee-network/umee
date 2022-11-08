@@ -28,7 +28,6 @@ Umee will allow a multitude of decentralized debt products.
   - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
-  - [Private](#private)
 - [Install](#install)
   - [Swagger](#swagger)
 
