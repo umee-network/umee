@@ -32,13 +32,13 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/leverage
+// GetCmdQueryParams creates a Cobra command to query for the x/incentive
 // module parameters.
 func GetCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
-		Short: "Query the x/incentive module parameters",
+		Short: fmt.Sprintf("Query the %s module parameters", types.ModuleName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
