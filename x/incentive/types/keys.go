@@ -123,7 +123,7 @@ func CreateRewardAccumulatorKey(uTokenDenom string) []byte {
 // CreateUnbondingKey returns the common prefix used by all reward bases
 // associated with a given address.
 func CreateUnbondingKey(cdc codec.Codec, addr sdk.AccAddress, height uint64) []byte {
-	// prefix | lengthprefixed(addr)
+	// prefix | lengthprefixed(addr) | height
 	var key []byte
 	key = append(key, KeyPrefixUnbonding...)
 	key = append(key, address.MustLengthPrefix(addr)...)
