@@ -60,10 +60,13 @@ func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// GetMedianKey - stored by *denom*
-func GetMedianKey(denom string) (key []byte) {
+// GetMedianKey - stored by *denom* and *block*
+func GetMedianKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedian...)
 	key = append(key, []byte(denom)...)
+	block := make([]byte, 8)
+	binary.LittleEndian.PutUint64(block, blockNum)
+	key = append(key, block...)
 	return append(key, 0) // append 0 for null-termination
 }
 
@@ -75,4 +78,12 @@ func GetHistoricPriceKey(denom string, blockNum uint64) (key []byte) {
 	binary.LittleEndian.PutUint64(block, blockNum)
 	key = append(key, block...)
 	return append(key, 0) // append 0 for null-termination
+}
+
+func ParseDemonFromHistoricPriceKey(key []byte) string {
+	return string(key[len(KeyPrefixExchangeRate) : len(key)-9])
+}
+
+func ParseBlockFromHistoricPriceKey(key []byte) uint64 {
+	return binary.LittleEndian.Uint64(key[len(key)-9 : len(key)-1])
 }

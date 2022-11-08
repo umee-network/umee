@@ -22,26 +22,24 @@ func median(prices []types.HistoricPrice) sdk.Dec {
 			Cmp(prices[j].ExchangeRates.ExchangeRate.BigInt()) > 0
 	})
 
-	var medianPrice sdk.Dec
-	if lenPrices % 2 == 0 {
-		medianPrice = prices[lenPrices/2-1].ExchangeRates.ExchangeRate.
+	if lenPrices%2 == 0 {
+		return prices[lenPrices/2-1].ExchangeRates.ExchangeRate.
 			Add(prices[lenPrices/2].ExchangeRates.ExchangeRate).
 			QuoInt64(2)
-	} else {
-		medianPrice = prices[lenPrices/2].ExchangeRates.ExchangeRate
 	}
-
-	return medianPrice
+	return prices[lenPrices/2].ExchangeRates.ExchangeRate
 }
 
-// GetMedian returns the median price of a given denom.
+// GetMedian returns a given denom's median price in the last prune
+// period since a given block.
 func (k Keeper) GetMedian(
 	ctx sdk.Context,
 	denom string,
+	blockNum uint64,
 ) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
 	denom = strings.ToUpper(denom)
-	bz := store.Get(types.GetMedianKey(denom))
+	bz := store.Get(types.GetMedianKey(denom, blockNum))
 	if bz == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
 	}
@@ -52,9 +50,10 @@ func (k Keeper) GetMedian(
 	return decProto.Dec, nil
 }
 
-// setMedian uses all the historic prices of given denom to set the
-// the median price of that denom in the store.
-func (k Keeper) setMedian(
+// SetMedian uses all the historic prices of a given denom to calculate
+// its median price in the last prune period since the current block and
+// set it to the store.
+func (k Keeper) SetMedian(
 	ctx sdk.Context,
 	denom string,
 ) {
@@ -63,7 +62,7 @@ func (k Keeper) setMedian(
 	median := median(historicPrices)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
 	denom = strings.ToUpper(denom)
-	store.Set(types.GetMedianKey(denom), bz)
+	store.Set(types.GetMedianKey(denom, uint64(ctx.BlockHeight())), bz)
 }
 
 // GetHistoricPrice returns the historic price of a denom at a given
@@ -118,15 +117,10 @@ func (k Keeper) IterateHistoricPrices(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
+	iter := sdk.KVStorePrefixIterator(store, append(types.KeyPrefixHistoricPrice, []byte(denom)...))
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		key := iter.Key()
-		historicPriceDenom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-9])
-		if historicPriceDenom != denom {
-			continue
-		}
 		var historicPrice types.HistoricPrice
 		k.cdc.MustUnmarshal(iter.Value(), &historicPrice)
 		if handler(historicPrice.ExchangeRates.ExchangeRate, historicPrice.BlockNum) {
@@ -156,9 +150,6 @@ func (k Keeper) AddHistoricPrice(
 	})
 	denom = strings.ToUpper(denom)
 	store.Set(types.GetHistoricPriceKey(denom, block), bz)
-
-	// update median after adding new historic price
-	k.setMedian(ctx, denom)
 }
 
 // DeleteHistoricPrice deletes the historic price of a denom at a
@@ -170,28 +161,4 @@ func (k Keeper) DeleteHistoricPrice(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.GetHistoricPriceKey(denom, blockNum))
-
-	// update median after deleting historic price
-	k.setMedian(ctx, denom)
-}
-
-func (k Keeper) ClearHistoricPrices(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
-
-	// clear medians as well
-	k.clearMedians(ctx)
-}
-
-func (k Keeper) clearMedians(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
 }
