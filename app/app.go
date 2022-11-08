@@ -28,6 +28,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
@@ -48,6 +49,7 @@ import (
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
@@ -74,6 +76,7 @@ import (
 	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	paramproposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
@@ -84,6 +87,7 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
+	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
@@ -95,6 +99,7 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v5/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v5/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v5/modules/core/02-client/client"
 	ibcclienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	ibcporttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
@@ -106,14 +111,17 @@ import (
 
 	// cosmwasm
 	"github.com/CosmWasm/wasmd/x/wasm"
+	wasmclient "github.com/CosmWasm/wasmd/x/wasm/client"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
+	customante "github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/swagger"
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v3/x/leverage"
+	leverageclient "github.com/umee-network/umee/v3/x/leverage/client"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	"github.com/umee-network/umee/v3/x/oracle"
@@ -287,18 +295,21 @@ func New(
 	bApp.SetVersion(version.Version)
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
-	keys := sdk.NewKVStoreKeys(
-		append([]string{
-			authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
-			minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
-			govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
-			evidencetypes.StoreKey, capabilitytypes.StoreKey,
-			authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
-			ibchost.StoreKey, ibctransfertypes.StoreKey,
-			gravitytypes.StoreKey,
-			leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
-		}, customKVStoreKeys()...)...,
-	)
+	storeKeys := []string{
+		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
+		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
+		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
+		evidencetypes.StoreKey, capabilitytypes.StoreKey,
+		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
+		ibchost.StoreKey, ibctransfertypes.StoreKey,
+		gravitytypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
+	}
+	if Experimental {
+		storeKeys = append(storeKeys, wasm.StoreKey)
+	}
+
+	keys := sdk.NewKVStoreKeys(storeKeys...)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
@@ -532,7 +543,9 @@ func New(
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// The wasm gov proposal types can be individually enabled
-	app.registerCustomProposals(govRouter, wasmEnabledProposals)
+	if Experimental && len(wasmEnabledProposals) != 0 {
+		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasmEnabledProposals))
+	}
 
 	govConfig := govtypes.DefaultConfig()
 	govConfig.MaxMetadataLen = 800
@@ -556,81 +569,79 @@ func New(
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
-	app.mm = module.NewManager(
-		append([]module.AppModule{
-			genutil.NewAppModule(
-				app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx,
-				encodingConfig.TxConfig,
-			),
-			auth.NewAppModule(appCodec, app.AccountKeeper, nil),
-			vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
-			bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
-			capability.NewAppModule(appCodec, *app.CapabilityKeeper),
-			crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
-			feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
-			gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
-			mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil),
-			// need to dereference StakingKeeper because x/distribution uses interface casting :(
-			// TODO: in the next SDK version we can remove the dereference
-			slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),
-			distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),
-			staking.NewAppModule(appCodec, *app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-			upgrade.NewAppModule(app.UpgradeKeeper),
-			evidence.NewAppModule(app.EvidenceKeeper),
-			ibc.NewAppModule(app.IBCKeeper),
-			params.NewAppModule(app.ParamsKeeper),
-			authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-			groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-			nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+	appModules := []module.AppModule{
+		genutil.NewAppModule(
+			app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx,
+			encodingConfig.TxConfig,
+		),
+		auth.NewAppModule(appCodec, app.AccountKeeper, nil),
+		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
+		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
+		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
+		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
+		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
+		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil),
+		// need to dereference StakingKeeper because x/distribution uses interface casting :(
+		// TODO: in the next SDK version we can remove the dereference
+		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),
+		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),
+		staking.NewAppModule(appCodec, *app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+		upgrade.NewAppModule(app.UpgradeKeeper),
+		evidence.NewAppModule(app.EvidenceKeeper),
+		ibc.NewAppModule(app.IBCKeeper),
+		params.NewAppModule(app.ParamsKeeper),
+		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
-			ibcTransferModule,
-			gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
-			leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
-			oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
-			bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
-		}, app.customModuleManager()...)...,
-	)
+		ibcTransferModule,
+		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
+		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
+		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
+	}
+	if Experimental {
+		appModules = append(appModules,
+			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper))
+	}
+	app.mm = module.NewManager(appModules...)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
-	app.mm.SetOrderBeginBlockers(
-		append([]string{
-			upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName,
-			slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
-			ibchost.ModuleName, ibctransfertypes.ModuleName,
-			authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
-			authz.ModuleName, feegrant.ModuleName,
-			nft.ModuleName,
-			group.ModuleName,
-			paramstypes.ModuleName, vestingtypes.ModuleName,
-			// icatypes.ModuleName,  ibcfeetypes.ModuleName,
-			leveragetypes.ModuleName,
-			oracletypes.ModuleName,
-			gravitytypes.ModuleName,
-			bech32ibctypes.ModuleName,
-		}, customOrderBeginBlocker()...)...,
-	)
-
-	app.mm.SetOrderEndBlockers(
-		append([]string{
-			crisistypes.ModuleName,
-			oracletypes.ModuleName, // must be before gov and staking
-			govtypes.ModuleName, stakingtypes.ModuleName,
-			ibchost.ModuleName, ibctransfertypes.ModuleName,
-			capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-			slashingtypes.ModuleName, minttypes.ModuleName,
-			genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
-			feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-			paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-			// icatypes.ModuleName,
-			leveragetypes.ModuleName,
-			gravitytypes.ModuleName,
-			bech32ibctypes.ModuleName,
-		}, customOrderEndBlocker()...)...,
-	)
+	beginBlockers := []string{
+		upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName,
+		slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
+		ibchost.ModuleName, ibctransfertypes.ModuleName,
+		authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
+		authz.ModuleName, feegrant.ModuleName,
+		nft.ModuleName,
+		group.ModuleName,
+		paramstypes.ModuleName, vestingtypes.ModuleName,
+		// icatypes.ModuleName,  ibcfeetypes.ModuleName,
+		leveragetypes.ModuleName,
+		oracletypes.ModuleName,
+		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
+	}
+	endBlockers := []string{
+		crisistypes.ModuleName,
+		oracletypes.ModuleName, // must be before gov and staking
+		govtypes.ModuleName, stakingtypes.ModuleName,
+		ibchost.ModuleName, ibctransfertypes.ModuleName,
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		slashingtypes.ModuleName, minttypes.ModuleName,
+		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
+		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
+		// icatypes.ModuleName,
+		leveragetypes.ModuleName,
+		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
+	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -638,37 +649,44 @@ func New(
 	// NOTE: Capability module must occur first so that it can initialize any capabilities
 	// so that other modules that want to create or claim capabilities afterwards in InitChain
 	// can do so safely.
-	app.mm.SetOrderInitGenesis(
-		append([]string{
-			capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-			stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-			crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
-			authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
-			feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-			paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
+	initGenesis := []string{
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
+		crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
+		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 
-			oracletypes.ModuleName,
-			leveragetypes.ModuleName,
-			gravitytypes.ModuleName,
-			bech32ibctypes.ModuleName,
-		}, customOrderInitGenesis()...)...,
-	)
+		oracletypes.ModuleName,
+		leveragetypes.ModuleName,
+		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
+	}
+	orderMigrations := []string{
+		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
+		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
+		crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
+		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 
-	app.mm.SetOrderMigrations(
-		append([]string{
-			capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-			stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-			crisistypes.ModuleName, ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
-			authz.ModuleName, ibctransfertypes.ModuleName, // icatypes.ModuleName,
-			feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-			paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
+		oracletypes.ModuleName,
+		leveragetypes.ModuleName,
+		gravitytypes.ModuleName,
+		bech32ibctypes.ModuleName,
+	}
 
-			oracletypes.ModuleName,
-			leveragetypes.ModuleName,
-			gravitytypes.ModuleName,
-			bech32ibctypes.ModuleName,
-		}, customOrderMigrations()...)...,
-	)
+	if Experimental {
+		beginBlockers = append(beginBlockers, wasm.ModuleName)
+		endBlockers = append(endBlockers, wasm.ModuleName)
+		initGenesis = append(initGenesis, wasm.ModuleName)
+		orderMigrations = append(orderMigrations, wasm.ModuleName)
+	}
+
+	app.mm.SetOrderBeginBlockers(beginBlockers...)
+	app.mm.SetOrderEndBlockers(endBlockers...)
+	app.mm.SetOrderInitGenesis(initGenesis...)
+	app.mm.SetOrderMigrations(orderMigrations...)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
@@ -677,7 +695,7 @@ func New(
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// Make sure it's called after `app.mm` and `app.configurator` are set.
-	app.registerUpgradeHandlers()
+	app.RegisterUpgradeHandlers(Experimental)
 
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata.RegisterQueryServer(app.GRPCQueryRouter(), testdata.QueryImpl{})
@@ -736,7 +754,20 @@ func New(
 func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
 	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) {
 
-	anteHandler, err := app.customAnteHandler(txConfig, wasmConfig, wasmStoreKey)
+	anteHandler, err := customante.NewAnteHandler(
+		customante.HandlerOptions{
+			AccountKeeper:     app.AccountKeeper,
+			BankKeeper:        app.BankKeeper,
+			OracleKeeper:      app.OracleKeeper,
+			IBCKeeper:         app.IBCKeeper,
+			SignModeHandler:   txConfig.SignModeHandler(),
+			FeegrantKeeper:    app.FeeGrantKeeper,
+			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
+			WasmConfig:        wasmConfig,
+			TXCounterStoreKey: wasmStoreKey,
+		},
+		Experimental,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -947,11 +978,26 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
+	if Experimental {
+		paramsKeeper.Subspace(wasm.ModuleName)
+	}
 
-	initCustomParamsKeeper(&paramsKeeper)
 	return paramsKeeper
 }
 
 func getGovProposalHandlers() []govclient.ProposalHandler {
-	return customProposalHanndlers()
+	handlers := []govclient.ProposalHandler{
+		paramsclient.ProposalHandler,
+		distrclient.ProposalHandler,
+		upgradeclient.LegacyProposalHandler,
+		upgradeclient.LegacyCancelProposalHandler,
+		leverageclient.ProposalHandler,
+		ibcclientclient.UpdateClientProposalHandler,
+		ibcclientclient.UpgradeProposalHandler,
+	}
+	if Experimental {
+		handlers = append(handlers, wasmclient.ProposalHandlers...)
+	}
+
+	return handlers
 }

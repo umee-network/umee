@@ -11,38 +11,25 @@ import (
 	"strings"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmclient "github.com/CosmWasm/wasmd/x/wasm/client"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
-	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
-	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	ibcclientclient "github.com/cosmos/ibc-go/v5/modules/core/02-client/client"
-	customante "github.com/umee-network/umee/v3/ante"
-	leverageclient "github.com/umee-network/umee/v3/x/leverage/client"
 )
 
-// Experimental is a flag which determines expermiental features.
-// It's set via build flag.
-const Experimental = true
-
-var (
+const (
+	// Experimental is a flag which determines expermiental features.
+	// It's set via build flag.
+	Experimental = true
 	// WasmProposalsEnabled enables all x/wasm proposals when it's value is "true"
 	// and EnableSpecificWasmProposals is empty. Otherwise, all x/wasm proposals
 	// are disabled.
 	WasmProposalsEnabled = "true"
+)
 
+var (
 	// EnableSpecificWasmProposals, if set, must be comma-separated list of values
 	// that are all a subset of "EnableAllProposals", which takes precedence over
 	// WasmProposalsEnabled.
@@ -62,64 +49,16 @@ func GetWasmEnabledProposals() []wasm.ProposalType {
 		if WasmProposalsEnabled == "true" {
 			return wasm.EnableAllProposals
 		}
-
 		return wasm.DisableAllProposals
 	}
 
 	chunks := strings.Split(EnableSpecificWasmProposals, ",")
-
 	proposals, err := wasm.ConvertToProposals(chunks)
 	if err != nil {
 		panic(err)
 	}
 
 	return proposals
-}
-
-func customKVStoreKeys() []string { return []string{wasm.StoreKey} }
-
-func (app *UmeeApp) customModuleManager() []module.AppModule {
-	return []module.AppModule{
-		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-	}
-}
-
-func customOrderInitGenesis() []string { return []string{wasm.ModuleName} }
-
-func customOrderBeginBlocker() []string { return []string{wasm.ModuleName} }
-
-func customOrderEndBlocker() []string { return []string{wasm.ModuleName} }
-
-func customOrderMigrations() []string { return []string{wasm.ModuleName} }
-
-func customProposalHanndlers() []govclient.ProposalHandler {
-	return append([]govclient.ProposalHandler{
-		paramsclient.ProposalHandler,
-		distrclient.ProposalHandler,
-		upgradeclient.LegacyProposalHandler,
-		upgradeclient.LegacyCancelProposalHandler,
-		leverageclient.ProposalHandler,
-		ibcclientclient.UpdateClientProposalHandler,
-		ibcclientclient.UpgradeProposalHandler,
-	}, wasmclient.ProposalHandlers...)
-}
-
-func (app *UmeeApp) customAnteHandler(txConfig client.TxConfig,
-	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) (sdk.AnteHandler, error) {
-	return customante.NewAnteHandler(
-		customante.HandlerOptions{
-			AccountKeeper:     app.AccountKeeper,
-			BankKeeper:        app.BankKeeper,
-			OracleKeeper:      app.OracleKeeper,
-			IBCKeeper:         app.IBCKeeper,
-			SignModeHandler:   txConfig.SignModeHandler(),
-			FeegrantKeeper:    app.FeeGrantKeeper,
-			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
-			WasmConfig:        wasmConfig,
-			TXCounterStoreKey: wasmStoreKey,
-		},
-		true,
-	)
 }
 
 func (app *UmeeApp) registerCustomExtensions() {
@@ -130,15 +69,6 @@ func (app *UmeeApp) registerCustomExtensions() {
 		if err != nil {
 			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
 		}
-	}
-}
-
-func (app *UmeeApp) registerCustomProposals(
-	govRouter govv1beta1.Router,
-	wasmEnabledProposals []wasmtypes.ProposalType,
-) {
-	if len(wasmEnabledProposals) != 0 {
-		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasmEnabledProposals))
 	}
 }
 
@@ -179,12 +109,6 @@ func (app *UmeeApp) customKeepers(
 	)
 }
 
-func initCustomParamsKeeper(paramsKeeper *paramskeeper.Keeper) {
-	paramsKeeper.Subspace(wasm.ModuleName)
-}
-
 func (app *UmeeApp) initializeCustomScopedKeepers() {
 	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
 }
-
-func (app *UmeeApp) registerUpgradeHandlers() { app.RegisterUpgradeHandlers(Experimental) }
