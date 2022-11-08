@@ -312,7 +312,7 @@ func validateStampPeriod(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v == 0 {
+	if v < 1 {
 		return fmt.Errorf("stamp period must be positive: %d", v)
 	}
 
@@ -325,7 +325,7 @@ func validatePrunePeriod(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v == 0 {
+	if v < 1 {
 		return fmt.Errorf("prune period must be positive: %d", v)
 	}
 
