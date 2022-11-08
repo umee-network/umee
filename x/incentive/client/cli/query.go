@@ -61,4 +61,35 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
+// GetCmdQueryIncentiveProgram creates a Cobra command to query a single incentive program
+// by its ID.
+func GetCmdQueryIncentiveProgram() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "incentive-program [id]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query a single incentive program by its ID",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			id := uint32(0) // TODO: get from args[0]
+
+			resp, err := queryClient.IncentiveProgram(cmd.Context(), &types.QueryIncentiveProgramRequest{Id: id})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // TODO: Add all queries
