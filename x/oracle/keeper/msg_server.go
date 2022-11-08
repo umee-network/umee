@@ -95,8 +95,8 @@ func (ms msgServer) AggregateExchangeRateVote(
 	}
 
 	// Filter out rates which aren't included in the AcceptList
-	// This is also needed for slashing: in the end blocker we are checking if validator voted
-	// for all required currencies. If he missed some, then we increase his slashing counter.
+	// This is also needed for slashing; in the end blocker we are checking if validator voted
+	// for all required currencies. If they missed some, then we increase their slashing counter.
 	filteredTuples := types.ExchangeRateTuples{}
 	for _, tuple := range exchangeRateTuples {
 		if params.AcceptList.Contains(tuple.Denom) {

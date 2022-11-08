@@ -36,7 +36,7 @@ func (k Keeper) RewardBallotWinners(
 		ballotPowerSum += winner.Weight
 	}
 
-	// early return - ballot was empty.
+	// early return - ballot was empty
 	if ballotPowerSum == 0 {
 		return
 	}
