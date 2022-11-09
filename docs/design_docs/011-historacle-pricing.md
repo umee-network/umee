@@ -28,7 +28,9 @@ Historacle pricing will provide an API for the leverage module to tell when pric
 
 ## Specification
 
-Each `Stamp Period`, the `x/oracle` module will now "stamp" the set of exchange rates in memory, and store it until a `Pruning Period` has passed (30 days). Another epoch, `Median Period`, will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in memory.
+We define two epoch periods, during which additional computation will be performed:
+- `Stamp Period`: duration during which the `x/oracle` module will now "stamp" the set of exchange rates in memory until a `Pruning Period` has passed (30 days).
+- `Median Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in memory.
 
 These values are stored in state in order to avoid the `x/leverage` module from having to calculate them while making decisions around allowable positions for users to take.
 
