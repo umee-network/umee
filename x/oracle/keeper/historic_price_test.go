@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -49,7 +50,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	historicPrices := app.OracleKeeper.GetHistoricPrices(ctx, displayDenom)
 	s.Require().Equal(len(historicPrices), 4)
 
-	// set and check median and median absolute deviation
+	// set and check median and median standard deviation
 	app.OracleKeeper.SetMedian(ctx, displayDenom)
 	median, err := app.OracleKeeper.GetMedian(ctx, displayDenom, uint64(ctx.BlockHeight()))
 	s.Require().NoError(err)
@@ -59,9 +60,19 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().NoError(err)
 	s.Require().Equal(medianDeviation, sdk.MustNewDecFromStr("0.0225"))
 
-	// delete first historic price
+	// delete first historic price, median, and median standard deviation
 	app.OracleKeeper.DeleteHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
+	app.OracleKeeper.DeleteMedian(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	app.OracleKeeper.DeleteMedianDeviation(ctx, displayDenom, uint64(ctx.BlockHeight()))
+
 	historicPrices = app.OracleKeeper.GetHistoricPrices(ctx, displayDenom)
-	s.Require().NoError(err)
 	s.Require().Equal(len(historicPrices), 3)
+
+	median, err = app.OracleKeeper.GetMedian(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	s.Require().Error(err, sdkerrors.Wrap(types.ErrUnknownDenom, displayDenom))
+	s.Require().Equal(median, sdk.ZeroDec())
+
+	medianDeviation, err = app.OracleKeeper.GetMedianDeviation(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	s.Require().Error(err, sdkerrors.Wrap(types.ErrUnknownDenom, displayDenom))
+	s.Require().Equal(median, sdk.ZeroDec())
 }
