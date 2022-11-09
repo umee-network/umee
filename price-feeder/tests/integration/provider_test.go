@@ -30,7 +30,6 @@ func TestServiceTestSuite(t *testing.T) {
 }
 
 func (s *IntegrationTestSuite) TestWebsocketProviders() {
-
 	if testing.Short() {
 		s.T().Skip("skipping integration test in short mode")
 	}
@@ -50,6 +49,10 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 }
 
 func (s *IntegrationTestSuite) TestSubscribeCurrencyPairs() {
+	if testing.Short() {
+		s.T().Skip("skipping integration test in short mode")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	currencyPairs := []types.CurrencyPair{{Base: "ATOM", Quote: "USDT"}}
 	pvd, _ := provider.NewOkxProvider(ctx, getLogger(), provider.Endpoint{}, currencyPairs...)
