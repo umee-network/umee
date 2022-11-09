@@ -218,6 +218,8 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		invCheckPeriod,
 		encCdc,
 		EmptyAppOptions{},
+		GetWasmEnabledProposals(),
+		EmptyWasmOpts,
 	)
 	if withGenesis {
 		return app, NewDefaultGenesisState(encCdc.Codec)
@@ -320,6 +322,8 @@ func IntegrationTestNetworkConfig() network.Config {
 			0,
 			encCfg,
 			EmptyAppOptions{},
+			GetWasmEnabledProposals(),
+			EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
 		)
