@@ -56,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1496](https://github.com/umee-network/umee/pull/1496) Dynamic provider minimum enforcement with CoinGecko API.
 - [1510](https://github.com/umee-network/umee/pull/1510) Integrate osmosis-api provider into price-feeder.
 - [1534](https://github.com/umee-network/umee/pull/1534) Query osmosis-api REST server for available asset pairs supported by it.
+- [1554](https://github.com/umee-network/umee/pull/1554) Convert remaining providers to the Websocket Controller
 
 ### Improvements
 
