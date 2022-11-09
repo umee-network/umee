@@ -123,7 +123,7 @@ Each `Median Period`, we will :
 
  Given a standard deviation where we have the median of each denom, find the square of each historic price's distance from the median, sum those values up, and average them:
 
-> *STD* = *ER*(2 x *H*) + 2
+> *STD* = *ER*(2*H* + 2)
 
 The cost of the `Median Period` is:
 
