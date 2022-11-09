@@ -55,11 +55,15 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	historicPrices := app.OracleKeeper.GetHistoricPrices(ctx, displayDenom)
 	s.Require().Equal(len(historicPrices), 4)
 
-	// set and check median
+	// set and check median and median absolute deviation
 	app.OracleKeeper.SetMedian(ctx, displayDenom)
 	median, err := app.OracleKeeper.GetMedian(ctx, displayDenom, uint64(ctx.BlockHeight()))
 	s.Require().NoError(err)
 	s.Require().Equal(median, sdk.MustNewDecFromStr("1.15"))
+
+	medianDeviation, err := app.OracleKeeper.GetMedianDeviation(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	s.Require().NoError(err)
+	s.Require().Equal(medianDeviation, sdk.MustNewDecFromStr("0.0225"))
 
 	// delete first historic price
 	app.OracleKeeper.DeleteHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()-3))

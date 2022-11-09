@@ -26,7 +26,8 @@ var (
 	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
 	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
 	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
-	KeyPrefixHistoricPrice                = []byte{0x07} // prefix for each key to a historic price
+	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
+	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 )
 
 // GetExchangeRateKey - stored by *denom*
@@ -63,6 +64,16 @@ func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 // GetMedianKey - stored by *denom* and *block*
 func GetMedianKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedian...)
+	key = append(key, []byte(denom)...)
+	block := make([]byte, 8)
+	binary.LittleEndian.PutUint64(block, blockNum)
+	key = append(key, block...)
+	return append(key, 0) // append 0 for null-termination
+}
+
+// GetMedianDeviationKey - stored by *denom* and *block*
+func GetMedianDeviationKey(denom string, blockNum uint64) (key []byte) {
+	key = append(key, KeyPrefixMedianDeviation...)
 	key = append(key, []byte(denom)...)
 	block := make([]byte, 8)
 	binary.LittleEndian.PutUint64(block, blockNum)
