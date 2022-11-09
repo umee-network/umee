@@ -71,6 +71,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 - Efficient API for the `x/leverage` module to use for safety.
 - We can continue listing low-volume assets for collateral.
 - Use of an existing module rather than creating a new one.
+- Protects against "borrowing + price dump" attacks which are not prevented by disabling low-volume asset collateral
 
 ### Negative
 
