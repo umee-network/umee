@@ -20,7 +20,7 @@ The attack goes:
 4. Account B collateralizes inflated FOO, and borrows USDC.
 5. Account B exits the market for a profit.
 
-In order to avoid this, and to continue with our goal of allowing users to collateralize low-volume assets, we need to have a safety net.
+In order to avoid these attacks, and to continue with our goal of allowing users to collateralize and borrow low-volume assets, we need to have a safety net.
 
 Currently, this is defended against by disallowing the use of `Umee` as collateral, however, we would like to re-enable that and list other assets with low volume for collateral.
 
