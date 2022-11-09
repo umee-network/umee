@@ -92,7 +92,7 @@ func (wsc *WebsocketController) Start() {
 		go wsc.readWebSocket()
 		go wsc.pingLoop()
 
-		if err := wsc.subscribe(); err != nil {
+		if err := wsc.subscribe(wsc.subscriptionMsgs); err != nil {
 			wsc.logger.Err(err).Send()
 			wsc.close()
 			continue
@@ -128,13 +128,24 @@ func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
 }
 
 // subscribe sends the WebsocketControllers subscription messages to the websocket
-func (wsc *WebsocketController) subscribe() error {
+func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 	telemetryWebsocketSubscribeCurrencyPairs(wsc.providerName, len(wsc.subscriptionMsgs))
-	for _, jsonMessage := range wsc.subscriptionMsgs {
+	for _, jsonMessage := range msgs {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
 	}
+	return nil
+}
+
+// AddSubscriptionMsgs immediately sends the new subscription messages and
+// adds them to the subscriptionMsgs array if successful
+func (wsc *WebsocketController) AddSubscriptionMsgs(msgs []interface{}) error {
+	err := wsc.subscribe(msgs)
+	if err != nil {
+		return err
+	}
+	wsc.subscriptionMsgs = append(wsc.subscriptionMsgs, msgs...)
 	return nil
 }
 
@@ -183,7 +194,7 @@ func (wsc *WebsocketController) ping() error {
 	if wsc.client == nil {
 		return fmt.Errorf("unable to ping closed connection")
 	}
-	err := wsc.client.WriteMessage(int(wsc.pingMessageType), []byte("ping"))
+	err := wsc.client.WriteMessage(int(wsc.pingMessageType), ping)
 	if err != nil {
 		wsc.logger.Err(fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)).Send()
 	}

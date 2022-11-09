@@ -30,6 +30,7 @@ type (
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
 	BinanceProvider struct {
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -115,27 +116,27 @@ func NewBinanceProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderBinance,
 		wsURL,
-		provider.getSubscriptionMsgs(),
+		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
 		disabledPingDuration,
 		websocket.PingMessage,
 		binanceLogger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
 }
 
-func (p *BinanceProvider) getSubscriptionMsgs() []interface{} {
+func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
 	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
-	for _, cp := range p.subscribedPairs {
+	for _, cp := range cps {
 		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
 		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceTickerPair))
 
@@ -175,6 +176,26 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 	}
 
 	return candlePrices, nil
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.RLock()
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+	p.mtx.RUnlock()
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
