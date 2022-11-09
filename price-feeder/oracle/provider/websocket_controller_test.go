@@ -23,13 +23,7 @@ func TestWebsocketController_readSuccess(t *testing.T) {
 		shouldCallMessageHandler bool
 	}{
 		{
-			"messageType is not a TextMessage",
-			8,
-			[]byte("asdf"),
-			false,
-		},
-		{
-			"messasge length is zero",
+			"message length is zero",
 			1,
 			[]byte{},
 			false,

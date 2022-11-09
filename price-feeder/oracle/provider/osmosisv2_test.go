@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"testing"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
@@ -110,31 +109,6 @@ func TestOsmosisV2Provider_GetCandlePrices(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.EqualError(t, err, "osmosisv2 failed to get candle price for FOO/BAR")
 		require.Nil(t, prices)
-	})
-}
-
-func TestOsmosisV2Provider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewOsmosisV2Provider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "OSMO", Quote: "ATOM"},
-	)
-	require.NoError(t, err)
-
-	// wait for response from osmosis-api
-	time.Sleep(time.Second * 10)
-
-	t.Run("ticker_prices_set", func(t *testing.T) {
-		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "OSMO", Quote: "ATOM"})
-		require.NoError(t, err)
-		require.NotEmpty(t, prices["OSMOATOM"])
-	})
-
-	t.Run("candle_prices_set", func(t *testing.T) {
-		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "OSMO", Quote: "ATOM"})
-		require.NoError(t, err)
-		require.NotEmpty(t, prices["OSMOATOM"])
 	})
 }
 
