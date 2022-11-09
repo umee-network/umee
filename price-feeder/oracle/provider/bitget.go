@@ -35,6 +35,7 @@ type (
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#tickers-channel
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#candlesticks-channel
 	BitgetProvider struct {
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -137,35 +138,48 @@ func NewBitgetProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderBitget,
 		wsURL,
-		provider.getSubscriptionMsgs(),
+		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
 		defaultPingDuration,
 		websocket.TextMessage,
 		bitgetLogger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
 }
 
-func (p *BitgetProvider) getSubscriptionMsgs() []interface{} {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
+func (p *BitgetProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
 	subscriptionMsgs := make([]interface{}, 0, 1)
-	cps := make([]types.CurrencyPair, 0, len(p.subscribedPairs))
-	for _, cp := range p.subscribedPairs {
-		cps = append(cps, cp)
-	}
-
 	bitgetTickerSubscriptionMsg := newBitgetTickerSubscriptionMsg(cps)
 	subscriptionMsgs = append(subscriptionMsgs, bitgetTickerSubscriptionMsg)
 
 	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *BitgetProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -334,9 +348,6 @@ func (p *BitgetProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandleP
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *BitgetProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}

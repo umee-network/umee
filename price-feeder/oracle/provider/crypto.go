@@ -137,7 +137,7 @@ func NewCryptoProvider(
 		ctx,
 		ProviderCrypto,
 		wsURL,
-		provider.getSubscriptionMsgs(),
+		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
 		disabledPingDuration,
 		websocket.PingMessage,
@@ -148,12 +148,9 @@ func NewCryptoProvider(
 	return provider, nil
 }
 
-func (p *CryptoProvider) getSubscriptionMsgs() []interface{} {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
-	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
-	for _, cp := range p.subscribedPairs {
+func (p *CryptoProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
+	subscriptionMsgs := make([]interface{}, 0, len(cps)*2)
+	for _, cp := range cps {
 		cryptoPair := currencyPairToCryptoPair(cp)
 		channel := cryptoTickerMsgPrefix + cryptoPair
 		msg := newCryptoSubscriptionMsg([]string{channel})
@@ -165,6 +162,27 @@ func (p *CryptoProvider) getSubscriptionMsgs() []interface{} {
 		subscriptionMsgs = append(subscriptionMsgs, msg)
 	}
 	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *CryptoProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -353,9 +371,6 @@ func (p *CryptoProvider) setCandlePair(symbol string, candlePair CryptoCandle) {
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *CryptoProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}

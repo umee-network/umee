@@ -35,6 +35,7 @@ type (
 	//
 	// REF: https://www.coinbase.io/docs/websocket/index.html
 	CoinbaseProvider struct {
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
@@ -120,37 +121,55 @@ func NewCoinbaseProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderCoinbase,
 		wsURL,
-		provider.getSubscriptionMsgs(),
+		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
 		defaultPingDuration,
 		websocket.PingMessage,
 		coinbaseLogger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
 }
 
-func (p *CoinbaseProvider) getSubscriptionMsgs() []interface{} {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
+func (p *CoinbaseProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
 	subscriptionMsgs := make([]interface{}, 0, 1)
 
-	topics := make([]string, len(p.subscribedPairs))
+	topics := make([]string, len(cps))
 	index := 0
 
-	for _, cp := range p.subscribedPairs {
+	for _, cp := range cps {
 		topics[index] = currencyPairToCoinbasePair(cp)
 		index++
 	}
 	msg := newCoinbaseSubscription(topics...)
 	subscriptionMsgs = append(subscriptionMsgs, msg)
 	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -370,9 +389,6 @@ func (p *CoinbaseProvider) setTradePair(tradeResponse CoinbaseTradeResponse) {
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *CoinbaseProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}

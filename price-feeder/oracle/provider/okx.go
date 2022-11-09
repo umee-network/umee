@@ -31,6 +31,7 @@ type (
 	//
 	// REF: https://www.okx.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
 	OkxProvider struct {
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -128,27 +129,24 @@ func NewOkxProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderOkx,
 		wsURL,
-		provider.getSubscriptionMsgs(),
+		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
 		defaultPingDuration,
 		websocket.PingMessage,
 		okxLogger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
 }
 
-func (p *OkxProvider) getSubscriptionMsgs() []interface{} {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
-	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
-	for _, cp := range p.subscribedPairs {
+func (p *OkxProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
+	subscriptionMsgs := make([]interface{}, 0, len(cps)*2)
+	for _, cp := range cps {
 		okxPair := currencyPairToOkxPair(cp)
 		okxTopic := newOkxCandleSubscriptionTopic(okxPair)
 		subscriptionMsgs = append(subscriptionMsgs, newOkxSubscriptionMsg(okxTopic))
@@ -157,6 +155,27 @@ func (p *OkxProvider) getSubscriptionMsgs() []interface{} {
 		subscriptionMsgs = append(subscriptionMsgs, newOkxSubscriptionMsg(okxTopic))
 	}
 	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -294,9 +313,6 @@ func (p *OkxProvider) setCandlePair(pairData []string, instID string) {
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *OkxProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}

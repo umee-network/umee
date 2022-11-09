@@ -30,6 +30,7 @@ type (
 	//
 	// REF: https://github.com/umee-network/osmosis-api
 	OsmosisV2Provider struct {
+		wsc             *WebsocketController
 		wsURL           url.URL
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
@@ -96,7 +97,7 @@ func NewOsmosisV2Provider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderOsmosisV2,
 		wsURL,
@@ -106,9 +107,19 @@ func NewOsmosisV2Provider(
 		websocket.PingMessage,
 		osmosisV2Logger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	p.setSubscribedPairs(cps...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -306,9 +317,6 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *OsmosisV2Provider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}

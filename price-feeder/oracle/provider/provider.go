@@ -38,8 +38,12 @@ type (
 		// GetCandlePrices returns the candlePrices based on the provided pairs.
 		GetCandlePrices(...types.CurrencyPair) (map[string][]types.CandlePrice, error)
 
-		// GetAvailablePairs return all available pairs symbol to susbscribe.
+		// GetAvailablePairs return all available pairs symbol to subscribe.
 		GetAvailablePairs() (map[string]struct{}, error)
+
+		// SubscribeCurrencyPairs sends subscription messages for the new currency
+		// pairs and adds t hem to the providers subscribed pairs
+		// SubscribeCurrencyPairs(...types.CurrencyPair) error
 	}
 
 	// Name name of an oracle provider. Usually it is an exchange
