@@ -6,6 +6,8 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
+var _ paramtypes.ParamSet = &Params{}
+
 const (
 	DefaultIBCPause = false
 )
@@ -28,7 +30,7 @@ func DefaultParams() *Params {
 	return &Params{IbcPause: DefaultIBCPause}
 }
 
-func (p *Params) Validate() error {
+func (p Params) Validate() error {
 	if err := validateBoolean(p.IbcPause); err != nil {
 		return err
 	}
@@ -38,7 +40,7 @@ func (p *Params) Validate() error {
 // ParamSetPairs implements params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyIBCPause, p.IbcPause, validateBoolean),
+		paramtypes.NewParamSetPair(KeyIBCPause, &p.IbcPause, validateBoolean),
 	}
 }
 

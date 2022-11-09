@@ -24,7 +24,13 @@ var (
 )
 
 // AppModuleBasic is the 29-fee AppModuleBasic
-type AppModuleBasic struct{}
+type AppModuleBasic struct {
+	cdc codec.Codec
+}
+
+func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
+	return AppModuleBasic{cdc: cdc}
+}
 
 // DefaultGenesis implements module.AppModuleBasic
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
@@ -33,7 +39,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 
 // GetQueryCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd()
+	return cli.GetQueryCmd(types.StoreKey)
 }
 
 // GetTxCmd implements module.AppModuleBasic
@@ -77,6 +83,13 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 type AppModule struct {
 	AppModuleBasic
 	keeper keeper.Keeper
+}
+
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
+	return AppModule{
+		AppModuleBasic: NewAppModuleBasic(cdc),
+		keeper:         keeper,
+	}
 }
 
 // ExportGenesis implements module.AppModule
@@ -125,4 +138,13 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 // Route implements module.AppModule
 func (AppModule) Route() sdk.Route {
 	return sdk.Route{}
+}
+
+// BeginBlock executes all ABCI BeginBlock logic respective to the x/ibc-rate-limit module.
+func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+
+// EndBlock executes all ABCI EndBlock logic respective to the x/ibc-rate-limit module.
+// It returns no validator updates.
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return EndBlocker(ctx, am.keeper)
 }

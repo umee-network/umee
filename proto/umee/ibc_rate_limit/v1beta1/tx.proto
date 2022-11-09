@@ -17,11 +17,13 @@ service Msg {
     // UpdateIBCDenomsRateLimit adds new rate limits for ibc denoms or 
     // updates the rate limits for existed ibc denoms.
     rpc UpdateIBCDenomsRateLimit(MsgUpdateIBCDenomsRateLimit) returns (MsgUpdateIBCDenomsRateLimitResponse);
+
+    // UpdateIBCTransferPauseStatus
+    rpc UpdateIBCTransferPauseStatus(MsgUpdateIBCTransferPauseStatus) returns (MsgUpdateIBCTransferPauseStatusResponse);
 }
 
 // MsgUpdateIBCDenomsRateLimit defines the Msg/UpdateIBCDenomsRateLimit request type.
 message MsgUpdateIBCDenomsRateLimit {
-    // option (gogoproto.equal)            = true;
     option (gogoproto.goproto_getters)  = false;
     option (gogoproto.goproto_stringer) = false;
     option (cosmos.msg.v1.signer) = "authority";
@@ -36,5 +38,21 @@ message MsgUpdateIBCDenomsRateLimit {
     repeated RateLimit update_ibc_denoms_rate_limits = 5 [(gogoproto.nullable) = false];
 }
 
-// MsgUpdateIBCDenomsRateLimitResponse defines the Msg/UpdateIBCDenomsRateLimit response type.
+// MsgUpdateIBCDenomsRateLimitResponse defines response type for the Msg/UpdateIBCDenomsRateLimit
 message MsgUpdateIBCDenomsRateLimitResponse {};
+
+// MsgUpdateIBCTransferPauseStatus defines request type for UpdateIBCTransferStatus
+message MsgUpdateIBCTransferPauseStatus {
+    option (gogoproto.goproto_getters)  = false;
+    option (gogoproto.goproto_stringer) = false;
+    option (cosmos.msg.v1.signer) = "authority";
+    // authority is the address of the governance account.
+    string         authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+    string         title       = 2;
+    string         description = 3;
+    // ibc_pause_status defines ibc transfer pause status
+    bool ibc_pause_status = 4;
+}
+
+// MsgUpdateIBCTransferPauseStatusResponse definesresponse type for Msg/MsgUpdateIBCTransferPauseStatus
+message MsgUpdateIBCTransferPauseStatusResponse {}

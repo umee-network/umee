@@ -2,10 +2,10 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "ibc-rate-limit"
+	ModuleName = "ibcratelimit"
 
 	// StoreKey defines the primary module store key
-	StoreKey = ModuleName
+	StoreKey = "ratelimit"
 
 	// RouterKey is the message route for slashing
 	RouterKey = ModuleName
@@ -13,3 +13,15 @@ const (
 	// QuerierRoute defines the module's query routing key
 	QuerierRoute = ModuleName
 )
+
+var (
+	KeyPrefixForIBCDenom = []byte{0x01}
+)
+
+func CreateKeyForRateLimitOfIBCDenom(ibcDenom string) []byte {
+	// interestScalarPrefix | denom | 0x00
+	var key []byte
+	key = append(key, KeyPrefixForIBCDenom...)
+	key = append(key, []byte(ibcDenom)...)
+	return append(key, 0) // append 0 for null-termination
+}

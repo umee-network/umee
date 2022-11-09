@@ -503,7 +503,7 @@ func New(
 
 	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
 		appCodec,
-		keys[ibchost.StoreKey], app.GetSubspace(ibcratelimittypes.ModuleName),
+		keys[ibcratelimittypes.StoreKey], app.GetSubspace(ibcratelimittypes.ModuleName),
 		app.IBCKeeper.ChannelKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
@@ -643,6 +643,7 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
+		ibcratelimit.NewAppModule(appCodec, app.ibcRateLimitKeeper),
 	}
 	if Experimental {
 		appModules = append(appModules,
@@ -669,6 +670,7 @@ func New(
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 	}
 	endBlockers := []string{
 		crisistypes.ModuleName,
@@ -684,6 +686,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -704,6 +707,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
@@ -717,7 +721,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-	}
+		ibcratelimittypes.ModuleName}
 
 	if Experimental {
 		beginBlockers = append(beginBlockers, wasm.ModuleName)
@@ -1018,6 +1022,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	// paramsKeeper.Subspace(icahosttypes.SubModuleName)
+	paramsKeeper.Subspace(ibcratelimittypes.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)

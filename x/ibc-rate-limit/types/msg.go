@@ -14,6 +14,7 @@ import (
 
 var (
 	_ sdk.Msg = &MsgUpdateIBCDenomsRateLimit{}
+	_ sdk.Msg = &MsgUpdateIBCTransferPauseStatus{}
 )
 
 func NewIbcDenomsRateLimits(authority, title, description string,
@@ -41,13 +42,13 @@ func (msg MsgUpdateIBCDenomsRateLimit) Route() string { return sdk.MsgTypeURL(&m
 func (msg MsgUpdateIBCDenomsRateLimit) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
-func (msg MsgUpdateIBCDenomsRateLimit) String() string {
+func (msg *MsgUpdateIBCDenomsRateLimit) String() string {
 	out, _ := yaml.Marshal(msg)
 	return string(out)
 }
 
 // ValidateBasic implements Msg
-func (msg MsgUpdateIBCDenomsRateLimit) ValidateBasic() error {
+func (msg *MsgUpdateIBCDenomsRateLimit) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
@@ -68,13 +69,13 @@ func (msg MsgUpdateIBCDenomsRateLimit) ValidateBasic() error {
 }
 
 // GetSignBytes implements Msg
-func (msg MsgUpdateIBCDenomsRateLimit) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
+func (msg *MsgUpdateIBCDenomsRateLimit) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg MsgUpdateIBCDenomsRateLimit) GetSigners() []sdk.AccAddress {
+func (msg *MsgUpdateIBCDenomsRateLimit) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
@@ -100,4 +101,57 @@ func validateAbstract(title, description string) error {
 
 func validateRateLimitsOfIBCDenom(rateLimits []RateLimit) error {
 	return nil
+}
+
+func NewUpdateIBCTransferPauseStatus(authority, title, description string,
+	ibcPauseStatus bool,
+) *MsgUpdateIBCTransferPauseStatus {
+	return &MsgUpdateIBCTransferPauseStatus{
+		Title:          title,
+		Description:    description,
+		Authority:      authority,
+		IbcPauseStatus: ibcPauseStatus,
+	}
+}
+
+// GetTitle returns the title of the proposal.
+func (msg *MsgUpdateIBCTransferPauseStatus) GetTitle() string { return msg.Title }
+
+// GetDescription returns the description of the proposal.
+func (msg *MsgUpdateIBCTransferPauseStatus) GetDescription() string { return msg.Description }
+
+// Route implements Msg
+func (msg MsgUpdateIBCTransferPauseStatus) Route() string { return sdk.MsgTypeURL(&msg) }
+
+// Type implements Msg
+func (msg MsgUpdateIBCTransferPauseStatus) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg *MsgUpdateIBCTransferPauseStatus) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// ValidateBasic implements Msg
+func (msg *MsgUpdateIBCTransferPauseStatus) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
+		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+
+	if err := validateAbstract(msg.Title, msg.Description); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetSignBytes implements Msg
+func (msg *MsgUpdateIBCTransferPauseStatus) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg *MsgUpdateIBCTransferPauseStatus) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
 }

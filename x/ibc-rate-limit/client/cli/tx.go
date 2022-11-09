@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
 )
@@ -18,7 +20,43 @@ func GetTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand()
+	cmd.AddCommand(
+		SampleTOkenRegistration(),
+	)
+
+	return cmd
+}
+
+func SampleTOkenRegistration() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "register",
+		Args:  cobra.NoArgs,
+		Short: "Supply a specified amount of a supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+			addRateLimits := []types.RateLimit{
+				{
+					IbcDenom:     "sai",
+					OutflowLimit: 1234,
+					Window:       1000,
+				},
+				{
+					IbcDenom:     "raj",
+					OutflowLimit: 1234,
+					Window:       1000,
+				},
+			}
+
+			msg := types.NewIbcDenomsRateLimits(clientCtx.FromAddress.String(), "title", "desc", addRateLimits, nil)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
