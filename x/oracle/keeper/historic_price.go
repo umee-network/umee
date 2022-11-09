@@ -21,7 +21,7 @@ func median(prices []types.HistoricPrice) sdk.Dec {
 			Cmp(prices[j].ExchangeRates.ExchangeRate.BigInt()) > 0
 	})
 
-	if lenPrices % 2 == 0 {
+	if lenPrices%2 == 0 {
 		return prices[lenPrices/2-1].ExchangeRates.ExchangeRate.
 			Add(prices[lenPrices/2].ExchangeRates.ExchangeRate).
 			QuoInt64(2)
@@ -38,8 +38,8 @@ func medianDeviation(median sdk.Dec, prices []types.HistoricPrice) sdk.Dec {
 
 	for _, price := range prices {
 		medianDeviation = medianDeviation.Add(price.ExchangeRates.ExchangeRate.
-		Sub(median).Abs().Power(2).
-		QuoInt64(int64(lenPrices)))
+			Sub(median).Abs().Power(2).
+			QuoInt64(int64(lenPrices)))
 	}
 
 	return medianDeviation
