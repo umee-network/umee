@@ -27,17 +27,17 @@ RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
 RUN cd price-feeder && LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
 
 # # Fetch peggo (gravity bridge) binary
-# FROM base-builder AS peggo-builder
-# ARG PEGGO_VERSION=v0.3.0
-# WORKDIR /downloads/
-# RUN git clone https://github.com/umee-network/peggo.git
-# RUN cd peggo && git checkout ${PEGGO_VERSION} && make build && cp ./build/peggo /usr/local/bin/
+FROM base-builder AS peggo-builder
+ARG PEGGO_VERSION=v0.3.0
+WORKDIR /downloads/
+RUN git clone https://github.com/umee-network/peggo.git
+RUN cd peggo && git checkout ${PEGGO_VERSION} && make build && cp ./build/peggo /usr/local/bin/
 
 # Add to a distroless container
 FROM gcr.io/distroless/cc:debug
 COPY --from=umeed-builder /go/bin/umeed /usr/local/bin/
 COPY --from=umeed-builder /go/bin/price-feeder /usr/local/bin/
-# COPY --from=peggo-builder /usr/local/bin/peggo /usr/local/bin/
+COPY --from=peggo-builder /usr/local/bin/peggo /usr/local/bin/
 EXPOSE 26656 26657 1317 9090 7171
 
 ENTRYPOINT ["umeed", "start"]
