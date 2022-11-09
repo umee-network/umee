@@ -19,11 +19,8 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	historicPrice, err := app.OracleKeeper.GetHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()))
 	s.Require().NoError(err)
 	s.Require().Equal(historicPrice, types.HistoricPrice{
-		ExchangeRates: types.ExchangeRateTuple{
-			Denom:        displayDenom,
-			ExchangeRate: sdk.OneDec(),
-		},
-		BlockNum: uint64(ctx.BlockHeight()),
+		ExchangeRate: sdk.OneDec(),
+		BlockNum:     uint64(ctx.BlockHeight()),
 	})
 
 	// add multiple historic prices to store
@@ -43,11 +40,8 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		historicPrice, err = app.OracleKeeper.GetHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()))
 		s.Require().NoError(err)
 		s.Require().Equal(historicPrice, types.HistoricPrice{
-			ExchangeRates: types.ExchangeRateTuple{
-				Denom:        displayDenom,
-				ExchangeRate: newRate,
-			},
-			BlockNum: uint64(ctx.BlockHeight()),
+			ExchangeRate: newRate,
+			BlockNum:     uint64(ctx.BlockHeight()),
 		})
 	}
 

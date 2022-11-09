@@ -20,6 +20,7 @@ var (
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
 	KeyStampPeriod              = []byte("StampPeriod")
 	KeyPrunePeriod              = []byte("PrunePeriod")
+	KeyMedianPeriod             = []byte("MedianPeriod")
 )
 
 // Default parameter values
@@ -27,8 +28,9 @@ const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
 	DefaultSlashWindow              = BlocksPerWeek       // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
-	DefaultStampPeriod              = BlocksPerDay        // window for a day
+	DefaultStampPeriod              = BlocksPerHour / 2   // window for 30 minutes
 	DefaultPrunePeriod              = BlocksPerMonth      // window for a month
+	DefaultMedianPeriod             = BlocksPerDay        // window for a day
 )
 
 // Default parameter values
@@ -66,6 +68,7 @@ func DefaultParams() Params {
 		MinValidPerWindow:        DefaultMinValidPerWindow,
 		StampPeriod:              DefaultStampPeriod,
 		PrunePeriod:              DefaultPrunePeriod,
+		MedianPeriod:             DefaultMedianPeriod,
 	}
 }
 
@@ -128,6 +131,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.PrunePeriod,
 			validatePrunePeriod,
 		),
+		paramstypes.NewParamSetPair(
+			KeyMedianPeriod,
+			&p.MedianPeriod,
+			validateMedianPeriod,
+		),
 	}
 }
 
@@ -168,6 +176,14 @@ func (p Params) Validate() error {
 
 	if p.PrunePeriod < p.StampPeriod {
 		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with StampPeriod")
+	}
+
+	if p.PrunePeriod < p.MedianPeriod {
+		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with MedianPeriod")
+	}
+
+	if p.MedianPeriod < p.StampPeriod {
+		return fmt.Errorf("oracle parameter MedianPeriod must be greater than or equal with StampPeriod")
 	}
 
 	for _, denom := range p.AcceptList {
@@ -327,6 +343,19 @@ func validatePrunePeriod(i interface{}) error {
 
 	if v < 1 {
 		return fmt.Errorf("prune period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMedianPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("median period must be positive: %d", v)
 	}
 
 	return nil

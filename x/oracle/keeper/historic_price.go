@@ -17,16 +17,16 @@ func median(prices []types.HistoricPrice) sdk.Dec {
 	}
 
 	sort.Slice(prices, func(i, j int) bool {
-		return prices[i].ExchangeRates.ExchangeRate.BigInt().
-			Cmp(prices[j].ExchangeRates.ExchangeRate.BigInt()) > 0
+		return prices[i].ExchangeRate.BigInt().
+			Cmp(prices[j].ExchangeRate.BigInt()) > 0
 	})
 
 	if lenPrices%2 == 0 {
-		return prices[lenPrices/2-1].ExchangeRates.ExchangeRate.
-			Add(prices[lenPrices/2].ExchangeRates.ExchangeRate).
+		return prices[lenPrices/2-1].ExchangeRate.
+			Add(prices[lenPrices/2].ExchangeRate).
 			QuoInt64(2)
 	}
-	return prices[lenPrices/2].ExchangeRates.ExchangeRate
+	return prices[lenPrices/2].ExchangeRate
 }
 
 // medianDeviation returns the standard deviation around the
@@ -37,7 +37,7 @@ func medianDeviation(median sdk.Dec, prices []types.HistoricPrice) sdk.Dec {
 	medianDeviation := sdk.ZeroDec()
 
 	for _, price := range prices {
-		medianDeviation = medianDeviation.Add(price.ExchangeRates.ExchangeRate.
+		medianDeviation = medianDeviation.Add(price.ExchangeRate.
 			Sub(median).Abs().Power(2).
 			QuoInt64(int64(lenPrices)))
 	}
@@ -141,11 +141,8 @@ func (k Keeper) GetHistoricPrices(
 
 	k.IterateHistoricPrices(ctx, denom, func(exchangeRate sdk.Dec, blockNum uint64) bool {
 		historicPrices = append(historicPrices, types.HistoricPrice{
-			ExchangeRates: types.ExchangeRateTuple{
-				Denom:        denom,
-				ExchangeRate: exchangeRate,
-			},
-			BlockNum: blockNum,
+			ExchangeRate: exchangeRate,
+			BlockNum:     blockNum,
 		})
 
 		return false
@@ -170,7 +167,7 @@ func (k Keeper) IterateHistoricPrices(
 	for ; iter.Valid(); iter.Next() {
 		var historicPrice types.HistoricPrice
 		k.cdc.MustUnmarshal(iter.Value(), &historicPrice)
-		if handler(historicPrice.ExchangeRates.ExchangeRate, historicPrice.BlockNum) {
+		if handler(historicPrice.ExchangeRate, historicPrice.BlockNum) {
 			break
 		}
 	}
@@ -185,15 +182,10 @@ func (k Keeper) AddHistoricPrice(
 	exchangeRate sdk.Dec,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	exchangeRateTuple := types.ExchangeRateTuple{
-		Denom:        denom,
-		ExchangeRate: exchangeRate,
-	}
-
 	block := uint64(ctx.BlockHeight())
 	bz := k.cdc.MustMarshal(&types.HistoricPrice{
-		ExchangeRates: exchangeRateTuple,
-		BlockNum:      block,
+		ExchangeRate: exchangeRate,
+		BlockNum:     block,
 	})
 	store.Set(types.GetHistoricPriceKey(denom, block), bz)
 }

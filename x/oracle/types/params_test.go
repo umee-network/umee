@@ -143,6 +143,17 @@ func TestValidatePrunePeriod(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidateMedianPeriod(t *testing.T) {
+	err := validateMedianPeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateMedianPeriod(uint64(0))
+	require.ErrorContains(t, err, "median period must be positive: 0")
+
+	err = validateMedianPeriod(uint64(10))
+	require.Nil(t, err)
+}
+
 func TestParamsEqual(t *testing.T) {
 	p1 := DefaultParams()
 	err := p1.Validate()
@@ -196,21 +207,35 @@ func TestParamsEqual(t *testing.T) {
 	err = p8.Validate()
 	require.Error(t, err)
 
-	// empty name
+	// PrunePeriod < MedianPeriod
 	p9 := DefaultParams()
-	p9.AcceptList[0].BaseDenom = ""
-	p9.AcceptList[0].SymbolDenom = "ATOM"
+	p9.MedianPeriod = 10
+	p9.PrunePeriod = 1
+	err = p8.Validate()
+	require.Error(t, err)
+
+	// MedianPeriod < StampPeriod
+	p10 := DefaultParams()
+	p10.StampPeriod = 10
+	p10.MedianPeriod = 1
+	err = p8.Validate()
+	require.Error(t, err)
+
+	// empty name
+	p11 := DefaultParams()
+	p11.AcceptList[0].BaseDenom = ""
+	p11.AcceptList[0].SymbolDenom = "ATOM"
 	err = p9.Validate()
 	require.Error(t, err)
 
 	// empty
-	p10 := DefaultParams()
-	p10.AcceptList[0].BaseDenom = "uatom"
-	p10.AcceptList[0].SymbolDenom = ""
+	p12 := DefaultParams()
+	p12.AcceptList[0].BaseDenom = "uatom"
+	p12.AcceptList[0].SymbolDenom = ""
 	err = p10.Validate()
 	require.Error(t, err)
 
-	p11 := DefaultParams()
-	require.NotNil(t, p11.ParamSetPairs())
-	require.NotNil(t, p11.String())
+	p13 := DefaultParams()
+	require.NotNil(t, p13.ParamSetPairs())
+	require.NotNil(t, p13.String())
 }
