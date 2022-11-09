@@ -40,6 +40,11 @@ func NewMockProvider() *MockProvider {
 	}
 }
 
+// SubscribeCurrencyPairs performs a no-op since mock does not use websockets
+func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}
+
 func (p MockProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 

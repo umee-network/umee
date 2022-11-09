@@ -105,7 +105,7 @@ func TestCryptoProvider_GetCandlePrices(t *testing.T) {
 
 		require.Equal(t, priceDec, prices["ATOMUSDT"][0].Price)
 		require.Equal(t, volumeDec, prices["ATOMUSDT"][0].Volume)
-		require.Equal(t, timeStamp, prices["ATOMUSDT"][0].TimeStamp)
+		require.Equal(t, timeStamp*1000, prices["ATOMUSDT"][0].TimeStamp)
 	})
 
 	t.Run("invalid_request_invalid_candle", func(t *testing.T) {

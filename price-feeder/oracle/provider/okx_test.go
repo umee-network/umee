@@ -97,8 +97,7 @@ func TestOkxProvider_getSubscriptionMsgs(t *testing.T) {
 	cps := []types.CurrencyPair{
 		{Base: "ATOM", Quote: "USDT"},
 	}
-	provider.setSubscribedPairs(cps...)
-	subMsgs := provider.getSubscriptionMsgs()
+	subMsgs := provider.getSubscriptionMsgs(cps...)
 
 	msg, _ := json.Marshal(subMsgs[0])
 	require.Equal(t, "{\"op\":\"subscribe\",\"args\":[{\"channel\":\"candle1m\",\"instId\":\"ATOM-USDT\"}]}", string(msg))

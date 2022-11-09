@@ -91,8 +91,7 @@ func TestGateProvider_getSubscriptionMsgs(t *testing.T) {
 	cps := []types.CurrencyPair{
 		{Base: "ATOM", Quote: "USDT"},
 	}
-	provider.setSubscribedPairs(cps...)
-	subMsgs := provider.getSubscriptionMsgs()
+	subMsgs := provider.getSubscriptionMsgs(cps...)
 
 	msg, _ := json.Marshal(subMsgs[0])
 	require.Equal(t, "{\"method\":\"ticker.subscribe\",\"params\":[\"ATOM_USDT\"],\"id\":1}", string(msg))
