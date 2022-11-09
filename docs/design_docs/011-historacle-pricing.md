@@ -6,7 +6,7 @@ Draft
 
 ## Abstract
 
-In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (30 days or so). This will allow the leverage module to make decisions around when to allow liquidations if an asset price is considered abnormal.
+In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (30 days or so). This will allow the leverage module to make decisions around when to allow additional borrowing activity if an asset price is considered abnormal.
 
 ## Context
 
