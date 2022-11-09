@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -83,23 +84,24 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
-func TestOkxProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewOkxProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-	require.NoError(t, err)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.ErrorContains(t, err, "currency pairs is empty")
-	})
-}
-
 func TestOkxCurrencyPairToOkxPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	okxSymbol := currencyPairToOkxPair(cp)
 	require.Equal(t, okxSymbol, "ATOM-USDT")
+}
+
+func TestOkxProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &OkxProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	subMsgs := provider.getSubscriptionMsgs(cps...)
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"op\":\"subscribe\",\"args\":[{\"channel\":\"candle1m\",\"instId\":\"ATOM-USDT\"}]}", string(msg))
+
+	msg, _ = json.Marshal(subMsgs[1])
+	require.Equal(t, "{\"op\":\"subscribe\",\"args\":[{\"channel\":\"tickers\",\"instId\":\"ATOM-USDT\"}]}", string(msg))
 }
