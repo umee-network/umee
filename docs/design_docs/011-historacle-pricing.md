@@ -99,6 +99,36 @@ Another version of this attack goes:
 4. The price of FOO returns to normal, and the value of the FOO exceeds the value of the USDC collateral.
 5. Attacker exits the market for a profit.
 
+### Computational Cost
+
+Where we define:
+
+> `Amount of Active Whitelisted Exchange Rates` = *ER*
+> `Amount of Historic Prices` = *H*
+> `Sorting algorithm` = *Sort*
+
+
+Each `Prune Period`, we will :
+
+1. Iterate over `Historic Prices`, and prune any which are past `Pruning Period`.
+2. Iterate over the current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of `ExchangeRate`
+
+> *H* + 2*ER* + 1
+
+Each `Median Period`, we will :
+
+- For each `Active Exchange Rate`, iterate over the historic prices and sort by ExchangeRate
+- Find the `Median`, and store it in state
+- Find the `Standard Deviation around the Median`, and store it in state
+
+ Given a standard deviation where we have the median of each denom, find the square of each historic price's distance from the median, sum those values up, and average them:
+
+> *STD* = *ER*(2 x *H*) + 2
+
+The cost of the `Median Period` is:
+
+> (*ER* x *Sort*(*HP*) + 4) + (*ER* x *STD*)
+
 ## References
 
 - [Twitter Thread on Mango Markets Hack](https://twitter.com/joshua_j_lim/status/1579987648546246658?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1579987648546246658%7Ctwgr%5E4d9aa2fbcc251280df2e9f47258135bac802b986%7Ctwcon%5Es1_&ref_url=https%3A%2F%2Fdecrypt.co%2F111727%2Fsolana-defi-trading-platform-mango-markets-loses-100m-in-hack)
