@@ -14,11 +14,11 @@ Right now, the volume of assets such as Juno, Umee, and Osmo are so low that it 
 
 The attack goes:
 
-1. Account A deposits & collateralizes a large amount of USDC.
-2. Account A uses collateral to borrow a lot of the low-volume token (here, FOO).
-3. Account A sells the tokens to Account B, inflating the price of FOO.
-4. Account B collateralizes inflated FOO, and borrows USDC.
-5. Account B exits the market for a profit.
+1. Attacker deposits & collateralizes a large amount FOO, a token with low volume on exchanges.
+2. Attacker spikes the price of FOO on the exchanges by buying a large amount.
+3. Attacker borrows USDC using their FOO as collateral at its current (spiked) oracle price.
+4. The price of FOO returns to normal, and the value of the USDC exceeds the value of the FOO collateral.
+5. Attacker exits the market for a profit.
 
 In order to avoid these attacks, and to continue with our goal of allowing users to collateralize and borrow low-volume assets, we need to have a safety net.
 
@@ -85,6 +85,16 @@ This will not introduce a new module, and it is relatively backwards compatible.
 ## Comments
 
 Originally a 24-hour median was thought to be effective enough to defend against this type of attack, but our modeling shows that we would need 30 days for adequate protection.
+
+### Additional Attack Scenario
+
+Another version of this attack goes:
+
+1. Attacker collateralizes USDC and borrows FOO
+2. Attacker sells borrowed FOO on exchanges, dumping the price
+3. Attacker borrows an even larger amount of FOO using the same collateral, due to the lower price
+4. The price of FOO returns to normal, and the value of the FOO exceeds the value of the USDC collateral.
+5. Attacker exits the market for a profit.
 
 ## References
 
