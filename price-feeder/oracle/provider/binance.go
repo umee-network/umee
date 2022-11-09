@@ -132,9 +132,6 @@ func NewBinanceProvider(
 }
 
 func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
 	for _, cp := range cps {
 		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
@@ -181,14 +178,15 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
 func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	p.mtx.RLock()
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
 	newPairs := []types.CurrencyPair{}
 	for _, cp := range cps {
 		if _, ok := p.subscribedPairs[cp.String()]; !ok {
 			newPairs = append(newPairs, cp)
 		}
 	}
-	p.mtx.RUnlock()
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
 	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
@@ -299,9 +297,6 @@ func (candle BinanceCandle) toCandlePrice() (types.CandlePrice, error) {
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
