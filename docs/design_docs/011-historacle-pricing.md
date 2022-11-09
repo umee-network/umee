@@ -37,7 +37,9 @@ These values are stored in state in order to avoid the `x/leverage` module from 
 
 ### Proposed API
 
-The leverage protocol will have access to a `Keeper` function from the `x/oracle` module, which will take a `denom`, and will return whether or not the current price of that asset is within the `Standard Deviation around the Median`.
+The `x/leverage` module will have access to the following `keeper` functions from the `x/oracle` module:
+- `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
+- `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
 
 ### Outcomes
 
