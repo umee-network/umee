@@ -46,11 +46,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
-
 ### State Machine Breaking
 
 - [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
+
+## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
 
 ### Features
 
