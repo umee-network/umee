@@ -108,7 +108,7 @@ Where we define:
 > `Sorting algorithm` = *Sort*
 
 
-Each `Prune Period`, we will :
+Each `Stamp Period`, we will :
 
 1. Iterate over `Historic Prices`, and prune any which are past `Pruning Period`.
 2. Iterate over the current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of `ExchangeRate`
