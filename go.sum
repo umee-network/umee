@@ -308,8 +308,8 @@ github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
 github.com/cosmos/iavl v0.19.4 h1:t82sN+Y0WeqxDLJRSpNd8YFX5URIrT+p8n6oJbJ2Dok=
 github.com/cosmos/iavl v0.19.4/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
-github.com/cosmos/ibc-go/v5 v5.0.1 h1:ZI5xCi6RDOL+hyu6Wx/w6JoAYFlOoK5hijsRTVWo+RA=
-github.com/cosmos/ibc-go/v5 v5.0.1/go.mod h1:LX0DHLW3dfi/1e4BJzi8MGLWmQ4DSraPEgVjyo3VzAo=
+github.com/cosmos/ibc-go/v5 v5.1.0 h1:m1NHXFkwwvNeJegZqtyox1WLinh+PMy4ivU/Cs9KjeA=
+github.com/cosmos/ibc-go/v5 v5.1.0/go.mod h1:H6sV0/CkNRDtvSrhbsIgiog1WnSwhguGfg8x34MOVEk=
 github.com/cosmos/interchain-accounts v0.3.2 h1:7S5rSndahpjkzUvG00kKZrTZsEuVHuVC9a7p0qDVcF8=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
 github.com/cosmos/ledger-cosmos-go v0.11.1/go.mod h1:J8//BsAGTo3OC/vDLjMRFLW6q0WAaXvHnVc7ZmE8iUY=
@@ -1336,8 +1336,8 @@ github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqz
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-3 h1:oxVcUBcfWDcGBms7M5OMEuFoE+RJVWT2hsEkqS5zy1s=
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-3/go.mod h1:ij4MmyaxHmljTohtd7IGwN66fdZyGVTM7DAPPqRB8Tk=
-github.com/umee-network/bech32-ibc v0.3.0 h1:WP0w6hG/B9WJ5hfUNx7Hd9pE0MJR/Lp9Y1NPjh03/40=
-github.com/umee-network/bech32-ibc v0.3.0/go.mod h1:PqMePY74J6wqJH7Yai1l94rPsEe6QVa9X8gt5/M5nIo=
+github.com/umee-network/bech32-ibc v0.3.1 h1:vn2+iXvHRcFLafbjyx9xf4DNqIa9I7ib30EtJFPmSk4=
+github.com/umee-network/bech32-ibc v0.3.1/go.mod h1:5aoZoZsxSVBXxHfGGw6lfysJI+No9+aLFdHuE+Xo0EI=
 github.com/umee-network/cosmos-sdk v0.46.4-umee h1:Wk1PiriCoT2YuYn87J8Tjm0zkHAKKa4HMPq190O+Pig=
 github.com/umee-network/cosmos-sdk v0.46.4-umee/go.mod h1:b5usG7aBEEvhaatYCdV6orFbDUsj4BG1V6UtKwNcJeQ=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
