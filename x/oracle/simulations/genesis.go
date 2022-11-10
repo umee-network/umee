@@ -19,6 +19,9 @@ const (
 	slashFractionKey            = "slash_fraction"
 	slashWindowKey              = "slash_window"
 	minValidPerWindowKey        = "min_valid_per_window"
+	stampPeriodKey              = "stamp_period"
+	prunePeriodKey              = "prune_period"
+	medianPeriodKey             = "median_period"
 )
 
 // GenVotePeriod produces a randomized VotePeriod in the range of [5, 100]
@@ -54,6 +57,21 @@ func GenSlashWindow(r *rand.Rand) uint64 {
 // GenMinValidPerWindow produces a randomized MinValidPerWindow in the range of [0, 0.500]
 func GenMinValidPerWindow(r *rand.Rand) sdk.Dec {
 	return sdk.ZeroDec().Add(sdk.NewDecWithPrec(int64(r.Intn(500)), 3))
+}
+
+// GenStampPeriod produces a randomized StampPeriod in the range of [100, 1000]
+func GenStampPeriod(r *rand.Rand) uint64 {
+	return uint64(100 + r.Intn(1000))
+}
+
+// GenPrunePeriod produces a randomized PrunePeriod in the range of [10001, 100000]
+func GenPrunePeriod(r *rand.Rand) uint64 {
+	return uint64(10001 + r.Intn(100000))
+}
+
+// GenMedianPeriod produces a randomized MedianPeriod in the range of [1001, 10000]
+func GenMedianPeriod(r *rand.Rand) uint64 {
+	return uint64(1001 + r.Intn(10000))
 }
 
 // RandomizedGenState generates a random GenesisState for oracle
@@ -100,6 +118,24 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { minValidPerWindow = GenMinValidPerWindow(r) },
 	)
 
+	var stampPeriod uint64
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, stampPeriodKey, &stampPeriod, simState.Rand,
+		func(r *rand.Rand) { stampPeriod = GenStampPeriod(r) },
+	)
+
+	var prunePeriod uint64
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, prunePeriodKey, &prunePeriod, simState.Rand,
+		func(r *rand.Rand) { prunePeriod = GenPrunePeriod(r) },
+	)
+
+	var medianPeriod uint64
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, medianPeriodKey, &medianPeriod, simState.Rand,
+		func(r *rand.Rand) { medianPeriod = GenMedianPeriod(r) },
+	)
+
 	oracleGenesis := types.NewGenesisState(
 		types.Params{
 			VotePeriod:               votePeriod,
@@ -112,6 +148,9 @@ func RandomizedGenState(simState *module.SimulationState) {
 			SlashFraction:     slashFraction,
 			SlashWindow:       slashWindow,
 			MinValidPerWindow: minValidPerWindow,
+			StampPeriod:       stampPeriod,
+			PrunePeriod:       prunePeriod,
+			MedianPeriod:      medianPeriod,
 		},
 		[]types.ExchangeRateTuple{},
 		[]types.FeederDelegation{},
