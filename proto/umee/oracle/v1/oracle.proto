@@ -47,7 +47,7 @@ message Params {
   // Prune Period represents the maximum amount of blocks which we want
   // to keep a record of our set of exchange rates.
   uint64 prune_period = 10;
-  // Medion Period reperesents the amount blocks we will wait between
+  // Median Period represents the amount blocks we will wait between
   // calculating the median and standard deviation of the median of
   // historic prices in the last Prune Period.
   uint64 median_period = 11;
