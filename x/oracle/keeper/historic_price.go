@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,7 +56,7 @@ func (k Keeper) GetMedian(
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetMedianKey(denom, blockNum))
 	if bz == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s block: %d", denom, blockNum))
 	}
 
 	decProto := sdk.DecProto{}
@@ -73,7 +74,7 @@ func (k Keeper) SetMedian(
 	denom string,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	historicPrices := k.GetHistoricPrices(ctx, denom)
+	historicPrices := k.getHistoricPrices(ctx, denom)
 	median := median(historicPrices)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
 	store.Set(types.GetMedianKey(denom, uint64(ctx.BlockHeight())), bz)
@@ -90,7 +91,7 @@ func (k Keeper) GetMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetMedianDeviationKey(denom, blockNum))
 	if bz == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, denom)
+		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s block: %d", denom, blockNum))
 	}
 
 	decProto := sdk.DecProto{}
@@ -113,27 +114,8 @@ func (k Keeper) setMedianDeviation(
 	store.Set(types.GetMedianDeviationKey(denom, uint64(ctx.BlockHeight())), bz)
 }
 
-// GetHistoricPrice returns the historic price of a denom at a given
-// block.
-func (k Keeper) GetHistoricPrice(
-	ctx sdk.Context,
-	denom string,
-	blockNum uint64,
-) (types.HistoricPrice, error) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetHistoricPriceKey(denom, blockNum))
-	if bz == nil {
-		return types.HistoricPrice{}, sdkerrors.Wrap(types.ErrUnknownDenom, denom)
-	}
-
-	var historicPrice types.HistoricPrice
-	k.cdc.MustUnmarshal(bz, &historicPrice)
-
-	return historicPrice, nil
-}
-
-// GetHistoricPrices returns all the historic prices of a given denom.
-func (k Keeper) GetHistoricPrices(
+// getHistoricPrices returns all the historic prices of a given denom.
+func (k Keeper) getHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 ) []types.HistoricPrice {
