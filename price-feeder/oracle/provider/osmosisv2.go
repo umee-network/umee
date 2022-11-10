@@ -79,7 +79,7 @@ func NewOsmosisV2Provider(
 	}
 
 	wsURL := url.URL{
-		Scheme: "ws",
+		Scheme: "wss",
 		Host:   endpoints.Websocket,
 		Path:   osmosisV2WSPath,
 	}
