@@ -28,10 +28,10 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	)
 
 	claimMap[valAddr.String()] = types.Claim{
-		Power:     1,
-		Weight:    1,
-		WinCount:  1,
-		Recipient: valAddr,
+		Power:       1,
+		Weight:      1,
+		TokensVoted: 1,
+		Validator:   valAddr,
 	}
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
@@ -66,7 +66,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	s.Require().NoError(err)
 	s.Require().Equal(voteRes, vote)
 
-	s.app.OracleKeeper.ClearBallots(s.ctx, 0)
+	s.app.OracleKeeper.ClearVotes(s.ctx, 0)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRatePrevote(s.ctx, valAddr)
 	s.Require().Error(err)
 	_, err = s.app.OracleKeeper.GetAggregateExchangeRateVote(s.ctx, valAddr)
