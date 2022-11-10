@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
@@ -21,25 +22,13 @@ type AggregateVoteHash []byte
 // GetAggregateVoteHash computes hash value of ExchangeRateVote to avoid
 // redundant DecCoins stringify operation.
 func GetAggregateVoteHash(salt, exchangeRatesStr string, voter sdk.ValAddress) AggregateVoteHash {
-	hash := tmhash.NewTruncated()
-	sourceStr := fmt.Sprintf("%s:%s:%s", salt, exchangeRatesStr, voter.String())
-
-	if _, err := hash.Write([]byte(sourceStr)); err != nil {
-		panic(err)
-	}
-
-	bz := hash.Sum(nil)
-	return bz
+	sourceStr := strings.Join([]string{salt, exchangeRatesStr, voter.String()}, ":")
+	return tmhash.SumTruncated([]byte(sourceStr))
 }
 
-// AggregateVoteHashFromHexString convert hex string to AggregateVoteHash.
-func AggregateVoteHashFromHexString(s string) (AggregateVoteHash, error) {
-	h, err := hex.DecodeString(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return h, nil
+// AggregateVoteHashFromHex convert hex string to AggregateVoteHash.
+func AggregateVoteHashFromHex(s string) (AggregateVoteHash, error) {
+	return hex.DecodeString(s)
 }
 
 // String implements fmt.Stringer interface
@@ -112,7 +101,7 @@ func (h *AggregateVoteHash) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	h2, err := AggregateVoteHashFromHexString(s)
+	h2, err := AggregateVoteHashFromHex(s)
 	if err != nil {
 		return err
 	}

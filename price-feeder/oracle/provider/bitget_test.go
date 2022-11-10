@@ -144,21 +144,6 @@ func TestBitgetProvider_GetCandlePrices(t *testing.T) {
 	})
 }
 
-func TestBitgetProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewBitgetProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-	require.NoError(t, err)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.ErrorContains(t, err, "currency pairs is empty")
-	})
-}
-
 func TestBitgetProvider_AvailablePairs(t *testing.T) {
 	p, err := NewBitgetProvider(
 		context.TODO(),
