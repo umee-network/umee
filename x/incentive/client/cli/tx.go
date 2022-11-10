@@ -24,6 +24,9 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdClaim(),
+		GetCmdBond(),
+		GetCmdBeginUnbonding(),
+		GetCmdSponsor(),
 	)
 
 	return cmd
