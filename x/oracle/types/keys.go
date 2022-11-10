@@ -64,31 +64,30 @@ func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 // GetMedianKey - stored by *denom* and *block*
 func GetMedianKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedian...)
-	key = append(key, []byte(denom)...)
-	block := make([]byte, 8)
-	binary.LittleEndian.PutUint64(block, blockNum)
-	key = append(key, block...)
+	key = appendDenomAndBlockToKey(key, denom, blockNum)
 	return append(key, 0) // append 0 for null-termination
 }
 
 // GetMedianDeviationKey - stored by *denom* and *block*
 func GetMedianDeviationKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedianDeviation...)
-	key = append(key, []byte(denom)...)
-	block := make([]byte, 8)
-	binary.LittleEndian.PutUint64(block, blockNum)
-	key = append(key, block...)
+	key = appendDenomAndBlockToKey(key, denom, blockNum)
 	return append(key, 0) // append 0 for null-termination
 }
 
 // GetHistoricPriceKey - stored by *denom* and *block*
 func GetHistoricPriceKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixHistoricPrice...)
+	key = appendDenomAndBlockToKey(key, denom, blockNum)
+	return append(key, 0) // append 0 for null-termination
+}
+
+func appendDenomAndBlockToKey(key []byte, denom string, blockNum uint64) []byte {
 	key = append(key, []byte(denom)...)
 	block := make([]byte, 8)
 	binary.LittleEndian.PutUint64(block, blockNum)
 	key = append(key, block...)
-	return append(key, 0) // append 0 for null-termination
+	return key
 }
 
 func ParseDemonFromHistoricPriceKey(key []byte) string {
