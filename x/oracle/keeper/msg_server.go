@@ -12,7 +12,6 @@ import (
 
 type msgServer struct {
 	Keeper
-	experimental bool
 }
 
 // NewMsgServerImpl returns an implementation of the oracle MsgServer interface
