@@ -89,17 +89,3 @@ func TestFTXProvider_GetCandlePrices(t *testing.T) {
 		require.Nil(t, prices)
 	})
 }
-
-func TestFTXProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p := NewFTXProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err := p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.NoError(t, err)
-	})
-}
