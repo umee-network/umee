@@ -200,7 +200,7 @@ func (k Keeper) DeleteHistoricPrice(
 	store.Delete(types.GetHistoricPriceKey(denom, blockNum))
 }
 
-// DeleteMedian deletes a givem denom's median price in the last prune
+// DeleteMedian deletes a given denom's median price in the last prune
 // period since a given block.
 func (k Keeper) DeleteMedian(
 	ctx sdk.Context,
