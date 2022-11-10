@@ -112,6 +112,11 @@ func NewFTXProvider(
 	return &ftx
 }
 
+// SubscribeCurrencyPairs performs a no-op since ftx does not use websockets
+func (p *FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+	return nil
+}
+
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *FTXProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	markets := p.getMarketsCache()
@@ -188,11 +193,6 @@ func (p *FTXProvider) GetAvailablePairs() (map[string]struct{}, error) {
 	}
 
 	return availablePairs, nil
-}
-
-// SubscribeCurrencyPairs performs a no-op since ftx does not use websockets
-func (p *FTXProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
 }
 
 // pollCache polls the markets and candles endpoints,

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -74,21 +75,6 @@ func TestCoinbaseProvider_GetTickerPrices(t *testing.T) {
 	})
 }
 
-func TestCoinbaseProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewCoinbaseProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-	require.NoError(t, err)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.ErrorContains(t, err, "currency pairs is empty")
-	})
-}
-
 func TestCoinbasePairToCurrencyPair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	currencyPairSymbol := coinbasePairToCurrencyPair("ATOM-USDT")
@@ -99,4 +85,17 @@ func TestCurrencyPairToCoinbasePair(t *testing.T) {
 	cp := types.CurrencyPair{Base: "ATOM", Quote: "USDT"}
 	coinbaseSymbol := currencyPairToCoinbasePair(cp)
 	require.Equal(t, coinbaseSymbol, "ATOM-USDT")
+}
+
+func TestCoinbaseProvider_getSubscriptionMsgs(t *testing.T) {
+	provider := &CoinbaseProvider{
+		subscribedPairs: map[string]types.CurrencyPair{},
+	}
+	cps := []types.CurrencyPair{
+		{Base: "ATOM", Quote: "USDT"},
+	}
+	subMsgs := provider.getSubscriptionMsgs(cps...)
+
+	msg, _ := json.Marshal(subMsgs[0])
+	require.Equal(t, "{\"type\":\"subscribe\",\"product_ids\":[\"ATOM-USDT\"],\"channels\":[\"matches\",\"ticker\"]}", string(msg))
 }

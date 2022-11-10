@@ -74,6 +74,8 @@ func TestFullAppSimulation(t *testing.T) {
 		simapp.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
+		umeeapp.GetWasmEnabledProposals(),
+		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
 	require.Equal(t, appparams.Name, app.Name())
@@ -145,6 +147,8 @@ func TestAppStateDeterminism(t *testing.T) {
 				simapp.FlagPeriodValue,
 				umeeapp.MakeEncodingConfig(),
 				umeeapp.EmptyAppOptions{},
+				umeeapp.GetWasmEnabledProposals(),
+				umeeapp.EmptyWasmOpts,
 				interBlockCacheOpt(),
 			)
 
@@ -220,6 +224,8 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		simapp.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
+		umeeapp.GetWasmEnabledProposals(),
+		umeeapp.EmptyWasmOpts,
 		interBlockCacheOpt(),
 	)
 
