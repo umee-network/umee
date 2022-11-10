@@ -30,6 +30,7 @@ type (
 	//
 	// REF: https://github.com/umee-network/osmosis-api
 	OsmosisV2Provider struct {
+		wsc             *WebsocketController
 		wsURL           url.URL
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
@@ -96,17 +97,29 @@ func NewOsmosisV2Provider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	controller := NewWebsocketController(
+	provider.wsc = NewWebsocketController(
 		ctx,
 		ProviderOsmosisV2,
 		wsURL,
 		[]interface{}{""},
 		provider.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
 		osmosisV2Logger,
 	)
-	go controller.Start()
+	go provider.wsc.Start()
 
 	return provider, nil
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	p.setSubscribedPairs(cps...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -176,17 +189,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candleList, nil
 }
 
-// SubscribeCurrencyPairs performs a no-op since the osmosis-api does not
-// have specific currency channels.
-func (p *OsmosisV2Provider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
-}
-
 func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	// check if message is an ack first
 	if string(bz) == "ack" {
 		return
@@ -202,6 +205,12 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 	)
 
 	messageErr = json.Unmarshal(bz, &messageResp)
+	if messageErr != nil {
+		p.logger.Error().
+			Int("length", len(bz)).
+			AnErr("message", messageErr).
+			Msg("Error on receive message")
+	}
 
 	// Check the response for currency pairs that the provider is subscribed
 	// to and determine whether it is a ticker or candle.
@@ -218,20 +227,21 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 						Int("length", len(bz)).
 						AnErr("ticker", tickerErr).
 						Msg("Error on receive message")
-
-					return
+					continue
 				}
 				p.setTickerPair(
 					osmosisV2Pair,
 					tickerResp,
 				)
 				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeTicker)
-
-				return
+				continue
 
 			// candle response
 			case []interface{}:
-				// use latest candlestick in list
+				// use latest candlestick in list if there is one
+				if len(v) == 0 {
+					continue
+				}
 				candleString, _ := json.Marshal(v[len(v)-1].(map[string]interface{}))
 				candleErr = json.Unmarshal(candleString, &candleResp)
 				if candleErr != nil {
@@ -239,24 +249,17 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 						Int("length", len(bz)).
 						AnErr("candle", candleErr).
 						Msg("Error on receive message")
-
-					return
+					continue
 				}
 				p.setCandlePair(
 					osmosisV2Pair,
 					candleResp,
 				)
 				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeCandle)
-
-				return
+				continue
 			}
 		}
 	}
-
-	p.logger.Error().
-		Int("length", len(bz)).
-		AnErr("message", messageErr).
-		Msg("Error on receive message")
 }
 
 func (p *OsmosisV2Provider) setTickerPair(symbol string, tickerPair OsmosisV2Ticker) {
@@ -314,9 +317,6 @@ func (p *OsmosisV2Provider) setCandlePair(symbol string, candlePair OsmosisV2Can
 
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *OsmosisV2Provider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
