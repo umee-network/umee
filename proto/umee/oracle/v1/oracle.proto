@@ -112,7 +112,6 @@ message ExchangeRateTuple {
 // HistoricPrice is an instance of a price "stamp"
 message HistoricPrice {
   ExchangeRateTuple exchange_rate = 1 [
-    (gogoproto.moretags)   = "yaml:\"exchange_rate\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
