@@ -174,8 +174,7 @@ func (k Keeper) IterateHistoricPrices(
 }
 
 // AddHistoricPrice adds the historic price of a denom at the current
-// block height when called to the store. Afterwards it will call
-// setMedian to update the median price of the denom in the store.
+// block height.
 func (k Keeper) AddHistoricPrice(
 	ctx sdk.Context,
 	denom string,
