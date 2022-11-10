@@ -107,6 +107,7 @@ type AppModule struct {
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	bankKeeper    bankkeeper.Keeper
+	experimental  bool
 }
 
 func NewAppModule(
@@ -114,12 +115,14 @@ func NewAppModule(
 	keeper keeper.Keeper,
 	accountKeeper types.AccountKeeper,
 	bankKeeper bankkeeper.Keeper,
+	experimental bool,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,
+		experimental:   experimental,
 	}
 }
 
