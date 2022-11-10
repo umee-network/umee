@@ -12,12 +12,13 @@ import (
 
 type msgServer struct {
 	Keeper
+	experimental bool
 }
 
 // NewMsgServerImpl returns an implementation of the oracle MsgServer interface
 // for the provided Keeper.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
-	return &msgServer{Keeper: keeper}
+func NewMsgServerImpl(keeper Keeper, experimental bool) types.MsgServer {
+	return &msgServer{Keeper: keeper, experimental: experimental}
 }
 
 func (ms msgServer) AggregateExchangeRatePrevote(
