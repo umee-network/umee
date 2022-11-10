@@ -115,6 +115,9 @@ import (
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
+	"github.com/umee-network/umee/v3/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v3/x/incentive/keeper"
+	incentivetypes "github.com/umee-network/umee/v3/x/incentive/types"
 	"github.com/umee-network/umee/v3/x/leverage"
 	leverageclient "github.com/umee-network/umee/v3/x/leverage/client"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
@@ -159,6 +162,7 @@ var (
 		ibctransfer.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
+		incentive.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 	)
@@ -176,6 +180,7 @@ var (
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		incentivetypes.ModuleName:   nil,
 		oracletypes.ModuleName:      nil,
 	}
 )
@@ -219,6 +224,7 @@ type UmeeApp struct {
 	IBCKeeper          *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	GravityKeeper      gravitykeeper.Keeper
 	LeverageKeeper     leveragekeeper.Keeper
+	IncentiveKeeper    incentivekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
 
@@ -276,7 +282,8 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, incentivetypes.StoreKey,
+		bech32ibctypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -415,6 +422,13 @@ func New(
 		),
 	)
 
+	app.IncentiveKeeper = incentivekeeper.NewKeeper(
+		appCodec,
+		keys[incentivetypes.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+	)
+
 	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -551,6 +565,7 @@ func New(
 		ibcTransferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
+		incentive.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	)
@@ -571,6 +586,7 @@ func New(
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentivetypes.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
@@ -588,6 +604,7 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentivetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	)
@@ -608,6 +625,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentivetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	)
@@ -622,6 +640,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentivetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	)
@@ -646,6 +665,7 @@ func New(
 	simStateModules := genmap.Pick(app.mm.Modules,
 		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
 	// TODO: Ensure x/leverage implements simulator and add it here:
+	// TODO: Same for x/incentive
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)

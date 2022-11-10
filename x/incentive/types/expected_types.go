@@ -17,6 +17,6 @@ type BankKeeper interface {
 
 // LeverageKeeper defines the expected x/leverage keeper interface.
 type LeverageKeeper interface {
-	GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
-	AssertNotBlacklisted(ctx sdk.Context, denom string) error
+	GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
+	// AssertNotBlacklisted(ctx sdk.Context, denom string) error
 }
