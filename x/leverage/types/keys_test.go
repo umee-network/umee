@@ -53,3 +53,71 @@ func TestDenomFromKey(t *testing.T) {
 
 	require.Equal(t, uDenom, expectedDenom)
 }
+
+func TestGetKeys(t *testing.T) {
+	type testCase struct {
+		actual      []byte
+		expected    [][]byte
+		description string
+	}
+
+	addr := sdk.AccAddress("addr________________") // length: 20
+	addrbytes := []byte{0x61, 0x64, 0x64, 0x72, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f}
+	uumeebytes := []byte{0x75, 0x75, 0x6d, 0x65, 0x65}                     // uumee
+	ibcabcdbytes := []byte{0x69, 0x62, 0x63, 0x2f, 0x61, 0x62, 0x63, 0x64} // ibc/abcd
+
+	testCases := []testCase{
+		{
+			types.CreateRegisteredTokenKey("uumee"),
+			[][]byte{
+				{0x01},     // prefix
+				uumeebytes, // uumee
+				{0x00},     // null terminator
+			},
+			"registered token key (uumee)",
+		},
+		{
+			types.CreateRegisteredTokenKey("ibc/abcd"),
+			[][]byte{
+				{0x01},       // prefix
+				ibcabcdbytes, // ibc/abcd
+				{0x00},       // null terminator
+			},
+			"registered token key (ibc/abcd)",
+		},
+		{
+			types.CreateAdjustedBorrowKey(addr, "uumee"),
+			[][]byte{
+				{0x02},     // prefix
+				{0x14},     // address length prefix = 20
+				addrbytes,  // addr________________
+				uumeebytes, // uumee
+				{0x00},     // null terminator
+			},
+			"adjusted borrow key (addr, uumee)",
+		},
+		{
+			types.CreateAdjustedBorrowKey(addr, "ibc/abcd"),
+			[][]byte{
+				{0x02},       // prefix
+				{0x14},       // address length prefix = 20
+				addrbytes,    // addr________________
+				ibcabcdbytes, // ibc/abcd
+				{0x00},       // null terminator
+			},
+			"adjusted borrow key (addr, ibc/abcd)",
+		},
+	}
+	for _, tc := range testCases {
+		expectedKey := []byte{}
+		for _, e := range tc.expected {
+			expectedKey = append(expectedKey, e...)
+		}
+		require.Equalf(
+			t,
+			expectedKey,
+			tc.actual,
+			tc.description,
+		)
+	}
+}
