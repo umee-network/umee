@@ -174,35 +174,15 @@ func (k Keeper) AddHistoricPrice(
 	store.Set(types.HistoricPriceKey(denom, block), bz)
 }
 
-// DeleteHistoricPrice deletes the historic price of a denom at a
-// given block.
-func (k Keeper) DeleteHistoricPrice(
+// DeleteHistoricPriceStats deletes the historic price, median price, and
+// standard deviation around its median price of a denom at a given block.
+func (k Keeper) DeleteHistoricPriceStats(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.HistoricPriceKey(denom, blockNum))
-}
-
-// DeleteMedian deletes a given denom's median price in the last prune
-// period since a given block.
-func (k Keeper) DeleteMedian(
-	ctx sdk.Context,
-	denom string,
-	blockNum uint64,
-) {
-	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.MedianKey(denom, blockNum))
-}
-
-// DeleteMedianDeviation deletes a given denom's standard deviation around
-// its median price in the last prune period since a given block.
-func (k Keeper) DeleteMedianDeviation(
-	ctx sdk.Context,
-	denom string,
-	blockNum uint64,
-) {
-	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.MedianDeviationKey(denom, blockNum))
 }
