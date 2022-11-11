@@ -28,7 +28,7 @@ threshold = "1.5"
 
 [[deviation_thresholds]]
 base = "DAI"
-threshold = "1.5"
+threshold = "2"
 
 [[deviation_thresholds]]
 base = "ETH"
@@ -42,14 +42,14 @@ threshold = "2"
 base = "UMEE"
 providers = [
   "okx",
-  "gate"
+  "gate",
 ]
 quote = "USDT"
 
 [[currency_pairs]]
 base = "UMEE"
 providers = [
-  "ftx"
+  "ftx",
 ]
 quote = "USD"
 
