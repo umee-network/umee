@@ -47,6 +47,10 @@ message Params {
   // Prune Period represents the maximum amount of blocks which we want
   // to keep a record of our set of exchange rates.
   uint64 prune_period = 10;
+  // Median Period represents the amount blocks we will wait between
+  // calculating the median and standard deviation of the median of
+  // historic prices in the last Prune Period.
+  uint64 median_period = 11;
 }
 
 // Denom - the object to hold configurations of each denom
@@ -107,9 +111,9 @@ message ExchangeRateTuple {
 
 // HistoricPrice is an instance of a price "stamp"
 message HistoricPrice {
-  ExchangeRateTuple exchange_rates = 1 [
-    (gogoproto.castrepeated) = "ExchangeRateTuples",
-    (gogoproto.nullable)     = false
+  ExchangeRateTuple exchange_rate = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
   uint64 block_num = 2;
 }

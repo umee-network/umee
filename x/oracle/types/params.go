@@ -18,6 +18,9 @@ var (
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
+	KeyStampPeriod              = []byte("StampPeriod")
+	KeyPrunePeriod              = []byte("PrunePeriod")
+	KeyMedianPeriod             = []byte("MedianPeriod")
 )
 
 // Default parameter values
@@ -25,6 +28,9 @@ const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
 	DefaultSlashWindow              = BlocksPerWeek       // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
+	DefaultStampPeriod              = BlocksPerHour / 2   // window for 30 minutes
+	DefaultPrunePeriod              = BlocksPerMonth      // window for a month
+	DefaultMedianPeriod             = BlocksPerDay        // window for a day
 )
 
 // Default parameter values
@@ -60,6 +66,9 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
+		StampPeriod:              DefaultStampPeriod,
+		PrunePeriod:              DefaultPrunePeriod,
+		MedianPeriod:             DefaultMedianPeriod,
 	}
 }
 
@@ -112,6 +121,21 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
 		),
+		paramstypes.NewParamSetPair(
+			KeyStampPeriod,
+			&p.StampPeriod,
+			validateStampPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyPrunePeriod,
+			&p.PrunePeriod,
+			validatePrunePeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMedianPeriod,
+			&p.MedianPeriod,
+			validateMedianPeriod,
+		),
 	}
 }
 
@@ -148,6 +172,18 @@ func (p Params) Validate() error {
 
 	if p.MinValidPerWindow.GT(sdk.OneDec()) || p.MinValidPerWindow.IsNegative() {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
+	}
+
+	if p.PrunePeriod < p.StampPeriod {
+		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with StampPeriod")
+	}
+
+	if p.PrunePeriod < p.MedianPeriod {
+		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with MedianPeriod")
+	}
+
+	if p.MedianPeriod < p.StampPeriod {
+		return fmt.Errorf("oracle parameter MedianPeriod must be greater than or equal with StampPeriod")
 	}
 
 	for _, denom := range p.AcceptList {
@@ -281,6 +317,45 @@ func validateMinValidPerWindow(i interface{}) error {
 
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("min valid per window is too large: %s", v)
+	}
+
+	return nil
+}
+
+func validateStampPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("stamp period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validatePrunePeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("prune period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMedianPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("median period must be positive: %d", v)
 	}
 
 	return nil

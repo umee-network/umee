@@ -85,7 +85,7 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 				return err
 			}
 
-			hash, err := types.AggregateVoteHashFromHexString(args[0])
+			hash, err := types.AggregateVoteHashFromHex(args[0])
 			if err != nil {
 				return err
 			}
