@@ -1082,22 +1082,6 @@ paths:
                     format: uint64
                   min_valid_per_window:
                     type: string
-                  stamp_period:
-                    type: string
-                    format: uint64
-                    description: >-
-                      Stamp Period represents the amount of blocks the
-                      historacle module
-
-                      waits before recording a set of prices from the oracle.
-                  prune_period:
-                    type: string
-                    format: uint64
-                    description: >-
-                      Prune Period represents the maximum amount of blocks which
-                      we want
-
-                      to keep a record of our set of exchange rates.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -2503,18 +2487,6 @@ definitions:
         format: uint64
       min_valid_per_window:
         type: string
-      stamp_period:
-        type: string
-        format: uint64
-        description: |-
-          Stamp Period represents the amount of blocks the historacle module
-          waits before recording a set of prices from the oracle.
-      prune_period:
-        type: string
-        format: uint64
-        description: |-
-          Prune Period represents the maximum amount of blocks which we want
-          to keep a record of our set of exchange rates.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2756,18 +2728,6 @@ definitions:
             format: uint64
           min_valid_per_window:
             type: string
-          stamp_period:
-            type: string
-            format: uint64
-            description: |-
-              Stamp Period represents the amount of blocks the historacle module
-              waits before recording a set of prices from the oracle.
-          prune_period:
-            type: string
-            format: uint64
-            description: |-
-              Prune Period represents the maximum amount of blocks which we want
-              to keep a record of our set of exchange rates.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object

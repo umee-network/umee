@@ -66,9 +66,9 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
-		StampPeriod:              DefaultStampPeriod,
-		PrunePeriod:              DefaultPrunePeriod,
-		MedianPeriod:             DefaultMedianPeriod,
+		// StampPeriod:              DefaultStampPeriod,
+		// PrunePeriod:              DefaultPrunePeriod,
+		// MedianPeriod:             DefaultMedianPeriod,
 	}
 }
 
@@ -121,21 +121,23 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
 		),
-		paramstypes.NewParamSetPair(
-			KeyStampPeriod,
-			&p.StampPeriod,
-			validateStampPeriod,
-		),
-		paramstypes.NewParamSetPair(
-			KeyPrunePeriod,
-			&p.PrunePeriod,
-			validatePrunePeriod,
-		),
-		paramstypes.NewParamSetPair(
-			KeyMedianPeriod,
-			&p.MedianPeriod,
-			validateMedianPeriod,
-		),
+		/*
+			paramstypes.NewParamSetPair(
+				KeyStampPeriod,
+				&p.StampPeriod,
+				validateStampPeriod,
+			),
+			paramstypes.NewParamSetPair(
+				KeyPrunePeriod,
+				&p.PrunePeriod,
+				validatePrunePeriod,
+			),
+			paramstypes.NewParamSetPair(
+				KeyMedianPeriod,
+				&p.MedianPeriod,
+				validateMedianPeriod,
+			),
+		*/
 	}
 }
 
@@ -174,17 +176,19 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
-	if p.PrunePeriod < p.StampPeriod {
-		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with StampPeriod")
-	}
+	/*
+		if p.PrunePeriod < p.StampPeriod {
+			return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with StampPeriod")
+		}
 
-	if p.PrunePeriod < p.MedianPeriod {
-		return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with MedianPeriod")
-	}
+		if p.PrunePeriod < p.MedianPeriod {
+			return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal with MedianPeriod")
+		}
 
-	if p.MedianPeriod < p.StampPeriod {
-		return fmt.Errorf("oracle parameter MedianPeriod must be greater than or equal with StampPeriod")
-	}
+		if p.MedianPeriod < p.StampPeriod {
+			return fmt.Errorf("oracle parameter MedianPeriod must be greater than or equal with StampPeriod")
+		}
+	*/
 
 	for _, denom := range p.AcceptList {
 		if len(denom.BaseDenom) == 0 {

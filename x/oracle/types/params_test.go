@@ -200,39 +200,43 @@ func TestParamsEqual(t *testing.T) {
 	err = p7.Validate()
 	require.Error(t, err)
 
-	// PrunePeriod < StampPeriod
-	p8 := DefaultParams()
-	p8.StampPeriod = 10
-	p8.PrunePeriod = 1
-	err = p8.Validate()
-	require.Error(t, err)
+	/*
 
-	// PrunePeriod < MedianPeriod
-	p9 := DefaultParams()
-	p9.MedianPeriod = 10
-	p9.PrunePeriod = 1
-	err = p8.Validate()
-	require.Error(t, err)
+		// PrunePeriod < StampPeriod
+		p8 := DefaultParams()
+		p8.StampPeriod = 10
+		p8.PrunePeriod = 1
+		err = p8.Validate()
+		require.Error(t, err)
 
-	// MedianPeriod < StampPeriod
-	p10 := DefaultParams()
-	p10.StampPeriod = 10
-	p10.MedianPeriod = 1
-	err = p8.Validate()
-	require.Error(t, err)
+		// PrunePeriod < MedianPeriod
+		p9 := DefaultParams()
+		p9.MedianPeriod = 10
+		p9.PrunePeriod = 1
+		err = p9.Validate()
+		require.Error(t, err)
+
+		// MedianPeriod < StampPeriod
+		p10 := DefaultParams()
+		p10.StampPeriod = 10
+		p10.MedianPeriod = 1
+		err = p10.Validate()
+		require.Error(t, err)
+
+	*/
 
 	// empty name
 	p11 := DefaultParams()
 	p11.AcceptList[0].BaseDenom = ""
 	p11.AcceptList[0].SymbolDenom = "ATOM"
-	err = p9.Validate()
+	err = p11.Validate()
 	require.Error(t, err)
 
 	// empty
 	p12 := DefaultParams()
 	p12.AcceptList[0].BaseDenom = "uatom"
 	p12.AcceptList[0].SymbolDenom = ""
-	err = p10.Validate()
+	err = p12.Validate()
 	require.Error(t, err)
 
 	p13 := DefaultParams()
