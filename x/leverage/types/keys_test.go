@@ -63,8 +63,9 @@ func TestGetKeys(t *testing.T) {
 
 	addr := sdk.AccAddress("addr________________") // length: 20
 	addrbytes := []byte{0x61, 0x64, 0x64, 0x72, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f, 0x5f}
-	uumeebytes := []byte{0x75, 0x75, 0x6d, 0x65, 0x65}                     // uumee
-	ibcabcdbytes := []byte{0x69, 0x62, 0x63, 0x2f, 0x61, 0x62, 0x63, 0x64} // ibc/abcd
+	uumeebytes := []byte{0x75, 0x75, 0x6d, 0x65, 0x65}                              // uumee
+	ibcabcdbytes := []byte{0x69, 0x62, 0x63, 0x2f, 0x61, 0x62, 0x63, 0x64}          // ibc/abcd
+	uibcbytes := []byte{0x75, 0x2f, 0x69, 0x62, 0x63, 0x2f, 0x61, 0x62, 0x63, 0x64} // u/ibc/abcd
 
 	testCases := []testCase{
 		{
@@ -94,7 +95,7 @@ func TestGetKeys(t *testing.T) {
 				uumeebytes, // uumee
 				{0x00},     // null terminator
 			},
-			"adjusted borrow key (addr, uumee)",
+			"adjusted borrow key (uumee)",
 		},
 		{
 			types.CreateAdjustedBorrowKey(addr, "ibc/abcd"),
@@ -105,7 +106,56 @@ func TestGetKeys(t *testing.T) {
 				ibcabcdbytes, // ibc/abcd
 				{0x00},       // null terminator
 			},
-			"adjusted borrow key (addr, ibc/abcd)",
+			"adjusted borrow key (ibc)",
+		},
+		{
+			types.CreateAdjustedBorrowKeyNoDenom(addr),
+			[][]byte{
+				{0x02},    // prefix
+				{0x14},    // address length prefix = 20
+				addrbytes, // addr________________
+			},
+			"adjusted borrow key (no denom)",
+		},
+		{
+			types.CreateCollateralAmountKey(addr, "u/ibc/abcd"),
+			[][]byte{
+				{0x04},    // prefix
+				{0x14},    // address length prefix = 20
+				addrbytes, // addr________________
+				uibcbytes, // u/ibc/abcd
+				{0x00},    // null terminator
+			},
+			"collateral amount key",
+		},
+		{
+			types.CreateCollateralAmountKeyNoDenom(addr),
+			[][]byte{
+				{0x04},    // prefix
+				{0x14},    // address length prefix = 20
+				addrbytes, // addr________________
+			},
+			"collateral amount key (no denom)",
+		},
+		{
+			types.CreateReserveAmountKey("ibc/abcd"),
+			[][]byte{
+				{0x05},       // prefix
+				ibcabcdbytes, // ibc/abcd
+				{0x00},       // null terminator
+			},
+			"reserve amount key",
+		},
+		{
+			types.CreateBadDebtKey("u/ibc/abcd", addr),
+			[][]byte{
+				{0x07},    // prefix
+				{0x14},    // address length prefix = 20
+				addrbytes, // addr________________
+				uibcbytes, // u/ibc/abcd
+				{0x00},    // null terminator
+			},
+			"bad debt key",
 		},
 	}
 	for _, tc := range testCases {
