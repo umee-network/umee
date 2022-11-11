@@ -30,51 +30,51 @@ var (
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 )
 
-// GetExchangeRateKey - stored by *denom*
-func GetExchangeRateKey(denom string) (key []byte) {
+// KeyExchangeRate - stored by *denom*
+func KeyExchangeRate(denom string) (key []byte) {
 	key = append(key, KeyPrefixExchangeRate...)
 	key = append(key, []byte(denom)...)
 	return append(key, 0) // append 0 for null-termination
 }
 
-// GetFeederDelegationKey - stored by *Validator* address
-func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
+// KeyFeederDelegation - stored by *Validator* address
+func KeyFeederDelegation(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixFeederDelegation...)
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
+// KeyMissCounter - stored by *Validator* address
+func KeyMissCounter(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixMissCounter...)
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
-func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
+// KeyAggregateExchangeRatePrevote - stored by *Validator* address
+func KeyAggregateExchangeRatePrevote(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixAggregateExchangeRatePrevote...)
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
+// KeyAggregateExchangeRateVote - stored by *Validator* address
+func KeyAggregateExchangeRateVote(v sdk.ValAddress) (key []byte) {
 	key = append(key, KeyPrefixAggregateExchangeRateVote...)
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// MedianKey - stored by *denom* and *block*
-func MedianKey(denom string, blockNum uint64) (key []byte) {
+// KeyMedian - stored by *denom* and *block*
+func KeyMedian(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedian...)
 	return appendDenomAndBlock(key, denom, blockNum)
 }
 
-// MedianDeviationKey - stored by *denom* and *block*
-func MedianDeviationKey(denom string, blockNum uint64) (key []byte) {
+// KeyMedianDeviation - stored by *denom* and *block*
+func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedianDeviation...)
 	return appendDenomAndBlock(key, denom, blockNum)
 }
 
-// HistoricPriceKey - stored by *denom* and *block*
-func HistoricPriceKey(denom string, blockNum uint64) (key []byte) {
+// KeyHistoricPrice - stored by *denom* and *block*
+func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixHistoricPrice...)
 	return appendDenomAndBlock(key, denom, blockNum)
 }

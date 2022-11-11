@@ -10,7 +10,7 @@ import (
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-func TestGetExchangeRateKey(t *testing.T) {
+func TestKeyExchangeRate(t *testing.T) {
 	testCases := []struct {
 		denom string
 		// KeyPrefixExchangeRate | []byte(denom) | 0
@@ -31,12 +31,12 @@ func TestGetExchangeRateKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetExchangeRateKey(testCase.denom)
+		actualKey := types.KeyExchangeRate(testCase.denom)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetFeederDelegationKey(t *testing.T) {
+func TestKeyFeederDelegation(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixFeederDelegation | lengthPrefixed(addr)
@@ -49,12 +49,12 @@ func TestGetFeederDelegationKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetFeederDelegationKey(testCase.val)
+		actualKey := types.KeyFeederDelegation(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetMissCounterKey(t *testing.T) {
+func TestKeyMissCounter(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixMissCounter | lengthPrefixed(addr)
@@ -67,12 +67,12 @@ func TestGetMissCounterKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetMissCounterKey(testCase.val)
+		actualKey := types.KeyMissCounter(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
+func TestKeyAggregateExchangeRatePrevote(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixAggregateExchangeRatePrevote | lengthPrefixed(addr)
@@ -85,12 +85,12 @@ func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetAggregateExchangeRatePrevoteKey(testCase.val)
+		actualKey := types.KeyAggregateExchangeRatePrevote(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
+func TestKeyAggregateExchangeRateVote(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixAggregateExchangeRateVote | lengthPrefixed(addr)
@@ -103,7 +103,7 @@ func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetAggregateExchangeRateVoteKey(testCase.val)
+		actualKey := types.KeyAggregateExchangeRateVote(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
