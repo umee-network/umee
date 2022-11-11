@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -31,8 +30,7 @@ type (
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
 	BinanceProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -73,6 +71,12 @@ type (
 		ID     uint16   `json:"id"`     // identify messages going back and forth
 	}
 
+	// BinanceSubscriptionResp the response structure for a binance subscription response
+	BinanceSubscriptionResp struct {
+		Result string `json:"result"`
+		ID     uint16 `json:"id"`
+	}
+
 	// BinancePairSummary defines the response structure for a Binance pair
 	// summary.
 	BinancePairSummary struct {
@@ -100,33 +104,64 @@ func NewBinanceProvider(
 		Path:   binanceWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBinance,
-			err,
-		)
-	}
+	binanceLogger := logger.With().Str("provider", string(ProviderBinance)).Logger()
 
 	provider := &BinanceProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(ProviderBinance)).Logger(),
+		logger:          binanceLogger,
 		endpoints:       endpoints,
 		tickers:         map[string]BinanceTicker{},
 		candles:         map[string][]BinanceCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleWebSocketMsgs(ctx)
+	provider.wsc = NewWebsocketController(
+		ctx,
+		ProviderBinance,
+		wsURL,
+		provider.getSubscriptionMsgs(pairs...),
+		provider.messageReceived,
+		disabledPingDuration,
+		websocket.PingMessage,
+		binanceLogger,
+	)
+	go provider.wsc.Start()
 
 	return provider, nil
+}
+
+func (p *BinanceProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
+	subscriptionMsgs := make([]interface{}, 0, len(p.subscribedPairs)*2)
+	for _, cp := range cps {
+		binanceTickerPair := currencyPairToBinanceTickerPair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceTickerPair))
+
+		binanceCandlePair := currencyPairToBinanceCandlePair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newBinanceSubscriptionMsg(binanceCandlePair))
+	}
+	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
@@ -159,60 +194,6 @@ func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[stri
 	}
 
 	return candlePrices, nil
-}
-
-// SubscribeCurrencyPairs subscribe all currency pairs into ticker and candle channels.
-func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeChannels(cps...); err != nil {
-		return err
-	}
-
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderBinance, len(cps))
-	return nil
-}
-
-// subscribeChannels subscribe to the ticker and candle channels for all currency pairs.
-func (p *BinanceProvider) subscribeChannels(cps ...types.CurrencyPair) error {
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-
-	return p.subscribeCandles(cps...)
-}
-
-// subscribeTickers subscribe to the ticker channel for all currency pairs.
-func (p *BinanceProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToBinanceTickerPair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribeCandles subscribe to the candle channel for all currency pairs.
-func (p *BinanceProvider) subscribeCandles(cps ...types.CurrencyPair) error {
-	pairs := make([]string, len(cps))
-
-	for i, cp := range cps {
-		pairs[i] = currencyPairToBinanceCandlePair(cp)
-	}
-
-	return p.subscribePairs(pairs...)
-}
-
-// subscribedPairsToSlice returns the map of subscribed pairs as a slice.
-func (p *BinanceProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
 }
 
 func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) {
@@ -248,15 +229,13 @@ func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, erro
 }
 
 func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	var (
-		tickerResp BinanceTicker
-		tickerErr  error
-		candleResp BinanceCandle
-		candleErr  error
+		tickerResp       BinanceTicker
+		tickerErr        error
+		candleResp       BinanceCandle
+		candleErr        error
+		subscribeResp    BinanceSubscriptionResp
+		subscribeRespErr error
 	)
 
 	tickerErr = json.Unmarshal(bz, &tickerResp)
@@ -273,10 +252,16 @@ func (p *BinanceProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
+	subscribeRespErr = json.Unmarshal(bz, &subscribeResp)
+	if subscribeResp.ID == 1 {
+		return
+	}
+
 	p.logger.Error().
 		Int("length", len(bz)).
 		AnErr("ticker", tickerErr).
 		AnErr("candle", candleErr).
+		AnErr("subscribeResp", subscribeRespErr).
 		Msg("Error on receive message")
 }
 
@@ -310,78 +295,11 @@ func (candle BinanceCandle) toCandlePrice() (types.CandlePrice, error) {
 		candle.Metadata.TimeStamp)
 }
 
-func (p *BinanceProvider) handleWebSocketMsgs(ctx context.Context) {
-	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
-	defer reconnectTicker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("could not read message")
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.messageReceived(messageType, bz)
-
-		case <-reconnectTicker.C:
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
-// reconnect closes the last WS connection then create a new one and subscribe to
-// all subscribed pairs in the ticker and candle pais. A single connection to
-// stream.binance.com is only valid for 24 hours; expect to be disconnected at the
-// 24 hour mark. The websocket server will send a ping frame every 3 minutes. If
-// the websocket server does not receive a pong frame back from the connection
-// within a 10 minute period, the connection will be disconnected.
-func (p *BinanceProvider) reconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		p.logger.Err(err).Msg("error closing binance websocket")
-	}
-
-	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf(
-			types.ErrWebsocketDial.Error(),
-			ProviderBinance,
-			err,
-		)
-	}
-	p.wsClient = wsConn
-	telemetryWebsocketReconnect(ProviderBinance)
-
-	return p.subscribeChannels(p.subscribedPairsToSlice()...)
-}
-
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *BinanceProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-// subscribePairs write the subscription msg to the provider.
-func (p *BinanceProvider) subscribePairs(pairs ...string) error {
-	subsMsg := newBinanceSubscriptionMsg(pairs...)
-	return p.wsClient.WriteJSON(subsMsg)
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.

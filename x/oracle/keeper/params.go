@@ -63,6 +63,47 @@ func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
+// StampPeriod returns the amount of blocks the oracle module waits
+// between recording a set of prices.
+func (k Keeper) StampPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyStampPeriod, &res)
+	return
+}
+
+// SetStampPeriod updates the amount of blocks the oracle module waits
+// between recording a set of prices.
+func (k Keeper) SetStampPeriod(ctx sdk.Context, stampPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyStampPeriod, stampPeriod)
+}
+
+// PrunePeriod returns the max amount of blocks that a record of the set
+// of exchanges is kept.
+func (k Keeper) PrunePeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyPrunePeriod, &res)
+	return
+}
+
+// SetPrunePeriod updates the max amount of blocks that a record of the set
+// of exchanges is kept.
+func (k Keeper) SetPrunePeriod(ctx sdk.Context, prunePeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyPrunePeriod, prunePeriod)
+}
+
+// MedianPeriod returns the amount blocks we will wait between calculating the
+// median and standard deviation of the median of historic prices in the
+// last Prune Period.
+func (k Keeper) MedianPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMedianPeriod, &res)
+	return
+}
+
+// MedianPeriod updates the amount blocks we will wait between calculating the
+// median and standard deviation of the median of historic prices in the
+// last Prune Period.
+func (k Keeper) SetMedianPeriod(ctx sdk.Context, medianPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyMedianPeriod, medianPeriod)
+}
+
 // GetParams returns the total set of oracle parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	k.paramSpace.GetParamSet(ctx, &params)
