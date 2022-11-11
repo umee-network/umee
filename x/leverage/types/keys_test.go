@@ -157,6 +157,33 @@ func TestGetKeys(t *testing.T) {
 			},
 			"bad debt key",
 		},
+		{
+			types.CreateInterestScalarKey("ibc/abcd"),
+			[][]byte{
+				{0x08},       // prefix
+				ibcabcdbytes, // ibc/abcd
+				{0x00},       // null terminator
+			},
+			"interest scalar key",
+		},
+		{
+			types.CreateAdjustedTotalBorrowKey("ibc/abcd"),
+			[][]byte{
+				{0x09},       // prefix
+				ibcabcdbytes, // ibc/abcd
+				{0x00},       // null terminator
+			},
+			"adjusted total borrow key",
+		},
+		{
+			types.CreateUTokenSupplyKey("u/ibc/abcd"),
+			[][]byte{
+				{0x0A},    // prefix
+				uibcbytes, // u/ibc/abcd
+				{0x00},    // null terminator
+			},
+			"uToken supply key",
+		},
 	}
 	for _, tc := range testCases {
 		expectedKey := []byte{}
