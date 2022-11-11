@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
+	"github.com/umee-network/umee/v3/util"
 )
 
 const (
@@ -31,60 +32,51 @@ var (
 )
 
 // KeyExchangeRate - stored by *denom*
-func KeyExchangeRate(denom string) (key []byte) {
-	key = append(key, KeyPrefixExchangeRate...)
-	key = append(key, []byte(denom)...)
-	return append(key, 0) // append 0 for null-termination
+func KeyExchangeRate(denom string) []byte {
+	// append 0 for null-termination
+	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(denom))
 }
 
 // KeyFeederDelegation - stored by *Validator* address
-func KeyFeederDelegation(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixFeederDelegation...)
-	return append(key, address.MustLengthPrefix(v)...)
+func KeyFeederDelegation(v sdk.ValAddress) []byte {
+	// note: length prefix is not needed here!
+	return util.ConcatBytes(0, KeyPrefixFeederDelegation, address.MustLengthPrefix(v))
 }
 
 // KeyMissCounter - stored by *Validator* address
-func KeyMissCounter(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixMissCounter...)
-	return append(key, address.MustLengthPrefix(v)...)
+func KeyMissCounter(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixMissCounter, address.MustLengthPrefix(v))
 }
 
 // KeyAggregateExchangeRatePrevote - stored by *Validator* address
-func KeyAggregateExchangeRatePrevote(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRatePrevote...)
-	return append(key, address.MustLengthPrefix(v)...)
+func KeyAggregateExchangeRatePrevote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRatePrevote, address.MustLengthPrefix(v))
 }
 
 // KeyAggregateExchangeRateVote - stored by *Validator* address
-func KeyAggregateExchangeRateVote(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRateVote...)
-	return append(key, address.MustLengthPrefix(v)...)
+func KeyAggregateExchangeRateVote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v))
 }
 
 // KeyMedian - stored by *denom* and *block*
 func KeyMedian(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixMedian...)
-	return appendDenomAndBlock(key, denom, blockNum)
+	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom), uintWithNullPrefix(blockNum))
 }
 
 // KeyMedianDeviation - stored by *denom* and *block*
 func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixMedianDeviation...)
-	return appendDenomAndBlock(key, denom, blockNum)
+	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom), uintWithNullPrefix(blockNum))
 }
 
 // KeyHistoricPrice - stored by *denom* and *block*
 func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixHistoricPrice...)
-	return appendDenomAndBlock(key, denom, blockNum)
+	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), uintWithNullPrefix(blockNum))
 }
 
-func appendDenomAndBlock(key []byte, denom string, blockNum uint64) []byte {
-	key = append(key, []byte(denom)...)
-	key = append(key, 0) // null delimeter to avoid collision between different denoms
-	block := make([]byte, 8)
-	binary.LittleEndian.PutUint64(block, blockNum)
-	return append(key, block...)
+func uintWithNullPrefix(n uint64) []byte {
+	bz := make([]byte, 9)
+	binary.LittleEndian.PutUint64(bz[1:], n)
+	return bz
 }
 
 func ParseDemonFromHistoricPriceKey(key []byte) string {
