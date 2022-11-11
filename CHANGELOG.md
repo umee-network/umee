@@ -46,6 +46,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+- [xxxx](https://github.com/umee-network/umee/pull/xxxx) Removes LIQUIDATOR build flag and adds `--enable-liquidator-query` or `-l` runtime flag to `umeed start`.
+
 ## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
 
 ### Features

@@ -259,6 +259,20 @@ Similarly, `AdjustedTotalBorrowed` is never set independently during regular ope
 
 See [leverage query proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/query.proto) for list of supported queries.
 
+Additionally, the query `liquidation-targets` is only enabled if the node is started with a flag:
+
+```bash
+# Enabled
+umeed start --enable-liquidator-query
+
+# Enabled
+umeed start -l
+
+# Disabled
+umeed start
+
+```
+
 ## Messages
 
 See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto#L11) for list of supported messages.

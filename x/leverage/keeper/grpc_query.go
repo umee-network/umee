@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -10,9 +9,6 @@ import (
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
-
-// EnableLiquidator must be set to "true" at compile time to enable QueryLiquidationTargets
-var EnableLiquidator = ""
 
 var _ types.QueryServer = Querier{}
 
@@ -241,7 +237,7 @@ func (q Querier) LiquidationTargets(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	if strings.ToLower(EnableLiquidator) != "true" {
+	if !*types.EnableLiquidator {
 		return nil, types.ErrNotLiquidatorNode
 	}
 

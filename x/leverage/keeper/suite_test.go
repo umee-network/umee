@@ -50,7 +50,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	})
 
 	// Enable liquidation queries for testing
-	keeper.EnableLiquidator = "true"
+	*types.EnableLiquidator = true
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
