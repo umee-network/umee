@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v3/util"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -54,7 +55,7 @@ func (k Keeper) GetMedian(
 	blockNum uint64,
 ) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetMedianKey(denom, blockNum))
+	bz := store.Get(types.MedianKey(denom, blockNum))
 	if bz == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s block: %d", denom, blockNum))
 	}
@@ -77,7 +78,7 @@ func (k Keeper) SetMedian(
 	historicPrices := k.getHistoricPrices(ctx, denom)
 	median := median(historicPrices)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
-	store.Set(types.GetMedianKey(denom, uint64(ctx.BlockHeight())), bz)
+	store.Set(types.MedianKey(denom, uint64(ctx.BlockHeight())), bz)
 	k.setMedianDeviation(ctx, denom, median, historicPrices)
 }
 
@@ -89,7 +90,7 @@ func (k Keeper) GetMedianDeviation(
 	blockNum uint64,
 ) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetMedianDeviationKey(denom, blockNum))
+	bz := store.Get(types.MedianDeviationKey(denom, blockNum))
 	if bz == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s block: %d", denom, blockNum))
 	}
@@ -111,7 +112,7 @@ func (k Keeper) setMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	medianDeviation := medianDeviation(median, prices)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: medianDeviation})
-	store.Set(types.GetMedianDeviationKey(denom, uint64(ctx.BlockHeight())), bz)
+	store.Set(types.MedianDeviationKey(denom, uint64(ctx.BlockHeight())), bz)
 }
 
 // getHistoricPrices returns all the historic prices of a given denom.
@@ -143,7 +144,9 @@ func (k Keeper) IterateHistoricPrices(
 ) {
 	store := ctx.KVStore(k.storeKey)
 
-	iter := sdk.KVStorePrefixIterator(store, append(types.KeyPrefixHistoricPrice, []byte(denom)...))
+	// make sure we have one zero byte to correctly separate denoms
+	prefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(denom))
+	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -168,7 +171,7 @@ func (k Keeper) AddHistoricPrice(
 		ExchangeRate: exchangeRate,
 		BlockNum:     block,
 	})
-	store.Set(types.GetHistoricPriceKey(denom, block), bz)
+	store.Set(types.HistoricPriceKey(denom, block), bz)
 }
 
 // DeleteHistoricPrice deletes the historic price of a denom at a
@@ -179,7 +182,7 @@ func (k Keeper) DeleteHistoricPrice(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetHistoricPriceKey(denom, blockNum))
+	store.Delete(types.HistoricPriceKey(denom, blockNum))
 }
 
 // DeleteMedian deletes a given denom's median price in the last prune
@@ -190,7 +193,7 @@ func (k Keeper) DeleteMedian(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetMedianKey(denom, blockNum))
+	store.Delete(types.MedianKey(denom, blockNum))
 }
 
 // DeleteMedianDeviation deletes a given denom's standard deviation around
@@ -201,5 +204,5 @@ func (k Keeper) DeleteMedianDeviation(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetMedianDeviationKey(denom, blockNum))
+	store.Delete(types.MedianDeviationKey(denom, blockNum))
 }
