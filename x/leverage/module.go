@@ -186,5 +186,5 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 
 // AddModuleInitFlags implements servertypes.ModuleInitFlags interface.
 func AddModuleInitFlags(startCmd *cobra.Command) {
-	types.EnableLiquidator = startCmd.Flags().BoolP(types.FlagEnableLiquidatorQuery, "l", false, "enable liquidator query")
+	types.EnableLiquidator = *startCmd.Flags().BoolP(types.FlagEnableLiquidatorQuery, "l", false, "enable liquidator query")
 }
