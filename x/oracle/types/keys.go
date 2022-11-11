@@ -61,33 +61,30 @@ func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
 	return append(key, address.MustLengthPrefix(v)...)
 }
 
-// GetMedianKey - stored by *denom* and *block*
-func GetMedianKey(denom string, blockNum uint64) (key []byte) {
+// MedianKey - stored by *denom* and *block*
+func MedianKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedian...)
-	key = appendDenomAndBlockToKey(key, denom, blockNum)
-	return append(key, 0) // append 0 for null-termination
+	return appendDenomAndBlock(key, denom, blockNum)
 }
 
-// GetMedianDeviationKey - stored by *denom* and *block*
-func GetMedianDeviationKey(denom string, blockNum uint64) (key []byte) {
+// MedianDeviationKey - stored by *denom* and *block*
+func MedianDeviationKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixMedianDeviation...)
-	key = appendDenomAndBlockToKey(key, denom, blockNum)
-	return append(key, 0) // append 0 for null-termination
+	return appendDenomAndBlock(key, denom, blockNum)
 }
 
-// GetHistoricPriceKey - stored by *denom* and *block*
-func GetHistoricPriceKey(denom string, blockNum uint64) (key []byte) {
+// HistoricPriceKey - stored by *denom* and *block*
+func HistoricPriceKey(denom string, blockNum uint64) (key []byte) {
 	key = append(key, KeyPrefixHistoricPrice...)
-	key = appendDenomAndBlockToKey(key, denom, blockNum)
-	return append(key, 0) // append 0 for null-termination
+	return appendDenomAndBlock(key, denom, blockNum)
 }
 
-func appendDenomAndBlockToKey(key []byte, denom string, blockNum uint64) []byte {
+func appendDenomAndBlock(key []byte, denom string, blockNum uint64) []byte {
 	key = append(key, []byte(denom)...)
+	key = append(key, 0) // null delimeter to avoid collision between different denoms
 	block := make([]byte, 8)
 	binary.LittleEndian.PutUint64(block, blockNum)
-	key = append(key, block...)
-	return key
+	return append(key, block...)
 }
 
 func ParseDemonFromHistoricPriceKey(key []byte) string {
