@@ -139,7 +139,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
-		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1])
+		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1]) // -1 to remove the null suffix
 		dp := sdk.DecProto{}
 
 		k.cdc.MustUnmarshal(iter.Value(), &dp)
