@@ -170,8 +170,7 @@ func (k Keeper) setReserves(ctx sdk.Context, reserves sdk.Coin) error {
 // Returns 0 if the value if the value is absent.
 func (k Keeper) getLastInterestTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(k.storeKey)
-	timeKey := types.CreateLastInterestTimeKey()
-	bz := store.Get(timeKey)
+	bz := store.Get(types.KeyPrefixLastInterestTime)
 	if bz == nil {
 		return 0
 	}
@@ -190,8 +189,6 @@ func (k Keeper) getLastInterestTime(ctx sdk.Context) int64 {
 // setLastInterestTime sets LastInterestTime to a given value
 func (k *Keeper) setLastInterestTime(ctx sdk.Context, interestTime int64) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateLastInterestTimeKey()
-
 	prevTime := k.getLastInterestTime(ctx)
 	if interestTime < prevTime {
 		// prevent time from moving backwards
@@ -204,7 +201,7 @@ func (k *Keeper) setLastInterestTime(ctx sdk.Context, interestTime int64) error 
 		return err
 	}
 
-	store.Set(key, bz)
+	store.Set(types.KeyPrefixLastInterestTime, bz)
 	return nil
 }
 
