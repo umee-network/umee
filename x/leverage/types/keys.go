@@ -43,9 +43,7 @@ func CreateRegisteredTokenKey(baseTokenDenom string) []byte {
 // adjusted borrow for a denom and borrower address.
 func CreateAdjustedBorrowKey(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
 	// borrowprefix | lengthprefixed(borrowerAddr) | denom | 0x00 for null-termination
-	key := CreateAdjustedBorrowKeyNoDenom(borrowerAddr)
-	key = append(key, []byte(tokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
+	return util.ConcatBytes(1, CreateAdjustedBorrowKeyNoDenom(borrowerAddr),[]byte(tokenDenom))
 }
 
 // CreateAdjustedBorrowKeyNoDenom returns the common prefix used by all borrows
@@ -59,9 +57,7 @@ func CreateAdjustedBorrowKeyNoDenom(borrower sdk.AccAddress) []byte {
 // collateral stored for a user in a given denom.
 func CreateCollateralAmountKey(addr sdk.AccAddress, uTokenDenom string) []byte {
 	// collateralPrefix | lengthprefixed(addr) | denom | 0x00 for null-termination
-	key := CreateCollateralAmountKeyNoDenom(addr)
-	key = append(key, []byte(uTokenDenom)...)
-	return append(key, 0) // append 0 for null-termination
+	return util.ConcatBytes(1, CreateCollateralAmountKeyNoDenom(addr),[]byte(uTokenDenom))
 }
 
 // CreateCollateralAmountKeyNoDenom returns the common prefix used by all collateral associated
