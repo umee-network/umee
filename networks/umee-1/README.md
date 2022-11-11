@@ -1,10 +1,17 @@
 <!-- markdownlint-disable MD034 -->
 <!-- markdownlint-disable MD013 -->
 <!-- markdown-link-check-disable -->
+
 # umee-1 mainnet
+
+## Governance Account
+
+Since Cosmos SDK v0.46 we use x/gov account to authorize governance proposal execution.
+You should use the following address as the `authority`: `"umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp"`
 
 ## State Sync Providers
 
+- https://polkachu.com/state_sync/umee
 - https://theamsolutions.info/umee-services
 - https://stakeangle.com/state-sync/umee
 - https://book.testnet.run/umee/state-sync
@@ -23,7 +30,7 @@
 ## Umee Archival Nodes
 
 | moniker    | location                  | endpoints                                                       |
-|------------|---------------------------|-----------------------------------------------------------------|
+| ---------- | ------------------------- | --------------------------------------------------------------- |
 | aphrodite  | Tokyo, Japan              | `08554ecf7c4c33cc809bceefc044c9bd23b933bd@34.146.11.20:26656`   |
 |            |                           | `grpc.aphrodite.main.network.umee.cc:443`                       |
 |            |                           | https://api.aphrodite.main.network.umee.cc                      |
@@ -50,7 +57,7 @@
 |            |                           | https://rpc.beluga.main.network.umee.cc                         |
 | blue       | The Dalles, Oregon, USA   | `b3f810438aa53685bba63705f3c29ec122e1e40c@34.127.76.180:26656`  |
 |            |                           | `grpc.blue.main.network.umee.cc:443`                            |
-|            |                           | https://api.blue.main.network.umee.cc                          |
+|            |                           | https://api.blue.main.network.umee.cc                           |
 |            |                           | https://rpc.blue.main.network.umee.cc                           |
 | bottlenose | Osasco, São Paulo, Brazil | `831e037739cb6047f9b2d28e38c4cd7e7a550d04@35.199.126.245:26656` |
 |            |                           | `grpc.bottlenose.main.network.umee.cc:443`                      |

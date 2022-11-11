@@ -18,7 +18,7 @@ import (
 
 const (
 	gateWSHost    = "ws.gate.io"
-	gateWSPath    = "/v3"
+	gateWSPath    = "/v4"
 	gatePingCheck = time.Second * 28 // should be < 30
 	gateRestHost  = "https://api.gateio.ws"
 	gateRestPath  = "/api/v4/spot/currency_pairs"
@@ -32,8 +32,7 @@ type (
 	//
 	// REF: https://www.gate.io/docs/websocket/index.html
 	GateProvider struct {
-		wsURL           url.URL
-		wsClient        *websocket.Conn
+		wsc             *WebsocketController
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex
@@ -123,31 +122,63 @@ func NewGateProvider(
 		Path:   gateWSPath,
 	}
 
-	wsConn, resp, err := websocket.DefaultDialer.Dial(wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf("error connecting to Gate websocket: %w", err)
-	}
+	gateLogger := logger.With().Str("provider", string(ProviderGate)).Logger()
 
 	provider := &GateProvider{
-		wsURL:           wsURL,
-		wsClient:        wsConn,
-		logger:          logger.With().Str("provider", string(ProviderGate)).Logger(),
+		logger:          gateLogger,
 		reconnectTimer:  time.NewTicker(gatePingCheck),
 		endpoints:       endpoints,
 		tickers:         map[string]GateTicker{},
 		candles:         map[string][]GateCandle{},
 		subscribedPairs: map[string]types.CurrencyPair{},
 	}
-	provider.wsClient.SetPongHandler(provider.pongHandler)
 
-	if err := provider.SubscribeCurrencyPairs(pairs...); err != nil {
-		return nil, err
-	}
+	provider.setSubscribedPairs(pairs...)
 
-	go provider.handleReceivedTickers(ctx)
+	provider.wsc = NewWebsocketController(
+		ctx,
+		ProviderGate,
+		wsURL,
+		provider.getSubscriptionMsgs(pairs...),
+		provider.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+		gateLogger,
+	)
+	go provider.wsc.Start()
 
 	return provider, nil
+}
+
+func (p *GateProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface{} {
+	subscriptionMsgs := make([]interface{}, 0, len(cps)*2)
+	for _, cp := range cps {
+		gatePair := currencyPairToGatePair(cp)
+		subscriptionMsgs = append(subscriptionMsgs, newGateTickerSubscription(gatePair))
+		subscriptionMsgs = append(subscriptionMsgs, newGateCandleSubscription(gatePair))
+	}
+	return subscriptionMsgs
+}
+
+// SubscribeCurrencyPairs sends the new subscription messages to the websocket
+// and adds them to the providers subscribedPairs array
+func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	newPairs := []types.CurrencyPair{}
+	for _, cp := range cps {
+		if _, ok := p.subscribedPairs[cp.String()]; !ok {
+			newPairs = append(newPairs, cp)
+		}
+	}
+
+	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
+	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
+		return err
+	}
+	p.setSubscribedPairs(newPairs...)
+	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -205,69 +236,6 @@ func (p *GateProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 	return candleList, nil
 }
 
-// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
-func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
-	if len(cps) == 0 {
-		return fmt.Errorf("currency pairs is empty")
-	}
-
-	if err := p.subscribeTickers(cps...); err != nil {
-		return err
-	}
-	if err := p.subscribeCandles(cps...); err != nil {
-		return err
-	}
-	p.setSubscribedPairs(cps...)
-	telemetryWebsocketSubscribeCurrencyPairs(ProviderGate, len(cps))
-	return nil
-}
-
-// subscribeTickers subscribes to the ticker channels for all pairs at once.
-func (p *GateProvider) subscribeTickers(cps ...types.CurrencyPair) error {
-	topics := []string{}
-
-	for _, cp := range cps {
-		topics = append(topics, currencyPairToGatePair(cp))
-	}
-
-	tickerMsg := newGateTickerSubscription(topics...)
-	if err := p.subscribeTickerPairs(tickerMsg); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// subscribeCandles subscribes to the candle channels for all pairs one-by-one.
-// The gate API currently only supports subscribing to one kline market at a time.
-//
-// REF: https://www.gate.io/docs/websocket/index.html
-func (p *GateProvider) subscribeCandles(cps ...types.CurrencyPair) error {
-	gatePairs := make([]string, len(cps))
-
-	iterator := 0
-	for _, cp := range cps {
-		gatePairs[iterator] = currencyPairToGatePair(cp)
-		iterator++
-	}
-
-	for _, pair := range gatePairs {
-		msg := newGateCandleSubscription(pair)
-		if err := p.subscribeCandlePair(msg); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (p *GateProvider) subscribedPairsToSlice() []types.CurrencyPair {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
-	return types.MapPairsToSlice(p.subscribedPairs)
-}
-
 func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
@@ -280,45 +248,7 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice,
 	return types.TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 }
 
-func (p *GateProvider) handleReceivedTickers(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(defaultReadNewWSMessage):
-			messageType, bz, err := p.wsClient.ReadMessage()
-			if err != nil {
-				// if some error occurs continue to try to read the next message.
-				p.logger.Err(err).Msg("could not read message")
-				if err := p.ping(); err != nil {
-					p.logger.Err(err).Msg("could not send ping")
-				}
-				continue
-			}
-
-			if len(bz) == 0 {
-				continue
-			}
-
-			p.resetReconnectTimer()
-			p.messageReceived(messageType, bz)
-
-		case <-p.reconnectTimer.C: // reset by the pongHandler.
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting")
-			}
-			if err := p.reconnect(); err != nil {
-				p.logger.Err(err).Msg("error reconnecting")
-			}
-		}
-	}
-}
-
 func (p *GateProvider) messageReceived(messageType int, bz []byte) {
-	if messageType != websocket.TextMessage {
-		return
-	}
-
 	var (
 		gateEvent GateEvent
 		gateErr   error
@@ -334,17 +264,6 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "":
 			break
 		default:
-			if err := p.disconnect(); err != nil {
-				p.logger.Err(err).Msg("error disconnecting")
-			}
-			err := p.reconnect()
-			if err != nil {
-				p.logger.Error().
-					AnErr("ticker", tickerErr).
-					AnErr("candle", candleErr).
-					AnErr("event", err).
-					Msg("Error on reconnecting")
-			}
 			return
 		}
 	}
@@ -493,73 +412,11 @@ func (p *GateProvider) setCandlePair(candle GateCandle) {
 	p.candles[candle.Symbol] = candleList
 }
 
-// subscribeTickerPairs write the subscription msg to the provider.
-func (p *GateProvider) subscribeTickerPairs(msg GateTickerSubscriptionMsg) error {
-	return p.wsClient.WriteJSON(msg)
-}
-
-// subscribeCandlePair write the subscription msg to the provider.
-func (p *GateProvider) subscribeCandlePair(msg GateCandleSubscriptionMsg) error {
-	return p.wsClient.WriteJSON(msg)
-}
-
 // setSubscribedPairs sets N currency pairs to the map of subscribed pairs.
 func (p *GateProvider) setSubscribedPairs(cps ...types.CurrencyPair) {
-	p.mtx.Lock()
-	defer p.mtx.Unlock()
-
 	for _, cp := range cps {
 		p.subscribedPairs[cp.String()] = cp
 	}
-}
-
-func (p *GateProvider) resetReconnectTimer() {
-	p.reconnectTimer.Reset(gatePingCheck)
-}
-
-// disconnect disconnects the existing websocket connection.
-func (p *GateProvider) disconnect() error {
-	err := p.wsClient.Close()
-	if err != nil {
-		return types.ErrProviderConnection.Wrapf("error closing Gate websocket %v", err)
-	}
-	return nil
-}
-
-// reconnect creates a new websocket connection. If there’s a
-// network problem, the system will automatically disable the connection. The
-// connection will break automatically if the subscription is not established or
-// data has not been pushed for more than 30 seconds. To keep the connection stable:
-// 1. Set a timer of N seconds whenever a response message is received, where N is
-// less than 30.
-// 2. If the timer is triggered, which means that no new message is received within
-// N seconds, send the String 'ping'.
-// 3. Expect a 'pong' as a response. If the response message is not received within
-// N seconds, please raise an error or reconnect.
-func (p *GateProvider) reconnect() error {
-	p.logger.Debug().Msg("reconnecting websocket")
-	wsConn, resp, err := websocket.DefaultDialer.Dial(p.wsURL.String(), nil)
-	defer resp.Body.Close()
-	if err != nil {
-		return fmt.Errorf("error reconnecting to Gate websocket: %w", err)
-	}
-	wsConn.SetPongHandler(p.pongHandler)
-	p.wsClient = wsConn
-
-	currencyPairs := p.subscribedPairsToSlice()
-
-	telemetryWebsocketReconnect(ProviderGate)
-	return p.SubscribeCurrencyPairs(currencyPairs...)
-}
-
-// ping to check websocket connection.
-func (p *GateProvider) ping() error {
-	return p.wsClient.WriteMessage(websocket.PingMessage, ping)
-}
-
-func (p *GateProvider) pongHandler(appData string) error {
-	p.resetReconnectTimer()
-	return nil
 }
 
 // GetAvailablePairs returns all pairs to which the provider can subscribe.

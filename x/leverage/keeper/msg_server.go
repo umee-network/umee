@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -273,4 +274,43 @@ func (s msgServer) Liquidate(
 		Collateral: liquidated,
 		Reward:     reward,
 	}, err
+}
+
+// GovUpdateRegistry updates existing tokens with new settings
+// or adds the new tokens to registry.
+func (s msgServer) GovUpdateRegistry(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateRegistry,
+) (*types.MsgGovUpdateRegistryResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// checking req msg authority is the gov module address
+	if s.keeper.authority != msg.Authority {
+		return &types.MsgGovUpdateRegistryResponse{},
+			govtypes.ErrInvalidSigner.Wrapf(
+				"invalid authority: expected %s, got %s",
+				s.keeper.authority, msg.Authority,
+			)
+	}
+
+	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
+	registeredTokenDenoms := make(map[string]bool)
+
+	for _, token := range registeredTokens {
+		registeredTokenDenoms[token.BaseDenom] = true
+	}
+
+	// update the token settings
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.UpdateTokens, registeredTokenDenoms, true)
+	if err != nil {
+		return &types.MsgGovUpdateRegistryResponse{}, err
+	}
+
+	// adds  the new token settings
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.AddTokens, registeredTokenDenoms, false)
+	if err != nil {
+		return &types.MsgGovUpdateRegistryResponse{}, err
+	}
+
+	return &types.MsgGovUpdateRegistryResponse{}, nil
 }

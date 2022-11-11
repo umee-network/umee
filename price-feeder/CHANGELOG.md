@@ -53,6 +53,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1448](https://github.com/umee-network/umee/pull/1448) Add crypto.com provider.
+- [1496](https://github.com/umee-network/umee/pull/1496) Dynamic provider minimum enforcement with CoinGecko API.
+- [1510](https://github.com/umee-network/umee/pull/1510) Integrate osmosis-api provider into price-feeder.
+- [1534](https://github.com/umee-network/umee/pull/1534) Query osmosis-api REST server for available asset pairs supported by it.
+- [1554](https://github.com/umee-network/umee/pull/1554) Convert remaining providers to the Websocket Controller
+
+### Improvements
+
+- [1484](https://github.com/umee-network/umee/pull/1484) Standardize websocket connection error for providers.
+- [1509](https://github.com/umee-network/umee/pull/1509) Update price feeder example config.
+- [1527](https://github.com/umee-network/umee/pull/1527) Update convertTickersToUSD and convertCandlesToUSD to public.
 
 ## [v1.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv1.0.0) - 2022-09-19
 

@@ -21,6 +21,7 @@ var (
 	ErrBorrowNotAllowed     = sdkerrors.Register(ModuleName, 204, "borrowing of Token disabled")
 	ErrBlacklisted          = sdkerrors.Register(ModuleName, 205, "blacklisted Token")
 	ErrCollateralWeightZero = sdkerrors.Register(ModuleName, 206, "collateral weight of Token is zero")
+	ErrDuplicateToken       = sdkerrors.Register(ModuleName, 207, "duplicate token")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")

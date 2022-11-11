@@ -23,13 +23,13 @@ jobs:
       - name: Install tparse
         if: steps.cache-go-tparse.outputs.cache-hit != 'true'
         run: |
-          export GO111MODULE="on" && go get github.com/mfridman/tparse@v0.9.0
+          go install github.com/mfridman/tparse@v0.11.1
 
   test-unit-cover:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/**.go
@@ -55,7 +55,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/**.go
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         with:
           PATTERNS: |
             **/**.go
@@ -116,7 +116,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.0
+      - uses: technote-space/get-diff-action@v6.1.1
         id: git_diff
         with:
           PATTERNS: |

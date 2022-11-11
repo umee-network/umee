@@ -30,6 +30,11 @@ endif
 
 build_tags = netgo
 
+#  experimental feature 
+ifeq ($(EXPERIMENTAL),true)
+	build_tags += experimental
+endif
+
 ifeq ($(LEDGER_ENABLED),true)
   ifeq ($(OS),Windows_NT)
     GCCEXE = $(shell where gcc.exe 2> NUL)
@@ -56,6 +61,8 @@ endif
 whitespace :=
 whitespace += $(whitespace)
 comma := ,
+
+build_tags += $(BUILD_TAGS)
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
@@ -66,6 +73,10 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
 		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
 
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
+
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
 
@@ -75,6 +86,10 @@ build: go.sum
 	@echo "--> Building..."
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
+build-experimental: go.sum
+	@echo "--> Building Experimental version..."
+	EXPERIMENTAL=true $(MAKE) build
+	 
 build-no_cgo:
 	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
 	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
@@ -122,7 +137,7 @@ docker-push-gaia:
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################
-##                              Tests & Linting                              ##
+##                                   Tests                                   ##
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
@@ -131,13 +146,23 @@ TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
 TEST_COVERAGE_PROFILE=coverage.txt
 
-test-unit: ARGS=-timeout=10m -tags='norace'
+UNIT_TEST_TAGS = norace 
+TEST_RACE_TAGS = ""
+TEST_E2E_TAGS = ""
+
+ifeq ($(EXPERIMENTAL),true)
+	UNIT_TEST_TAGS	+= experimental
+	TEST_RACE_TAGS 	+= experimental
+	TEST_E2E_TAGS 	+= experimental
+endif
+
+test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
+test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-race: ARGS=-timeout=10m -race
+test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
+test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
@@ -150,19 +175,32 @@ else
 	@go test -mod=readonly $(ARGS) $(TEST_PACKAGES)
 endif
 
-.PHONY: run-tests $(TEST_TARGETS)
-
-lint:
-	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
-	@cd price-feeder && go run github.com/golangci/golangci-lint/cmd/golangci-lint run --fix --timeout=8m
-
 cover-html: test-unit-cover
 	@echo "--> Opening in the browser"
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
+.PHONY: cover-html run-tests $(TEST_TARGETS)
 
-.PHONY: lint
+###############################################################################
+###                                Linting                                  ###
+###############################################################################
+
+golangci_lint_cmd=golangci-lint
+
+lint:
+	@echo "--> Running linter with revive"
+	@go install github.com/mgechev/revive
+	@revive -config .revive.toml -formatter friendly ./...
+
+lint-fix:
+	@echo "--> Running linter to fix the lint issues"
+	@go install mvdan.cc/gofumpt
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
+	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+
+.PHONY: lint lint-fix
 
 ###############################################################################
 ##                                Simulations                                ##
@@ -193,7 +231,7 @@ test-sim-benchmark-invariants
 ##                                 Protobuf                                  ##
 ###############################################################################
 
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.7.0
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.8.0
 
 containerProtoVer=v0.7
 containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
@@ -221,7 +259,7 @@ proto-format:
 
 proto-lint:
 	@echo "Linting Protobuf files"
-#	@$(DOCKER_BUF) lint --error-format=json
+	@$(DOCKER_BUF) lint --error-format=json
 
 proto-check-breaking:
 	@echo "Checking for breaking changes"

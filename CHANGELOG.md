@@ -46,6 +46,20 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [1555](https://github.com/umee-network/umee/pull/1555) Updates IBC to v5.1.0 that adds adds optional memo field to `FungibleTokenPacketData` and `MsgTransfer`.
+
+### State Machine Breaking
+
+- [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
+
+## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
+
+### Features
+
+- [1513](https://github.com/umee-network/umee/pull/1513) New query service exposing chain information via new RPC route. See [cosmos-sdk/11582](https://github.com/cosmos/cosmos-sdk/issues/11582).
+
 ### State Machine Breaking
 
 - [1474](https://github.com/umee-network/umee/pull/1474) Enabled all Gravity Bridge claims.
@@ -54,14 +68,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1471](https://github.com/umee-network/umee/pull/1471) Fix slash window progress query.
+- [1501](https://github.com/umee-network/umee/pull/1501) Cosmos SDK patch release.
 
-## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
+## [v3.0.3](https://github.com/umee-network/umee/releases/tag/v3.0.3) - 2022-10-21
+
+### Fixes
+
+- [1511](https://github.com/umee-network/umee/pull/1511) Cosmos SDK patch release for Umee v3.0.3.
+
+## [v3.0.2] - 2022-09-29
 
 ### Fixes
 
 - [1460](https://github.com/umee-network/umee/pull/1460) Bump Gravity Bridge.
 
-## [v3.0.1](https://github.com/umee-network/umee/releases/tag/v3.0.1) - 2022-09-28
+## [v3.0.1] - 2022-09-28
 
 ### Fixes
 

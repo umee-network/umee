@@ -25,4 +25,7 @@ var (
 	ErrNegativeOrZeroRate    = sdkerrors.Register(ModuleName, 14, "invalid exchange rate; should be positive")
 	ErrExistingPrevote       = sdkerrors.Register(ModuleName, 15, "prevote already submitted for this voting period")
 	ErrBallotNotSorted       = sdkerrors.Register(ModuleName, 16, "ballot must be sorted before this operation")
+	ErrNotImplemented        = sdkerrors.Register(ModuleName, 17, "functon not implemented")
+	ErrNoMedian              = sdkerrors.Register(ModuleName, 18, "no median for this denom at this block")
+	ErrNoMedianDeviation     = sdkerrors.Register(ModuleName, 19, "no median deviation for this denom at this block")
 )
