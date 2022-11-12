@@ -13,7 +13,7 @@ func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	tokenKey := types.CreateRegisteredTokenKey(token.BaseDenom)
+	tokenKey := types.KeyRegisteredToken(token.BaseDenom)
 
 	bz, err := k.cdc.Marshal(&token)
 	if err != nil {
@@ -28,7 +28,7 @@ func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 // GetTokenSettings gets a token from the x/leverage module's KVStore.
 func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, error) {
 	store := ctx.KVStore(k.storeKey)
-	tokenKey := types.CreateRegisteredTokenKey(denom)
+	tokenKey := types.KeyRegisteredToken(denom)
 
 	token := types.Token{}
 	bz := store.Get(tokenKey)
