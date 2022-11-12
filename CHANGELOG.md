@@ -54,6 +54,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
 
+### API Breaking
+
+- [1578](https://github.com/umee-network/umee/pull/1578) Reorganize key constructors in x/leverage/types and x/oracle/types.
+
 ## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
 
 ### Features
