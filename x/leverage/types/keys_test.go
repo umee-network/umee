@@ -13,13 +13,13 @@ import (
 
 func TestAddressFromKey(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	key := types.CreateAdjustedBorrowKey(address, appparams.BondDenom)
+	key := types.KeyAdjustedBorrow(address, appparams.BondDenom)
 	expectedAddress := types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, address, expectedAddress)
 
 	address = sdk.AccAddress([]byte("anotherAddr________________"))
-	key = types.CreateCollateralAmountKeyNoDenom(address)
+	key = types.KeyCollateralAmountNoDenom(address)
 	expectedAddress = types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, address, expectedAddress)
@@ -28,13 +28,13 @@ func TestAddressFromKey(t *testing.T) {
 func TestDenomFromKeyWithAddress(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
 	denom := appparams.BondDenom
-	key := types.CreateAdjustedBorrowKey(address, denom)
+	key := types.KeyAdjustedBorrow(address, denom)
 	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 
 	require.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
-	key = types.CreateCollateralAmountKey(address, uDenom)
+	key = types.KeyCollateralAmount(address, uDenom)
 	expectedDenom = types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 
 	require.Equal(t, uDenom, expectedDenom)
@@ -42,13 +42,13 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 
 func TestDenomFromKey(t *testing.T) {
 	denom := appparams.BondDenom
-	key := types.CreateReserveAmountKey(denom)
+	key := types.KeyReserveAmount(denom)
 	expectedDenom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
 	require.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
-	key = types.CreateReserveAmountKey(uDenom)
+	key = types.KeyReserveAmount(uDenom)
 	expectedDenom = types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
 	require.Equal(t, uDenom, expectedDenom)
@@ -87,7 +87,7 @@ func TestGetKeys(t *testing.T) {
 			"registered token key (ibc/abcd)",
 		},
 		{
-			types.CreateAdjustedBorrowKey(addr, "uumee"),
+			types.KeyAdjustedBorrow(addr, "uumee"),
 			[][]byte{
 				{0x02},     // prefix
 				{0x14},     // address length prefix = 20
@@ -98,7 +98,7 @@ func TestGetKeys(t *testing.T) {
 			"adjusted borrow key (uumee)",
 		},
 		{
-			types.CreateAdjustedBorrowKey(addr, "ibc/abcd"),
+			types.KeyAdjustedBorrow(addr, "ibc/abcd"),
 			[][]byte{
 				{0x02},       // prefix
 				{0x14},       // address length prefix = 20
@@ -109,7 +109,7 @@ func TestGetKeys(t *testing.T) {
 			"adjusted borrow key (ibc)",
 		},
 		{
-			types.CreateAdjustedBorrowKeyNoDenom(addr),
+			types.KeyAdjustedBorrowNoDenom(addr),
 			[][]byte{
 				{0x02},    // prefix
 				{0x14},    // address length prefix = 20
@@ -118,7 +118,7 @@ func TestGetKeys(t *testing.T) {
 			"adjusted borrow key (no denom)",
 		},
 		{
-			types.CreateCollateralAmountKey(addr, "u/ibc/abcd"),
+			types.KeyCollateralAmount(addr, "u/ibc/abcd"),
 			[][]byte{
 				{0x04},    // prefix
 				{0x14},    // address length prefix = 20
@@ -129,7 +129,7 @@ func TestGetKeys(t *testing.T) {
 			"collateral amount key",
 		},
 		{
-			types.CreateCollateralAmountKeyNoDenom(addr),
+			types.KeyCollateralAmountNoDenom(addr),
 			[][]byte{
 				{0x04},    // prefix
 				{0x14},    // address length prefix = 20
@@ -138,7 +138,7 @@ func TestGetKeys(t *testing.T) {
 			"collateral amount key (no denom)",
 		},
 		{
-			types.CreateReserveAmountKey("ibc/abcd"),
+			types.KeyReserveAmount("ibc/abcd"),
 			[][]byte{
 				{0x05},       // prefix
 				ibcabcdbytes, // ibc/abcd
@@ -147,7 +147,7 @@ func TestGetKeys(t *testing.T) {
 			"reserve amount key",
 		},
 		{
-			types.CreateBadDebtKey("u/ibc/abcd", addr),
+			types.KeyBadDebt("u/ibc/abcd", addr),
 			[][]byte{
 				{0x07},    // prefix
 				{0x14},    // address length prefix = 20
@@ -158,7 +158,7 @@ func TestGetKeys(t *testing.T) {
 			"bad debt key",
 		},
 		{
-			types.CreateInterestScalarKey("ibc/abcd"),
+			types.KeyInterestScalar("ibc/abcd"),
 			[][]byte{
 				{0x08},       // prefix
 				ibcabcdbytes, // ibc/abcd
@@ -167,7 +167,7 @@ func TestGetKeys(t *testing.T) {
 			"interest scalar key",
 		},
 		{
-			types.CreateAdjustedTotalBorrowKey("ibc/abcd"),
+			types.KeyAdjustedTotalBorrow("ibc/abcd"),
 			[][]byte{
 				{0x09},       // prefix
 				ibcabcdbytes, // ibc/abcd
@@ -176,7 +176,7 @@ func TestGetKeys(t *testing.T) {
 			"adjusted total borrow key",
 		},
 		{
-			types.CreateUTokenSupplyKey("u/ibc/abcd"),
+			types.KeyUTokenSupply("u/ibc/abcd"),
 			[][]byte{
 				{0x0A},    // prefix
 				uibcbytes, // u/ibc/abcd
