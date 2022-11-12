@@ -121,7 +121,6 @@ import (
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v3/x/leverage"
-	leverageclient "github.com/umee-network/umee/v3/x/leverage/client"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	"github.com/umee-network/umee/v3/x/oracle"
@@ -456,6 +455,7 @@ func New(
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	if err != nil {
 		panic(err)
@@ -580,8 +580,6 @@ func New(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		// TODO: remove and use new proposal flow
-		AddRoute(leveragetypes.RouterKey, leverage.NewUpdateRegistryProposalHandler(app.LeverageKeeper)).
 		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper)).
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
@@ -1039,7 +1037,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		distrclient.ProposalHandler,
 		upgradeclient.LegacyProposalHandler,
 		upgradeclient.LegacyCancelProposalHandler,
-		leverageclient.ProposalHandler,
 		ibcclientclient.UpdateClientProposalHandler,
 		ibcclientclient.UpgradeProposalHandler,
 	}

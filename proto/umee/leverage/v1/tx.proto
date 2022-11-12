@@ -2,7 +2,10 @@ syntax = "proto3";
 package umee.leverage.v1;
 
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "umee/leverage/v1/leverage.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
 
@@ -38,6 +41,10 @@ service Msg {
 
   // SupplyCollateral combines the Supply and Collateralize actions.
   rpc SupplyCollateral(MsgSupplyCollateral) returns (MsgSupplyCollateralResponse);
+
+  // GovUpdateRegistry adds new tokens to the token registry or
+  // updates existing tokens with new settings.
+  rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -159,3 +166,23 @@ message MsgSupplyCollateralResponse {
   // Collateralized is the amount of uTokens collateralized.
   cosmos.base.v1beta1.Coin collateralized = 1 [(gogoproto.nullable) = false];
 }
+
+// MsgGovUpdateRegistry defines the Msg/GovUpdateRegistry request type.
+message MsgGovUpdateRegistry {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title       = 2;
+  string description = 3;
+  // add_tokens defines new token settings.
+  repeated Token add_tokens = 4 [(gogoproto.nullable) = false];
+  // update_tokens defines the new settings for existed tokens.
+  repeated Token update_tokens = 5 [(gogoproto.nullable) = false];
+}
+
+// MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
+message MsgGovUpdateRegistryResponse {}
