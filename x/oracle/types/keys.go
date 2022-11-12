@@ -39,7 +39,6 @@ func KeyExchangeRate(denom string) []byte {
 
 // KeyFeederDelegation - stored by *Validator* address
 func KeyFeederDelegation(v sdk.ValAddress) []byte {
-	// note: length prefix is not needed here!
 	return util.ConcatBytes(0, KeyPrefixFeederDelegation, address.MustLengthPrefix(v))
 }
 
