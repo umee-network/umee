@@ -69,7 +69,7 @@ func TestGetKeys(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			types.CreateRegisteredTokenKey("uumee"),
+			types.KeyRegisteredToken("uumee"),
 			[][]byte{
 				{0x01},     // prefix
 				uumeebytes, // uumee
@@ -78,7 +78,7 @@ func TestGetKeys(t *testing.T) {
 			"registered token key (uumee)",
 		},
 		{
-			types.CreateRegisteredTokenKey("ibc/abcd"),
+			types.KeyRegisteredToken("ibc/abcd"),
 			[][]byte{
 				{0x01},       // prefix
 				ibcabcdbytes, // ibc/abcd
