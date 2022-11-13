@@ -186,6 +186,10 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MedianPeriod must be greater than or equal with StampPeriod")
 	}
 
+	if p.StampPeriod % p.VotePeriod != 0 || p.MedianPeriod % p.VotePeriod != 0 || p.PrunePeriod % p.VotePeriod != 0 {
+		return fmt.Errorf("oracle parameters StampPeriod, MedianPeriod, and PrunePeriod must be exact multiples of VotePeiod")
+	}
+
 	for _, denom := range p.AcceptList {
 		if len(denom.BaseDenom) == 0 {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")

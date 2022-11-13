@@ -211,31 +211,44 @@ func TestParamsEqual(t *testing.T) {
 	p9 := DefaultParams()
 	p9.MedianPeriod = 10
 	p9.PrunePeriod = 1
-	err = p8.Validate()
+	err = p9.Validate()
 	require.Error(t, err)
 
 	// MedianPeriod < StampPeriod
 	p10 := DefaultParams()
 	p10.StampPeriod = 10
 	p10.MedianPeriod = 1
-	err = p8.Validate()
-	require.Error(t, err)
-
-	// empty name
-	p11 := DefaultParams()
-	p11.AcceptList[0].BaseDenom = ""
-	p11.AcceptList[0].SymbolDenom = "ATOM"
-	err = p9.Validate()
-	require.Error(t, err)
-
-	// empty
-	p12 := DefaultParams()
-	p12.AcceptList[0].BaseDenom = "uatom"
-	p12.AcceptList[0].SymbolDenom = ""
 	err = p10.Validate()
 	require.Error(t, err)
 
+	// StampPeriod, MedianPeriod, PrunePeriod are multiples of VotePeriod
+	p11 := DefaultParams()
+	p11.StampPeriod = 10
+	p11.VotePeriod = 3
+	err = p11.Validate()
+	require.Error(t, err)
+	p11.MedianPeriod = 10
+	err = p11.Validate()
+	require.Error(t, err)
+	p11.PrunePeriod = 10
+	err = p11.Validate()
+	require.Error(t, err)
+
+	// empty name
+	p12 := DefaultParams()
+	p12.AcceptList[0].BaseDenom = ""
+	p12.AcceptList[0].SymbolDenom = "ATOM"
+	err = p12.Validate()
+	require.Error(t, err)
+
+	// empty
 	p13 := DefaultParams()
-	require.NotNil(t, p13.ParamSetPairs())
-	require.NotNil(t, p13.String())
+	p13.AcceptList[0].BaseDenom = "uatom"
+	p13.AcceptList[0].SymbolDenom = ""
+	err = p13.Validate()
+	require.Error(t, err)
+
+	p14 := DefaultParams()
+	require.NotNil(t, p14.ParamSetPairs())
+	require.NotNil(t, p14.String())
 }
