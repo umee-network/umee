@@ -32,6 +32,8 @@ jobs:
         run: |-
           git tag -d ${{ env.RELEASE_VERSION }} || echo "No such a tag exists before"
           git tag ${{ env.RELEASE_VERSION }} HEAD
+      - name: Install Required GCC Package for Cross-Compile
+        run: sudo apt-get install -y gcc-arm-linux-gnueabihf
       - name: Release
         uses: goreleaser/goreleaser-action@v3
         with:
