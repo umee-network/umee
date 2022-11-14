@@ -118,23 +118,25 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { minValidPerWindow = GenMinValidPerWindow(r) },
 	)
 
-	var stampPeriod uint64
-	simState.AppParams.GetOrGenerate(
-		simState.Cdc, stampPeriodKey, &stampPeriod, simState.Rand,
-		func(r *rand.Rand) { stampPeriod = GenStampPeriod(r) },
-	)
+	/*
+		var stampPeriod uint64
+		simState.AppParams.GetOrGenerate(
+			simState.Cdc, stampPeriodKey, &stampPeriod, simState.Rand,
+			func(r *rand.Rand) { stampPeriod = GenStampPeriod(r) },
+		)
 
-	var prunePeriod uint64
-	simState.AppParams.GetOrGenerate(
-		simState.Cdc, prunePeriodKey, &prunePeriod, simState.Rand,
-		func(r *rand.Rand) { prunePeriod = GenPrunePeriod(r) },
-	)
+		var prunePeriod uint64
+		simState.AppParams.GetOrGenerate(
+			simState.Cdc, prunePeriodKey, &prunePeriod, simState.Rand,
+			func(r *rand.Rand) { prunePeriod = GenPrunePeriod(r) },
+		)
 
-	var medianPeriod uint64
-	simState.AppParams.GetOrGenerate(
-		simState.Cdc, medianPeriodKey, &medianPeriod, simState.Rand,
-		func(r *rand.Rand) { medianPeriod = GenMedianPeriod(r) },
-	)
+		var medianPeriod uint64
+		simState.AppParams.GetOrGenerate(
+			simState.Cdc, medianPeriodKey, &medianPeriod, simState.Rand,
+			func(r *rand.Rand) { medianPeriod = GenMedianPeriod(r) },
+		)
+	*/
 
 	oracleGenesis := types.NewGenesisState(
 		types.Params{
@@ -148,9 +150,9 @@ func RandomizedGenState(simState *module.SimulationState) {
 			SlashFraction:     slashFraction,
 			SlashWindow:       slashWindow,
 			MinValidPerWindow: minValidPerWindow,
-			StampPeriod:       stampPeriod,
-			PrunePeriod:       prunePeriod,
-			MedianPeriod:      medianPeriod,
+			// StampPeriod:       stampPeriod,
+			// PrunePeriod:       prunePeriod,
+			// MedianPeriod:      medianPeriod,
 		},
 		[]types.ExchangeRateTuple{},
 		[]types.FeederDelegation{},
