@@ -119,13 +119,6 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 	ctx, require := s.ctx, s.Require()
 
-	types.EnableLiquidator = false
-
-	_, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
-	require.ErrorIs(err, types.ErrNotLiquidatorNode)
-
-	types.EnableLiquidator = true
-
 	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
 	require.NoError(err)
 

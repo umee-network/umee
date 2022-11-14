@@ -27,6 +27,7 @@ func NewTestKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	authority string,
+	enableLiquidatorQuery bool,
 ) (Keeper, TestKeeper) {
 	k, err := NewKeeper(
 		cdc,
@@ -35,6 +36,7 @@ func NewTestKeeper(
 		bk,
 		ok,
 		authority,
+		enableLiquidatorQuery,
 	)
 	require.NoError(err)
 	return k, TestKeeper{&k}

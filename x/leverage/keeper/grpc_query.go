@@ -237,7 +237,7 @@ func (q Querier) LiquidationTargets(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	if !types.EnableLiquidator {
+	if !q.Keeper.liquidatorQueryEnabled {
 		return nil, types.ErrNotLiquidatorNode
 	}
 

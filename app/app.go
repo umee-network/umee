@@ -442,6 +442,8 @@ func New(
 		distrtypes.ModuleName,
 	)
 	var err error
+	// TODO: enable query on flag. where does this come from?
+	enableLiquidatorQuery := cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery))
 	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
@@ -449,6 +451,7 @@ func New(
 		app.BankKeeper,
 		app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		enableLiquidatorQuery,
 	)
 	if err != nil {
 		panic(err)
@@ -750,8 +753,8 @@ func New(
 }
 
 func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
-	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) {
-
+	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey,
+) {
 	anteHandler, err := customante.NewAnteHandler(
 		customante.HandlerOptions{
 			AccountKeeper:     app.AccountKeeper,

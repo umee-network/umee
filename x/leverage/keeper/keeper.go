@@ -15,13 +15,14 @@ import (
 )
 
 type Keeper struct {
-	cdc          codec.Codec
-	storeKey     storetypes.StoreKey
-	paramSpace   paramtypes.Subspace
-	hooks        types.Hooks
-	bankKeeper   types.BankKeeper
-	oracleKeeper types.OracleKeeper
-	authority    string // the gov module account
+	cdc                    codec.Codec
+	storeKey               storetypes.StoreKey
+	paramSpace             paramtypes.Subspace
+	hooks                  types.Hooks
+	bankKeeper             types.BankKeeper
+	oracleKeeper           types.OracleKeeper
+	authority              string // the gov module account
+	liquidatorQueryEnabled bool
 }
 
 func NewKeeper(
@@ -31,6 +32,7 @@ func NewKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	authority string,
+	enableLiquidatorQuery bool,
 ) (Keeper, error) {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
@@ -38,12 +40,13 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		paramSpace:   paramSpace,
-		bankKeeper:   bk,
-		oracleKeeper: ok,
-		authority:    authority,
+		cdc:                    cdc,
+		storeKey:               storeKey,
+		paramSpace:             paramSpace,
+		bankKeeper:             bk,
+		oracleKeeper:           ok,
+		authority:              authority,
+		liquidatorQueryEnabled: enableLiquidatorQuery,
 	}, nil
 }
 
