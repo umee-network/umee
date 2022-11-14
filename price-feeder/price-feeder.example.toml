@@ -52,7 +52,7 @@ base = "USDT"
 providers = [
   "kraken",
   "coinbase",
-  "ftx",
+  "binanceus",
 ]
 quote = "USD"
 
