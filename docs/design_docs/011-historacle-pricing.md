@@ -99,6 +99,8 @@ Another version of this attack goes:
 4. The price of FOO returns to normal, and the value of the FOO exceeds the value of the USDC collateral.
 5. Attacker exits the market for a profit.
 
+Alternatively, the Attacker can also dump the price of FOO and withdraw their USDC while reaping the benefit of having the profit from selling FOO and withdrawing their original USDC collateral
+
 ### Computational Cost
 
 Where we define:
