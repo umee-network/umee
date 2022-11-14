@@ -442,7 +442,6 @@ func New(
 		distrtypes.ModuleName,
 	)
 	var err error
-	enableLiquidatorQuery := cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery))
 	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
@@ -450,7 +449,7 @@ func New(
 		app.BankKeeper,
 		app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		enableLiquidatorQuery,
+		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
 	if err != nil {
 		panic(err)
