@@ -15,10 +15,12 @@ import (
 )
 
 const (
-	binanceWSHost   = "stream.binance.com:9443"
-	binanceWSPath   = "/ws/umeestream"
-	binanceRestHost = "https://api1.binance.com"
-	binanceRestPath = "/api/v3/ticker/price"
+	binanceWSHost     = "stream.binance.com:9443"
+	binanceUSWSHost   = "stream.binance.us:9443"
+	binanceWSPath     = "/ws/umeestream"
+	binanceRestHost   = "https://api1.binance.com"
+	binanceRestUSHost = "https://api.binance.us"
+	binanceRestPath   = "/api/v3/ticker/price"
 )
 
 var _ Provider = (*BinanceProvider)(nil)
@@ -88,13 +90,22 @@ func NewBinanceProvider(
 	ctx context.Context,
 	logger zerolog.Logger,
 	endpoints Endpoint,
+	binanceUS bool,
 	pairs ...types.CurrencyPair,
 ) (*BinanceProvider, error) {
 	if (endpoints.Name) != ProviderBinance {
-		endpoints = Endpoint{
-			Name:      ProviderBinance,
-			Rest:      binanceRestHost,
-			Websocket: binanceWSHost,
+		if !binanceUS {
+			endpoints = Endpoint{
+				Name:      ProviderBinance,
+				Rest:      binanceRestHost,
+				Websocket: binanceWSHost,
+			}
+		} else {
+			endpoints = Endpoint{
+				Name:      ProviderBinanceUS,
+				Rest:      binanceRestUSHost,
+				Websocket: binanceUSWSHost,
+			}
 		}
 	}
 
