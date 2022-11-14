@@ -26,6 +26,7 @@ func NewTestKeeper(
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
+	authority string,
 ) (Keeper, TestKeeper) {
 	k, err := NewKeeper(
 		cdc,
@@ -33,6 +34,7 @@ func NewTestKeeper(
 		paramSpace,
 		bk,
 		ok,
+		authority,
 	)
 	require.NoError(err)
 	return k, TestKeeper{&k}

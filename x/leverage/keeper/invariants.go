@@ -35,15 +35,13 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		reserveAmountPrefix := types.CreateReserveAmountKeyNoDenom()
-
 		// Iterate through all denoms which have an reserve amount stored
 		// in the keeper. If a token is registered but its reserve amount is
 		// negative or it has some error doing the unmarshal it
 		// adds the denom invariant count and message description
-		err := k.iterate(ctx, reserveAmountPrefix, func(key, val []byte) error {
-			// remove reserveAmountPrefix and null-terminator
-			denom := types.DenomFromKey(key, reserveAmountPrefix)
+		err := k.iterate(ctx, types.KeyPrefixReserveAmount, func(key, val []byte) error {
+			// remove types.KeyPrefixReserveAmount and null-terminator
+			denom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
 			amount := sdk.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
@@ -81,15 +79,13 @@ func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 			count int
 		)
 
-		collateralPrefix := types.CreateCollateralAmountKeyNoAddress()
-
 		// Iterate through all collateral amounts stored in the keeper,
 		// ensuring all successfully unmarshal to positive values.
-		err := k.iterate(ctx, collateralPrefix, func(key, val []byte) error {
+		err := k.iterate(ctx, types.KeyPrefixCollateralAmount, func(key, val []byte) error {
 			// remove prefix | lengthPrefixed(addr) and null-terminator
-			denom := types.DenomFromKeyWithAddress(key, collateralPrefix)
+			denom := types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 			// remove prefix | denom and null-terminator
-			address := types.AddressFromKey(key, collateralPrefix)
+			address := types.AddressFromKey(key, types.KeyPrefixCollateralAmount)
 
 			amount := sdk.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {

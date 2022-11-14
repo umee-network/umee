@@ -8,6 +8,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
@@ -34,6 +36,8 @@ type IntegrationTestSuite struct {
 	tk                  keeper.TestKeeper
 	queryClient         types.QueryClient
 	setupAccountCounter sdkmath.Int
+	addrs               []sdk.AccAddress
+	msgSrvr             types.MsgServer
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -60,6 +64,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
 		newMockOracleKeeper(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
 	s.tk = tk
@@ -81,6 +86,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
+	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdk.NewInt(3000000))
+	s.msgSrvr = keeper.NewMsgServerImpl(s.app.LeverageKeeper)
 }
 
 // requireEqualCoins compares two sdk.Coins in such a way that sdk.Coins(nil) == sdk.Coins([]sdk.Coin{})
