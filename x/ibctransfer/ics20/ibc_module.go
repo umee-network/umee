@@ -7,7 +7,7 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/ibctransfer/keeper"
+	"github.com/umee-network/umee/v3/x/ibctransfer/ics20/keeper"
 )
 
 // IBCModule embeds the ICS-20 transfer IBCModule where we only override specific

@@ -119,7 +119,8 @@ import (
 	"github.com/umee-network/umee/v3/swagger"
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
-	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
+	uics20transfer "github.com/umee-network/umee/v3/x/ibctransfer/ics20"
+	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/ics20/keeper"
 	uibctransfertypes "github.com/umee-network/umee/v3/x/ibctransfer/types"
 	"github.com/umee-network/umee/v3/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
@@ -552,7 +553,7 @@ func New(
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
-	transferStack = uibctransfer.NewIBCModule(
+	transferStack = uics20transfer.NewIBCModule(
 		ibctransfer.NewIBCModule(ibcTransferKeeper),
 		app.UIBCTransferKeeper,
 	)
