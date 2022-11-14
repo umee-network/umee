@@ -5,7 +5,6 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
-import "umee/ibctransfer/v1/ibc_rate_limit.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/ibctransfer/types";
 

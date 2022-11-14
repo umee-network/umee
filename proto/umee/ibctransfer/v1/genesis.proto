@@ -7,6 +7,7 @@ import "umee/ibctransfer/v1/ibc_rate_limit.proto";
 option go_package                      = "github.com/umee-network/umee/v3/x/ibctransfer/types";
 option (gogoproto.goproto_getters_all) = false;
 
+// GenesisState defines the ibctrasfer module's genesis state.
 message GenesisState {
   Params             params      = 1 [(gogoproto.nullable) = false];
   repeated RateLimit rate_limits = 2 [(gogoproto.nullable) = false];

@@ -23,6 +23,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// GenesisState defines the ibctrasfer module's genesis state.
 type GenesisState struct {
 	Params     Params      `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
 	RateLimits []RateLimit `protobuf:"bytes,2,rep,name=rate_limits,json=rateLimits,proto3" json:"rate_limits"`
