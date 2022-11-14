@@ -43,22 +43,16 @@ base = "UMEE"
 providers = [
   "okx",
   "gate",
+  "mexc"
 ]
 quote = "USDT"
-
-[[currency_pairs]]
-base = "UMEE"
-providers = [
-  "ftx",
-]
-quote = "USD"
 
 [[currency_pairs]]
 base = "USDT"
 providers = [
   "kraken",
+  "coinbase",
   "ftx",
-  "coinbase"
 ]
 quote = "USD"
 
@@ -66,6 +60,7 @@ quote = "USD"
 base = "ATOM"
 providers = [
   "okx",
+  "bitget",
 ]
 quote = "USDT"
 
@@ -73,7 +68,6 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
-  "ftx",
 ]
 quote = "USD"
 
