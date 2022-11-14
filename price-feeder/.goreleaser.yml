@@ -3,6 +3,7 @@ project_name: price-feeder
 env:
   - GO111MODULE=on
   - CGO_ENABLED=1
+  - CC=arm-linux-gnueabi-gcc
 
 before:
   hooks:
