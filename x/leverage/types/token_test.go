@@ -65,14 +65,16 @@ func validToken() types.Token {
 func TestUpdateRegistryProposal_String(t *testing.T) {
 	token := validToken()
 	token.ReserveFactor = sdk.NewDec(40)
-	p := types.UpdateRegistryProposal{
+	p := types.MsgGovUpdateRegistry{
+		Authority:   "authority",
 		Title:       "test",
 		Description: "test",
-		Registry:    []types.Token{token},
+		AddTokens:   []types.Token{token},
 	}
-	expected := `title: test
+	expected := `authority: authority
+title: test
 description: test
-registry:
+addtokens:
     - base_denom: uumee
       reserve_factor: "40.000000000000000000"
       collateral_weight: "0.500000000000000000"
@@ -91,6 +93,7 @@ registry:
       max_supply_utilization: "1.000000000000000000"
       min_collateral_liquidity: "1.000000000000000000"
       max_supply: "1000"
+updatetokens: []
 `
 	require.Equal(t, expected, p.String())
 }

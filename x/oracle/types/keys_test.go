@@ -1,16 +1,17 @@
-package types_test
+package types
 
 import (
+	"encoding/binary"
+	"math"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
 	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-func TestGetExchangeRateKey(t *testing.T) {
+func TestKeyExchangeRate(t *testing.T) {
 	testCases := []struct {
 		denom string
 		// KeyPrefixExchangeRate | []byte(denom) | 0
@@ -21,22 +22,22 @@ func TestGetExchangeRateKey(t *testing.T) {
 			expectedKey: []byte{0x1, 0x75, 0x75, 0x6d, 0x65, 0x65, 0x0},
 		},
 		{
-			denom:       types.IbcDenomLuna,
+			denom:       IbcDenomLuna,
 			expectedKey: []byte{0x1, 0x69, 0x62, 0x63, 0x2f, 0x30, 0x45, 0x46, 0x31, 0x35, 0x44, 0x46, 0x32, 0x46, 0x30, 0x32, 0x34, 0x38, 0x30, 0x41, 0x44, 0x45, 0x30, 0x42, 0x42, 0x36, 0x45, 0x38, 0x35, 0x44, 0x39, 0x45, 0x42, 0x42, 0x35, 0x44, 0x41, 0x45, 0x41, 0x32, 0x38, 0x33, 0x36, 0x44, 0x33, 0x38, 0x36, 0x30, 0x45, 0x39, 0x46, 0x39, 0x37, 0x46, 0x39, 0x41, 0x41, 0x44, 0x45, 0x34, 0x46, 0x35, 0x37, 0x41, 0x33, 0x31, 0x41, 0x41, 0x30, 0x0},
 		},
 		{
-			denom:       types.IbcDenomAtom,
+			denom:       IbcDenomAtom,
 			expectedKey: []byte{0x1, 0x69, 0x62, 0x63, 0x2f, 0x32, 0x37, 0x33, 0x39, 0x34, 0x46, 0x42, 0x30, 0x39, 0x32, 0x44, 0x32, 0x45, 0x43, 0x43, 0x44, 0x35, 0x36, 0x31, 0x32, 0x33, 0x43, 0x37, 0x34, 0x46, 0x33, 0x36, 0x45, 0x34, 0x43, 0x31, 0x46, 0x39, 0x32, 0x36, 0x30, 0x30, 0x31, 0x43, 0x45, 0x41, 0x44, 0x41, 0x39, 0x43, 0x41, 0x39, 0x37, 0x45, 0x41, 0x36, 0x32, 0x32, 0x42, 0x32, 0x35, 0x46, 0x34, 0x31, 0x45, 0x35, 0x45, 0x42, 0x32, 0x0},
 		},
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetExchangeRateKey(testCase.denom)
+		actualKey := KeyExchangeRate(testCase.denom)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetFeederDelegationKey(t *testing.T) {
+func TestKeyFeederDelegation(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixFeederDelegation | lengthPrefixed(addr)
@@ -49,12 +50,12 @@ func TestGetFeederDelegationKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetFeederDelegationKey(testCase.val)
+		actualKey := KeyFeederDelegation(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetMissCounterKey(t *testing.T) {
+func TestKeyMissCounter(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixMissCounter | lengthPrefixed(addr)
@@ -67,12 +68,12 @@ func TestGetMissCounterKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetMissCounterKey(testCase.val)
+		actualKey := KeyMissCounter(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
+func TestKeyAggregateExchangeRatePrevote(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixAggregateExchangeRatePrevote | lengthPrefixed(addr)
@@ -85,12 +86,12 @@ func TestGetAggregateExchangeRatePrevoteKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetAggregateExchangeRatePrevoteKey(testCase.val)
+		actualKey := KeyAggregateExchangeRatePrevote(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
 }
 
-func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
+func TestKeyAggregateExchangeRateVote(t *testing.T) {
 	testCases := []struct {
 		val sdk.ValAddress
 		// KeyPrefixAggregateExchangeRateVote | lengthPrefixed(addr)
@@ -103,7 +104,17 @@ func TestGetAggregateExchangeRateVoteKey(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		actualKey := types.GetAggregateExchangeRateVoteKey(testCase.val)
+		actualKey := KeyAggregateExchangeRateVote(testCase.val)
 		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
 	}
+}
+
+func TestUintWithNullPrefix(t *testing.T) {
+	expected := []byte{0}
+	num := make([]byte, 8)
+	binary.LittleEndian.PutUint64(num, math.MaxUint64)
+	expected = append(expected, num...)
+
+	out := uintWithNullPrefix(math.MaxUint64)
+	require.Equal(t, expected, out)
 }
