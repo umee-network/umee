@@ -6,10 +6,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 	"github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
+	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
 )
 
 type IBCMiddleware struct {
@@ -62,22 +64,31 @@ func (im IBCMiddleware) OnChanOpenConfirm(ctx sdk.Context, portID string, channe
 
 // OnChanCloseInit implements types.Middleware
 func (im IBCMiddleware) OnChanCloseInit(ctx sdk.Context, portID string, channelID string) error {
-	if err := im.app.OnChanCloseInit(ctx, portID, channelID); err != nil {
-		return err
-	}
-
-	// TODO: do ourn own logic
-	return nil
+	return im.app.OnChanCloseInit(ctx, portID, channelID)
 }
 
 // OnChanCloseConfirm implements types.Middleware
 func (im IBCMiddleware) OnChanCloseConfirm(ctx sdk.Context, portID string, channelID string) error {
-	return im.app.OnChanCloseInit(ctx, portID, channelID)
+	return im.app.OnChanCloseConfirm(ctx, portID, channelID)
 }
 
 // OnRecvPacket implements types.Middleware
 func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) exported.Acknowledgement {
-	panic("unimplemented")
+	if err := ValidateReceiverAddress(packet); err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+
+	amount, denom, err := im.keeper.GetFundsFromPacket(packet)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(types.ErrBadPacket.Wrapf("bad packet in rate limit's OnRecvPacket"))
+	}
+
+	if err := im.keeper.CheckAndUpdateRateLimits(ctx, denom, amount); err != nil {
+		return channeltypes.NewErrorAcknowledgement(types.ErrRateLimitExceeded)
+	}
+
+	// if this returns an Acknowledgement that isn't successful, all state changes are discarded
+	return im.app.OnRecvPacket(ctx, packet, relayer)
 }
 
 // OnAcknowledgementPacket implements types.Middleware
@@ -89,6 +100,17 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 
 	if !ack.Success() {
 		// TODO: reverse sent the ibc transfer
+		err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
+		if err != nil {
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventBadRevert,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+					sdk.NewAttribute(types.AttributeKeyFailureType, "timeout"),
+					sdk.NewAttribute(types.AttributeKeyPacket, string(packet.GetData())),
+				),
+			)
+		}
 	}
 
 	return im.app.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
@@ -96,21 +118,48 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 
 // OnTimeoutPacket implements types.Middleware
 func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	// TODO: do reverse logic
+	err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
+	if err != nil {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventBadRevert,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+				sdk.NewAttribute(types.AttributeKeyFailureType, "timeout"),
+				sdk.NewAttribute(types.AttributeKeyPacket, string(packet.GetData())),
+			),
+		)
+	}
 	return im.app.OnTimeoutPacket(ctx, packet, relayer)
 }
 
-// GetAppVersion implements types.Middleware
-func (im IBCMiddleware) GetAppVersion(ctx sdk.Context, portID string, channelID string) (string, bool) {
-	return im.keeper.GetAppVersion(ctx, portID, channelID)
+// RevertSentPacket Notifies the contract that a sent packet wasn't properly received
+func (im *IBCMiddleware) RevertSentPacket(
+	ctx sdk.Context,
+	packet channeltypes.Packet,
+) error {
+	var data transfertypes.FungibleTokenPacketData
+	if err := json.Unmarshal(packet.GetData(), &data); err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+	}
+
+	if err := im.keeper.UndoSendRateLimit(
+		ctx,
+		data.Denom,
+		data.Amount,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// SendPacket implements types.Middleware
-func (im IBCMiddleware) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI) error {
-	return im.keeper.SendPacket(ctx, chanCap, packet)
-}
-
-// WriteAcknowledgement implements types.Middleware
-func (im IBCMiddleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI, ack exported.Acknowledgement) error {
-	return im.keeper.WriteAcknowledgement(ctx, chanCap, packet, ack)
+func ValidateReceiverAddress(packet channeltypes.Packet) error {
+	var packetData transfertypes.FungibleTokenPacketData
+	if err := json.Unmarshal(packet.GetData(), &packetData); err != nil {
+		return err
+	}
+	if len(packetData.Receiver) >= 4096 {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "IBC Receiver address too long. Max supported length is %d", 4096)
+	}
+	return nil
 }

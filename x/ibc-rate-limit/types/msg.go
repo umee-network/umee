@@ -18,7 +18,7 @@ var (
 )
 
 func NewIbcDenomsRateLimits(authority, title, description string,
-	newIBCDenomsRateLimits, updateIBCDenomsRateLimits []RateLimit,
+	newIBCDenomsRateLimits, updateIBCDenomsRateLimits []MsgRateLimit,
 ) *MsgUpdateIBCDenomsRateLimit {
 	return &MsgUpdateIBCDenomsRateLimit{
 		Title:                     title,
@@ -99,7 +99,7 @@ func validateAbstract(title, description string) error {
 	return nil
 }
 
-func validateRateLimitsOfIBCDenom(rateLimits []RateLimit) error {
+func validateRateLimitsOfIBCDenom(rateLimits []MsgRateLimit) error {
 	return nil
 }
 

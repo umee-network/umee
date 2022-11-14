@@ -5,7 +5,6 @@ import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
 import "umee/ibc_rate_limit/v1beta1/ibc_rate_limit.proto";
 
-
 option go_package = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
 
 option (gogoproto.goproto_getters_all) = false;
@@ -39,19 +38,19 @@ message QueryParamsResponse {
 }
 
 // QueryRateLimitsOfIBCDenoms defines request type
-message QueryRateLimitsOfIBCDenoms{}
+message QueryRateLimitsOfIBCDenoms {}
 
-// QueryRateLimitsOfIBCDenomsResponse defines response type 
-message QueryRateLimitsOfIBCDenomsResponse{
+// QueryRateLimitsOfIBCDenomsResponse defines response type
+message QueryRateLimitsOfIBCDenomsResponse {
   repeated RateLimit rate_limits = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryRateLimitsOfIBCDenom defines request type 
-message QueryRateLimitsOfIBCDenom{
+// QueryRateLimitsOfIBCDenom defines request type
+message QueryRateLimitsOfIBCDenom {
   string ibc_denom = 1;
 }
 
 // QueryRateLimitsOfIBCDenomResponse defines response type of QueryRateLimitsOfIBCDenom
-message QueryRateLimitsOfIBCDenomResponse{
+message QueryRateLimitsOfIBCDenomResponse {
   RateLimit rate_limit = 1 [(gogoproto.nullable) = false];
 }

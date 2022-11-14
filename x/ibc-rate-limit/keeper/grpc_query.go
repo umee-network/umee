@@ -20,7 +20,7 @@ func NewQuerier(k Keeper) Querier {
 	return Querier{Keeper: k}
 }
 
-// Params implements types.QueryServer
+// Params returns params of the x/ibc-rate-limit module.
 func (q Querier) Params(goCtx context.Context, req *types.QueryParams) (*types.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -32,22 +32,7 @@ func (q Querier) Params(goCtx context.Context, req *types.QueryParams) (*types.Q
 	return &types.QueryParamsResponse{Params: params}, nil
 }
 
-// RateLimitsOfIBCDenom implements types.QueryServer
-func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *types.QueryRateLimitsOfIBCDenom) (*types.QueryRateLimitsOfIBCDenomResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
-	if err != nil {
-		return &types.QueryRateLimitsOfIBCDenomResponse{}, nil
-	}
-
-	return &types.QueryRateLimitsOfIBCDenomResponse{RateLimit: rateLimit}, nil
-}
-
-// RateLimitsOfIBCDenoms implements types.QueryServer
+// RateLimitsOfIBCDenoms returns rate limits of ibc denoms.
 func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *types.QueryRateLimitsOfIBCDenoms) (*types.QueryRateLimitsOfIBCDenomsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -60,4 +45,19 @@ func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *types.QueryRa
 	}
 
 	return &types.QueryRateLimitsOfIBCDenomsResponse{RateLimits: rateLimits}, nil
+}
+
+// RateLimitsOfIBCDenom returns rate limits of ibc denom.
+func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *types.QueryRateLimitsOfIBCDenom) (*types.QueryRateLimitsOfIBCDenomResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
+	if err != nil {
+		return &types.QueryRateLimitsOfIBCDenomResponse{}, nil
+	}
+
+	return &types.QueryRateLimitsOfIBCDenomResponse{RateLimit: rateLimit}, nil
 }

@@ -39,7 +39,7 @@ func (k Keeper) UpdateIBCTansferStatus(ctx sdk.Context, ibcStatus bool) error {
 	var ibcPause bool
 	k.paramSpace.Get(ctx, types.KeyIBCPause, &ibcPause)
 
-	if ibcPause == ibcPause {
+	if ibcPause == ibcStatus {
 		return types.ErrIBCPauseStatus
 	}
 

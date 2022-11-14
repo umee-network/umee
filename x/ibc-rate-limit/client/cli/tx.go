@@ -27,6 +27,7 @@ func GetTxCmd() *cobra.Command {
 	return cmd
 }
 
+// TODO: remove after test
 func SampleTOkenRegistration() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "register",
@@ -37,16 +38,16 @@ func SampleTOkenRegistration() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			addRateLimits := []types.RateLimit{
+			addRateLimits := []types.MsgRateLimit{
 				{
 					IbcDenom:     "sai",
 					OutflowLimit: 1234,
-					Window:       1000,
+					TimeWindow:   1000,
 				},
 				{
 					IbcDenom:     "raj",
 					OutflowLimit: 1234,
-					Window:       1000,
+					TimeWindow:   1000,
 				},
 			}
 

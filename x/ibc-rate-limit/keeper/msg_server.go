@@ -34,7 +34,31 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *types.Ms
 			)
 	}
 
-	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, msg.NewIbcDenomsRateLimits); err != nil {
+	// save the new ibc rate limits
+	var rateLimitsOfIBCDenoms []types.RateLimit
+	for _, rateLimitOfIBCDenom := range msg.NewIbcDenomsRateLimits {
+		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, types.RateLimit{
+			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
+			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
+			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
+			TimeWindow:   rateLimitOfIBCDenom.TimeWindow,
+		})
+	}
+	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, rateLimitsOfIBCDenoms); err != nil {
+		return &types.MsgUpdateIBCDenomsRateLimitResponse{}, err
+	}
+
+	// update the rate limits of the ibc denoms
+	var updateRateLimitsForIBCDenoms []types.RateLimit
+	for _, rateLimitOfIBCDenom := range msg.UpdateIbcDenomsRateLimits {
+		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, types.RateLimit{
+			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
+			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
+			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
+			TimeWindow:   rateLimitOfIBCDenom.TimeWindow,
+		})
+	}
+	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, updateRateLimitsForIBCDenoms); err != nil {
 		return &types.MsgUpdateIBCDenomsRateLimitResponse{}, err
 	}
 

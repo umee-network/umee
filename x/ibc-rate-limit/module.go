@@ -141,7 +141,9 @@ func (AppModule) Route() sdk.Route {
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/ibc-rate-limit module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+	BeginBlock(ctx, am.keeper)
+}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/ibc-rate-limit module.
 // It returns no validator updates.

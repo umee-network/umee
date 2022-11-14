@@ -4,10 +4,10 @@ package umee.ibcratelimit.v1beta1;
 import "gogoproto/gogo.proto";
 import "umee/ibc_rate_limit/v1beta1/ibc_rate_limit.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
+option go_package                      = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
 option (gogoproto.goproto_getters_all) = false;
 
 message GenesisState {
-    Params params = 1 [(gogoproto.nullable) = false];
-    repeated RateLimit rate_limits = 2 [(gogoproto.nullable) = false];
+  Params             params      = 1 [(gogoproto.nullable) = false];
+  repeated RateLimit rate_limits = 2 [(gogoproto.nullable) = false];
 }
