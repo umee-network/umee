@@ -442,7 +442,6 @@ func New(
 		distrtypes.ModuleName,
 	)
 	var err error
-	// TODO: enable query on flag. where does this come from?
 	enableLiquidatorQuery := cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery))
 	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
 		appCodec,
