@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -119,13 +118,6 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 	ctx, require := s.ctx, s.Require()
-
-	keeper.EnableLiquidator = "false"
-
-	_, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
-	require.ErrorIs(err, types.ErrNotLiquidatorNode)
-
-	keeper.EnableLiquidator = "true"
 
 	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
 	require.NoError(err)
