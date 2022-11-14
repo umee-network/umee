@@ -10,8 +10,8 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 type IBCMiddleware struct {

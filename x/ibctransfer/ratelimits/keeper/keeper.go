@@ -5,7 +5,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 type Keeper struct {

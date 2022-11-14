@@ -8,7 +8,7 @@ import (
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 // GetRateLimitsOfIBCDenoms returns rate limits of all registered ibc denoms.

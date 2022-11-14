@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 var _ types.MsgServer = msgServer{}

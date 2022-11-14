@@ -1,4 +1,4 @@
-package ibc_rate_limit
+package ibctransfer
 
 import (
 	"context"
@@ -13,9 +13,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/client/cli"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/client/cli"
+	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 var (
@@ -140,12 +140,12 @@ func (AppModule) Route() sdk.Route {
 	return sdk.Route{}
 }
 
-// BeginBlock executes all ABCI BeginBlock logic respective to the x/ibc-rate-limit module.
+// BeginBlock executes all ABCI BeginBlock logic respective to the x/ibctransfer module.
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
 	BeginBlock(ctx, am.keeper)
 }
 
-// EndBlock executes all ABCI EndBlock logic respective to the x/ibc-rate-limit module.
+// EndBlock executes all ABCI EndBlock logic respective to the x/ibctransfer module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)

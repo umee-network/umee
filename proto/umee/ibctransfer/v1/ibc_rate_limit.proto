@@ -1,11 +1,11 @@
 syntax = "proto3";
-package umee.ibcratelimit.v1beta1;
+package umee.ibctransfer.v1;
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
+option go_package = "github.com/umee-network/umee/v3/x/ibctransfer/types";
 
 // RateLimit is format of ibc rate limit
 message RateLimit {

@@ -1,9 +1,9 @@
-package ibc_rate_limit
+package ibctransfer
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
+	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
 )
 
 // BeginBlock implements BeginBlock for the x/ibc-rate-limit module.

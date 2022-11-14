@@ -120,6 +120,7 @@ import (
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
+	uibctransfertypes "github.com/umee-network/umee/v3/x/ibctransfer/types"
 	"github.com/umee-network/umee/v3/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
@@ -127,9 +128,8 @@ import (
 	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 
-	ibcratelimit "github.com/umee-network/umee/v3/x/ibc-rate-limit"
-	ibcratelimitkeeper "github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
-	ibcratelimittypes "github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	ibcratelimit "github.com/umee-network/umee/v3/x/ibctransfer/ratelimits"
+	ibcratelimitkeeper "github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
 )
 
 var (
@@ -175,7 +175,7 @@ func init() {
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
-		ibcratelimit.AppModuleBasic{},
+		uibctransfer.AppModuleBasic{},
 	}
 
 	if Experimental {
@@ -197,7 +197,7 @@ func init() {
 		gravitytypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:       nil,
-		ibcratelimittypes.ModuleName: nil,
+		uibctransfertypes.ModuleName: nil,
 	}
 
 	if Experimental {
@@ -309,7 +309,7 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey, ibcratelimittypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey, uibctransfertypes.StoreKey,
 	}
 	if Experimental {
 		storeKeys = append(storeKeys, wasm.StoreKey)
@@ -503,7 +503,7 @@ func New(
 
 	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
 		appCodec,
-		keys[ibcratelimittypes.StoreKey], app.GetSubspace(ibcratelimittypes.ModuleName),
+		keys[uibctransfertypes.StoreKey], app.GetSubspace(uibctransfertypes.ModuleName),
 		app.IBCKeeper.ChannelKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
@@ -641,7 +641,7 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper, Experimental),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
-		ibcratelimit.NewAppModule(appCodec, app.ibcRateLimitKeeper),
+		uibctransfer.NewAppModule(appCodec, app.ibcRateLimitKeeper),
 	}
 	if Experimental {
 		appModules = append(appModules,
@@ -668,7 +668,7 @@ func New(
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		ibcratelimittypes.ModuleName,
+		uibctransfertypes.ModuleName,
 	}
 	endBlockers := []string{
 		crisistypes.ModuleName,
@@ -684,7 +684,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		ibcratelimittypes.ModuleName,
+		uibctransfertypes.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -705,7 +705,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		ibcratelimittypes.ModuleName,
+		uibctransfertypes.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
@@ -719,7 +719,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		ibcratelimittypes.ModuleName}
+		uibctransfertypes.ModuleName}
 
 	if Experimental {
 		beginBlockers = append(beginBlockers, wasm.ModuleName)
@@ -1020,7 +1020,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	// paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(ibcratelimittypes.ModuleName)
+	paramsKeeper.Subspace(uibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)

@@ -1,11 +1,11 @@
 syntax = "proto3";
-package umee.ibcratelimit.v1beta1;
+package umee.ibctransfer.v1;
 
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
-import "umee/ibc_rate_limit/v1beta1/ibc_rate_limit.proto";
+import "umee/ibctransfer/v1/ibc_rate_limit.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/ibc-rate-limit/types";
+option go_package = "github.com/umee-network/umee/v3/x/ibctransfer/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
@@ -13,17 +13,17 @@ option (gogoproto.goproto_getters_all) = false;
 service Query {
   // Params queries the parameters of the x/ibc-rate-limit module.
   rpc Params(QueryParams) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/umee/ibc_rate_limit/v1/params";
+    option (google.api.http).get = "/umee/ibctransfer/v1/params";
   }
 
   // RateLimitsOfIBCDenoms queries the rate limits of ibc denoms.
   rpc RateLimitsOfIBCDenoms(QueryRateLimitsOfIBCDenoms) returns (QueryRateLimitsOfIBCDenomsResponse) {
-    option (google.api.http).get = "/umee/ibc_rate_limit/v1/rate_limits";
+    option (google.api.http).get = "/umee/ibctransfer/v1/rate_limits";
   }
 
   // RateLimitsOfIBCDenom queries the rate limits of ibc denom.
   rpc RateLimitsOfIBCDenom(QueryRateLimitsOfIBCDenom) returns (QueryRateLimitsOfIBCDenomResponse) {
-    option (google.api.http).get = "/umee/ibc_rate_limit/v1/rate_limits/{ibc_denom}";
+    option (google.api.http).get = "/umee/ibctransfer/v1/rate_limits/{ibc_denom}";
   }
 }
 

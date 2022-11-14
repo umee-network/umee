@@ -7,7 +7,7 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function

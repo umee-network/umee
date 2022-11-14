@@ -7,10 +7,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
-// GetTxCmd returns the CLI transaction commands for the x/ibc-rate-limit module.
+// GetTxCmd returns the CLI transaction commands for the x/ibctransfer module.
 func GetTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,

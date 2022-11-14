@@ -1,9 +1,9 @@
-package ibc_rate_limit
+package ibctransfer
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/keeper"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 // InitGenesis initializes the x/leverage module's state from a provided genesis

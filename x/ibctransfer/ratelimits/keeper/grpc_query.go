@@ -4,7 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/ibc-rate-limit/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
