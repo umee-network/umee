@@ -3,6 +3,7 @@ project_name: price-feeder
 env:
   - GO111MODULE=on
   - CGO_ENABLED=1
+  - CC=aarch64-linux-gnu-gcc
 
 before:
   hooks:
