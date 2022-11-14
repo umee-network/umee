@@ -57,14 +57,14 @@ func KeyAggregateExchangeRateVote(v sdk.ValAddress) []byte {
 	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v))
 }
 
-// KeyMedian - stored by *denom* and *block*
-func KeyMedian(denom string, blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom), uintWithNullPrefix(blockNum))
+// KeyMedian - stored by *denom*
+func KeyMedian(denom string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom))
 }
 
-// KeyMedianDeviation - stored by *denom* and *block*
-func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom), uintWithNullPrefix(blockNum))
+// KeyMedianDeviation - stored by *denom*
+func KeyMedianDeviation(denom string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom))
 }
 
 // KeyHistoricPrice - stored by *denom* and *block*
