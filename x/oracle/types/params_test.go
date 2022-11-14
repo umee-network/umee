@@ -122,6 +122,8 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 }
 
 /*
+// TODO #1585: re-enable
+
 func TestValidateStampPeriod(t *testing.T) {
 	err := validateStampPeriod("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")
@@ -203,6 +205,7 @@ func TestParamsEqual(t *testing.T) {
 	require.Error(t, err)
 
 	/*
+		// TODO #1585: re-enable
 
 		// PrunePeriod < StampPeriod
 		p8 := DefaultParams()

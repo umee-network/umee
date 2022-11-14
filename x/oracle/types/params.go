@@ -66,6 +66,7 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
+		// TODO #1585: re-enable
 		// StampPeriod:              DefaultStampPeriod,
 		// PrunePeriod:              DefaultPrunePeriod,
 		// MedianPeriod:             DefaultMedianPeriod,
@@ -121,6 +122,7 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
 		),
+		// TODO #1585: re-enable
 		/*
 			paramstypes.NewParamSetPair(
 				KeyStampPeriod,
@@ -177,6 +179,7 @@ func (p Params) Validate() error {
 	}
 
 	/*
+		// TODO #1585: re-enable
 		if p.PrunePeriod < p.StampPeriod {
 			return fmt.Errorf("oracle parameter PrunePeriod must be greater than or equal to StampPeriod")
 		}
@@ -327,6 +330,8 @@ func validateMinValidPerWindow(i interface{}) error {
 }
 
 /*
+// TODO #1585: re-enable
+
 func validateStampPeriod(i interface{}) error {
 	v, ok := i.(uint64)
 	if !ok {

@@ -119,6 +119,8 @@ func RandomizedGenState(simState *module.SimulationState) {
 	)
 
 	/*
+		TODO #1585: re-enable
+
 		var stampPeriod uint64
 		simState.AppParams.GetOrGenerate(
 			simState.Cdc, stampPeriodKey, &stampPeriod, simState.Rand,
@@ -150,6 +152,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 			SlashFraction:     slashFraction,
 			SlashWindow:       slashWindow,
 			MinValidPerWindow: minValidPerWindow,
+			// TODO #1585: re-enable
 			// StampPeriod:       stampPeriod,
 			// PrunePeriod:       prunePeriod,
 			// MedianPeriod:      medianPeriod,
