@@ -11,7 +11,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
 // Keeper embeds the ICS-20 transfer keeper where we only override specific
@@ -20,10 +20,10 @@ type Keeper struct {
 	// embed the ICS-20 transfer keeper
 	ibctransferkeeper.Keeper
 
-	bankKeeper types.BankKeeper
+	bankKeeper ibctransfer.BankKeeper
 }
 
-func New(tk ibctransferkeeper.Keeper, bk types.BankKeeper) Keeper {
+func New(tk ibctransferkeeper.Keeper, bk ibctransfer.BankKeeper) Keeper {
 	return Keeper{
 		Keeper:     tk,
 		bankKeeper: bk,

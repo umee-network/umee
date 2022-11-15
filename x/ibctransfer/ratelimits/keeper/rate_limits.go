@@ -8,21 +8,21 @@ import (
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
 // GetRateLimitsOfIBCDenoms returns rate limits of all registered ibc denoms.
-func (k Keeper) GetRateLimitsOfIBCDenoms(ctx sdk.Context) ([]types.RateLimit, error) {
-	var rateLimitsOfIBCDenoms []types.RateLimit
+func (k Keeper) GetRateLimitsOfIBCDenoms(ctx sdk.Context) ([]ibctransfer.RateLimit, error) {
+	var rateLimitsOfIBCDenoms []ibctransfer.RateLimit
 
-	prefix := types.KeyPrefixForIBCDenom
+	prefix := ibctransfer.KeyPrefixForIBCDenom
 	store := ctx.KVStore(k.storeKey)
 
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		var rateLimitsOfIBCDenom types.RateLimit
+		var rateLimitsOfIBCDenom ibctransfer.RateLimit
 		if err := rateLimitsOfIBCDenom.Unmarshal(iter.Value()); err != nil {
 			return nil, err
 		}
@@ -34,17 +34,17 @@ func (k Keeper) GetRateLimitsOfIBCDenoms(ctx sdk.Context) ([]types.RateLimit, er
 }
 
 // GetRateLimitsOfIBCDenom retunes the rate limits of ibc denom.
-func (k Keeper) GetRateLimitsOfIBCDenom(ctx sdk.Context, ibcDenom string) (types.RateLimit, error) {
+func (k Keeper) GetRateLimitsOfIBCDenom(ctx sdk.Context, ibcDenom string) (ibctransfer.RateLimit, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.CreateKeyForRateLimitOfIBCDenom(ibcDenom))
-	var rateLimitsOfIBCDenom types.RateLimit
+	bz := store.Get(ibctransfer.CreateKeyForRateLimitOfIBCDenom(ibcDenom))
+	var rateLimitsOfIBCDenom ibctransfer.RateLimit
 	k.cdc.Unmarshal(bz, &rateLimitsOfIBCDenom)
 
 	return rateLimitsOfIBCDenom, nil
 }
 
 // SetRateLimitsOfIBCDenoms save the rate limits of ibc denoms into store.
-func (k Keeper) SetRateLimitsOfIBCDenoms(ctx sdk.Context, rateLimits []types.RateLimit) error {
+func (k Keeper) SetRateLimitsOfIBCDenoms(ctx sdk.Context, rateLimits []ibctransfer.RateLimit) error {
 	for _, rateLimitOfIBCDenom := range rateLimits {
 		if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
 			return err
@@ -55,9 +55,9 @@ func (k Keeper) SetRateLimitsOfIBCDenoms(ctx sdk.Context, rateLimits []types.Rat
 }
 
 // SetRateLimitsOfIBCDenom save the rate limits of ibc denom into store.
-func (k Keeper) SetRateLimitsOfIBCDenom(ctx sdk.Context, rateLimitOfIBCDenom types.RateLimit) error {
+func (k Keeper) SetRateLimitsOfIBCDenom(ctx sdk.Context, rateLimitOfIBCDenom ibctransfer.RateLimit) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.CreateKeyForRateLimitOfIBCDenom(rateLimitOfIBCDenom.IbcDenom)
+	key := ibctransfer.CreateKeyForRateLimitOfIBCDenom(rateLimitOfIBCDenom.IbcDenom)
 
 	bz, err := k.cdc.Marshal(&rateLimitOfIBCDenom)
 	if err != nil {
@@ -86,7 +86,7 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom, amount string) 
 	}
 
 	if rateLimitOfIBCDenom.InflowSum+sentAmount.BigInt().Uint64() > rateLimitOfIBCDenom.InflowLimit {
-		return types.ErrRateLimitExceeded
+		return ibctransfer.ErrRateLimitExceeded
 	}
 
 	rateLimitOfIBCDenom.InflowSum = rateLimitOfIBCDenom.InflowSum + sentAmount.BigInt().Uint64()
@@ -137,7 +137,7 @@ func (k Keeper) GetLocalDenom(denom string) string {
 }
 
 // ResetRateLimitsSum reset the expire time and inflow and outflow sum of rate limit.
-func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit types.RateLimit) (types.RateLimit, error) {
+func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit ibctransfer.RateLimit) (ibctransfer.RateLimit, error) {
 	expiredTime := rateLimit.ExpiredTime.Add(rateLimit.TimeWindow)
 
 	rateLimit.ExpiredTime = &expiredTime
@@ -145,7 +145,7 @@ func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit types.RateLimit) (
 	rateLimit.OutflowSum = 0
 
 	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimit); err != nil {
-		return types.RateLimit{}, err
+		return ibctransfer.RateLimit{}, err
 	}
 
 	return rateLimit, nil

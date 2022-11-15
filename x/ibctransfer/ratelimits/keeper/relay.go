@@ -7,7 +7,7 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
@@ -29,8 +29,8 @@ func (k Keeper) GetAppVersion(ctx sdk.Context, portID, channelID string) (string
 		return "", false
 	}
 
-	var metadata types.Metadata
-	if err := types.ModuleCdc.UnmarshalJSON([]byte(version), &metadata); err != nil {
+	var metadata ibctransfer.Metadata
+	if err := ibctransfer.ModuleCdc.UnmarshalJSON([]byte(version), &metadata); err != nil {
 		panic(fmt.Errorf("unable to unmarshal metadata for fee enabled channel: %w", err))
 	}
 

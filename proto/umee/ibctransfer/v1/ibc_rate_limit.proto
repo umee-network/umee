@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/ibctransfer/types";
+option go_package = "github.com/umee-network/umee/v3/x/ibctransfer";
 
 // RateLimit is format of ibc rate limit
 message RateLimit {

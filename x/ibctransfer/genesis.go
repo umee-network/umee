@@ -1,29 +1,22 @@
 package ibctransfer
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
-)
-
-// InitGenesis initializes the x/leverage module's state from a provided genesis
-// state.
-func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
-	k.SetParams(ctx, genState.Params)
-	if err := k.SetRateLimitsOfIBCDenoms(ctx, genState.RateLimits); err != nil {
-		panic(err)
+func NewGenesisState(params Params) *GenesisState {
+	return &GenesisState{
+		Params: params,
 	}
 }
 
-// ExportGenesis returns the x/leverage module's exported genesis state.
-func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
-	rateLimits, err := k.GetRateLimitsOfIBCDenoms(ctx)
-	if err != nil {
-		panic(err)
+func DefaultGenesisState() *GenesisState {
+	return &GenesisState{
+		Params: *DefaultParams(),
+	}
+}
+
+// Validate performs basic valida`tion of the interchain accounts GenesisState
+func (gs GenesisState) Validate() error {
+	if err := gs.Params.Validate(); err != nil {
+		return err
 	}
 
-	return &types.GenesisState{
-		Params:     k.GetParams(ctx),
-		RateLimits: rateLimits,
-	}
+	return nil
 }

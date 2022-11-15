@@ -1,4 +1,4 @@
-package types
+package ibctransfer
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -29,7 +29,6 @@ func init() {
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUpdateIBCDenomsRateLimit{}, "umee/ibcratelimit/MsgUpdateIBCDenomsRateLimit", nil)
 	cdc.RegisterConcrete(&MsgUpdateIBCTransferPauseStatus{}, "umee/ibcratelimit/MsgUpdateIBCTransferPauseStatus", nil)
-
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

@@ -1,4 +1,4 @@
-package types
+package ibctransfer
 
 const (
 	EventBadRevert          = "bad_revert"

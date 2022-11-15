@@ -5,14 +5,15 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
 type Keeper struct {
 	storeKey    storetypes.StoreKey
 	cdc         codec.BinaryCodec
 	paramSpace  paramtypes.Subspace
-	ics4Wrapper types.ICS4Wrapper
+	ics4Wrapper ibctransfer.ICS4Wrapper
 	authority   string // the gov module account
 }
 
@@ -22,7 +23,7 @@ func NewKeeper(
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
-		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
+		paramSpace = paramSpace.WithKeyTable(ibctransfer.ParamKeyTable())
 	}
 
 	return Keeper{
@@ -37,14 +38,14 @@ func NewKeeper(
 // UpdateIBCTansferStatus update the ibc pause status in module params.
 func (k Keeper) UpdateIBCTansferStatus(ctx sdk.Context, ibcStatus bool) error {
 	var ibcPause bool
-	k.paramSpace.Get(ctx, types.KeyIBCPause, &ibcPause)
+	k.paramSpace.Get(ctx, ibctransfer.KeyIBCPause, &ibcPause)
 
 	if ibcPause == ibcStatus {
-		return types.ErrIBCPauseStatus
+		return ibctransfer.ErrIBCPauseStatus
 	}
 
 	// update the ibc status
-	k.paramSpace.Set(ctx, types.KeyIBCPause, ibcStatus)
+	k.paramSpace.Set(ctx, ibctransfer.KeyIBCPause, ibcStatus)
 
 	return nil
 }

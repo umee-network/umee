@@ -1,4 +1,4 @@
-package ibc_rate_limit
+package ratelimits
 
 import (
 	"encoding/json"
@@ -10,8 +10,8 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
 )
 
 type IBCMiddleware struct {
@@ -80,11 +80,11 @@ func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet
 
 	amount, denom, err := im.keeper.GetFundsFromPacket(packet)
 	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(types.ErrBadPacket.Wrapf("bad packet in rate limit's OnRecvPacket"))
+		return channeltypes.NewErrorAcknowledgement(ibctransfer.ErrBadPacket.Wrapf("bad packet in rate limit's OnRecvPacket"))
 	}
 
 	if err := im.keeper.CheckAndUpdateRateLimits(ctx, denom, amount); err != nil {
-		return channeltypes.NewErrorAcknowledgement(types.ErrRateLimitExceeded)
+		return channeltypes.NewErrorAcknowledgement(ibctransfer.ErrRateLimitExceeded)
 	}
 
 	// if this returns an Acknowledgement that isn't successful, all state changes are discarded
@@ -104,10 +104,10 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 		if err != nil {
 			ctx.EventManager().EmitEvent(
 				sdk.NewEvent(
-					types.EventBadRevert,
-					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-					sdk.NewAttribute(types.AttributeKeyFailureType, "timeout"),
-					sdk.NewAttribute(types.AttributeKeyPacket, string(packet.GetData())),
+					ibctransfer.EventBadRevert,
+					sdk.NewAttribute(sdk.AttributeKeyModule, ibctransfer.ModuleName),
+					sdk.NewAttribute(ibctransfer.AttributeKeyFailureType, "timeout"),
+					sdk.NewAttribute(ibctransfer.AttributeKeyPacket, string(packet.GetData())),
 				),
 			)
 		}
@@ -122,10 +122,10 @@ func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Pac
 	if err != nil {
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				types.EventBadRevert,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-				sdk.NewAttribute(types.AttributeKeyFailureType, "timeout"),
-				sdk.NewAttribute(types.AttributeKeyPacket, string(packet.GetData())),
+				ibctransfer.EventBadRevert,
+				sdk.NewAttribute(sdk.AttributeKeyModule, ibctransfer.ModuleName),
+				sdk.NewAttribute(ibctransfer.AttributeKeyFailureType, "timeout"),
+				sdk.NewAttribute(ibctransfer.AttributeKeyPacket, string(packet.GetData())),
 			),
 		)
 	}

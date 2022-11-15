@@ -1,4 +1,4 @@
-package types
+package ibctransfer
 
 const (
 	// ModuleName defines the module name

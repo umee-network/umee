@@ -1,4 +1,4 @@
-package ibctransfer
+package ics20
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"

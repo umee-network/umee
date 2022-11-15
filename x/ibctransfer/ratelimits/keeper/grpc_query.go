@@ -4,12 +4,12 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-var _ types.QueryServer = Querier{}
+var _ ibctransfer.QueryServer = Querier{}
 
 // Querier implements a QueryServer for the x/ibc-rate-limit module.
 type Querier struct {
@@ -21,7 +21,7 @@ func NewQuerier(k Keeper) Querier {
 }
 
 // Params returns params of the x/ibc-rate-limit module.
-func (q Querier) Params(goCtx context.Context, req *types.QueryParams) (*types.QueryParamsResponse, error) {
+func (q Querier) Params(goCtx context.Context, req *ibctransfer.QueryParams) (*ibctransfer.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -29,11 +29,11 @@ func (q Querier) Params(goCtx context.Context, req *types.QueryParams) (*types.Q
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.Keeper.GetParams(ctx)
 
-	return &types.QueryParamsResponse{Params: params}, nil
+	return &ibctransfer.QueryParamsResponse{Params: params}, nil
 }
 
 // RateLimitsOfIBCDenoms returns rate limits of ibc denoms.
-func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *types.QueryRateLimitsOfIBCDenoms) (*types.QueryRateLimitsOfIBCDenomsResponse, error) {
+func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *ibctransfer.QueryRateLimitsOfIBCDenoms) (*ibctransfer.QueryRateLimitsOfIBCDenomsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -41,14 +41,14 @@ func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *types.QueryRa
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	rateLimits, err := q.Keeper.GetRateLimitsOfIBCDenoms(ctx)
 	if err != nil {
-		return &types.QueryRateLimitsOfIBCDenomsResponse{}, err
+		return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{}, err
 	}
 
-	return &types.QueryRateLimitsOfIBCDenomsResponse{RateLimits: rateLimits}, nil
+	return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{RateLimits: rateLimits}, nil
 }
 
 // RateLimitsOfIBCDenom returns rate limits of ibc denom.
-func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *types.QueryRateLimitsOfIBCDenom) (*types.QueryRateLimitsOfIBCDenomResponse, error) {
+func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *ibctransfer.QueryRateLimitsOfIBCDenom) (*ibctransfer.QueryRateLimitsOfIBCDenomResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -56,8 +56,8 @@ func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *types.QueryRat
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
 	if err != nil {
-		return &types.QueryRateLimitsOfIBCDenomResponse{}, nil
+		return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{}, nil
 	}
 
-	return &types.QueryRateLimitsOfIBCDenomResponse{RateLimit: rateLimit}, nil
+	return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{RateLimit: rateLimit}, nil
 }

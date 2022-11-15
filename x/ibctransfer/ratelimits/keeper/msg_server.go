@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
-var _ types.MsgServer = msgServer{}
+var _ ibctransfer.MsgServer = msgServer{}
 
 type msgServer struct {
 	keeper Keeper
@@ -17,17 +17,17 @@ type msgServer struct {
 
 // NewMsgServerImpl returns an implementation of MsgServer for the x/ibc-rate-limit
 // module.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+func NewMsgServerImpl(keeper Keeper) ibctransfer.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
 // AddIBCDenomRateLimit implements types.MsgServer
-func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *types.MsgUpdateIBCDenomsRateLimit) (*types.MsgUpdateIBCDenomsRateLimitResponse, error) {
+func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctransfer.MsgUpdateIBCDenomsRateLimit) (*ibctransfer.MsgUpdateIBCDenomsRateLimitResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// checking req msg authority is the gov module address
 	if m.keeper.authority != msg.Authority {
-		return &types.MsgUpdateIBCDenomsRateLimitResponse{},
+		return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{},
 			govtypes.ErrInvalidSigner.Wrapf(
 				"invalid authority: expected %s, got %s",
 				m.keeper.authority, msg.Authority,
@@ -35,9 +35,9 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *types.Ms
 	}
 
 	// save the new ibc rate limits
-	var rateLimitsOfIBCDenoms []types.RateLimit
+	var rateLimitsOfIBCDenoms []ibctransfer.RateLimit
 	for _, rateLimitOfIBCDenom := range msg.NewIbcDenomsRateLimits {
-		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, types.RateLimit{
+		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
 			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
 			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
@@ -45,13 +45,13 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *types.Ms
 		})
 	}
 	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, rateLimitsOfIBCDenoms); err != nil {
-		return &types.MsgUpdateIBCDenomsRateLimitResponse{}, err
+		return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
 	}
 
 	// update the rate limits of the ibc denoms
-	var updateRateLimitsForIBCDenoms []types.RateLimit
+	var updateRateLimitsForIBCDenoms []ibctransfer.RateLimit
 	for _, rateLimitOfIBCDenom := range msg.UpdateIbcDenomsRateLimits {
-		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, types.RateLimit{
+		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
 			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
 			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
@@ -59,19 +59,19 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *types.Ms
 		})
 	}
 	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, updateRateLimitsForIBCDenoms); err != nil {
-		return &types.MsgUpdateIBCDenomsRateLimitResponse{}, err
+		return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
 	}
 
-	return &types.MsgUpdateIBCDenomsRateLimitResponse{}, nil
+	return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, nil
 }
 
 // UpdateIBCTransferPauseStatus implements types.MsgServer
-func (m msgServer) UpdateIBCTransferPauseStatus(goCtx context.Context, msg *types.MsgUpdateIBCTransferPauseStatus) (*types.MsgUpdateIBCTransferPauseStatusResponse, error) {
+func (m msgServer) UpdateIBCTransferPauseStatus(goCtx context.Context, msg *ibctransfer.MsgUpdateIBCTransferPauseStatus) (*ibctransfer.MsgUpdateIBCTransferPauseStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// checking req msg authority is the gov module address
 	if m.keeper.authority != msg.Authority {
-		return &types.MsgUpdateIBCTransferPauseStatusResponse{},
+		return &ibctransfer.MsgUpdateIBCTransferPauseStatusResponse{},
 			govtypes.ErrInvalidSigner.Wrapf(
 				"invalid authority: expected %s, got %s",
 				m.keeper.authority, msg.Authority,
@@ -79,8 +79,8 @@ func (m msgServer) UpdateIBCTransferPauseStatus(goCtx context.Context, msg *type
 	}
 
 	if err := m.keeper.UpdateIBCTansferStatus(ctx, msg.IbcPauseStatus); err != nil {
-		return &types.MsgUpdateIBCTransferPauseStatusResponse{}, err
+		return &ibctransfer.MsgUpdateIBCTransferPauseStatusResponse{}, err
 	}
 
-	return &types.MsgUpdateIBCTransferPauseStatusResponse{}, nil
+	return &ibctransfer.MsgUpdateIBCTransferPauseStatusResponse{}, nil
 }

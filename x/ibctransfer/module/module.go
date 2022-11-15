@@ -13,9 +13,10 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 	"github.com/umee-network/umee/v3/x/ibctransfer/client/cli"
 	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 var (
@@ -34,12 +35,12 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 
 // DefaultGenesis implements module.AppModuleBasic
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesisState())
+	return cdc.MustMarshalJSON(ibctransfer.DefaultGenesisState())
 }
 
 // GetQueryCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(types.StoreKey)
+	return cli.GetQueryCmd(ibctransfer.StoreKey)
 }
 
 // GetTxCmd implements module.AppModuleBasic
@@ -49,31 +50,31 @@ func (AppModuleBasic) GetTxCmd() *cobra.Command {
 
 // Name implements module.AppModuleBasic
 func (AppModuleBasic) Name() string {
-	return types.ModuleName
+	return ibctransfer.ModuleName
 }
 
 // RegisterGRPCGatewayRoutes implements module.AppModuleBasic
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+	if err := ibctransfer.RegisterQueryHandlerClient(context.Background(), mux, ibctransfer.NewQueryClient(clientCtx)); err != nil {
 		panic(err)
 	}
 }
 
 // RegisterInterfaces implements module.AppModuleBasic
 func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
-	types.RegisterInterfaces(registry)
+	ibctransfer.RegisterInterfaces(registry)
 }
 
 // RegisterLegacyAminoCodec implements module.AppModuleBasic
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	types.RegisterLegacyAminoCodec(cdc)
+	ibctransfer.RegisterLegacyAminoCodec(cdc)
 }
 
 // ValidateGenesis implements module.AppModuleBasic
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
-	var gs types.GenesisState
+	var gs ibctransfer.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", ibctransfer.ModuleName, err)
 	}
 
 	return gs.Validate()
@@ -94,15 +95,15 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
 
 // ExportGenesis implements module.AppModule
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := ExportGenesis(ctx, am.keeper)
+	genState := am.keeper.ExportGenesis(ctx)
 	return cdc.MustMarshalJSON(genState)
 }
 
 // InitGenesis implements module.AppModule
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-	var genState types.GenesisState
+	var genState ibctransfer.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	InitGenesis(ctx, am.keeper, genState)
+	am.keeper.InitGenesis(ctx, genState)
 
 	return []abci.ValidatorUpdate{}
 }
@@ -121,7 +122,7 @@ func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(ctx sdk.Context, 
 
 // QuerierRoute implements module.AppModule
 func (AppModule) QuerierRoute() string {
-	return types.QuerierRoute
+	return ibctransfer.QuerierRoute
 }
 
 // RegisterInvariants implements module.AppModule
@@ -131,8 +132,8 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+	ibctransfer.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	ibctransfer.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
 // Route implements module.AppModule

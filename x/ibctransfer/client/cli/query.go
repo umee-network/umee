@@ -7,14 +7,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/v3/util/cli"
-	"github.com/umee-network/umee/v3/x/ibctransfer/types"
+	"github.com/umee-network/umee/v3/x/ibctransfer"
 )
 
 // GetQueryCmd returns the CLI query commands for the x/ibc-rate-limit module.
 func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),
+		Use:                        ibctransfer.ModuleName,
+		Short:                      fmt.Sprintf("Querying commands for the %s module", ibctransfer.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -41,8 +41,8 @@ func GetCmdQueryParams() *cobra.Command {
 				return err
 			}
 
-			queryClient := types.NewQueryClient(clientCtx)
-			resp, err := queryClient.Params(cmd.Context(), &types.QueryParams{})
+			queryClient := ibctransfer.NewQueryClient(clientCtx)
+			resp, err := queryClient.Params(cmd.Context(), &ibctransfer.QueryParams{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -64,13 +64,13 @@ func GetRateLimitsForIBCDenoms() *cobra.Command {
 				return err
 			}
 
-			queryClient := types.NewQueryClient(clientCtx)
+			queryClient := ibctransfer.NewQueryClient(clientCtx)
 			if len(args) > 0 {
-				resp, err := queryClient.RateLimitsOfIBCDenom(cmd.Context(), &types.QueryRateLimitsOfIBCDenom{IbcDenom: args[0]})
+				resp, err := queryClient.RateLimitsOfIBCDenom(cmd.Context(), &ibctransfer.QueryRateLimitsOfIBCDenom{IbcDenom: args[0]})
 				return cli.PrintOrErr(resp, err, clientCtx)
 			}
 
-			resp, err := queryClient.RateLimitsOfIBCDenoms(cmd.Context(), &types.QueryRateLimitsOfIBCDenoms{})
+			resp, err := queryClient.RateLimitsOfIBCDenoms(cmd.Context(), &ibctransfer.QueryRateLimitsOfIBCDenoms{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
