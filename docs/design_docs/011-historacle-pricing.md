@@ -1,5 +1,11 @@
 # Design Doc 011: Historacle Pricing
 
+## Changelog
+
+- Nov 09, 2022: Initial feature description (@adamewozniak)
+- Nov 14, 2022: Additional scenario description (@brentxu)
+- Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
+
 ## Status
 
 Draft
