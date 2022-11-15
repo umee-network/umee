@@ -26,23 +26,26 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		app.OracleKeeper.SetMedian(ctx, displayDenom)
 	}
 
-	// check median and median standard deviation at current block
-	median, err := app.OracleKeeper.GetMedian(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	// set and check median and median standard deviation
+	app.OracleKeeper.SetMedian(ctx, displayDenom)
+	median, err := app.OracleKeeper.GetMedian(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(median, sdk.MustNewDecFromStr("1.15"))
 
-	medianDeviation, err := app.OracleKeeper.GetMedianDeviation(ctx, displayDenom, uint64(ctx.BlockHeight()))
+	medianDeviation, err := app.OracleKeeper.GetMedianDeviation(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(medianDeviation, sdk.MustNewDecFromStr("0.0225"))
 
 	// delete first historic price, median, and median standard deviation
-	app.OracleKeeper.DeleteHistoricPriceStats(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
+	app.OracleKeeper.DeleteHistoricPrice(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
+	app.OracleKeeper.DeleteMedian(ctx, displayDenom)
+	app.OracleKeeper.DeleteMedianDeviation(ctx, displayDenom)
 
-	median, err = app.OracleKeeper.GetMedian(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
+	median, err = app.OracleKeeper.GetMedian(ctx, displayDenom)
 	s.Require().Error(err, sdkerrors.Wrap(types.ErrUnknownDenom, displayDenom))
 	s.Require().Equal(median, sdk.ZeroDec())
 
-	medianDeviation, err = app.OracleKeeper.GetMedianDeviation(ctx, displayDenom, uint64(ctx.BlockHeight()-3))
+	medianDeviation, err = app.OracleKeeper.GetMedianDeviation(ctx, displayDenom)
 	s.Require().Error(err, sdkerrors.Wrap(types.ErrUnknownDenom, displayDenom))
 	s.Require().Equal(median, sdk.ZeroDec())
 }

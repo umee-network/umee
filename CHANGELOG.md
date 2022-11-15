@@ -47,12 +47,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## [Unreleased]
 
 ### Features
-
 - [1555](https://github.com/umee-network/umee/pull/1555) Updates IBC to v5.1.0 that adds adds optional memo field to `FungibleTokenPacketData` and `MsgTransfer`.
+- [1577](https://github.com/umee-network/umee/pull/1577) Removes LIQUIDATOR build flag and adds `--enable-liquidator-query` or `-l` runtime flag to `umeed start`. See [README.md](README.md) file for more details.
 
 ### State Machine Breaking
 
 - [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
+
+### API Breaking
+
+- [1578](https://github.com/umee-network/umee/pull/1578) Reorganize key constructors in x/leverage/types and x/oracle/types.
 
 ## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
 

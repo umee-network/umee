@@ -101,7 +101,7 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	prefix := types.CreateAdjustedBorrowKeyNoDenom(borrowerAddr)
+	prefix := types.KeyAdjustedBorrowNoDenom(borrowerAddr)
 	totalBorrowed := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {
@@ -133,7 +133,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 
 // GetBorrowerCollateral returns an sdk.Coins containing all of a borrower's collateral.
 func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	prefix := types.CreateCollateralAmountKeyNoDenom(borrowerAddr)
+	prefix := types.KeyCollateralAmountNoDenom(borrowerAddr)
 	totalCollateral := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {

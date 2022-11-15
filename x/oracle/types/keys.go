@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
+	"github.com/umee-network/umee/v3/util"
 )
 
 const (
@@ -30,61 +31,51 @@ var (
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 )
 
-// GetExchangeRateKey - stored by *denom*
-func GetExchangeRateKey(denom string) (key []byte) {
-	key = append(key, KeyPrefixExchangeRate...)
-	key = append(key, []byte(denom)...)
-	return append(key, 0) // append 0 for null-termination
+// KeyExchangeRate - stored by *denom*
+func KeyExchangeRate(denom string) []byte {
+	// append 0 for null-termination
+	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(denom))
 }
 
-// GetFeederDelegationKey - stored by *Validator* address
-func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixFeederDelegation...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyFeederDelegation - stored by *Validator* address
+func KeyFeederDelegation(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixFeederDelegation, address.MustLengthPrefix(v))
 }
 
-// GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixMissCounter...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyMissCounter - stored by *Validator* address
+func KeyMissCounter(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixMissCounter, address.MustLengthPrefix(v))
 }
 
-// GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
-func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRatePrevote...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyAggregateExchangeRatePrevote - stored by *Validator* address
+func KeyAggregateExchangeRatePrevote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRatePrevote, address.MustLengthPrefix(v))
 }
 
-// GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRateVote...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyAggregateExchangeRateVote - stored by *Validator* address
+func KeyAggregateExchangeRateVote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v))
 }
 
-// MedianKey - stored by *denom* and *block*
-func MedianKey(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixMedian...)
-	return appendDenomAndBlock(key, denom, blockNum)
+// KeyMedian - stored by *denom*
+func KeyMedian(denom string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom))
 }
 
-// MedianDeviationKey - stored by *denom* and *block*
-func MedianDeviationKey(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixMedianDeviation...)
-	return appendDenomAndBlock(key, denom, blockNum)
+// KeyMedianDeviation - stored by *denom*
+func KeyMedianDeviation(denom string) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom))
 }
 
-// HistoricPriceKey - stored by *denom* and *block*
-func HistoricPriceKey(denom string, blockNum uint64) (key []byte) {
-	key = append(key, KeyPrefixHistoricPrice...)
-	return appendDenomAndBlock(key, denom, blockNum)
+// KeyHistoricPrice - stored by *denom* and *block*
+func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), uintWithNullPrefix(blockNum))
 }
 
-func appendDenomAndBlock(key []byte, denom string, blockNum uint64) []byte {
-	key = append(key, []byte(denom)...)
-	key = append(key, 0) // null delimeter to avoid collision between different denoms
-	block := make([]byte, 8)
-	binary.LittleEndian.PutUint64(block, blockNum)
-	return append(key, block...)
+func uintWithNullPrefix(n uint64) []byte {
+	bz := make([]byte, 9)
+	binary.LittleEndian.PutUint64(bz[1:], n)
+	return bz
 }
 
 func ParseDemonFromHistoricPriceKey(key []byte) string {
