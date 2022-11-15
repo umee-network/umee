@@ -105,12 +105,10 @@ func (k Keeper) SetMedianPeriod(ctx sdk.Context, medianPeriod uint64) {
 }
 
 // GetParams returns the total set of oracle parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
+// TODO: remove this and remove the param object from the parmspace
+func (k Keeper) GetLegacyParams(ctx sdk.Context) (params types.Params) {
 	k.paramSpace.GetParamSet(ctx, &params)
+	k.paramSpace.Set(ctx sdk.Context, key []byte, value interface{})
 	return params
 }
 
-// SetParams sets the total set of oracle parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-	k.paramSpace.SetParamSet(ctx, &params)
-}

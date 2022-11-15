@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/umee-network/umee/v3/x/oracle/types"
@@ -137,4 +138,38 @@ func (ms msgServer) DelegateFeedConsent(
 		Operator: msg.Operator, Delegate: msg.Delegate})
 
 	return &types.MsgDelegateFeedConsentResponse{}, err
+}
+
+// GovUpdateParams updates existing tokens with new settings
+// or adds the new tokens to registry.
+func (s msgServer) GovUpdateParams(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateParams,
+) (*types.MsgGovUpdateParamsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// checking req msg authority is the gov module address
+	if s.authority != msg.Authority {
+		return &types.MsgGovUpdateParamsResponse{},
+			govtypes.ErrInvalidSigner.Wrapf(
+				"invalid authority: expected %s, got %s",
+				s.authority, msg.Authority,
+			)
+	}
+
+	s.SaveParams(ctx, msg.Params)
+
+	// update the token settings
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.UpdateTokens, registeredTokenDenoms, true)
+	if err != nil {
+		return &types.MsgGovUpdateParamsResponse{}, err
+	}
+
+	// adds  the new token settings
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.AddTokens, registeredTokenDenoms, false)
+	if err != nil {
+		return &types.MsgGovUpdateParamsResponse{}, err
+	}
+
+	return &types.MsgGovUpdateParamsResponse{}, nil
 }

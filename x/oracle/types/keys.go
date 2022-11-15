@@ -29,6 +29,7 @@ var (
 	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
 	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
+	KeyParams                             = []byte{0x09} // oracle params key
 )
 
 // KeyExchangeRate - stored by *denom*

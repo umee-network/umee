@@ -30,6 +30,7 @@ type Keeper struct {
 	StakingKeeper types.StakingKeeper
 
 	distrName string
+	authority string
 }
 
 // NewKeeper constructs a new keeper for oracle
@@ -42,6 +43,7 @@ func NewKeeper(
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
 	distrName string,
+	authority string,
 ) Keeper {
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
@@ -62,6 +64,7 @@ func NewKeeper(
 		distrKeeper:   distrKeeper,
 		StakingKeeper: stakingKeeper,
 		distrName:     distrName,
+		authority:     authority,
 	}
 }
 
@@ -326,7 +329,6 @@ func (k Keeper) GetAggregateExchangeRateVote(
 	voter sdk.ValAddress,
 ) (types.AggregateExchangeRateVote, error) {
 	store := ctx.KVStore(k.storeKey)
-
 	bz := store.Get(types.KeyAggregateExchangeRateVote(voter))
 	if bz == nil {
 		return types.AggregateExchangeRateVote{}, sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
@@ -345,7 +347,6 @@ func (k Keeper) SetAggregateExchangeRateVote(
 	vote types.AggregateExchangeRateVote,
 ) {
 	store := ctx.KVStore(k.storeKey)
-
 	bz := k.cdc.MustMarshal(&vote)
 	store.Set(types.KeyAggregateExchangeRateVote(voter), bz)
 }
@@ -394,4 +395,22 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	}
 
 	return nil
+}
+
+
+// GetParams returns the total set of oracle parameters.
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params, error) {
+	bz := ctx.KVStore(k.storeKey).Get(types.KeyParams)
+	if bz == nil {
+		return types.Params{}, sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
+	}
+	var p Params
+	k.cdc.MustUnmarshal(bz, &p)
+	return p, nil
+}
+
+// SetParams returns the total set of oracle parameters.
+func (k Keeper) SetParams(ctx sdk.Context) (params types.Params) {
+	bz := k.cdc.MustMarshal(&vote)
+	ctx.KVStore(k.storeKey).Set(types.KeyParams, bz)
 }
