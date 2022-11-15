@@ -35,11 +35,14 @@ We define three epoch periods, during which additional computation will be perfo
 
 These values are stored in state in order to avoid the `x/leverage` module from having to calculate them while making decisions around allowable positions for users to take.
 
+Also, there will be an `AssetList` for assets which will use this protection methodology (mainly manipulatable assets). Any assets not on this list will not be stamped.
+
 ### Proposed API
 
 The `x/leverage` module will have access to the following `keeper` functions from the `x/oracle` module:
 - `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
 - `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
+- `HistoracleAssets() (map[denom]struct{}, error)`, returns a map which contains the assets which we're currently keeping track of.
 
 ### Outcomes
 
