@@ -22,27 +22,37 @@ threshold = "1.5"
 base = "USDC"
 threshold = "1.5"
 
-[[currency_pairs]]
-base = "UMEE"
-providers = [
-  "okx",
-  "gate"
-]
-quote = "USDT"
+[[deviation_thresholds]]
+base = "CRO"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "DAI"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "ETH"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "BTC"
+threshold = "2"
 
 [[currency_pairs]]
 base = "UMEE"
 providers = [
-  "ftx"
+  "okx",
+  "gate",
+  "mexc"
 ]
-quote = "USD"
+quote = "USDT"
 
 [[currency_pairs]]
 base = "USDT"
 providers = [
   "kraken",
-  "ftx",
-  "coinbase"
+  "coinbase",
+  "binanceus",
 ]
 quote = "USD"
 
@@ -50,6 +60,7 @@ quote = "USD"
 base = "ATOM"
 providers = [
   "okx",
+  "bitget",
 ]
 quote = "USDT"
 
@@ -57,7 +68,6 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
-  "ftx",
 ]
 quote = "USD"
 
@@ -67,6 +77,56 @@ providers = [
   "okx",
   "bitget",
   "kraken",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "CRO"
+providers = [
+  "okx",
+  "bitget",
+  "huobi",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "DAI"
+providers = [
+  "okx",
+  "bitget",
+  "huobi",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "DAI"
+providers = [
+  "kraken",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "ETH"
+providers = [
+  "binance",
+  "okx",
+  "bitget",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "ETH"
+providers = [
+  "kraken",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "WBTC"
+providers = [
+  "okx",
+  "mexc",
+  "bitget",
 ]
 quote = "USDT"
 
