@@ -26,7 +26,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 	app.registerV3_2Upgrade(upgradeInfo)
 }
 
-// performs upgrade from v3.1 -> v3.3
+// performs upgrade from v3.1 -> v3.2
 func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
 	const planName = "v3.2.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
