@@ -27,15 +27,21 @@ ldflags = -X github.com/umee-network/umee/price-feeder/cmd.Version=$(VERSION) \
 		  -X github.com/umee-network/umee/price-feeder/cmd.Commit=$(COMMIT) \
 		  -X github.com/umee-network/umee/price-feeder/cmd.SDKVersion=$(SDK_VERSION)
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
+
+build_tags += $(BUILD_TAGS)
+
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
 
 install: go.sum
 	@echo "--> Installing..."
-	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 .PHONY: build install
 
@@ -45,7 +51,7 @@ install: go.sum
 
 test-unit:
 	@echo "--> Running tests"
-	@go test -mod=readonly -race ./... -v
+	@go test -short -mod=readonly -race ./... -v
 
 .PHONY: test-unit
 

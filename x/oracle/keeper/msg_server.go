@@ -44,7 +44,7 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 	}
 
 	// Convert hex string to votehash
-	voteHash, err := types.AggregateVoteHashFromHexString(msg.Hash)
+	voteHash, err := types.AggregateVoteHashFromHex(msg.Hash)
 	if err != nil {
 		return nil, sdkerrors.Wrap(types.ErrInvalidHash, err.Error())
 	}
@@ -78,23 +78,25 @@ func (ms msgServer) AggregateExchangeRateVote(
 		return nil, sdkerrors.Wrap(types.ErrNoAggregatePrevote, msg.Validator)
 	}
 
-	// Check a msg is submitted proper period
-	if (uint64(ctx.BlockHeight())/params.VotePeriod)-(aggregatePrevote.SubmitBlock/params.VotePeriod) != 1 {
+	// Check the vote is submitted in the `period == prevote.period+1`
+	if (uint64(ctx.BlockHeight()) / params.VotePeriod) != (aggregatePrevote.SubmitBlock/params.VotePeriod)+1 {
 		return nil, types.ErrRevealPeriodMissMatch
 	}
 
 	exchangeRateTuples, err := types.ParseExchangeRateTuples(msg.ExchangeRates)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, err.Error())
+		return nil, err
 	}
 
-	// Verify a exchange rate with aggregate prevote hash
+	// Verify that the vote hash and prevote hash match
 	hash := types.GetAggregateVoteHash(msg.Salt, msg.ExchangeRates, valAddr)
 	if aggregatePrevote.Hash != hash.String() {
 		return nil, sdkerrors.Wrapf(types.ErrVerificationFailed, "must be given %s not %s", aggregatePrevote.Hash, hash)
 	}
 
 	// Filter out rates which aren't included in the AcceptList
+	// This is also needed for slashing; in the end blocker we are checking if validator voted
+	// for all required currencies. If they missed some, then we increase their slashing counter.
 	filteredTuples := types.ExchangeRateTuples{}
 	for _, tuple := range exchangeRateTuples {
 		if params.AcceptList.Contains(tuple.Denom) {
