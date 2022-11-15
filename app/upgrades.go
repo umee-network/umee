@@ -23,31 +23,43 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 
 	app.registerV3_0Upgrade(upgradeInfo)
 	app.registerV3_1Upgrade(upgradeInfo)
+	app.registerV3_2Upgrade(upgradeInfo)
+}
+
+// performs upgrade from v3.1 -> v3.3
+func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
+	const planName = "v3.2.0"
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		})
 }
 
 // performs upgrade from v3.0 -> v3.1
 func (app *UmeeApp) registerV3_1Upgrade(_ upgradetypes.Plan) {
-	const UpgradeV3_1Plan = "v3.1.0"
+	const planName = "v3.1.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
-		UpgradeV3_1Plan,
+		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_1Plan)
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			return fromVM, nil
 		})
 }
 
 // performs upgrade from v1->v3
 func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
-	const UpgradeV3_0Plan = "v1.1-v3.0"
+	const planName = "v1.1-v3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
-		UpgradeV3_0Plan,
+		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", UpgradeV3_0Plan)
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Running setupBech32ibcKeeper")
 			err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
 				return nil, sdkerrors.Wrapf(
-					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", UpgradeV3_0Plan)
+					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
 			}
 
 			ctx.Logger().Info("Running module migrations")
@@ -61,22 +73,22 @@ func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
-					UpgradeV3_0Plan)
+					planName)
 			}
 
 			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
-				"name", UpgradeV3_0Plan)
+				"name", planName)
 			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
 				return vm, sdkerrors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate for validators",
-					UpgradeV3_0Plan)
+					planName)
 			}
 
 			return vm, err
 		})
 
-	if upgradeInfo.Name == UpgradeV3_0Plan && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	if upgradeInfo.Name == planName && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{
 				group.ModuleName,
