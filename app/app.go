@@ -458,6 +458,7 @@ func New(
 		app.BankKeeper,
 		app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
 	if err != nil {
 		panic(err)
@@ -799,8 +800,8 @@ func New(
 }
 
 func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
-	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey) {
-
+	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey,
+) {
 	anteHandler, err := customante.NewAnteHandler(
 		customante.HandlerOptions{
 			AccountKeeper:     app.AccountKeeper,

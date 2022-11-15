@@ -25,6 +25,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/leverage"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
@@ -187,6 +188,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
+	leverage.AddModuleInitFlags(startCmd)
 }
 
 func queryCommand(ac appCreator) *cobra.Command {

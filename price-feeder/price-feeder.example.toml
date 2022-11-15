@@ -43,22 +43,16 @@ base = "UMEE"
 providers = [
   "okx",
   "gate",
+  "mexc"
 ]
 quote = "USDT"
-
-[[currency_pairs]]
-base = "UMEE"
-providers = [
-  "ftx",
-]
-quote = "USD"
 
 [[currency_pairs]]
 base = "USDT"
 providers = [
   "kraken",
-  "ftx",
-  "coinbase"
+  "coinbase",
+  "binanceus",
 ]
 quote = "USD"
 
@@ -66,6 +60,7 @@ quote = "USD"
 base = "ATOM"
 providers = [
   "okx",
+  "bitget",
 ]
 quote = "USDT"
 
@@ -73,7 +68,6 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
-  "ftx",
 ]
 quote = "USD"
 
@@ -128,21 +122,13 @@ providers = [
 quote = "USD"
 
 [[currency_pairs]]
-base = "BTC"
+base = "WBTC"
 providers = [
-  "binance",
   "okx",
+  "mexc",
   "bitget",
-  "huobi",
 ]
 quote = "USDT"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "kraken",
-]
-quote = "USD"
 
 [account]
 address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"

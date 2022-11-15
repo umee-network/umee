@@ -10,7 +10,6 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
 HTTPS_GIT      := https://github.com/umee-network/umee.git
-LIQUIDATOR     := $(if $(LIQUIDATOR),true,false)
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -70,8 +69,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
-		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
+		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
 
 ifeq ($(LINK_STATICALLY),true)
 	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
@@ -96,9 +94,6 @@ build-no_cgo:
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
-
-build-liquidator:
-	LIQUIDATOR=true $(MAKE) build
 
 install: go.sum
 	@echo "--> Installing..."

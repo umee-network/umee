@@ -2,7 +2,6 @@ syntax = "proto3";
 package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 import "umee/oracle/v1/oracle.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/oracle/types";
@@ -23,8 +22,9 @@ message GenesisState {
       [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [(gogoproto.nullable) = false];
-  repeated cosmos.base.v1beta1.DecCoin medians         = 7 [(gogoproto.nullable) = false];
-  repeated HistoricPrice               historic_prices = 8 [(gogoproto.nullable) = false];
+  repeated HistoricPrice               historic_prices  = 8 [(gogoproto.nullable) = false];
+  repeated ExchangeRateTuple medians          = 7 [(gogoproto.nullable) = false];
+  repeated ExchangeRateTuple medianDeviations = 9 [(gogoproto.nullable) = false];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are
@@ -40,4 +40,12 @@ message FeederDelegation {
 message MissCounter {
   string validator_address = 1;
   uint64 miss_counter      = 2;
+}
+
+// HistoricPrice is an instance of a price "stamp"
+message HistoricPrice {
+  ExchangeRateTuple exchange_rate_tuple = 1 [
+    (gogoproto.nullable)   = false
+  ];
+  uint64 block_num = 2;
 }
