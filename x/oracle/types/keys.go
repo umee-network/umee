@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/binary"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
@@ -84,9 +83,7 @@ func ParseDenomFromHistoricPriceKey(key []byte) string {
 }
 
 func ParseBlockFromHistoricPriceKey(key []byte) uint64 {
-	fmt.Println(key)
-	fmt.Println(len(key))
-	return binary.LittleEndian.Uint64(key[len(key)-9 : len(key)-1])
+	return binary.LittleEndian.Uint64(key[len(key)-8:])
 }
 
 func ParseDenomFromMedianKey(key []byte) string {

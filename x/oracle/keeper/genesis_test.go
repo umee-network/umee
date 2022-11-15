@@ -1,8 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -38,8 +36,6 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 		},
 	)
 
-	fmt.Printf("%+v\n", newPrices)
-
 	s.Require().Equal(len(historicPrices), len(newPrices))
 
 	// Verify that the historic prices from IterateAllHistoricPrices equal
@@ -55,27 +51,3 @@ FOUND:
 		s.T().Errorf("did not find match for historic price: %+v", oldPrice)
 	}
 }
-
-// func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
-// 	keeper, ctx := s.app.OracleKeeper, s.ctx
-
-// 	medians := []sdk.DecCoin{
-// 		{Denom: "umee", Amount: sdk.MustNewDecFromStr("35.19")},
-// 		{Denom: "atom", Amount: sdk.MustNewDecFromStr("31.22")},
-// 	}
-
-// 	for _, median := range medians {
-// 		keeper.SetMedian(ctx, median.Denom, median.Amount)
-// 	}
-
-// 	newMedians := []sdk.DecCoin{}
-// 	keeper.IterateAllMedianPrices(
-// 		ctx,
-// 		func(median sdk.DecCoin) bool {
-// 			newMedians = append(newMedians, median)
-// 			return false
-// 		},
-// 	)
-
-// 	s.Require().Equal(len(medians), len(newMedians))
-// }
