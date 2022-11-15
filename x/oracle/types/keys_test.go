@@ -118,3 +118,13 @@ func TestUintWithNullPrefix(t *testing.T) {
 	out := uintWithNullPrefix(math.MaxUint64)
 	require.Equal(t, expected, out)
 }
+
+func TestParseBlockFromHistoricPriceKey(t *testing.T) {
+	denom := "umee"
+	blockNum := uint64(4567)
+	key := KeyHistoricPrice(denom, blockNum)
+
+	newBlockNum := ParseBlockFromHistoricPriceKey(key)
+
+	require.Equal(t, blockNum, newBlockNum)
+}
