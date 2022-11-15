@@ -40,6 +40,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		k.ClearExchangeRates(ctx)
+		// Clear median and median deviations
+		if isPeriodLastBlock(ctx, params.MedianPeriod) {
+			for _, v := range params.AcceptList {
+				k.DeleteMedian(ctx, v.String())
+				k.DeleteMedianDeviation(ctx, v.String())
+			}
+		}
 
 		// NOTE: it filters out inactive or jailed validators
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
@@ -106,7 +113,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	if isPeriodLastBlock(ctx, params.PrunePeriod) {
 		pruneBlock := uint64(ctx.BlockHeight()) - params.PrunePeriod
 		for _, v := range params.AcceptList {
-			k.DeleteHistoricPriceStats(ctx, v.String(), pruneBlock)
+			k.DeleteHistoricPrice(ctx, v.String(), pruneBlock)
 		}
 	}
 
