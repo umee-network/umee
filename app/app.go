@@ -310,7 +310,7 @@ func New(
 		gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, incentivetypes.StoreKey,
 		bech32ibctypes.StoreKey,
-	)
+	}
 	if Experimental {
 		storeKeys = append(storeKeys, wasm.StoreKey)
 	}
