@@ -1,12 +1,8 @@
 package types
 
 import (
-	"strings"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/gov/types"
-	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
 	"github.com/umee-network/umee/v3/util/checkers"
 )
@@ -121,10 +117,7 @@ func NewMsgGovSetParams(authority, title, description string, params Params) *Ms
 }
 
 func (msg MsgGovSetParams) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
-	}
-	if err := validateProposal(msg.Title, msg.Description); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
 	return msg.Params.Validate()
@@ -151,10 +144,7 @@ func NewMsgCreateProgram(authority, title, description string, program Incentive
 }
 
 func (msg MsgGovCreateProgram) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
-	}
-	if err := validateProposal(msg.Title, msg.Description); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
 	if err := validateProposedIncentiveProgram(msg.Program); err != nil {
@@ -186,14 +176,11 @@ func NewMsgCreateAndSponsorProgram(authority, title, description, sponsor string
 }
 
 func (msg MsgGovCreateAndSponsorProgram) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+		return err
 	}
 	if _, err := sdk.AccAddressFromBech32(msg.Sponsor); err != nil {
 		return sdkerrors.Wrap(err, "invalid sponsor address")
-	}
-	if err := validateProposal(msg.Title, msg.Description); err != nil {
-		return err
 	}
 	if err := validateProposedIncentiveProgram(msg.Program); err != nil {
 		return err
@@ -210,24 +197,6 @@ func (msg MsgGovCreateAndSponsorProgram) GetSignBytes() []byte {
 // GetSigners implements Msg
 func (msg MsgGovCreateAndSponsorProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
-}
-
-func validateProposal(title, description string) error {
-	if len(strings.TrimSpace(title)) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
-	}
-	if len(title) > gov1b1.MaxTitleLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
-			gov1b1.MaxTitleLength)
-	}
-	if len(description) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
-	}
-	if len(description) > gov1b1.MaxDescriptionLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
-			gov1b1.MaxDescriptionLength)
-	}
-	return nil
 }
 
 // validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
