@@ -319,6 +319,8 @@ func (m *MsgBeginUnbondingResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgBeginUnbondingResponse proto.InternalMessageInfo
 
 // MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
+// The program must have been passed by governance, not yet started, and not yet funded.
+// Funded assets must be the full amount required by the program.
 type MsgSponsor struct {
 	Sponsor string     `protobuf:"bytes,1,opt,name=sponsor,proto3" json:"sponsor,omitempty"`
 	Program uint32     `protobuf:"varint,2,opt,name=program,proto3" json:"program,omitempty"`
@@ -850,7 +852,7 @@ type MsgClient interface {
 	Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
-	// Sponsor defines a permissionless method for sponsoring an incentive program.
+	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.CallOption) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error)
@@ -939,7 +941,7 @@ type MsgServer interface {
 	Bond(context.Context, *MsgBond) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
-	// Sponsor defines a permissionless method for sponsoring an incentive program.
+	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	Sponsor(context.Context, *MsgSponsor) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(context.Context, *MsgGovSetParams) (*MsgGovSetParamsResponse, error)
