@@ -1098,6 +1098,17 @@ paths:
                       we want
 
                       to keep a record of our set of exchange rates.
+                  median_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Median Period represents the amount blocks we will wait
+                      between
+
+                      calculating the median and standard deviation of the
+                      median of
+
+                      historic prices in the last Prune Period.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -2515,6 +2526,13 @@ definitions:
         description: |-
           Prune Period represents the maximum amount of blocks which we want
           to keep a record of our set of exchange rates.
+      median_period:
+        type: string
+        format: uint64
+        description: |-
+          Median Period represents the amount blocks we will wait between
+          calculating the median and standard deviation of the median of
+          historic prices in the last Prune Period.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2768,6 +2786,13 @@ definitions:
             description: |-
               Prune Period represents the maximum amount of blocks which we want
               to keep a record of our set of exchange rates.
+          median_period:
+            type: string
+            format: uint64
+            description: |-
+              Median Period represents the amount blocks we will wait between
+              calculating the median and standard deviation of the median of
+              historic prices in the last Prune Period.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object

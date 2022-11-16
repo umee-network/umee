@@ -58,7 +58,7 @@ message QueryIncentiveProgramsResponse {
 // gRPC service handler.
 message QueryIncentiveProgramRequest {
   // ID specifies which program to query for
-  uint64 id = 1;
+  uint32 id = 1;
 }
 
 // QueryIncentivePrograResponse defines the response structure for the
