@@ -68,16 +68,24 @@ func (k Keeper) GetMedian(
 // its median price in the last prune period since the current block and
 // set it to the store. It will also call setMedianDeviation with the
 // calculated median.
-func (k Keeper) SetMedian(
+func (k Keeper) CalcAndSetMedian(
 	ctx sdk.Context,
 	denom string,
 ) {
-	store := ctx.KVStore(k.storeKey)
 	historicPrices := k.getHistoricPrices(ctx, denom)
 	median := median(historicPrices)
+	k.SetMedian(ctx, denom, median)
+	k.calcAndSetMedianDeviation(ctx, denom, median, historicPrices)
+}
+
+func (k Keeper) SetMedian(
+	ctx sdk.Context,
+	denom string,
+	median sdk.Dec,
+) {
+	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
 	store.Set(types.KeyMedian(denom), bz)
-	k.setMedianDeviation(ctx, denom, median, historicPrices)
 }
 
 // GetMedianDeviation returns a given denom's standard deviation around
@@ -100,14 +108,22 @@ func (k Keeper) GetMedianDeviation(
 
 // setMedianDeviation sets a given denom's standard deviation around
 // its median price in the last prune period since the current block.
-func (k Keeper) setMedianDeviation(
+func (k Keeper) calcAndSetMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 	median sdk.Dec,
 	prices []sdk.Dec,
 ) {
-	store := ctx.KVStore(k.storeKey)
 	medianDeviation := medianDeviation(median, prices)
+	k.SetMedianDeviation(ctx, denom, medianDeviation)
+}
+
+func (k Keeper) SetMedianDeviation(
+	ctx sdk.Context,
+	denom string,
+	medianDeviation sdk.Dec,
+) {
+	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: medianDeviation})
 	store.Set(types.KeyMedianDeviation(denom), bz)
 }
@@ -158,10 +174,19 @@ func (k Keeper) AddHistoricPrice(
 	denom string,
 	exchangeRate sdk.Dec,
 ) {
-	store := ctx.KVStore(k.storeKey)
 	block := uint64(ctx.BlockHeight())
+	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
+}
+
+func (k Keeper) SetHistoricPrice(
+	ctx sdk.Context,
+	denom string,
+	blockNum uint64,
+	exchangeRate sdk.Dec,
+) {
+	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	store.Set(types.KeyHistoricPrice(denom, block), bz)
+	store.Set(types.KeyHistoricPrice(denom, blockNum), bz)
 }
 
 // DeleteHistoricPrice deletes the historic price of a denom at a
