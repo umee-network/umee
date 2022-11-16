@@ -9,7 +9,7 @@ import (
 )
 
 // GetStoredInt retrieves an sdkmath.Int from a KVStore, or a provided minimum value if no value is stored.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minumum value.
+// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetStoredInt(store sdk.KVStore, key []byte, min sdkmath.Int, desc string) sdkmath.Int {
 	if bz := store.Get(key); bz != nil {
@@ -46,7 +46,7 @@ func SetStoredInt(store sdk.KVStore, key []byte, val, min sdkmath.Int, desc stri
 }
 
 // GetStoredDec retrieves an sdk.Dec from a KVStore, or a provided minimum value if no value is stored.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minumum value.
+// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetStoredDec(store sdk.KVStore, key []byte, min sdk.Dec, desc string) sdk.Dec {
 	if bz := store.Get(key); bz != nil {
@@ -84,7 +84,7 @@ func SetStoredDec(store sdk.KVStore, key []byte, val, min sdk.Dec, desc string) 
 
 // GetStoredUint32 retrieves a uint32 from a KVStore, or a provided minimum value if no value is stored.
 // Uses gogoproto Uint32Value for unmarshaling.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minumum value.
+// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetStoredUint32(store sdk.KVStore, key []byte, min uint32, desc string) uint32 {
 	if bz := store.Get(key); bz != nil {
@@ -124,7 +124,7 @@ func SetStoredUint32(store sdk.KVStore, key []byte, val, min uint32, desc string
 
 // GetStoredUint64 retrieves a uint32 from a KVStore, or a provided minimum value if no value is stored.
 // Uses gogoproto Uint64Value for unmarshaling.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minumum value.
+// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetStoredUint64(store sdk.KVStore, key []byte, min uint64, desc string) uint64 {
 	if bz := store.Get(key); bz != nil {
