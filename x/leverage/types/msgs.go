@@ -12,9 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	_ sdk.Msg = &MsgGovUpdateRegistry{}
-)
+var _ sdk.Msg = &MsgGovUpdateRegistry{}
 
 // NewMsgUpdateRegistry will creates a new MsgUpdateRegistry instance
 func NewMsgUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {
@@ -44,11 +42,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
-	}
-
-	if err := validateProposal(msg.Title, msg.Description); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
 
