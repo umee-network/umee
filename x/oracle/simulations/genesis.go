@@ -151,9 +151,9 @@ func RandomizedGenState(simState *module.SimulationState) {
 			HistoricAcceptList: types.DenomList{
 				{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
 			},
-			StampPeriod:       stampPeriod,
-			PrunePeriod:       prunePeriod,
-			MedianPeriod:      medianPeriod,
+			StampPeriod:  stampPeriod,
+			PrunePeriod:  prunePeriod,
+			MedianPeriod: medianPeriod,
 		},
 		[]types.ExchangeRateTuple{},
 		[]types.FeederDelegation{},
