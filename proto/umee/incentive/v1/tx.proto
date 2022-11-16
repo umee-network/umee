@@ -126,6 +126,7 @@ message MsgGovCreateAndSponsorProgram {
   IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
 
   // sponsor is the address of the community fund or an account from which program rewards will be taken.
+  // it should not be a module account.
   string sponsor = 5;
 }
 
