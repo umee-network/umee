@@ -26,7 +26,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	}
 
 	// set and check median and median standard deviation
-	app.OracleKeeper.SetMedian(ctx, displayDenom)
+	app.OracleKeeper.CalcAndSetMedian(ctx, displayDenom)
 	median, err := app.OracleKeeper.GetMedian(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(median, sdk.MustNewDecFromStr("1.15"))
