@@ -148,6 +148,9 @@ func RandomizedGenState(simState *module.SimulationState) {
 			SlashFraction:     slashFraction,
 			SlashWindow:       slashWindow,
 			MinValidPerWindow: minValidPerWindow,
+			HistoricAcceptList: types.DenomList{
+				{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
+			},
 			StampPeriod:       stampPeriod,
 			PrunePeriod:       prunePeriod,
 			MedianPeriod:      medianPeriod,
