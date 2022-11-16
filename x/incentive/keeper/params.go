@@ -9,7 +9,7 @@ import (
 // SetParams sets the x/incentive module's parameters.
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
 	// k.paramSpace.SetParamSet(ctx, &params)
-	return types.ErrNotImplemented
+	return nil
 }
 
 // GetParams gets the x/incentive module's parameters.
