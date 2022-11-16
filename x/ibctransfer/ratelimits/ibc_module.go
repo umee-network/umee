@@ -74,19 +74,6 @@ func (im IBCMiddleware) OnChanCloseConfirm(ctx sdk.Context, portID string, chann
 
 // OnRecvPacket implements types.Middleware
 func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) exported.Acknowledgement {
-	if err := ValidateReceiverAddress(packet); err != nil {
-		return channeltypes.NewErrorAcknowledgement(err)
-	}
-
-	amount, denom, err := im.keeper.GetFundsFromPacket(packet)
-	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(ibctransfer.ErrBadPacket.Wrapf("bad packet in rate limit's OnRecvPacket"))
-	}
-
-	if err := im.keeper.CheckAndUpdateRateLimits(ctx, denom, amount); err != nil {
-		return channeltypes.NewErrorAcknowledgement(ibctransfer.ErrRateLimitExceeded)
-	}
-
 	// if this returns an Acknowledgement that isn't successful, all state changes are discarded
 	return im.app.OnRecvPacket(ctx, packet, relayer)
 }
@@ -99,7 +86,6 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 	}
 
 	if !ack.Success() {
-		// TODO: reverse sent the ibc transfer
 		err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
 		if err != nil {
 			ctx.EventManager().EmitEvent(
@@ -133,7 +119,7 @@ func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Pac
 }
 
 // RevertSentPacket Notifies the contract that a sent packet wasn't properly received
-func (im *IBCMiddleware) RevertSentPacket(
+func (im IBCMiddleware) RevertSentPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
 ) error {

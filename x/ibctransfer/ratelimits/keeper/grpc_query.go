@@ -56,8 +56,8 @@ func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *ibctransfer.Qu
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
 	if err != nil {
-		return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{}, nil
+		return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{}, err
 	}
 
-	return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{RateLimit: rateLimit}, nil
+	return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{RateLimit: *rateLimit}, nil
 }

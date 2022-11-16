@@ -11,27 +11,23 @@ option go_package = "github.com/umee-network/umee/v3/x/ibctransfer";
 message RateLimit {
   // ibc_denom defines the ibc denom
   string ibc_denom = 1;
-  // inflow_limit defines the inflow limit of ibc-transfer
-  uint64 inflow_limit = 2;
   // outflow_limit defines the outflow limit of ibc-transfer
-  uint64 outflow_limit = 3;
+  uint64 outflow_limit = 2;
   // time_window defines window for rate limit of ibc_denom
-  google.protobuf.Duration time_window = 4 [
+  google.protobuf.Duration time_window = 3 [
     (gogoproto.nullable)    = false,
     (gogoproto.stdduration) = true,
     (gogoproto.jsontag)     = "time_window,omitempty",
     (gogoproto.moretags)    = "yaml:\"time_window\""
   ];
   // expired_time defines rate limit expires time based on time_window
-  google.protobuf.Timestamp expired_time = 5 [
+  google.protobuf.Timestamp expired_time = 4 [
     (gogoproto.stdtime)  = true,
     (gogoproto.nullable) = true,
     (gogoproto.moretags) = "yaml:\"expired_time\""
   ];
-  // inflow_sum defines sum of inflow tokens from ibc-transfer
-  uint64 inflow_sum = 6;
   // outflow_sum defines the sum of outflow tokens from ibc-transfer
-  uint64 outflow_sum = 7;
+  uint64 outflow_sum = 5;
 }
 
 // Params of x/ibc-rate-limit module

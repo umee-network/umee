@@ -2,6 +2,7 @@ package keeper
 
 import (
 	context "context"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -39,11 +40,17 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	for _, rateLimitOfIBCDenom := range msg.NewIbcDenomsRateLimits {
 		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
-			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
 			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
-			TimeWindow:   rateLimitOfIBCDenom.TimeWindow,
+			TimeWindow:   time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow),
 		})
 	}
+
+	for _, rateLimitOfIBCDenom := range rateLimitsOfIBCDenoms {
+		if err := rateLimitOfIBCDenom.Validate(); err != nil {
+			return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
+		}
+	}
+
 	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, rateLimitsOfIBCDenoms); err != nil {
 		return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
 	}
@@ -53,11 +60,17 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	for _, rateLimitOfIBCDenom := range msg.UpdateIbcDenomsRateLimits {
 		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
-			InflowLimit:  rateLimitOfIBCDenom.InflowLimit,
 			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
-			TimeWindow:   rateLimitOfIBCDenom.TimeWindow,
+			TimeWindow:   time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow),
 		})
 	}
+
+	for _, rateLimitOfIBCDenom := range updateRateLimitsForIBCDenoms {
+		if err := rateLimitOfIBCDenom.Validate(); err != nil {
+			return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
+		}
+	}
+
 	if err := m.keeper.SetRateLimitsOfIBCDenoms(ctx, updateRateLimitsForIBCDenoms); err != nil {
 		return &ibctransfer.MsgUpdateIBCDenomsRateLimitResponse{}, err
 	}
