@@ -8,7 +8,7 @@ import (
 
 // InitGenesis initializes the x/incentive module state from a provided genesis state.
 func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
-	if err := k.SetParams(ctx, genState.Params); err != nil {
+	if err := k.setParams(ctx, genState.Params); err != nil {
 		panic(err)
 	}
 
