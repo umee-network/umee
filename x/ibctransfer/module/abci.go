@@ -25,7 +25,7 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 				expiredTime := ctx.BlockTime().Add(time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow))
 				rateLimitOfIBCDenom.ExpiredTime = &expiredTime
 				// reset the outflow limit to 0
-				rateLimitOfIBCDenom.OutflowSum = 0
+				rateLimitOfIBCDenom.OutflowSum = sdk.NewDec(0)
 			}
 		}
 		// storing the rate limits to store

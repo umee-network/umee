@@ -105,8 +105,8 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		return err
 	}
 
-	// TODO: needs to divide the amount by exponent of denom
-	amountInUSD := exchangeRate.MulInt64(amount).RoundInt()
+	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(rateLimitOfIBCDenom.DenomExponent))
+	amountInUSD := exchangeRate.Mul(sendingAmount)
 
 	if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
 		rateLimitOfIBCDenom, err = k.ResetRateLimitsSum(ctx, rateLimitOfIBCDenom)
@@ -115,13 +115,11 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		}
 	}
 
-	outflowSum := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowSum)
-	outflowLimit := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowLimit)
-	if outflowSum.Add(amountInUSD).GT(outflowLimit) {
+	if rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD).GT(rateLimitOfIBCDenom.OutflowLimit) {
 		return ibctransfer.ErrRateLimitExceeded
 	}
 
-	rateLimitOfIBCDenom.OutflowSum = outflowSum.Add(amountInUSD).Uint64()
+	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD)
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
 
 	return nil
@@ -149,11 +147,10 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 		return err
 	}
 
-	// TODO: needs to divide the amount by exponent of denom
-	amountInUSD := exchangeRate.MulInt64(amount).RoundInt()
+	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(rateLimitOfIBCDenom.DenomExponent))
+	amountInUSD := exchangeRate.Mul(sendingAmount)
 
-	outflowSum := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowSum)
-	rateLimitOfIBCDenom.OutflowSum = outflowSum.Sub(amountInUSD).Uint64()
+	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Sub(amountInUSD)
 
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
 
@@ -192,7 +189,7 @@ func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateL
 	expiredTime := rateLimit.ExpiredTime.Add(rateLimit.TimeWindow)
 
 	rateLimit.ExpiredTime = &expiredTime
-	rateLimit.OutflowSum = 0
+	rateLimit.OutflowSum = sdk.NewDec(0)
 
 	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimit); err != nil {
 		return nil, err

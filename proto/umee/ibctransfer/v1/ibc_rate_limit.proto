@@ -4,6 +4,7 @@ package umee.ibctransfer.v1;
 import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/ibctransfer";
 
@@ -12,7 +13,11 @@ message RateLimit {
   // ibc_denom defines the ibc denom
   string ibc_denom = 1;
   // outflow_limit defines the outflow limit of ibc-transfer
-  uint64 outflow_limit = 2;
+  string outflow_limit = 2 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
   // time_window defines window for rate limit of ibc_denom
   google.protobuf.Duration time_window = 3 [
     (gogoproto.nullable)    = false,
@@ -27,7 +32,13 @@ message RateLimit {
     (gogoproto.moretags) = "yaml:\"expired_time\""
   ];
   // outflow_sum defines the sum of outflow tokens from ibc-transfer
-  uint64 outflow_sum = 5;
+  string outflow_sum = 5 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // denom_exponent defines the exponent of base_denom
+  int64 denom_exponent = 6;
 }
 
 // Params of x/ibc-rate-limit module

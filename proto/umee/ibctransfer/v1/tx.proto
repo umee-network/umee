@@ -58,10 +58,13 @@ message MsgUpdateIBCTransferPauseStatusResponse {}
 
 // MsgRateLimit is format of ibc rate limit
 message MsgRateLimit {
-  string                   ibc_denom     = 1;
-  uint64                   inflow_limit  = 2;
-  uint64                   outflow_limit = 3;
-  google.protobuf.Duration time_window   = 4 [
+  string ibc_denom     = 1;
+  string outflow_limit = 2 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  google.protobuf.Duration time_window = 3 [
     (gogoproto.nullable)    = false,
     (gogoproto.stdduration) = true,
     (gogoproto.jsontag)     = "time_window,omitempty",
