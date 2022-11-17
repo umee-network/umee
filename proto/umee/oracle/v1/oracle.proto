@@ -41,24 +41,23 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // Historic Asset List is a list of assets which will use the historic
-  // price stamping protection methodology (mainly manipulatable assets).
-  // Any assets not on this list will not be stamped.
-  repeated Denom historic_accept_list = 9 [
-    (gogoproto.moretags)     = "yaml:\"historic_accept_list\"",
-    (gogoproto.castrepeated) = "DenomList",
-    (gogoproto.nullable)     = false
-  ];
   // Stamp Period represents the amount of blocks the historacle module
   // waits before recording a set of prices from the oracle.
-  uint64 stamp_period = 10;
+  uint64 stamp_period = 9;
   // Prune Period represents the maximum amount of blocks which we want
   // to keep a record of our set of exchange rates.
-  uint64 prune_period = 11;
+  uint64 prune_period = 10;
   // Median Period represents the amount blocks we will wait between
   // calculating the median and standard deviation of the median of
   // historic prices in the last Prune Period.
-  uint64 median_period = 12;
+  uint64 median_period = 11;
+    // Historic Asset List is a list of assets which will use the historic
+  // price stamping protection methodology (mainly manipulatable assets).
+  // Any assets not on this list will not be stamped.
+  repeated Denom historic_accept_list = 12 [
+    (gogoproto.castrepeated) = "DenomList",
+    (gogoproto.nullable)     = false
+  ];
 }
 
 // Denom - the object to hold configurations of each denom
