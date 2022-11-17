@@ -34,7 +34,7 @@ jobs:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
         uses: goreleaser/goreleaser-action@v3
-        if: startsWith(github.ref, 'refs/tags/')
+        # if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
           args: release --rm-dist
