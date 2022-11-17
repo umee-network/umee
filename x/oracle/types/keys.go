@@ -78,10 +78,14 @@ func uintWithNullPrefix(n uint64) []byte {
 	return bz
 }
 
-func ParseDemonFromHistoricPriceKey(key []byte) string {
-	return string(key[len(KeyPrefixExchangeRate) : len(key)-9])
+func ParseDenomFromHistoricPriceKey(key []byte) string {
+	return string(key[len(KeyPrefixHistoricPrice) : len(key)-9])
 }
 
 func ParseBlockFromHistoricPriceKey(key []byte) uint64 {
-	return binary.LittleEndian.Uint64(key[len(key)-9 : len(key)-1])
+	return binary.LittleEndian.Uint64(key[len(key)-8:])
+}
+
+func ParseDenomFromMedianKey(key []byte) string {
+	return string(key[len(KeyPrefixMedian):])
 }
