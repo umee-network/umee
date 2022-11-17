@@ -23,7 +23,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(i))
 
 		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, sdk.MustNewDecFromStr(exchangeRate))
-		app.OracleKeeper.SetMedian(ctx, displayDenom)
+		app.OracleKeeper.CalcAndSetMedian(ctx, displayDenom)
 	}
 
 	// set and check median and median standard deviation

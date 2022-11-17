@@ -189,8 +189,8 @@ func (k Keeper) SetHistoricPrice(
 	store.Set(types.KeyHistoricPrice(denom, blockNum), bz)
 }
 
-// DeleteHistoricPriceStats deletes the historic price, median price, and
-// standard deviation around its median price of a denom at a given block.
+// DeleteHistoricPriceStats deletes the historic price of a denom at a
+// given block.
 func (k Keeper) DeleteHistoricPrice(
 	ctx sdk.Context,
 	denom string,
@@ -200,8 +200,7 @@ func (k Keeper) DeleteHistoricPrice(
 	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
-// DeleteMedian deletes a given denom's median price in the last prune
-// period since a given block.
+// DeleteMedian deletes a given denom's median price.
 func (k Keeper) DeleteMedian(
 	ctx sdk.Context,
 	denom string,
@@ -211,7 +210,7 @@ func (k Keeper) DeleteMedian(
 }
 
 // DeleteMedianDeviation deletes a given denom's standard deviation around
-// its median price in the last prune period since a given block.
+// its median price.
 func (k Keeper) DeleteMedianDeviation(
 	ctx sdk.Context,
 	denom string,

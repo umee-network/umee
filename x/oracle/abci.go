@@ -42,9 +42,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.ClearExchangeRates(ctx)
 		// Clear median and median deviations
 		if isPeriodLastBlock(ctx, params.MedianPeriod) {
-			for _, v := range params.AcceptList {
-				k.DeleteMedian(ctx, v.String())
-				k.DeleteMedianDeviation(ctx, v.String())
+			for _, v := range params.HistoricAcceptList {
+				denom := v.String()
+				k.DeleteMedian(ctx, denom)
+				k.DeleteMedianDeviation(ctx, denom)
 			}
 		}
 
@@ -64,14 +65,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 				return err
 			}
 
-			// Stamp rate every stamp period
-			if isPeriodLastBlock(ctx, params.StampPeriod) {
+			// Stamp rate every stamp period if asset is set to have historic stats tracked
+			if isPeriodLastBlock(ctx, params.StampPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
 				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
 			}
 
-			// Set median price for each denom every median period
-			if isPeriodLastBlock(ctx, params.MedianPeriod) {
-				k.SetMedian(ctx, ballotDenom.Denom)
+			// Set median price every median period if asset is set to have historic stats tracked
+			if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+				k.CalcAndSetMedian(ctx, ballotDenom.Denom)
 			}
 		}
 
@@ -108,11 +109,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		k.SlashAndResetMissCounters(ctx)
 	}
 
-	// Prune historic price, median price, and standard deviation around its
-	// median price for each denom every prune period
+	// Prune historic prices every prune period
 	if isPeriodLastBlock(ctx, params.PrunePeriod) {
 		pruneBlock := uint64(ctx.BlockHeight()) - params.PrunePeriod
-		for _, v := range params.AcceptList {
+		for _, v := range params.HistoricAcceptList {
 			k.DeleteHistoricPrice(ctx, v.String(), pruneBlock)
 		}
 	}
