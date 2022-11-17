@@ -105,7 +105,13 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		return err
 	}
 
-	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(rateLimitOfIBCDenom.DenomExponent))
+	// get the registerd token settings from leverage
+	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(int64(tokenSettings.Exponent)))
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 
 	if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
@@ -136,6 +142,12 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 		return nil
 	}
 
+	// get the registerd token settings from leverage
+	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return err
+	}
+
 	amount, err := strconv.ParseInt(sendAmount, 10, 64)
 	if err != nil {
 		return err
@@ -147,7 +159,7 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 		return err
 	}
 
-	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(rateLimitOfIBCDenom.DenomExponent))
+	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(int64(tokenSettings.Exponent)))
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Sub(amountInUSD)

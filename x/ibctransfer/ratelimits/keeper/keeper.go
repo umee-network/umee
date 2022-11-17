@@ -10,18 +10,19 @@ import (
 )
 
 type Keeper struct {
-	storeKey     storetypes.StoreKey
-	cdc          codec.BinaryCodec
-	paramSpace   paramtypes.Subspace
-	oracleKeeper ibctransfer.OracleKeeper
-	ics4Wrapper  ibctransfer.ICS4Wrapper
+	storeKey       storetypes.StoreKey
+	cdc            codec.BinaryCodec
+	paramSpace     paramtypes.Subspace
+	oracleKeeper   ibctransfer.OracleKeeper
+	leverageKeeper ibctransfer.LeverageKeeper
+	ics4Wrapper    ibctransfer.ICS4Wrapper
 
 	authority string // the gov module account
 }
 
 func NewKeeper(
 	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace, ics4Wrapper types.ICS4Wrapper,
-	oracleKeeper ibctransfer.OracleKeeper, authority string,
+	oracleKeeper ibctransfer.OracleKeeper, leverageKeeper ibctransfer.LeverageKeeper, authority string,
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
@@ -29,12 +30,13 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     key,
-		paramSpace:   paramSpace,
-		ics4Wrapper:  ics4Wrapper,
-		oracleKeeper: oracleKeeper,
-		authority:    authority,
+		cdc:            cdc,
+		storeKey:       key,
+		paramSpace:     paramSpace,
+		ics4Wrapper:    ics4Wrapper,
+		oracleKeeper:   oracleKeeper,
+		leverageKeeper: leverageKeeper,
+		authority:      authority,
 	}
 }
 

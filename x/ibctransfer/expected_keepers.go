@@ -5,6 +5,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
+
+	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.
@@ -23,4 +25,8 @@ type ICS4Wrapper interface {
 
 type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
+}
+
+type LeverageKeeper interface {
+	GetTokenSettings(ctx sdk.Context, baseDenom string) (leveragetypes.Token, error)
 }

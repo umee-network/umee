@@ -37,8 +37,6 @@ message RateLimit {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // denom_exponent defines the exponent of base_denom
-  int64 denom_exponent = 6;
 }
 
 // Params of x/ibc-rate-limit module

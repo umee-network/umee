@@ -504,13 +504,6 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
-	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
-		appCodec,
-		keys[uibctransfer.StoreKey], app.GetSubspace(uibctransfer.ModuleName),
-		app.IBCKeeper.ChannelKeeper, app.OracleKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibchost.StoreKey],
@@ -520,6 +513,12 @@ func New(
 		app.ScopedIBCKeeper,
 	)
 
+	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
+		appCodec,
+		keys[uibctransfer.StoreKey], app.GetSubspace(uibctransfer.ModuleName),
+		app.IBCKeeper.ChannelKeeper, app.OracleKeeper, app.LeverageKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
 	// Create IBC Router
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
