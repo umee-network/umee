@@ -121,6 +121,26 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidateHistoricAcceptList(t *testing.T) {
+	err := validateHistoricAcceptList("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: ""},
+	})
+	require.ErrorContains(t, err, "oracle parameter HistoricAcceptList Denom must have BaseDenom")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: ""},
+	})
+	require.ErrorContains(t, err, "oracle parameter HistoricAcceptList Denom must have SymbolDenom")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: DenomUmee.SymbolDenom},
+	})
+	require.Nil(t, err)
+}
+
 func TestValidateStampPeriod(t *testing.T) {
 	err := validateStampPeriod("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")
@@ -211,28 +231,28 @@ func TestParamsEqual(t *testing.T) {
 	p9 := DefaultParams()
 	p9.MedianPeriod = 10
 	p9.PrunePeriod = 1
-	err = p8.Validate()
+	err = p9.Validate()
 	require.Error(t, err)
 
 	// MedianPeriod < StampPeriod
 	p10 := DefaultParams()
 	p10.StampPeriod = 10
 	p10.MedianPeriod = 1
-	err = p8.Validate()
+	err = p10.Validate()
 	require.Error(t, err)
 
 	// empty name
 	p11 := DefaultParams()
 	p11.AcceptList[0].BaseDenom = ""
 	p11.AcceptList[0].SymbolDenom = "ATOM"
-	err = p9.Validate()
+	err = p11.Validate()
 	require.Error(t, err)
 
 	// empty
 	p12 := DefaultParams()
 	p12.AcceptList[0].BaseDenom = "uatom"
 	p12.AcceptList[0].SymbolDenom = ""
-	err = p10.Validate()
+	err = p12.Validate()
 	require.Error(t, err)
 
 	p13 := DefaultParams()
