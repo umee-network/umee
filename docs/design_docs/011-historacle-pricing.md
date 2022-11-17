@@ -48,7 +48,7 @@ Also, there will be an `AssetList` for assets which will use this protection met
 The `x/leverage` module will have access to the following `keeper` functions from the `x/oracle` module:
 - `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
 - `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
-- `IsHistoracleAsset(denom string) bool`, returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
+- `IsHistoricAsset(denom string) bool`, returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
 
 ### Outcomes
 
