@@ -94,10 +94,19 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		return nil
 	}
 
-	amount, err := strconv.ParseUint(sendAmount, 10, 64)
+	amount, err := strconv.ParseInt(sendAmount, 10, 64)
 	if err != nil {
 		return err
 	}
+
+	// get the exchange rate of denom in USD
+	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	// TODO: needs to divide the amount by exponent of denom
+	amountInUSD := exchangeRate.MulInt64(amount).RoundInt()
 
 	if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
 		rateLimitOfIBCDenom, err = k.ResetRateLimitsSum(ctx, rateLimitOfIBCDenom)
@@ -107,13 +116,12 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 	}
 
 	outflowSum := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowSum)
-	sendingAmount := sdk.NewIntFromUint64(amount)
 	outflowLimit := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowLimit)
-	if outflowSum.Add(sendingAmount).GT(outflowLimit) {
+	if outflowSum.Add(amountInUSD).GT(outflowLimit) {
 		return ibctransfer.ErrRateLimitExceeded
 	}
 
-	rateLimitOfIBCDenom.OutflowSum = outflowSum.Add(sendingAmount).Uint64()
+	rateLimitOfIBCDenom.OutflowSum = outflowSum.Add(amountInUSD).Uint64()
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
 
 	return nil
@@ -130,14 +138,22 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 		return nil
 	}
 
-	amount, err := strconv.ParseUint(sendAmount, 10, 64)
+	amount, err := strconv.ParseInt(sendAmount, 10, 64)
 	if err != nil {
 		return err
 	}
 
+	// get the exchange rate of denom in USD
+	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	// TODO: needs to divide the amount by exponent of denom
+	amountInUSD := exchangeRate.MulInt64(amount).RoundInt()
+
 	outflowSum := sdk.NewIntFromUint64(rateLimitOfIBCDenom.OutflowSum)
-	sendingAmount := sdk.NewIntFromUint64(amount)
-	rateLimitOfIBCDenom.OutflowSum = outflowSum.Sub(sendingAmount).Uint64()
+	rateLimitOfIBCDenom.OutflowSum = outflowSum.Sub(amountInUSD).Uint64()
 
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
 

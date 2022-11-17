@@ -20,3 +20,7 @@ type ICS4Wrapper interface {
 	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
 	GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool)
 }
+
+type OracleKeeper interface {
+	GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
+}

@@ -507,7 +507,7 @@ func New(
 	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
 		appCodec,
 		keys[uibctransfer.StoreKey], app.GetSubspace(uibctransfer.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.ChannelKeeper, app.OracleKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
