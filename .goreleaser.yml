@@ -4,8 +4,6 @@ project_name: umee
 env:
   - GO111MODULE=on
   - CGO_ENABLED=1
-  - CC=oa64-clang
-  - CXX=oa64-clang++
 
 before:
   hooks:
