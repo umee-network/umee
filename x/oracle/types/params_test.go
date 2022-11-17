@@ -121,6 +121,26 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidateHistoricAcceptList(t *testing.T) {
+	err := validateHistoricAcceptList("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: ""},
+	})
+	require.ErrorContains(t, err, "oracle parameter HistoricAcceptList Denom must have BaseDenom")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: ""},
+	})
+	require.ErrorContains(t, err, "oracle parameter HistoricAcceptList Denom must have SymbolDenom")
+
+	err = validateHistoricAcceptList(DenomList{
+		{BaseDenom: DenomUmee.BaseDenom, SymbolDenom: DenomUmee.SymbolDenom},
+	})
+	require.Nil(t, err)
+}
+
 func TestValidateStampPeriod(t *testing.T) {
 	err := validateStampPeriod("invalidUint64")
 	require.ErrorContains(t, err, "invalid parameter type: string")

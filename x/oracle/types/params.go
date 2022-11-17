@@ -18,6 +18,7 @@ var (
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
+	KeyHistoricAcceptList       = []byte("HistoricAcceptList")
 	KeyStampPeriod              = []byte("StampPeriod")
 	KeyPrunePeriod              = []byte("PrunePeriod")
 	KeyMedianPeriod             = []byte("MedianPeriod")
@@ -49,8 +50,9 @@ var (
 			Exponent:    AtomExponent,
 		},
 	}
-	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
-	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
+	DefaultSlashFraction      = sdk.NewDecWithPrec(1, 4) // 0.01%
+	DefaultMinValidPerWindow  = sdk.NewDecWithPrec(5, 2) // 5%
+	DefaultHistoricAcceptList = DenomList(nil)
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -66,6 +68,7 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
+		HistoricAcceptList:       DefaultHistoricAcceptList,
 		StampPeriod:              DefaultStampPeriod,
 		PrunePeriod:              DefaultPrunePeriod,
 		MedianPeriod:             DefaultMedianPeriod,
@@ -120,6 +123,11 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMinValidPerWindow,
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
+		),
+		paramstypes.NewParamSetPair(
+			KeyHistoricAcceptList,
+			&p.HistoricAcceptList,
+			validateHistoricAcceptList,
 		),
 		paramstypes.NewParamSetPair(
 			KeyStampPeriod,
@@ -198,6 +206,16 @@ func (p Params) Validate() error {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
 	}
+
+	for _, denom := range p.HistoricAcceptList {
+		if len(denom.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter HistoricAcceptList Denom must have BaseDenom")
+		}
+		if len(denom.SymbolDenom) == 0 {
+			return fmt.Errorf("oracle parameter HistoricAcceptList Denom must have SymbolDenom")
+		}
+	}
+
 	return nil
 }
 
@@ -321,6 +339,24 @@ func validateMinValidPerWindow(i interface{}) error {
 
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("min valid per window is too large: %s", v)
+	}
+
+	return nil
+}
+
+func validateHistoricAcceptList(i interface{}) error {
+	v, ok := i.(DenomList)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, d := range v {
+		if len(d.BaseDenom) == 0 {
+			return fmt.Errorf("oracle parameter HistoricAcceptList Denom must have BaseDenom")
+		}
+		if len(d.SymbolDenom) == 0 {
+			return fmt.Errorf("oracle parameter HistoricAcceptList Denom must have SymbolDenom")
+		}
 	}
 
 	return nil
