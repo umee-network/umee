@@ -4,10 +4,12 @@ project_name: umee
 env:
   - GO111MODULE=on
   - CGO_ENABLED=1
+  - CC=oa64-clang
+  - CXX=oa64-clang++
 
 before:
   hooks:
-    - go mod tidy -compat=1.19
+    - go mod download
 
 builds:
   - main: ./cmd/umeed
@@ -20,7 +22,6 @@ builds:
     ldflags:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     goos:
-      - darwin
       - linux
     goarch:
       - amd64

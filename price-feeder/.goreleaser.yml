@@ -2,10 +2,13 @@ project_name: price-feeder
 
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=1
+  - CC=oa64-clang
+  - CXX=oa64-clang++
 
 before:
   hooks:
-    - go mod tidy -compat=1.17
+    - go mod download
 
 builds:
   - main: ./
@@ -14,16 +17,12 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
-    env:
-      - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/umee-network/umee/price-feeder/cmd.Version={{ replace .Version "price-feeder/" "price-feeder-" }} -X github.com/umee-network/umee/price-feeder/cmd.Commit={{ .Commit }}
     goos:
-      - darwin
       - linux
     goarch:
       - amd64
-      - arm
       - arm64
 
 archives:
