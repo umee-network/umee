@@ -148,12 +148,12 @@ func RandomizedGenState(simState *module.SimulationState) {
 		SlashFraction:     slashFraction,
 		SlashWindow:       slashWindow,
 		MinValidPerWindow: minValidPerWindow,
-    HistoricAcceptList: types.DenomList{
+		HistoricAcceptList: types.DenomList{
 			{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
 		},
-		StampPeriod:       stampPeriod,
-		PrunePeriod:       prunePeriod,
-		MedianPeriod:      medianPeriod,
+		StampPeriod:  stampPeriod,
+		PrunePeriod:  prunePeriod,
+		MedianPeriod: medianPeriod,
 	}
 
 	bz, err := json.MarshalIndent(&oracleGenesis.Params, "", " ")
