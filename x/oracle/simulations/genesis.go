@@ -136,31 +136,25 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { medianPeriod = GenMedianPeriod(r) },
 	)
 
-	oracleGenesis := types.NewGenesisState(
-		types.Params{
-			VotePeriod:               votePeriod,
-			VoteThreshold:            voteThreshold,
-			RewardBand:               rewardBand,
-			RewardDistributionWindow: rewardDistributionWindow,
-			AcceptList: types.DenomList{
-				{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
-			},
-			SlashFraction:     slashFraction,
-			SlashWindow:       slashWindow,
-			MinValidPerWindow: minValidPerWindow,
-			HistoricAcceptList: types.DenomList{
-				{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
-			},
-			StampPeriod:  stampPeriod,
-			PrunePeriod:  prunePeriod,
-			MedianPeriod: medianPeriod,
+	oracleGenesis := types.DefaultGenesisState()
+	oracleGenesis.Params = types.Params{
+		VotePeriod:               votePeriod,
+		VoteThreshold:            voteThreshold,
+		RewardBand:               rewardBand,
+		RewardDistributionWindow: rewardDistributionWindow,
+		AcceptList: types.DenomList{
+			{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
 		},
-		[]types.ExchangeRateTuple{},
-		[]types.FeederDelegation{},
-		[]types.MissCounter{},
-		[]types.AggregateExchangeRatePrevote{},
-		[]types.AggregateExchangeRateVote{},
-	)
+		SlashFraction:     slashFraction,
+		SlashWindow:       slashWindow,
+		MinValidPerWindow: minValidPerWindow,
+    HistoricAcceptList: types.DenomList{
+			{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
+		},
+		StampPeriod:       stampPeriod,
+		PrunePeriod:       prunePeriod,
+		MedianPeriod:      medianPeriod,
+	}
 
 	bz, err := json.MarshalIndent(&oracleGenesis.Params, "", " ")
 	if err != nil {
