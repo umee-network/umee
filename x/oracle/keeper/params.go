@@ -45,6 +45,25 @@ func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }
 
+// HistoricAcceptList returns the list of assets whose historic prices and
+// medians are getting tracked.
+func (k Keeper) HistoricAcceptList(ctx sdk.Context) (res types.DenomList) {
+	k.paramSpace.Get(ctx, types.KeyHistoricAcceptList, &res)
+	return
+}
+
+// IsHistoricAsset returns whether or not a given denom is being tracked as
+// a historic asset.
+func (k Keeper) IsHistoricAsset(ctx sdk.Context, denom string) bool {
+	return k.HistoricAcceptList(ctx).Contains(denom)
+}
+
+// SetAcceptList updates the the list of assets whose historic prices and
+// medians are getting tracked.
+func (k Keeper) SetHistoricAcceptList(ctx sdk.Context, historicAcceptList types.DenomList) {
+	k.paramSpace.Set(ctx, types.KeyHistoricAcceptList, historicAcceptList)
+}
+
 // SlashFraction returns oracle voting penalty rate
 func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
