@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
@@ -36,7 +37,13 @@ func onlyRunMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandle
 // performs upgrade from v3.1 -> v3.2
 func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
 	const planName = "v3.2.0"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyRunMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			bankkeeper.NewMigrator(*app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		})
 }
 
 // performs upgrade from v3.0 -> v3.1
