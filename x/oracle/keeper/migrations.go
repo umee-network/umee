@@ -2,6 +2,8 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // Migrator is a struct for handling in-place store migrations.
@@ -19,5 +21,6 @@ func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 	m.keeper.SetStampPeriod(ctx, 1)
 	m.keeper.SetPrunePeriod(ctx, 1)
 	m.keeper.SetMedianPeriod(ctx, 1)
+	m.keeper.SetHistoricAcceptList(ctx, types.DenomList{})
 	return nil
 }
