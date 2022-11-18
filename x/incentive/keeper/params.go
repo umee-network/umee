@@ -10,19 +10,33 @@ import (
 // setParams sets the x/incentive module's parameters.
 func (k Keeper) setParams(ctx sdk.Context, params types.Params) error {
 	kvs := k.kvStore(ctx)
-	store.SetStoredUint32(kvs, types.KeyPrefixParamMaxUnbondings,
-		params.MaxUnbondings, 1, "max unbondings")
-	store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationShort,
-		params.UnbondingDurationShort, 1, "short unbonding duration")
-	store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationMiddle,
-		params.UnbondingDurationMiddle, 1, "middle unbonding duration")
-	store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationLong,
-		params.UnbondingDurationLong, 1, "long unbonding duration")
-	store.SetStoredDec(kvs, types.KeyPrefixParamTierWeightShort,
-		params.TierWeightShort, sdk.ZeroDec(), "short tier weight")
-	store.SetStoredDec(kvs, types.KeyPrefixParamTierWeightMiddle,
+	if err := store.SetStoredUint32(kvs, types.KeyPrefixParamMaxUnbondings,
+		params.MaxUnbondings, 1, "max unbondings",
+	); err != nil {
+		return err
+	}
+	if err := store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationShort,
+		params.UnbondingDurationShort, 1, "short unbonding duration",
+	); err != nil {
+		return err
+	}
+	if err := store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationMiddle,
+		params.UnbondingDurationMiddle, 1, "middle unbonding duration",
+	); err != nil {
+		return err
+	}
+	if err := store.SetStoredUint64(kvs, types.KeyPrefixParamUnbondingDurationLong,
+		params.UnbondingDurationLong, 1, "long unbonding duration",
+	); err != nil {
+		return err
+	}
+	if err := store.SetStoredDec(kvs, types.KeyPrefixParamTierWeightShort,
+		params.TierWeightShort, sdk.ZeroDec(), "short tier weight",
+	); err != nil {
+		return err
+	}
+	return store.SetStoredDec(kvs, types.KeyPrefixParamTierWeightMiddle,
 		params.TierWeightMiddle, sdk.ZeroDec(), "middle tier weight")
-	return nil
 }
 
 // GetParams gets all of the x/incentive module's parameters at once.
