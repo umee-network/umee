@@ -58,7 +58,7 @@ func (k Keeper) IsHistoricAsset(ctx sdk.Context, denom string) bool {
 	return k.HistoricAcceptList(ctx).Contains(denom)
 }
 
-// SetAcceptList updates the the list of assets whose historic prices and
+// SetHistoricAcceptList updates the the list of assets whose historic prices and
 // medians are getting tracked.
 func (k Keeper) SetHistoricAcceptList(ctx sdk.Context, historicAcceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyHistoricAcceptList, historicAcceptList)
