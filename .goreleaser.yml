@@ -38,17 +38,14 @@ archives:
       - README.md
 
 release:
-  github:
-    owner: umee-network
-    name: umee
   name_template: "v{{.Version}}"
+
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
 
 checksum:
   name_template: SHA256SUMS-v{{.Version}}.txt
   algorithm: sha256
-
-snapshot:
-  name_template: SNAPSHOT-{{ .Commit }}
 
 changelog:
   skip: false
