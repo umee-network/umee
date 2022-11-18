@@ -34,7 +34,7 @@ func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
 		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			bankkeeper.NewMigrator(*app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			bankkeeper.NewMigrator(app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		})
 }
