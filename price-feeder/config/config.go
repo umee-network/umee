@@ -42,7 +42,6 @@ var (
 		provider.ProviderHuobi:     {},
 		provider.ProviderGate:      {},
 		provider.ProviderCoinbase:  {},
-		provider.ProviderFTX:       {},
 		provider.ProviderBitget:    {},
 		provider.ProviderMexc:      {},
 		provider.ProviderCrypto:    {},
