@@ -46,8 +46,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
 ### Improvements
 
 - [1602](https://github.com/umee-network/umee/pull/1602) Remove FTX provider.
@@ -58,7 +56,6 @@ v2.0.0 of the price feeder contains numerous fixes for low-market-cap assets and
 
 This was released as a part of [Umee Prop 27.](https://www.mintscan.io/umee/proposals/27)
 
->>>>>>> cd1fc23 (fix(price-feeder): remove ftx provider (#1602))
 ### Bugs
 
 - [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
