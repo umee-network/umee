@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"github.com/umee-network/umee/v3/x/oracle/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 // VotePeriod returns the number of blocks during which voting takes place.
@@ -43,6 +43,25 @@ func (k Keeper) AcceptList(ctx sdk.Context) (res types.DenomList) {
 // module.
 func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
+}
+
+// HistoricAcceptList returns the list of assets whose historic prices and
+// medians are getting tracked.
+func (k Keeper) HistoricAcceptList(ctx sdk.Context) (res types.DenomList) {
+	k.paramSpace.Get(ctx, types.KeyHistoricAcceptList, &res)
+	return
+}
+
+// IsHistoricAsset returns whether or not a given denom is being tracked as
+// a historic asset.
+func (k Keeper) IsHistoricAsset(ctx sdk.Context, denom string) bool {
+	return k.HistoricAcceptList(ctx).Contains(denom)
+}
+
+// SetHistoricAcceptList updates the the list of assets whose historic prices and
+// medians are getting tracked.
+func (k Keeper) SetHistoricAcceptList(ctx sdk.Context, historicAcceptList types.DenomList) {
+	k.paramSpace.Set(ctx, types.KeyHistoricAcceptList, historicAcceptList)
 }
 
 // SlashFraction returns oracle voting penalty rate

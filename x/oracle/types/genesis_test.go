@@ -10,7 +10,7 @@ import (
 
 func TestGenesisValidation(t *testing.T) {
 	// Valid state
-	genState := NewGenesisState(DefaultParams(), []ExchangeRateTuple{}, []FeederDelegation{}, []MissCounter{}, []AggregateExchangeRatePrevote{}, []AggregateExchangeRateVote{})
+	genState := DefaultGenesisState()
 	require.NoError(t, ValidateGenesis(genState))
 
 	// Invalid Vote Period

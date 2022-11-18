@@ -70,3 +70,8 @@ minimum-gas-prices = "0uumee"
 [state-sync]
 snapshot-interval=1000
 ```
+
+## Peggo
+
+Gravity Bridge Smart contract: 0x4d6D7b1dF43C9dE926BeC5F733980Ad7da6D9486
+Network: [Goerli](https://goerli.etherscan.io/tx/0x57f296d59d9be9604133fa951f15a1bcc03a2a332972b5761629a9f76d17e36d)
