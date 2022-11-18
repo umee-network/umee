@@ -2,7 +2,6 @@
 project_name: umee
 
 env:
-  - GO111MODULE=on
   - CGO_ENABLED=1
 
 before:
@@ -23,7 +22,7 @@ builds:
       - linux
     goarch:
       - amd64
-#      - arm64
+#      - arm64  # github only supports linux @ amd64
 
 archives:
   # - id: bins
@@ -39,12 +38,8 @@ archives:
       - README.md
 
 release:
-  # github:
-  #   owner: umee-network
-  #   name: umee
-  # name_template: "v{{.Version}}"
   github:
-    owner: robert-zaremba
+    owner: umee-network
     name: umee
 
 snapshot:
