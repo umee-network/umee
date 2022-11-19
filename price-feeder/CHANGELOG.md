@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [1602](https://github.com/umee-network/umee/pull/1602) Remove FTX provider.
+
 ## [v2.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.0) 2022-11-15
 
 v2.0.0 of the price feeder contains numerous fixes for low-market-cap assets and API changes. It's highly recommended to switch to v2.0.0, especially as it removes the need to use the `ftx` provider for certain assets.
