@@ -31,7 +31,6 @@ The list of current supported providers:
 - [Bitget](https://www.bitget.com/)
 - [Coinbase](https://www.coinbase.com/)
 - [Crypto](https://crypto.com/)
-- [FTX](https://ftx.com/)
 - [Gate](https://www.gate.io/)
 - [Huobi](https://www.huobi.com/en-us/)
 - [Kraken](https://www.kraken.com/en-us/)

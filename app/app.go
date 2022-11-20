@@ -122,7 +122,7 @@ import (
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v3/x/incentive"
 	incentivekeeper "github.com/umee-network/umee/v3/x/incentive/keeper"
-	incentivetypes "github.com/umee-network/umee/v3/x/incentive/types"
+	incentivemodule "github.com/umee-network/umee/v3/x/incentive/module"
 	"github.com/umee-network/umee/v3/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
@@ -172,7 +172,7 @@ func init() {
 		ibctransfer.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
-		incentive.AppModuleBasic{},
+		incentivemodule.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 	}
@@ -195,7 +195,7 @@ func init() {
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		incentivetypes.ModuleName:   nil,
+		incentive.ModuleName:        nil,
 		oracletypes.ModuleName:      nil,
 	}
 
@@ -308,7 +308,7 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, incentivetypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, incentive.StoreKey,
 		bech32ibctypes.StoreKey,
 	}
 	if Experimental {
@@ -469,7 +469,7 @@ func New(
 
 	app.IncentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
-		keys[incentivetypes.StoreKey],
+		keys[incentive.StoreKey],
 		app.BankKeeper,
 		app.LeverageKeeper,
 	)
@@ -611,7 +611,7 @@ func New(
 		ibcTransferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
-		incentive.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
+		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper, Experimental),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	}
@@ -637,7 +637,7 @@ func New(
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentivetypes.ModuleName,
+		incentive.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
@@ -654,7 +654,7 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		// icatypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentivetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	}
@@ -675,7 +675,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentivetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	}
@@ -689,7 +689,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentivetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	}

@@ -1,4 +1,4 @@
-package incentive
+package module
 
 import (
 	"context"
@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/umee-network/umee/v3/x/incentive"
 	"github.com/umee-network/umee/v3/x/incentive/client/cli"
 	"github.com/umee-network/umee/v3/x/incentive/keeper"
-	"github.com/umee-network/umee/v3/x/incentive/types"
 )
 
 var (
@@ -37,23 +37,23 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 
 // Name returns the x/incentive module's name.
 func (AppModuleBasic) Name() string {
-	return types.ModuleName
+	return incentive.ModuleName
 }
 
 // RegisterLegacyAminoCodec registers the x/incentive module's types with a legacy
 // Amino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	types.RegisterLegacyAminoCodec(cdc)
+	incentive.RegisterLegacyAminoCodec(cdc)
 }
 
 // RegisterInterfaces registers the module's interface types.
 func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
-	types.RegisterInterfaces(reg)
+	incentive.RegisterInterfaces(reg)
 }
 
 // DefaultGenesis returns the x/incentive module's default genesis state.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesis())
+	return cdc.MustMarshalJSON(incentive.DefaultGenesis())
 }
 
 // ValidateGenesis performs genesis state validation for the x/incentive module.
@@ -62,9 +62,9 @@ func (AppModuleBasic) ValidateGenesis(
 	config client.TxEncodingConfig,
 	bz json.RawMessage,
 ) error {
-	var genState types.GenesisState
+	var genState incentive.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", incentive.ModuleName, err)
 	}
 
 	return genState.Validate()
@@ -77,7 +77,8 @@ func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/leverage
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+	err := incentive.RegisterQueryHandlerClient(context.Background(), mux, incentive.NewQueryClient(clientCtx))
+	if err != nil {
 		panic(err)
 	}
 }
@@ -89,7 +90,7 @@ func (a AppModuleBasic) GetTxCmd() *cobra.Command {
 
 // GetQueryCmd returns the x/incentive module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(types.StoreKey)
+	return cli.GetQueryCmd(incentive.StoreKey)
 }
 
 // AppModule implements the AppModule interface for the x/incentive module.
@@ -97,11 +98,11 @@ type AppModule struct {
 	AppModuleBasic
 
 	keeper         keeper.Keeper
-	bankKeeper     types.BankKeeper
-	leverageKeeper types.LeverageKeeper
+	bankKeeper     incentive.BankKeeper
+	leverageKeeper incentive.LeverageKeeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, bk types.BankKeeper, lk types.LeverageKeeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, bk incentive.BankKeeper, lk incentive.LeverageKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
@@ -125,19 +126,19 @@ func (am AppModule) Route() sdk.Route {
 }
 
 // QuerierRoute returns the x/incentive module's query routing key.
-func (AppModule) QuerierRoute() string { return types.QuerierRoute }
+func (AppModule) QuerierRoute() string { return incentive.QuerierRoute }
 
 // LegacyQuerierHandler returns a no-op legacy querier.
 func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
+		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", incentive.ModuleName)
 	}
 }
 
 // RegisterServices registers gRPC services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+	incentive.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	incentive.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 }
 
 // RegisterInvariants registers the x/incentive module's invariants.
@@ -148,9 +149,9 @@ func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 // InitGenesis performs the x/incentive module's genesis initialization. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-	var genState types.GenesisState
+	var genState incentive.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	InitGenesis(ctx, am.keeper, genState)
+	am.keeper.InitGenesis(ctx, genState)
 
 	return []abci.ValidatorUpdate{}
 }
@@ -158,7 +159,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 // ExportGenesis returns the x/incentive module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := ExportGenesis(ctx, am.keeper)
+	genState := am.keeper.ExportGenesis(ctx)
 	return cdc.MustMarshalJSON(genState)
 }
 

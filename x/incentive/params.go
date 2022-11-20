@@ -1,4 +1,4 @@
-package types
+package incentive
 
 import (
 	fmt "fmt"

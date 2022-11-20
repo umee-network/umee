@@ -9,14 +9,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/incentive module.
 func GetTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("Transaction commands for the %s module", types.ModuleName),
+		Use:                        incentive.ModuleName,
+		Short:                      fmt.Sprintf("Transaction commands for the %s module", incentive.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -45,7 +45,7 @@ func GetCmdClaim() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgClaim(clientCtx.GetFromAddress())
+			msg := incentive.NewMsgClaim(clientCtx.GetFromAddress())
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -75,7 +75,7 @@ func GetCmdBond() *cobra.Command {
 
 			tier := uint32(0) // TODO: get from args[1]
 
-			msg := types.NewMsgBond(clientCtx.GetFromAddress(), tier, asset)
+			msg := incentive.NewMsgBond(clientCtx.GetFromAddress(), tier, asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -105,7 +105,7 @@ func GetCmdBeginUnbonding() *cobra.Command {
 
 			tier := uint32(0) // TODO: get from args[1]
 
-			msg := types.NewMsgBeginUnbonding(clientCtx.GetFromAddress(), tier, asset)
+			msg := incentive.NewMsgBeginUnbonding(clientCtx.GetFromAddress(), tier, asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -135,7 +135,7 @@ func GetCmdSponsor() *cobra.Command {
 
 			id := uint32(0) // TODO: get from args[1]
 
-			msg := types.NewMsgSponsor(clientCtx.GetFromAddress(), id, asset)
+			msg := incentive.NewMsgSponsor(clientCtx.GetFromAddress(), id, asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

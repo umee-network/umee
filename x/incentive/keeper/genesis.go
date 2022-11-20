@@ -3,11 +3,11 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
 // InitGenesis initializes the x/incentive module state from a provided genesis state.
-func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
+func (k Keeper) InitGenesis(ctx sdk.Context, genState incentive.GenesisState) {
 	if err := k.setParams(ctx, genState.Params); err != nil {
 		panic(err)
 	}
@@ -16,8 +16,8 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 }
 
 // ExportGenesis returns the x/incentive module's exported genesis state.
-func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
-	return types.NewGenesisState(
+func (k Keeper) ExportGenesis(ctx sdk.Context) *incentive.GenesisState {
+	return incentive.NewGenesisState(
 		// TODO: Get everything
 		k.GetParams(ctx),
 		nil,

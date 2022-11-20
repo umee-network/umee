@@ -3,10 +3,10 @@ package keeper
 import (
 	"context"
 
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
-var _ types.MsgServer = msgServer{}
+var _ incentive.MsgServer = msgServer{}
 
 type msgServer struct {
 	keeper Keeper
@@ -14,69 +14,69 @@ type msgServer struct {
 
 // NewMsgServerImpl returns an implementation of MsgServer for the x/incentive
 // module.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+func NewMsgServerImpl(keeper Keeper) incentive.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
 func (s msgServer) Claim(
 	goCtx context.Context,
-	msg *types.MsgClaim,
-) (*types.MsgClaimResponse, error) {
+	msg *incentive.MsgClaim,
+) (*incentive.MsgClaimResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgClaimResponse{}, types.ErrNotImplemented
+	return &incentive.MsgClaimResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) Bond(
 	goCtx context.Context,
-	msg *types.MsgBond,
-) (*types.MsgBondResponse, error) {
+	msg *incentive.MsgBond,
+) (*incentive.MsgBondResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgBondResponse{}, types.ErrNotImplemented
+	return &incentive.MsgBondResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) BeginUnbonding(
 	goCtx context.Context,
-	msg *types.MsgBeginUnbonding,
-) (*types.MsgBeginUnbondingResponse, error) {
+	msg *incentive.MsgBeginUnbonding,
+) (*incentive.MsgBeginUnbondingResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgBeginUnbondingResponse{}, types.ErrNotImplemented
+	return &incentive.MsgBeginUnbondingResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) Sponsor(
 	goCtx context.Context,
-	msg *types.MsgSponsor,
-) (*types.MsgSponsorResponse, error) {
+	msg *incentive.MsgSponsor,
+) (*incentive.MsgSponsorResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgSponsorResponse{}, types.ErrNotImplemented
+	return &incentive.MsgSponsorResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) GovSetParams(
 	goCtx context.Context,
-	msg *types.MsgGovSetParams,
-) (*types.MsgGovSetParamsResponse, error) {
+	msg *incentive.MsgGovSetParams,
+) (*incentive.MsgGovSetParamsResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgGovSetParamsResponse{}, types.ErrNotImplemented
+	return &incentive.MsgGovSetParamsResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) GovCreateProgram(
 	goCtx context.Context,
-	msg *types.MsgGovCreateProgram,
-) (*types.MsgGovCreateProgramResponse, error) {
+	msg *incentive.MsgGovCreateProgram,
+) (*incentive.MsgGovCreateProgramResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgGovCreateProgramResponse{}, types.ErrNotImplemented
+	return &incentive.MsgGovCreateProgramResponse{}, incentive.ErrNotImplemented
 }
 
 func (s msgServer) GovCreateAndSponsorProgram(
 	goCtx context.Context,
-	msg *types.MsgGovCreateAndSponsorProgram,
-) (*types.MsgGovCreateAndSponsorProgramResponse, error) {
+	msg *incentive.MsgGovCreateAndSponsorProgram,
+) (*incentive.MsgGovCreateAndSponsorProgramResponse, error) {
 	// TODO: Implement
 
-	return &types.MsgGovCreateAndSponsorProgramResponse{}, types.ErrNotImplemented
+	return &incentive.MsgGovCreateAndSponsorProgramResponse{}, incentive.ErrNotImplemented
 }

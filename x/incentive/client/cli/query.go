@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
 // Flag constants
@@ -18,8 +18,8 @@ const (
 // GetQueryCmd returns the CLI query commands for the x/incentive module.
 func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),
+		Use:                        incentive.ModuleName,
+		Short:                      fmt.Sprintf("Querying commands for the %s module", incentive.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -40,16 +40,16 @@ func GetCmdQueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
-		Short: fmt.Sprintf("Query the %s module parameters", types.ModuleName),
+		Short: fmt.Sprintf("Query the %s module parameters", incentive.ModuleName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			queryClient := types.NewQueryClient(clientCtx)
+			queryClient := incentive.NewQueryClient(clientCtx)
 
-			resp, err := queryClient.Params(cmd.Context(), &types.QueryParamsRequest{})
+			resp, err := queryClient.Params(cmd.Context(), &incentive.QueryParamsRequest{})
 			if err != nil {
 				return err
 			}
@@ -76,11 +76,11 @@ func GetCmdQueryIncentiveProgram() *cobra.Command {
 				return err
 			}
 
-			queryClient := types.NewQueryClient(clientCtx)
+			queryClient := incentive.NewQueryClient(clientCtx)
 
 			id := uint32(0) // TODO: get from args[0]
 
-			resp, err := queryClient.IncentiveProgram(cmd.Context(), &types.QueryIncentiveProgramRequest{Id: id})
+			resp, err := queryClient.IncentiveProgram(cmd.Context(), &incentive.QueryIncentiveProgramRequest{Id: id})
 			if err != nil {
 				return err
 			}

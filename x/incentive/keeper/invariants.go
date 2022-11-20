@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 
 // RegisterInvariants registers the incentive module invariants
 func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
-	ir.RegisterRoute(types.ModuleName, routeNextID, NextIDInvariant(k))
+	ir.RegisterRoute(incentive.ModuleName, routeNextID, NextIDInvariant(k))
 }
 
 // AllInvariants runs all invariants of the x/incentive module.
@@ -39,7 +39,7 @@ func NextIDInvariant(k Keeper) sdk.Invariant {
 		broken := count != 0
 
 		return sdk.FormatInvariant(
-			types.ModuleName, routeNextID,
+			incentive.ModuleName, routeNextID,
 			fmt.Sprintf("invalid next ID: %d", count),
 		), broken
 	}

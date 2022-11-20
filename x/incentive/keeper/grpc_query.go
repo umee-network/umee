@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v3/x/incentive/types"
+	"github.com/umee-network/umee/v3/x/incentive"
 )
 
-var _ types.QueryServer = Querier{}
+var _ incentive.QueryServer = Querier{}
 
 // Querier implements a QueryServer for the x/incentive module.
 type Querier struct {
@@ -23,8 +23,8 @@ func NewQuerier(k Keeper) Querier {
 
 func (q Querier) Params(
 	goCtx context.Context,
-	req *types.QueryParamsRequest,
-) (*types.QueryParamsResponse, error) {
+	req *incentive.QueryParamsRequest,
+) (*incentive.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -32,41 +32,41 @@ func (q Querier) Params(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.Keeper.GetParams(ctx)
 
-	return &types.QueryParamsResponse{Params: params}, nil
+	return &incentive.QueryParamsResponse{Params: params}, nil
 }
 
 func (q Querier) IncentiveProgram(
 	goCtx context.Context,
-	req *types.QueryIncentiveProgramRequest,
-) (*types.QueryIncentiveProgramResponse, error) {
+	req *incentive.QueryIncentiveProgramRequest,
+) (*incentive.QueryIncentiveProgramResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	program := types.IncentiveProgram{}
+	program := incentive.IncentiveProgram{}
 
-	resp := &types.QueryIncentiveProgramResponse{
+	resp := &incentive.QueryIncentiveProgramResponse{
 		Program: program,
 	}
 
-	return resp, types.ErrNotImplemented
+	return resp, incentive.ErrNotImplemented
 }
 
 func (q Querier) IncentivePrograms(
 	goCtx context.Context,
-	req *types.QueryIncentiveProgramsRequest,
-) (*types.QueryIncentiveProgramsResponse, error) {
+	req *incentive.QueryIncentiveProgramsRequest,
+) (*incentive.QueryIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	// TODO: get all programs (also: pagination)
 
-	resp := &types.QueryIncentiveProgramsResponse{
-		Programs: make([]types.IncentiveProgram, 0),
+	resp := &incentive.QueryIncentiveProgramsResponse{
+		Programs: make([]incentive.IncentiveProgram, 0),
 	}
 
-	return resp, types.ErrNotImplemented
+	return resp, incentive.ErrNotImplemented
 }
 
 // TODO: other queries

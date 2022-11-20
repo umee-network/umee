@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
 import "umee/incentive/v1/incentive.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/incentive/types";
+option go_package = "github.com/umee-network/umee/v3/x/incentive";
 
 // Query defines the gRPC querier service.
 service Query {
