@@ -102,7 +102,9 @@ type AppModule struct {
 	leverageKeeper incentive.LeverageKeeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, bk incentive.BankKeeper, lk incentive.LeverageKeeper) AppModule {
+func NewAppModule(
+	cdc codec.Codec, keeper keeper.Keeper, bk incentive.BankKeeper, lk incentive.LeverageKeeper,
+) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
