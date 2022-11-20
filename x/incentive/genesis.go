@@ -10,8 +10,11 @@ import (
 // NewGenesisState creates a new GenesisState object
 func NewGenesisState(
 	params Params,
-	programs []IncentiveProgram,
+	upcomingPrograms []IncentiveProgram,
+	ongoingPrograms []IncentiveProgram,
+	completedPrograms []IncentiveProgram,
 	nextID uint32,
+	lastRewardsTime uint64,
 	totalBonded sdk.Coins,
 	bondAmounts []BondAmount,
 	pendingRewards []PendingReward,
@@ -21,7 +24,10 @@ func NewGenesisState(
 ) *GenesisState {
 	return &GenesisState{
 		Params:             params,
-		Programs:           programs,
+		UpcomingPrograms:   upcomingPrograms,
+		OngoingPrograms:    ongoingPrograms,
+		CompletedPrograms:  completedPrograms,
+		LastRewardsTime:    lastRewardsTime,
 		NextProgramId:      nextID,
 		TotalBonded:        totalBonded,
 		BondAmounts:        bondAmounts,
@@ -35,8 +41,9 @@ func NewGenesisState(
 // DefaultGenesis returns the default genesis state of the x/incentive module.
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		Params:        DefaultParams(),
-		NextProgramId: 1,
+		Params:          DefaultParams(),
+		NextProgramId:   1,
+		LastRewardsTime: 0,
 	}
 }
 
@@ -50,7 +57,17 @@ func (gs GenesisState) Validate() error {
 	// TODO: Finish validation logic - includes in-progress programs
 	// all ID < NextID (and NextID = len(programs) + 1)
 
-	for _, p := range gs.Programs {
+	for _, p := range gs.UpcomingPrograms {
+		if err := p.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, p := range gs.OngoingPrograms {
+		if err := p.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, p := range gs.CompletedPrograms {
 		if err := p.Validate(); err != nil {
 			return err
 		}

@@ -6,13 +6,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const blocksPerDay = 86400 / 5
+const secondsPerDay = 86400
 
 var (
 	defaultMaxUnbondings           = uint32(20)
-	defaultUnbondingDurationShort  = uint64(blocksPerDay)
-	defaultUnbondingDurationMiddle = uint64(blocksPerDay * 7)
-	defaultUnbondingDurationLong   = uint64(blocksPerDay * 14)
+	defaultUnbondingDurationShort  = uint64(secondsPerDay)
+	defaultUnbondingDurationMiddle = uint64(secondsPerDay * 7)
+	defaultUnbondingDurationLong   = uint64(secondsPerDay * 14)
 	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
 	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
 )

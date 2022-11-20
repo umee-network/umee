@@ -10,17 +10,20 @@ import "umee/incentive/v1/incentive.proto";
 // GenesisState defines the x/incentive module's genesis state.
 message GenesisState {
   Params                    params               = 1 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram programs             = 2 [(gogoproto.nullable) = false];
-  uint32                    next_program_id      = 3;
-  repeated cosmos.base.v1beta1.Coin total_bonded = 4 [
+  repeated IncentiveProgram completed_programs   = 2 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram ongoing_programs     = 3 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram upcoming_programs    = 4 [(gogoproto.nullable) = false];
+  uint32                    next_program_id      = 5;
+  uint64                    last_rewards_time    = 6;
+  repeated cosmos.base.v1beta1.Coin total_bonded = 7 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  repeated BondAmount        bond_amounts        = 5 [(gogoproto.nullable) = false];
-  repeated PendingReward     pending_rewards     = 6 [(gogoproto.nullable) = false];
-  repeated RewardBasis       reward_bases        = 7 [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 8 [(gogoproto.nullable) = false];
-  repeated Unbonding         unbondings          = 9 [(gogoproto.nullable) = false];
+  repeated BondAmount        bond_amounts        = 8 [(gogoproto.nullable) = false];
+  repeated PendingReward     pending_rewards     = 9 [(gogoproto.nullable) = false];
+  repeated RewardBasis       reward_bases        = 10 [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 11 [(gogoproto.nullable) = false];
+  repeated Unbonding         unbondings          = 12 [(gogoproto.nullable) = false];
 }
 
 // BondAmount tracks the amount of coins of one uToken denomination bonded to a
