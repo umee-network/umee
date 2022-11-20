@@ -21,6 +21,9 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *incentive.GenesisState {
 		// TODO: Get everything
 		k.GetParams(ctx),
 		nil,
+		nil,
+		nil,
+		0,
 		0,
 		sdk.NewCoins(),
 		nil,

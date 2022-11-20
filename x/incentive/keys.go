@@ -14,6 +14,7 @@ const (
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
 
+	// StoreKey defines the query route
 	QuerierRoute = ModuleName
 )
 
@@ -28,21 +29,56 @@ var (
 	KeyPrefixParamTierWeightMiddle        = []byte{0x01, 0x06}
 
 	// Regular state
-	KeyPrefixIncentiveProgram  = []byte{0x02}
-	KeyPrefixNextProgramID     = []byte{0x03}
-	KeyPrefixTotalBonded       = []byte{0x04}
-	KeyPrefixBondAmount        = []byte{0x05}
-	KeyPrefixPendingReward     = []byte{0x06}
-	KeyPrefixRewardBasis       = []byte{0x07}
-	KeyPrefixRewardAccumulator = []byte{0x08}
-	KeyPrefixUnbonding         = []byte{0x09}
+	KeyPrefixUpcomingIncentiveProgram  = []byte{0x02}
+	KeyPrefixOngoingIncentiveProgram   = []byte{0x03}
+	KeyPrefixCompletedIncentiveProgram = []byte{0x04}
+	KeyPrefixNextProgramID             = []byte{0x05}
+	KeyPrefixLastRewardsTime           = []byte{0x06}
+	KeyPrefixTotalBonded               = []byte{0x07}
+	KeyPrefixBondAmount                = []byte{0x08}
+	KeyPrefixPendingReward             = []byte{0x09}
+	KeyPrefixRewardBasis               = []byte{0x0A}
+	KeyPrefixRewardAccumulator         = []byte{0x0B}
+	KeyPrefixUnbonding                 = []byte{0x0C}
 )
 
-// CreateIncentiveProgramKey returns a KVStore key for getting and setting an IncentiveProgram.
-func CreateIncentiveProgramKey(cdc codec.Codec, id uint32) []byte {
+// CreateUpcomingIncentiveProgramKey returns a KVStore key for getting and setting an upcoming IncentiveProgram.
+func CreateUpcomingIncentiveProgramKey(cdc codec.Codec, id uint32) []byte {
 	// prefix | id
 	var key []byte
-	key = append(key, KeyPrefixIncentiveProgram...)
+	key = append(key, KeyPrefixUpcomingIncentiveProgram...)
+
+	// note: use of codec required by using a uint32 as part of a key
+	bz, err := cdc.Marshal(&gogotypes.UInt32Value{Value: id})
+	if err != nil {
+		panic(err)
+	}
+
+	key = append(key, bz...)
+	return key
+}
+
+// CreateOngoingIncentiveProgramKey returns a KVStore key for getting and setting an ongoing IncentiveProgram.
+func CreateOngoingIncentiveProgramKey(cdc codec.Codec, id uint32) []byte {
+	// prefix | id
+	var key []byte
+	key = append(key, KeyPrefixOngoingIncentiveProgram...)
+
+	// note: use of codec required by using a uint32 as part of a key
+	bz, err := cdc.Marshal(&gogotypes.UInt32Value{Value: id})
+	if err != nil {
+		panic(err)
+	}
+
+	key = append(key, bz...)
+	return key
+}
+
+// CreateCompletedIncentiveProgramKey returns a KVStore key for getting and setting an completed IncentiveProgram.
+func CreateCompletedIncentiveProgramKey(cdc codec.Codec, id uint32) []byte {
+	// prefix | id
+	var key []byte
+	key = append(key, KeyPrefixCompletedIncentiveProgram...)
 
 	// note: use of codec required by using a uint32 as part of a key
 	bz, err := cdc.Marshal(&gogotypes.UInt32Value{Value: id})

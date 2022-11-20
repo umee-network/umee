@@ -11,27 +11,41 @@ option go_package = "github.com/umee-network/umee/v3/x/incentive";
 // Query defines the gRPC querier service.
 service Query {
   // Params queries the parameters of the x/incentive module.
-  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+  rpc Params(QueryParams) returns (QueryParamsResponse) {
     option (google.api.http).get = "/umee/incentive/v1/params";
   }
 
-  // IncentivePrograms queries for all incentives programs that have been passed
-  // by governance, including upcoming and completed ones.
-  rpc IncentivePrograms(QueryIncentiveProgramsRequest)
-      returns (QueryIncentiveProgramsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/incentive_programs";
+  // CompletedIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, and either run to completion or expired immediately due to not being funded.
+  rpc CompletedIncentivePrograms(QueryCompletedIncentivePrograms)
+      returns (QueryCompletedIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/completed";
+  }
+
+  // OngoingIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, funded, and started but not yet completed.
+  rpc OngoingIncentivePrograms(QueryOngoingIncentivePrograms)
+      returns (QueryOngoingIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/ongoing";
+  }
+
+  // UpcomingIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, but not yet started. They may or may not have been funded.
+  rpc UpcomingIncentivePrograms(QueryUpcomingIncentivePrograms)
+      returns (QueryUpcomingIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/upcoming";
   }
 
   // IncentiveProgram queries a single incentive program by ID.
-  rpc IncentiveProgram(QueryIncentiveProgramRequest)
+  rpc IncentiveProgram(QueryIncentiveProgram)
       returns (QueryIncentiveProgramResponse) {
     option (google.api.http).get = "/umee/incentive/v1/incentive_program/{id}";
   }
 }
 
-// QueryParamsRequest defines the request structure for the Params gRPC service
+// QueryParams defines the request structure for the Params gRPC service
 // handler.
-message QueryParamsRequest {}
+message QueryParams {}
 
 // QueryParamsResponse defines the response structure for the Params gRPC
 // service handler.
@@ -39,24 +53,46 @@ message QueryParamsResponse {
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryIncentiveProgramsRequest defines the request structure for the IncentivePrograms
-// gRPC service handler.
-message QueryIncentiveProgramsRequest {
+// QueryUpcomingIncentivePrograms defines the request structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryUpcomingIncentivePrograms {
+}
+
+// QueryUpcomingIncentiveProgramsResponse defines the response structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryUpcomingIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryOngoingIncentivePrograms defines the request structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryOngoingIncentivePrograms {
+}
+
+// QueryOngoingIncentiveProgramsResponse defines the response structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryOngoingIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCompletedIncentivePrograms defines the request structure for the
+// CompletedIncentivePrograms gRPC service handler.
+message QueryCompletedIncentivePrograms {
   // pagination defines an optional pagination for the request.
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-// QueryIncentiveProgramsResponse defines the response structure for the
-// IncentivePrograms gRPC service handler.
-message QueryIncentiveProgramsResponse {
+// QueryCompletedIncentiveProgramsResponse defines the response structure for the
+// CompletedIncentivePrograms gRPC service handler.
+message QueryCompletedIncentiveProgramsResponse {
   repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
   // pagination defines an optional pagination for the request.
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
-// QueryIncentiveProgramRequest defines the request structure for the IncentiveProgram
+// QueryIncentiveProgram defines the request structure for the IncentiveProgram
 // gRPC service handler.
-message QueryIncentiveProgramRequest {
+message QueryIncentiveProgram {
   // ID specifies which program to query for
   uint32 id = 1;
 }

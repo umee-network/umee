@@ -23,7 +23,7 @@ func NewQuerier(k Keeper) Querier {
 
 func (q Querier) Params(
 	goCtx context.Context,
-	req *incentive.QueryParamsRequest,
+	req *incentive.QueryParams,
 ) (*incentive.QueryParamsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -37,7 +37,7 @@ func (q Querier) Params(
 
 func (q Querier) IncentiveProgram(
 	goCtx context.Context,
-	req *incentive.QueryIncentiveProgramRequest,
+	req *incentive.QueryIncentiveProgram,
 ) (*incentive.QueryIncentiveProgramResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -52,18 +52,53 @@ func (q Querier) IncentiveProgram(
 	return resp, incentive.ErrNotImplemented
 }
 
-func (q Querier) IncentivePrograms(
+func (q Querier) UpcomingIncentivePrograms(
 	goCtx context.Context,
-	req *incentive.QueryIncentiveProgramsRequest,
-) (*incentive.QueryIncentiveProgramsResponse, error) {
+	req *incentive.QueryUpcomingIncentivePrograms,
+) (*incentive.QueryUpcomingIncentiveProgramsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// TODO: get all programs
+
+	resp := &incentive.QueryUpcomingIncentiveProgramsResponse{
+		Programs: make([]incentive.IncentiveProgram, 0),
+	}
+
+	return resp, incentive.ErrNotImplemented
+}
+
+func (q Querier) OngoingIncentivePrograms(
+	goCtx context.Context,
+	req *incentive.QueryOngoingIncentivePrograms,
+) (*incentive.QueryOngoingIncentiveProgramsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// TODO: get all programs
+
+	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
+		Programs: make([]incentive.IncentiveProgram, 0),
+	}
+
+	return resp, incentive.ErrNotImplemented
+}
+
+func (q Querier) CompletedIncentivePrograms(
+	goCtx context.Context,
+	req *incentive.QueryCompletedIncentivePrograms,
+) (*incentive.QueryCompletedIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	// TODO: get all programs (also: pagination)
 
-	resp := &incentive.QueryIncentiveProgramsResponse{
+	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
 		Programs: make([]incentive.IncentiveProgram, 0),
+		// TODO: pagination
 	}
 
 	return resp, incentive.ErrNotImplemented

@@ -49,7 +49,7 @@ func GetCmdQueryParams() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 
-			resp, err := queryClient.Params(cmd.Context(), &incentive.QueryParamsRequest{})
+			resp, err := queryClient.Params(cmd.Context(), &incentive.QueryParams{})
 			if err != nil {
 				return err
 			}
@@ -80,7 +80,7 @@ func GetCmdQueryIncentiveProgram() *cobra.Command {
 
 			id := uint32(0) // TODO: get from args[0]
 
-			resp, err := queryClient.IncentiveProgram(cmd.Context(), &incentive.QueryIncentiveProgramRequest{Id: id})
+			resp, err := queryClient.IncentiveProgram(cmd.Context(), &incentive.QueryIncentiveProgram{Id: id})
 			if err != nil {
 				return err
 			}

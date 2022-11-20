@@ -13,13 +13,13 @@ message Params {
   // max_unbondings defines the maximum amount of concurrent unbondings an address can have.
   uint32 max_unbondings = 1;
 
-  // unbonding_duration_long defines the unbonding duration (in blocks) of the long tier.
+  // unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.
   uint64 unbonding_duration_long = 2;
 
-  // unbonding_duration_middle defines the unbonding duration (in blocks) of the middle tier.
+  // unbonding_duration_middle defines the unbonding duration (in seconds) of the middle tier.
   uint64 unbonding_duration_middle = 3;
 
-  // unbonding_duration_short defines the unbonding duration (in blocks) of the short tier.
+  // unbonding_duration_short defines the unbonding duration (in seconds) of the short tier.
   uint64 unbonding_duration_short = 4;
 
   // The tier_weight_short defines how the proportion of rewards assets locked
@@ -48,10 +48,10 @@ message IncentiveProgram {
   // It is zero when the program is being proposed by governance.
   uint32 id = 1;
 
-  // start_height is the block height at which the incentives begin.
-  uint64 start_height = 2;
+  // start_time is the block time at which the incentives begin.
+  uint64 start_time = 2;
 
-  // duration is the length of the incentive program in blocks.
+  // duration is the length of the incentive program in seconds.
   uint64 duration = 3;
 
   // denom defines the denomination of the incentivized collateral uToken.
