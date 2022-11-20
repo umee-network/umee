@@ -1,6 +1,8 @@
-package types
+package incentive
 
 import (
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -235,5 +237,21 @@ func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error 
 	if tier < 1 || tier > 3 {
 		return ErrInvalidTier.Wrapf("%d", tier)
 	}
+	return nil
+}
+
+// Validate performs validation on an IncentiveProgram type returning an error
+// if the program is invalid.
+func (ip IncentiveProgram) Validate() error {
+	if err := sdk.ValidateDenom(ip.Denom); err != nil {
+		return err
+	}
+	if !strings.HasPrefix(ip.Denom, "u/") {
+		// only allow uToken denoms
+		return sdkerrors.Wrap(ErrNotUToken, ip.Denom)
+	}
+
+	// TODO: Finish validate logic
+
 	return nil
 }

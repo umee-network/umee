@@ -1109,6 +1109,27 @@ paths:
                       median of
 
                       historic prices in the last Prune Period.
+                  historic_accept_list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        base_denom:
+                          type: string
+                        symbol_denom:
+                          type: string
+                        exponent:
+                          type: integer
+                          format: int64
+                      title: Denom - the object to hold configurations of each denom
+                    description: >-
+                      Historic Asset List is a list of assets which will use the
+                      historic
+
+                      price stamping protection methodology (mainly
+                      manipulatable assets).
+
+                      Any assets not on this list will not be stamped.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -2533,6 +2554,23 @@ definitions:
           Median Period represents the amount blocks we will wait between
           calculating the median and standard deviation of the median of
           historic prices in the last Prune Period.
+      historic_accept_list:
+        type: array
+        items:
+          type: object
+          properties:
+            base_denom:
+              type: string
+            symbol_denom:
+              type: string
+            exponent:
+              type: integer
+              format: int64
+          title: Denom - the object to hold configurations of each denom
+        description: |-
+          Historic Asset List is a list of assets which will use the historic
+          price stamping protection methodology (mainly manipulatable assets).
+          Any assets not on this list will not be stamped.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2793,6 +2831,27 @@ definitions:
               Median Period represents the amount blocks we will wait between
               calculating the median and standard deviation of the median of
               historic prices in the last Prune Period.
+          historic_accept_list:
+            type: array
+            items:
+              type: object
+              properties:
+                base_denom:
+                  type: string
+                symbol_denom:
+                  type: string
+                exponent:
+                  type: integer
+                  format: int64
+              title: Denom - the object to hold configurations of each denom
+            description: >-
+              Historic Asset List is a list of assets which will use the
+              historic
+
+              price stamping protection methodology (mainly manipulatable
+              assets).
+
+              Any assets not on this list will not be stamped.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object

@@ -2,11 +2,11 @@
 // source: umee/incentive/v1/query.proto
 
 /*
-Package types is a reverse proxy.
+Package incentive is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package types
+package incentive
 
 import (
 	"context"

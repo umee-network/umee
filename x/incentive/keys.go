@@ -1,4 +1,4 @@
-package types
+package incentive
 
 const (
 	// ModuleName defines the module name
