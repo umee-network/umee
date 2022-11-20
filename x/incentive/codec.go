@@ -6,7 +6,6 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
-	proto "github.com/gogo/protobuf/proto"
 )
 
 var (
@@ -24,12 +23,12 @@ func init() {
 // concrete types on the provided LegacyAmino codec. These types are used for
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgClaim{}, proto.MessageName(&MsgClaim{}), nil)
-	cdc.RegisterConcrete(&MsgBond{}, proto.MessageName(&MsgBond{}), nil)
-	cdc.RegisterConcrete(&MsgBeginUnbonding{}, proto.MessageName(&MsgBeginUnbonding{}), nil)
-	cdc.RegisterConcrete(&MsgSponsor{}, proto.MessageName(&MsgSponsor{}), nil)
-	cdc.RegisterConcrete(&MsgGovCreateProgram{}, proto.MessageName(&MsgGovCreateProgram{}), nil)
-	cdc.RegisterConcrete(&MsgGovCreateAndSponsorProgram{}, proto.MessageName(&MsgGovCreateAndSponsorProgram{}), nil)
+	cdc.RegisterConcrete(&MsgClaim{}, "umee/incentive/MsgClaim", nil)
+	cdc.RegisterConcrete(&MsgBond{}, "umee/incentive/MsgBond", nil)
+	cdc.RegisterConcrete(&MsgBeginUnbonding{}, "umee/incentive/MsgBeginUnbonding", nil)
+	cdc.RegisterConcrete(&MsgSponsor{}, "umee/incentive/MsgSponsor", nil)
+	cdc.RegisterConcrete(&MsgGovCreateProgram{}, "umee/incentive/MsgGovCreateProgram", nil)
+	cdc.RegisterConcrete(&MsgGovCreateAndSponsorProgram{}, "umee/incentive/MsgGovCreateAndSponsorProgram", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

@@ -7,6 +7,9 @@ import (
 )
 
 var (
+	// 0 = TODO
+	ErrNotImplemented = sdkerrors.Register(ModuleName, 0, "not implemented")
+
 	// 1XX = General
 	ErrInvalidProgramID = sdkerrors.Register(ModuleName, 100, "invalid program ID")
 	ErrNilAsset         = sdkerrors.Register(ModuleName, 101, "nil asset")
