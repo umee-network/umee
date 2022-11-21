@@ -16,7 +16,7 @@ func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 }
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
+func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
@@ -40,14 +40,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		k.ClearExchangeRates(ctx)
-		// // Clear median and median deviations
-		// if isPeriodLastBlock(ctx, params.MedianPeriod) {
-		// 	for _, v := range params.HistoricAcceptList {
-		// 		denom := v.String()
-		// 		k.DeleteMedian(ctx, denom)
-		// 		k.DeleteMedianDeviation(ctx, denom)
-		// 	}
-		// }
+		// Clear median and median deviations
+		if isPeriodLastBlock(ctx, params.MedianPeriod) && experimental {
+			for _, v := range params.HistoricAcceptList {
+				denom := v.String()
+				k.DeleteMedian(ctx, denom)
+				k.DeleteMedianDeviation(ctx, denom)
+			}
+		}
 
 		// NOTE: it filters out inactive or jailed validators
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
@@ -65,15 +65,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 				return err
 			}
 
-			// Stamp rate every stamp period if asset is set to have historic stats tracked
-			if isPeriodLastBlock(ctx, params.StampPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
-				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
-			}
+			if experimental {
+				// Stamp rate every stamp period if asset is set to have historic stats tracked
+				if isPeriodLastBlock(ctx, params.StampPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+				}
 
-			// // Set median price every median period if asset is set to have historic stats tracked
-			// if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
-			// 	k.CalcAndSetMedian(ctx, ballotDenom.Denom)
-			// }
+				// Set median price every median period if asset is set to have historic stats tracked
+				if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+					k.CalcAndSetMedian(ctx, ballotDenom.Denom)
+				}
+			}
 		}
 
 		// update miss counting & slashing
@@ -110,7 +112,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	}
 
 	// Prune historic prices every prune period
-	if isPeriodLastBlock(ctx, params.PrunePeriod) {
+	if isPeriodLastBlock(ctx, params.PrunePeriod) && experimental {
 		pruneBlock := uint64(ctx.BlockHeight()) - params.PrunePeriod
 		for _, v := range params.HistoricAcceptList {
 			k.DeleteHistoricPrice(ctx, v.String(), pruneBlock)
