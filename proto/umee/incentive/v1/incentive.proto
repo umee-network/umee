@@ -25,6 +25,7 @@ message Params {
   // The tier_weight_short defines how the proportion of rewards assets locked
   // in the short unbonding duration receive compared to what the same amount
   // would receive on the long tier.
+  // valid values: [0;1]
   string tier_weight_short = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
