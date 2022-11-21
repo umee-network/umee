@@ -56,7 +56,7 @@ message IncentiveProgram {
   // duration is the length of the incentive program in seconds.
   uint64 duration = 3;
 
-  // denom defines the denomination of the incentivized collateral uToken.
+  // denom is the incentivized uToken collateral.
   string denom = 4;
 
   // total_rewards are total amount of rewards which can be distributed to
