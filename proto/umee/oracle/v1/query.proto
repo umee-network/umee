@@ -78,11 +78,20 @@ service Query {
     option (google.api.http).get = "/umee/oracle/v1/params";
   }
 
-  // Medians returns medians of all denoms
+  // Medians returns medians of all denoms,
+  // or, if specified, returns a single median
   rpc Medians(QueryMedians)
       returns (QueryMediansResponse) {
     option (google.api.http).get =
         "/umee/historacle/v1/denoms/medians";
+  }
+
+  // MedianDeviations returns median deviations of all denoms,
+  // or, if specified, returns a single median deviation
+  rpc MedianDeviations(QueryMedianDeviations)
+      returns (QueryMedianDeviationsResponse) {
+    option (google.api.http).get =
+        "/umee/historacle/v1/denoms/median_deviations";
   }
 }
 
@@ -250,6 +259,24 @@ message QueryMedians {
 message QueryMediansResponse {
   // medians defines a list of the medians for all stamped denoms.
   repeated cosmos.base.v1beta1.DecCoin medians = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable)     = false
+  ];
+}
+
+// QueryMedianDeviations is the request type for the Query/MedianDeviations RPC Response.
+message QueryMedianDeviations {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+  // denom defines the denomination to query for.
+  string denom = 1;
+}
+
+// QueryMedianDeviationsResponse is response type for the
+// Query/MedianDeviations RPC method.
+message QueryMedianDeviationsResponse {
+  // medians defines a list of the median deviations for all stamped denoms.
+  repeated cosmos.base.v1beta1.DecCoin medianDeviations = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false
   ];
