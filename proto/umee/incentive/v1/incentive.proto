@@ -49,7 +49,7 @@ message IncentiveProgram {
   // It is zero when the program is being proposed by governance.
   uint32 id = 1;
 
-  // start_time is the block time at which the incentives begin.
+  // start_time is the unix time (in seconds) at which the incentives begin.
   uint64 start_time = 2;
 
   // duration is the length of the incentive program in seconds.
