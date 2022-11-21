@@ -106,6 +106,35 @@ func (k Keeper) GetMedianDeviation(
 	return decProto.Dec, nil
 }
 
+// WithinMedianDeviation returns whether or not a given price of a given
+// denom is within the Standard Deviation around the Median.
+func (k Keeper) WithinMedianDeviation(
+	ctx sdk.Context,
+	denom string,
+	price sdk.Dec,
+) (bool, error) {
+	store := ctx.KVStore(k.storeKey)
+
+	bz := store.Get(types.KeyMedian(denom))
+	if bz == nil {
+		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
+	}
+	median := sdk.DecProto{}
+	k.cdc.MustUnmarshal(bz, &median)
+
+	bz = store.Get(types.KeyMedianDeviation(denom))
+	if bz == nil {
+		return false, sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s", denom))
+	}
+	medianDeviation := sdk.DecProto{}
+	k.cdc.MustUnmarshal(bz, &medianDeviation)
+
+	if price.Sub(median.Dec).Abs().LTE(medianDeviation.Dec) {
+		return true, nil
+	}
+	return false, nil
+}
+
 // setMedianDeviation sets a given denom's standard deviation around
 // its median price in the last prune period since the current block.
 func (k Keeper) calcAndSetMedianDeviation(
