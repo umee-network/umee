@@ -189,7 +189,7 @@ func (k Keeper) SetHistoricPrice(
 	store.Set(types.KeyHistoricPrice(denom, blockNum), bz)
 }
 
-// DeleteHistoricPriceStats deletes the historic price of a denom at a
+// DeleteHistoricPrice deletes the historic price of a denom at a
 // given block.
 func (k Keeper) DeleteHistoricPrice(
 	ctx sdk.Context,
