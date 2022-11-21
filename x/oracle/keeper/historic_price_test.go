@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().NoError(err)
 	s.Require().Equal(medianDeviation, sdk.MustNewDecFromStr("0.0225"))
 
-	// check prices are with the median deviation
+	// check prices are within the median deviation
 	price1 := sdk.MustNewDecFromStr("1.13")
 	price2 := sdk.MustNewDecFromStr("1.12")
 	result, err := app.OracleKeeper.WithinMedianDeviation(ctx, displayDenom, price1)
