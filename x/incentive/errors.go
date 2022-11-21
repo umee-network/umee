@@ -14,7 +14,6 @@ var (
 	ErrInvalidProgramID = sdkerrors.Register(ModuleName, 100, "invalid program ID")
 	ErrNilAsset         = sdkerrors.Register(ModuleName, 101, "nil asset")
 	ErrInvalidTier      = sdkerrors.Register(ModuleName, 102, "invalid unbonding tier")
-	ErrNotUToken        = sdkerrors.Register(ModuleName, 103, "lock denom should be a uToken")
 
 	// 2XX = Params
 	ErrUnbondingTierOrder   = sdkerrors.Register(ModuleName, 200, "unbonding tier lock durations out of order")
