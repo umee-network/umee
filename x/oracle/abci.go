@@ -40,14 +40,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		}
 
 		k.ClearExchangeRates(ctx)
-		// Clear median and median deviations
-		if isPeriodLastBlock(ctx, params.MedianPeriod) {
-			for _, v := range params.HistoricAcceptList {
-				denom := v.String()
-				k.DeleteMedian(ctx, denom)
-				k.DeleteMedianDeviation(ctx, denom)
-			}
-		}
+		// // Clear median and median deviations
+		// if isPeriodLastBlock(ctx, params.MedianPeriod) {
+		// 	for _, v := range params.HistoricAcceptList {
+		// 		denom := v.String()
+		// 		k.DeleteMedian(ctx, denom)
+		// 		k.DeleteMedianDeviation(ctx, denom)
+		// 	}
+		// }
 
 		// NOTE: it filters out inactive or jailed validators
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
@@ -70,10 +70,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
 			}
 
-			// Set median price every median period if asset is set to have historic stats tracked
-			if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
-				k.CalcAndSetMedian(ctx, ballotDenom.Denom)
-			}
+			// // Set median price every median period if asset is set to have historic stats tracked
+			// if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+			// 	k.CalcAndSetMedian(ctx, ballotDenom.Denom)
+			// }
 		}
 
 		// update miss counting & slashing
