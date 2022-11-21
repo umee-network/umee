@@ -250,10 +250,64 @@ func (q querier) AggregateVotes(
 	}, nil
 }
 
-// Medians currently performs a no-op.
+// Medians queries medians of all denoms, or, if specified, returns
+// a single median.
 func (q querier) Medians(
 	goCtx context.Context,
 	req *types.QueryMedians,
 ) (*types.QueryMediansResponse, error) {
-	return nil, types.ErrNotImplemented
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var medians sdk.DecCoins
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.GetMedian(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+
+		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+	} else {
+		q.IterateAllMedianPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+			return false
+		})
+	}
+
+	return &types.QueryMediansResponse{Medians: medians}, nil
+}
+
+// MedianDeviations queries median deviations of all denoms, or, if specified, returns
+// a single median deviation.
+func (q querier) MedianDeviations(
+	goCtx context.Context,
+	req *types.QueryMedianDeviations,
+) (*types.QueryMedianDeviationsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var medians sdk.DecCoins
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.GetMedianDeviation(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+
+		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+	} else {
+		q.IterateAllMedianDeviationPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+			return false
+		})
+	}
+
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: medians}, nil
 }
