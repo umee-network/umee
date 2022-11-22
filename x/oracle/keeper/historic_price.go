@@ -129,10 +129,7 @@ func (k Keeper) WithinMedianDeviation(
 	medianDeviation := sdk.DecProto{}
 	k.cdc.MustUnmarshal(bz, &medianDeviation)
 
-	if price.Sub(median.Dec).Abs().LTE(medianDeviation.Dec) {
-		return true, nil
-	}
-	return false, nil
+	return price.Sub(median.Dec).Abs().LTE(medianDeviation.Dec), nil
 }
 
 // setMedianDeviation sets a given denom's standard deviation around
