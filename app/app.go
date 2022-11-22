@@ -218,7 +218,7 @@ type UmeeApp struct {
 
 	// keepers
 	AccountKeeper    authkeeper.AccountKeeper
-	BankKeeper       bankkeeper.Keeper
+	BankKeeper       bankkeeper.BaseKeeper
 	CapabilityKeeper *capabilitykeeper.Keeper
 	StakingKeeper    *stakingkeeper.Keeper
 	SlashingKeeper   slashingkeeper.Keeper
@@ -460,12 +460,11 @@ func New(
 		),
 	)
 
-	baseBankKeeper := app.BankKeeper.(bankkeeper.BaseKeeper)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
 		app.GetSubspace(gravitytypes.ModuleName),
 		appCodec,
-		&baseBankKeeper,
+		&app.BankKeeper,
 		app.StakingKeeper,
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
