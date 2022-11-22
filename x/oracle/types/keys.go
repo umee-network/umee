@@ -15,6 +15,9 @@ const (
 	// StoreKey is the string store representation
 	StoreKey = ModuleName
 
+	// RouterKey is the message route for oracle module
+	RouterKey = ModuleName
+
 	// QuerierRoute is the query router key for the oracle module
 	QuerierRoute = ModuleName
 )
