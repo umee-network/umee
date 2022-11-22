@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bugs
+
+- [1615](https://github.com/umee-network/umee/pull/1615) Parse multiple candles from OsmosisV2 response
+
 ### Improvements
 
 - [1602](https://github.com/umee-network/umee/pull/1602) Remove FTX provider.
@@ -59,7 +63,6 @@ This was released as a part of [Umee Prop 27.](https://www.mintscan.io/umee/prop
 ### Bugs
 
 - [1428](https://github.com/umee-network/umee/pull/1428) Update umeed version to an actual tag.
-- [1615](https://github.com/umee-network/umee/pull/1615) Parse multiple candles from OsmosisV2 response
 
 ### Features
 
