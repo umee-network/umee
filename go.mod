@@ -8,7 +8,7 @@ require (
 	github.com/CosmWasm/wasmd v0.29.0
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
 	github.com/cosmos/cosmos-proto v1.0.0-alpha8
-	github.com/cosmos/cosmos-sdk v0.46.4
+	github.com/cosmos/cosmos-sdk v0.46.6
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v5 v5.1.0
 	github.com/ethereum/go-ethereum v1.10.26
@@ -17,7 +17,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/ignite/cli v0.25.1
+	github.com/ignite/cli v0.25.2
 	github.com/mgechev/revive v1.2.4
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.1
