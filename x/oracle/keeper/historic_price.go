@@ -113,23 +113,17 @@ func (k Keeper) WithinMedianDeviation(
 	denom string,
 	price sdk.Dec,
 ) (bool, error) {
-	store := ctx.KVStore(k.storeKey)
-
-	bz := store.Get(types.KeyMedian(denom))
-	if bz == nil {
-		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
+	median, err := k.GetMedian(ctx, denom)
+	if err != nil {
+		return false, err
 	}
-	median := sdk.DecProto{}
-	k.cdc.MustUnmarshal(bz, &median)
 
-	bz = store.Get(types.KeyMedianDeviation(denom))
-	if bz == nil {
-		return false, sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s", denom))
+	medianDeviation, err := k.GetMedianDeviation(ctx, denom)
+	if err != nil {
+		return false, err
 	}
-	medianDeviation := sdk.DecProto{}
-	k.cdc.MustUnmarshal(bz, &medianDeviation)
 
-	return price.Sub(median.Dec).Abs().LTE(medianDeviation.Dec), nil
+	return price.Sub(median).Abs().LTE(medianDeviation), nil
 }
 
 // setMedianDeviation sets a given denom's standard deviation around
