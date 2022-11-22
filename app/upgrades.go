@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
@@ -26,17 +27,19 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 	app.registerV3_2Upgrade(upgradeInfo)
 }
 
-func onlyRunMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		ctx.Logger().Info("Upgrade handler execution", "name", planName)
-		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-	}
-}
-
 // performs upgrade from v3.1 -> v3.2
 func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
 	const planName = "v3.2.0"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyRunMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			err := bankkeeper.NewMigrator(app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			if err != nil {
+				return fromVM, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		})
 }
 
 // performs upgrade from v3.0 -> v3.1
@@ -85,21 +88,31 @@ func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
 			return vm, err
 		})
 
-	if upgradeInfo.Name == planName && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{
-				group.ModuleName,
-				nft.ModuleName,
-				bech32ibctypes.ModuleName,
-				// icacontrollertypes.StoreKey,
-				// icahosttypes.StoreKey,
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			group.ModuleName,
+			nft.ModuleName,
+			bech32ibctypes.ModuleName,
+			// icacontrollertypes.StoreKey,
+			// icahosttypes.StoreKey,
 
-				oracletypes.ModuleName,
-				leveragetypes.ModuleName,
-			},
-		}
+			oracletypes.ModuleName,
+			leveragetypes.ModuleName,
+		}})
+}
+
+func onlyRunMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
+	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	}
+}
+
+// helper function to check if the store loader should be upgraded
+func (app *UmeeApp) storeUpgrade(planName string, ui upgradetypes.Plan, stores storetypes.StoreUpgrades) {
+	if ui.Name == planName && !app.UpgradeKeeper.IsSkipHeight(ui.Height) {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(
-			upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+			upgradetypes.UpgradeStoreLoader(ui.Height, &stores))
 	}
 }
