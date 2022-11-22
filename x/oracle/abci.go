@@ -40,13 +40,10 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 		}
 
 		k.ClearExchangeRates(ctx)
-		// Clear median and median deviations
+
 		if isPeriodLastBlock(ctx, params.MedianPeriod) && experimental {
-			for _, v := range params.HistoricAcceptList {
-				denom := v.String()
-				k.DeleteMedian(ctx, denom)
-				k.DeleteMedianDeviation(ctx, denom)
-			}
+			k.ClearMedians(ctx)
+			k.ClearMedianDeviations(ctx)
 		}
 
 		// NOTE: it filters out inactive or jailed validators

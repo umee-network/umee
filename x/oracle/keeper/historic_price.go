@@ -238,3 +238,24 @@ func (k Keeper) DeleteMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom))
 }
+
+// ClearMedians iterates through all medians in the store and deletes them.
+func (k Keeper) ClearMedians(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
+}
+
+// ClearMedianDeviations iterates through all median deviations in the store
+// and deletes them.
+func (k Keeper) ClearMedianDeviations(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
+}
