@@ -39,25 +39,18 @@ func (q Querier) RateLimitsOfIBCDenoms(goCtx context.Context, req *ibctransfer.Q
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	rateLimits, err := q.Keeper.GetRateLimitsOfIBCDenoms(ctx)
-	if err != nil {
-		return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{}, err
+
+	if len(req.IbcDenom) == 0 {
+		rateLimits, err := q.Keeper.GetRateLimitsOfIBCDenoms(ctx)
+		if err != nil {
+			return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{}, err
+		}
+		return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{RateLimits: rateLimits}, nil
+	} else {
+		rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
+		if err != nil {
+			return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{}, err
+		}
+		return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{RateLimits: []ibctransfer.RateLimit{*rateLimit}}, nil
 	}
-
-	return &ibctransfer.QueryRateLimitsOfIBCDenomsResponse{RateLimits: rateLimits}, nil
-}
-
-// RateLimitsOfIBCDenom returns rate limits of ibc denom.
-func (q Querier) RateLimitsOfIBCDenom(goCtx context.Context, req *ibctransfer.QueryRateLimitsOfIBCDenom) (*ibctransfer.QueryRateLimitsOfIBCDenomResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	rateLimit, err := q.Keeper.GetRateLimitsOfIBCDenom(ctx, req.IbcDenom)
-	if err != nil {
-		return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{}, err
-	}
-
-	return &ibctransfer.QueryRateLimitsOfIBCDenomResponse{RateLimit: *rateLimit}, nil
 }

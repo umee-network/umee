@@ -1,8 +1,6 @@
 package ibctransfer
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
@@ -15,14 +13,16 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 		panic(err)
 	}
 
+	params := keeper.GetParams(ctx)
+
 	for _, rateLimitOfIBCDenom := range rateLimitsOfIBCDenoms {
 		if rateLimitOfIBCDenom.ExpiredTime == nil {
-			expiredTime := ctx.BlockTime().Add(rateLimitOfIBCDenom.TimeWindow)
+			expiredTime := ctx.BlockTime().Add(params.QuotaDuration)
 			rateLimitOfIBCDenom.ExpiredTime = &expiredTime
 		} else {
 			if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
 				// reset the expire time
-				expiredTime := ctx.BlockTime().Add(time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow))
+				expiredTime := ctx.BlockTime().Add(params.QuotaDuration)
 				rateLimitOfIBCDenom.ExpiredTime = &expiredTime
 				// reset the outflow limit to 0
 				rateLimitOfIBCDenom.OutflowSum = sdk.NewDec(0)

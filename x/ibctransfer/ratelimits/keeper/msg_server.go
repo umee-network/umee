@@ -2,7 +2,6 @@ package keeper
 
 import (
 	context "context"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -39,9 +38,8 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	var rateLimitsOfIBCDenoms []ibctransfer.RateLimit
 	for _, rateLimitOfIBCDenom := range msg.NewIbcDenomsRateLimits {
 		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, ibctransfer.RateLimit{
-			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
-			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
-			TimeWindow:   time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow),
+			IbcDenom:   rateLimitOfIBCDenom.IbcDenom,
+			OutflowSum: sdk.NewDec(0),
 		})
 	}
 
@@ -59,9 +57,8 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	var updateRateLimitsForIBCDenoms []ibctransfer.RateLimit
 	for _, rateLimitOfIBCDenom := range msg.UpdateIbcDenomsRateLimits {
 		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, ibctransfer.RateLimit{
-			IbcDenom:     rateLimitOfIBCDenom.IbcDenom,
-			OutflowLimit: rateLimitOfIBCDenom.OutflowLimit,
-			TimeWindow:   time.Duration(time.Second * rateLimitOfIBCDenom.TimeWindow),
+			IbcDenom:   rateLimitOfIBCDenom.IbcDenom,
+			OutflowSum: sdk.NewDec(0),
 		})
 	}
 

@@ -16,6 +16,7 @@ const (
 
 var (
 	KeyPrefixForIBCDenom = []byte{0x01}
+	KeyTotalOutflowSum   = []byte("TotalOutflowSum")
 )
 
 func CreateKeyForRateLimitOfIBCDenom(ibcDenom string) []byte {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -40,9 +41,6 @@ func (k Keeper) GetRateLimitsOfIBCDenom(ctx sdk.Context, ibcDenom string) (*ibct
 	if err != nil {
 		return nil, err
 	}
-	if rate == nil {
-		return nil, ibctransfer.ErrNoRateLimitsForIBCDenom
-	}
 
 	return rate, nil
 }
@@ -52,7 +50,14 @@ func (k Keeper) getRateLimitsOfIBCDenom(ctx sdk.Context, ibcDenom string) (*ibct
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(ibctransfer.CreateKeyForRateLimitOfIBCDenom(ibcDenom))
 	var rateLimitsOfIBCDenom ibctransfer.RateLimit
-	k.cdc.Unmarshal(bz, &rateLimitsOfIBCDenom)
+
+	if bz == nil {
+		return nil, ibctransfer.ErrNoRateLimitsForIBCDenom
+	}
+
+	if err := k.cdc.Unmarshal(bz, &rateLimitsOfIBCDenom); err != nil {
+		return nil, err
+	}
 
 	return &rateLimitsOfIBCDenom, nil
 }
@@ -83,8 +88,23 @@ func (k Keeper) SetRateLimitsOfIBCDenom(ctx sdk.Context, rateLimitOfIBCDenom *ib
 	return nil
 }
 
+func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(ibctransfer.KeyTotalOutflowSum)
+	return sdk.MustNewDecFromStr(string(bz))
+}
+
+func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount string) error {
+	store := ctx.KVStore(k.storeKey)
+	key := ibctransfer.KeyTotalOutflowSum
+	store.Set(key, []byte(amount))
+	return nil
+}
+
 // CheckAndUpdateRateLimits
 func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmount string) error {
+	params := k.GetParams(ctx)
+
 	rateLimitOfIBCDenom, err := k.GetRateLimitsOfIBCDenom(ctx, denom)
 	if err != nil {
 		return err
@@ -99,14 +119,14 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		return err
 	}
 
-	// get the exchange rate of denom in USD
-	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
-	if err != nil {
-		return err
-	}
-
 	// get the registerd token settings from leverage
 	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return nil
+	}
+
+	// get the exchange rate of denom in USD
+	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -115,18 +135,29 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 
 	if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
-		rateLimitOfIBCDenom, err = k.ResetRateLimitsSum(ctx, rateLimitOfIBCDenom)
+		rateLimitOfIBCDenom, err = k.ResetRateLimitsSum(ctx, rateLimitOfIBCDenom, params.QuotaDuration)
 		if err != nil {
 			return err
 		}
 	}
 
-	if rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD).GT(rateLimitOfIBCDenom.OutflowLimit) {
+	// checking token quota
+	if rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD).GT(params.TokenQuota) {
 		return ibctransfer.ErrRateLimitExceeded
 	}
 
+	// checking total outflow quota
+	totalOutflowSum := k.GetTotalOutflowSum(ctx)
+	if totalOutflowSum.Add(amountInUSD).GT(params.TotalQuota) {
+		return ibctransfer.ErrRateLimitExceeded
+	}
+
+	// update the per token outflow sum
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD)
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
+
+	// updating the total outflow sum
+	k.SetTotalOutflowSum(ctx, totalOutflowSum.Add(amountInUSD).String())
 
 	return nil
 }
@@ -145,7 +176,7 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 	// get the registerd token settings from leverage
 	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	amount, err := strconv.ParseInt(sendAmount, 10, 64)
@@ -161,10 +192,13 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 
 	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(10).Power(uint64(tokenSettings.Exponent)))
 	amountInUSD := exchangeRate.Mul(sendingAmount)
-
+	// reset the outflow limit of per token
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Sub(amountInUSD)
-
 	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
+
+	// reset the total outflow sum
+	totalOutflowSum := k.GetTotalOutflowSum(ctx)
+	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD).String())
 
 	return nil
 }
@@ -197,8 +231,8 @@ func (k Keeper) GetLocalDenom(denom string) string {
 }
 
 // ResetRateLimitsSum reset the expire time and outflow sum of rate limit.
-func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateLimit) (*ibctransfer.RateLimit, error) {
-	expiredTime := rateLimit.ExpiredTime.Add(rateLimit.TimeWindow)
+func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateLimit, quotaDuration time.Duration) (*ibctransfer.RateLimit, error) {
+	expiredTime := ctx.BlockTime().Add(quotaDuration)
 
 	rateLimit.ExpiredTime = &expiredTime
 	rateLimit.OutflowSum = sdk.NewDec(0)

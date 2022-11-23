@@ -1,16 +1,24 @@
 package ibctransfer
 
-func NewGenesisState(params Params, rateLimits []RateLimit) *GenesisState {
+import (
+	fmt "fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+func NewGenesisState(params Params, rateLimits []RateLimit, outflowSum sdk.Dec) *GenesisState {
 	return &GenesisState{
-		Params:     params,
-		RateLimits: rateLimits,
+		Params:          params,
+		RateLimits:      rateLimits,
+		TotalOutflowSum: outflowSum,
 	}
 }
 
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Params:     *DefaultParams(),
-		RateLimits: nil,
+		Params:          *DefaultParams(),
+		RateLimits:      nil,
+		TotalOutflowSum: sdk.NewDec(0),
 	}
 }
 
@@ -24,6 +32,10 @@ func (gs GenesisState) Validate() error {
 		if err := rateLimits.Validate(); err != nil {
 			return err
 		}
+	}
+
+	if gs.TotalOutflowSum.IsNegative() {
+		return fmt.Errorf("total outflow sum shouldn't be negative : %s ", gs.TotalOutflowSum.String())
 	}
 
 	return nil

@@ -157,10 +157,6 @@ func (msg *MsgUpdateIBCTransferPauseStatus) GetSigners() []sdk.AccAddress {
 }
 
 func (r *RateLimit) Validate() error {
-	if r.TimeWindow < 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("invalid timewindow")
-	}
-
 	if len(r.IbcDenom) == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("ibcDenom shouldn't be empty")
 	}

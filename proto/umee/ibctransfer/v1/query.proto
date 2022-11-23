@@ -18,11 +18,6 @@ service Query {
 
   // RateLimitsOfIBCDenoms queries the rate limits of ibc denoms.
   rpc RateLimitsOfIBCDenoms(QueryRateLimitsOfIBCDenoms) returns (QueryRateLimitsOfIBCDenomsResponse) {
-    option (google.api.http).get = "/umee/ibctransfer/v1/rate_limits";
-  }
-
-  // RateLimitsOfIBCDenom queries the rate limits of ibc denom.
-  rpc RateLimitsOfIBCDenom(QueryRateLimitsOfIBCDenom) returns (QueryRateLimitsOfIBCDenomResponse) {
     option (google.api.http).get = "/umee/ibctransfer/v1/rate_limits/{ibc_denom}";
   }
 }
@@ -38,19 +33,11 @@ message QueryParamsResponse {
 }
 
 // QueryRateLimitsOfIBCDenoms defines request type
-message QueryRateLimitsOfIBCDenoms {}
+message QueryRateLimitsOfIBCDenoms {
+  string ibc_denom = 1;
+}
 
 // QueryRateLimitsOfIBCDenomsResponse defines response type
 message QueryRateLimitsOfIBCDenomsResponse {
   repeated RateLimit rate_limits = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryRateLimitsOfIBCDenom defines request type
-message QueryRateLimitsOfIBCDenom {
-  string ibc_denom = 1;
-}
-
-// QueryRateLimitsOfIBCDenomResponse defines response type of QueryRateLimitsOfIBCDenom
-message QueryRateLimitsOfIBCDenomResponse {
-  RateLimit rate_limit = 1 [(gogoproto.nullable) = false];
 }

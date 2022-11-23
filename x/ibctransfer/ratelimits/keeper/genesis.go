@@ -12,6 +12,10 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState ibctransfer.GenesisState) 
 	if err := k.SetRateLimitsOfIBCDenoms(ctx, genState.RateLimits); err != nil {
 		panic(err)
 	}
+
+	if err := k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum.String()); err != nil {
+		panic(err)
+	}
 }
 
 // ExportGenesis returns the x/leverage module's exported genesis state.
@@ -22,7 +26,8 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *ibctransfer.GenesisState {
 	}
 
 	return &ibctransfer.GenesisState{
-		Params:     k.GetParams(ctx),
-		RateLimits: rateLimits,
+		Params:          k.GetParams(ctx),
+		RateLimits:      rateLimits,
+		TotalOutflowSum: k.GetTotalOutflowSum(ctx),
 	}
 }

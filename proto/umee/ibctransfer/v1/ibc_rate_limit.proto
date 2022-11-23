@@ -12,27 +12,14 @@ option go_package = "github.com/umee-network/umee/v3/x/ibctransfer";
 message RateLimit {
   // ibc_denom defines the ibc denom
   string ibc_denom = 1;
-  // outflow_limit defines the outflow limit of ibc-transfer
-  string outflow_limit = 2 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-  // time_window defines window for rate limit of ibc_denom
-  google.protobuf.Duration time_window = 3 [
-    (gogoproto.nullable)    = false,
-    (gogoproto.stdduration) = true,
-    (gogoproto.jsontag)     = "time_window,omitempty",
-    (gogoproto.moretags)    = "yaml:\"time_window\""
-  ];
-  // expired_time defines rate limit expires time based on time_window
-  google.protobuf.Timestamp expired_time = 4 [
+  // expired_time defines rate limit expires time based on quota_duration
+  google.protobuf.Timestamp expired_time = 2 [
     (gogoproto.stdtime)  = true,
     (gogoproto.nullable) = true,
     (gogoproto.moretags) = "yaml:\"expired_time\""
   ];
   // outflow_sum defines the sum of outflow tokens from ibc-transfer
-  string outflow_sum = 5 [
+  string outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
@@ -43,4 +30,23 @@ message RateLimit {
 message Params {
   // ibc_status defines the wethever ibc-transfer allow or not
   bool ibc_pause = 1;
+  // total_quota defines the total outflow limit of ibc-transfer in USD
+  string total_quota = 2 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // token_quota defines the outflow limit per token in USD
+  string token_quota = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // quota_duration defines quota expires for each ibc-transfer denom in seconds
+  google.protobuf.Duration quota_duration = 4 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "quota_duration,omitempty",
+    (gogoproto.moretags)    = "yaml:\"quota_duration\""
+  ];
 }
