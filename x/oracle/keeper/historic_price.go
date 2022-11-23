@@ -106,6 +106,26 @@ func (k Keeper) GetMedianDeviation(
 	return decProto.Dec, nil
 }
 
+// WithinMedianDeviation returns whether or not a given price of a given
+// denom is within the Standard Deviation around the Median.
+func (k Keeper) WithinMedianDeviation(
+	ctx sdk.Context,
+	denom string,
+	price sdk.Dec,
+) (bool, error) {
+	median, err := k.GetMedian(ctx, denom)
+	if err != nil {
+		return false, err
+	}
+
+	medianDeviation, err := k.GetMedianDeviation(ctx, denom)
+	if err != nil {
+		return false, err
+	}
+
+	return price.Sub(median).Abs().LTE(medianDeviation), nil
+}
+
 // setMedianDeviation sets a given denom's standard deviation around
 // its median price in the last prune period since the current block.
 func (k Keeper) calcAndSetMedianDeviation(
@@ -200,8 +220,7 @@ func (k Keeper) DeleteHistoricPrice(
 	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
-// DeleteMedian deletes a given denom's median price in the last prune
-// period since a given block.
+// DeleteMedian deletes a given denom's median price.
 func (k Keeper) DeleteMedian(
 	ctx sdk.Context,
 	denom string,
@@ -211,11 +230,32 @@ func (k Keeper) DeleteMedian(
 }
 
 // DeleteMedianDeviation deletes a given denom's standard deviation around
-// its median price in the last prune period since a given block.
+// its median price.
 func (k Keeper) DeleteMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom))
+}
+
+// ClearMedians iterates through all medians in the store and deletes them.
+func (k Keeper) ClearMedians(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
+}
+
+// ClearMedianDeviations iterates through all median deviations in the store
+// and deletes them.
+func (k Keeper) ClearMedianDeviations(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
 }
