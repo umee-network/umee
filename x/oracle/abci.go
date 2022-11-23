@@ -16,7 +16,7 @@ func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 }
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
+func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
@@ -41,6 +41,11 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		k.ClearExchangeRates(ctx)
 
+		if isPeriodLastBlock(ctx, params.MedianPeriod) && experimental {
+			k.ClearMedians(ctx)
+			k.ClearMedianDeviations(ctx)
+		}
+
 		// NOTE: it filters out inactive or jailed validators
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
@@ -55,6 +60,18 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			// Set the exchange rate, emit ABCI event
 			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
 				return err
+			}
+
+			if experimental {
+				// Stamp rate every stamp period if asset is set to have historic stats tracked
+				if isPeriodLastBlock(ctx, params.StampPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+				}
+
+				// Set median price every median period if asset is set to have historic stats tracked
+				if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+					k.CalcAndSetMedian(ctx, ballotDenom.Denom)
+				}
 			}
 		}
 
@@ -89,6 +106,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// reset miss counters of all validators at the last block of slash window
 	if isPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
+	}
+
+	// Prune historic prices every prune period
+	if isPeriodLastBlock(ctx, params.PrunePeriod) && experimental {
+		pruneBlock := uint64(ctx.BlockHeight()) - params.PrunePeriod
+		for _, v := range params.HistoricAcceptList {
+			k.DeleteHistoricPrice(ctx, v.String(), pruneBlock)
+		}
 	}
 
 	return nil

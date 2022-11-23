@@ -12,11 +12,12 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 
 	// add multiple historic prices to store
 	exchangeRates := []string{"1.0", "1.2", "1.1", "1.4"}
-	for _, exchangeRate := range exchangeRates {
-		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, sdk.MustNewDecFromStr(exchangeRate))
-
+	for i, exchangeRate := range exchangeRates {
 		// update blockheight
-		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
+		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(i))
+
+		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, sdk.MustNewDecFromStr(exchangeRate))
+		app.OracleKeeper.CalcAndSetMedian(ctx, displayDenom)
 	}
 
 	// set and check median and median standard deviation

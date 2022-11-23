@@ -220,8 +220,7 @@ func (k Keeper) DeleteHistoricPrice(
 	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
-// DeleteMedian deletes a given denom's median price in the last prune
-// period since a given block.
+// DeleteMedian deletes a given denom's median price.
 func (k Keeper) DeleteMedian(
 	ctx sdk.Context,
 	denom string,
@@ -231,11 +230,32 @@ func (k Keeper) DeleteMedian(
 }
 
 // DeleteMedianDeviation deletes a given denom's standard deviation around
-// its median price in the last prune period since a given block.
+// its median price.
 func (k Keeper) DeleteMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom))
+}
+
+// ClearMedians iterates through all medians in the store and deletes them.
+func (k Keeper) ClearMedians(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
+}
+
+// ClearMedianDeviations iterates through all median deviations in the store
+// and deletes them.
+func (k Keeper) ClearMedianDeviations(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
 }
