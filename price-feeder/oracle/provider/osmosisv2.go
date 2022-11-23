@@ -200,7 +200,7 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 		messageErr  error
 		tickerResp  OsmosisV2Ticker
 		tickerErr   error
-		candleResp  OsmosisV2Candle
+		candleResp  []OsmosisV2Candle
 		candleErr   error
 	)
 
@@ -242,7 +242,7 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 				if len(v) == 0 {
 					continue
 				}
-				candleString, _ := json.Marshal(v[len(v)-1].(map[string]interface{}))
+				candleString, _ := json.Marshal(v)
 				candleErr = json.Unmarshal(candleString, &candleResp)
 				if candleErr != nil {
 					p.logger.Error().
@@ -251,10 +251,12 @@ func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
 						Msg("Error on receive message")
 					continue
 				}
-				p.setCandlePair(
-					osmosisV2Pair,
-					candleResp,
-				)
+				for _, singleCandle := range candleResp {
+					p.setCandlePair(
+						osmosisV2Pair,
+						singleCandle,
+					)
+				}
 				telemetryWebsocketMessage(ProviderOsmosisV2, MessageTypeCandle)
 				continue
 			}
