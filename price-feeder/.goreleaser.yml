@@ -1,11 +1,11 @@
 project_name: price-feeder
 
 env:
-  - GO111MODULE=on
+  - CGO_ENABLED=1
 
 before:
   hooks:
-    - go mod tidy -compat=1.17
+    - go mod download
 
 builds:
   - main: ./
@@ -14,17 +14,12 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
-    env:
-      - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/umee-network/umee/price-feeder/cmd.Version={{ replace .Version "price-feeder/" "price-feeder-" }} -X github.com/umee-network/umee/price-feeder/cmd.Commit={{ .Commit }}
     goos:
-      - darwin
       - linux
     goarch:
       - amd64
-      - arm
-      - arm64
 
 archives:
   - format: tar.gz
@@ -35,17 +30,17 @@ archives:
     name_template: '{{ replace .Version "price-feeder/" "price-feeder-" }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:
       - README.md
+      - ../LICENSE
 
 release:
   disable: false
-  name_template: "{{ .Tag }}"
+
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
 
 checksum:
   name_template: 'SHA256SUMS-{{ replace .Version "price-feeder/" "price-feeder-" }}.txt'
   algorithm: sha256
-
-snapshot:
-  name_template: SNAPSHOT-{{ .Commit }}
 
 changelog:
   skip: false
