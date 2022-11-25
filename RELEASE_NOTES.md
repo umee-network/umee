@@ -14,7 +14,7 @@ Highlights:
 
 - IBC update to v5.1
 - `QueryLiquidationTargets` RPC is now available when the node is run with `--enable-liquidator-query`. The LIQUIDATOR build flag has been removed. NOTE: the future should not be enabled for nodes with public API. The query involves intensive computation and can impact node stability when used by an attacker.
-- Introduced experimental features, available when build with `experimental` flag. It must not be used with a mainnet.
+- Introduced experimental features, available when build with `experimental` flag. This flag must not be used on mainnet.
 
 Please see the [CHANGELOG](https://github.com/umee-network/umee/blob/v3.2.0/CHANGELOG.md) for an exhaustive list of changes.
 
