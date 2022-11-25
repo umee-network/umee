@@ -24,7 +24,7 @@ jobs:
         run: echo "TM_VERSION=$(go list -m github.com/tendermint/tendermint | sed 's:.* ::')" >> $GITHUB_ENV
 
       # useful to test builds. However will require to add "push" rule to the "on" section
-      - name: Build
+      - name: goreleaser test-build
         uses: goreleaser/goreleaser-action@v3
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
