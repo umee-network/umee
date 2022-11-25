@@ -48,6 +48,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v3.2.0](https://github.com/umee-network/umee/releases/tag/v3.2.0) - 2022-11-25
 
+Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.
+Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
+
 ### Features
 
 - [1555](https://github.com/umee-network/umee/pull/1555) Updates IBC to v5.1.0 that adds adds optional memo field to `FungibleTokenPacketData` and `MsgTransfer`.
