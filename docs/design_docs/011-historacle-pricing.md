@@ -39,9 +39,9 @@ These values are stored in state in order to avoid the `x/leverage` module from 
 
 ### Epochs
 
-We define three epoch periods, during which additional computation will be performed:
+We define two epoch periods, during which additional computation will be performed:
 
-- `Historic Stamp Period`: duration during which the `x/oracle` module will now "stamp" the set of exchange rates in the state machine until a `Pruning Period` has passed (30 days).
+- `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Historic Prices` is met.
 - `Median Stamp Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
 
 ### Maximums
@@ -60,6 +60,7 @@ Modules will have access to the following `keeper` functions from the `x/oracle`
 - `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
 - `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
 - `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
+- `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
 
 ### Outcomes
 
@@ -107,7 +108,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 
 ## Comments
 
-Currently we are planning on keeping the last 6 hours or so of medians, and a longer historic price period. This way each median can be calculated based off of the last 1 hour or 12 hours, and we can perform computations over the last x amount of medians.
+Currently we are planning on keeping the last 6 hours or so of medians, and a longer historic price period. This implementation is meant to be agnostic, so that the `Maximum Medians` and the `Maximum Historic Prices` have no relative constraints.
 
 ### Additional Attack Scenario
 
