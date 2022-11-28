@@ -5,6 +5,7 @@
 - Nov 09, 2022: Initial feature description (@adamewozniak)
 - Nov 14, 2022: Additional scenario description (@brentxu)
 - Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
+- Nov 28, 2022: Remove AcceptList functionality & Add Historic Medians (@adamewozniak)
 
 ## Status
 
@@ -56,7 +57,6 @@ Modules will have access to the following `keeper` functions from the `x/oracle`
 
 - `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
 - `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
-- `IsHistoricAsset(denom string) bool` returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
 - `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
 - `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
 - `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
@@ -107,7 +107,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 
 ## Comments
 
-Originally a 24-hour median was thought to be effective enough to defend against this type of attack, but our modeling shows that we would need 30 days for adequate protection.
+Currently we are planning on keeping the last 6 hours or so of medians, and a longer pruning period.
 
 ### Additional Attack Scenario
 
@@ -125,7 +125,7 @@ Alternatively, the Attacker can also dump the price of FOO and withdraw their US
 
 Where we define:
 
-> `Amount of Active Whitelisted Exchange Rates` = *ER*
+> `Amount of Active Exchange Rates` = *ER*
 > `Amount of Historic Prices` = *H*
 > `Sorting algorithm` = *Sort*
 
