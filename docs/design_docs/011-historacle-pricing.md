@@ -107,7 +107,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 
 ## Comments
 
-Currently we are planning on keeping the last 6 hours or so of medians, and a longer historic price period. This way each median can be calculated based off of the last 1 hour or 12 hour, and we can perform computations over the last x amount of medians.
+Currently we are planning on keeping the last 6 hours or so of medians, and a longer historic price period. This way each median can be calculated based off of the last 1 hour or 12 hours, and we can perform computations over the last x amount of medians.
 
 ### Additional Attack Scenario
 
