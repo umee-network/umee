@@ -34,21 +34,32 @@ Historacle pricing will provide an API for the leverage module to tell when pric
 
 ## Specification
 
-We define three epoch periods, during which additional computation will be performed:
-- `Stamp Period`: duration during which the `x/oracle` module will now "stamp" the set of exchange rates in the state machine until a `Pruning Period` has passed (30 days).
-- `Pruning Period`: duration after which the `x/oracle` module will begin to prune expired historic prices.
-- `Median Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
-
 These values are stored in state in order to avoid the `x/leverage` module from having to calculate them while making decisions around allowable positions for users to take.
 
-Also, there will be an `AssetList` for assets which will use this protection methodology (mainly manipulatable assets). Any assets not on this list will not be stamped.
+### Epochs
+
+We define three epoch periods, during which additional computation will be performed:
+
+- `Historic Stamp Period`: duration during which the `x/oracle` module will now "stamp" the set of exchange rates in the state machine until a `Pruning Period` has passed (30 days).
+- `Median Stamp Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
+
+### Maximums
+
+We define two Maximum values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
+
+- `Maximum Historic Prices`: The maximum amount of `Historic Prices` we will store. Prices will be pruned via FIFO.
+- `Maximum Medians`: The maximum amount of `Medians` and Standard Deviations we will store for each asset. Medians will be pruned via FIFO.
 
 ### Proposed API
 
-The `x/leverage` module will have access to the following `keeper` functions from the `x/oracle` module:
+Modules will have access to the following `keeper` functions from the `x/oracle` module:
+
 - `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
 - `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
-- `IsHistoricAsset(denom string) bool`, returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
+- `IsHistoricAsset(denom string) bool` returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
+- `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
+- `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
+- `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
 
 ### Outcomes
 
