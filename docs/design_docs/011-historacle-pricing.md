@@ -5,7 +5,7 @@
 - Nov 09, 2022: Initial feature description (@adamewozniak)
 - Nov 14, 2022: Additional scenario description (@brentxu)
 - Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
-- Nov 28, 2022: Remove AcceptList functionality & Add Historic Medians (@adamewozniak)
+- Nov 28, 2022: Remove AcceptList functionality & Add Median Stamps (@adamewozniak)
 
 ## Status
 
@@ -41,15 +41,22 @@ These values are stored in state in order to avoid the `x/leverage` module from 
 
 We define two epoch periods, during which additional computation will be performed:
 
-- `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Historic Prices` is met.
+- `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Price Stamps` is met.
 - `Median Stamp Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
 
 ### Maximums
 
 We define two Maximum values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
 
-- `Maximum Historic Prices`: The maximum amount of `Historic Prices` we will store. Prices will be pruned via FIFO.
-- `Maximum Medians`: The maximum amount of `Medians` and Standard Deviations we will store for each asset. Medians will be pruned via FIFO.
+- `Maximum Price Stamps`: The maximum amount of `Price Stamps` we will store. Prices will be pruned via FIFO.
+- `Maximum Median Stamps`: The maximum amount of `Median Stamps` and Standard Deviations we will store for each asset. Medians will be pruned via FIFO.
+
+### Historic Data Table
+
+| Name           | Description                                                          | How often it is recorded      | When it is pruned                     |
+| -------------- | -------------------------------------------------------------------- | ----------------------------- | ------------------------------------  |
+| `Price Stamp`  | A price for an asset recorded at a given block                       | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
+| `Median Stamp` | Of a given asset & block, the median of the stored `Price Stamps`    | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
 
 ### Proposed API
 
@@ -127,7 +134,7 @@ Alternatively, the Attacker can also dump the price of FOO and withdraw their US
 Where we define:
 
 > `Amount of Active Exchange Rates` = *ER*
-> `Amount of Historic Prices` = *H*
+> `Amount of Price Stamps` = *PS*
 > `Sorting algorithm` = *Sort*
 
 
@@ -136,15 +143,15 @@ Each `Stamp Period`, we will :
 1. Iterate over `Historic Prices`, and prune any which are past `Pruning Period`.
 2. Iterate over the current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of `ExchangeRate`
 
-> *H* + 2*ER* + 1
+> *PS* + 2*ER* + 1
 
 Each `Median Period`, we will :
 
-- For each `Active Exchange Rate`, iterate over the historic prices and sort by ExchangeRate
+- For each `Active Exchange Rate`, iterate over the price stamps and sort by ExchangeRate
 - Find the `Median`, and store it in state
 - Find the `Standard Deviation around the Median`, and store it in state
 
- Given a standard deviation where we have the median of each denom, find the square of each historic price's distance from the median, sum those values up, and average them:
+ Given a standard deviation where we have the median of each denom, find the square of each price stamp's distance from the median, sum those values up, and average them:
 
 > *STD* = *ER*(2*H* + 2)
 
