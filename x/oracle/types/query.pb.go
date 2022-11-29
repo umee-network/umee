@@ -905,7 +905,7 @@ func (m *QueryMediansResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMediansResponse proto.InternalMessageInfo
 
-// QueryMedians is the request type for the Query/Medians RPC Response.
+// QueryMedianDeviations is the request type for the Query/MedianDeviations RPC Response.
 type QueryMedianDeviations struct {
 	// denom defines the denomination to query for.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -944,10 +944,10 @@ func (m *QueryMedianDeviations) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMedianDeviations proto.InternalMessageInfo
 
-// QueryMediansResponse is response type for the
-// Query/Medians RPC method.
+// QueryMedianDeviationsResponse is response type for the
+// Query/MedianDeviations RPC method.
 type QueryMedianDeviationsResponse struct {
-	// medians defines a list of the medians for all stamped denoms.
+	// medians defines a list of the median deviations for all stamped denoms.
 	MedianDeviations github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,1,rep,name=medianDeviations,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"medianDeviations"`
 }
 
@@ -1124,8 +1124,8 @@ type QueryClient interface {
 	// Medians returns medians of all denoms,
 	// or, if specified, returns a single median
 	Medians(ctx context.Context, in *QueryMedians, opts ...grpc.CallOption) (*QueryMediansResponse, error)
-	// MedianDeviations returns medians of all denoms,
-	// or, if specified, returns a single median
+	// MedianDeviations returns median deviations of all denoms,
+	// or, if specified, returns a single median deviation
 	MedianDeviations(ctx context.Context, in *QueryMedianDeviations, opts ...grpc.CallOption) (*QueryMedianDeviationsResponse, error)
 }
 
@@ -1271,8 +1271,8 @@ type QueryServer interface {
 	// Medians returns medians of all denoms,
 	// or, if specified, returns a single median
 	Medians(context.Context, *QueryMedians) (*QueryMediansResponse, error)
-	// MedianDeviations returns medians of all denoms,
-	// or, if specified, returns a single median
+	// MedianDeviations returns median deviations of all denoms,
+	// or, if specified, returns a single median deviation
 	MedianDeviations(context.Context, *QueryMedianDeviations) (*QueryMedianDeviationsResponse, error)
 }
 
