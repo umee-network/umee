@@ -67,7 +67,7 @@ Modules will have access to the following `keeper` functions from the `x/oracle`
 - `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
 - `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
 - `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
-- `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
+- `MinMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
 
 ### Outcomes
 
