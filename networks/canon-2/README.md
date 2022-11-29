@@ -1,26 +1,17 @@
 # Canon-2
 
-Canon-2 will be a long-running testnet.
+Canon-2 is a long-running testnet mirroring mainnet functionality. We use it also as the last test before the mainnet upgrade for the next major version.
 
-It was created by stepping through the same upgrade process as
-mainnet (1.0 -> 1.1 -> 3.0) and will soon test the (3.0 -> 3.1) upgrade.
+`canon-1` was created by stepping through the same upgrade process as
+mainnet (1.0 -> 1.1 -> 3.0) however the v3.0 update introduced consensus bug and we had to start the testnet from scratch.
 
-## Validators
+`canon-2` starts from v3.0.3 and follows mainnet updates (3.0.3 -> 3.1 -> 3.2 ...).
 
-Before the (3.0 -> 3.1) upgrade, run:
+## Syncing
 
-- Umeed v3.0.2
-- Peggo v1.2.1 with --eth-merge-pause=true
-- Price feeder v1.0.0
+If you start from scratch, start with umeed v3.0.2 and follow the mainnet upgrades outlined in the [Compatibilty Matrix](https://github.com/umee-network/umee#release-compatibility-matrix).
 
-After the (3.0 -> 3.1) upgrade, run:
-
-- Umeed v3.1.0-rc2
-- Peggo v1.2.1 with --eth-merge-pause=false
-  - or do not set flag (default is false)
-- Price feeder v1.0.0
-
-## Our validator + archive nodes
+### Our validator + archive nodes
 
 ```shell
 api.ruby.canon-2.network.umee.cc
@@ -36,7 +27,7 @@ rpc.sapphire.canon-2.network.umee.cc
 grpc.sapphire.canon-2.network.umee.cc
 ```
 
-## To state sync
+### To state sync
 
 - init with umeed 3.0.2
 - modify config.toml
@@ -46,7 +37,7 @@ grpc.sapphire.canon-2.network.umee.cc
 
 Note: Additional steps required to become a validator
 
-## config.toml changes
+### config.toml changes
 
 ```toml
 [mempool]
@@ -62,7 +53,7 @@ trust_hash = "67D5E02CCA0508FF464D991C9B2F688A804A6AF821A91461A353C53E90FFD0D3"
 seeds = "ab9e8d7227a3199c2832018eec42ade5bf47e71d@35.215.72.45:26656,e89407a37d2ebe0dfa2291c5240abe3a5410995f@35.212.203.22:26656"
 ```
 
-## app.toml changes
+### app.toml changes
 
 ```toml
 minimum-gas-prices = "0uumee"
