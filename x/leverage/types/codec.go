@@ -34,6 +34,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBorrow{}, "umee/leverage/MsgBorrow", nil)
 	cdc.RegisterConcrete(&MsgRepay{}, "umee/leverage/MsgRepay", nil)
 	cdc.RegisterConcrete(&MsgLiquidate{}, "umee/leverage/MsgLiquidate", nil)
+	cdc.RegisterConcrete(&UpdateRegistryProposal{}, "umee/leverage/UpdateRegistryProposal", nil)
 	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
 	cdc.RegisterConcrete(&MsgSupplyCollateral{}, "umee/leverage/MsgSupplyCollateral", nil)
 }
