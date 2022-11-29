@@ -1,0 +1,21 @@
+syntax = "proto3";
+package umee.leverage.v1;
+
+import "gogoproto/gogo.proto";
+import "umee/leverage/v1/leverage.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// UpdateRegistryProposal is DEPRECATED.
+// We will keep the proto so old proposals are readable.
+message UpdateRegistryProposal {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+
+  string         title       = 1;
+  string         description = 2;
+  repeated Token registry    = 3 [(gogoproto.nullable) = false];
+}
