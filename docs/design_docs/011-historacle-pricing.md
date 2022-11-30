@@ -5,6 +5,7 @@
 - Nov 09, 2022: Initial feature description (@adamewozniak)
 - Nov 14, 2022: Additional scenario description (@brentxu)
 - Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
+- Nov 28, 2022: Remove AcceptList functionality & Add Median Stamps (@adamewozniak)
 
 ## Status
 
@@ -34,21 +35,39 @@ Historacle pricing will provide an API for the leverage module to tell when pric
 
 ## Specification
 
-We define three epoch periods, during which additional computation will be performed:
-- `Stamp Period`: duration during which the `x/oracle` module will now "stamp" the set of exchange rates in the state machine until a `Pruning Period` has passed (30 days).
-- `Pruning Period`: duration after which the `x/oracle` module will begin to prune expired historic prices.
-- `Median Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
-
 These values are stored in state in order to avoid the `x/leverage` module from having to calculate them while making decisions around allowable positions for users to take.
 
-Also, there will be an `AssetList` for assets which will use this protection methodology (mainly manipulatable assets). Any assets not on this list will not be stamped.
+### Epochs
+
+We define two epoch periods, during which additional computation will be performed:
+
+- `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Price Stamps` is met.
+- `Median Stamp Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
+
+### Maximums
+
+We define two Maximum values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
+
+- `Maximum Price Stamps`: The maximum amount of `Price Stamps` we will store. Prices will be pruned via FIFO.
+- `Maximum Median Stamps`: The maximum amount of `Median Stamps` and Standard Deviations we will store for each asset. Medians will be pruned via FIFO.
+
+### Historic Data Table
+
+| Name           | Description                                                          | How often it is recorded      | When it is pruned                     |
+| -------------- | -------------------------------------------------------------------- | ----------------------------- | ------------------------------------  |
+| `Price Stamp`  | A price for an asset recorded at a given block                       | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
+| `Median Stamp` | Of a given asset & block, the median of the stored `Price Stamps`    | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
 
 ### Proposed API
 
-The `x/leverage` module will have access to the following `keeper` functions from the `x/oracle` module:
+Modules will have access to the following `keeper` functions from the `x/oracle` module:
+
 - `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
 - `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
-- `IsHistoricAsset(denom string) bool`, returns `true` if `denom` is a historacle asset, and returns `false` if it is not.
+- `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
+- `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
+- `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
+- `MinMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
 
 ### Outcomes
 
@@ -96,7 +115,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 
 ## Comments
 
-Originally a 24-hour median was thought to be effective enough to defend against this type of attack, but our modeling shows that we would need 30 days for adequate protection.
+Currently we are planning on keeping the last 6 hours or so of medians, and a longer historic price period. This implementation is meant to be agnostic, so that the `Maximum Medians` and the `Maximum Historic Prices` have no relative constraints.
 
 ### Additional Attack Scenario
 
@@ -114,8 +133,8 @@ Alternatively, the Attacker can also dump the price of FOO and withdraw their US
 
 Where we define:
 
-> `Amount of Active Whitelisted Exchange Rates` = *ER*
-> `Amount of Historic Prices` = *H*
+> `Amount of Active Exchange Rates` = *ER*
+> `Amount of Price Stamps` = *PS*
 > `Sorting algorithm` = *Sort*
 
 
@@ -124,15 +143,15 @@ Each `Stamp Period`, we will :
 1. Iterate over `Historic Prices`, and prune any which are past `Pruning Period`.
 2. Iterate over the current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of `ExchangeRate`
 
-> *H* + 2*ER* + 1
+> *PS* + 2*ER* + 1
 
 Each `Median Period`, we will :
 
-- For each `Active Exchange Rate`, iterate over the historic prices and sort by ExchangeRate
+- For each `Active Exchange Rate`, iterate over the price stamps and sort by ExchangeRate
 - Find the `Median`, and store it in state
 - Find the `Standard Deviation around the Median`, and store it in state
 
- Given a standard deviation where we have the median of each denom, find the square of each historic price's distance from the median, sum those values up, and average them:
+ Given a standard deviation where we have the median of each denom, find the square of each price stamp's distance from the median, sum those values up, and average them:
 
 > *STD* = *ER*(2*H* + 2)
 
