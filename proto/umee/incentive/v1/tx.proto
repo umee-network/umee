@@ -1,0 +1,134 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "umee/incentive/v1/incentive.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/incentive";
+
+// Msg defines the x/incentive module's Msg service.
+service Msg {
+  // Claim defines a method for claiming any pending incentive rewards.
+  rpc Claim(MsgClaim) returns (MsgClaimResponse);
+
+  // Bond defines a method for bonding uToken collateral into reward tier.
+  rpc Bond(MsgBond) returns (MsgBondResponse);
+
+  // BeginUnbonding defines a method for starting to unbond uToken collateral.
+  rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
+
+  // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
+  rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
+
+  // GovSetParams is used by governance proposals to update parameters.
+  rpc GovSetParams(MsgGovSetParams) returns (MsgGovSetParamsResponse);
+
+  // GovCreateProgram is used by governance proposals to create (but not fund) an incentive program.
+  rpc GovCreateProgram(MsgGovCreateProgram) returns (MsgGovCreateProgramResponse);
+
+  // GovCreateAndSponsorProgram is used by governance proposals to create and fund an incentive program.
+  rpc GovCreateAndSponsorProgram(MsgGovCreateAndSponsorProgram) returns (MsgGovCreateAndSponsorProgramResponse);
+}
+
+// MsgClaim represents a account's request to claim pending rewards.
+message MsgClaim {
+  string account = 1;
+}
+
+// MsgClaimResponse defines the Msg/Claim response type.
+message MsgClaimResponse {
+  repeated cosmos.base.v1beta1.Coin amount = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgBond represents a account's request to bond uToken collateral.
+message MsgBond {
+  string                   account = 1;
+  uint32                   tier    = 2;
+  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgBondResponse defines the Msg/Lock response type.
+message MsgBondResponse {}
+
+// MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
+message MsgBeginUnbonding {
+  string                   account = 1;
+  uint32                   tier    = 2;
+  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.
+message MsgBeginUnbondingResponse {}
+
+// MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
+// The program must have been passed by governance, not yet started, and not yet funded.
+// Funded assets must be the full amount required by the program.
+message MsgSponsor {
+  string                   sponsor = 1;
+  uint32                   program = 2;
+  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSponsorResponse defines the Msg/Sponsor response type.
+message MsgSponsorResponse {}
+
+// MsgGovSetParams is used by governance to update module parameters.
+message MsgGovSetParams {
+  option (gogoproto.equal)           = true;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer)      = "authority";
+
+  // authority is the address of the governance account.
+  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title       = 2;
+  string description = 3;
+  Params params      = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgGovSetParamsResponse defines the Msg/SetParams response type.
+message MsgGovSetParamsResponse {}
+
+// MsgGovCreateProgram is used by governance to create an incentive program.
+message MsgGovCreateProgram {
+  option (gogoproto.equal)           = true;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer)      = "authority";
+
+  // authority is the address of the governance account.
+  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string           title       = 2;
+  string           description = 3;
+  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgGovCreateProgramResponse defines the Msg/CreateProgram response type.
+message MsgGovCreateProgramResponse {}
+
+// MsgGovCreateAndSponsorProgram is used by governance to create an incentive program
+// and fund it in the same transaction. The sponsor address should be the community
+// fund or an agreed upon account - program reward funds will be taken from that address
+// when the incentive program passes governance.
+message MsgGovCreateAndSponsorProgram {
+  option (gogoproto.equal)           = true;
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer)      = "authority";
+
+  // authority is the address of the governance account.
+  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string           title       = 2;
+  string           description = 3;
+  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+
+  // sponsor is the address of the community fund or an account from which program rewards will be taken.
+  // it should not be a module account.
+  string sponsor = 5;
+}
+
+// MsgGovCreateAndSponsorProgramResponse defines the Msg/CreateAndSponsorProgram response type.
+message MsgGovCreateAndSponsorProgramResponse {}

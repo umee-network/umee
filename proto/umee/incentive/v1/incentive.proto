@@ -1,0 +1,86 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/incentive";
+
+// Params defines the parameters for the incentive module.
+message Params {
+  option (gogoproto.equal) = true;
+
+  // max_unbondings defines the maximum amount of concurrent unbondings an address can have.
+  uint32 max_unbondings = 1;
+
+  // unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.
+  uint64 unbonding_duration_long = 2;
+
+  // unbonding_duration_middle defines the unbonding duration (in seconds) of the middle tier.
+  uint64 unbonding_duration_middle = 3;
+
+  // unbonding_duration_short defines the unbonding duration (in seconds) of the short tier.
+  uint64 unbonding_duration_short = 4;
+
+  // The tier_weight_short defines how the proportion of rewards assets locked
+  // in the short unbonding duration receive compared to what the same amount
+  // would receive on the long tier.
+  // valid values: [0;1]
+  string tier_weight_short = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // The tier_weight_middle defines how the proportion of rewards assets locked
+  // in the middle unbonding duration receive compared to what the same amount
+  // would receive on the long tier.
+  // valid values: [0;1]
+  string tier_weight_middle = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// IncentiveProgram defines a liquidity mining incentive program on a single
+// locked uToken denom that will run for a set amount of time.
+message IncentiveProgram {
+  option (gogoproto.equal) = true;
+
+  // ID uniquely identifies the incentive program after it has been created.
+  // It is zero when the program is being proposed by governance.
+  uint32 id = 1;
+
+  // start_time is the unix time (in seconds) at which the incentives begin.
+  uint64 start_time = 2;
+
+  // duration is the length of the incentive program in seconds.
+  uint64 duration = 3;
+
+  // denom is the incentivized uToken collateral.
+  string denom = 4;
+
+  // total_rewards are total amount of rewards which can be distributed to
+  // suppliers by this program. This is set to its final value when the program
+  // is proposed by governance.
+  cosmos.base.v1beta1.Coin total_rewards = 5 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // funded_rewards are total amount of rewards which have been funded by a
+  // sponsor to this program. This is zero until the program is both passed
+  // by governance and funded.
+  cosmos.base.v1beta1.Coin funded_rewards = 6 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+
+  // remaining_rewards are total amount of this program's funded rewards
+  // which have not yet been allocated to suppliers. This is zero until the
+  // program is both passed by governance and funded, then begins decreasing
+  // to zero as the program runs to completion.
+  cosmos.base.v1beta1.Coin remaining_rewards = 7 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
