@@ -27,12 +27,6 @@ func NewMsgUpdateRegistry(authority, title, description string, updateTokens, ad
 	}
 }
 
-// GetTitle returns the title of the proposal.
-func (msg *MsgGovUpdateRegistry) GetTitle() string { return msg.Title }
-
-// GetDescription returns the description of the proposal.
-func (msg *MsgGovUpdateRegistry) GetDescription() string { return msg.Description }
-
 // Type implements Msg
 func (msg MsgGovUpdateRegistry) Type() string { return sdk.MsgTypeURL(&msg) }
 
