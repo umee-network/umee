@@ -19,16 +19,16 @@ message GenesisState {
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  repeated BondAmount        bond_amounts        = 8 [(gogoproto.nullable) = false];
+  repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
   repeated PendingReward     pending_rewards     = 9 [(gogoproto.nullable) = false];
   repeated RewardBasis       reward_bases        = 10 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 11 [(gogoproto.nullable) = false];
   repeated Unbonding         unbondings          = 12 [(gogoproto.nullable) = false];
 }
 
-// BondAmount tracks the amount of coins of one uToken denomination bonded to a
+// Bond tracks the amount of coins of one uToken denomination bonded to a
 // given reward tier by a single account.
-message BondAmount {
+message Bond {
   string                   account = 1;
   uint32                   tier    = 2;
   cosmos.base.v1beta1.Coin amount  = 3 [(gogoproto.nullable) = false];
