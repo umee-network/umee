@@ -113,6 +113,7 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 				if timePeriod < candle.TimeStamp {
 					// timeDiff = now - candle.TimeStamp
 					timeDiff := sdk.NewDec(now - candle.TimeStamp)
+					// set minimum candle volume for low-trading assets
 					if candle.Volume.Equal(sdk.ZeroDec()) {
 						candle.Volume = minimumCandleVolume
 					}
