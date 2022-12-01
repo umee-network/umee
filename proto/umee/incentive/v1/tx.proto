@@ -21,6 +21,7 @@ service Msg {
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
 
   // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
+  // In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
   rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
 
   // GovSetParams is used by governance proposals to update parameters.
