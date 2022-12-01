@@ -1,6 +1,6 @@
 # Canon-2
 
-Canon-2 is a long-running testnet mirroring mainnet functionality. We use it also as the last test before the mainnet upgrade for the next major version.
+Canon-2 is a long-running testnet mirroring mainnet functionality. We use it also as the last test before mainnet when doing chain upgrades.
 
 `canon-1` was created by stepping through the same upgrade process as
 mainnet (1.0 -> 1.1 -> 3.0) however the v3.0 update introduced consensus bug and we had to start the testnet from scratch.
@@ -38,6 +38,8 @@ grpc.sapphire.canon-2.network.umee.cc
 Note: Additional steps required to become a validator
 
 ### config.toml changes
+
+(Trusted height and hash should be replaced with a more recent block when syncing - usually the last multiple of `10000`)
 
 ```toml
 [mempool]
