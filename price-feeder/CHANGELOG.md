@@ -44,11 +44,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [Unreleased]
+## [v2.0.1](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.1) 2022-12-01
 
 ### Bugs
 
 - [1615](https://github.com/umee-network/umee/pull/1615) Parse multiple candles from OsmosisV2 response
+- [1635](https://github.com/umee-network/umee/pull/1635) Vote on exchange rates even if one is missing.
+- [1634](https://github.com/umee-network/umee/pull/1634) Add minimum candle volume for low-trading assets.
 
 ### Improvements
 
