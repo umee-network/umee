@@ -6,6 +6,7 @@
 - Nov 14, 2022: Additional scenario description (@brentxu)
 - Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
 - Nov 28, 2022: Remove AcceptList functionality & Add Median Stamps (@adamewozniak)
+- Dec 1, 2022: Update computation (@robert-zaremba)
 
 ## Status
 
@@ -42,7 +43,7 @@ These values are stored in state in order to avoid the `x/leverage` module from 
 We define two epoch periods, during which additional computation will be performed:
 
 - `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Price Stamps` is met.
-- `Median Stamp Period`: will determine how often the Median and the `Standard Deviation around the Median` are calculated, which will also be stored in the state machine.
+- `Median Stamp Period`: will determine how often the Median and the Standard Deviations around the Median are calculated, which will also be stored in the state machine.
 
 ### Maximums
 
@@ -53,18 +54,18 @@ We define two Maximum values, which correspond to the most we will store of a me
 
 ### Historic Data Table
 
-| Name           | Description                                                          | How often it is recorded      | When it is pruned                     |
-| -------------- | -------------------------------------------------------------------- | ----------------------------- | ------------------------------------  |
-| `Price Stamp`  | A price for an asset recorded at a given block                       | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
-| `Median Stamp` | Of a given asset & block, the median of the stored `Price Stamps`    | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
+| Name           | Description                                                       | How often it is recorded      | When it is pruned                     |
+| -------------- | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------- |
+| `Price Stamp`  | A price for an asset recorded at a given block                    | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
+| `Median Stamp` | Of a given asset & block, the median of the stored `Price Stamps` | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
 
 ### Proposed API
 
 Modules will have access to the following `keeper` functions from the `x/oracle` module:
 
-- `HistoricMedian(denom) (sdk.Dec, error)` returns the median price of an asset in the last `Pruning Period`
-- `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the `Standard Deviation around the Median`.
-- `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`.
+- `HistoricMedian(denom) ([]sdk.Dec, error)` returns list median prices of an asset in the last `Pruning Period`
+- `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the Standard Deviation around the Median.
+- `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`. TODO: what does it mean "within the past blockNum"?
 - `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
 - `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
 - `MinMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
@@ -103,6 +104,7 @@ This will not introduce a new module, and it is relatively backwards compatible.
 - We can continue listing low-volume assets for collateral.
 - Use of an existing module rather than creating a new one.
 - Protects against "borrowing + price dump" attacks which are not prevented by disabling low-volume asset collateral
+- Storing multiple amount of medians allow clients to do their own calculation: average of medians, median of medians ...
 
 ### Negative
 
@@ -133,31 +135,31 @@ Alternatively, the Attacker can also dump the price of FOO and withdraw their US
 
 Where we define:
 
-> `Amount of Active Exchange Rates` = *ER*
-> `Amount of Price Stamps` = *PS*
-> `Sorting algorithm` = *Sort*
+- `ER` = amount of Active Exchange Rates
+- `PS` = amount of Price Stamps
+- `D` = amount of denoms
 
+At the end of each `Stamp Period`, we will :
 
-Each `Stamp Period`, we will :
+1. Prune `Historic Prices` (Median, Avg, ...) any which are past `Pruning Period`.
+1. Collect current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of TVWAP `ExchangeRate` (of that denom).
+1. Prune exchange rates.
 
-1. Iterate over `Historic Prices`, and prune any which are past `Pruning Period`.
-2. Iterate over the current set of exchange rates, and copy them into the state with a key of `{Denom}{Block}` and value of `ExchangeRate`
+Complexity: `D*(PS*(pruning_period/stamp_period) + 2*ER + 1)`
 
-> *PS* + 2*ER* + 1
+At the end of each `Median Period`, we will :
 
-Each `Median Period`, we will :
+- For each Denom, collect and sort price stamps.
+- Find Median, and store it in state.
+- Compute Standard Deviation around the Median, and store it in state.
 
-- For each `Active Exchange Rate`, iterate over the price stamps and sort by ExchangeRate
-- Find the `Median`, and store it in state
-- Find the `Standard Deviation around the Median`, and store it in state
+Given a standard deviation where we have the median of each denom, find the square of each price stamp's distance from the median, sum those values up, and average them:
 
- Given a standard deviation where we have the median of each denom, find the square of each price stamp's distance from the median, sum those values up, and average them:
-
-> *STD* = *ER*(2*H* + 2)
+> _STD_ = _ER_(2*H* + 2)
 
 The cost of the `Median Period` is:
 
-> (*ER* x *Sort*(*HP*) + 4) + (*ER* x *STD*)
+> (_ER_ x _Sort_(_HP_) + 4) + (_ER_ x _STD_)
 
 ## References
 
