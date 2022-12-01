@@ -130,6 +130,13 @@ func ComputeLiquidation(
 	// Start with the maximum possible repayment amount, as a decimal
 	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
+
+	//
+	//
+	// TODO 1: uses repay / reward (base), so can be improved
+	//
+	//
+
 	maxReward := maxRepay.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
@@ -145,7 +152,14 @@ func ComputeLiquidation(
 
 	// We will track limiting factors by the ratio by which the max repayment would need to be reduced to comply
 	ratio := sdk.OneDec()
-	// Repaid value cannot exceed borrowed value times close factor
+	// Repaid value cannot exceed borrowed value times close factor.
+
+	//
+	//
+	// TODO 2: This needs adjustment against rounding
+	//
+	//
+
 	ratio = sdk.MinDec(ratio,
 		borrowedValue.Mul(closeFactor).Quo(maxRepay.Mul(repayTokenPrice)),
 	)
