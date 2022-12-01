@@ -35,15 +35,15 @@ base = "ETH"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "2"
+base = "WBTC"
+threshold = "1.5"
 
 [[currency_pairs]]
 base = "UMEE"
 providers = [
   "okx",
   "gate",
-  "mexc"
+  "mexc",
 ]
 quote = "USDT"
 
@@ -81,15 +81,6 @@ providers = [
 quote = "USDT"
 
 [[currency_pairs]]
-base = "CRO"
-providers = [
-  "okx",
-  "bitget",
-  "huobi",
-]
-quote = "USDT"
-
-[[currency_pairs]]
 base = "DAI"
 providers = [
   "okx",
@@ -108,7 +99,6 @@ quote = "USD"
 [[currency_pairs]]
 base = "ETH"
 providers = [
-  "binance",
   "okx",
   "bitget",
 ]
@@ -125,8 +115,8 @@ quote = "USD"
 base = "WBTC"
 providers = [
   "okx",
-  "mexc",
   "bitget",
+  "crypto",
 ]
 quote = "USDT"
 
