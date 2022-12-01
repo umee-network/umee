@@ -51,7 +51,7 @@ func (m *mockOracleKeeper) Reset() {
 	m.baseExchangeRates = map[string]sdk.Dec{
 		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
 		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
-		daiDenom:            sdk.MustNewDecFromStr("0.00003938"),
+		daiDenom:            sdk.MustNewDecFromStr("0.000000000000000001"),
 	}
 }
 
