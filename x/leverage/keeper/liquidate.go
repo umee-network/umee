@@ -62,11 +62,11 @@ func (k Keeper) getLiquidationAmounts(
 	)
 
 	// get oracle prices for the reward and repay denoms
-	repayTokenPrice, err := k.TokenPrice(ctx, repayDenom)
+	repayTokenPrice, err := k.TokenBasePrice(ctx, repayDenom)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	rewardTokenPrice, err := k.TokenPrice(ctx, rewardDenom)
+	rewardTokenPrice, err := k.TokenBasePrice(ctx, rewardDenom)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

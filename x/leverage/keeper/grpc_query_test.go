@@ -36,12 +36,12 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
 	require.NoError(err)
 
-	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
+	oracleSymbolPrice := sdk.MustNewDecFromStr("4.21")
 
 	expected := types.QueryMarketSummaryResponse{
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
-		OraclePrice:            &oraclePrice,
+		OraclePrice:            &oracleSymbolPrice,
 		UTokenExchangeRate:     sdk.OneDec(),
 		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
 		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),

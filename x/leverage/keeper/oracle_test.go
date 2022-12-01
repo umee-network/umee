@@ -10,12 +10,14 @@ import (
 )
 
 type mockOracleKeeper struct {
-	exchangeRates map[string]sdk.Dec
+	baseExchangeRates   map[string]sdk.Dec
+	symbolExchangeRates map[string]sdk.Dec
 }
 
 func newMockOracleKeeper() *mockOracleKeeper {
 	m := &mockOracleKeeper{
-		exchangeRates: make(map[string]sdk.Dec),
+		baseExchangeRates:   make(map[string]sdk.Dec),
+		symbolExchangeRates: make(map[string]sdk.Dec),
 	}
 	m.Reset()
 
@@ -23,7 +25,7 @@ func newMockOracleKeeper() *mockOracleKeeper {
 }
 
 func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
-	p, ok := m.exchangeRates[denom]
+	p, ok := m.symbolExchangeRates[denom]
 	if !ok {
 		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
 	}
@@ -32,36 +34,60 @@ func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec
 }
 
 func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	p, err := m.GetExchangeRate(ctx, denom)
-	if err != nil {
-		return sdk.ZeroDec(), err
+	p, ok := m.baseExchangeRates[denom]
+	if !ok {
+		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
 	}
 
-	// assume 10^6 for the base denom
-	return p.Quo(sdk.MustNewDecFromStr("1000000.00")), nil
+	return p, nil
 }
 
 func (m *mockOracleKeeper) Reset() {
-	m.exchangeRates = map[string]sdk.Dec{
-		appparams.BondDenom: sdk.MustNewDecFromStr("4.21"),
-		atomDenom:           sdk.MustNewDecFromStr("39.38"),
+	m.symbolExchangeRates = map[string]sdk.Dec{
+		"UMEE": sdk.MustNewDecFromStr("4.21"),
+		"ATOM": sdk.MustNewDecFromStr("39.38"),
+		"DAI":  sdk.MustNewDecFromStr("1.00"),
+	}
+	m.baseExchangeRates = map[string]sdk.Dec{
+		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
+		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
+		daiDenom:            sdk.MustNewDecFromStr("0.00003938"),
 	}
 }
 
-func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
+func (s *IntegrationTestSuite) TestOracle_TokenBasePrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	p, err := app.LeverageKeeper.TokenPrice(ctx, appparams.BondDenom)
+	p, err := app.LeverageKeeper.TokenBasePrice(ctx, appparams.BondDenom)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.00000421"), p)
 
-	p, err = app.LeverageKeeper.TokenPrice(ctx, atomDenom)
+	p, err = app.LeverageKeeper.TokenBasePrice(ctx, atomDenom)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.00003938"), p)
 
-	p, err = app.LeverageKeeper.TokenPrice(ctx, "foo")
+	p, err = app.LeverageKeeper.TokenBasePrice(ctx, "foo")
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
+}
+
+func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	p, e, err := app.LeverageKeeper.TokenSymbolPrice(ctx, appparams.BondDenom)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenSymbolPrice(ctx, atomDenom)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("39.38"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenSymbolPrice(ctx, "foo")
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
+	require.Equal(sdk.ZeroDec(), p)
+	require.Equal(uint32(0), e)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TokenValue() {

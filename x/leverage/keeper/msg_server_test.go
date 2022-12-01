@@ -10,8 +10,8 @@ import (
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	registeredUmee := fixtures.Token("uumee", "UMEE")
-	newTokens := fixtures.Token("uabcd", "ABCD")
+	registeredUmee := fixtures.Token("uumee", "UMEE", 6)
+	newTokens := fixtures.Token("uabcd", "ABCD", 6)
 
 	testCases := []struct {
 		name      string
@@ -26,7 +26,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,
@@ -95,7 +95,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 
 func (s *IntegrationTestSuite) TestUpdateRegistry() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	modifiedUmee := fixtures.Token("uumee", "UMEE")
+	modifiedUmee := fixtures.Token("uumee", "UMEE", 6)
 	modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
 
 	testCases := []struct {
@@ -111,7 +111,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,
@@ -124,7 +124,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,

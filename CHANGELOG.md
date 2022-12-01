@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Increases price calculation precision for high exponent assets.
+
 ## [v3.2.0](https://github.com/umee-network/umee/releases/tag/v3.2.0) - 2022-11-25
 
 Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.

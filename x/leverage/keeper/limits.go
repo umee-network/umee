@@ -40,7 +40,7 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 
 	// determine the amount of uTokens which would be required to reach maxValue
 	tokenDenom := types.ToTokenDenom(denom)
-	tokenPrice, err := k.TokenPrice(ctx, tokenDenom)
+	tokenPrice, err := k.TokenBasePrice(ctx, tokenDenom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
