@@ -35,8 +35,8 @@ Please check [Supported Platforms](https://github.com/CosmWasm/wasmvm/tree/v1.1.
 
 ### Update instructions
 
-- Note: Skip this step if you build binary from source 
-    - Download `libwasmvm` 
+- Note: Skip this step if you build binary from source
+  - Download `libwasmvm`
 ```bash
 $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
 ```
