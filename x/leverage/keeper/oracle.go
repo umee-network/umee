@@ -38,8 +38,8 @@ func (k Keeper) TokenBasePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, erro
 	return price, nil
 }
 
-// TokenSymbolPrice returns the USD value of a token. Note, the token's denomination
-// must be the symbol denomination, e.g. UMEE. When error is nil, price is guaranteed
+// TokenSymbolPrice returns the USD value of a token. Note, the input denom must
+// still be the base denomination, e.g. uumee. When error is nil, price is guaranteed
 // to be positive. Also returns the token's exponent to reduce redundant registry reads.
 func (k Keeper) TokenSymbolPrice(ctx sdk.Context, baseDenom string) (sdk.Dec, uint32, error) {
 	t, err := k.GetTokenSettings(ctx, baseDenom)
