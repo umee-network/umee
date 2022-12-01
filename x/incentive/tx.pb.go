@@ -322,6 +322,7 @@ var xxx_messageInfo_MsgBeginUnbondingResponse proto.InternalMessageInfo
 // The program must have been passed by governance, not yet started, and not yet funded.
 // Funded assets must be the full amount required by the program.
 type MsgSponsor struct {
+	// Sponsor bech32 account address
 	Sponsor string     `protobuf:"bytes,1,opt,name=sponsor,proto3" json:"sponsor,omitempty"`
 	Program uint32     `protobuf:"varint,2,opt,name=program,proto3" json:"program,omitempty"`
 	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
@@ -727,6 +728,7 @@ type MsgClient interface {
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
+	// In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.CallOption) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error)
@@ -805,6 +807,7 @@ type MsgServer interface {
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
+	// In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(context.Context, *MsgSponsor) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(context.Context, *MsgGovSetParams) (*MsgGovSetParamsResponse, error)
