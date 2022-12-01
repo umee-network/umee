@@ -43,7 +43,7 @@ base = "UMEE"
 providers = [
   "okx",
   "gate",
-  "mexc"
+  "mexc",
 ]
 quote = "USDT"
 
@@ -99,7 +99,6 @@ quote = "USD"
 [[currency_pairs]]
 base = "ETH"
 providers = [
-  "binance",
   "okx",
   "bitget",
 ]
@@ -116,8 +115,8 @@ quote = "USD"
 base = "WBTC"
 providers = [
   "okx",
-  "mexc",
   "bitget",
+  "crypto",
 ]
 quote = "USDT"
 
