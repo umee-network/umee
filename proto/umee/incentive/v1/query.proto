@@ -26,7 +26,7 @@ service Query {
   // Bonded queries all bonded collateral uTokens associated with an account.
   rpc Bonded(QueryBonded)
       returns (QueryBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/bonded";
+    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}";
   }
 
   // Unbondings queries all current uToken unbondings associated with an account.
