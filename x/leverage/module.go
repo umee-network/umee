@@ -155,7 +155,6 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 // RegisterInvariants registers the x/leverage module's invariants.
@@ -186,7 +185,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/leverage module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return EndBlocker(ctx, am.keeper, am.govKeeper)
+	return EndBlocker(ctx, am.keeper)
 }
 
 // WeightedOperations returns the all the leverage module operations with their respective weights.
