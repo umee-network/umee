@@ -341,7 +341,7 @@ func (m *UpdateRegistryProposal) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Registry = append(m.Registry, Token{})
+			m.Registry = append(m.Registry, types.Token{})
 			if err := m.Registry[len(m.Registry)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}

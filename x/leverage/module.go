@@ -17,8 +17,11 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
+
 	"github.com/umee-network/umee/v3/x/leverage/client/cli"
 	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v3/x/leverage/migrations/mv2"
 	"github.com/umee-network/umee/v3/x/leverage/simulation"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -55,6 +58,7 @@ func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 // RegisterInterfaces registers the module's interface types.
 func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
+	mv2.RegisterInterfaces(reg)
 }
 
 // DefaultGenesis returns the x/leverage module's default genesis state.
@@ -105,14 +109,16 @@ type AppModule struct {
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	bankKeeper    bankkeeper.Keeper
+	govKeeper     govkeeper.Keeper
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk bankkeeper.Keeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk bankkeeper.Keeper, gk govkeeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 		accountKeeper:  ak,
 		bankKeeper:     bk,
+		govKeeper:      gk,
 	}
 }
 
@@ -144,6 +150,12 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+
+	err := cfg.RegisterMigration(types.ModuleName, 1, mv2.Migrator1to2(am.govKeeper))
+	if err != nil {
+		panic(err)
+	}
+
 }
 
 // RegisterInvariants registers the x/leverage module's invariants.
@@ -174,7 +186,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/leverage module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return EndBlocker(ctx, am.keeper)
+	return EndBlocker(ctx, am.keeper, am.govKeeper)
 }
 
 // WeightedOperations returns the all the leverage module operations with their respective weights.

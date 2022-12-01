@@ -1,6 +1,8 @@
 package mv2
 
 import (
+	"encoding/json"
+
 	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
@@ -8,7 +10,10 @@ import (
 var _ gov1b1.Content = &UpdateRegistryProposal{}
 
 // String implements the Stringer interface.
-func (p UpdateRegistryProposal) String() string { return "not needed" }
+func (p UpdateRegistryProposal) String() string {
+	b, _ := json.Marshal(p)
+	return string(b)
+}
 
 // GetTitle returns the title of the proposal.
 func (p *UpdateRegistryProposal) GetTitle() string { return p.Title }
