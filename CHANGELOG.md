@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) MarketSummary query now displays symbol price instead of base price for readability.
+
 ### Fixes
 
 - [XXXX](https://github.com/umee-network/umee/pull/XXXX) Increases price calculation precision for high exponent assets.
