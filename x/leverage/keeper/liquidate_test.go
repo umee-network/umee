@@ -40,12 +40,14 @@ func TestComputeLiquidation(t *testing.T) {
 	}
 
 	runTestCase := func(tc testCase, expectedRepay, expectedCollateral, expectedReward int64, msg string) {
+		priceRatio := tc.repayTokenPrice.Quo(tc.rewardTokenPrice)
 		repay, collateral, reward := keeper.ComputeLiquidation(
 			tc.availableRepay,
 			tc.availableCollateral,
 			tc.availableReward,
 			tc.repayTokenPrice,
 			tc.rewardTokenPrice,
+			priceRatio,
 			tc.uTokenExchangeRate,
 			tc.liquidationIncentive,
 			tc.closeFactor,
@@ -175,7 +177,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustUp.repayTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveCollateralDustUp.rewardTokenPrice = sdk.MustNewDecFromStr("40.1")
 	expensiveCollateralDustUp.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveCollateralDustUp, 21, 1, 1, "expensive collateral dust with price up")
+	runTestCase(expensiveCollateralDustUp, 21, 0, 0, "expensive collateral dust with price up")
 
 	// collateral dust case, with high collateral token value rounds required repayment up
 	expensiveCollateralDustDown := baseCase()
@@ -183,7 +185,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustDown.repayTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveCollateralDustDown.rewardTokenPrice = sdk.MustNewDecFromStr("39.9")
 	expensiveCollateralDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveCollateralDustDown, 20, 1, 1, "expensive collateral dust with price down")
+	runTestCase(expensiveCollateralDustDown, 20, 0, 0, "expensive collateral dust with price down")
 
 	// collateral dust case, with low collateral token value rounds required repayment up
 	cheapCollateralDust := baseCase()

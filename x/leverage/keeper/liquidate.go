@@ -71,6 +71,12 @@ func (k Keeper) getLiquidationAmounts(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
+	// get more precise (less rounding at high exponent) price ratio
+	priceRatio, err := k.PriceRatio(ctx, repayDenom, rewardDenom)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
+
 	// get collateral uToken exchange rate
 	exchangeRate := k.DeriveExchangeRate(ctx, rewardDenom)
 
@@ -89,6 +95,7 @@ func (k Keeper) getLiquidationAmounts(
 		k.AvailableLiquidity(ctx, rewardDenom),
 		repayTokenPrice,
 		rewardTokenPrice,
+		priceRatio,
 		exchangeRate,
 		liqudationIncentive,
 		closeFactor,
@@ -107,6 +114,7 @@ func (k Keeper) getLiquidationAmounts(
 // - availableReward: The amount of unreserved reward tokens in the module balance
 // - repayTokenPrice: The oracle price of the base repayment denom
 // - rewardTokenPrice: The oracle price of the base reward denom
+// - priceRatio: The less rounded ratio of repay / reward, which is used when computing rewards
 // - uTokenExchangeRate: The uToken exchange rate from collateral uToken denom to reward base denom
 // - liquidationIncentive: The liquidation incentive of the token reward denomination
 // - closeFactor: The dynamic close factor computed from the borrower's borrowed value and liquidation threshold
@@ -117,6 +125,7 @@ func ComputeLiquidation(
 	availableReward sdkmath.Int,
 	repayTokenPrice,
 	rewardTokenPrice,
+	priceRatio,
 	uTokenExchangeRate,
 	liquidationIncentive,
 	closeFactor,
@@ -131,13 +140,7 @@ func ComputeLiquidation(
 	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
 
-	//
-	//
-	// TODO 1: uses repay / reward (base), so can be improved
-	//
-	//
-
-	maxReward := maxRepay.Mul(repayTokenPrice).Mul(sdk.OneDec().Add(liquidationIncentive)).Quo(rewardTokenPrice)
+	maxReward := maxRepay.Mul(priceRatio).Mul(sdk.OneDec().Add(liquidationIncentive))
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
