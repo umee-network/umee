@@ -20,7 +20,7 @@ service Query {
   // PendingRewards queries unclaimed incentive rewards associated with an account.
   rpc PendingRewards(QueryPendingRewards)
       returns (QueryPendingRewardsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/pending_rewards";
+    option (google.api.http).get = "/umee/incentive/v1/pending_rewards/{address}";
   }
 
   // Bonded queries all bonded collateral uTokens associated with an account.
