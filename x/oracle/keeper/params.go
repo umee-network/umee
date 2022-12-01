@@ -45,25 +45,6 @@ func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }
 
-// HistoricAcceptList returns the list of assets whose historic prices and
-// medians are getting tracked.
-func (k Keeper) HistoricAcceptList(ctx sdk.Context) (res types.DenomList) {
-	k.paramSpace.Get(ctx, types.KeyHistoricAcceptList, &res)
-	return
-}
-
-// IsHistoricAsset returns whether or not a given denom is being tracked as
-// a historic asset.
-func (k Keeper) IsHistoricAsset(ctx sdk.Context, denom string) bool {
-	return k.HistoricAcceptList(ctx).Contains(denom)
-}
-
-// SetHistoricAcceptList updates the the list of assets whose historic prices and
-// medians are getting tracked.
-func (k Keeper) SetHistoricAcceptList(ctx sdk.Context, historicAcceptList types.DenomList) {
-	k.paramSpace.Set(ctx, types.KeyHistoricAcceptList, historicAcceptList)
-}
-
 // SlashFraction returns oracle voting penalty rate
 func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
@@ -82,45 +63,56 @@ func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
-// StampPeriod returns the amount of blocks the oracle module waits
-// between recording a set of prices.
-func (k Keeper) StampPeriod(ctx sdk.Context) (res uint64) {
-	k.paramSpace.Get(ctx, types.KeyStampPeriod, &res)
+// HistoricStampPeriod returns the amount of blocks the oracle module waits
+// before recording a new historic price.
+func (k Keeper) HistoricStampPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyHistoricStampPeriod, &res)
 	return
 }
 
-// SetStampPeriod updates the amount of blocks the oracle module waits
-// between recording a set of prices.
-func (k Keeper) SetStampPeriod(ctx sdk.Context, stampPeriod uint64) {
-	k.paramSpace.Set(ctx, types.KeyStampPeriod, stampPeriod)
+// SetHistoricStampPeriod updates the amount of blocks the oracle module waits
+// before recording a new historic price.
+func (k Keeper) SetHistoricStampPeriod(ctx sdk.Context, historicPriceStampPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyHistoricStampPeriod, historicPriceStampPeriod)
 }
 
-// PrunePeriod returns the max amount of blocks that a record of the set
-// of exchanges is kept.
-func (k Keeper) PrunePeriod(ctx sdk.Context) (res uint64) {
-	k.paramSpace.Get(ctx, types.KeyPrunePeriod, &res)
+// MedianStampPeriod returns the amount blocks the oracle module waits between
+// calculating a new median and standard deviation of that median.
+func (k Keeper) MedianStampPeriod(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMedianStampPeriod, &res)
 	return
 }
 
-// SetPrunePeriod updates the max amount of blocks that a record of the set
-// of exchanges is kept.
-func (k Keeper) SetPrunePeriod(ctx sdk.Context, prunePeriod uint64) {
-	k.paramSpace.Set(ctx, types.KeyPrunePeriod, prunePeriod)
+// SetMedianStampPeriod updates the amount blocks the oracle module waits between
+// calculating a new median and standard deviation of that median.
+func (k Keeper) SetMedianStampPeriod(ctx sdk.Context, medianStampPeriod uint64) {
+	k.paramSpace.Set(ctx, types.KeyMedianStampPeriod, medianStampPeriod)
 }
 
-// MedianPeriod returns the amount blocks we will wait between calculating the
-// median and standard deviation of the median of historic prices in the
-// last Prune Period.
-func (k Keeper) MedianPeriod(ctx sdk.Context) (res uint64) {
-	k.paramSpace.Get(ctx, types.KeyMedianPeriod, &res)
+// MaximumMedianStamps returns the maximum amount of historic prices the oracle
+// module will hold.
+func (k Keeper) MaximumPriceStamps(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMaximumPriceStamps, &res)
 	return
 }
 
-// MedianPeriod updates the amount blocks we will wait between calculating the
-// median and standard deviation of the median of historic prices in the
-// last Prune Period.
-func (k Keeper) SetMedianPeriod(ctx sdk.Context, medianPeriod uint64) {
-	k.paramSpace.Set(ctx, types.KeyMedianPeriod, medianPeriod)
+// SetMaximumPriceStamps updates the the maximum amount of historic prices the
+// oracle module will hold.
+func (k Keeper) SetMaximumPriceStamps(ctx sdk.Context, maximumPriceStamps uint64) {
+	k.paramSpace.Set(ctx, types.KeyMaximumPriceStamps, maximumPriceStamps)
+}
+
+// MaximumMedianStamps returns the maximum amount of medians the oracle module will
+// hold.
+func (k Keeper) MaximumMedianStamps(ctx sdk.Context) (res uint64) {
+	k.paramSpace.Get(ctx, types.KeyMaximumMedianStamps, &res)
+	return
+}
+
+// SetMaximumMedianStamps updates the the maximum amount of medians the oracle module will
+// hold.
+func (k Keeper) SetMaximumMedianStamps(ctx sdk.Context, maximumMedianStamps uint64) {
+	k.paramSpace.Set(ctx, types.KeyMaximumMedianStamps, maximumMedianStamps)
 }
 
 // GetParams returns the total set of oracle parameters.

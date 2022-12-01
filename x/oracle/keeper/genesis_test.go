@@ -62,13 +62,13 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	}
 
 	for _, m := range medians {
-		keeper.SetMedian(ctx, m.Denom, m.ExchangeRate)
+		keeper.SetMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
 	}
 
-	newMedians := []types.ExchangeRateTuple{}
+	newMedians := []types.HistoricPrice{}
 	keeper.IterateAllMedianPrices(
 		ctx,
-		func(median types.ExchangeRateTuple) bool {
+		func(median types.HistoricPrice) bool {
 			newMedians = append(newMedians, median)
 			return false
 		},
@@ -78,8 +78,8 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 FOUND:
 	for _, oldMedian := range medians {
 		for _, newMedian := range newMedians {
-			if oldMedian.Denom == newMedian.Denom {
-				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRate)
+			if oldMedian.Denom == newMedian.ExchangeRateTuple.Denom {
+				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRateTuple.ExchangeRate)
 				continue FOUND
 			}
 		}
@@ -96,13 +96,13 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	}
 
 	for _, m := range medians {
-		keeper.SetMedianDeviation(ctx, m.Denom, m.ExchangeRate)
+		keeper.SetMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
 	}
 
-	newMedians := []types.ExchangeRateTuple{}
+	newMedians := []types.HistoricPrice{}
 	keeper.IterateAllMedianDeviationPrices(
 		ctx,
-		func(median types.ExchangeRateTuple) bool {
+		func(median types.HistoricPrice) bool {
 			newMedians = append(newMedians, median)
 			return false
 		},
@@ -112,8 +112,8 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 FOUND:
 	for _, oldMedian := range medians {
 		for _, newMedian := range newMedians {
-			if oldMedian.Denom == newMedian.Denom {
-				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRate)
+			if oldMedian.Denom == newMedian.ExchangeRateTuple.Denom {
+				s.Require().Equal(oldMedian.ExchangeRate, newMedian.ExchangeRateTuple.ExchangeRate)
 				continue FOUND
 			}
 		}

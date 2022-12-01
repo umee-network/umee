@@ -23,8 +23,8 @@ message GenesisState {
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [(gogoproto.nullable) = false];
   repeated HistoricPrice               historic_prices  = 8 [(gogoproto.nullable) = false];
-  repeated ExchangeRateTuple medians          = 7 [(gogoproto.nullable) = false];
-  repeated ExchangeRateTuple medianDeviations = 9 [(gogoproto.nullable) = false];
+  repeated HistoricPrice medians          = 7 [(gogoproto.nullable) = false];
+  repeated HistoricPrice medianDeviations = 9 [(gogoproto.nullable) = false];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

@@ -137,9 +137,19 @@ func TestParseDenomFromHistoricPriceKey(t *testing.T) {
 	require.Equal(t, denom, parsedDenom)
 }
 
+func TestParseBlockFromMedianKey(t *testing.T) {
+	denom := "umee"
+	blockNum := uint64(4567)
+	key := KeyHistoricPrice(denom, blockNum)
+
+	parsedBlockNum := ParseBlockFromMedianKey(key)
+	require.Equal(t, blockNum, parsedBlockNum)
+}
+
 func TestParseDenomFromMedianKey(t *testing.T) {
 	denom := "umee"
-	key := KeyMedian(denom)
+	blockNum := uint64(4567)
+	key := KeyMedian(denom, blockNum)
 
 	parsedDenom := ParseDenomFromMedianKey(key)
 	require.Equal(t, denom, parsedDenom)

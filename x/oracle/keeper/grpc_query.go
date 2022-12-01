@@ -265,15 +265,15 @@ func (q querier) Medians(
 	var medians sdk.DecCoins
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetMedian(ctx, req.Denom)
+		exchangeRate, err := q.HistoricMedian(ctx, req.Denom)
 		if err != nil {
 			return nil, err
 		}
 
 		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateAllMedianPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+		q.IterateAllMedianPrices(ctx, func(median types.HistoricPrice) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
 			return false
 		})
 	}
@@ -296,15 +296,15 @@ func (q querier) MedianDeviations(
 	var medians sdk.DecCoins
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetMedianDeviation(ctx, req.Denom)
+		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
 		if err != nil {
 			return nil, err
 		}
 
 		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.HistoricPrice) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(medianDeviation.ExchangeRateTuple.Denom, medianDeviation.ExchangeRateTuple.ExchangeRate))
 			return false
 		})
 	}
