@@ -48,19 +48,19 @@ func (k Keeper) TokenSymbolPrice(ctx sdk.Context, baseDenom string) (sdk.Dec, ui
 	}
 
 	if t.Blacklist {
-		return sdk.ZeroDec(), uint32(t.Exponent), types.ErrBlacklisted
+		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
 	price, err := k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
 	if err != nil {
-		return sdk.ZeroDec(), uint32(t.Exponent), sdkerrors.Wrap(err, "oracle")
+		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
 	}
 
 	if price.IsNil() || !price.IsPositive() {
-		return sdk.ZeroDec(), uint32(t.Exponent), sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
+		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
 	}
 
-	return price, uint32(t.Exponent), nil
+	return price, t.Exponent, nil
 }
 
 // exponent multiplies an sdk.Dec by 10^n. n can be negative.
