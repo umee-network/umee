@@ -39,6 +39,7 @@ Please check [Supported Platforms](https://github.com/CosmWasm/wasmvm/tree/v1.1.
     - Download `libwasmvm` 
 ```bash
 $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
+```
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Run latest Peggo (v1.3.0) - **updated**
 - Run latest Price Feeder (v2.0.0) - **updated**
@@ -46,7 +47,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 - Restart the chain.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
-- If you use Cosmovisor, you have to download the respective `libwasmvm` into your machine. 
+- If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine.  
 ```bash
 $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
 ```
