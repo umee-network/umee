@@ -55,7 +55,6 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 
 	registry.RegisterImplementations(
 		(*govtypes.Content)(nil),
-		&UpdateRegistryProposal{},
 		&MsgGovUpdateRegistry{},
 	)
 

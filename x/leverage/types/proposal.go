@@ -4,8 +4,8 @@ import (
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
-const (
-	proposalTypeMsgGovUpdateRegistry string = "MsgGovUpdateRegistry"
+var (
+	proposalTypeMsgGovUpdateRegistry = MsgGovUpdateRegistry{}.Type()
 )
 
 func init() {
