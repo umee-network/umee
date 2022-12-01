@@ -32,7 +32,7 @@ service Query {
   // Unbondings queries all current uToken unbondings associated with an account.
   rpc Unbondings(QueryUnbondings)
       returns (QueryUnbondingsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/unbondings";
+    option (google.api.http).get = "/umee/incentive/v1/unbondings/{address}";
   }
 
   // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
