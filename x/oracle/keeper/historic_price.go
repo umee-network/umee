@@ -253,7 +253,8 @@ func (k Keeper) getHistoricPrices(
 	return historicPrices
 }
 
-// getMedians returns all the medians of a given denom.
+// getMedians returns all the medians of a given denom in a given block
+// range.
 func (k Keeper) getMedians(
 	ctx sdk.Context,
 	denom string,

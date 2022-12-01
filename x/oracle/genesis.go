@@ -66,7 +66,12 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, medianDeviation := range genState.MedianDeviations {
-		keeper.SetMedianDeviation(ctx, medianDeviation.ExchangeRateTuple.Denom, medianDeviation.BlockNum, medianDeviation.ExchangeRateTuple.ExchangeRate)
+		keeper.SetMedianDeviation(
+			ctx,
+			medianDeviation.ExchangeRateTuple.Denom,
+			medianDeviation.BlockNum,
+			medianDeviation.ExchangeRateTuple.ExchangeRate,
+		)
 	}
 
 	keeper.SetParams(ctx, genState.Params)
