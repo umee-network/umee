@@ -9,7 +9,10 @@ import (
 	"github.com/umee-network/umee/price-feeder/oracle/provider"
 )
 
-var minimumTimeWeight = sdk.MustNewDecFromStr("0.2")
+var (
+	minimumTimeWeight   = sdk.MustNewDecFromStr("0.2000")
+	minimumCandleVolume = sdk.MustNewDecFromStr("0.0001")
+)
 
 const (
 	// tvwapCandlePeriod represents the time period we use for tvwap in minutes
@@ -110,6 +113,11 @@ func ComputeTVWAP(prices provider.AggregatedProviderCandles) (map[string]sdk.Dec
 				if timePeriod < candle.TimeStamp {
 					// timeDiff = now - candle.TimeStamp
 					timeDiff := sdk.NewDec(now - candle.TimeStamp)
+					// set minimum candle volume for low-trading assets
+					if candle.Volume.Equal(sdk.ZeroDec()) {
+						candle.Volume = minimumCandleVolume
+					}
+
 					// volume = candle.Volume * (weightUnit * (period - timeDiff) + minimumTimeWeight)
 					volume := candle.Volume.Mul(
 						weightUnit.Mul(period.Sub(timeDiff).Add(minimumTimeWeight)),
