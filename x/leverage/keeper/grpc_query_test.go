@@ -14,7 +14,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 
 	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
 	require.NoError(err)
-	require.Len(resp.Registry, 2, "token registry length")
+	require.Len(resp.Registry, 3, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {

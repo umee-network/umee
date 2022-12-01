@@ -135,8 +135,18 @@ func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 
 	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, atomDenom)
 	require.NoError(err)
-	// $4.21 / $39.38
+	// $4.21 / $39.38 at same exponent
 	require.Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
+
+	r, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, daiDenom)
+	require.NoError(err)
+	// $4.21 / $1.00 at a difference of 12 exponent
+	require.Equal(sdk.MustNewDecFromStr("4210000000000"), r)
+
+	r, err = app.LeverageKeeper.PriceRatio(ctx, daiDenom, appparams.BondDenom)
+	require.NoError(err)
+	// $1.00 / $4.21 at a difference of -12 exponent
+	require.Equal(sdk.MustNewDecFromStr("0.000000000000237530"), r)
 
 	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)

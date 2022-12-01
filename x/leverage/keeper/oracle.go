@@ -126,7 +126,6 @@ func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec,
 	powerDifference := int32(e2) - int32(e1)
 	// Price ratio > 1 if fromDenom is worth more than toDenom.
 	return exponent(p1, powerDifference).Quo(p2), nil
-	// TODO: add test with differing exponents
 }
 
 // FundOracle transfers requested coins to the oracle module account, as

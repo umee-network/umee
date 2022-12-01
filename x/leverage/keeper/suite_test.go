@@ -74,6 +74,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
