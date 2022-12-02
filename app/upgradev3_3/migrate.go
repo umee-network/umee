@@ -1,8 +1,6 @@
 package upgradev3_3
 
 import (
-	"fmt"
-
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -28,6 +26,8 @@ type migrator struct {
 	gov govkeeper.Keeper
 }
 
+// Creats migration handler for gov leverage proposals to new the gov  system
+// and MsgGovUpdateRegistry type.
 func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.MigrationHandler {
 	registerInterfaces(registry)
 	m := migrator{gk}
@@ -36,7 +36,6 @@ func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.M
 
 var done bool
 
-// Migrates leverage module from v1 to v3
 func (m migrator) migrate(ctx sdk.Context) error {
 	logger := ctx.Logger()
 	if done {
@@ -45,9 +44,7 @@ func (m migrator) migrate(ctx sdk.Context) error {
 	}
 	done = true
 
-	// m.gov.RemoveFromActiveProposalQueue(ctx types.Context, proposalID uint64, endTime time.Time)
 	proposals := m.gov.GetProposals(ctx)
-	fmt.Println("\n MIGRATION end blocker")
 	alreadyAdded := map[string]bool{
 		"uume": true,
 		"ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9": true, // "atom"
@@ -93,7 +90,7 @@ func (m migrator) migrate(ctx sdk.Context) error {
 		if err != nil {
 			logger.Error("Cant pack ANY", err)
 		}
-		fmt.Println("\n\nMIGRATING:", newMsg.String())
+		logger.Info("\n\nMIGRATING proposal:\n" + newMsg.String())
 		m.gov.SetProposal(ctx, *p)
 	}
 	return nil
