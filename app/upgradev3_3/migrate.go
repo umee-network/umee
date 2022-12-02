@@ -26,7 +26,7 @@ type migrator struct {
 	gov govkeeper.Keeper
 }
 
-// Creats migration handler for gov leverage proposals to new the gov  system
+// Creates migration handler for gov leverage proposals to new the gov system
 // and MsgGovUpdateRegistry type.
 func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.MigrationHandler {
 	registerInterfaces(registry)
