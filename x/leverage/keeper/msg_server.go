@@ -83,6 +83,42 @@ func (s msgServer) Withdraw(
 	}, err
 }
 
+func (s msgServer) WithdrawMaximum(
+	goCtx context.Context,
+	msg *types.MsgWithdrawMaximum,
+) (*types.MsgWithdrawMaximumResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: derive amount
+	uToken := sdk.NewCoin(msg.Denom, sdk.ZeroInt())
+
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
+	if err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"maximum supplied assets withdrawn",
+		"supplier", msg.Supplier,
+		"redeemed", uToken.String(),
+		"received", received.String(),
+	)
+	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+		Supplier: msg.Supplier,
+		Utoken:   uToken,
+		Asset:    received,
+	})
+	return &types.MsgWithdrawMaximumResponse{
+		Withdrawn: uToken,
+		Received:  received,
+	}, err
+}
+
 func (s msgServer) Collateralize(
 	goCtx context.Context,
 	msg *types.MsgCollateralize,
