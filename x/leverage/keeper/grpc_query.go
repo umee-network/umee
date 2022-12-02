@@ -135,7 +135,7 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle price in response will be nil if it is unavailable
-	if oraclePrice, _, oracleErr := q.Keeper.TokenSymbolPrice(ctx, req.Denom); oracleErr == nil {
+	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
 

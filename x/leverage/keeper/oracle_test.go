@@ -74,17 +74,17 @@ func (s *IntegrationTestSuite) TestOracle_TokenBasePrice() {
 func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	p, e, err := app.LeverageKeeper.TokenSymbolPrice(ctx, appparams.BondDenom)
+	p, e, err := app.LeverageKeeper.TokenDefaultDenomPrice(ctx, appparams.BondDenom)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenSymbolPrice(ctx, atomDenom)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, atomDenom)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("39.38"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenSymbolPrice(ctx, "foo")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "foo")
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)

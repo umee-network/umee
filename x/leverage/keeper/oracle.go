@@ -38,10 +38,10 @@ func (k Keeper) TokenBasePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, erro
 	return price, nil
 }
 
-// TokenSymbolPrice returns the USD value of a token. Note, the input denom must
-// still be the base denomination, e.g. uumee. When error is nil, price is guaranteed
+// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. UMEE. Note, the input
+// denom must still be the base denomination, e.g. uumee. When error is nil, price is guaranteed
 // to be positive. Also returns the token's exponent to reduce redundant registry reads.
-func (k Keeper) TokenSymbolPrice(ctx sdk.Context, baseDenom string) (sdk.Dec, uint32, error) {
+func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string) (sdk.Dec, uint32, error) {
 	t, err := k.GetTokenSettings(ctx, baseDenom)
 	if err != nil {
 		return sdk.ZeroDec(), 0, err
@@ -77,10 +77,10 @@ func exponent(input sdk.Dec, n int32) sdk.Dec {
 
 // TokenValue returns the total token value given a Coin. An error is
 // returned if we cannot get the token's price or if it's not an accepted token.
-// Computation uses price of token's symbol denom to avoid rounding errors
+// Computation uses price of token's default denom to avoid rounding errors
 // for exponent >= 18 tokens.
 func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
-	p, exp, err := k.TokenSymbolPrice(ctx, coin.Denom)
+	p, exp, err := k.TokenDefaultDenomPrice(ctx, coin.Denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
@@ -109,14 +109,14 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 
 // PriceRatio computed the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
 // Will return an error if either token price is not positive, and guarantees a positive output.
-// Computation uses price of token's symbol denom to avoid rounding errors for exponent >= 18 tokens,
+// Computation uses price of token's default denom to avoid rounding errors for exponent >= 18 tokens,
 // but returns in terms of base tokens.
 func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec, error) {
-	p1, e1, err := k.TokenSymbolPrice(ctx, fromDenom)
+	p1, e1, err := k.TokenDefaultDenomPrice(ctx, fromDenom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	p2, e2, err := k.TokenSymbolPrice(ctx, toDenom)
+	p2, e2, err := k.TokenDefaultDenomPrice(ctx, toDenom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
