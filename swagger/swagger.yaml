@@ -473,6 +473,91 @@ paths:
           type: string
       tags:
         - Query
+  /umee/leverage/v1/max_withdraw:
+    get:
+      summary: >-
+        MaxWithdraw queries the maximum amount of a given token an address can
+        withdraw.
+      operationId: MaxWithdraw
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              uTokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: uTokens is the maximum amount of uTokens that can be withdrawn
+              tokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: >-
+                  Tokens is the equivalent of max uTokens converted to base
+                  tokens
+            description: >-
+              QueryMaxWithdrawResponse defines the response structure for the
+              MaxWithdraw gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: query
+          required: false
+          type: string
+        - name: denom
+          description: >-
+            denom is the base token denom associated with the uToken to
+            withdraw.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/leverage/v1/params:
     get:
       summary: Params queries the parameters of the x/leverage module.
@@ -862,9 +947,77 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/historacle/v1/denoms/median_deviations:
+    get:
+      summary: |-
+        MedianDeviations returns median deviations of all denoms,
+        or, if specified, returns a single median deviation
+      operationId: MedianDeviations
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              medianDeviations:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  medians defines a list of the median deviations for all
+                  stamped denoms.
+            description: |-
+              QueryMedianDeviationsResponse is response type for the
+              Query/MedianDeviations RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/historacle/v1/denoms/medians:
     get:
-      summary: Medians returns medians of all denoms
+      summary: |-
+        Medians returns medians of all denoms,
+        or, if specified, returns a single median
       operationId: Medians
       responses:
         '200':
@@ -1098,6 +1251,38 @@ paths:
                       we want
 
                       to keep a record of our set of exchange rates.
+                  median_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Median Period represents the amount blocks we will wait
+                      between
+
+                      calculating the median and standard deviation of the
+                      median of
+
+                      historic prices in the last Prune Period.
+                  historic_accept_list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        base_denom:
+                          type: string
+                        symbol_denom:
+                          type: string
+                        exponent:
+                          type: integer
+                          format: int64
+                      title: Denom - the object to hold configurations of each denom
+                    description: >-
+                      Historic Asset List is a list of assets which will use the
+                      historic
+
+                      price stamping protection methodology (mainly
+                      manipulatable assets).
+
+                      Any assets not on this list will not be stamped.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -1924,6 +2109,38 @@ definitions:
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.
+  umee.leverage.v1.QueryMaxWithdrawResponse:
+    type: object
+    properties:
+      uTokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: uTokens is the maximum amount of uTokens that can be withdrawn
+      tokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: Tokens is the equivalent of max uTokens converted to base tokens
+    description: >-
+      QueryMaxWithdrawResponse defines the response structure for the
+      MaxWithdraw gRPC service handler.
   umee.leverage.v1.QueryParamsResponse:
     type: object
     properties:
@@ -2515,6 +2732,30 @@ definitions:
         description: |-
           Prune Period represents the maximum amount of blocks which we want
           to keep a record of our set of exchange rates.
+      median_period:
+        type: string
+        format: uint64
+        description: |-
+          Median Period represents the amount blocks we will wait between
+          calculating the median and standard deviation of the median of
+          historic prices in the last Prune Period.
+      historic_accept_list:
+        type: array
+        items:
+          type: object
+          properties:
+            base_denom:
+              type: string
+            symbol_denom:
+              type: string
+            exponent:
+              type: integer
+              format: int64
+          title: Denom - the object to hold configurations of each denom
+        description: |-
+          Historic Asset List is a list of assets which will use the historic
+          price stamping protection methodology (mainly manipulatable assets).
+          Any assets not on this list will not be stamped.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2688,6 +2929,29 @@ definitions:
     description: |-
       QueryFeederDelegationResponse is response type for the
       Query/FeederDelegation RPC method.
+  umee.oracle.v1.QueryMedianDeviationsResponse:
+    type: object
+    properties:
+      medianDeviations:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          medians defines a list of the median deviations for all stamped
+          denoms.
+    description: |-
+      QueryMedianDeviationsResponse is response type for the
+      Query/MedianDeviations RPC method.
   umee.oracle.v1.QueryMediansResponse:
     type: object
     properties:
@@ -2768,6 +3032,34 @@ definitions:
             description: |-
               Prune Period represents the maximum amount of blocks which we want
               to keep a record of our set of exchange rates.
+          median_period:
+            type: string
+            format: uint64
+            description: |-
+              Median Period represents the amount blocks we will wait between
+              calculating the median and standard deviation of the median of
+              historic prices in the last Prune Period.
+          historic_accept_list:
+            type: array
+            items:
+              type: object
+              properties:
+                base_denom:
+                  type: string
+                symbol_denom:
+                  type: string
+                exponent:
+                  type: integer
+                  format: int64
+              title: Denom - the object to hold configurations of each denom
+            description: >-
+              Historic Asset List is a list of assets which will use the
+              historic
+
+              price stamping protection methodology (mainly manipulatable
+              assets).
+
+              Any assets not on this list will not be stamped.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object
