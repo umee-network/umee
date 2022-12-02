@@ -54,7 +54,7 @@ func (app *UmeeApp) registerV3_1to3_3_Upgrade(_ upgradetypes.Plan) {
 
 // performs upgrade from v3.2 -> v3.3
 func (app *UmeeApp) registerV3_2to3_3_Upgrade(_ upgradetypes.Plan) {
-	const planName = "v3.3"
+	const planName = "v3.2-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
