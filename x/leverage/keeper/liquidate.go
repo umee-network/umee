@@ -92,14 +92,14 @@ func (k Keeper) getLiquidationAmounts(
 	}
 
 	// max repayment amount is limited by a number of factors
-	xxx := requestedRepay.Amount                              // maximum allowed by liquidator
-	xxx = sdk.MinInt(xxx, availableRepay)                     // liquidator account balance
-	xxx = sdk.MinInt(xxx, totalBorrowed.AmountOf(repayDenom)) // borrower position
-	xxx = sdk.MinInt(xxx, maxRepayAfterCloseFactor)           // close factor
+	maxRepay := requestedRepay.Amount                                   // maximum allowed by liquidator
+	maxRepay = sdk.MinInt(maxRepay, availableRepay)                     // liquidator account balance
+	maxRepay = sdk.MinInt(maxRepay, totalBorrowed.AmountOf(repayDenom)) // borrower position
+	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor)           // close factor
 
 	// compute final liquidation amounts
 	repay, burn, reward := ComputeLiquidation(
-		xxx,
+		maxRepay,
 		borrowerCollateral.AmountOf(collateralDenom),
 		k.AvailableLiquidity(ctx, rewardDenom),
 		// repayTokenPrice,
