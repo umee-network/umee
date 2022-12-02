@@ -62,37 +62,23 @@ func KeyAggregateExchangeRateVote(v sdk.ValAddress) []byte {
 
 // KeyMedian - stored by *denom*
 func KeyMedian(denom string, blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom), uintWithNullPrefix(blockNum))
+	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom), util.UintWithNullPrefix(blockNum))
 }
 
 // KeyMedianDeviation - stored by *denom*
 func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom), uintWithNullPrefix(blockNum))
+	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom), util.UintWithNullPrefix(blockNum))
 }
 
 // KeyHistoricPrice - stored by *denom* and *block*
 func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
-	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), uintWithNullPrefix(blockNum))
+	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), util.UintWithNullPrefix(blockNum))
 }
 
-func uintWithNullPrefix(n uint64) []byte {
-	bz := make([]byte, 9)
-	binary.LittleEndian.PutUint64(bz[1:], n)
-	return bz
+func ParseDenomFromKey(key []byte, prefix []byte) string {
+	return string(key[len(prefix) : len(key)-9])
 }
 
-func ParseDenomFromHistoricPriceKey(key []byte) string {
-	return string(key[len(KeyPrefixHistoricPrice) : len(key)-9])
-}
-
-func ParseBlockFromHistoricPriceKey(key []byte) uint64 {
-	return binary.LittleEndian.Uint64(key[len(key)-8:])
-}
-
-func ParseDenomFromMedianKey(key []byte) string {
-	return string(key[len(KeyPrefixMedian) : len(key)-9])
-}
-
-func ParseBlockFromMedianKey(key []byte) uint64 {
+func ParseBlockFromKey(key []byte) uint64 {
 	return binary.LittleEndian.Uint64(key[len(key)-8:])
 }

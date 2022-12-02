@@ -1,8 +1,6 @@
 package types
 
 import (
-	"encoding/binary"
-	"math"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -109,22 +107,12 @@ func TestKeyAggregateExchangeRateVote(t *testing.T) {
 	}
 }
 
-func TestUintWithNullPrefix(t *testing.T) {
-	expected := []byte{0}
-	num := make([]byte, 8)
-	binary.LittleEndian.PutUint64(num, math.MaxUint64)
-	expected = append(expected, num...)
-
-	out := uintWithNullPrefix(math.MaxUint64)
-	require.Equal(t, expected, out)
-}
-
 func TestParseBlockFromHistoricPriceKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
 	key := KeyHistoricPrice(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromHistoricPriceKey(key)
+	parsedBlockNum := ParseBlockFromKey(key)
 	require.Equal(t, blockNum, parsedBlockNum)
 }
 
@@ -133,16 +121,16 @@ func TestParseDenomFromHistoricPriceKey(t *testing.T) {
 	blockNum := uint64(4567)
 	key := KeyHistoricPrice(denom, blockNum)
 
-	parsedDenom := ParseDenomFromHistoricPriceKey(key)
+	parsedDenom := ParseDenomFromKey(key, KeyPrefixHistoricPrice)
 	require.Equal(t, denom, parsedDenom)
 }
 
 func TestParseBlockFromMedianKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
-	key := KeyHistoricPrice(denom, blockNum)
+	key := KeyMedian(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromMedianKey(key)
+	parsedBlockNum := ParseBlockFromKey(key)
 	require.Equal(t, blockNum, parsedBlockNum)
 }
 
@@ -151,6 +139,24 @@ func TestParseDenomFromMedianKey(t *testing.T) {
 	blockNum := uint64(4567)
 	key := KeyMedian(denom, blockNum)
 
-	parsedDenom := ParseDenomFromMedianKey(key)
+	parsedDenom := ParseDenomFromKey(key, KeyPrefixMedian)
+	require.Equal(t, denom, parsedDenom)
+}
+
+func TestParseBlockFromMedianDeviationKey(t *testing.T) {
+	denom := "umee"
+	blockNum := uint64(4567)
+	key := KeyMedianDeviation(denom, blockNum)
+
+	parsedBlockNum := ParseBlockFromKey(key)
+	require.Equal(t, blockNum, parsedBlockNum)
+}
+
+func TestParseDenomFromMedianDeviationKey(t *testing.T) {
+	denom := "umee"
+	blockNum := uint64(4567)
+	key := KeyMedianDeviation(denom, blockNum)
+
+	parsedDenom := ParseDenomFromKey(key, KeyPrefixMedianDeviation)
 	require.Equal(t, denom, parsedDenom)
 }

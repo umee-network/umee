@@ -18,8 +18,8 @@ func (k Keeper) IterateAllHistoricPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromHistoricPriceKey(iter.Key())
-		blockNum := types.ParseBlockFromHistoricPriceKey(iter.Key())
+		denom := types.ParseDenomFromKey(iter.Key(), types.KeyPrefixHistoricPrice)
+		blockNum := types.ParseBlockFromKey(iter.Key())
 		historicPrice := types.HistoricPrice{
 			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
 			BlockNum:          blockNum,
@@ -43,8 +43,8 @@ func (k Keeper) IterateAllMedianPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromMedianKey(iter.Key())
-		blockNum := types.ParseBlockFromMedianKey(iter.Key())
+		denom := types.ParseDenomFromKey(iter.Key(), types.KeyPrefixMedian)
+		blockNum := types.ParseBlockFromKey(iter.Key())
 		median := types.HistoricPrice{
 			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
 			BlockNum:          blockNum,
@@ -69,8 +69,8 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromMedianKey(iter.Key())
-		blockNum := types.ParseBlockFromMedianKey(iter.Key())
+		denom := types.ParseDenomFromKey(iter.Key(), types.KeyPrefixMedianDeviation)
+		blockNum := types.ParseBlockFromKey(iter.Key())
 		medianDeviation := types.HistoricPrice{
 			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
 			BlockNum:          blockNum,
