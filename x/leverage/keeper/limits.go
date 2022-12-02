@@ -16,9 +16,10 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
+	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
 	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
-	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
+	specificCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 
 	// calculate borrowed value for the account
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed)
@@ -44,26 +45,32 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 		return sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
-	// get collateral weight
-	ts, err := k.GetTokenSettings(ctx, denom)
+	// determine the USD amount of borrow limit that is currently unused
+	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
+
+	// calculate the contribution to borrow limit made by only the type of collateral being withdrawn
+	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral))
 	if err != nil {
 		return sdk.Coin{}, err
 	}
+	if unusedBorrowLimit.GT(specificBorrowLimit) {
+		// If borrow limit is sufficiently high even without this collateral, withdraw the full amount
+		withdrawAmount := walletUtokens.Add(specificCollateral.Amount)
+		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
+	}
 
-	// get uToken exchange rate
-	uTokenExchangeRate := k.DeriveExchangeRate(ctx, denom)
+	// if only a portion of collateral is unused, withdraw only that portion
+	unusedCollateralFraction := unusedBorrowLimit.Quo(specificBorrowLimit)
+	unusedCollateral := unusedCollateralFraction.MulInt(specificCollateral.Amount).TruncateInt()
 
-	// determine how many uTokens can be withdrawn from collateral to reduce borrow limit to borrowed value
-	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
-	unusedCollateral := unusedBorrowLimit.Quo(uTokenExchangeRate).Quo(ts.CollateralWeight).TruncateInt()
+	// add wallet uTokens to the unused amount from collateral
+	withdrawAmount := unusedCollateral.Add(walletUtokens)
 
-	// determine how many uTokens can actually be withdrawn from collateral alone
-	withdrawAmount := sdk.MinInt(unusedCollateral, totalCollateral.AmountOf(uDenom))
+	// reduce amount to withdraw if it exceeds available liquidity
+	withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
 
-	// add wallet uTokens to the amount from collateral
-	withdrawAmount = withdrawAmount.Add(walletUtokens)
-
-	return sdk.NewCoin(uDenom, sdk.MinInt(withdrawAmount, availableUTokens.Amount)), nil
+	return sdk.NewCoin(uDenom, withdrawAmount), nil
 }
 
 // maxCollateralFromShare calculates the maximum amount of collateral a utoken denom
