@@ -229,7 +229,7 @@ type QueryMarketSummaryResponse struct {
 	SymbolDenom string `protobuf:"bytes,1,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`
 	// Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
 	Exponent uint32 `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
-	// Oracle Price is the current USD value of a base token. Exponent must be applied to reach the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+	// Oracle Price is the current USD value of a token. Oracle price is nil when the oracle is down.
 	OraclePrice *github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
 	// uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example, a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
 	UTokenExchangeRate github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"utoken_exchange_rate"`

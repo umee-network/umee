@@ -311,10 +311,8 @@ paths:
               oracle_price:
                 type: string
                 description: >-
-                  Oracle Price is the current USD value of a base token.
-                  Exponent must be applied to reach the price from symbol_denom.
-                  For example, a price of $0.000001 for 1 uumee is equivalent to
-                  $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+                  Oracle Price is the current USD value of a token. Oracle price
+                  is nil when the oracle is down.
               uToken_exchange_rate:
                 type: string
                 description: >-
@@ -1982,10 +1980,8 @@ definitions:
       oracle_price:
         type: string
         description: >-
-          Oracle Price is the current USD value of a base token. Exponent must
-          be applied to reach the price from symbol_denom. For example, a price
-          of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle
-          price is nil when the oracle is down.
+          Oracle Price is the current USD value of a token. Oracle price is nil
+          when the oracle is down.
       uToken_exchange_rate:
         type: string
         description: >-
