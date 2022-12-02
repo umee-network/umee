@@ -1,4 +1,4 @@
-package mv2
+package upgradev3_3
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ import (
 // Implements Proposal Interface
 var _ gov.Content = &UpdateRegistryProposal{}
 
-func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
+func registerInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*gov.Content)(nil),
 		&UpdateRegistryProposal{},
@@ -28,7 +28,8 @@ type migrator struct {
 	gov govkeeper.Keeper
 }
 
-func Migrator1to2(gk govkeeper.Keeper) module.MigrationHandler {
+func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.MigrationHandler {
+	registerInterfaces(registry)
 	m := migrator{gk}
 	return m.migrate
 }
