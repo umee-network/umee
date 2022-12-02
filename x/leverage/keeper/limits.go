@@ -6,6 +6,66 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
+// maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
+// input should be a base token.
+func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+	uDenom := types.ToUTokenDenom(denom)
+
+	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
+	availableUTokens, err := k.ExchangeToken(ctx, availableTokens)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
+	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
+	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
+
+	// calculate borrowed value for the account
+	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
+	if borrowedValue.IsZero() {
+		withdrawAmount := walletUtokens.Add(totalCollateral.AmountOf(uDenom))
+		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
+	}
+
+	// for nonzero borrows, calculations are based on unused borrow limit
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	// borrowers above their borrow limit cannot withdraw collateral, but can withdraw wallet uTokens
+	if borrowLimit.LTE(borrowedValue) {
+		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
+	}
+
+	// get collateral weight
+	ts, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// get uToken exchange rate
+	uTokenExchangeRate := k.DeriveExchangeRate(ctx, denom)
+
+	// determine how many uTokens can be withdrawn from collateral to reduce borrow limit to borrowed value
+	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
+	unusedCollateral := unusedBorrowLimit.Quo(uTokenExchangeRate).Quo(ts.CollateralWeight).TruncateInt()
+
+	// determine how many uTokens can actually be withdrawn from collateral alone
+	withdrawAmount := sdk.MinInt(unusedCollateral, totalCollateral.AmountOf(uDenom))
+
+	// add wallet uTokens to the amount from collateral
+	withdrawAmount = withdrawAmount.Add(walletUtokens)
+
+	return sdk.NewCoin(uDenom, sdk.MinInt(withdrawAmount, availableUTokens.Amount)), nil
+}
+
 // maxCollateralFromShare calculates the maximum amount of collateral a utoken denom
 // is allowed to have, taking into account its associated token's MaxCollateralShare
 // under current market conditions

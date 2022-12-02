@@ -94,8 +94,10 @@ func (s msgServer) WithdrawMaximum(
 		return nil, err
 	}
 
-	// TODO: derive amount
-	uToken := sdk.NewCoin(msg.Denom, sdk.ZeroInt())
+	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {

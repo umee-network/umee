@@ -281,47 +281,25 @@ func (q Querier) MaxWithdraw(
 		return nil, status.Error(codes.InvalidArgument, "empty address")
 	}
 
-	// TODO: derive amount
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	/*
-		ctx := sdk.UnwrapSDKContext(goCtx)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
-		addr, err := sdk.AccAddressFromBech32(req.Address)
-		if err != nil {
-			return nil, err
-		}
+	uToken, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom)
+	if err != nil {
+		return nil, err
+	}
 
-		supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
-		if err != nil {
-			return nil, err
-		}
-		collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
-		borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
-
-		suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied)
-		if err != nil {
-			return nil, err
-		}
-		borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed)
-		if err != nil {
-			return nil, err
-		}
-		collateralValue, err := q.Keeper.CalculateCollateralValue(ctx, collateral)
-		if err != nil {
-			return nil, err
-		}
-		borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
-		if err != nil {
-			return nil, err
-		}
-		liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
-		if err != nil {
-			return nil, err
-		}
-	*/
+	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.QueryMaxWithdrawResponse{
-		// Tokens:  sdk.NewCoin(req.Denom,sdk.ZeroInt()),
-		// UTokens: sdk.NewCoin(req.Denom,sdk.ZeroInt())),
+		Tokens:  token,
+		UTokens: uToken,
 	}, nil
 }
