@@ -26,6 +26,7 @@ import (
 const (
 	umeeDenom = appparams.BondDenom
 	atomDenom = fixtures.AtomDenom
+	daiDenom  = fixtures.DaiDenom
 )
 
 type IntegrationTestSuite struct {
@@ -71,8 +72,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE")))
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM")))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
@@ -98,8 +100,8 @@ func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAn
 }
 
 // newToken creates a test token with reasonable initial parameters
-func newToken(base, symbol string) types.Token {
-	return fixtures.Token(base, symbol)
+func newToken(base, symbol string, exponent uint32) types.Token {
+	return fixtures.Token(base, symbol, exponent)
 }
 
 // coin creates a coin with a given base denom and amount
