@@ -22,14 +22,16 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 		panic(err)
 	}
 
-	app.registerV3_0Upgrade(upgradeInfo)
-	app.registerV3_1Upgrade(upgradeInfo)
-	app.registerV3_2Upgrade(upgradeInfo)
+	app.registerV3_0_Upgrade(upgradeInfo)
+	app.registerV3_1_Upgrade(upgradeInfo)
+
+	app.registerV3_1to3_3_Upgrade(upgradeInfo)
+	app.registerV3_2to3_3_Upgrade(upgradeInfo)
 }
 
-// performs upgrade from v3.1 -> v3.2
-func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
-	const planName = "v3.2"
+// performs upgrade from v3.1 -> v3.3 (including the v3.2 chanages)
+func (app *UmeeApp) registerV3_1to3_3_Upgrade(_ upgradetypes.Plan) {
+	const planName = "v3.1-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -42,14 +44,25 @@ func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
 		})
 }
 
+// performs upgrade from v3.2 -> v3.3
+func (app *UmeeApp) registerV3_2to3_3_Upgrade(_ upgradetypes.Plan) {
+	const planName = "v3.3"
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		})
+}
+
 // performs upgrade from v3.0 -> v3.1
-func (app *UmeeApp) registerV3_1Upgrade(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerV3_1_Upgrade(_ upgradetypes.Plan) {
 	const planName = "v3.1.0"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyRunMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v1->v3
-func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerV3_0_Upgrade(upgradeInfo upgradetypes.Plan) {
 	const planName = "v1.1-v3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
@@ -101,7 +114,7 @@ func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
 		}})
 }
 
-func onlyRunMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
+func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("Upgrade handler execution", "name", planName)
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
