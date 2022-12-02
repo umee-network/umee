@@ -294,7 +294,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		{
-			"query max withdraw (nonzero)",
+			"query max withdraw (borrow limit reached)",
 			cli.GetCmdQueryMaxWithdraw(),
 			[]string{
 				val.Address.String(),
@@ -303,11 +303,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMaxWithdrawResponse{},
 			&types.QueryMaxWithdrawResponse{
-				//
-				//
-				// TODO: determine correct amounts
-				//
-				//
 				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
 				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
 			},
