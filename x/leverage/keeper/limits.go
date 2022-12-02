@@ -40,11 +40,15 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 
 	// determine the amount of uTokens which would be required to reach maxValue
 	tokenDenom := types.ToTokenDenom(denom)
-	tokenPrice, err := k.TokenPrice(ctx, tokenDenom)
+	tokenPrice, err := k.TokenBasePrice(ctx, tokenDenom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
 	uTokenExchangeRate := k.DeriveExchangeRate(ctx, tokenDenom)
+
+	// in the case of a base token price smaller than the smallest sdk.Dec (10^-18),
+	// this maxCollateralAmount will use the price of 10^-18 and thus derive a lower
+	// (more cautious) limit than a precise price would produce
 	maxCollateralAmount := maxValue.Quo(tokenPrice).Quo(uTokenExchangeRate).TruncateInt()
 
 	// return the computed maximum or the current uToken supply, whichever is smaller

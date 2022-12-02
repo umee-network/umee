@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
-	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
+	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")
 
 	initialQueries := []testQuery{
 		{
@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryMarketSummaryResponse{
 				SymbolDenom:        "UMEE",
 				Exponent:           6,
-				OraclePrice:        &oraclePrice,
+				OraclePrice:        &oracleSymbolPrice,
 				UTokenExchangeRate: sdk.OneDec(),
 				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
 				// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
