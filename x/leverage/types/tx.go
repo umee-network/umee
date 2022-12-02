@@ -54,6 +54,30 @@ func (msg *MsgWithdraw) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgWithdrawMaximum(supplier sdk.AccAddress, denom string) *MsgWithdrawMaximum {
+	return &MsgWithdrawMaximum{
+		Supplier: supplier.String(),
+		Denom:    denom,
+	}
+}
+
+func (msg MsgWithdrawMaximum) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgWithdrawMaximum) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgWithdrawMaximum) ValidateBasic() error {
+	return validateSenderAndDenom(msg.Supplier, msg.Denom)
+}
+
+func (msg *MsgWithdrawMaximum) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Supplier)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgWithdrawMaximum) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
 func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateralize {
 	return &MsgCollateralize{
 		Borrower: borrower.String(),
@@ -216,6 +240,17 @@ func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 		return ErrNilAsset
 	}
 	if err := asset.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateSenderAndDenom(sender string, denom string) error {
+	_, err := sdk.AccAddressFromBech32(sender)
+	if err != nil {
+		return err
+	}
+	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
 	return nil
