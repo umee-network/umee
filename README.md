@@ -52,8 +52,8 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 
 ### Public
 
-- [umee-1](networks/umee-1)
-- [canon-2](networks/canon-2)
+- [umee-1](networks/umee-1) (mainnet)
+- [canon-2](networks/canon-2) (testnet)
 
 ## Install
 
@@ -92,5 +92,8 @@ export DAEMON_RESTART_AFTER_UPGRADE=true
 export DAEMON_ALLOW_DOWNLOAD_BINARIES=true
 export DAEMON_PREUPGRADE_MAX_RETRIES=3
 ```
-
+- If you didn't build binary from source in the machine, you have to download the respective `libwasmvm` into your machine.  
+```bash
+$ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
+```
 - To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`

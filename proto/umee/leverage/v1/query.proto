@@ -53,6 +53,12 @@ service Query {
       returns (QueryBadDebtsResponse) {
     option (google.api.http).get = "/umee/leverage/v1/bad_debts";
   }
+
+  // MaxWithdraw queries the maximum amount of a given token an address can withdraw.
+  rpc MaxWithdraw(QueryMaxWithdraw)
+      returns (QueryMaxWithdrawResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/max_withdraw";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -86,7 +92,7 @@ message QueryMarketSummaryResponse {
   string symbol_denom = 1;
   // Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
   uint32 exponent = 2;
-  // Oracle Price is the current USD value of a base token. Exponent must be applied to reach the price from symbol_denom. For example, a price of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+  // Oracle Price is the current USD value of a token. Oracle price is nil when the oracle is down.
   string oracle_price = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = true
@@ -249,4 +255,19 @@ message QueryBadDebtsResponse {
   repeated BadDebt targets = 1 [
     (gogoproto.nullable) = false
   ];
+}
+
+// QueryMaxWithdraw defines the request structure for the MaxWithdraw gRPC service handler.
+message QueryMaxWithdraw {
+  string address = 1;
+  // denom is the base token denom associated with the uToken to withdraw
+  string denom = 2;
+}
+
+// QueryMaxWithdrawResponse defines the response structure for the MaxWithdraw gRPC service handler.
+message QueryMaxWithdrawResponse {
+  // uTokens is the maximum amount of uTokens that can be withdrawn
+  cosmos.base.v1beta1.Coin uTokens = 1 [(gogoproto.nullable) = false];
+  // Tokens is the equivalent of max uTokens converted to base tokens
+  cosmos.base.v1beta1.Coin tokens = 2 [(gogoproto.nullable) = false];
 }
