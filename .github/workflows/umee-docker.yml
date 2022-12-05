@@ -49,7 +49,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          file: contrib/images/umeed.Dockerfile
+          file: contrib/images/umeed.dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
