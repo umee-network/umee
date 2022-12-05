@@ -121,7 +121,7 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
+	@docker build -t umeenet/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
