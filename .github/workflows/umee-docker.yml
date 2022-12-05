@@ -24,7 +24,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           # github.repository == <account>/<repo>
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository_owner }}/umeed
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
