@@ -142,7 +142,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			"249uumee",
+			"249uumee", // produces a borrowed amount of 250 due to rounding
 		},
 		nil,
 	}
@@ -162,7 +162,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"249uumee", // repays only the remaining borrowed balance, reduced automatically from 50
+			"250uumee", // repays only the remaining borrowed balance, reduced automatically from 250
 		},
 		nil,
 	}
