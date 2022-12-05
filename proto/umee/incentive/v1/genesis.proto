@@ -21,7 +21,7 @@ message GenesisState {
   ];
   repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
   repeated PendingReward     pending_rewards     = 9 [(gogoproto.nullable) = false];
-  repeated RewardBasis       reward_bases        = 10 [(gogoproto.nullable) = false];
+  repeated RewardTracker     reward_bases        = 10 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 11 [(gogoproto.nullable) = false];
   repeated Unbonding         unbondings          = 12 [(gogoproto.nullable) = false];
 }
@@ -44,13 +44,13 @@ message PendingReward {
   ];
 }
 
-// RewardBasis tracks the value of a given tier and lock denom's RewardAccumulator
+// RewardTracker tracks the value of a given tier and lock denom's RewardAccumulator
 // at the last time a specific account calculated pending rewards for it.
-message RewardBasis {
-  string   account                                  = 1;
-  uint32   tier                                     = 2;
-  string   denom                                    = 3;
-  repeated cosmos.base.v1beta1.DecCoin reward_basis = 4 [
+message RewardTracker {
+  string   account                                    = 1;
+  uint32   tier                                       = 2;
+  string   denom                                      = 3;
+  repeated cosmos.base.v1beta1.DecCoin reward_tracker = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
@@ -60,9 +60,9 @@ message RewardBasis {
 // of rewards that a single unit of denom would have acucmulated if it was bonded
 // at a given tier since genesis.
 message RewardAccumulator {
-  uint32   tier                                     = 1;
-  string   denom                                    = 2;
-  repeated cosmos.base.v1beta1.DecCoin reward_basis = 3 [
+  uint32   tier                                       = 1;
+  string   denom                                      = 2;
+  repeated cosmos.base.v1beta1.DecCoin reward_tracker = 3 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];

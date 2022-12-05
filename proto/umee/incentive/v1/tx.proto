@@ -100,10 +100,11 @@ message MsgGovCreateProgram {
   option (cosmos.msg.v1.signer)      = "authority";
 
   // authority is the address of the governance account.
-  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string           title       = 2;
-  string           description = 3;
-  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+  string           authority           = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string           title               = 2;
+  string           description         = 3;
+  IncentiveProgram program             = 4 [(gogoproto.nullable) = false];
+  bool             from_community_fund = 5;
 }
 
 // MsgGovCreateProgramResponse defines the Msg/CreateProgram response type.
