@@ -23,15 +23,15 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 		panic(err)
 	}
 
-	app.registerV3_0_Upgrade(upgradeInfo)
-	app.registerV3_1_Upgrade(upgradeInfo)
+	app.registerUpgrade3_0(upgradeInfo)
+	app.registerUpgrade3_1(upgradeInfo)
 
-	app.registerV3_1to3_3_Upgrade(upgradeInfo)
-	app.registerV3_2to3_3_Upgrade(upgradeInfo)
+	app.registerUpgrade3_1to3_3(upgradeInfo)
+	app.registerUpgrade3_2to3_3(upgradeInfo)
 }
 
 // performs upgrade from v3.1 -> v3.3 (including the v3.2 chanages)
-func (app *UmeeApp) registerV3_1to3_3_Upgrade(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 	const planName = "v3.1-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
@@ -53,7 +53,7 @@ func (app *UmeeApp) registerV3_1to3_3_Upgrade(_ upgradetypes.Plan) {
 }
 
 // performs upgrade from v3.2 -> v3.3
-func (app *UmeeApp) registerV3_2to3_3_Upgrade(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_2to3_3(_ upgradetypes.Plan) {
 	const planName = "v3.2-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
@@ -70,13 +70,13 @@ func (app *UmeeApp) registerV3_2to3_3_Upgrade(_ upgradetypes.Plan) {
 }
 
 // performs upgrade from v3.0 -> v3.1
-func (app *UmeeApp) registerV3_1_Upgrade(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_1(_ upgradetypes.Plan) {
 	const planName = "v3.1.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v1->v3
-func (app *UmeeApp) registerV3_0_Upgrade(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v1.1-v3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
