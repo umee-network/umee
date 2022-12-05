@@ -34,6 +34,7 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -250,26 +251,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
-	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:              appparams.BondDenom,
-		SymbolDenom:            appparams.DisplayDenom,
-		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-		EnableMsgSupply:        true,
-		EnableMsgBorrow:        true,
-		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100000000000),
-	})
+	leverageGenState.Registry = append(leverageGenState.Registry,
+		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+	)
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
