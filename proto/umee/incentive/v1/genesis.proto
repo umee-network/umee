@@ -45,7 +45,10 @@ message PendingReward {
 }
 
 // RewardTracker tracks the value of a given tier and lock denom's RewardAccumulator
-// at the last time a specific account calculated pending rewards for it.
+// at the last time a specific account calculated pending rewards for it. When calculating
+// available rewards, this value is used to determine the difference between the current
+// RewardAccumulator for a tier and the last value at which the user updated bonds or claimed
+// tokens. Their pending rewards increase by only the rewards accrued in that time period.
 message RewardTracker {
   string   account                                    = 1;
   uint32   tier                                       = 2;

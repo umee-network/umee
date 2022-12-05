@@ -275,7 +275,10 @@ func (m *PendingReward) GetPendingReward() github_com_cosmos_cosmos_sdk_types.Co
 }
 
 // RewardTracker tracks the value of a given tier and lock denom's RewardAccumulator
-// at the last time a specific account calculated pending rewards for it.
+// at the last time a specific account calculated pending rewards for it. When calculating
+// available rewards, this value is used to determine the difference between the current
+// RewardAccumulator for a tier and the last value at which the user updated bonds or claimed
+// tokens. Their pending rewards increase by only the rewards accrued in that time period.
 type RewardTracker struct {
 	Account       string                                      `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	Tier          uint32                                      `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
