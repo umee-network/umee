@@ -265,12 +265,9 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		return err
 	}
 
-	if len(computedPrices) != len(requiredRates) {
-		return fmt.Errorf("unable to get prices for all exchange candles")
-	}
 	for base := range requiredRates {
 		if _, ok := computedPrices[base]; !ok {
-			return fmt.Errorf("reported prices were not equal to required rates, missed: %s", base)
+			o.logger.Warn().Str("asset", base).Msg("unable to report price for expected asset")
 		}
 	}
 
