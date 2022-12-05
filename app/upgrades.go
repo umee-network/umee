@@ -12,7 +12,7 @@ import (
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v3/app/upgradev3"
-	"github.com/umee-network/umee/v3/app/upgradev3_3"
+	"github.com/umee-network/umee/v3/app/upgradev3x3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -38,7 +38,7 @@ func (app *UmeeApp) registerV3_1to3_3_Upgrade(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v3.3 migrator")
-			err := upgradev3_3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
+			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
 			if err != nil {
 				return fromVM, err
 			}
@@ -60,7 +60,7 @@ func (app *UmeeApp) registerV3_2to3_3_Upgrade(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v3.3 migrator")
-			err := upgradev3_3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
+			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
 			if err != nil {
 				return fromVM, err
 			}

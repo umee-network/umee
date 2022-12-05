@@ -1,4 +1,4 @@
-package upgradev3_3
+package upgradev3x3
 
 import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
