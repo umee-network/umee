@@ -87,7 +87,7 @@ build: go.sum
 build-experimental: go.sum
 	@echo "--> Building Experimental version..."
 	EXPERIMENTAL=true $(MAKE) build
-	 
+
 build-no_cgo:
 	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
 	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
