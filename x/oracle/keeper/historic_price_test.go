@@ -22,8 +22,10 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		app.OracleKeeper.AddHistoricPrice(ctx, displayDenom, sdk.MustNewDecFromStr(exchangeRate))
 		app.OracleKeeper.AddHistoricPrice(ctx, displayDenomVariation, sdk.MustNewDecFromStr(exchangeRate))
 		if ((i + 1) % int(app.OracleKeeper.MedianStampPeriod(ctx))) == 0 {
-			app.OracleKeeper.CalcAndSetMedian(ctx, displayDenom)
-			app.OracleKeeper.CalcAndSetMedian(ctx, displayDenomVariation)
+			err := app.OracleKeeper.CalcAndSetMedian(ctx, displayDenom)
+			s.Require().NoError(err)
+			err = app.OracleKeeper.CalcAndSetMedian(ctx, displayDenomVariation)
+			s.Require().NoError(err)
 		}
 
 		// update blockheight

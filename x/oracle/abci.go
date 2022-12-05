@@ -66,7 +66,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 				// Calculate and stamp median/median deviation if median stamp period has passed
 				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-					k.CalcAndSetMedian(ctx, strings.ToUpper(ballotDenom.Denom))
+					if err = k.CalcAndSetMedian(ctx, strings.ToUpper(ballotDenom.Denom)); err != nil {
+						return err
+					}
 				}
 			}
 		}

@@ -46,8 +46,7 @@ func (k Keeper) CalcAndSetMedian(
 
 	block := uint64(ctx.BlockHeight())
 	k.SetMedian(ctx, denom, block, median)
-	k.calcAndSetMedianDeviation(ctx, denom, median, historicPrices)
-	return nil
+	return k.calcAndSetMedianDeviation(ctx, denom, median, historicPrices)
 }
 
 func (k Keeper) SetMedian(
