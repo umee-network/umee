@@ -33,9 +33,9 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	// check median and median standard deviation
 	medians := app.OracleKeeper.GetHistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 3)
-	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.1"))
+	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
 	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
-	s.Require().Equal(medians[2], sdk.MustNewDecFromStr("1.2"))
+	s.Require().Equal(medians[2], sdk.MustNewDecFromStr("1.1"))
 
 	medianDeviation, err := app.OracleKeeper.GetHistoricMedianDeviation(ctx, displayDenom)
 	s.Require().NoError(err)
@@ -52,23 +52,31 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().NoError(err)
 
 	// check median stats of last 3 stamps
-	medianOfMedians := app.OracleKeeper.GetMedianOfMedians(ctx, displayDenom, 3)
+	medianOfMedians, err := app.OracleKeeper.GetMedianOfMedians(ctx, displayDenom, 3)
+	s.Require().NoError(err)
 	s.Require().Equal(medianOfMedians, sdk.MustNewDecFromStr("1.125"))
-	averageOfMedians := app.OracleKeeper.GetAverageOfMedians(ctx, displayDenom, 3)
+	averageOfMedians, err := app.OracleKeeper.GetAverageOfMedians(ctx, displayDenom, 3)
+	s.Require().NoError(err)
 	s.Require().Equal(averageOfMedians, sdk.MustNewDecFromStr("1.141666666666666666"))
-	maxMedian := app.OracleKeeper.GetMaxOfMedians(ctx, displayDenom, 3)
+	maxMedian, err := app.OracleKeeper.GetMaxOfMedians(ctx, displayDenom, 3)
+	s.Require().NoError(err)
 	s.Require().Equal(maxMedian, sdk.MustNewDecFromStr("1.2"))
-	minMedian := app.OracleKeeper.GetMinOfMedians(ctx, displayDenom, 3)
+	minMedian, err := app.OracleKeeper.GetMinOfMedians(ctx, displayDenom, 3)
+	s.Require().NoError(err)
 	s.Require().Equal(minMedian, sdk.MustNewDecFromStr("1.1"))
 
 	// check median stats of last 1 stamps
-	medianOfMedians = app.OracleKeeper.GetMedianOfMedians(ctx, displayDenom, 1)
+	medianOfMedians, err = app.OracleKeeper.GetMedianOfMedians(ctx, displayDenom, 1)
+	s.Require().NoError(err)
 	s.Require().Equal(medianOfMedians, sdk.MustNewDecFromStr("1.2"))
-	averageOfMedians = app.OracleKeeper.GetAverageOfMedians(ctx, displayDenom, 1)
+	averageOfMedians, err = app.OracleKeeper.GetAverageOfMedians(ctx, displayDenom, 1)
+	s.Require().NoError(err)
 	s.Require().Equal(averageOfMedians, sdk.MustNewDecFromStr("1.2"))
-	maxMedian = app.OracleKeeper.GetMaxOfMedians(ctx, displayDenom, 1)
+	maxMedian, err = app.OracleKeeper.GetMaxOfMedians(ctx, displayDenom, 1)
+	s.Require().NoError(err)
 	s.Require().Equal(maxMedian, sdk.MustNewDecFromStr("1.2"))
-	minMedian = app.OracleKeeper.GetMinOfMedians(ctx, displayDenom, 1)
+	minMedian, err = app.OracleKeeper.GetMinOfMedians(ctx, displayDenom, 1)
+	s.Require().NoError(err)
 	s.Require().Equal(minMedian, sdk.MustNewDecFromStr("1.2"))
 
 	// delete first median
@@ -79,6 +87,6 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 
 	medians = app.OracleKeeper.GetHistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 2)
-	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.125"))
-	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.2"))
+	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
+	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
 }

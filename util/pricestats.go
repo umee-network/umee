@@ -1,16 +1,22 @@
 package util
 
 import (
+	"fmt"
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Median returns the median of a list of prices.
-func Median(prices []sdk.Dec) sdk.Dec {
+var (
+	ErrEmptyList = fmt.Errorf("empty price list passed in")
+)
+
+// Median returns the median of a list of prices. Returns error
+// if prices is empty list.
+func Median(prices []sdk.Dec) (sdk.Dec, error) {
 	lenPrices := len(prices)
 	if lenPrices == 0 {
-		return sdk.ZeroDec()
+		return sdk.ZeroDec(), ErrEmptyList
 	}
 
 	sort.Slice(prices, func(i, j int) bool {
@@ -21,17 +27,20 @@ func Median(prices []sdk.Dec) sdk.Dec {
 	if lenPrices%2 == 0 {
 		return prices[lenPrices/2-1].
 			Add(prices[lenPrices/2]).
-			QuoInt64(2)
+			QuoInt64(2), nil
 	}
-	return prices[lenPrices/2]
+	return prices[lenPrices/2], nil
 }
 
 // MedianDeviation returns the standard deviation around the
-// median of a list of prices.
+// median of a list of prices. Returns error if prices is empty list.
 // MedianDeviation = ∑((price - median)^2 / len(prices))
-func MedianDeviation(median sdk.Dec, prices []sdk.Dec) sdk.Dec {
-	lenPrices := len(prices)
+func MedianDeviation(median sdk.Dec, prices []sdk.Dec) (sdk.Dec, error) {
 	medianDeviation := sdk.ZeroDec()
+	lenPrices := len(prices)
+	if lenPrices == 0 {
+		return medianDeviation, ErrEmptyList
+	}
 
 	for _, price := range prices {
 		medianDeviation = medianDeviation.Add(price.
@@ -39,40 +48,53 @@ func MedianDeviation(median sdk.Dec, prices []sdk.Dec) sdk.Dec {
 			QuoInt64(int64(lenPrices)))
 	}
 
-	return medianDeviation
+	return medianDeviation, nil
 }
 
-// Average returns the average value of a list of prices
-func Average(prices []sdk.Dec) sdk.Dec {
+// Average returns the average value of a list of prices. Returns error
+// if prices is empty list.
+func Average(prices []sdk.Dec) (sdk.Dec, error) {
 	lenPrices := len(prices)
-	sumPrices := sdk.ZeroDec()
 	if lenPrices == 0 {
-		return sdk.ZeroDec()
+		return sdk.ZeroDec(), ErrEmptyList
 	}
 
+	sumPrices := sdk.ZeroDec()
 	for _, price := range prices {
 		sumPrices = sumPrices.Add(price)
 	}
 
-	return sumPrices.QuoInt64(int64(lenPrices))
+	return sumPrices.QuoInt64(int64(lenPrices)), nil
 }
 
-// Max returns the max value of a list of prices
-func Max(prices []sdk.Dec) sdk.Dec {
+// Max returns the max value of a list of prices. Returns error
+// if prices is empty list.
+func Max(prices []sdk.Dec) (sdk.Dec, error) {
+	lenPrices := len(prices)
+	if lenPrices == 0 {
+		return sdk.ZeroDec(), ErrEmptyList
+	}
+
 	sort.Slice(prices, func(i, j int) bool {
 		return prices[i].BigInt().
 			Cmp(prices[j].BigInt()) < 0
 	})
 
-	return prices[len(prices)-1]
+	return prices[len(prices)-1], nil
 }
 
-// Min returns the min value of a list of prices
-func Min(prices []sdk.Dec) sdk.Dec {
+// Min returns the min value of a list of prices. Returns error
+// if prices is empty list.
+func Min(prices []sdk.Dec) (sdk.Dec, error) {
+	lenPrices := len(prices)
+	if lenPrices == 0 {
+		return sdk.ZeroDec(), ErrEmptyList
+	}
+
 	sort.Slice(prices, func(i, j int) bool {
 		return prices[i].BigInt().
 			Cmp(prices[j].BigInt()) < 0
 	})
 
-	return prices[0]
+	return prices[0], nil
 }

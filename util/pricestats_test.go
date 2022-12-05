@@ -16,8 +16,13 @@ func TestMedian(t *testing.T) {
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
-	median := Median(prices)
+	median, err := Median(prices)
+	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.125"), median)
+
+	// test empty prices list
+	median, err = Median([]sdk.Dec{})
+	require.ErrorIs(err, ErrEmptyList)
 }
 
 func TestMedianDeviation(t *testing.T) {
@@ -30,8 +35,13 @@ func TestMedianDeviation(t *testing.T) {
 	}
 	median := sdk.MustNewDecFromStr("1.125")
 
-	medianDeviation := MedianDeviation(median, prices)
+	medianDeviation, err := MedianDeviation(median, prices)
+	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.003125"), medianDeviation)
+
+	// test empty prices list
+	medianDeviation, err = MedianDeviation(median, []sdk.Dec{})
+	require.ErrorIs(err, ErrEmptyList)
 }
 
 func TestAverage(t *testing.T) {
@@ -43,8 +53,13 @@ func TestAverage(t *testing.T) {
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
-	average := Average(prices)
+	average, err := Average(prices)
+	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.125"), average)
+
+	// test empty prices list
+	average, err = Average([]sdk.Dec{})
+	require.ErrorIs(err, ErrEmptyList)
 }
 
 func TestMin(t *testing.T) {
@@ -56,8 +71,13 @@ func TestMin(t *testing.T) {
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
-	min := Min(prices)
+	min, err := Min(prices)
+	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.05"), min)
+
+	// test empty prices list
+	min, err = Min([]sdk.Dec{})
+	require.ErrorIs(err, ErrEmptyList)
 }
 
 func TestMax(t *testing.T) {
@@ -69,6 +89,11 @@ func TestMax(t *testing.T) {
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
-	max := Max(prices)
+	max, err := Max(prices)
+	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.2"), max)
+
+	// test empty prices list
+	max, err = Max([]sdk.Dec{})
+	require.ErrorIs(err, ErrEmptyList)
 }
