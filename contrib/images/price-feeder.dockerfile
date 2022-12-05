@@ -2,7 +2,7 @@
 FROM golang:1.19-alpine AS builder
 ENV PACKAGES make git libc-dev gcc linux-headers build-base
 RUN apk add --no-cache $PACKAGES
-WORKDIR /src/app/
+WORKDIR /src/
 COPY . .
 # Cosmwasm - Download correct libwasmvm version
 RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) && \
@@ -15,7 +15,7 @@ RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) &&
 RUN cd price-feeder && LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
 
 
-FROM alpine:3.14
+FROM alpine:3.17
 RUN apk add bash curl jq
 COPY --from=builder /go/bin/price-feeder /usr/local/bin/
 EXPOSE 7171
