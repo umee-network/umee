@@ -6,7 +6,7 @@ This document specifies the `x/leverage` module of the Umee chain.
 
 The leverage module allows users to supply and borrow assets, and implements various features to support this, such as a token accept-list, a dynamic interest rate module, incentivized liquidation of undercollateralized debt, and automatic reserve-based repayment of bad debt.
 
-The leverage module depends directly on `x/oracle` for asset prices, and interacts indirectly with `x/ibctransfer`, `x/peggy`, and the cosmos `x/bank` module as these all affect account balances.
+The leverage module depends directly on `x/oracle` for asset prices, and interacts indirectly with `x/ibctransfer`, `x/gravity`, and the cosmos `x/bank` module as these all affect account balances.
 
 ## Contents
 
@@ -73,6 +73,8 @@ Users have the following actions available to them:
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
   Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+
+- `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdawn.
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
@@ -281,7 +283,7 @@ See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/ume
 
 `Update-Registry` gov proposal will adds the new tokens to token registry or update the existing token with new settings.
 
-### Cli
+### CLI
 ```bash
 umeed tx gov submit-proposal [path-to-proposal-json] [flags]
 ```

@@ -471,6 +471,91 @@ paths:
           type: string
       tags:
         - Query
+  /umee/leverage/v1/max_withdraw:
+    get:
+      summary: >-
+        MaxWithdraw queries the maximum amount of a given token an address can
+        withdraw.
+      operationId: MaxWithdraw
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              uTokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: uTokens is the maximum amount of uTokens that can be withdrawn
+              tokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: >-
+                  Tokens is the equivalent of max uTokens converted to base
+                  tokens
+            description: >-
+              QueryMaxWithdrawResponse defines the response structure for the
+              MaxWithdraw gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: query
+          required: false
+          type: string
+        - name: denom
+          description: >-
+            denom is the base token denom associated with the uToken to
+            withdraw.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/leverage/v1/params:
     get:
       summary: Params queries the parameters of the x/leverage module.
@@ -2020,6 +2105,38 @@ definitions:
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.
+  umee.leverage.v1.QueryMaxWithdrawResponse:
+    type: object
+    properties:
+      uTokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: uTokens is the maximum amount of uTokens that can be withdrawn
+      tokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: Tokens is the equivalent of max uTokens converted to base tokens
+    description: >-
+      QueryMaxWithdrawResponse defines the response structure for the
+      MaxWithdraw gRPC service handler.
   umee.leverage.v1.QueryParamsResponse:
     type: object
     properties:

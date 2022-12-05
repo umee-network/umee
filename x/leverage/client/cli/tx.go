@@ -26,6 +26,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdSupply(),
 		GetCmdWithdraw(),
+		GetCmdMaxWithdraw(),
 		GetCmdCollateralize(),
 		GetCmdDecollateralize(),
 		GetCmdBorrow(),
@@ -85,6 +86,32 @@ func GetCmdWithdraw() *cobra.Command {
 			}
 
 			msg := types.NewMsgWithdraw(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdMaxWithdraw creates a Cobra command to generate or broadcast a
+// transaction with a MsgMaxWithdraw message.
+func GetCmdMaxWithdraw() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "withdraw-max [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Withdraw the maximum valid amount of a supplied asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			denom := args[0]
+
+			msg := types.NewMsgMaxWithdraw(clientCtx.GetFromAddress(), denom)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
