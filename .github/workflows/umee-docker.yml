@@ -3,9 +3,9 @@
 name: Umeed Docker Release
 on:
   push:
-    tags:
-      - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
-      - "v[0-9]+\\.[0-9]+.+" # test
+    # tags:
+    #   - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
+    #   - "v[0-9]+\\.[0-9]+.+" # test
 
 jobs:
   umeed-docker:
