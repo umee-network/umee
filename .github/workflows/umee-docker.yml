@@ -20,12 +20,12 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: robert/umeed
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=semver,pattern=latest-{{major}}.{{minor}}
-          flavor: |
-            latest=false
+          # tags: |
+          #   type=raw,value=latest,enable={{is_default_branch}}
+          #   type=semver,pattern={{version}}
+          #   type=semver,pattern=latest-{{major}}.{{minor}}
+          # flavor: |
+          #   latest=false
 
       - name: Print tags and labels
         run: |
@@ -44,7 +44,7 @@ jobs:
         with:
           file: contrib/images/umeed.Dockerfile
           push: true
-          driver: docker
+          # build-args: driver: docker
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
