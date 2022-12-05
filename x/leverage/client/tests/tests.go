@@ -222,7 +222,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
 				// (1000 / 1000000) * 34.21 = 0.03421
 				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
-				// (249 / 1000000) * 34.21 = 0.0085525
+				// (250 / 1000000) * 34.21 = 0.0085525
 				BorrowedValue: sdk.MustNewDecFromStr("0.0085525"),
 				// (1000 / 1000000) * 34.21 * 0.25 = 0.0085525
 				BorrowLimit: sdk.MustNewDecFromStr("0.0085525"),
