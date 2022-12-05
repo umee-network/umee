@@ -52,8 +52,8 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 
 ### Public
 
-- [umee-1](networks/umee-1)
-- [canon-2](networks/canon-2)
+- [umee-1](networks/umee-1) (mainnet)
+- [canon-2](networks/canon-2) (testnet)
 
 ## Install
 

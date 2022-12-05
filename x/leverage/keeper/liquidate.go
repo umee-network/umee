@@ -102,13 +102,9 @@ func (k Keeper) getLiquidationAmounts(
 		maxRepay,
 		borrowerCollateral.AmountOf(collateralDenom),
 		k.AvailableLiquidity(ctx, rewardDenom),
-		// repayTokenPrice,
-		// rewardTokenPrice,
 		priceRatio,
 		exchangeRate,
 		liqudationIncentive,
-		// closeFactor,
-		// borrowedValue,
 	)
 
 	return sdk.NewCoin(repayDenom, repay), sdk.NewCoin(collateralDenom, burn), sdk.NewCoin(rewardDenom, reward), nil
