@@ -128,3 +128,52 @@ func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 
 	require.Equal(expected, *resp)
 }
+
+func (s *IntegrationTestSuite) TestQuerier_BadDebts() {
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.BadDebts(ctx.Context(), &types.QueryBadDebts{})
+	require.NoError(err)
+
+	expected := types.QueryBadDebtsResponse{
+		Targets: nil,
+	}
+
+	require.Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
+	ctx, require := s.ctx, s.Require()
+
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+
+	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected := types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000)),
+		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000)),
+	}
+	require.Equal(expected, *resp)
+
+	// borrow 100 UMEE for non-trivial query
+	s.borrow(addr, coin(umeeDenom, 100_000000))
+
+	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000)),
+		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000)),
+	}
+	require.Equal(expected, *resp)
+}
