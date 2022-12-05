@@ -5,6 +5,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -70,27 +71,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryRegisteredTokensResponse{},
 			&types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					{
-						// must match app/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:              appparams.BondDenom,
-						SymbolDenom:            appparams.DisplayDenom,
-						Exponent:               6,
-						ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-						CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-						LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-						BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-						KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-						MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-						KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-						LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-						EnableMsgSupply:        true,
-						EnableMsgBorrow:        true,
-						Blacklist:              false,
-						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-						MaxSupply:              sdk.NewInt(100000000000),
-					},
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
 		},
@@ -108,12 +89,12 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				OraclePrice:        &oracleSymbolPrice,
 				UTokenExchangeRate: sdk.OneDec(),
 				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
-				// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
-				Supply_APY: sdk.MustNewDecFromStr("1.335"),
+				// 1.50 * (1 - 0.2 - 0.01) = 1.2008
+				Supply_APY: sdk.MustNewDecFromStr("1.2008"),
 				// This is an edge case technically - when effective supply, meaning
 				// module balance + total borrows, is zero, utilization (0/0) is
 				// interpreted as 100% so max borrow rate (150% APY) is used.
-				Borrow_APY:             sdk.MustNewDecFromStr("1.50"),
+				Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
 				Supplied:               sdk.ZeroInt(),
 				Reserved:               sdk.ZeroInt(),
 				Collateral:             sdk.ZeroInt(),
@@ -161,7 +142,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			"50uumee",
+			"249uumee",
 		},
 		nil,
 	}
@@ -181,7 +162,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"50uumee", // repays only the remaining borrowed balance, reduced automatically from 50
+			"249uumee", // repays only the remaining borrowed balance, reduced automatically from 50
 		},
 		nil,
 	}
@@ -221,7 +202,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BondDenom, 51),
+					sdk.NewInt64Coin(appparams.BondDenom, 250),
 				),
 			},
 		},
@@ -241,12 +222,12 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
 				// (1000 / 1000000) * 34.21 = 0.03421
 				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
-				// (51 / 1000000) * 34.21 = 0.00174471
-				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
-				// (1000 / 1000000) * 34.21 * 0.05 = 0.0017105
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
-				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
+				// (249 / 1000000) * 34.21 = 0.0085525
+				BorrowedValue: sdk.MustNewDecFromStr("0.0085525"),
+				// (1000 / 1000000) * 34.21 * 0.25 = 0.0085525
+				BorrowLimit: sdk.MustNewDecFromStr("0.0085525"),
+				// (1000 / 1000000) * 0.25 * 34.21 = 0.0085525
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0085525"),
 			},
 		},
 	}
