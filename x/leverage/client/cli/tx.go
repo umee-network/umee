@@ -100,7 +100,7 @@ func GetCmdWithdraw() *cobra.Command {
 // transaction with a MsgWithdrawMaximum message.
 func GetCmdWithdrawMaximum() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw-max [amount]",
+		Use:   "withdraw-max [denom]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Withdraw the maximum valid amount of a supplied asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
