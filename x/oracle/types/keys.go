@@ -74,7 +74,8 @@ func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
 func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), util.UintWithNullPrefix(blockNum))
 }
-
+// ParseDenomFromKey returns the denom contained in the *key* that has a uint64
+// at the end with a null prefix (length 9).
 func ParseDenomFromKey(key []byte, prefix []byte) string {
 	return string(key[len(prefix) : len(key)-9])
 }
