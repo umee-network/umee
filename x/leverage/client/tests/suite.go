@@ -45,18 +45,22 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 // runTestQuery
 func (s *IntegrationTestSuite) runTestQueries(tqs ...testQuery) {
 	for _, t := range tqs {
-		s.Run(t.msg, func() {
-			t.Run(s)
-		})
+		// since steps of this test suite depend on previous transactions, we want to stop
+		// on the first failure, rather than continue producing potentially inaccurate
+		// errors as an effect of the first.
+		// t.Run(s) stops properly, whereas s.Run would not
+		t.Run(s)
 	}
 }
 
 // runTestCases runs test transactions or queries, stopping early if an error occurs
 func (s *IntegrationTestSuite) runTestTransactions(txs ...testTransaction) {
 	for _, t := range txs {
-		s.Run(t.msg, func() {
-			t.Run(s)
-		})
+		// since steps of this test suite depend on previous transactions, we want to stop
+		// on the first failure, rather than continue producing potentially inaccurate
+		// errors as an effect of the first.
+		// t.Run(s) stops properly, whereas s.Run would not
+		t.Run(s)
 	}
 }
 
