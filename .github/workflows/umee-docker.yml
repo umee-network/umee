@@ -37,8 +37,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          file: umeed.Dockerfile
-          context: ./contrib/images
+          file: contrib/images/umeed.Dockerfile
           push: true
           driver: docker
           # platforms: linux/amd64,linux/arm64
