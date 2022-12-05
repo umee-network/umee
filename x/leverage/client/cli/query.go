@@ -33,6 +33,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		GetCmdQueryAccountBalances(),
 		GetCmdQueryAccountSummary(),
 		GetCmdQueryLiquidationTargets(),
+		GetCmdQueryBadDebts(),
+		GetCmdQueryMaxWithdraw(),
 	)
 
 	return cmd
@@ -183,6 +185,59 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryLiquidationTargets{}
 			resp, err := queryClient.LiquidationTargets(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryBadDebts creates a Cobra command to query for
+// all bad debts.
+func GetCmdQueryBadDebts() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "bad-debts",
+		Args:  cobra.ExactArgs(0),
+		Short: "Query for all bad debts",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryBadDebts{}
+			resp, err := queryClient.BadDebts(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMaxWithdraw creates a Cobra command to query for
+// the maximum amount of a given token an address can withdraw.
+func GetCmdQueryMaxWithdraw() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "max-withdraw [addr] [denom]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Query for the maximum amount of a given base token an address can withdraw",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryMaxWithdraw{
+				Address: args[0],
+				Denom:   args[1],
+			}
+			resp, err := queryClient.MaxWithdraw(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

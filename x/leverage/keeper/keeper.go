@@ -372,9 +372,9 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 // Because partial liquidation is possible and exchange rates vary, Liquidate returns the actual amount of
 // tokens repaid, collateral liquidated, and base tokens or uTokens rewarded.
 func (k Keeper) Liquidate(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, maxRepay sdk.Coin, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, requestedRepay sdk.Coin, rewardDenom string,
 ) (repaid sdk.Coin, liquidated sdk.Coin, reward sdk.Coin, err error) {
-	if err := k.validateAcceptedAsset(ctx, maxRepay); err != nil {
+	if err := k.validateAcceptedAsset(ctx, requestedRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
@@ -393,7 +393,7 @@ func (k Keeper) Liquidate(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
-		maxRepay,
+		requestedRepay,
 		rewardDenom,
 		directLiquidation,
 	)
