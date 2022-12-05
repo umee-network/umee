@@ -83,10 +83,10 @@ func (s msgServer) Withdraw(
 	}, err
 }
 
-func (s msgServer) WithdrawMaximum(
+func (s msgServer) MaxWithdraw(
 	goCtx context.Context,
-	msg *types.MsgWithdrawMaximum,
-) (*types.MsgWithdrawMaximumResponse, error) {
+	msg *types.MsgMaxWithdraw,
+) (*types.MsgMaxWithdrawResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
@@ -115,7 +115,7 @@ func (s msgServer) WithdrawMaximum(
 		Utoken:   uToken,
 		Asset:    received,
 	})
-	return &types.MsgWithdrawMaximumResponse{
+	return &types.MsgMaxWithdrawResponse{
 		Withdrawn: uToken,
 		Received:  received,
 	}, err

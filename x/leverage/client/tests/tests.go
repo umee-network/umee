@@ -241,7 +241,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 
 	withdrawMax := testTransaction{
 		"withdraw max",
-		cli.GetCmdWithdrawMaximum(),
+		cli.GetCmdMaxWithdraw(),
 		[]string{
 			"uumee",
 		},

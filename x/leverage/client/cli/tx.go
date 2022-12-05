@@ -26,7 +26,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdSupply(),
 		GetCmdWithdraw(),
-		GetCmdWithdrawMaximum(),
+		GetCmdMaxWithdraw(),
 		GetCmdCollateralize(),
 		GetCmdDecollateralize(),
 		GetCmdBorrow(),
@@ -96,9 +96,9 @@ func GetCmdWithdraw() *cobra.Command {
 	return cmd
 }
 
-// GetCmdWithdrawMaximum creates a Cobra command to generate or broadcast a
-// transaction with a MsgWithdrawMaximum message.
-func GetCmdWithdrawMaximum() *cobra.Command {
+// GetCmdMaxWithdraw creates a Cobra command to generate or broadcast a
+// transaction with a MsgMaxWithdraw message.
+func GetCmdMaxWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "withdraw-max [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -111,7 +111,7 @@ func GetCmdWithdrawMaximum() *cobra.Command {
 
 			denom := args[0]
 
-			msg := types.NewMsgWithdrawMaximum(clientCtx.GetFromAddress(), denom)
+			msg := types.NewMsgMaxWithdraw(clientCtx.GetFromAddress(), denom)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

@@ -54,26 +54,26 @@ func (msg *MsgWithdraw) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgWithdrawMaximum(supplier sdk.AccAddress, denom string) *MsgWithdrawMaximum {
-	return &MsgWithdrawMaximum{
+func NewMsgMaxWithdraw(supplier sdk.AccAddress, denom string) *MsgMaxWithdraw {
+	return &MsgMaxWithdraw{
 		Supplier: supplier.String(),
 		Denom:    denom,
 	}
 }
 
-func (msg MsgWithdrawMaximum) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgWithdrawMaximum) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
 
-func (msg *MsgWithdrawMaximum) ValidateBasic() error {
+func (msg *MsgMaxWithdraw) ValidateBasic() error {
 	return validateSenderAndDenom(msg.Supplier, msg.Denom)
 }
 
-func (msg *MsgWithdrawMaximum) GetSigners() []sdk.AccAddress {
+func (msg *MsgMaxWithdraw) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Supplier)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgWithdrawMaximum) GetSignBytes() []byte {
+func (msg *MsgMaxWithdraw) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
