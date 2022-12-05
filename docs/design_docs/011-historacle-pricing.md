@@ -155,11 +155,11 @@ At the end of each `Median Period`, we will :
 
 Given a standard deviation where we have the median of each denom, find the square of each price stamp's distance from the median, sum those values up, and average them:
 
-> _STD_ = _ER_(2*H* + 2)
+> STD = ER\*(2H + 2)
 
 The cost of the `Median Period` is:
 
-> (_ER_ x _Sort_(_HP_) + 4) + (_ER_ x _STD_)
+> (ER x Sort(HP) + 4) + (ER x STD)
 
 ## References
 
