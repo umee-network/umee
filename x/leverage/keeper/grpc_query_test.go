@@ -14,7 +14,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 
 	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
 	require.NoError(err)
-	require.Len(resp.Registry, 2, "token registry length")
+	require.Len(resp.Registry, 3, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
@@ -36,12 +36,12 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
 	require.NoError(err)
 
-	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
+	oracleSymbolPrice := sdk.MustNewDecFromStr("4.21")
 
 	expected := types.QueryMarketSummaryResponse{
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
-		OraclePrice:            &oraclePrice,
+		OraclePrice:            &oracleSymbolPrice,
 		UTokenExchangeRate:     sdk.OneDec(),
 		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
 		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
