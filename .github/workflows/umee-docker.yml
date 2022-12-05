@@ -3,9 +3,10 @@
 name: Umeed Docker Release
 on:
   push:
-    # Sequence of patterns matched against refs/tags
-    # tags:
-    #   - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
+    Sequence of patterns matched against refs/tags
+    tags:
+      - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
+      - "v[0-9]+\\.[0-9]+.+" # test
 
 jobs:
   umeed-docker:
@@ -39,6 +40,7 @@ jobs:
           file: umeed.Dockerfile
           context: ./contrib/images
           push: true
-          platforms: linux/amd64,linux/arm64
+          driver: docker
+          # platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
