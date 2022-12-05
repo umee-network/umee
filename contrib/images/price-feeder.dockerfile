@@ -1,9 +1,9 @@
 # Fetch base packages
 FROM golang:1.19-alpine AS builder
-ENV PACKAGES make git libc-dev gcc linux-headers build-base
-RUN apk add --no-cache $PACKAGES
+RUN apk add --no-cache make git libc-dev gcc linux-headers build-base
 WORKDIR /src/
 COPY . .
+
 # Cosmwasm - Download correct libwasmvm version
 RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) && \
     wget https://github.com/CosmWasm/wasmvm/releases/download/$WASMVM_VERSION/libwasmvm_muslc.$(uname -m).a \
@@ -13,7 +13,6 @@ RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) &&
     sha256sum /lib/libwasmvm_muslc.a | grep $(cat /tmp/checksums.txt | grep $(uname -m) | cut -d ' ' -f 1)
 # Build the binary
 RUN cd price-feeder && LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
-
 
 FROM alpine:3.17
 RUN apk add bash curl jq
