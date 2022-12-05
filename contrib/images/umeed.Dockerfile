@@ -15,7 +15,7 @@ COPY . .
 #     sha256sum /lib/libwasmvm_muslc.a | grep $(cat /tmp/checksums.txt | grep $(uname -m) | cut -d ' ' -f 1)
 
 # Build the binary
-RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
+RUN LEDGER_ENABLED=false make install
 
 # Final image
 FROM alpine:edge
