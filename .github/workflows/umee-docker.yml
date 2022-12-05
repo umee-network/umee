@@ -4,8 +4,8 @@ name: Umeed Docker Release
 on:
   push:
     # Sequence of patterns matched against refs/tags
-    tags:
-      - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
+    # tags:
+    #   - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
 
 jobs:
   umeed-docker:
@@ -19,7 +19,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: umee-network/umeed
+          images: robert/umeed
 
       - name: Print tags and labels
         run: |
