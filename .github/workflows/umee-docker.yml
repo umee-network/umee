@@ -7,6 +7,10 @@ on:
     #   - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Push only official release version tags e.g. v2.0.5
     #   - "v[0-9]+\\.[0-9]+.+" # test
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   umeed-docker:
     name: umee Docker
