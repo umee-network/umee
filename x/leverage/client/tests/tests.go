@@ -40,6 +40,17 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
+		{
+			"query max withdraw - invalid address",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				"xyz",
+				"uumee",
+			},
+			true,
+			nil,
+			nil,
+		},
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
@@ -128,6 +139,30 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				AvailableCollateralize: sdk.ZeroInt(),
 			},
 		},
+		{
+			"query bad debts",
+			cli.GetCmdQueryBadDebts(),
+			[]string{},
+			false,
+			&types.QueryBadDebtsResponse{},
+			&types.QueryBadDebtsResponse{
+				Targets: []types.BadDebt{},
+			},
+		},
+		{
+			"query max withdraw (zero)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
+			},
+		},
 	}
 
 	supply := testTransaction{
@@ -204,6 +239,15 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		nil,
 	}
 
+	withdrawMax := testTransaction{
+		"withdraw max",
+		cli.GetCmdMaxWithdraw(),
+		[]string{
+			"uumee",
+		},
+		nil,
+	}
+
 	nonzeroQueries := []testQuery{
 		{
 			"query account balances",
@@ -249,6 +293,20 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
 			},
 		},
+		{
+			"query max withdraw (borrow limit reached)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
+			},
+		},
 	}
 
 	postQueries := []testQuery{
@@ -268,6 +326,52 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
 				),
 				Borrowed: sdk.NewCoins(),
+			},
+		},
+		{
+			"query max withdraw (after repay)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.NewInt(201)),
+				UTokens: sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+			},
+		},
+	}
+
+	lastQueries := []testQuery{
+		{
+			"query account balances (empty after withdraw max)",
+			cli.GetCmdQueryAccountBalances(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
+				Supplied:   sdk.NewCoins(),
+				Collateral: sdk.NewCoins(),
+				Borrowed:   sdk.NewCoins(),
+			},
+		},
+
+		{
+			"query max withdraw (after withdraw max)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
 			},
 		},
 	}
@@ -294,6 +398,14 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		withdraw,
 	)
 
-	// Confirm cleanup transaction effects
+	// Confirm additional transaction effects
 	s.runTestQueries(postQueries...)
+
+	// This transaction will run last
+	s.runTestTransactions(
+		withdrawMax,
+	)
+
+	// Confirm withdraw max transaction effects
+	s.runTestQueries(lastQueries...)
 }

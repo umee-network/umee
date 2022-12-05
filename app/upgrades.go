@@ -12,6 +12,7 @@ import (
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v3/app/upgradev3"
+	"github.com/umee-network/umee/v3/app/upgradev3x3"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -22,34 +23,60 @@ func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
 		panic(err)
 	}
 
-	app.registerV3_0Upgrade(upgradeInfo)
-	app.registerV3_1Upgrade(upgradeInfo)
-	app.registerV3_2Upgrade(upgradeInfo)
+	app.registerUpgrade3_0(upgradeInfo)
+	app.registerUpgrade3_1(upgradeInfo)
+
+	app.registerUpgrade3_1to3_3(upgradeInfo)
+	app.registerUpgrade3_2to3_3(upgradeInfo)
 }
 
-// performs upgrade from v3.1 -> v3.2
-func (app *UmeeApp) registerV3_2Upgrade(_ upgradetypes.Plan) {
-	const planName = "v3.2"
+// performs upgrade from v3.1 -> v3.3 (including the v3.2 chanages)
+func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
+	const planName = "v3.1-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			err := bankkeeper.NewMigrator(app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			ctx.Logger().Info("Run v3.3 migrator")
+			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
 			if err != nil {
 				return fromVM, err
 			}
+			ctx.Logger().Info("Run x/bank v0.46.5 migration")
+			err = bankkeeper.NewMigrator(app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			if err != nil {
+				return fromVM, err
+			}
+			ctx.Logger().Info("Run module migrations")
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		})
+}
+
+// performs upgrade from v3.2 -> v3.3
+func (app *UmeeApp) registerUpgrade3_2to3_3(_ upgradetypes.Plan) {
+	const planName = "v3.2-v3.3"
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			ctx.Logger().Info("Run v3.3 migrator")
+			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
+			if err != nil {
+				return fromVM, err
+			}
+			ctx.Logger().Info("Run module migrations")
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		})
 }
 
 // performs upgrade from v3.0 -> v3.1
-func (app *UmeeApp) registerV3_1Upgrade(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_1(_ upgradetypes.Plan) {
 	const planName = "v3.1.0"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyRunMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v1->v3
-func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 	const planName = "v1.1-v3.0"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
@@ -101,7 +128,7 @@ func (app *UmeeApp) registerV3_0Upgrade(upgradeInfo upgradetypes.Plan) {
 		}})
 }
 
-func onlyRunMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
+func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("Upgrade handler execution", "name", planName)
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
