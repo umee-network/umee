@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgWithdrawMax
+- [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgMaxWithdraw
 - [1633](https://github.com/umee-network/umee/pull/1633) MarketSummary query now displays symbol price instead of base price for readability.
 
 ### Fixes
