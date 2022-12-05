@@ -1,9 +1,11 @@
-# Fetch base packages
+# Builder docker container
 FROM golang:1.19-alpine AS builder
-ENV PACKAGES make git libc-dev gcc linux-headers build-base
-RUN apk add --no-cache $PACKAGES
+RUN apk add --no-cache make git libc-dev gcc linux-headers build-base && \
+    apk add --update ca-certificates
+
 WORKDIR /src/app/
 COPY . .
+
 # Cosmwasm - Download correct libwasmvm version
 RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) && \
     wget https://github.com/CosmWasm/wasmvm/releases/download/$WASMVM_VERSION/libwasmvm_muslc.$(uname -m).a \
@@ -14,10 +16,14 @@ RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) &&
 # Build the binary
 RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install
 
+# Final image
+FROM alpine:edge
+RUN apk add bash curl jq && \
+    apk add --update ca-certificates
 
-FROM alpine:3.14
-RUN apk add bash curl jq
 COPY --from=builder /go/bin/umeed /usr/local/bin/
 EXPOSE 26656 26657 1317 9090
-CMD ["umeed", "start"]
+
+# Run umeed by default, omit entrypoint to ease using container with CLI
+CMD ["umeed"]
 STOPSIGNAL SIGTERM
