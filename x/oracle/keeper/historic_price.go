@@ -80,29 +80,33 @@ func (k Keeper) GetHistoricMedianDeviation(
 	return decProto.Dec, nil
 }
 
-// WithinMedianDeviation returns whether or not a given price of a given
-// denom is within the latest stamped Standard Deviation around the Median.
+// WithinMedianDeviation returns whether or not the current price of a
+// given denom is within the latest stamped Standard Deviation around
+// the Median.
 func (k Keeper) WithinMedianDeviation(
 	ctx sdk.Context,
 	denom string,
-	price sdk.Dec,
 ) (bool, error) {
 	// get latest median
-	medians := k.GetHistoricMedians(
-		ctx,
-		denom,
-		1,
-	)
+	medians := k.GetHistoricMedians(ctx, denom, 1)
 	if len(medians) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
 	}
+	median := medians[0]
+
+	// get latest historic price
+	prices := k.getHistoricPrices(ctx, denom)
+	if len(prices) == 0 {
+		return false, sdkerrors.Wrap(types.ErrNoHistoricPrice, fmt.Sprintf("denom: %s", denom))
+	}
+	price := prices[0]
 
 	medianDeviation, err := k.GetHistoricMedianDeviation(ctx, denom)
 	if err != nil {
 		return false, err
 	}
 
-	return price.Sub(medians[0]).Abs().LTE(medianDeviation), nil
+	return price.Sub(median).Abs().LTE(medianDeviation), nil
 }
 
 // setMedianDeviation sets a given denom's standard deviation around
@@ -221,7 +225,7 @@ func (k Keeper) IterateHistoricPrices(
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(denom))
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+	iter := sdk.KVStoreReversePrefixIterator(store, prefix)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
