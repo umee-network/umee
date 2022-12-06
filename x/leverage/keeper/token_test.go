@@ -7,7 +7,7 @@ import (
 func (s *IntegrationTestSuite) TestGetToken() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	uabc := newToken("uabc", "ABC")
+	uabc := newToken("uabc", "ABC", 6)
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, uabc))
 
 	t, err := app.LeverageKeeper.GetTokenSettings(ctx, "uabc")

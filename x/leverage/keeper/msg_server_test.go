@@ -10,8 +10,8 @@ import (
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	registeredUmee := fixtures.Token("uumee", "UMEE")
-	newTokens := fixtures.Token("uabcd", "ABCD")
+	registeredUmee := fixtures.Token("uumee", "UMEE", 6)
+	newTokens := fixtures.Token("uabcd", "ABCD", 6)
 
 	testCases := []struct {
 		name      string
@@ -26,7 +26,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,
@@ -83,7 +83,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 3)
+				s.Require().Len(tokens, 4)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uabcd")
 				s.Require().NoError(err)
@@ -95,7 +95,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 
 func (s *IntegrationTestSuite) TestUpdateRegistry() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
-	modifiedUmee := fixtures.Token("uumee", "UMEE")
+	modifiedUmee := fixtures.Token("uumee", "UMEE", 6)
 	modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
 
 	testCases := []struct {
@@ -111,7 +111,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,
@@ -124,7 +124,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
-					fixtures.Token("uosmo", ""), // empty denom is invalid
+					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
 			},
 			true,
@@ -155,7 +155,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 2)
+				s.Require().Len(tokens, 3)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)

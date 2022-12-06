@@ -46,6 +46,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgMaxWithdraw
+- [1633](https://github.com/umee-network/umee/pull/1633) MarketSummary query now displays symbol price instead of base price for readability.
+
+### Fixes
+
+- [1642](https://github.com/umee-network/umee/pull/1642) Added missing CLI for QueryBadDebts
+- [1633](https://github.com/umee-network/umee/pull/1633) Increases price calculation precision for high exponent assets.
+
 ## [v3.2.0](https://github.com/umee-network/umee/releases/tag/v3.2.0) - 2022-11-25
 
 Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.

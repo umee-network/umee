@@ -67,20 +67,53 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	s.keeper.Logger(ctx).Debug(
-		"supplied assets withdrawn",
-		"supplier", msg.Supplier,
-		"redeemed", msg.Asset.String(),
-		"received", received.String(),
-	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
-		Supplier: msg.Supplier,
-		Utoken:   msg.Asset,
-		Asset:    received,
-	})
+	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
 	}, err
+}
+
+func (s msgServer) MaxWithdraw(
+	goCtx context.Context,
+	msg *types.MsgMaxWithdraw,
+) (*types.MsgMaxWithdrawResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
+	return &types.MsgMaxWithdrawResponse{
+		Withdrawn: uToken,
+		Received:  received,
+	}, err
+}
+
+func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) error {
+	s.keeper.Logger(ctx).Debug(
+		desc,
+		"supplier", supplier,
+		"redeemed", redeemed.String(),
+		"received", received.String(),
+	)
+	err := ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+		Supplier: supplier,
+		Utoken:   redeemed,
+		Asset:    received,
+	})
+	return err
 }
 
 func (s msgServer) Collateralize(
