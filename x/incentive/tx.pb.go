@@ -421,7 +421,7 @@ var xxx_messageInfo_MsgSponsorResponse proto.InternalMessageInfo
 
 // MsgGovSetParams is used by governance to update module parameters.
 type MsgGovSetParams struct {
-	// authority is the address of the governance account.
+	// authority must be the address of the governance account.
 	Authority   string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
@@ -507,7 +507,7 @@ var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
 // after this message passes, but before the program's start_time, or the program
 // will be cancelled when it would otherwise start.
 type MsgGovCreateProgram struct {
-	// authority is the address of the governance account.
+	// authority must be the address of the governance account.
 	Authority   string           `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Title       string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
