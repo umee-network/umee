@@ -29,8 +29,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // registry can be updated in the Umee capital facility. Note, the registry
 // defined in the proposal replaces the current registry in its entirety.
 type UpdateRegistryProposal struct {
-	Title       string        `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description string        `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Title       string  `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description string  `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Registry    []types.Token `protobuf:"bytes,3,rep,name=registry,proto3" json:"registry"`
 }
 
