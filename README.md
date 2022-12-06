@@ -46,7 +46,9 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 |    v1.x.x    |    ✓    |      ✗       |  v0.45.x   | v2.0.x | v0.2.x  |     N/A      | umee/v1 module/v1.4.x-umee |
 |    v2.x.x    |    ✗    |      ✓       |  v0.45.x   | v2.3.x | v0.2.x  |    v0.2.x    |   umee/v2 module/v1.4.x    |
 |   v3.0-1.x   |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.3.x+ |    v1.0.x    | umee/v3 module/v1.5.x-umee |
-|    v3.2.x    |    ✓    |      ✗       |  v0.46.6+  | v5.0.x | v1.3.x+ |    v2.0.x    |   umee/v3 v1.5.3-umee-3    |
+|  v3.1.0-cw1  |    ✗    |      ✓       |  v0.46.x   | v5.0.x | v1.3.x+ |    v2.0.x    | umee/v3 module/v1.5.x-umee |
+|    v3.2.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.x    |   umee/v3 v1.5.3-umee-3    |
+|    v3.2.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |   v2.0.1+    |   umee/v3 v1.5.3-umee-3    |
 
 ## Active Networks
 
@@ -92,8 +94,11 @@ export DAEMON_RESTART_AFTER_UPGRADE=true
 export DAEMON_ALLOW_DOWNLOAD_BINARIES=true
 export DAEMON_PREUPGRADE_MAX_RETRIES=3
 ```
-- If you didn't build binary from source in the machine, you have to download the respective `libwasmvm` into your machine.  
+
+- If you didn't build binary from source in the machine, you have to download the respective `libwasmvm` into your machine.
+
 ```bash
 $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
 ```
+
 - To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`

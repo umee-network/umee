@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-07
+
 ### Features
 
 - [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgMaxWithdraw
@@ -53,6 +55,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
+- [1640](https://github.com/umee-network/umee/pull/1640) Migrate legacy x/leverage gov handler proposals to the new `MsgGovUpdateRegistry` messages.
 - [1642](https://github.com/umee-network/umee/pull/1642) Added missing CLI for QueryBadDebts
 - [1633](https://github.com/umee-network/umee/pull/1633) Increases price calculation precision for high exponent assets.
 
