@@ -63,12 +63,12 @@ We define two Maximum values, which correspond to the most we will store of a me
 
 Modules will have access to the following `keeper` functions from the `x/oracle` module:
 
-- `HistoricMedian(denom) ([]sdk.Dec, error)` returns list median prices of an asset in the last `Pruning Period`
-- `WithinHistoricDeviation(denom) (bool, error)` returns whether or not the current price of an asset is within the Standard Deviation around the Median.
-- `MedianOfMedians(denom string, blockNum int) sdk.Dec` returns the Median of the all the Medians recorded within the past `blockNum`. TODO: what does it mean "within the past blockNum"?
-- `AverageOfMedians(denom string, blockNum int) sdk.Dec` returns the Average of all the Medians recorded within the past `blockNum`.
-- `MaxMedian(denom string, blockNum int) sdk.Dec` returns the Maximum of all the Medians recorded within the past `blockNum`.
-- `MinMedian(denom string, blockNum int) sdk.Dec` returns the Minimum of all the Medians recorded within the past `blockNum`.
+- `GetHistoricMedians(denom string, numStamps uint64) []sdk.Dec` returns list of last `numStamps` amount of median prices of an asset
+- `WithinHistoricDeviation(denom string, price sdk.Dec) (bool, error)` returns whether or not a price of an asset is within the Standard Deviation around the Median.
+- `GetMedianOfMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Median of the all the Medians recorded within the past `numStamps` of medians.
+- `GetAverageOfMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Average of all the Medians recorded within the past `numStamps` of medians.
+- `GetMaxOfMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Maximum of all the Medians recorded within the past `numStamps` of medians.
+- `GetMinOfMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Minimum of all the Medians recorded within the past `numStamps` of medians.
 
 ### Outcomes
 
