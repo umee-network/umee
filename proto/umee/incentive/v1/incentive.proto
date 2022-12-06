@@ -22,23 +22,30 @@ message Params {
   // unbonding_duration_short defines the unbonding duration (in seconds) of the short tier.
   uint64 unbonding_duration_short = 4;
 
-  // The tier_weight_short defines how the proportion of rewards assets locked
+  // tier_weight_short defines the proportion of rewards which assets bonded
   // in the short unbonding duration receive compared to what the same amount
-  // would receive on the long tier.
+  // would receive bonded to the long tier.
   // valid values: [0;1]
   string tier_weight_short = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
 
-  // The tier_weight_middle defines how the proportion of rewards assets locked
+  // tier_weight_middle defines the proportion of rewards which assets bonded
   // in the middle unbonding duration receive compared to what the same amount
-  // would receive on the long tier.
+  // would receive bonded to the long tier.
   // valid values: [0;1]
   string tier_weight_middle = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+
+  // community_fund_address is the address from which all incentive programs
+  // proposed with "from_community_fund = true" will receive their funding.
+  // Since funds are withdrawn automatically when an incentive program passes
+  // governance, this account should always contain sufficient balance to
+  // cover incentive programs which are being voted upon.
+  string community_fund_address = 7;
 }
 
 // IncentiveProgram defines a liquidity mining incentive program on a single

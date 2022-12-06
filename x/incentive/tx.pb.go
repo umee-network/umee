@@ -498,14 +498,22 @@ func (m *MsgGovSetParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
 
-// MsgGovCreateProgram is used by governance to create an incentive program.
+// MsgGovCreateProgram is used by governance to create an incentive program. There are two
+// funding scenarios, depending on from_community_fund.
+// If it is true,the program's total rewards will be automatically withdrawn from
+// the (parameter) community_fund_address to the incentive module account when this
+// message is passed. (Insufficient funds cause the parameter to be treated as false.)
+// If it is false, a MsgSponsor fundign the program's full amount must be submitted
+// after this message passes, but before the program's start_time, or the program
+// will be cancelled when it would otherwise start.
 type MsgGovCreateProgram struct {
 	// authority is the address of the governance account.
-	Authority         string           `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Title             string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description       string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Program           IncentiveProgram `protobuf:"bytes,4,opt,name=program,proto3" json:"program"`
-	FromCommunityFund bool             `protobuf:"varint,5,opt,name=from_community_fund,json=fromCommunityFund,proto3" json:"from_community_fund,omitempty"`
+	Authority   string           `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Title       string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Program     IncentiveProgram `protobuf:"bytes,4,opt,name=program,proto3" json:"program"`
+	// from_community_fund defines the source of funds for a proposed incentive program.
+	FromCommunityFund bool `protobuf:"varint,5,opt,name=from_community_fund,json=fromCommunityFund,proto3" json:"from_community_fund,omitempty"`
 }
 
 func (m *MsgGovCreateProgram) Reset()         { *m = MsgGovCreateProgram{} }
