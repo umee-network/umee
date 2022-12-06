@@ -830,6 +830,8 @@ var xxx_messageInfo_QueryParamsResponse proto.InternalMessageInfo
 type QueryMedians struct {
 	// denom defines the denomination to query for.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// numStamps defines the number of median stamps to query for.
+	NumStamps uint64 `protobuf:"varint,2,opt,name=numStamps,proto3" json:"numStamps,omitempty"`
 }
 
 func (m *QueryMedians) Reset()         { *m = QueryMedians{} }
@@ -905,7 +907,7 @@ func (m *QueryMediansResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMediansResponse proto.InternalMessageInfo
 
-// QueryMedians is the request type for the Query/Medians RPC Response.
+// QueryMedianDeviations is the request type for the Query/MedianDeviations RPC Response.
 type QueryMedianDeviations struct {
 	// denom defines the denomination to query for.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -944,10 +946,10 @@ func (m *QueryMedianDeviations) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMedianDeviations proto.InternalMessageInfo
 
-// QueryMediansResponse is response type for the
-// Query/Medians RPC method.
+// QueryMedianDeviationsResponse is response type for the
+// Query/MedianDeviations RPC method.
 type QueryMedianDeviationsResponse struct {
-	// medians defines a list of the medians for all stamped denoms.
+	// medians defines a list of the median deviations for all stamped denoms.
 	MedianDeviations github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,1,rep,name=medianDeviations,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"medianDeviations"`
 }
 
@@ -984,6 +986,330 @@ func (m *QueryMedianDeviationsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryMedianDeviationsResponse proto.InternalMessageInfo
 
+// QueryMedianOfMedians is the request type for the Query/MedianOfMedians RPC Response.
+type QueryMedianOfMedians struct {
+	// denom defines the denomination to query for.
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// numStamps defines the number of median stamps to query for.
+	NumStamps uint64 `protobuf:"varint,2,opt,name=numStamps,proto3" json:"numStamps,omitempty"`
+}
+
+func (m *QueryMedianOfMedians) Reset()         { *m = QueryMedianOfMedians{} }
+func (m *QueryMedianOfMedians) String() string { return proto.CompactTextString(m) }
+func (*QueryMedianOfMedians) ProtoMessage()    {}
+func (*QueryMedianOfMedians) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{24}
+}
+func (m *QueryMedianOfMedians) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMedianOfMedians) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMedianOfMedians.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMedianOfMedians) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMedianOfMedians.Merge(m, src)
+}
+func (m *QueryMedianOfMedians) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMedianOfMedians) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMedianOfMedians.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMedianOfMedians proto.InternalMessageInfo
+
+// QueryMedianOfMediansResponse is response type for the
+// Query/MedianOfMediansResponse RPC method.
+type QueryMedianOfMediansResponse struct {
+	// medianOfMedian defines a median of stamped medians.
+	MedianOfMedians types.DecCoin `protobuf:"bytes,1,opt,name=medianOfMedians,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"medianOfMedians"`
+}
+
+func (m *QueryMedianOfMediansResponse) Reset()         { *m = QueryMedianOfMediansResponse{} }
+func (m *QueryMedianOfMediansResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryMedianOfMediansResponse) ProtoMessage()    {}
+func (*QueryMedianOfMediansResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{25}
+}
+func (m *QueryMedianOfMediansResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMedianOfMediansResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMedianOfMediansResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMedianOfMediansResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMedianOfMediansResponse.Merge(m, src)
+}
+func (m *QueryMedianOfMediansResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMedianOfMediansResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMedianOfMediansResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMedianOfMediansResponse proto.InternalMessageInfo
+
+// QueryAverageOfMedians is the request type for the Query/AverageOfMedians RPC Response.
+type QueryAverageOfMedians struct {
+	// denom defines the denomination to query for.
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// numStamps defines the number of median stamps to query for.
+	NumStamps uint64 `protobuf:"varint,2,opt,name=numStamps,proto3" json:"numStamps,omitempty"`
+}
+
+func (m *QueryAverageOfMedians) Reset()         { *m = QueryAverageOfMedians{} }
+func (m *QueryAverageOfMedians) String() string { return proto.CompactTextString(m) }
+func (*QueryAverageOfMedians) ProtoMessage()    {}
+func (*QueryAverageOfMedians) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{26}
+}
+func (m *QueryAverageOfMedians) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAverageOfMedians) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAverageOfMedians.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAverageOfMedians) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAverageOfMedians.Merge(m, src)
+}
+func (m *QueryAverageOfMedians) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAverageOfMedians) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAverageOfMedians.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAverageOfMedians proto.InternalMessageInfo
+
+// QueryAverageOfMediansResponse is response type for the
+// Query/AverageOfMediansResponse RPC method.
+type QueryAverageOfMediansResponse struct {
+	// averageOfMedian defines a average of stamped medians.
+	AverageOfMedians types.DecCoin `protobuf:"bytes,1,opt,name=averageOfMedians,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"averageOfMedians"`
+}
+
+func (m *QueryAverageOfMediansResponse) Reset()         { *m = QueryAverageOfMediansResponse{} }
+func (m *QueryAverageOfMediansResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAverageOfMediansResponse) ProtoMessage()    {}
+func (*QueryAverageOfMediansResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{27}
+}
+func (m *QueryAverageOfMediansResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAverageOfMediansResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAverageOfMediansResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAverageOfMediansResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAverageOfMediansResponse.Merge(m, src)
+}
+func (m *QueryAverageOfMediansResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAverageOfMediansResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAverageOfMediansResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAverageOfMediansResponse proto.InternalMessageInfo
+
+// QueryMinOfMedians is the request type for the Query/MinOfMedians RPC Response.
+type QueryMinOfMedians struct {
+	// denom defines the denomination to query for.
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// numStamps defines the number of median stamps to query for.
+	NumStamps uint64 `protobuf:"varint,2,opt,name=numStamps,proto3" json:"numStamps,omitempty"`
+}
+
+func (m *QueryMinOfMedians) Reset()         { *m = QueryMinOfMedians{} }
+func (m *QueryMinOfMedians) String() string { return proto.CompactTextString(m) }
+func (*QueryMinOfMedians) ProtoMessage()    {}
+func (*QueryMinOfMedians) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{28}
+}
+func (m *QueryMinOfMedians) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMinOfMedians) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMinOfMedians.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMinOfMedians) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMinOfMedians.Merge(m, src)
+}
+func (m *QueryMinOfMedians) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMinOfMedians) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMinOfMedians.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMinOfMedians proto.InternalMessageInfo
+
+// QueryMinOfMediansResponse is response type for the
+// Query/MinOfMediansResponse RPC method.
+type QueryMinOfMediansResponse struct {
+	// minOfMedian defines a min of stamped medians.
+	MinOfMedians types.DecCoin `protobuf:"bytes,1,opt,name=minOfMedians,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"minOfMedians"`
+}
+
+func (m *QueryMinOfMediansResponse) Reset()         { *m = QueryMinOfMediansResponse{} }
+func (m *QueryMinOfMediansResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryMinOfMediansResponse) ProtoMessage()    {}
+func (*QueryMinOfMediansResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{29}
+}
+func (m *QueryMinOfMediansResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMinOfMediansResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMinOfMediansResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMinOfMediansResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMinOfMediansResponse.Merge(m, src)
+}
+func (m *QueryMinOfMediansResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMinOfMediansResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMinOfMediansResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMinOfMediansResponse proto.InternalMessageInfo
+
+// QueryMaxOfMedians is the request type for the Query/MaxOfMedians RPC Response.
+type QueryMaxOfMedians struct {
+	// denom defines the denomination to query for.
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// numStamps defines the number of median stamps to query for.
+	NumStamps uint64 `protobuf:"varint,2,opt,name=numStamps,proto3" json:"numStamps,omitempty"`
+}
+
+func (m *QueryMaxOfMedians) Reset()         { *m = QueryMaxOfMedians{} }
+func (m *QueryMaxOfMedians) String() string { return proto.CompactTextString(m) }
+func (*QueryMaxOfMedians) ProtoMessage()    {}
+func (*QueryMaxOfMedians) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{30}
+}
+func (m *QueryMaxOfMedians) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMaxOfMedians) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMaxOfMedians.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMaxOfMedians) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMaxOfMedians.Merge(m, src)
+}
+func (m *QueryMaxOfMedians) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMaxOfMedians) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMaxOfMedians.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMaxOfMedians proto.InternalMessageInfo
+
+// QueryMaxOfMediansResponse is response type for the
+// Query/MaxOfMediansResponse RPC method.
+type QueryMaxOfMediansResponse struct {
+	// maxOfMedian defines a max of stamped medians.
+	MaxOfMedians types.DecCoin `protobuf:"bytes,1,opt,name=maxOfMedians,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"maxOfMedians"`
+}
+
+func (m *QueryMaxOfMediansResponse) Reset()         { *m = QueryMaxOfMediansResponse{} }
+func (m *QueryMaxOfMediansResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryMaxOfMediansResponse) ProtoMessage()    {}
+func (*QueryMaxOfMediansResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_710e319bc1815d33, []int{31}
+}
+func (m *QueryMaxOfMediansResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryMaxOfMediansResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryMaxOfMediansResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryMaxOfMediansResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMaxOfMediansResponse.Merge(m, src)
+}
+func (m *QueryMaxOfMediansResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryMaxOfMediansResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMaxOfMediansResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryMaxOfMediansResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*QueryExchangeRates)(nil), "umee.oracle.v1.QueryExchangeRates")
 	proto.RegisterType((*QueryExchangeRatesResponse)(nil), "umee.oracle.v1.QueryExchangeRatesResponse")
@@ -1009,83 +1335,106 @@ func init() {
 	proto.RegisterType((*QueryMediansResponse)(nil), "umee.oracle.v1.QueryMediansResponse")
 	proto.RegisterType((*QueryMedianDeviations)(nil), "umee.oracle.v1.QueryMedianDeviations")
 	proto.RegisterType((*QueryMedianDeviationsResponse)(nil), "umee.oracle.v1.QueryMedianDeviationsResponse")
+	proto.RegisterType((*QueryMedianOfMedians)(nil), "umee.oracle.v1.QueryMedianOfMedians")
+	proto.RegisterType((*QueryMedianOfMediansResponse)(nil), "umee.oracle.v1.QueryMedianOfMediansResponse")
+	proto.RegisterType((*QueryAverageOfMedians)(nil), "umee.oracle.v1.QueryAverageOfMedians")
+	proto.RegisterType((*QueryAverageOfMediansResponse)(nil), "umee.oracle.v1.QueryAverageOfMediansResponse")
+	proto.RegisterType((*QueryMinOfMedians)(nil), "umee.oracle.v1.QueryMinOfMedians")
+	proto.RegisterType((*QueryMinOfMediansResponse)(nil), "umee.oracle.v1.QueryMinOfMediansResponse")
+	proto.RegisterType((*QueryMaxOfMedians)(nil), "umee.oracle.v1.QueryMaxOfMedians")
+	proto.RegisterType((*QueryMaxOfMediansResponse)(nil), "umee.oracle.v1.QueryMaxOfMediansResponse")
 }
 
 func init() { proto.RegisterFile("umee/oracle/v1/query.proto", fileDescriptor_710e319bc1815d33) }
 
 var fileDescriptor_710e319bc1815d33 = []byte{
-	// 1129 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xcf, 0x6f, 0x1b, 0x45,
-	0x14, 0xc7, 0xbd, 0xd0, 0x1f, 0xf4, 0xb9, 0x76, 0xdd, 0x69, 0x1b, 0x45, 0x9b, 0xb0, 0x09, 0xd3,
-	0x14, 0x42, 0x9a, 0xec, 0x36, 0x4e, 0x10, 0x28, 0xa2, 0x82, 0xfc, 0x42, 0x48, 0x80, 0x14, 0x8c,
-	0x14, 0x10, 0x17, 0x6b, 0xe2, 0x1d, 0x9c, 0x25, 0xf1, 0x8e, 0xd9, 0xd9, 0x38, 0x89, 0xaa, 0x08,
-	0x44, 0x2f, 0x1c, 0x91, 0x2a, 0xe5, 0x58, 0x55, 0x80, 0x40, 0xe2, 0xc2, 0xbf, 0x91, 0x63, 0x25,
-	0x2e, 0x9c, 0xf8, 0x91, 0x70, 0xe0, 0xcf, 0x40, 0x3b, 0x33, 0x9e, 0xec, 0x2f, 0xc7, 0x4e, 0xa5,
-	0x9e, 0x92, 0x7d, 0xef, 0xcd, 0xfb, 0x7e, 0xe6, 0xed, 0xce, 0x7c, 0x65, 0x30, 0x77, 0x5a, 0x94,
-	0x3a, 0x2c, 0x20, 0x8d, 0x6d, 0xea, 0x74, 0x66, 0x9d, 0xaf, 0x76, 0x68, 0xb0, 0x6f, 0xb7, 0x03,
-	0x16, 0x32, 0x54, 0x8e, 0x72, 0xb6, 0xcc, 0xd9, 0x9d, 0x59, 0xf3, 0x66, 0x93, 0x35, 0x99, 0x48,
-	0x39, 0xd1, 0x7f, 0xb2, 0xca, 0x1c, 0x6d, 0x32, 0xd6, 0xdc, 0xa6, 0x0e, 0x69, 0x7b, 0x0e, 0xf1,
-	0x7d, 0x16, 0x92, 0xd0, 0x63, 0x3e, 0x57, 0xd9, 0x91, 0x54, 0x7f, 0xd5, 0x4d, 0x26, 0xad, 0x06,
-	0xe3, 0x2d, 0xc6, 0x9d, 0x0d, 0xc2, 0xa3, 0xe4, 0x06, 0x0d, 0xc9, 0xac, 0xd3, 0x60, 0x9e, 0x2f,
-	0xf3, 0x78, 0x1e, 0xd0, 0xc7, 0x11, 0xcf, 0xea, 0x5e, 0x63, 0x93, 0xf8, 0x4d, 0x5a, 0x23, 0x21,
-	0xe5, 0xe8, 0x26, 0x5c, 0x74, 0xa9, 0xcf, 0x5a, 0xc3, 0xc6, 0xb8, 0x31, 0x79, 0xa5, 0x26, 0x1f,
-	0x16, 0x5e, 0xfa, 0xee, 0xc9, 0x58, 0xe1, 0xbf, 0x27, 0x63, 0x05, 0x7c, 0x68, 0x80, 0x99, 0x5d,
-	0x56, 0xa3, 0xbc, 0xcd, 0x7c, 0x4e, 0xd1, 0x1e, 0x94, 0xa9, 0x4a, 0xd4, 0x83, 0x28, 0x33, 0x6c,
-	0x8c, 0xbf, 0x38, 0x59, 0xac, 0x8e, 0xda, 0x92, 0xc6, 0x8e, 0x68, 0x6c, 0x45, 0x63, 0xaf, 0xd0,
-	0xc6, 0x32, 0xf3, 0xfc, 0xa5, 0xb9, 0xa3, 0x3f, 0xc7, 0x0a, 0xbf, 0xfe, 0x35, 0x76, 0xb7, 0xe9,
-	0x85, 0x9b, 0x3b, 0x1b, 0x76, 0x83, 0xb5, 0x1c, 0x45, 0x2f, 0xff, 0xcc, 0x70, 0x77, 0xcb, 0x09,
-	0xf7, 0xdb, 0x94, 0x77, 0xd7, 0xf0, 0x5a, 0x89, 0xc6, 0x09, 0xb0, 0x09, 0xc3, 0x82, 0x6b, 0xb1,
-	0x11, 0x7a, 0x1d, 0x9a, 0xa0, 0xc3, 0xab, 0x30, 0xde, 0x2b, 0xa7, 0xc9, 0x5f, 0x81, 0xab, 0x44,
-	0xa4, 0x63, 0xdc, 0x57, 0x6a, 0x45, 0x19, 0x93, 0x6d, 0xde, 0x87, 0x5b, 0xa2, 0xcd, 0x7b, 0x94,
-	0xba, 0x34, 0x58, 0xa1, 0xdb, 0xb4, 0x29, 0x5e, 0x07, 0xba, 0x03, 0xe5, 0x0e, 0xd9, 0xf6, 0x5c,
-	0x12, 0xb2, 0xa0, 0x4e, 0x5c, 0x37, 0x50, 0xd3, 0x2b, 0xe9, 0xe8, 0xa2, 0xeb, 0x06, 0xb1, 0x29,
-	0xbe, 0x0b, 0x2f, 0xe7, 0x76, 0xd2, 0x34, 0x63, 0x50, 0xfc, 0x42, 0xe4, 0xe2, 0xed, 0x40, 0x86,
-	0xa2, 0x5e, 0x78, 0x19, 0x2a, 0xa2, 0xc3, 0x47, 0x1e, 0xe7, 0xcb, 0x6c, 0xc7, 0x0f, 0x69, 0x70,
-	0x7e, 0x8c, 0xfb, 0x6a, 0x66, 0xb1, 0x26, 0xf1, 0x79, 0xb4, 0x3c, 0xce, 0xeb, 0x0d, 0x19, 0x17,
-	0xad, 0x2e, 0xd4, 0x8a, 0xad, 0xd3, 0x52, 0x8c, 0x14, 0xc3, 0x27, 0xdb, 0x84, 0x6f, 0x7e, 0xea,
-	0xf9, 0x2e, 0xdb, 0xc5, 0xcb, 0xaa, 0x65, 0x2c, 0xa6, 0x5b, 0xbe, 0x06, 0xd7, 0x76, 0x45, 0xa4,
-	0xde, 0x0e, 0x58, 0x33, 0xa0, 0x9c, 0xab, 0xae, 0x65, 0x19, 0x5e, 0x53, 0x51, 0x3d, 0xe8, 0xc5,
-	0x66, 0x33, 0x88, 0x26, 0x43, 0xd7, 0x02, 0xda, 0x61, 0x21, 0x3d, 0xff, 0x0e, 0xbf, 0x31, 0xd4,
-	0xa4, 0xd3, 0xad, 0x34, 0x54, 0x1d, 0xae, 0x93, 0x6e, 0xae, 0xde, 0x96, 0x49, 0xd1, 0xb5, 0x58,
-	0x9d, 0xb6, 0x93, 0x67, 0xd4, 0xd6, 0x4d, 0xe2, 0x9f, 0x90, 0x6a, 0xb8, 0x74, 0x21, 0xfa, 0x88,
-	0x6b, 0x15, 0x92, 0x12, 0xc2, 0xc3, 0x30, 0x94, 0x4b, 0xc0, 0xf1, 0x43, 0x03, 0xac, 0xfc, 0x94,
-	0xa6, 0x23, 0x80, 0x32, 0x74, 0xdd, 0x33, 0xf5, 0x2c, 0x78, 0xd7, 0x49, 0x86, 0x62, 0x55, 0xdd,
-	0x03, 0x7a, 0xf5, 0xfa, 0x33, 0x4d, 0x3a, 0x54, 0xf7, 0x42, 0xa2, 0x8d, 0xde, 0xc7, 0x3a, 0x94,
-	0x4f, 0xf7, 0x11, 0x1b, 0xf1, 0xeb, 0x03, 0xed, 0x61, 0xfd, 0x74, 0x03, 0x25, 0x12, 0xef, 0x8f,
-	0x6f, 0xc1, 0x8d, 0xac, 0x2a, 0xc7, 0xbb, 0x30, 0x92, 0x13, 0xd6, 0x34, 0x9f, 0xc1, 0xb5, 0x24,
-	0x4d, 0x77, 0xa4, 0xe7, 0xc6, 0x29, 0x93, 0xa4, 0x70, 0x09, 0x8a, 0x42, 0x78, 0x8d, 0x04, 0xa4,
-	0xc5, 0xf1, 0x07, 0x0a, 0x4f, 0x3e, 0x6a, 0xfd, 0x79, 0xb8, 0xd4, 0x16, 0x11, 0x35, 0x85, 0xa1,
-	0xb4, 0xac, 0xac, 0x57, 0x1a, 0xaa, 0x16, 0xdb, 0x70, 0x55, 0x9e, 0x56, 0xea, 0x7a, 0xc4, 0xef,
-	0x7f, 0x55, 0x3f, 0x34, 0xe0, 0x66, 0x7c, 0x81, 0x96, 0xdf, 0x82, 0xcb, 0x2d, 0x19, 0x7a, 0x7e,
-	0xb7, 0x73, 0x57, 0x01, 0xbf, 0xa9, 0xce, 0xb2, 0x84, 0x58, 0xa1, 0x1d, 0x4f, 0x5a, 0x58, 0x5f,
-	0xfc, 0xc7, 0xdd, 0xa3, 0x9b, 0x5e, 0xa9, 0xf7, 0x71, 0x00, 0x95, 0x56, 0x2a, 0xf7, 0xfc, 0x36,
-	0x94, 0x91, 0xaa, 0xfe, 0x5c, 0x86, 0x8b, 0x02, 0x10, 0x1d, 0x1a, 0x50, 0x4a, 0xda, 0x28, 0x4e,
-	0xbf, 0xd1, 0xac, 0x67, 0x9a, 0x53, 0xfd, 0x6b, 0xba, 0x5b, 0xc5, 0x6f, 0x7c, 0xfb, 0xfb, 0xbf,
-	0x8f, 0x5e, 0x70, 0xd0, 0x8c, 0x93, 0xb2, 0x7c, 0x31, 0x35, 0xee, 0x24, 0x4d, 0xd7, 0x79, 0x20,
-	0xc2, 0x07, 0xe8, 0x17, 0x03, 0x6e, 0xe4, 0x98, 0x1e, 0x9a, 0xcc, 0x95, 0xce, 0xa9, 0x34, 0xef,
-	0x0d, 0x5a, 0xa9, 0x51, 0xe7, 0x05, 0xaa, 0x8d, 0xa6, 0x7b, 0xa0, 0x2a, 0x97, 0x4d, 0x12, 0xa3,
-	0x9f, 0x0c, 0xa8, 0x64, 0x7d, 0x35, 0x57, 0x3c, 0x5d, 0x66, 0xce, 0x0c, 0x54, 0xa6, 0x01, 0x17,
-	0x04, 0xe0, 0x3c, 0xaa, 0xa6, 0x01, 0xf5, 0xd5, 0xc6, 0x9d, 0x07, 0xc9, 0xcb, 0xef, 0xc0, 0x91,
-	0xd6, 0x8b, 0x1e, 0x19, 0x50, 0x8c, 0x5b, 0xee, 0x78, 0xae, 0x74, 0xac, 0xc2, 0x9c, 0xec, 0x57,
-	0xa1, 0xb9, 0xde, 0x12, 0x5c, 0x55, 0x74, 0xef, 0x3c, 0x5c, 0x91, 0x1f, 0xa3, 0xaf, 0xa1, 0x18,
-	0xf3, 0xdb, 0x1e, 0x50, 0xb1, 0x8a, 0x1e, 0x50, 0x39, 0x9e, 0x8d, 0x27, 0x04, 0x94, 0x85, 0x46,
-	0xd3, 0x50, 0x3c, 0x2a, 0xae, 0x4b, 0xe3, 0x46, 0xbf, 0x19, 0x50, 0xc9, 0x9a, 0x75, 0xfe, 0xa7,
-	0x93, 0x2a, 0xeb, 0xf1, 0xf6, 0x7a, 0xf9, 0x35, 0x5e, 0x15, 0x40, 0xef, 0xa0, 0xfb, 0xe7, 0x99,
-	0x52, 0xc6, 0x43, 0xd1, 0x0f, 0x06, 0x5c, 0xcf, 0xd8, 0x2e, 0x7a, 0x75, 0x20, 0x16, 0x6e, 0xda,
-	0x83, 0xd5, 0xf5, 0x3f, 0xbe, 0x31, 0xe8, 0xac, 0xcf, 0xa3, 0x1f, 0x0d, 0x28, 0x25, 0x6d, 0x19,
-	0x9f, 0x2d, 0x1c, 0xd5, 0xf4, 0xb8, 0x57, 0x72, 0x7d, 0x19, 0x2f, 0x09, 0xb0, 0xb7, 0xd1, 0x42,
-	0x0e, 0x98, 0xeb, 0xf5, 0x9d, 0xa6, 0x18, 0xe5, 0xa1, 0x01, 0xe5, 0xa4, 0xd1, 0xa2, 0xdb, 0xfd,
-	0x11, 0xb8, 0x79, 0x77, 0x80, 0x22, 0x0d, 0x5a, 0x15, 0xa0, 0xd3, 0x68, 0x6a, 0xa0, 0x09, 0xca,
-	0xf1, 0x7d, 0x09, 0x97, 0xa4, 0x91, 0xa2, 0x91, 0x5c, 0x29, 0x99, 0x34, 0x6f, 0x9f, 0x91, 0xd4,
-	0xfa, 0x96, 0xd0, 0x1f, 0x46, 0x43, 0x69, 0x7d, 0x69, 0xce, 0x68, 0x1f, 0x2e, 0x77, 0x7d, 0x79,
-	0x34, 0xff, 0xc4, 0xcb, 0xac, 0x39, 0x71, 0x56, 0x56, 0xcb, 0x4d, 0x09, 0xb9, 0x09, 0x84, 0xa5,
-	0xdc, 0xa6, 0xc7, 0xc3, 0xcc, 0x45, 0xaa, 0x1c, 0x16, 0x3d, 0x36, 0xa0, 0x92, 0x71, 0xd7, 0x3b,
-	0x67, 0xc8, 0x9c, 0x96, 0xf5, 0x38, 0x7c, 0xbd, 0x1c, 0x37, 0x7d, 0xb7, 0x9f, 0x81, 0x55, 0x77,
-	0xf5, 0xea, 0xa5, 0x0f, 0x8f, 0xfe, 0xb1, 0x0a, 0x47, 0xc7, 0x96, 0xf1, 0xf4, 0xd8, 0x32, 0xfe,
-	0x3e, 0xb6, 0x8c, 0xef, 0x4f, 0xac, 0xc2, 0xd3, 0x13, 0xab, 0xf0, 0xc7, 0x89, 0x55, 0xf8, 0xdc,
-	0x8e, 0xb9, 0x70, 0xd4, 0x75, 0xc6, 0xa7, 0xe1, 0x2e, 0x0b, 0xb6, 0xa4, 0x44, 0x67, 0xce, 0xd9,
-	0xeb, 0x4e, 0x5b, 0x38, 0xf2, 0xc6, 0x25, 0xf1, 0xf3, 0x75, 0xee, 0xff, 0x00, 0x00, 0x00, 0xff,
-	0xff, 0xd4, 0x9f, 0x06, 0xe5, 0x5d, 0x0f, 0x00, 0x00,
+	// 1361 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x98, 0xcf, 0x6f, 0x1b, 0x45,
+	0x14, 0xc7, 0xbd, 0xa5, 0x3f, 0xe8, 0x73, 0xe3, 0x38, 0xd3, 0x1f, 0x0a, 0x5b, 0xe3, 0xa4, 0xd3,
+	0x16, 0xd2, 0x34, 0xd9, 0x6d, 0xdc, 0x20, 0x50, 0x45, 0x05, 0x4d, 0x1a, 0x84, 0x44, 0x11, 0xad,
+	0x0b, 0x05, 0x71, 0xb1, 0x26, 0xf6, 0xd4, 0x59, 0x1a, 0xef, 0x9a, 0x9d, 0x8d, 0x93, 0x52, 0x2a,
+	0x10, 0xbd, 0x20, 0x2e, 0x80, 0x2a, 0xf5, 0x00, 0xa2, 0x54, 0x80, 0x84, 0xc4, 0x85, 0x7f, 0xa3,
+	0xc7, 0x4a, 0x5c, 0x38, 0xf1, 0xa3, 0xe5, 0xc0, 0x9f, 0x81, 0x76, 0x66, 0x3c, 0x9e, 0xfd, 0x65,
+	0x3b, 0x51, 0xc2, 0xa9, 0xf5, 0x7b, 0x6f, 0xdf, 0xfb, 0xbc, 0xb7, 0x3b, 0x6f, 0xbe, 0x0a, 0x98,
+	0x6b, 0x2d, 0x4a, 0x6d, 0xcf, 0x27, 0xf5, 0x55, 0x6a, 0x77, 0xe6, 0xec, 0x0f, 0xd7, 0xa8, 0x7f,
+	0xd3, 0x6a, 0xfb, 0x5e, 0xe0, 0xa1, 0x42, 0xe8, 0xb3, 0x84, 0xcf, 0xea, 0xcc, 0x99, 0x87, 0x9a,
+	0x5e, 0xd3, 0xe3, 0x2e, 0x3b, 0xfc, 0x9f, 0x88, 0x32, 0x4b, 0x4d, 0xcf, 0x6b, 0xae, 0x52, 0x9b,
+	0xb4, 0x1d, 0x9b, 0xb8, 0xae, 0x17, 0x90, 0xc0, 0xf1, 0x5c, 0x26, 0xbd, 0x47, 0x63, 0xf9, 0x65,
+	0x36, 0xe1, 0x2c, 0xd7, 0x3d, 0xd6, 0xf2, 0x98, 0xbd, 0x4c, 0x58, 0xe8, 0x5c, 0xa6, 0x01, 0x99,
+	0xb3, 0xeb, 0x9e, 0xe3, 0x0a, 0x3f, 0x9e, 0x07, 0x74, 0x25, 0xe4, 0x59, 0xda, 0xa8, 0xaf, 0x10,
+	0xb7, 0x49, 0xab, 0x24, 0xa0, 0x0c, 0x1d, 0x82, 0x3d, 0x0d, 0xea, 0x7a, 0xad, 0x71, 0x63, 0xd2,
+	0x98, 0xda, 0x5f, 0x15, 0x3f, 0xce, 0x3d, 0xfd, 0xf9, 0x83, 0x89, 0xdc, 0xbf, 0x0f, 0x26, 0x72,
+	0xf8, 0x9e, 0x01, 0x66, 0xf2, 0xb1, 0x2a, 0x65, 0x6d, 0xcf, 0x65, 0x14, 0x6d, 0x40, 0x81, 0x4a,
+	0x47, 0xcd, 0x0f, 0x3d, 0xe3, 0xc6, 0xe4, 0x53, 0x53, 0xf9, 0x4a, 0xc9, 0x12, 0x34, 0x56, 0x48,
+	0x63, 0x49, 0x1a, 0xeb, 0x22, 0xad, 0x2f, 0x7a, 0x8e, 0xbb, 0x70, 0xf6, 0xe1, 0x1f, 0x13, 0xb9,
+	0x5f, 0xfe, 0x9c, 0x38, 0xdd, 0x74, 0x82, 0x95, 0xb5, 0x65, 0xab, 0xee, 0xb5, 0x6c, 0x49, 0x2f,
+	0xfe, 0x99, 0x65, 0x8d, 0x1b, 0x76, 0x70, 0xb3, 0x4d, 0x59, 0xf7, 0x19, 0x56, 0x1d, 0xa1, 0x3a,
+	0x01, 0x36, 0x61, 0x9c, 0x73, 0x5d, 0xa8, 0x07, 0x4e, 0x87, 0x46, 0xe8, 0xf0, 0x12, 0x4c, 0x66,
+	0xf9, 0x14, 0xf9, 0x31, 0x38, 0x40, 0xb8, 0x5b, 0xe3, 0xde, 0x5f, 0xcd, 0x0b, 0x9b, 0x48, 0xf3,
+	0x3a, 0x1c, 0xe6, 0x69, 0x5e, 0xa3, 0xb4, 0x41, 0xfd, 0x8b, 0x74, 0x95, 0x36, 0xf9, 0xeb, 0x40,
+	0x27, 0xa1, 0xd0, 0x21, 0xab, 0x4e, 0x83, 0x04, 0x9e, 0x5f, 0x23, 0x8d, 0x86, 0x2f, 0xa7, 0x37,
+	0xa2, 0xac, 0x17, 0x1a, 0x0d, 0x5f, 0x9b, 0xe2, 0xab, 0xf0, 0x6c, 0x6a, 0x26, 0x45, 0x33, 0x01,
+	0xf9, 0xeb, 0xdc, 0xa7, 0xa7, 0x03, 0x61, 0x0a, 0x73, 0xe1, 0x45, 0x28, 0xf2, 0x0c, 0x6f, 0x3a,
+	0x8c, 0x2d, 0x7a, 0x6b, 0x6e, 0x40, 0xfd, 0xcd, 0x63, 0x9c, 0x97, 0x33, 0xd3, 0x92, 0xe8, 0xf3,
+	0x68, 0x39, 0x8c, 0xd5, 0xea, 0xc2, 0xce, 0x53, 0xed, 0xae, 0xe6, 0x5b, 0xbd, 0x50, 0x8c, 0x24,
+	0xc3, 0xd5, 0x55, 0xc2, 0x56, 0xde, 0x75, 0xdc, 0x86, 0xb7, 0x8e, 0x17, 0x65, 0x4a, 0xcd, 0xa6,
+	0x52, 0x3e, 0x0f, 0xa3, 0xeb, 0xdc, 0x52, 0x6b, 0xfb, 0x5e, 0xd3, 0xa7, 0x8c, 0xc9, 0xac, 0x05,
+	0x61, 0xbe, 0x2c, 0xad, 0x6a, 0xd0, 0x17, 0x9a, 0x4d, 0x3f, 0x9c, 0x0c, 0xbd, 0xec, 0xd3, 0x8e,
+	0x17, 0xd0, 0xcd, 0x77, 0xf8, 0xa9, 0x21, 0x27, 0x1d, 0x4f, 0xa5, 0xa0, 0x6a, 0x30, 0x46, 0xba,
+	0xbe, 0x5a, 0x5b, 0x38, 0x79, 0xd6, 0x7c, 0x65, 0xc6, 0x8a, 0x9e, 0x51, 0x4b, 0x25, 0xd1, 0x3f,
+	0x21, 0x99, 0x70, 0x61, 0x77, 0xf8, 0x11, 0x57, 0x8b, 0x24, 0x56, 0x08, 0x8f, 0xc3, 0x91, 0x54,
+	0x02, 0x86, 0xef, 0x18, 0x50, 0x4e, 0x77, 0x29, 0x3a, 0x02, 0x28, 0x41, 0xd7, 0x3d, 0x53, 0x5b,
+	0xc1, 0x1b, 0x23, 0x09, 0x8a, 0x25, 0xb9, 0x07, 0xd4, 0xd3, 0xd7, 0xb6, 0x34, 0xe9, 0x40, 0xee,
+	0x85, 0x48, 0x1a, 0xd5, 0xc7, 0x35, 0x28, 0xf4, 0xfa, 0xd0, 0x46, 0x7c, 0x6a, 0xa8, 0x1e, 0xae,
+	0xf5, 0x1a, 0x18, 0x21, 0x7a, 0x7e, 0x7c, 0x18, 0x0e, 0x26, 0xab, 0x32, 0xbc, 0x0e, 0x47, 0x53,
+	0xcc, 0x8a, 0xe6, 0x3d, 0x18, 0x8d, 0xd2, 0x74, 0x47, 0xba, 0x69, 0x9c, 0x02, 0x89, 0x16, 0x1e,
+	0x81, 0x3c, 0x2f, 0x7c, 0x99, 0xf8, 0xa4, 0xc5, 0xf0, 0x1b, 0x12, 0x4f, 0xfc, 0x54, 0xf5, 0xe7,
+	0x61, 0x6f, 0x9b, 0x5b, 0xe4, 0x14, 0x8e, 0xc4, 0xcb, 0x8a, 0x78, 0x59, 0x43, 0xc6, 0xe2, 0x4b,
+	0x70, 0x40, 0x9c, 0x56, 0xda, 0x70, 0x88, 0x9b, 0xb1, 0xaa, 0x51, 0x09, 0xf6, 0xbb, 0x6b, 0xad,
+	0xab, 0x01, 0x69, 0xb5, 0xd9, 0xf8, 0x2e, 0x7e, 0xbc, 0x7a, 0x06, 0xed, 0x7d, 0xdd, 0x31, 0xe0,
+	0x90, 0x9e, 0x4e, 0xc1, 0xdd, 0x80, 0x7d, 0x2d, 0x61, 0xda, 0xb9, 0xdd, 0xdd, 0xad, 0x80, 0x5f,
+	0x94, 0x27, 0x5d, 0x40, 0x5c, 0xa4, 0x1d, 0x47, 0x5c, 0x70, 0x03, 0xef, 0xa1, 0xfb, 0xdd, 0x83,
+	0x1d, 0x7f, 0x52, 0xf5, 0x71, 0x1b, 0x8a, 0xad, 0x98, 0x6f, 0xe7, 0x1a, 0x4a, 0x94, 0xc2, 0x6f,
+	0x47, 0xc6, 0xfb, 0xd6, 0xf5, 0xed, 0x79, 0x6b, 0xdf, 0x18, 0x50, 0x4a, 0x4b, 0xab, 0xba, 0xfe,
+	0x08, 0x46, 0x5b, 0x51, 0x97, 0xfc, 0xc6, 0xfa, 0x37, 0x5d, 0x91, 0x4d, 0x4f, 0x0f, 0xdf, 0x74,
+	0x35, 0x5e, 0x08, 0xbf, 0xd3, 0x5d, 0xdb, 0x1d, 0xea, 0x93, 0x26, 0xdd, 0xae, 0x9e, 0xbf, 0x53,
+	0x3b, 0x3c, 0x96, 0x57, 0x35, 0xfd, 0x31, 0x14, 0x49, 0xcc, 0xb7, 0x63, 0x5d, 0x27, 0x2a, 0xe1,
+	0x2b, 0x30, 0x26, 0x6f, 0xd1, 0x6d, 0x7b, 0xcd, 0x5f, 0x1b, 0xf0, 0x4c, 0x22, 0xa7, 0x6a, 0x37,
+	0x08, 0xaf, 0xe6, 0xff, 0xe1, 0x05, 0x47, 0xaa, 0xf4, 0xda, 0x24, 0x1b, 0xdb, 0xdf, 0xa6, 0x96,
+	0x33, 0xd2, 0xa6, 0x66, 0xdf, 0xc1, 0x36, 0xb5, 0x2a, 0x95, 0x2f, 0x0e, 0xc2, 0x1e, 0xce, 0x84,
+	0xee, 0x19, 0x30, 0x12, 0x15, 0xc7, 0x38, 0xbe, 0xa7, 0x93, 0x4a, 0xd8, 0x9c, 0x1e, 0x1c, 0xd3,
+	0xed, 0x10, 0xbf, 0xf0, 0xd9, 0x6f, 0xff, 0xdc, 0xdd, 0x65, 0xa3, 0x59, 0x3b, 0x26, 0xe4, 0xf9,
+	0x18, 0x99, 0x1d, 0x95, 0xd2, 0xf6, 0x2d, 0x6e, 0xbe, 0x8d, 0x7e, 0x36, 0xe0, 0x60, 0x8a, 0x94,
+	0x45, 0x53, 0xa9, 0xa5, 0x53, 0x22, 0xcd, 0x33, 0xc3, 0x46, 0x2a, 0xd4, 0x79, 0x8e, 0x6a, 0xa1,
+	0x99, 0x0c, 0x54, 0xa9, 0x9d, 0xa3, 0xc4, 0xe8, 0x27, 0x03, 0x8a, 0x49, 0xb5, 0x9c, 0x5a, 0x3c,
+	0x1e, 0x66, 0xce, 0x0e, 0x15, 0xa6, 0x00, 0xcf, 0x71, 0xc0, 0x79, 0x54, 0x89, 0x03, 0x2a, 0xc1,
+	0xc2, 0xec, 0x5b, 0x51, 0x49, 0x73, 0xdb, 0x16, 0x82, 0x1a, 0xdd, 0x35, 0x20, 0xaf, 0x0b, 0xe9,
+	0xc9, 0xd4, 0xd2, 0x5a, 0x84, 0x39, 0x35, 0x28, 0x42, 0x71, 0xbd, 0xc4, 0xb9, 0x2a, 0xe8, 0xcc,
+	0x66, 0xb8, 0x42, 0x95, 0x8d, 0x3e, 0x81, 0xbc, 0xa6, 0xa2, 0x33, 0xa0, 0xb4, 0x88, 0x0c, 0xa8,
+	0x14, 0x25, 0x8e, 0x4f, 0x70, 0xa8, 0x32, 0x2a, 0xc5, 0xa1, 0x58, 0x18, 0x5c, 0x13, 0x72, 0x1c,
+	0xfd, 0x6a, 0x40, 0x31, 0x29, 0xc1, 0xd3, 0x3f, 0x9d, 0x58, 0x58, 0xc6, 0xdb, 0xcb, 0x52, 0xe1,
+	0x78, 0x89, 0x03, 0xbd, 0x82, 0xce, 0x6f, 0x66, 0x4a, 0x09, 0x65, 0x8c, 0x7e, 0x30, 0x60, 0x2c,
+	0x21, 0xa6, 0xd1, 0x73, 0x43, 0xb1, 0x30, 0xd3, 0x1a, 0x2e, 0x6e, 0xf0, 0xf1, 0xd5, 0xa0, 0x93,
+	0xea, 0x1d, 0xfd, 0x68, 0xc0, 0x48, 0x54, 0x6c, 0xe3, 0xfe, 0x85, 0xc3, 0x98, 0x8c, 0xbd, 0x92,
+	0xaa, 0xb6, 0xf1, 0x02, 0x07, 0x7b, 0x19, 0x9d, 0x4b, 0x01, 0x6b, 0x38, 0x03, 0xa7, 0xc9, 0x47,
+	0x79, 0xcf, 0x80, 0x42, 0x54, 0x3e, 0xa3, 0xe3, 0x83, 0x11, 0x98, 0x79, 0x7a, 0x88, 0x20, 0x05,
+	0x5a, 0xe1, 0xa0, 0x33, 0x68, 0x7a, 0xa8, 0x09, 0x8a, 0xf1, 0x7d, 0x00, 0x7b, 0x85, 0x3c, 0x46,
+	0x47, 0x53, 0x4b, 0x09, 0xa7, 0x79, 0xbc, 0x8f, 0x53, 0xd5, 0x2f, 0xf3, 0xfa, 0xe3, 0xe8, 0x48,
+	0xbc, 0xbe, 0x90, 0xdc, 0xe8, 0x26, 0xec, 0xeb, 0xde, 0x74, 0xa5, 0xf4, 0x13, 0x2f, 0xbc, 0xe6,
+	0x89, 0x7e, 0x5e, 0x55, 0x6e, 0x9a, 0x97, 0x3b, 0x81, 0xb0, 0x28, 0xb7, 0xe2, 0xb0, 0x20, 0xb1,
+	0x48, 0xa5, 0x32, 0x46, 0xf7, 0x0d, 0x28, 0x26, 0x54, 0xf1, 0xc9, 0x3e, 0x65, 0x7a, 0x61, 0x19,
+	0x87, 0x2f, 0x4b, 0x29, 0xc7, 0x77, 0x7b, 0x1f, 0xac, 0x5a, 0xa3, 0xc7, 0xf2, 0xad, 0x01, 0xa3,
+	0x71, 0x71, 0xdb, 0x6f, 0x0c, 0x2a, 0xca, 0x9c, 0x19, 0x26, 0x6a, 0x2b, 0x74, 0xde, 0xf5, 0x5a,
+	0x77, 0x7c, 0xdf, 0x87, 0xbb, 0x2b, 0xae, 0x43, 0x33, 0x76, 0x57, 0x2c, 0x2c, 0x6b, 0x77, 0x65,
+	0xa8, 0xcf, 0xf8, 0x1a, 0x48, 0x05, 0x94, 0xa2, 0x51, 0x27, 0xfc, 0xd2, 0x80, 0x03, 0x11, 0xc9,
+	0x78, 0x2c, 0xe3, 0x4e, 0xd1, 0x26, 0x77, 0x6a, 0x60, 0x88, 0xa2, 0x9a, 0xe3, 0x54, 0xa7, 0xd1,
+	0xa9, 0x7e, 0x63, 0x73, 0xdc, 0x04, 0x91, 0xae, 0xee, 0x32, 0x88, 0xb4, 0x90, 0x2c, 0xa2, 0x14,
+	0x3d, 0x37, 0x1c, 0x11, 0xd9, 0xd0, 0x88, 0x16, 0x2e, 0x3d, 0xfc, 0xbb, 0x9c, 0x7b, 0xf8, 0xb8,
+	0x6c, 0x3c, 0x7a, 0x5c, 0x36, 0xfe, 0x7a, 0x5c, 0x36, 0xbe, 0x7a, 0x52, 0xce, 0x3d, 0x7a, 0x52,
+	0xce, 0xfd, 0xfe, 0xa4, 0x9c, 0x7b, 0xdf, 0xd2, 0x44, 0x5e, 0x98, 0x72, 0xd6, 0xa5, 0xc1, 0xba,
+	0xe7, 0xdf, 0x10, 0xf9, 0x3b, 0x67, 0xed, 0x8d, 0xee, 0x89, 0xe6, 0x82, 0x6f, 0x79, 0x2f, 0xff,
+	0xc3, 0xe7, 0xd9, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x04, 0xa1, 0x84, 0x22, 0x97, 0x15, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1124,9 +1473,21 @@ type QueryClient interface {
 	// Medians returns medians of all denoms,
 	// or, if specified, returns a single median
 	Medians(ctx context.Context, in *QueryMedians, opts ...grpc.CallOption) (*QueryMediansResponse, error)
-	// MedianDeviations returns medians of all denoms,
-	// or, if specified, returns a single median
+	// MedianDeviations returns median deviations of all denoms,
+	// or, if specified, returns a single median deviation
 	MedianDeviations(ctx context.Context, in *QueryMedianDeviations, opts ...grpc.CallOption) (*QueryMedianDeviationsResponse, error)
+	// MedianOfMedians returns the median of a specified amount of
+	// stamped medians
+	MedianOfMedians(ctx context.Context, in *QueryMedianOfMedians, opts ...grpc.CallOption) (*QueryMedianOfMediansResponse, error)
+	// AverageOfMedians returns the average of a specified amount of
+	// stamped medians
+	AverageOfMedians(ctx context.Context, in *QueryAverageOfMedians, opts ...grpc.CallOption) (*QueryAverageOfMediansResponse, error)
+	// MinOfMedians returns the min of a specified amount of
+	// stamped medians
+	MinOfMedians(ctx context.Context, in *QueryMinOfMedians, opts ...grpc.CallOption) (*QueryMinOfMediansResponse, error)
+	// MaxOfMedians returns the max of a specified amount of
+	// stamped medians
+	MaxOfMedians(ctx context.Context, in *QueryMaxOfMedians, opts ...grpc.CallOption) (*QueryMaxOfMediansResponse, error)
 }
 
 type queryClient struct {
@@ -1245,6 +1606,42 @@ func (c *queryClient) MedianDeviations(ctx context.Context, in *QueryMedianDevia
 	return out, nil
 }
 
+func (c *queryClient) MedianOfMedians(ctx context.Context, in *QueryMedianOfMedians, opts ...grpc.CallOption) (*QueryMedianOfMediansResponse, error) {
+	out := new(QueryMedianOfMediansResponse)
+	err := c.cc.Invoke(ctx, "/umee.oracle.v1.Query/MedianOfMedians", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AverageOfMedians(ctx context.Context, in *QueryAverageOfMedians, opts ...grpc.CallOption) (*QueryAverageOfMediansResponse, error) {
+	out := new(QueryAverageOfMediansResponse)
+	err := c.cc.Invoke(ctx, "/umee.oracle.v1.Query/AverageOfMedians", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) MinOfMedians(ctx context.Context, in *QueryMinOfMedians, opts ...grpc.CallOption) (*QueryMinOfMediansResponse, error) {
+	out := new(QueryMinOfMediansResponse)
+	err := c.cc.Invoke(ctx, "/umee.oracle.v1.Query/MinOfMedians", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) MaxOfMedians(ctx context.Context, in *QueryMaxOfMedians, opts ...grpc.CallOption) (*QueryMaxOfMediansResponse, error) {
+	out := new(QueryMaxOfMediansResponse)
+	err := c.cc.Invoke(ctx, "/umee.oracle.v1.Query/MaxOfMedians", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// ExchangeRates returns exchange rates of all denoms,
@@ -1271,9 +1668,21 @@ type QueryServer interface {
 	// Medians returns medians of all denoms,
 	// or, if specified, returns a single median
 	Medians(context.Context, *QueryMedians) (*QueryMediansResponse, error)
-	// MedianDeviations returns medians of all denoms,
-	// or, if specified, returns a single median
+	// MedianDeviations returns median deviations of all denoms,
+	// or, if specified, returns a single median deviation
 	MedianDeviations(context.Context, *QueryMedianDeviations) (*QueryMedianDeviationsResponse, error)
+	// MedianOfMedians returns the median of a specified amount of
+	// stamped medians
+	MedianOfMedians(context.Context, *QueryMedianOfMedians) (*QueryMedianOfMediansResponse, error)
+	// AverageOfMedians returns the average of a specified amount of
+	// stamped medians
+	AverageOfMedians(context.Context, *QueryAverageOfMedians) (*QueryAverageOfMediansResponse, error)
+	// MinOfMedians returns the min of a specified amount of
+	// stamped medians
+	MinOfMedians(context.Context, *QueryMinOfMedians) (*QueryMinOfMediansResponse, error)
+	// MaxOfMedians returns the max of a specified amount of
+	// stamped medians
+	MaxOfMedians(context.Context, *QueryMaxOfMedians) (*QueryMaxOfMediansResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -1315,6 +1724,18 @@ func (*UnimplementedQueryServer) Medians(ctx context.Context, req *QueryMedians)
 }
 func (*UnimplementedQueryServer) MedianDeviations(ctx context.Context, req *QueryMedianDeviations) (*QueryMedianDeviationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MedianDeviations not implemented")
+}
+func (*UnimplementedQueryServer) MedianOfMedians(ctx context.Context, req *QueryMedianOfMedians) (*QueryMedianOfMediansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MedianOfMedians not implemented")
+}
+func (*UnimplementedQueryServer) AverageOfMedians(ctx context.Context, req *QueryAverageOfMedians) (*QueryAverageOfMediansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AverageOfMedians not implemented")
+}
+func (*UnimplementedQueryServer) MinOfMedians(ctx context.Context, req *QueryMinOfMedians) (*QueryMinOfMediansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MinOfMedians not implemented")
+}
+func (*UnimplementedQueryServer) MaxOfMedians(ctx context.Context, req *QueryMaxOfMedians) (*QueryMaxOfMediansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MaxOfMedians not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -1537,6 +1958,78 @@ func _Query_MedianDeviations_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_MedianOfMedians_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMedianOfMedians)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).MedianOfMedians(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.oracle.v1.Query/MedianOfMedians",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).MedianOfMedians(ctx, req.(*QueryMedianOfMedians))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AverageOfMedians_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAverageOfMedians)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AverageOfMedians(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.oracle.v1.Query/AverageOfMedians",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AverageOfMedians(ctx, req.(*QueryAverageOfMedians))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_MinOfMedians_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMinOfMedians)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).MinOfMedians(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.oracle.v1.Query/MinOfMedians",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).MinOfMedians(ctx, req.(*QueryMinOfMedians))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_MaxOfMedians_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMaxOfMedians)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).MaxOfMedians(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.oracle.v1.Query/MaxOfMedians",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).MaxOfMedians(ctx, req.(*QueryMaxOfMedians))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umee.oracle.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -1588,6 +2081,22 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MedianDeviations",
 			Handler:    _Query_MedianDeviations_Handler,
+		},
+		{
+			MethodName: "MedianOfMedians",
+			Handler:    _Query_MedianOfMedians_Handler,
+		},
+		{
+			MethodName: "AverageOfMedians",
+			Handler:    _Query_AverageOfMedians_Handler,
+		},
+		{
+			MethodName: "MinOfMedians",
+			Handler:    _Query_MinOfMedians_Handler,
+		},
+		{
+			MethodName: "MaxOfMedians",
+			Handler:    _Query_MaxOfMedians_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2207,6 +2716,11 @@ func (m *QueryMedians) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.NumStamps != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.NumStamps))
+		i--
+		dAtA[i] = 0x10
+	}
 	if len(m.Denom) > 0 {
 		i -= len(m.Denom)
 		copy(dAtA[i:], m.Denom)
@@ -2318,6 +2832,278 @@ func (m *QueryMedianDeviationsResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 			dAtA[i] = 0xa
 		}
 	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMedianOfMedians) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMedianOfMedians) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMedianOfMedians) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NumStamps != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.NumStamps))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMedianOfMediansResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMedianOfMediansResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMedianOfMediansResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.MedianOfMedians.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAverageOfMedians) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAverageOfMedians) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAverageOfMedians) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NumStamps != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.NumStamps))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAverageOfMediansResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAverageOfMediansResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAverageOfMediansResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.AverageOfMedians.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMinOfMedians) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMinOfMedians) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMinOfMedians) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NumStamps != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.NumStamps))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMinOfMediansResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMinOfMediansResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMinOfMediansResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.MinOfMedians.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMaxOfMedians) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMaxOfMedians) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMaxOfMedians) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NumStamps != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.NumStamps))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryMaxOfMediansResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryMaxOfMediansResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryMaxOfMediansResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.MaxOfMedians.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -2582,6 +3368,9 @@ func (m *QueryMedians) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
+	if m.NumStamps != 0 {
+		n += 1 + sovQuery(uint64(m.NumStamps))
+	}
 	return n
 }
 
@@ -2625,6 +3414,114 @@ func (m *QueryMedianDeviationsResponse) Size() (n int) {
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
+	return n
+}
+
+func (m *QueryMedianOfMedians) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.NumStamps != 0 {
+		n += 1 + sovQuery(uint64(m.NumStamps))
+	}
+	return n
+}
+
+func (m *QueryMedianOfMediansResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.MedianOfMedians.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryAverageOfMedians) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.NumStamps != 0 {
+		n += 1 + sovQuery(uint64(m.NumStamps))
+	}
+	return n
+}
+
+func (m *QueryAverageOfMediansResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.AverageOfMedians.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryMinOfMedians) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.NumStamps != 0 {
+		n += 1 + sovQuery(uint64(m.NumStamps))
+	}
+	return n
+}
+
+func (m *QueryMinOfMediansResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.MinOfMedians.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryMaxOfMedians) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.NumStamps != 0 {
+		n += 1 + sovQuery(uint64(m.NumStamps))
+	}
+	return n
+}
+
+func (m *QueryMaxOfMediansResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.MaxOfMedians.Size()
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -4158,6 +5055,25 @@ func (m *QueryMedians) Unmarshal(dAtA []byte) error {
 			}
 			m.Denom = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NumStamps", wireType)
+			}
+			m.NumStamps = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NumStamps |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -4405,6 +5321,742 @@ func (m *QueryMedianDeviationsResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.MedianDeviations = append(m.MedianDeviations, types.DecCoin{})
 			if err := m.MedianDeviations[len(m.MedianDeviations)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMedianOfMedians) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMedianOfMedians: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMedianOfMedians: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NumStamps", wireType)
+			}
+			m.NumStamps = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NumStamps |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMedianOfMediansResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMedianOfMediansResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMedianOfMediansResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MedianOfMedians", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MedianOfMedians.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAverageOfMedians) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAverageOfMedians: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAverageOfMedians: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NumStamps", wireType)
+			}
+			m.NumStamps = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NumStamps |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAverageOfMediansResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAverageOfMediansResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAverageOfMediansResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AverageOfMedians", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.AverageOfMedians.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMinOfMedians) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMinOfMedians: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMinOfMedians: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NumStamps", wireType)
+			}
+			m.NumStamps = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NumStamps |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMinOfMediansResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMinOfMediansResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMinOfMediansResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MinOfMedians", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MinOfMedians.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMaxOfMedians) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMaxOfMedians: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMaxOfMedians: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NumStamps", wireType)
+			}
+			m.NumStamps = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NumStamps |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryMaxOfMediansResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryMaxOfMediansResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryMaxOfMediansResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxOfMedians", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaxOfMedians.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
