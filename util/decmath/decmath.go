@@ -1,4 +1,4 @@
-package util
+package decmath
 
 import (
 	"fmt"
@@ -75,12 +75,14 @@ func Max(prices []sdk.Dec) (sdk.Dec, error) {
 		return sdk.ZeroDec(), ErrEmptyList
 	}
 
-	sort.Slice(prices, func(i, j int) bool {
-		return prices[i].BigInt().
-			Cmp(prices[j].BigInt()) < 0
-	})
+	max := prices[0]
+	for _, price := range prices {
+		if price.GT(max) {
+			max = price
+		}
+	}
 
-	return prices[len(prices)-1], nil
+	return max, nil
 }
 
 // Min returns the min value of a list of prices. Returns error
@@ -91,10 +93,12 @@ func Min(prices []sdk.Dec) (sdk.Dec, error) {
 		return sdk.ZeroDec(), ErrEmptyList
 	}
 
-	sort.Slice(prices, func(i, j int) bool {
-		return prices[i].BigInt().
-			Cmp(prices[j].BigInt()) < 0
-	})
+	min := prices[0]
+	for _, price := range prices {
+		if price.LT(min) {
+			min = price
+		}
+	}
 
-	return prices[0], nil
+	return min, nil
 }

@@ -1,4 +1,4 @@
-package util
+package decmath
 
 import (
 	"testing"
@@ -10,15 +10,15 @@ import (
 func TestMedian(t *testing.T) {
 	require := require.New(t)
 	prices := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.1"),
-		sdk.MustNewDecFromStr("1.05"),
-		sdk.MustNewDecFromStr("1.15"),
+		sdk.MustNewDecFromStr("1.12"),
+		sdk.MustNewDecFromStr("1.07"),
+		sdk.MustNewDecFromStr("1.11"),
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
 	median, err := Median(prices)
 	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.125"), median)
+	require.Equal(sdk.MustNewDecFromStr("1.115"), median)
 
 	// test empty prices list
 	median, err = Median([]sdk.Dec{})
@@ -28,16 +28,16 @@ func TestMedian(t *testing.T) {
 func TestMedianDeviation(t *testing.T) {
 	require := require.New(t)
 	prices := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.1"),
-		sdk.MustNewDecFromStr("1.05"),
-		sdk.MustNewDecFromStr("1.15"),
+		sdk.MustNewDecFromStr("1.12"),
+		sdk.MustNewDecFromStr("1.07"),
+		sdk.MustNewDecFromStr("1.11"),
 		sdk.MustNewDecFromStr("1.2"),
 	}
-	median := sdk.MustNewDecFromStr("1.125")
+	median := sdk.MustNewDecFromStr("1.115")
 
 	medianDeviation, err := MedianDeviation(median, prices)
 	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("0.003125"), medianDeviation)
+	require.Equal(sdk.MustNewDecFromStr("0.002325"), medianDeviation)
 
 	// test empty prices list
 	medianDeviation, err = MedianDeviation(median, []sdk.Dec{})
@@ -47,9 +47,9 @@ func TestMedianDeviation(t *testing.T) {
 func TestAverage(t *testing.T) {
 	require := require.New(t)
 	prices := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.1"),
-		sdk.MustNewDecFromStr("1.05"),
-		sdk.MustNewDecFromStr("1.15"),
+		sdk.MustNewDecFromStr("1.12"),
+		sdk.MustNewDecFromStr("1.07"),
+		sdk.MustNewDecFromStr("1.11"),
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
@@ -65,15 +65,15 @@ func TestAverage(t *testing.T) {
 func TestMin(t *testing.T) {
 	require := require.New(t)
 	prices := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.1"),
-		sdk.MustNewDecFromStr("1.05"),
-		sdk.MustNewDecFromStr("1.15"),
+		sdk.MustNewDecFromStr("1.12"),
+		sdk.MustNewDecFromStr("1.07"),
+		sdk.MustNewDecFromStr("1.11"),
 		sdk.MustNewDecFromStr("1.2"),
 	}
 
 	min, err := Min(prices)
 	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.05"), min)
+	require.Equal(sdk.MustNewDecFromStr("1.07"), min)
 
 	// test empty prices list
 	min, err = Min([]sdk.Dec{})
@@ -83,9 +83,9 @@ func TestMin(t *testing.T) {
 func TestMax(t *testing.T) {
 	require := require.New(t)
 	prices := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.1"),
-		sdk.MustNewDecFromStr("1.05"),
-		sdk.MustNewDecFromStr("1.15"),
+		sdk.MustNewDecFromStr("1.12"),
+		sdk.MustNewDecFromStr("1.07"),
+		sdk.MustNewDecFromStr("1.11"),
 		sdk.MustNewDecFromStr("1.2"),
 	}
 

@@ -7,6 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v3/util"
+	"github.com/umee-network/umee/v3/util/decmath"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -39,7 +40,7 @@ func (k Keeper) CalcAndSetMedian(
 	denom string,
 ) error {
 	historicPrices := k.getHistoricPrices(ctx, denom)
-	median, err := util.Median(historicPrices)
+	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -112,7 +113,7 @@ func (k Keeper) calcAndSetMedianDeviation(
 	median sdk.Dec,
 	prices []sdk.Dec,
 ) error {
-	medianDeviation, err := util.MedianDeviation(median, prices)
+	medianDeviation, err := decmath.MedianDeviation(median, prices)
 	if err != nil {
 		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -141,7 +142,7 @@ func (k Keeper) GetMedianOfMedians(
 	numStamps uint64,
 ) (sdk.Dec, error) {
 	medians := k.GetHistoricMedians(ctx, denom, numStamps)
-	median, err := util.Median(medians)
+	median, err := decmath.Median(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -156,7 +157,7 @@ func (k Keeper) GetAverageOfMedians(
 	numStamps uint64,
 ) (sdk.Dec, error) {
 	medians := k.GetHistoricMedians(ctx, denom, numStamps)
-	average, err := util.Average(medians)
+	average, err := decmath.Average(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -171,7 +172,7 @@ func (k Keeper) GetMaxOfMedians(
 	numStamps uint64,
 ) (sdk.Dec, error) {
 	medians := k.GetHistoricMedians(ctx, denom, numStamps)
-	max, err := util.Max(medians)
+	max, err := decmath.Max(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -186,7 +187,7 @@ func (k Keeper) GetMinOfMedians(
 	numStamps uint64,
 ) (sdk.Dec, error) {
 	medians := k.GetHistoricMedians(ctx, denom, numStamps)
-	min, err := util.Min(medians)
+	min, err := decmath.Min(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
