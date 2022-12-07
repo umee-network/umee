@@ -159,21 +159,6 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	return totalCollateral
 }
 
-// HasCollateral returns true if a borrower has any collateral.
-func (k Keeper) HasCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) bool {
-	iter := sdk.KVStorePrefixIterator(
-		ctx.KVStore(k.storeKey),
-		types.KeyPrefixCollateralAmount,
-	)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		// Stored collateral amounts are never zero, so this is enough
-		return true
-	}
-	return false
-}
-
 // GetEligibleLiquidationTargets returns a list of borrower addresses eligible for liquidation.
 func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress, error) {
 	prefix := types.KeyPrefixAdjustedBorrow
