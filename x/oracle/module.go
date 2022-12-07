@@ -156,7 +156,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 }
 
 // RegisterInvariants registers the x/oracle module's invariants.
-func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
+func (am AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // InitGenesis performs the x/oracle module's genesis initialization. It returns
 // no validator updates.
@@ -177,7 +177,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.

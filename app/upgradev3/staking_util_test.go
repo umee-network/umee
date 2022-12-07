@@ -36,17 +36,17 @@ func (m *MockStakingKeeper) GetValidator(_ sdk.Context, addr sdk.ValAddress) (ty
 }
 
 // BeforeValidatorModified implements StakingKeeper
-func (*MockStakingKeeper) BeforeValidatorModified(_ sdk.Context, _ sdk.ValAddress) error {
+func (*MockStakingKeeper) BeforeValidatorModified(sdk.Context, sdk.ValAddress) error {
 	return nil
 }
 
 // GetAllValidators implements StakingKeeper
-func (m *MockStakingKeeper) GetAllValidators(_ sdk.Context) (validators []types.Validator) {
+func (m *MockStakingKeeper) GetAllValidators(sdk.Context) (validators []types.Validator) {
 	return m.validators
 }
 
 // GetParams implements StakingKeeper
-func (m *MockStakingKeeper) GetParams(_ sdk.Context) types.Params {
+func (m *MockStakingKeeper) GetParams(sdk.Context) types.Params {
 	return m.params
 }
 

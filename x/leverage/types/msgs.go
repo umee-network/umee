@@ -12,9 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	_ sdk.Msg = &MsgGovUpdateRegistry{}
-)
+var _ sdk.Msg = &MsgGovUpdateRegistry{}
 
 // NewMsgUpdateRegistry will creates a new MsgUpdateRegistry instance
 func NewMsgUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {

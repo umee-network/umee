@@ -119,7 +119,7 @@ func (sk MockStakingKeeper) Validator(ctx sdk.Context, address sdk.ValAddress) s
 	return nil
 }
 
-func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdkmath.Int {
+func (MockStakingKeeper) TotalBondedTokens(sdk.Context) sdkmath.Int {
 	return sdk.ZeroInt()
 }
 
