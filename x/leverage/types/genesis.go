@@ -25,6 +25,7 @@ func NewGenesisState(
 		Registry:         tokens,
 		AdjustedBorrows:  adjustedBorrows,
 		Collateral:       collateral,
+		Reserves:         reserves,
 		LastInterestTime: lastInterestTime,
 		BadDebts:         badDebts,
 		InterestScalars:  interestScalars,
