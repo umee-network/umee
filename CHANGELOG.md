@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
+- [1650](https://github.com/umee-network/umee/pull/1650) Fixes bug with reserves in ExportGenesis
 - [1642](https://github.com/umee-network/umee/pull/1642) Added missing CLI for QueryBadDebts
 - [1633](https://github.com/umee-network/umee/pull/1633) Increases price calculation precision for high exponent assets.
 
