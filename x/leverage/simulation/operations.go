@@ -92,7 +92,7 @@ func WeightedOperations(
 		),
 		simulation.NewWeightedOperation(
 			weightMsgCollateralize,
-			SimulateMsgCollateralize(ak, bk, lk),
+			SimulateMsgCollateralize(ak, bk),
 		),
 		simulation.NewWeightedOperation(
 			weightMsgBorrow,
@@ -176,7 +176,6 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk kee
 func SimulateMsgCollateralize(
 	ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper,
-	_ keeper.Keeper,
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,

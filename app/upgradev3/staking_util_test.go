@@ -18,7 +18,7 @@ type MockStakingKeeper struct {
 }
 
 // GetValidator implements StakingKeeper
-func (m *MockStakingKeeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (types.Validator, bool) {
+func (m *MockStakingKeeper) GetValidator(_ sdk.Context, addr sdk.ValAddress) (types.Validator, bool) {
 	var (
 		validator types.Validator
 		found     bool
@@ -36,12 +36,12 @@ func (m *MockStakingKeeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (
 }
 
 // BeforeValidatorModified implements StakingKeeper
-func (*MockStakingKeeper) BeforeValidatorModified(ctx sdk.Context, valAddr sdk.ValAddress) error {
+func (*MockStakingKeeper) BeforeValidatorModified(_ sdk.Context, _ sdk.ValAddress) error {
 	return nil
 }
 
 // GetAllValidators implements StakingKeeper
-func (m *MockStakingKeeper) GetAllValidators(ctx sdk.Context) (validators []types.Validator) {
+func (m *MockStakingKeeper) GetAllValidators(_ sdk.Context) (validators []types.Validator) {
 	return m.validators
 }
 
