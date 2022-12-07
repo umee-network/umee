@@ -65,7 +65,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 // ValidateGenesis performs genesis state validation for the x/leverage module.
 func (AppModuleBasic) ValidateGenesis(
 	cdc codec.JSONCodec,
-	config client.TxEncodingConfig,
+	_ client.TxEncodingConfig,
 	bz json.RawMessage,
 ) error {
 	var genState types.GenesisState
@@ -95,7 +95,7 @@ func (a AppModuleBasic) GetTxCmd() *cobra.Command {
 
 // GetQueryCmd returns the x/leverage module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(types.StoreKey)
+	return cli.GetQueryCmd()
 }
 
 // AppModule implements the AppModule interface for the x/leverage module.
@@ -134,7 +134,7 @@ func (am AppModule) Route() sdk.Route {
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
 // LegacyQuerierHandler returns a no-op legacy querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
+func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
 		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
 	}

@@ -176,7 +176,7 @@ func SimulateMsgBorrow(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk kee
 func SimulateMsgCollateralize(
 	ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper,
-	lk keeper.Keeper,
+	_ keeper.Keeper,
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
