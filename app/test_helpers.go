@@ -59,7 +59,7 @@ var DefaultConsensusParams = &abci.ConsensusParams{
 
 type EmptyAppOptions struct{}
 
-func (EmptyAppOptions) Get(_ string) interface{} { return nil }
+func (EmptyAppOptions) Get(string) interface{} { return nil }
 
 func Setup(t *testing.T) *UmeeApp {
 	t.Helper()

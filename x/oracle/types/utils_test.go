@@ -123,7 +123,7 @@ func (MockStakingKeeper) TotalBondedTokens(_ sdk.Context) sdkmath.Int {
 	return sdk.ZeroInt()
 }
 
-func (k MockStakingKeeper) GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator {
+func (MockStakingKeeper) GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator {
 	return nil
 }
 
@@ -131,8 +131,8 @@ func (MockStakingKeeper) ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Itera
 	return sdk.KVStoreReversePrefixIterator(nil, nil)
 }
 
-func (k MockStakingKeeper) GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) (power int64) {
-	return k.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
+func (sk MockStakingKeeper) GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) (power int64) {
+	return sk.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
 }
 
 func (MockStakingKeeper) MaxValidators(sdk.Context) uint32 {
@@ -218,11 +218,11 @@ func (v *MockValidator) SetConsensusPower(power int64) {
 	v.power = power
 }
 
-func (v MockValidator) GetCommission() sdk.Dec {
+func (MockValidator) GetCommission() sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) GetMinSelfDelegation() sdkmath.Int {
+func (MockValidator) GetMinSelfDelegation() sdkmath.Int {
 	return sdk.OneInt()
 }
 
@@ -230,22 +230,22 @@ func (v MockValidator) GetDelegatorShares() sdk.Dec {
 	return sdk.NewDec(v.power)
 }
 
-func (v MockValidator) TokensFromShares(sdk.Dec) sdk.Dec {
+func (MockValidator) TokensFromShares(sdk.Dec) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) TokensFromSharesTruncated(sdk.Dec) sdk.Dec {
+func (MockValidator) TokensFromSharesTruncated(sdk.Dec) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) TokensFromSharesRoundUp(sdk.Dec) sdk.Dec {
+func (MockValidator) TokensFromSharesRoundUp(sdk.Dec) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-func (v MockValidator) SharesFromTokens(amt sdkmath.Int) (sdk.Dec, error) {
+func (MockValidator) SharesFromTokens(sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }
 
-func (v MockValidator) SharesFromTokensTruncated(amt sdkmath.Int) (sdk.Dec, error) {
+func (MockValidator) SharesFromTokensTruncated(sdkmath.Int) (sdk.Dec, error) {
 	return sdk.ZeroDec(), nil
 }
