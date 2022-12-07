@@ -262,7 +262,6 @@ func (p *GateProvider) messageReceived(messageType int, bz []byte) {
 		case "success":
 			return
 		case "":
-			break
 		default:
 			return
 		}
