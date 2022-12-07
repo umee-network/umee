@@ -131,8 +131,8 @@ func (MockStakingKeeper) ValidatorsPowerStoreIterator(ctx sdk.Context) sdk.Itera
 	return sdk.KVStoreReversePrefixIterator(nil, nil)
 }
 
-func (sk MockStakingKeeper) GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) (power int64) {
-	return sk.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
+func (k MockStakingKeeper) GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) (power int64) {
+	return k.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
 }
 
 func (MockStakingKeeper) MaxValidators(sdk.Context) uint32 {

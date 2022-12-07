@@ -61,7 +61,7 @@ type EmptyAppOptions struct{}
 
 func (EmptyAppOptions) Get(o string) interface{} { return nil }
 
-func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
+func Setup(t *testing.T, isCheckTx bool) *UmeeApp {
 	t.Helper()
 
 	privVal := mock.NewPV()

@@ -17,7 +17,9 @@ import (
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
-func (app UmeeApp) RegisterUpgradeHandlers(experimental bool) {
+// RegisterUpgradeHandlersregisters upgrade handlers.
+// It takes a boolean parameter to enable or disable experimental features.
+func (app UmeeApp) RegisterUpgradeHandlers(_ bool) {
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
 		panic(err)
@@ -125,7 +127,8 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 
 			oracletypes.ModuleName,
 			leveragetypes.ModuleName,
-		}})
+		},
+	})
 }
 
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {

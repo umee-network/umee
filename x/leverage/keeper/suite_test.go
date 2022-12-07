@@ -47,7 +47,7 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
-	app := umeeapp.Setup(s.T(), false, 1)
+	app := umeeapp.Setup(s.T(), false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,

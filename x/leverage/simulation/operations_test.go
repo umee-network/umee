@@ -31,7 +31,7 @@ type SimTestSuite struct {
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	app := umeeapp.Setup(s.T(), checkTx, 1)
+	app := umeeapp.Setup(s.T(), checkTx)
 	ctx := app.NewContext(checkTx, tmproto.Header{})
 
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
