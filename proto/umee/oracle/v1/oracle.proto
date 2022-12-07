@@ -51,7 +51,7 @@ message Params {
   // calculating the median and standard deviation of the median of
   // historic prices in the last Prune Period.
   uint64 median_period = 11;
-    // Historic Asset List is a list of assets which will use the historic
+  // Historic Asset List is a list of assets which will use the historic
   // price stamping protection methodology (mainly manipulatable assets).
   // Any assets not on this list will not be stamped.
   repeated Denom historic_accept_list = 12 [
