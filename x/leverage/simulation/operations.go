@@ -50,37 +50,37 @@ func WeightedOperations(
 		weightMsgLiquidate       int
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgSupply, &weightMsgSupply, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgSupply = DefaultWeightMsgSupply
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgWithdraw, &weightMsgWithdraw, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgWithdraw = DefaultWeightMsgWithdraw
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgBorrow, &weightMsgBorrow, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgBorrow = DefaultWeightMsgBorrow
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgCollateralize, &weightMsgCollateralize, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgCollateralize = DefaultWeightMsgCollateralize
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgDecollateralize, &weightMsgDecollateralize, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgDecollateralize = DefaultWeightMsgDecollateralize
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgRepay, &weightMsgRepay, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgRepay = DefaultWeightMsgRepay
 		},
 	)
 	appParams.GetOrGenerate(cdc, OperationWeightMsgLiquidate, &weightMsgLiquidate, nil,
-		func(_ *rand.Rand) {
+		func(*rand.Rand) {
 			weightMsgLiquidate = DefaultWeightMsgLiquidate
 		},
 	)
