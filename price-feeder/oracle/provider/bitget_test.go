@@ -25,7 +25,7 @@ func TestBitgetProvider_GetTickerPrices(t *testing.T) {
 		instID := "ATOMUSDT"
 
 		tickerMap := map[string]BitgetTicker{}
-		tickerMap[instId] = BitgetTicker{
+		tickerMap[instID] = BitgetTicker{
 			Arg: BitgetSubscriptionArg{
 				Channel: "tickers",
 				InstID:  instID,
