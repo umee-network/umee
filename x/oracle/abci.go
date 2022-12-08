@@ -59,7 +59,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 			}
 
 			if experimental {
-				// Stamp historic price if historic stamp period has passed
 				if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 					k.AddHistoricPrice(ctx, strings.ToUpper(ballotDenom.Denom), exchangeRate)
 				}
