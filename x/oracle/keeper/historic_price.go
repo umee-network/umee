@@ -19,7 +19,7 @@ func (k Keeper) HistoricMedians(
 ) []sdk.Dec {
 	medians := []sdk.Dec{}
 
-	k.IterateHistoricMediansSinceBlock(ctx, denom, uint(numStamps), func(median sdk.Dec) bool {
+	k.IterateHistoricMedians(ctx, denom, uint(numStamps), func(median sdk.Dec) bool {
 		medians = append(medians, median)
 		return false
 	})
@@ -202,7 +202,7 @@ func (k Keeper) historicPrices(
 	// calculate start block to iterate from
 	historicPrices := []sdk.Dec{}
 
-	k.IterateHistoricPricesSinceBlock(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec) bool {
+	k.IterateHistoricPrices(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec) bool {
 		historicPrices = append(historicPrices, exchangeRate)
 		return false
 	})
@@ -211,9 +211,9 @@ func (k Keeper) historicPrices(
 }
 
 // IterateHistoricPrices iterates over historic prices of a given
-// denom in the store.
+// denom in the store in reverse.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
-func (k Keeper) IterateHistoricPricesSinceBlock(
+func (k Keeper) IterateHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
@@ -236,10 +236,9 @@ func (k Keeper) IterateHistoricPricesSinceBlock(
 }
 
 // IterateHistoricMediansSinceBlock iterates over medians of a given
-// denom in the store in reverse starting from the latest median
-// until startBlock.
+// denom in the store in reverse.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
-func (k Keeper) IterateHistoricMediansSinceBlock(
+func (k Keeper) IterateHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
