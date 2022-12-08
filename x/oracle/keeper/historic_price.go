@@ -17,14 +17,9 @@ func (k Keeper) HistoricMedians(
 	denom string,
 	numStamps uint64,
 ) []sdk.Dec {
-	// calculate start block to iterate from
-	blockPeriod := (numStamps - 1) * k.MedianStampPeriod(ctx)
-	lastStampBlock := uint64(ctx.BlockHeight()) - (uint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1)
-	startBlock := lastStampBlock - blockPeriod
-
 	medians := []sdk.Dec{}
 
-	k.IterateHistoricMediansSinceBlock(ctx, denom, startBlock, func(median sdk.Dec) bool {
+	k.IterateHistoricMediansSinceBlock(ctx, denom, uint(numStamps), func(median sdk.Dec) bool {
 		medians = append(medians, median)
 		return false
 	})
@@ -205,13 +200,9 @@ func (k Keeper) historicPrices(
 	numStamps uint64,
 ) []sdk.Dec {
 	// calculate start block to iterate from
-	blockPeriod := (numStamps - 1) * k.HistoricStampPeriod(ctx)
-	lastStampBlock := uint64(ctx.BlockHeight()) - (uint64(ctx.BlockHeight())%k.HistoricStampPeriod(ctx) + 1)
-	startBlock := lastStampBlock - blockPeriod
-
 	historicPrices := []sdk.Dec{}
 
-	k.IterateHistoricPricesSinceBlock(ctx, denom, startBlock, func(exchangeRate sdk.Dec) bool {
+	k.IterateHistoricPricesSinceBlock(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec) bool {
 		historicPrices = append(historicPrices, exchangeRate)
 		return false
 	})
@@ -225,21 +216,20 @@ func (k Keeper) historicPrices(
 func (k Keeper) IterateHistoricPricesSinceBlock(
 	ctx sdk.Context,
 	denom string,
-	startBlock uint64,
+	numStamps uint,
 	handler func(sdk.Dec) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(denom))
-	iter := sdk.KVStoreReversePrefixIterator(store, prefix)
+	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		_, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
-		if handler(decProto.Dec) || block <= startBlock {
+		if handler(decProto.Dec) {
 			break
 		}
 	}
@@ -252,21 +242,20 @@ func (k Keeper) IterateHistoricPricesSinceBlock(
 func (k Keeper) IterateHistoricMediansSinceBlock(
 	ctx sdk.Context,
 	denom string,
-	startBlock uint64,
+	numStamps uint,
 	handler func(sdk.Dec) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixMedian, []byte(denom))
-	iter := sdk.KVStoreReversePrefixIterator(store, prefix)
+	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		_, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
-		if handler(decProto.Dec) || block <= startBlock {
+		if handler(decProto.Dec) {
 			break
 		}
 	}
