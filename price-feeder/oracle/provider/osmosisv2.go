@@ -189,7 +189,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candleList, nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(messageType int, bz []byte) {
+func (p *OsmosisV2Provider) messageReceived(_ int, bz []byte) {
 	// check if message is an ack first
 	if string(bz) == "ack" {
 		return
