@@ -75,7 +75,7 @@ func Max(prices []sdk.Dec) (sdk.Dec, error) {
 	}
 
 	max := prices[0]
-	for _, price := range prices {
+	for _, price := range prices[1:] {
 		if price.GT(max) {
 			max = price
 		}
