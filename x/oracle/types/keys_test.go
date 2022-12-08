@@ -107,56 +107,32 @@ func TestKeyAggregateExchangeRateVote(t *testing.T) {
 	}
 }
 
-func TestParseBlockFromHistoricPriceKey(t *testing.T) {
+func TestParseDenomAndBlockFromHistoricPriceKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
 	key := KeyHistoricPrice(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromKey(key)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixHistoricPrice)
+	require.Equal(t, denom, parsedDenom)
 	require.Equal(t, blockNum, parsedBlockNum)
 }
 
-func TestParseDenomFromHistoricPriceKey(t *testing.T) {
-	denom := "umee"
-	blockNum := uint64(4567)
-	key := KeyHistoricPrice(denom, blockNum)
-
-	parsedDenom := ParseDenomFromKey(key, KeyPrefixHistoricPrice)
-	require.Equal(t, denom, parsedDenom)
-}
-
-func TestParseBlockFromMedianKey(t *testing.T) {
+func TestParseDenomAndBlockFromMedianKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
 	key := KeyMedian(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromKey(key)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedian)
+	require.Equal(t, denom, parsedDenom)
 	require.Equal(t, blockNum, parsedBlockNum)
 }
 
-func TestParseDenomFromMedianKey(t *testing.T) {
-	denom := "umee"
-	blockNum := uint64(4567)
-	key := KeyMedian(denom, blockNum)
-
-	parsedDenom := ParseDenomFromKey(key, KeyPrefixMedian)
-	require.Equal(t, denom, parsedDenom)
-}
-
-func TestParseBlockFromMedianDeviationKey(t *testing.T) {
+func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
 	key := KeyMedianDeviation(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromKey(key)
-	require.Equal(t, blockNum, parsedBlockNum)
-}
-
-func TestParseDenomFromMedianDeviationKey(t *testing.T) {
-	denom := "umee"
-	blockNum := uint64(4567)
-	key := KeyMedianDeviation(denom, blockNum)
-
-	parsedDenom := ParseDenomFromKey(key, KeyPrefixMedianDeviation)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedianDeviation)
 	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
 }

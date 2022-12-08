@@ -94,10 +94,10 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 
 	// with experimental flag off median doesn't get deleted
 	oracle.EndBlocker(ctx, app.OracleKeeper, false)
-	medians := []types.HistoricPrice{}
+	medians := []types.Price{}
 	app.OracleKeeper.IterateAllMedianPrices(
 		ctx,
-		func(median types.HistoricPrice) bool {
+		func(median types.Price) bool {
 			medians = append(medians, median)
 			return false
 		},
@@ -106,10 +106,10 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 
 	// with experimental flag on median gets deleted
 	oracle.EndBlocker(ctx, app.OracleKeeper, true)
-	experimentalMedians := []types.HistoricPrice{}
+	experimentalMedians := []types.Price{}
 	app.OracleKeeper.IterateAllMedianPrices(
 		ctx,
-		func(median types.HistoricPrice) bool {
+		func(median types.Price) bool {
 			medians = append(experimentalMedians, median)
 			return false
 		},

@@ -39,7 +39,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 ) error {
-	historicPrices := k.historicPrices(ctx, denom)
+	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -95,7 +95,7 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	median := medians[0]
 
 	// get latest historic price
-	prices := k.historicPrices(ctx, denom)
+	prices := k.historicPrices(ctx, denom, 1)
 	if len(prices) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoHistoricPrice, fmt.Sprintf("denom: %s", denom))
 	}
@@ -202,10 +202,16 @@ func (k Keeper) MinOfHistoricMedians(
 func (k Keeper) historicPrices(
 	ctx sdk.Context,
 	denom string,
+	numStamps uint64,
 ) []sdk.Dec {
+	// calculate start block to iterate from
+	blockPeriod := (numStamps - 1) * k.HistoricStampPeriod(ctx)
+	lastStampBlock := uint64(ctx.BlockHeight()) - (uint64(ctx.BlockHeight())%k.HistoricStampPeriod(ctx) + 1)
+	startBlock := lastStampBlock - blockPeriod
+
 	historicPrices := []sdk.Dec{}
 
-	k.IterateHistoricPrices(ctx, denom, func(exchangeRate sdk.Dec) bool {
+	k.IterateHistoricPricesSinceBlock(ctx, denom, startBlock, func(exchangeRate sdk.Dec) bool {
 		historicPrices = append(historicPrices, exchangeRate)
 		return false
 	})
@@ -216,9 +222,10 @@ func (k Keeper) historicPrices(
 // IterateHistoricPrices iterates over historic prices of a given
 // denom in the store.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
-func (k Keeper) IterateHistoricPrices(
+func (k Keeper) IterateHistoricPricesSinceBlock(
 	ctx sdk.Context,
 	denom string,
+	startBlock uint64,
 	handler func(sdk.Dec) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
@@ -231,7 +238,8 @@ func (k Keeper) IterateHistoricPrices(
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		if handler(decProto.Dec) {
+		_, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
+		if handler(decProto.Dec) || block <= startBlock {
 			break
 		}
 	}
@@ -257,7 +265,7 @@ func (k Keeper) IterateHistoricMediansSinceBlock(
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		block := types.ParseBlockFromKey(iter.Key())
+		_, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
 		if handler(decProto.Dec) || block <= startBlock {
 			break
 		}

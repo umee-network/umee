@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -60,12 +59,12 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 			if experimental {
 				if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-					k.AddHistoricPrice(ctx, strings.ToUpper(ballotDenom.Denom), exchangeRate)
+					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
 				}
 
 				// Calculate and stamp median/median deviation if median stamp period has passed
 				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-					if err = k.CalcAndSetHistoricMedian(ctx, strings.ToUpper(ballotDenom.Denom)); err != nil {
+					if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
 						return err
 					}
 				}
@@ -107,13 +106,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 	// Prune historic prices and medians outside pruning period determined by
 	// the stamp period multiplied by the max stamps.
-	if experimental {
-		pruneHistoricBlock := uint64(ctx.BlockHeight()) - (params.HistoricStampPeriod * params.MaximumPriceStamps)
-		pruneMedianBlock := uint64(ctx.BlockHeight()) - (params.MedianStampPeriod * params.MaximumMedianStamps)
+	if experimental && isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		pruneHistoricBlock := uint64(ctx.BlockHeight()) - (params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod)
+		pruneMedianBlock := uint64(ctx.BlockHeight()) - (params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod)
 		for _, v := range params.AcceptList {
-			k.DeleteHistoricPrice(ctx, strings.ToUpper(v.SymbolDenom), pruneHistoricBlock)
-			k.DeleteHistoricMedian(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
-			k.DeleteHistoricMedianDeviation(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
+			k.DeleteHistoricPrice(ctx, v.SymbolDenom, pruneHistoricBlock)
+			k.DeleteHistoricMedian(ctx, v.SymbolDenom, pruneMedianBlock)
+			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, pruneMedianBlock)
 		}
 	}
 

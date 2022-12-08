@@ -135,28 +135,28 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		},
 	)
 
-	historicPrices := []types.HistoricPrice{}
+	historicPrices := []types.Price{}
 	keeper.IterateAllHistoricPrices(
 		ctx,
-		func(historicPrice types.HistoricPrice) bool {
+		func(historicPrice types.Price) bool {
 			historicPrices = append(historicPrices, historicPrice)
 			return false
 		},
 	)
 
-	medianPrices := []types.HistoricPrice{}
+	medianPrices := []types.Price{}
 	keeper.IterateAllMedianPrices(
 		ctx,
-		func(medianPrice types.HistoricPrice) bool {
+		func(medianPrice types.Price) bool {
 			medianPrices = append(medianPrices, medianPrice)
 			return false
 		},
 	)
 
-	medianDeviationPrices := []types.HistoricPrice{}
+	medianDeviationPrices := []types.Price{}
 	keeper.IterateAllMedianDeviationPrices(
 		ctx,
-		func(medianDeviationPrice types.HistoricPrice) bool {
+		func(medianDeviationPrice types.Price) bool {
 			medianDeviationPrices = append(medianDeviationPrices, medianDeviationPrice)
 			return false
 		},
