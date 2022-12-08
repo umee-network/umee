@@ -7,7 +7,7 @@ confidence = 0
 
 # https://github.com/mgechev/revive#configuration
 
-# Recommended configuration, minus [rule.exported] and [rule.package-comments]
+# Recommended configuration, minus what's commented out
 [rule.blank-imports]
 [rule.context-as-argument]
 [rule.context-keys-type]
@@ -24,7 +24,7 @@ confidence = 0
 #[rule.package-comments]
 [rule.range]
 [rule.receiver-naming]
-[rule.redefines-builtin-id]
+#[rule.redefines-builtin-id]
 [rule.superfluous-else]
 [rule.time-naming]
 [rule.unexported-return]

@@ -99,11 +99,7 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	if err := gs.UtokenSupply.Validate(); err != nil {
-		return err
-	}
-
-	return nil
+	return gs.UtokenSupply.Validate()
 }
 
 // GetGenesisStateFromAppState returns x/leverage GenesisState given raw application

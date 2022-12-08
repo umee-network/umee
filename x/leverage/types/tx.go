@@ -239,10 +239,7 @@ func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	if asset == nil {
 		return ErrNilAsset
 	}
-	if err := asset.Validate(); err != nil {
-		return err
-	}
-	return nil
+	return asset.Validate()
 }
 
 func validateSenderAndDenom(sender string, denom string) error {
@@ -250,8 +247,5 @@ func validateSenderAndDenom(sender string, denom string) error {
 	if err != nil {
 		return err
 	}
-	if err := sdk.ValidateDenom(denom); err != nil {
-		return err
-	}
-	return nil
+	return sdk.ValidateDenom(denom)
 }

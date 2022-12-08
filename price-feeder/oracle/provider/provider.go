@@ -80,7 +80,7 @@ func (n Name) String() string {
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
-func preventRedirect(_ *http.Request, _ []*http.Request) error {
+func preventRedirect(*http.Request, []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 
