@@ -54,4 +54,4 @@ func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) 
 // useful to still have price data for assets outside of the scope of the
 // x/leverage registry. If assets need to be removed, they can always be purged
 // via param change proposals.
-func (h Hooks) AfterRegisteredTokenRemoved(ctx sdk.Context, token leveragetypes.Token) {}
+func (h Hooks) AfterRegisteredTokenRemoved(sdk.Context, leveragetypes.Token) {}

@@ -334,13 +334,13 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.UpdateTokens, registeredTokenDenoms, true)
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, registeredTokenDenoms, true)
 	if err != nil {
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}
 
 	// adds  the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.AddTokens, registeredTokenDenoms, false)
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, registeredTokenDenoms, false)
 	if err != nil {
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}

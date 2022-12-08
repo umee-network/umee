@@ -11,7 +11,7 @@ type TestProvider struct {
 	handlerCalled bool
 }
 
-func (mp *TestProvider) messageHandler(messageType int, bz []byte) {
+func (mp *TestProvider) messageHandler(int, []byte) {
 	mp.handlerCalled = true
 }
 
