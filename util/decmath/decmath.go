@@ -42,10 +42,9 @@ func MedianDeviation(median sdk.Dec, prices []sdk.Dec) (sdk.Dec, error) {
 		return medianDeviation, ErrEmptyList
 	}
 
-	for _, price := range prices {
-		medianDeviation = medianDeviation.Add(price.
-			Sub(median).Abs().Power(2).
-			QuoInt64(int64(lenPrices)))
+	for _, p := range prices {
+		medianDeviation = medianDeviation.Add(
+			p.Sub(median).Abs().Power(2).QuoInt64(int64(lenPrices)))
 	}
 
 	return medianDeviation, nil
