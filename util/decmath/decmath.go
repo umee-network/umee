@@ -93,7 +93,7 @@ func Min(prices []sdk.Dec) (sdk.Dec, error) {
 	}
 
 	min := prices[0]
-	for _, price := range prices {
+	for _, price := range prices[1:] {
 		if price.LT(min) {
 			min = price
 		}
