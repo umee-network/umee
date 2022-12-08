@@ -62,7 +62,7 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	}
 
 	for _, m := range medians {
-		keeper.SetMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
+		keeper.SetHistoricMedian(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
 	}
 
 	newMedians := []types.HistoricPrice{}
@@ -96,7 +96,7 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	}
 
 	for _, m := range medians {
-		keeper.SetMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
+		keeper.SetHistoricMedianDeviation(ctx, m.Denom, uint64(s.ctx.BlockHeight()), m.ExchangeRate)
 	}
 
 	newMedians := []types.HistoricPrice{}

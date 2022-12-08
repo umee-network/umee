@@ -66,7 +66,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 				// Calculate and stamp median/median deviation if median stamp period has passed
 				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-					if err = k.CalcAndSetMedian(ctx, strings.ToUpper(ballotDenom.Denom)); err != nil {
+					if err = k.CalcAndSetHistoricMedian(ctx, strings.ToUpper(ballotDenom.Denom)); err != nil {
 						return err
 					}
 				}
@@ -113,8 +113,8 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 		pruneMedianBlock := uint64(ctx.BlockHeight()) - (params.MedianStampPeriod * params.MaximumMedianStamps)
 		for _, v := range params.AcceptList {
 			k.DeleteHistoricPrice(ctx, strings.ToUpper(v.SymbolDenom), pruneHistoricBlock)
-			k.DeleteMedian(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
-			k.DeleteMedianDeviation(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
+			k.DeleteHistoricMedian(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
+			k.DeleteHistoricMedianDeviation(ctx, strings.ToUpper(v.SymbolDenom), pruneMedianBlock)
 		}
 	}
 

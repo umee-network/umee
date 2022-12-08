@@ -88,7 +88,7 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 
 	// add historic price and calcSet median stats
 	app.OracleKeeper.AddHistoricPrice(s.ctx, displayDenom, sdk.MustNewDecFromStr("1.0"))
-	app.OracleKeeper.CalcAndSetMedian(s.ctx, displayDenom)
+	app.OracleKeeper.CalcAndSetHistoricMedian(s.ctx, displayDenom)
 	medianPruneBlock := ctx.BlockHeight() + int64(types.DefaultMaximumMedianStamps*types.DefaultMedianStampPeriod)
 	ctx = ctx.WithBlockHeight(medianPruneBlock)
 

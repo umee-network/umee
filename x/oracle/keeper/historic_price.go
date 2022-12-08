@@ -12,7 +12,7 @@ import (
 )
 
 // HistoricMedians returns a list of a given denom's last numStamps medians.
-func (k Keeper) GetHistoricMedians(
+func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
@@ -24,7 +24,7 @@ func (k Keeper) GetHistoricMedians(
 
 	medians := []sdk.Dec{}
 
-	k.IterateMediansSinceBlock(ctx, denom, startBlock, func(median sdk.Dec) bool {
+	k.IterateHistoricMediansSinceBlock(ctx, denom, startBlock, func(median sdk.Dec) bool {
 		medians = append(medians, median)
 		return false
 	})
@@ -32,25 +32,25 @@ func (k Keeper) GetHistoricMedians(
 	return medians
 }
 
-// CalcAndSetMedian uses all the historic prices of a given denom to
+// CalcAndSetHistoricMedian uses all the historic prices of a given denom to
 // calculate its median price at the current block and set it to the store.
 // It will also call setMedianDeviation with the calculated median.
-func (k Keeper) CalcAndSetMedian(
+func (k Keeper) CalcAndSetHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 ) error {
-	historicPrices := k.getHistoricPrices(ctx, denom)
+	historicPrices := k.historicPrices(ctx, denom)
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
 
 	block := uint64(ctx.BlockHeight())
-	k.SetMedian(ctx, denom, block, median)
-	return k.calcAndSetMedianDeviation(ctx, denom, median, historicPrices)
+	k.SetHistoricMedian(ctx, denom, block, median)
+	return k.calcAndSetHistoricMedianDeviation(ctx, denom, median, historicPrices)
 }
 
-func (k Keeper) SetMedian(
+func (k Keeper) SetHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
@@ -63,7 +63,7 @@ func (k Keeper) SetMedian(
 
 // HistoricMedianDeviation returns a given denom's most recently stamped
 // standard deviation around its median price at a given block.
-func (k Keeper) GetHistoricMedianDeviation(
+func (k Keeper) HistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 ) (sdk.Dec, error) {
@@ -80,28 +80,28 @@ func (k Keeper) GetHistoricMedianDeviation(
 	return decProto.Dec, nil
 }
 
-// WithinMedianDeviation returns whether or not the current price of a
+// WithinHistoricMedianDeviation returns whether or not the current price of a
 // given denom is within the latest stamped Standard Deviation around
 // the Median.
-func (k Keeper) WithinMedianDeviation(
+func (k Keeper) WithinHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 ) (bool, error) {
 	// get latest median
-	medians := k.GetHistoricMedians(ctx, denom, 1)
+	medians := k.HistoricMedians(ctx, denom, 1)
 	if len(medians) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
 	}
 	median := medians[0]
 
 	// get latest historic price
-	prices := k.getHistoricPrices(ctx, denom)
+	prices := k.historicPrices(ctx, denom)
 	if len(prices) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoHistoricPrice, fmt.Sprintf("denom: %s", denom))
 	}
 	price := prices[0]
 
-	medianDeviation, err := k.GetHistoricMedianDeviation(ctx, denom)
+	medianDeviation, err := k.HistoricMedianDeviation(ctx, denom)
 	if err != nil {
 		return false, err
 	}
@@ -109,9 +109,9 @@ func (k Keeper) WithinMedianDeviation(
 	return price.Sub(median).Abs().LTE(medianDeviation), nil
 }
 
-// setMedianDeviation sets a given denom's standard deviation around
-// its median price in the current block.
-func (k Keeper) calcAndSetMedianDeviation(
+// calcAndSetHistoricMedianDeviation calculates and sets a given denom's standard
+// deviation around its median price in the current block.
+func (k Keeper) calcAndSetHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 	median sdk.Dec,
@@ -123,11 +123,11 @@ func (k Keeper) calcAndSetMedianDeviation(
 	}
 
 	block := uint64(ctx.BlockHeight())
-	k.SetMedianDeviation(ctx, denom, block, medianDeviation)
+	k.SetHistoricMedianDeviation(ctx, denom, block, medianDeviation)
 	return nil
 }
 
-func (k Keeper) SetMedianDeviation(
+func (k Keeper) SetHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
@@ -138,14 +138,14 @@ func (k Keeper) SetMedianDeviation(
 	store.Set(types.KeyMedianDeviation(denom, blockNum), bz)
 }
 
-// MedianOfMedians calculates and returns the median of the last stampNum
-// medians.
-func (k Keeper) GetMedianOfMedians(
+// MedianOfHistoricMedians calculates and returns the median of the last stampNum
+// historic medians.
+func (k Keeper) MedianOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
 ) (sdk.Dec, error) {
-	medians := k.GetHistoricMedians(ctx, denom, numStamps)
+	medians := k.HistoricMedians(ctx, denom, numStamps)
 	median, err := decmath.Median(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -153,14 +153,14 @@ func (k Keeper) GetMedianOfMedians(
 	return median, nil
 }
 
-// AverageOfMedians calculates and returns the average of the last stampNum
-// medians.
-func (k Keeper) GetAverageOfMedians(
+// AverageOfHistoricMedians calculates and returns the average of the last stampNum
+// historic medians.
+func (k Keeper) AverageOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
 ) (sdk.Dec, error) {
-	medians := k.GetHistoricMedians(ctx, denom, numStamps)
+	medians := k.HistoricMedians(ctx, denom, numStamps)
 	average, err := decmath.Average(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -168,14 +168,14 @@ func (k Keeper) GetAverageOfMedians(
 	return average, nil
 }
 
-// MaxMedian calculates and returns the maximum value of the last stampNum
-// medians.
-func (k Keeper) GetMaxOfMedians(
+// MaxOfHistoricMedian calculates and returns the maximum value of the last stampNum
+// historic medians.
+func (k Keeper) MaxOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
 ) (sdk.Dec, error) {
-	medians := k.GetHistoricMedians(ctx, denom, numStamps)
+	medians := k.HistoricMedians(ctx, denom, numStamps)
 	max, err := decmath.Max(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -183,14 +183,14 @@ func (k Keeper) GetMaxOfMedians(
 	return max, nil
 }
 
-// MinMedian calculates and returns the minimum value of the last stampNum
-// medians.
-func (k Keeper) GetMinOfMedians(
+// MinOfHistoricMedians calculates and returns the minimum value of the last stampNum
+// historic medians.
+func (k Keeper) MinOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
 ) (sdk.Dec, error) {
-	medians := k.GetHistoricMedians(ctx, denom, numStamps)
+	medians := k.HistoricMedians(ctx, denom, numStamps)
 	min, err := decmath.Min(medians)
 	if err != nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -198,8 +198,8 @@ func (k Keeper) GetMinOfMedians(
 	return min, nil
 }
 
-// getHistoricPrices returns all the historic prices of a given denom.
-func (k Keeper) getHistoricPrices(
+// historicPrices returns all the historic prices of a given denom.
+func (k Keeper) historicPrices(
 	ctx sdk.Context,
 	denom string,
 ) []sdk.Dec {
@@ -237,11 +237,11 @@ func (k Keeper) IterateHistoricPrices(
 	}
 }
 
-// IterateMediansSinceBlock iterates over medians of a given
+// IterateHistoricMediansSinceBlock iterates over medians of a given
 // denom in the store in reverse starting from the latest median
 // until startBlock.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
-func (k Keeper) IterateMediansSinceBlock(
+func (k Keeper) IterateHistoricMediansSinceBlock(
 	ctx sdk.Context,
 	denom string,
 	startBlock uint64,
@@ -297,8 +297,8 @@ func (k Keeper) DeleteHistoricPrice(
 	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
-// DeleteMedian deletes a given denom's median price at a given block.
-func (k Keeper) DeleteMedian(
+// DeleteHistoricMedian deletes a given denom's median price at a given block.
+func (k Keeper) DeleteHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
@@ -307,9 +307,9 @@ func (k Keeper) DeleteMedian(
 	store.Delete(types.KeyMedian(denom, blockNum))
 }
 
-// DeleteMedianDeviation deletes a given denom's standard deviation around
-// its median price at a given block.
-func (k Keeper) DeleteMedianDeviation(
+// DeleteHistoricMedianDeviation deletes a given denom's standard deviation
+// around its median price at a given block.
+func (k Keeper) DeleteHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
@@ -318,8 +318,9 @@ func (k Keeper) DeleteMedianDeviation(
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
 }
 
-// ClearMedians iterates through all medians in the store and deletes them.
-func (k Keeper) ClearMedians(ctx sdk.Context) {
+// ClearHistoricMedians iterates through all medians in the store and deletes
+// them.
+func (k Keeper) ClearHistoricMedians(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
 	defer iter.Close()
@@ -328,9 +329,9 @@ func (k Keeper) ClearMedians(ctx sdk.Context) {
 	}
 }
 
-// ClearMedianDeviations iterates through all median deviations in the store
-// and deletes them.
-func (k Keeper) ClearMedianDeviations(ctx sdk.Context) {
+// ClearHistoricMedianDeviations iterates through all median deviations in
+// the store and deletes them.
+func (k Keeper) ClearHistoricMedianDeviations(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
 	defer iter.Close()
