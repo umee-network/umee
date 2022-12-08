@@ -12,7 +12,7 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
   For mainnet upgrade, please also look at the [`v3.2` Release Notes](https://github.com/umee-network/umee/blob/v3.2.0/RELEASE_NOTES.md), notably the **Gravity Bridge Slashing**.
 - For the Canon-2 testnet, this release includes updated from v3.2.x → v3.3.x
 
-v3.2.0 was not release on mainnet due to a bug in x/leverage gov messages migration to the new format which utilizes x/gov authorization system. The bug didn't create any insecurity, however it broke x/gov proposal queries: all indexers wouldn't be able to properly show proposals. In v3.3 we fix that bug.
+v3.2.0 was not released on mainnet due to a bug in x/leverage gov messages migration to the new format which utilizes x/gov authorization system. The bug cause legacy token registry updates to break x/gov proposal queries. In v3.3 we fix that bug.
 
 Additional highlights:
 
