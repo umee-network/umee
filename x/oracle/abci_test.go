@@ -42,7 +42,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T())
 	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  int64(types.DefaultMedianPeriod) - 1,
 	})
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
@@ -89,19 +88,33 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 
 	// add historic price and calcSet median stats
 	app.OracleKeeper.AddHistoricPrice(s.ctx, displayDenom, sdk.MustNewDecFromStr("1.0"))
-	app.OracleKeeper.CalcAndSetMedian(s.ctx, displayDenom)
+	app.OracleKeeper.CalcAndSetHistoricMedian(s.ctx, displayDenom)
+	medianPruneBlock := ctx.BlockHeight() + int64(types.DefaultMaximumMedianStamps*types.DefaultMedianStampPeriod)
+	ctx = ctx.WithBlockHeight(medianPruneBlock)
 
-	// with experimental flag off median stats don't get cleared
+	// with experimental flag off median doesn't get deleted
 	oracle.EndBlocker(ctx, app.OracleKeeper, false)
-	median, err := app.OracleKeeper.GetMedian(s.ctx, displayDenom)
-	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), median)
+	medians := []types.Price{}
+	app.OracleKeeper.IterateAllMedianPrices(
+		ctx,
+		func(median types.Price) bool {
+			medians = append(medians, median)
+			return false
+		},
+	)
+	s.Require().Equal(1, len(medians))
 
-	// with experimental flag on median stats get cleared
+	// with experimental flag on median gets deleted
 	oracle.EndBlocker(ctx, app.OracleKeeper, true)
-	median, err = app.OracleKeeper.GetMedian(s.ctx, displayDenom)
-	s.Require().Error(err)
-	s.Require().Equal(sdk.ZeroDec(), median)
+	experimentalMedians := []types.Price{}
+	app.OracleKeeper.IterateAllMedianPrices(
+		ctx,
+		func(median types.Price) bool {
+			medians = append(experimentalMedians, median)
+			return false
+		},
+	)
+	s.Require().Equal(0, len(experimentalMedians))
 }
 
 func TestOracleTestSuite(t *testing.T) {

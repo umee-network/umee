@@ -41,11 +41,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 		k.ClearExchangeRates(ctx)
 
-		if isPeriodLastBlock(ctx, params.MedianPeriod) && experimental {
-			k.ClearMedians(ctx)
-			k.ClearMedianDeviations(ctx)
-		}
-
 		// NOTE: it filters out inactive or jailed validators
 		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 
@@ -63,14 +58,15 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 			}
 
 			if experimental {
-				// Stamp rate every stamp period if asset is set to have historic stats tracked
-				if isPeriodLastBlock(ctx, params.StampPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
+				if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
 				}
 
-				// Set median price every median period if asset is set to have historic stats tracked
-				if isPeriodLastBlock(ctx, params.MedianPeriod) && params.HistoricAcceptList.Contains(ballotDenom.Denom) {
-					k.CalcAndSetMedian(ctx, ballotDenom.Denom)
+				// Calculate and stamp median/median deviation if median stamp period has passed
+				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+					if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -108,11 +104,15 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 		k.SlashAndResetMissCounters(ctx)
 	}
 
-	// Prune historic prices every prune period
-	if isPeriodLastBlock(ctx, params.PrunePeriod) && experimental {
-		pruneBlock := uint64(ctx.BlockHeight()) - params.PrunePeriod
-		for _, v := range params.HistoricAcceptList {
-			k.DeleteHistoricPrice(ctx, v.String(), pruneBlock)
+	// Prune historic prices and medians outside pruning period determined by
+	// the stamp period multiplied by the max stamps.
+	if experimental && isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
+		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
+		for _, v := range params.AcceptList {
+			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
 		}
 	}
 

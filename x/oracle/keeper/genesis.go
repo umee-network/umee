@@ -9,7 +9,7 @@ import (
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllHistoricPrices(
 	ctx sdk.Context,
-	handler func(types.HistoricPrice) bool,
+	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
@@ -18,9 +18,8 @@ func (k Keeper) IterateAllHistoricPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromHistoricPriceKey(iter.Key())
-		blockNum := types.ParseBlockFromHistoricPriceKey(iter.Key())
-		historicPrice := types.HistoricPrice{
+		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixHistoricPrice)
+		historicPrice := types.Price{
 			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
 			BlockNum:          blockNum,
 		}
@@ -34,7 +33,7 @@ func (k Keeper) IterateAllHistoricPrices(
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianPrices(
 	ctx sdk.Context,
-	handler func(types.ExchangeRateTuple) bool,
+	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
@@ -43,8 +42,11 @@ func (k Keeper) IterateAllMedianPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromMedianKey(iter.Key())
-		median := types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom}
+		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
+		median := types.Price{
+			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
+			BlockNum:          blockNum,
+		}
 
 		if handler(median) {
 			break
@@ -56,7 +58,7 @@ func (k Keeper) IterateAllMedianPrices(
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianDeviationPrices(
 	ctx sdk.Context,
-	handler func(types.ExchangeRateTuple) bool,
+	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
@@ -65,8 +67,12 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 	for ; iter.Valid(); iter.Next() {
 		var decProto sdk.DecProto
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		denom := types.ParseDenomFromMedianKey(iter.Key())
-		medianDeviation := types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom}
+		denom, blockNum := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedianDeviation)
+		medianDeviation := types.Price{
+			ExchangeRateTuple: types.ExchangeRateTuple{ExchangeRate: decProto.Dec, Denom: denom},
+			BlockNum:          blockNum,
+		}
+
 		if handler(medianDeviation) {
 			break
 		}
