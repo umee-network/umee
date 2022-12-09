@@ -265,13 +265,13 @@ func (q querier) Medians(
 	var medians sdk.DecCoins
 
 	if len(req.Denom) > 0 {
-		medianList := q.GetHistoricMedians(ctx, req.Denom, req.NumStamps)
+		medianList := q.HistoricMedians(ctx, req.Denom, req.NumStamps)
 
 		for _, median := range medianList {
 			medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, median))
 		}
 	} else {
-		q.IterateAllMedianPrices(ctx, func(median types.HistoricPrice) (stop bool) {
+		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
 			medians = medians.Add(sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
 			return false
 		})
@@ -295,7 +295,7 @@ func (q querier) MedianDeviations(
 	var medians sdk.DecCoins
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetHistoricMedianDeviation(ctx, req.Denom)
+		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
 
 		if err != nil {
 			return nil, err
@@ -303,7 +303,7 @@ func (q querier) MedianDeviations(
 
 		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.HistoricPrice) (stop bool) {
+		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
 			medians = medians.Add(sdk.NewDecCoinFromDec(
 				medianDeviation.ExchangeRateTuple.Denom,
 				medianDeviation.ExchangeRateTuple.ExchangeRate,
@@ -327,7 +327,7 @@ func (q querier) MedianOfMedians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	medianOfMedians, err := q.GetMedianOfMedians(ctx, req.Denom, req.NumStamps)
+	medianOfMedians, err := q.MedianOfHistoricMedians(ctx, req.Denom, req.NumStamps)
 	if err != nil {
 		return nil, err
 	}
@@ -349,7 +349,7 @@ func (q querier) AverageOfMedians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	averageOfMedians, err := q.GetAverageOfMedians(ctx, req.Denom, req.NumStamps)
+	averageOfMedians, err := q.AverageOfHistoricMedians(ctx, req.Denom, req.NumStamps)
 	if err != nil {
 		return nil, err
 	}
@@ -371,7 +371,7 @@ func (q querier) MinOfMedians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	minOfMedians, err := q.GetMinOfMedians(ctx, req.Denom, req.NumStamps)
+	minOfMedians, err := q.MinOfHistoricMedians(ctx, req.Denom, req.NumStamps)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +393,7 @@ func (q querier) MaxOfMedians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	maxOfMedians, err := q.GetMaxOfMedians(ctx, req.Denom, req.NumStamps)
+	maxOfMedians, err := q.MaxOfHistoricMedians(ctx, req.Denom, req.NumStamps)
 	if err != nil {
 		return nil, err
 	}
