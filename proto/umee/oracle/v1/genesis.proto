@@ -22,7 +22,7 @@ message GenesisState {
       [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [(gogoproto.nullable) = false];
-  repeated Price               historic_prices  = 8 [(gogoproto.nullable) = false];
+  repeated Price historic_prices  = 8 [(gogoproto.nullable) = false];
   repeated Price medians          = 7 [(gogoproto.nullable) = false];
   repeated Price medianDeviations = 9 [(gogoproto.nullable) = false];
 }
