@@ -93,38 +93,6 @@ service Query {
     option (google.api.http).get =
         "/umee/historacle/v1/denoms/median_deviations";
   }
-
-  // MedianOfMedians returns the median of a specified amount of
-  // stamped medians
-  rpc MedianOfMedians(QueryMedianOfMedians)
-      returns (QueryMedianOfMediansResponse) {
-    option (google.api.http).get =
-        "/umee/historacle/v1/denoms/median_of_medians";
-  }
-
-  // AverageOfMedians returns the average of a specified amount of
-  // stamped medians
-  rpc AverageOfMedians(QueryAverageOfMedians)
-      returns (QueryAverageOfMediansResponse) {
-    option (google.api.http).get =
-        "/umee/historacle/v1/denoms/average_of_medians";
-  }
-
-  // MinOfMedians returns the min of a specified amount of
-  // stamped medians
-  rpc MinOfMedians(QueryMinOfMedians)
-      returns (QueryMinOfMediansResponse) {
-    option (google.api.http).get =
-        "/umee/historacle/v1/denoms/min_of_medians";
-  }
-
-  // MaxOfMedians returns the max of a specified amount of
-  // stamped medians
-  rpc MaxOfMedians(QueryMaxOfMedians)
-      returns (QueryMaxOfMediansResponse) {
-    option (google.api.http).get =
-        "/umee/historacle/v1/denoms/max_of_medians";
-  }
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC
@@ -312,86 +280,6 @@ message QueryMedianDeviationsResponse {
   // medians defines a list of the median deviations for all stamped denoms.
   repeated cosmos.base.v1beta1.DecCoin medianDeviations = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
-  ];
-}
-
-// QueryMedianOfMedians is the request type for the Query/MedianOfMedians RPC Response.
-message QueryMedianOfMedians {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-  // denom defines the denomination to query for.
-  string denom = 1;
-  // numStamps defines the number of median stamps to query for.
-  uint64 numStamps = 2;
-}
-
-// QueryMedianOfMediansResponse is response type for the
-// Query/MedianOfMediansResponse RPC method.
-message QueryMedianOfMediansResponse {
-  // medianOfMedian defines a median of stamped medians.
-  cosmos.base.v1beta1.DecCoin medianOfMedians = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
-    (gogoproto.nullable)     = false
-  ];
-}
-
-// QueryAverageOfMedians is the request type for the Query/AverageOfMedians RPC Response.
-message QueryAverageOfMedians {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-  // denom defines the denomination to query for.
-  string denom = 1;
-  // numStamps defines the number of median stamps to query for.
-  uint64 numStamps = 2;
-}
-
-// QueryAverageOfMediansResponse is response type for the
-// Query/AverageOfMediansResponse RPC method.
-message QueryAverageOfMediansResponse {
-  // averageOfMedian defines a average of stamped medians.
-  cosmos.base.v1beta1.DecCoin averageOfMedians = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
-    (gogoproto.nullable)     = false
-  ];
-}
-
-// QueryMinOfMedians is the request type for the Query/MinOfMedians RPC Response.
-message QueryMinOfMedians {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-  // denom defines the denomination to query for.
-  string denom = 1;
-  // numStamps defines the number of median stamps to query for.
-  uint64 numStamps = 2;
-}
-
-// QueryMinOfMediansResponse is response type for the
-// Query/MinOfMediansResponse RPC method.
-message QueryMinOfMediansResponse {
-  // minOfMedian defines a min of stamped medians.
-  cosmos.base.v1beta1.DecCoin minOfMedians = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
-    (gogoproto.nullable)     = false
-  ];
-}
-
-// QueryMaxOfMedians is the request type for the Query/MaxOfMedians RPC Response.
-message QueryMaxOfMedians {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-  // denom defines the denomination to query for.
-  string denom = 1;
-  // numStamps defines the number of median stamps to query for.
-  uint64 numStamps = 2;
-}
-
-// QueryMaxOfMediansResponse is response type for the
-// Query/MaxOfMediansResponse RPC method.
-message QueryMaxOfMediansResponse {
-  // maxOfMedian defines a max of stamped medians.
-  cosmos.base.v1beta1.DecCoin maxOfMedians = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
     (gogoproto.nullable)     = false
   ];
 }
