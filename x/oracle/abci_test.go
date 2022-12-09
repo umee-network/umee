@@ -109,7 +109,7 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 	s.Require().Equal(0, len(experimentalMedians))
 }
 
-func (s *IntegrationTestSuite) TestEnblocker() {
+func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	app, ctx := s.app, s.ctx
 
 	// update historacle params
