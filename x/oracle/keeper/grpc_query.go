@@ -296,6 +296,7 @@ func (q querier) MedianDeviations(
 
 	if len(req.Denom) > 0 {
 		exchangeRate, err := q.GetHistoricMedianDeviation(ctx, req.Denom)
+
 		if err != nil {
 			return nil, err
 		}

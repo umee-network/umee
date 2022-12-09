@@ -209,14 +209,15 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	umeeMedian := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
 
 	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
-	app.OracleKeeper.SetMedian(ctx, atomMedian.Denom, uint64(ctx.BlockHeight()-1), atomMedian.Amount)
-	app.OracleKeeper.SetMedian(ctx, umeeMedian.Denom, uint64(ctx.BlockHeight()-1), umeeMedian.Amount)
+	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian.Denom, uint64(ctx.BlockHeight()-1), atomMedian.Amount)
+	app.OracleKeeper.SetHistoricMedian(ctx, umeeMedian.Denom, uint64(ctx.BlockHeight()-1), umeeMedian.Amount)
 
 	res, err := s.queryClient.Medians(ctx.Context(), &types.QueryMedians{})
 	s.Require().NoError(err)
 	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian, umeeMedian))
 
 	res, err = s.queryClient.Medians(ctx.Context(), &types.QueryMedians{Denom: atomMedian.Denom, NumStamps: 1})
+
 	s.Require().NoError(err)
 	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian))
 }
@@ -228,8 +229,8 @@ func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("9541.48")}
 
 	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
-	app.OracleKeeper.SetMedianDeviation(ctx, atomMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), atomMedianDeviation.Amount)
-	app.OracleKeeper.SetMedianDeviation(ctx, umeeMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), umeeMedianDeviation.Amount)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, atomMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), atomMedianDeviation.Amount)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, umeeMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), umeeMedianDeviation.Amount)
 
 	res, err := s.queryClient.MedianDeviations(ctx.Context(), &types.QueryMedianDeviations{})
 	s.Require().NoError(err)

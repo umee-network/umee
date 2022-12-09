@@ -18,7 +18,7 @@ type MockStakingKeeper struct {
 }
 
 // GetValidator implements StakingKeeper
-func (m *MockStakingKeeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (types.Validator, bool) {
+func (m *MockStakingKeeper) GetValidator(_ sdk.Context, addr sdk.ValAddress) (types.Validator, bool) {
 	var (
 		validator types.Validator
 		found     bool
@@ -36,27 +36,27 @@ func (m *MockStakingKeeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (
 }
 
 // BeforeValidatorModified implements StakingKeeper
-func (*MockStakingKeeper) BeforeValidatorModified(ctx sdk.Context, valAddr sdk.ValAddress) error {
+func (*MockStakingKeeper) BeforeValidatorModified(sdk.Context, sdk.ValAddress) error {
 	return nil
 }
 
 // GetAllValidators implements StakingKeeper
-func (m *MockStakingKeeper) GetAllValidators(ctx sdk.Context) (validators []types.Validator) {
+func (m *MockStakingKeeper) GetAllValidators(sdk.Context) (validators []types.Validator) {
 	return m.validators
 }
 
 // GetParams implements StakingKeeper
-func (m *MockStakingKeeper) GetParams(ctx sdk.Context) types.Params {
+func (m *MockStakingKeeper) GetParams(sdk.Context) types.Params {
 	return m.params
 }
 
 // SetParams implements StakingKeeper
-func (m *MockStakingKeeper) SetParams(ctx sdk.Context, params types.Params) {
+func (m *MockStakingKeeper) SetParams(_ sdk.Context, params types.Params) {
 	m.params = params
 }
 
 // SetValidator implements StakingKeeper
-func (m *MockStakingKeeper) SetValidator(ctx sdk.Context, validator types.Validator) {
+func (m *MockStakingKeeper) SetValidator(_ sdk.Context, validator types.Validator) {
 	for index, v := range m.validators {
 		if v.GetOperator().Equals(validator.GetOperator()) {
 			m.validators[index] = validator

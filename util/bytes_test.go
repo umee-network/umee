@@ -1,7 +1,12 @@
 package util
 
-import "testing"
-import "github.com/stretchr/testify/require"
+import (
+	"encoding/binary"
+	"math"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestMergeBytes(t *testing.T) {
 	require := require.New(t)
@@ -21,4 +26,14 @@ func TestMergeBytes(t *testing.T) {
 	for i, tc := range tcs {
 		require.Equal(tc.out, ConcatBytes(tc.inMargin, tc.in...), i)
 	}
+}
+
+func TestUintWithNullPrefix(t *testing.T) {
+	expected := []byte{0}
+	num := make([]byte, 8)
+	binary.LittleEndian.PutUint64(num, math.MaxUint64)
+	expected = append(expected, num...)
+
+	out := UintWithNullPrefix(math.MaxUint64)
+	require.Equal(t, expected, out)
 }

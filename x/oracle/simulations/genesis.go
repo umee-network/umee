@@ -19,9 +19,10 @@ const (
 	slashFractionKey            = "slash_fraction"
 	slashWindowKey              = "slash_window"
 	minValidPerWindowKey        = "min_valid_per_window"
-	stampPeriodKey              = "stamp_period"
-	prunePeriodKey              = "prune_period"
-	medianPeriodKey             = "median_period"
+	historicStampPeriodKey      = "historic_stamp_period"
+	medianStampPeriodKey        = "median_stamp_period"
+	maximumPriceStampsKey       = "maximum_price_stamps"
+	maximumMedianStampsKey      = "maximum_median_stamps"
 )
 
 // GenVotePeriod produces a randomized VotePeriod in the range of [5, 100]
@@ -59,19 +60,24 @@ func GenMinValidPerWindow(r *rand.Rand) sdk.Dec {
 	return sdk.ZeroDec().Add(sdk.NewDecWithPrec(int64(r.Intn(500)), 3))
 }
 
-// GenStampPeriod produces a randomized StampPeriod in the range of [100, 1000]
-func GenStampPeriod(r *rand.Rand) uint64 {
+// GenHistoricStampPeriod produces a randomized HistoricStampPeriod in the range of [100, 1000]
+func GenHistoricStampPeriod(r *rand.Rand) uint64 {
 	return uint64(100 + r.Intn(1000))
 }
 
-// GenPrunePeriod produces a randomized PrunePeriod in the range of [10001, 100000]
-func GenPrunePeriod(r *rand.Rand) uint64 {
+// GenMedianStampPeriod produces a randomized MedianStampPeriod in the range of [100, 1000]
+func GenMedianStampPeriod(r *rand.Rand) uint64 {
 	return uint64(10001 + r.Intn(100000))
 }
 
-// GenMedianPeriod produces a randomized MedianPeriod in the range of [1001, 10000]
-func GenMedianPeriod(r *rand.Rand) uint64 {
-	return uint64(1001 + r.Intn(10000))
+// GenMaximumPriceStamps produces a randomized MaximumPriceStamps in the range of [10, 100]
+func GenMaximumPriceStamps(r *rand.Rand) uint64 {
+	return uint64(11 + r.Intn(100))
+}
+
+// GenMaximumMedianStamps produces a randomized MaximumMedianStamps in the range of [10, 100]
+func GenMaximumMedianStamps(r *rand.Rand) uint64 {
+	return uint64(11 + r.Intn(100))
 }
 
 // RandomizedGenState generates a random GenesisState for oracle
@@ -118,22 +124,28 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { minValidPerWindow = GenMinValidPerWindow(r) },
 	)
 
-	var stampPeriod uint64
+	var historicStampPeriod uint64
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, stampPeriodKey, &stampPeriod, simState.Rand,
-		func(r *rand.Rand) { stampPeriod = GenStampPeriod(r) },
+		simState.Cdc, historicStampPeriodKey, &historicStampPeriod, simState.Rand,
+		func(r *rand.Rand) { historicStampPeriod = GenHistoricStampPeriod(r) },
 	)
 
-	var prunePeriod uint64
+	var medianStampPeriod uint64
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, prunePeriodKey, &prunePeriod, simState.Rand,
-		func(r *rand.Rand) { prunePeriod = GenPrunePeriod(r) },
+		simState.Cdc, medianStampPeriodKey, &medianStampPeriod, simState.Rand,
+		func(r *rand.Rand) { medianStampPeriod = GenMedianStampPeriod(r) },
 	)
 
-	var medianPeriod uint64
+	var maximumPriceStamps uint64
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, medianPeriodKey, &medianPeriod, simState.Rand,
-		func(r *rand.Rand) { medianPeriod = GenMedianPeriod(r) },
+		simState.Cdc, maximumPriceStampsKey, &maximumPriceStamps, simState.Rand,
+		func(r *rand.Rand) { maximumPriceStamps = GenMaximumPriceStamps(r) },
+	)
+
+	var maximumMedianStamps uint64
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, maximumMedianStampsKey, &maximumMedianStamps, simState.Rand,
+		func(r *rand.Rand) { maximumMedianStamps = GenMaximumMedianStamps(r) },
 	)
 
 	oracleGenesis := types.DefaultGenesisState()
@@ -145,15 +157,13 @@ func RandomizedGenState(simState *module.SimulationState) {
 		AcceptList: types.DenomList{
 			{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
 		},
-		SlashFraction:     slashFraction,
-		SlashWindow:       slashWindow,
-		MinValidPerWindow: minValidPerWindow,
-		HistoricAcceptList: types.DenomList{
-			{SymbolDenom: types.UmeeSymbol, BaseDenom: types.UmeeDenom},
-		},
-		StampPeriod:  stampPeriod,
-		PrunePeriod:  prunePeriod,
-		MedianPeriod: medianPeriod,
+		SlashFraction:       slashFraction,
+		SlashWindow:         slashWindow,
+		MinValidPerWindow:   minValidPerWindow,
+		HistoricStampPeriod: historicStampPeriod,
+		MedianStampPeriod:   medianStampPeriod,
+		MaximumPriceStamps:  historicStampPeriod,
+		MaximumMedianStamps: historicStampPeriod,
 	}
 
 	bz, err := json.MarshalIndent(&oracleGenesis.Params, "", " ")

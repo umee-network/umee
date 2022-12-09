@@ -28,7 +28,7 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupTest() {
-	app := umeeapp.Setup(s.T(), false, 1)
+	app := umeeapp.Setup(s.T())
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
