@@ -316,6 +316,17 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 
 // ClearHistoricMedians iterates through all medians in the store and deletes
 // them.
+func (k Keeper) ClearHistoricPrices(ctx sdk.Context) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
+}
+
+// ClearHistoricMedians iterates through all medians in the store and deletes
+// them.
 func (k Keeper) ClearHistoricMedians(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)

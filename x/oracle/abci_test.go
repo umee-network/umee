@@ -75,6 +75,69 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
 )
 
+var historacleTestCases = []struct {
+	exchangeRates                         []string
+	expectedHistoricMedians               []sdk.Dec
+	expectedHistoricMedianDeviation       sdk.Dec
+	expectedWithinHistoricMedianDeviation bool
+	expectedMedianOfHistoricMedians       sdk.Dec
+	expectedAverageOfHistoricMedians      sdk.Dec
+	expectedMinOfHistoricMedians          sdk.Dec
+	expectedMaxOfHistoricMedians          sdk.Dec
+}{
+	{
+		[]string{"1.0", "1.2", "1.1", "1.4", "1.1", "1.15",
+			"1.2", "1.3", "1.2", "1.12", "1.2", "1.15",
+			"1.17", "1.1", "1.0", "1.16", "1.15", "1.12"},
+		[]sdk.Dec{
+			sdk.MustNewDecFromStr("1.155"),
+			sdk.MustNewDecFromStr("1.16"),
+			sdk.MustNewDecFromStr("1.175"),
+			sdk.MustNewDecFromStr("1.2"),
+		},
+		sdk.MustNewDecFromStr("0.009724999999999997"),
+		false,
+		sdk.MustNewDecFromStr("1.1675"),
+		sdk.MustNewDecFromStr("1.1725"),
+		sdk.MustNewDecFromStr("1.155"),
+		sdk.MustNewDecFromStr("1.2"),
+	},
+	{
+		[]string{"2.3", "2.12", "2.14", "2.24", "2.18", "2.15",
+			"2.51", "2.59", "2.67", "2.76", "2.89", "2.85",
+			"3.17", "3.15", "3.35", "3.56", "3.55", "3.49"},
+		[]sdk.Dec{
+			sdk.MustNewDecFromStr("3.02"),
+			sdk.MustNewDecFromStr("2.715"),
+			sdk.MustNewDecFromStr("2.405"),
+			sdk.MustNewDecFromStr("2.24"),
+		},
+		sdk.MustNewDecFromStr("0.145091666666666664"),
+		false,
+		sdk.MustNewDecFromStr("2.56"),
+		sdk.MustNewDecFromStr("2.595"),
+		sdk.MustNewDecFromStr("2.24"),
+		sdk.MustNewDecFromStr("3.02"),
+	},
+	{
+		[]string{"5.2", "5.25", "5.31", "5.22", "5.14", "5.15",
+			"4.85", "4.72", "4.52", "4.47", "4.36", "4.22",
+			"4.11", "4.04", "3.92", "3.82", "3.85", "3.83"},
+		[]sdk.Dec{
+			sdk.MustNewDecFromStr("4.165"),
+			sdk.MustNewDecFromStr("4.495"),
+			sdk.MustNewDecFromStr("4.995"),
+			sdk.MustNewDecFromStr("5.15"),
+		},
+		sdk.MustNewDecFromStr("0.194024999999999997"),
+		false,
+		sdk.MustNewDecFromStr("4.745"),
+		sdk.MustNewDecFromStr("4.70125"),
+		sdk.MustNewDecFromStr("4.165"),
+		sdk.MustNewDecFromStr("5.15"),
+	},
+}
+
 func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 	app, ctx := s.app, s.ctx
 
@@ -118,69 +181,65 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	app.OracleKeeper.SetMaximumPriceStamps(ctx, 12)
 	app.OracleKeeper.SetMaximumMedianStamps(ctx, 4)
 
-	exchangeRates := []string{"1.0", "1.2", "1.1", "1.4", "1.1", "1.15",
-		"1.2", "1.3", "1.2", "1.12", "1.2", "1.15",
-		"1.17", "1.1", "1.0", "1.16", "1.15", "1.12"}
+	for _, tc := range historacleTestCases {
+		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.MedianStampPeriod(ctx)-1))
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.MedianStampPeriod(ctx)-1))
+		for _, exchangeRate := range tc.exchangeRates {
+			var tuples types.ExchangeRateTuples
+			for _, denom := range app.OracleKeeper.AcceptList(ctx) {
+				tuples = append(tuples, types.ExchangeRateTuple{
+					Denom:        denom.SymbolDenom,
+					ExchangeRate: sdk.MustNewDecFromStr(exchangeRate),
+				})
+			}
 
-	for _, exchangeRate := range exchangeRates {
-		var tuples types.ExchangeRateTuples
+			prevote := types.AggregateExchangeRatePrevote{
+				Hash:        "hash",
+				Voter:       valAddr.String(),
+				SubmitBlock: uint64(ctx.BlockHeight()),
+			}
+			app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr, prevote)
+			oracle.EndBlocker(ctx, app.OracleKeeper, true)
+
+			ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
+			vote := types.AggregateExchangeRateVote{
+				ExchangeRateTuples: tuples,
+				Voter:              valAddr.String(),
+			}
+			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
+			oracle.EndBlocker(ctx, app.OracleKeeper, true)
+		}
+
 		for _, denom := range app.OracleKeeper.AcceptList(ctx) {
-			tuples = append(tuples, types.ExchangeRateTuple{
-				Denom:        denom.SymbolDenom,
-				ExchangeRate: sdk.MustNewDecFromStr(exchangeRate),
-			})
+			// query for past 6 medians (should only get 4 back since max median stamps is set to 4)
+			medians := app.OracleKeeper.HistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(4, len(medians))
+			s.Require().Equal(tc.expectedHistoricMedians, medians)
+
+			medianHistoricDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, denom.SymbolDenom)
+			s.Require().NoError(err)
+			s.Require().Equal(tc.expectedHistoricMedianDeviation, medianHistoricDeviation)
+
+			withinHistoricMedianDeviation, err := app.OracleKeeper.WithinHistoricMedianDeviation(ctx, denom.SymbolDenom)
+			s.Require().NoError(err)
+			s.Require().Equal(tc.expectedWithinHistoricMedianDeviation, withinHistoricMedianDeviation)
+
+			medianOfHistoricMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(tc.expectedMedianOfHistoricMedians, medianOfHistoricMedians)
+
+			averageOfHistoricMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(tc.expectedAverageOfHistoricMedians, averageOfHistoricMedians)
+
+			minOfHistoricMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(tc.expectedMinOfHistoricMedians, minOfHistoricMedians)
+
+			maxOfHistoricMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(tc.expectedMaxOfHistoricMedians, maxOfHistoricMedians)
 		}
-
-		prevote := types.AggregateExchangeRatePrevote{
-			Hash:        "hash",
-			Voter:       valAddr.String(),
-			SubmitBlock: uint64(ctx.BlockHeight()),
-		}
-		app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr, prevote)
-		oracle.EndBlocker(ctx, app.OracleKeeper, true)
-
-		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
-		vote := types.AggregateExchangeRateVote{
-			ExchangeRateTuples: tuples,
-			Voter:              valAddr.String(),
-		}
-		app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
-		oracle.EndBlocker(ctx, app.OracleKeeper, true)
-	}
-
-	expectedMedians := []sdk.Dec{
-		sdk.MustNewDecFromStr("1.155"),
-		sdk.MustNewDecFromStr("1.16"),
-		sdk.MustNewDecFromStr("1.175"),
-		sdk.MustNewDecFromStr("1.2"),
-	}
-	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
-		// query for past 6 medians (should only get 4 back since max median stamps is set to 4)
-		medians := app.OracleKeeper.HistoricMedians(ctx, denom.SymbolDenom, 6)
-		s.Require().Equal(4, len(medians))
-		s.Require().Equal(expectedMedians, medians)
-
-		medianDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, denom.SymbolDenom)
-		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("0.009724999999999997"), medianDeviation)
-
-		withinMedianDeviation, err := app.OracleKeeper.WithinHistoricMedianDeviation(ctx, denom.SymbolDenom)
-		s.Require().NoError(err)
-		s.Require().Equal(false, withinMedianDeviation)
-
-		medianOfMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.1675"), medianOfMedians)
-
-		averageOfMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.1725"), averageOfMedians)
-
-		minOfMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.155"), minOfMedians)
-
-		maxOfMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.2"), maxOfMedians)
+		app.OracleKeeper.ClearHistoricPrices(ctx)
+		app.OracleKeeper.ClearHistoricMedians(ctx)
+		app.OracleKeeper.ClearHistoricMedianDeviations(ctx)
+		ctx = ctx.WithBlockHeight(0)
 	}
 }
 
